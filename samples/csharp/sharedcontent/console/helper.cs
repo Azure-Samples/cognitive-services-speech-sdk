@@ -75,9 +75,18 @@ namespace MicrosoftSpeechSDKSamples
             if (formatSize > 16)
                 reader.ReadBytes((int)(formatSize - 16));
 
-            // Second Chunk, data
-            // tag: data.
+            // Handle optional LIST chunk.
+            // tag: "LIST"
             reader.Read(data, 0, 4);
+            if (data[0] == 'L' && data[1] == 'I' && data[2] == 'S' && data[3] == 'T')
+            {
+                var listChunkSize = reader.ReadUInt32();
+                reader.ReadBytes((int)listChunkSize);
+                reader.Read(data, 0, 4);
+            }
+
+            // Second Chunk, data
+            // tag: "data"
             Trace.Assert((data[0] == 'd') && (data[1] == 'a') && (data[2] == 't') && (data[3] == 'a'), "Wrong data tag in wav");
             // data chunk size
             int dataSize = reader.ReadInt32();

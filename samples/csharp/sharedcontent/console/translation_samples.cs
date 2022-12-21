@@ -148,7 +148,7 @@ namespace MicrosoftSpeechSDKSamples
             config.AddTargetLanguage("de");
             config.AddTargetLanguage("fr");
 
-            var stopTranslation = new TaskCompletionSource<int>();
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a translation recognizer using file as audio input.
             // Replace with your own audio file name.
@@ -251,7 +251,7 @@ namespace MicrosoftSpeechSDKSamples
             config.AddTargetLanguage("de");
             config.AddTargetLanguage("fr");
 
-            var stopTranslation = new TaskCompletionSource<int>();
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a translation recognizer using file as audio input.
             using (var pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.MP3)))
@@ -375,7 +375,7 @@ namespace MicrosoftSpeechSDKSamples
             config.AddTargetLanguage("de");
             config.AddTargetLanguage("fr");
 
-            var stopTranslation = new TaskCompletionSource<int>();
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
@@ -612,7 +612,7 @@ namespace MicrosoftSpeechSDKSamples
             config.SetProperty(PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "zh-CN" });
 
-            var stopTranslation = new TaskCompletionSource<int>();
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a translation recognizer using file as audio input.
             // Replace with your own audio file name.

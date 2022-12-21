@@ -94,7 +94,7 @@ def _paginate(api, paginated_object):
     """
     yield from paginated_object.values
     typename = type(paginated_object).__name__
-    auth_settings = ["apiKeyHeader", "apiKeyQuery"]
+    auth_settings = ["api_key"]
     while paginated_object.next_link:
         link = paginated_object.next_link[len(api.api_client.configuration.host):]
         paginated_object, status, headers = api.api_client.call_api(link, "GET",
@@ -141,7 +141,7 @@ def transcribe():
     api = cris_client.CustomSpeechTranscriptionsApi(api_client=client)
 
     # Specify transcription properties by passing a dict to the properties parameter. See
-    # https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription#configuration-properties
+    # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options
     # for supported parameters.
     properties = {
         # "punctuationMode": "DictatedAndAutomatic",

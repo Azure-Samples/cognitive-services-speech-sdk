@@ -5,19 +5,16 @@
 
 namespace Connector.Serializable.TextAnalytics
 {
-    using System;
-    using Connector.Enums;
-
     public class TextAnalyticsEntity
     {
         public TextAnalyticsEntity(string text, string category, string subCategory, int offset, int length, float score)
         {
-            Text = text;
-            CategoryString = category;
-            SubCategory = subCategory;
-            Offset = offset;
-            Length = length;
-            Score = score;
+            this.Text = text;
+            this.Category = category;
+            this.SubCategory = subCategory;
+            this.Offset = offset;
+            this.Length = length;
+            this.Score = score;
         }
 
         public string Text { get; private set; }
@@ -30,19 +27,6 @@ namespace Connector.Serializable.TextAnalytics
 
         public float Score { get; private set; }
 
-        public EntityCategory Category
-        {
-            get
-            {
-                if (Enum.TryParse(CategoryString, out EntityCategory outputType))
-                {
-                    return outputType;
-                }
-
-                return EntityCategory.Unknown;
-            }
-        }
-
-        private string CategoryString { get; set; }
+        public string Category { get; set; }
     }
 }

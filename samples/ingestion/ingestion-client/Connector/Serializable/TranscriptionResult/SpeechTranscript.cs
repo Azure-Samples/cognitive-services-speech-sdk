@@ -6,18 +6,21 @@
 namespace Connector
 {
     using System.Collections.Generic;
+
+    using Connector.Serializable.Language.Conversations;
+
     using Newtonsoft.Json;
 
     public class SpeechTranscript
     {
         public SpeechTranscript(string source, string timestamp, long durationInTicks, string duration, IEnumerable<CombinedRecognizedPhrase> combinedRecognizedPhrases, IEnumerable<RecognizedPhrase> recognizedPhrases)
         {
-            Source = source;
-            Timestamp = timestamp;
-            DurationInTicks = durationInTicks;
-            Duration = duration;
-            CombinedRecognizedPhrases = combinedRecognizedPhrases;
-            RecognizedPhrases = recognizedPhrases;
+            this.Source = source;
+            this.Timestamp = timestamp;
+            this.DurationInTicks = durationInTicks;
+            this.Duration = duration;
+            this.CombinedRecognizedPhrases = combinedRecognizedPhrases;
+            this.RecognizedPhrases = recognizedPhrases;
         }
 
         [JsonProperty("source")]
@@ -37,5 +40,8 @@ namespace Connector
 
         [JsonProperty("recognizedPhrases")]
         public IEnumerable<RecognizedPhrase> RecognizedPhrases { get; }
+
+        [JsonProperty("conversationAnalyticsResults")]
+        public ConversationAnalyticsResults ConversationAnalyticsResults { get; set; }
     }
 }

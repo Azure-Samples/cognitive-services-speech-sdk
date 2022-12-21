@@ -6,7 +6,6 @@
 namespace Connector
 {
     using System;
-    using System.Text;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
     using Microsoft.Extensions.Logging;

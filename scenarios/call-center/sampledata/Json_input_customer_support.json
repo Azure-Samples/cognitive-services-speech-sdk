@@ -1,0 +1,192 @@
+{
+    "displayName": "Analyze conversations from xxx",
+    "analysisInput": {
+        "conversations": [
+            {
+                "id": "2b601070-f418-4684-a3f8-e58b48f5d72e",
+                "language": "en",
+                "modality": "transcript",
+                "conversationItems": [
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d1",
+                        "text": "Hello, you’re chatting with Rene. How may I help you?",
+                        "lexical": "Hello, you’re chatting with Rene. How may I help you?",
+                        "itn": "Hello, you’re chatting with Rene. How may I help you?",
+                        "maskedItn": "Hello, you’re chatting with Rene. How may I help you?"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Customer",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d",
+                        "text": "Hi, I tried to set up wifi connection for Smart Brew 300 espresso machine, but it didn’t work.",
+                        "lexical": "Hi, I tried to set up wifi connection for Smart Brew 300 espresso machine, but it didn’t work.",
+                        "itn": "Hi, I tried to set up wifi connection for Smart Brew 300 espresso machine, but it didn’t work.",
+                        "maskedItn": "Hi, I tried to set up wifi connection for Smart Brew 300 espresso machine, but it didn’t work."
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d2",
+                        "text": "I’m sorry to hear that. Let’s see what we can do to fix this issue. Could you please try the following steps for me? First, could you push the wifi connection button, hold for 3 seconds, then let me know if the power light is slowly blinking on and off every second?",
+                        "lexical": "I’m sorry to hear that. Let’s see what we can do to fix this issue. Could you please try the following steps for me? First, could you push the wifi connection button, hold for 3 seconds, then let me know if the power light is slowly blinking on and off every second?",
+                        "itn": "I’m sorry to hear that. Let’s see what we can do to fix this issue. Could you please try the following steps for me? First, could you push the wifi connection button, hold for 3 seconds, then let me know if the power light is slowly blinking on and off every second?",
+                        "maskedItn": "I’m sorry to hear that. Let’s see what we can do to fix this issue. Could you please try the following steps for me? First, could you push the wifi connection button, hold for 3 seconds, then let me know if the power light is slowly blinking on and off every second?"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Customer",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d3",
+                        "text": "Yes, I pushed the wifi connection button, and now the power light is slowly blinking.",
+                        "lexical": "Yes, I pushed the wifi connection button, and now the power light is slowly blinking.",
+                        "itn": "Yes, I pushed the wifi connection button, and now the power light is slowly blinking.",
+                        "maskedItn": "Yes, I pushed the wifi connection button, and now the power light is slowly blinking."
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d4",
+                        "text": "Great. Thank you! Now, please check in your Contoso Coffee app. Does it prompt to ask you to connect with the machine?",
+                        "lexical": "Great. Thank you! Now, please check in your Contoso Coffee app. Does it prompt to ask you to connect with the machine?",
+                        "itn": "Great. Thank you! Now, please check in your Contoso Coffee app. Does it prompt to ask you to connect with the machine?",
+                        "maskedItn": "Great. Thank you! Now, please check in your Contoso Coffee app. Does it prompt to ask you to connect with the machine?"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Customer",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d5",
+                        "text": "No. Nothing happened.",
+                        "lexical": "No. Nothing happened.",
+                        "itn": "No. Nothing happened.",
+                        "maskedItn": "No. Nothing happened."
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d6",
+                        "text": "I see. Thanks. Let’s try if a factory reset can solve the issue. Could you please press and hold the center button for 5 seconds to start the factory reset.",
+                        "lexical": "I see. Thanks. Let’s try if a factory reset can solve the issue. Could you please press and hold the center button for 5 seconds to start the factory reset.",
+                        "itn": "I see. Thanks. Let’s try if a factory reset can solve the issue. Could you please press and hold the center button for 5 seconds to start the factory reset.",
+                        "maskedItn": "I see. Thanks. Let’s try if a factory reset can solve the issue. Could you please press and hold the center button for 5 seconds to start the factory reset."
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Customer",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d7",
+                        "text": "I’ve tried the factory reset and followed the above steps again, but it still didn’t work.",
+                        "lexical": "I’ve tried the factory reset and followed the above steps again, but it still didn’t work.",
+                        "itn": "I’ve tried the factory reset and followed the above steps again, but it still didn’t work.",
+                        "maskedItn": "I’ve tried the factory reset and followed the above steps again, but it still didn’t work."
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d8",
+                        "text": "I’m very sorry to hear that. Let me see if there’s another way to fix the issue. Please hold on for a minute.",
+                        "lexical": "I’m very sorry to hear that. Let me see if there’s another way to fix the issue. Please hold on for a minute.",
+                        "itn": "I’m very sorry to hear that. Let me see if there’s another way to fix the issue. Please hold on for a minute.",
+                        "maskedItn": "I’m very sorry to hear that. Let me see if there’s another way to fix the issue. Please hold on for a minute."
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2d9",
+                        "text": "thank you for your patient!",
+                        "lexical": "thank you for your patient!",
+                        "itn": "thank you for your patient!",
+                        "maskedItn": "thank you for your patient!"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2e1",
+                        "text": "Does the network you are connected to have 5GHz in the name?",
+                        "lexical": "Does the network you are connected to have 5GHz in the name?",
+                        "itn": "Does the network you are connected to have 5GHz in the name?",
+                        "maskedItn": "Does the network you are connected to have 5GHz in the name?"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Customer",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2e2",
+                        "text": "yes, it does",
+                        "lexical": "yes, it does",
+                        "itn": "yes, it does",
+                        "maskedItn": "yes, it does"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2e3",
+                        "text": "The smart brew 300 can only connect to 2.4GHz networks. Could you please reconnect it to the same network but with 2.4GHz in the name? then try and reconnect",
+                        "lexical": "The smart brew 300 can only connect to 2.4GHz networks. Could you please reconnect it to the same network but with 2.4GHz in the name? then try and reconnect",
+                        "itn": "The smart brew 300 can only connect to 2.4GHz networks. Could you please reconnect it to the same network but with 2.4GHz in the name? then try and reconnect",
+                        "maskedItn": "The smart brew 300 can only connect to 2.4GHz networks. Could you please reconnect it to the same network but with 2.4GHz in the name? then try and reconnect"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Customer",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2e4",
+                        "text": "Ah, yes! It works now",
+                        "lexical": "Ah, yes! It works now",
+                        "itn": "Ah, yes! It works now",
+                        "maskedItn": "Ah, yes! It works now"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2e5",
+                        "text": "Fantastic! Is there anything else I can assist you today?",
+                        "lexical": "Fantastic! Is there anything else I can assist you today?",
+                        "itn": "Fantastic! Is there anything else I can assist you today?",
+                        "maskedItn": "Fantastic! Is there anything else I can assist you today?"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Customer",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2e6",
+                        "text": "no. that is everything. Thank you!",
+                        "lexical": "no. that is everything. Thank you!",
+                        "itn": "no. that is everything. Thank you!",
+                        "maskedItn": "no. that is everything. Thank you!"
+                    },
+                    {
+                        "modality": "transcript",
+                        "participantId": "Agent",
+                        "id": "11f80016-dcb7-4ae5-9b55-2486c88be2e7",
+                        "text": "you're welcome! Have a nice day!",
+                        "lexical": "you're welcome! Have a nice day!",
+                        "itn": "you're welcome! Have a nice day!",
+                        "maskedItn": "you're welcome! Have a nice day!"
+                    }
+
+                ]
+            }
+        ]
+    },
+    "tasks": [
+        {
+            "kind": "ConversationalPIITask",
+            "parameters": {
+                "loggingOptOut": false,
+                "redactionSource": "lexical",
+                "modelVersion": "latest",
+                "piiCategories": [
+                    "all"
+                ],
+                "includeAudioRedaction": false
+            }
+        },
+         {
+            "kind": "ConversationalSummarizationTask",
+              "parameters": {
+                "modelVersion": "2022-05-15-preview",
+                "summaryAspects": [
+                    "Issue",
+                    "Resolution"
+                ]
+            }
+        }
+    ]
+}

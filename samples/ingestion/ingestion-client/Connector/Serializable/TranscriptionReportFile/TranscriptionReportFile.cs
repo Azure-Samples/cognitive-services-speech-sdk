@@ -11,9 +11,9 @@ namespace Connector
     {
         public TranscriptionReportFile(string successfulTranscriptionsCount, string failedTranscriptionsCount, IEnumerable<TranscriptionReportFileDetail> details)
         {
-            SuccessfulTranscriptionsCount = successfulTranscriptionsCount;
-            FailedTranscriptionsCount = failedTranscriptionsCount;
-            Details = details;
+            this.SuccessfulTranscriptionsCount = successfulTranscriptionsCount;
+            this.FailedTranscriptionsCount = failedTranscriptionsCount;
+            this.Details = details;
         }
 
         public string SuccessfulTranscriptionsCount { get; }

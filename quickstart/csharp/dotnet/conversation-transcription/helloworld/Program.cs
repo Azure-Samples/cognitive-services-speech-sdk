@@ -79,7 +79,7 @@ namespace helloworld
         {
             var config = SpeechConfig.FromSubscription(subscriptionKey, region);
             config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Create an audio stream from a wav file or from the default microphone if you want to stream live audio from the supported devices
             using (var audioInput = AudioStreamReader.OpenWavFile(conversationWaveFile))
@@ -136,9 +136,9 @@ namespace helloworld
                         // Add participants to the conversation.
                         // Voice signature needs to be in the following format:
                         // { "Version": <Numeric value>, "Tag": "string", "Data": "string" }
-                        var languageForUser1 = "User1PreferredLanguage"; // For example "en-US"
+                        var languageForUser1 = "en-US"; // For example "en-US"
                         var speakerA = Participant.From("User1", languageForUser1, voiceSignatureUser1);
-                        var languageForUser2 = "User2PreferredLanguage"; // For example "en-US"
+                        var languageForUser2 = "en-US"; // For example "en-US"
                         var speakerB = Participant.From("User2", languageForUser2, voiceSignatureUser2);
                         await conversation.AddParticipantAsync(speakerA);
                         await conversation.AddParticipantAsync(speakerB);
@@ -167,12 +167,12 @@ namespace helloworld
 
             // The input audio wave format for voice signatures is 16-bit samples, 16 kHz sample rate, and a single channel (mono).
             // The recommended length for each sample is between thirty seconds and two minutes.
-            var voiceSignatureWaveFileUser1 = "YourEnrollmentWaveFilePathForUser1";
-            var voiceSignatureWaveFileUser2 = "YourEnrollmentWaveFilePathForUser2";
+            var voiceSignatureWaveFileUser1 = "enrollment_audio_katie.wav";
+            var voiceSignatureWaveFileUser2 = "enrollment_audio_steve.wav";
 
             // This sample expects a wavfile which is captured using a supported devices (8 channel, 16kHz, 16-bit PCM)
             // See https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-devices-sdk-microphone
-            var conversationWaveFile = "YourConversationFilePath";
+            var conversationWaveFile = "katiesteve.wav";
 
             // Create voice signature for the user1 and convert it to json string
             var voiceSignature = CreateVoiceSignatureFromVoiceSample(voiceSignatureWaveFileUser1, subscriptionKey, serviceRegion);

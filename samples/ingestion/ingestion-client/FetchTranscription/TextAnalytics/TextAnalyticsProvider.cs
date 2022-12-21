@@ -10,13 +10,20 @@ namespace TextAnalytics
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+
     using Azure;
     using Azure.AI.TextAnalytics;
+
     using Connector;
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
+
     using FetchTranscriptionFunction;
+
+    using Language;
+
     using Microsoft.Extensions.Logging;
+
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     /// <summary>
@@ -44,35 +51,50 @@ namespace TextAnalytics
 
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
 
-        private readonly TextAnalyticsClient TextAnalyticsClient;
+        private readonly TextAnalyticsClient textAnalyticsClient;
 
-        private readonly string Locale;
+        private readonly string locale;
 
-        private readonly ILogger Log;
+        private readonly ILogger log;
 
         public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log)
         {
-            TextAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
-            Locale = locale;
-            Log = log;
+            this.textAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.locale = locale;
+            this.log = log;
         }
 
         /// <summary>
         /// Checks for all text analytics requests that were marked as running if they have completed and sets a new state accordingly.
-        /// </summary>
         /// <param name="audioFileInfos"></param>
         /// <returns>True if all requests completed, else false.</returns>
+        /// </summary>
         public async Task<bool> TextAnalyticsRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
+            if (audioFileInfos == null || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any())
+            {
+                return true;
+            }
+
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
-            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
-            runningTextAnalyticsRequests.AddRange(audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+
+            runningTextAnalyticsRequests.AddRange(
+                audioFileInfos
+                    .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.AudioLevelRequests != null)
+                    .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests)
+                    .Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+
+            runningTextAnalyticsRequests.AddRange(
+                audioFileInfos
+                    .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.UtteranceLevelRequests != null)
+                    .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests)
+                    .Where(text => text.Status == TextAnalyticsRequestStatus.Running));
 
             var textAnalyticsRequestCompleted = true;
 
             foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
             {
-                var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, TextAnalyticsClient);
+                var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, this.textAnalyticsClient);
 
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
@@ -109,7 +131,7 @@ namespace TextAnalytics
                 return (new List<string>(), new List<string>());
             }
 
-            var documents = speechTranscript.RecognizedPhrases.Where(r => r.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(r.NBest.First().Display)).Select(r => new TextDocumentInput($"{r.Channel}_{r.Offset}", r.NBest.First().Display) { Language = Locale });
+            var documents = speechTranscript.RecognizedPhrases.Where(r => r.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(r.NBest.First().Display)).Select(r => new TextDocumentInput($"{r.Channel}_{r.Offset}", r.NBest.First().Display) { Language = this.locale });
 
             var actions = new TextAnalyticsActions
             {
@@ -117,7 +139,7 @@ namespace TextAnalytics
                 AnalyzeSentimentActions = new List<AnalyzeSentimentAction>() { new AnalyzeSentimentAction() }
             };
 
-            return await SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
+            return await this.SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -140,7 +162,7 @@ namespace TextAnalytics
                 return (new List<string>(), new List<string>());
             }
 
-            var documents = speechTranscript.CombinedRecognizedPhrases.Where(r => !string.IsNullOrEmpty(r.Display)).Select(r => new TextDocumentInput($"{r.Channel}", r.Display) { Language = Locale });
+            var documents = speechTranscript.CombinedRecognizedPhrases.Where(r => !string.IsNullOrEmpty(r.Display)).Select(r => new TextDocumentInput($"{r.Channel}", r.Display) { Language = this.locale });
 
             var actions = new TextAnalyticsActions
             {
@@ -169,7 +191,7 @@ namespace TextAnalytics
                 actions.RecognizePiiEntitiesActions = new List<RecognizePiiEntitiesAction>() { action };
             }
 
-            return await SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
+            return await this.SubmitDocumentsAsync(documents, actions).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -198,17 +220,20 @@ namespace TextAnalytics
                 var index = $"{recognizedPhrase.Channel}_{recognizedPhrase.Offset}";
                 var firstNBest = recognizedPhrase.NBest.FirstOrDefault();
 
-                // utterance level requests can only contain sentiment results at the moment
-                var sentimentResult = sentimentResults.Where(s => s.Id == index).FirstOrDefault();
-
-                if (firstNBest != null)
+                if (sentimentResults != null)
                 {
-                    firstNBest.Sentiment = new Sentiment()
+                    // utterance level requests can only contain sentiment results at the moment
+                    var sentimentResult = sentimentResults.Where(s => s.Id == index).FirstOrDefault();
+
+                    if (firstNBest != null)
                     {
-                        Negative = sentimentResult?.DocumentSentiment.ConfidenceScores.Negative ?? 0.0,
-                        Positive = sentimentResult?.DocumentSentiment.ConfidenceScores.Positive ?? 0.0,
-                        Neutral = sentimentResult?.DocumentSentiment.ConfidenceScores.Neutral ?? 0.0,
-                    };
+                        firstNBest.Sentiment = new Sentiment()
+                        {
+                            Negative = sentimentResult?.DocumentSentiment.ConfidenceScores.Negative ?? 0.0,
+                            Positive = sentimentResult?.DocumentSentiment.ConfidenceScores.Positive ?? 0.0,
+                            Neutral = sentimentResult?.DocumentSentiment.ConfidenceScores.Neutral ?? 0.0,
+                        };
+                    }
                 }
             }
 
@@ -251,31 +276,34 @@ namespace TextAnalytics
                     };
                 }
 
-                var piiResult = piiResults.Where(document => document.Id.Equals($"{channel}", StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
-                if (piiResult != null)
+                if (!AnalyzeConversationsProvider.IsConversationalPiiEnabled())
                 {
-                    var redactedText = piiResult.Entities.RedactedText;
-
-                    combinedRecognizedPhrase.Display = redactedText;
-                    combinedRecognizedPhrase.ITN = string.Empty;
-                    combinedRecognizedPhrase.MaskedITN = string.Empty;
-                    combinedRecognizedPhrase.Lexical = string.Empty;
-
-                    var phrases = speechTranscript.RecognizedPhrases.Where(phrase => phrase.Channel == channel);
-
-                    var startIndex = 0;
-                    foreach (var phrase in phrases)
+                    var piiResult = piiResults.Where(document => document.Id.Equals($"{channel}", StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
+                    if (piiResult != null)
                     {
-                        var firstNBest = phrase.NBest.FirstOrDefault();
+                        var redactedText = piiResult.Entities.RedactedText;
 
-                        if (firstNBest != null && !string.IsNullOrEmpty(firstNBest.Display))
+                        combinedRecognizedPhrase.Display = redactedText;
+                        combinedRecognizedPhrase.ITN = string.Empty;
+                        combinedRecognizedPhrase.MaskedITN = string.Empty;
+                        combinedRecognizedPhrase.Lexical = string.Empty;
+
+                        var phrases = speechTranscript.RecognizedPhrases.Where(phrase => phrase.Channel == channel);
+
+                        var startIndex = 0;
+                        foreach (var phrase in phrases)
                         {
-                            firstNBest.Display = redactedText.Substring(startIndex, firstNBest.Display.Length);
-                            firstNBest.ITN = string.Empty;
-                            firstNBest.MaskedITN = string.Empty;
-                            firstNBest.Lexical = string.Empty;
+                            var firstNBest = phrase.NBest.FirstOrDefault();
 
-                            startIndex += firstNBest.Display.Length + 1;
+                            if (firstNBest != null && !string.IsNullOrEmpty(firstNBest.Display))
+                            {
+                                firstNBest.Display = redactedText.Substring(startIndex, firstNBest.Display.Length);
+                                firstNBest.ITN = string.Empty;
+                                firstNBest.MaskedITN = string.Empty;
+                                firstNBest.Lexical = string.Empty;
+
+                                startIndex += firstNBest.Display.Length + 1;
+                            }
                         }
                     }
                 }
@@ -297,7 +325,7 @@ namespace TextAnalytics
             var chunkedDocuments = new List<List<TextDocumentInput>>();
             var totalDocuments = documents.Count();
 
-            for (int i = 0; i < totalDocuments; i += MaxRecordsPerRequest)
+            for (var i = 0; i < totalDocuments; i += MaxRecordsPerRequest)
             {
                 var chunk = documents.Skip(i).Take(Math.Min(MaxRecordsPerRequest, totalDocuments - i)).ToList();
                 chunkedDocuments.Add(chunk);
@@ -311,13 +339,13 @@ namespace TextAnalytics
             foreach (var documentChunk in chunkedDocuments)
             {
                 var index = counter;
-                tasks.Add(SubmitDocumentsChunkAsync(index, documentChunk, actions));
+                tasks.Add(this.SubmitDocumentsChunkAsync(index, documentChunk, actions));
                 counter++;
             }
 
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var jobIds = results.Select(t => t.jobId);
+            var jobIds = results.Select(t => t.jobId).Where(t => !string.IsNullOrEmpty(t));
             var errors = results.SelectMany(t => t.errors);
 
             return (jobIds, errors);
@@ -329,16 +357,16 @@ namespace TextAnalytics
 
             try
             {
-                Log.LogInformation($"Sending text analytics request for document chunk with id {chunkId}.");
+                this.log.LogInformation($"Sending text analytics request for document chunk with id {chunkId}.");
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
-                var operation = await TextAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
+                var operation = await this.textAnalyticsClient.StartAnalyzeActionsAsync(documentChunk, actions, cancellationToken: cts.Token).ConfigureAwait(false);
                 return (operation.Id, errors);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException operationCanceledException)
             {
-                throw new TimeoutException($"The operation has timed out after {RequestTimeout.TotalSeconds} seconds.");
+                throw new TransientFailureException($"Operation was canceled after {RequestTimeout.TotalSeconds} seconds.", operationCanceledException);
             }
 
             // do not catch throttling errors, rather throw and retry
@@ -370,7 +398,7 @@ namespace TextAnalytics
             foreach (var jobId in jobIds)
             {
                 var index = counter;
-                tasks.Add(GetOperationResults(index, jobId));
+                tasks.Add(this.GetOperationResults(index, jobId));
                 counter++;
             }
 
@@ -394,11 +422,11 @@ namespace TextAnalytics
 
             try
             {
-                Log.LogInformation($"Sending text analytics request for document chunk with id {index}.");
+                this.log.LogInformation($"Sending text analytics request for document chunk with id {index}.");
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(RequestTimeout);
 
-                var textAnalyticsOperation = new AnalyzeActionsOperation(operationId, TextAnalyticsClient);
+                var textAnalyticsOperation = new AnalyzeActionsOperation(operationId, this.textAnalyticsClient);
 
                 await textAnalyticsOperation.UpdateStatusAsync().ConfigureAwait(false);
 
@@ -430,9 +458,9 @@ namespace TextAnalytics
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException operationCanceledException)
             {
-                throw new TimeoutException($"The operation has timed out after {RequestTimeout.TotalSeconds} seconds.");
+                throw new TransientFailureException($"Operation was canceled after {RequestTimeout.TotalSeconds} seconds.", operationCanceledException);
             }
 
             // do not catch throttling errors, rather throw and retry
