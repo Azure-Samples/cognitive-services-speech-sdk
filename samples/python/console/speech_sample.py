@@ -858,8 +858,6 @@ def pronunciation_assessment_continuous_from_file():
 
     speech_recognizer.stop_continuous_recognition()
 
-    # We can calculate whole accuracy and fluency scores by duration weighted averaging
-    accuracy_score = sum(i[0] * i[1] for i in zip(accuracy_scores, durations)) / sum(durations)
     # Re-calculate fluency score
     fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
 
@@ -898,6 +896,15 @@ def pronunciation_assessment_continuous_from_file():
                 final_words += recognized_words[j1:j2]
     else:
         final_words = recognized_words
+
+    # We can calculate whole accuracy by averaging
+    final_accuracy_scores = []
+    for word in final_words:
+        if word.error_type == 'Insertion':
+            continue
+        else:
+            final_accuracy_scores.append(word.accuracy_score)
+    accuracy_score = sum(final_accuracy_scores) / len(final_accuracy_scores)
 
     # Calculate whole completeness score
     completeness_score = len([w for w in final_words if w.error_type == 'None']) / len(reference_words) * 100
