@@ -11,9 +11,9 @@ namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
     {
         public AudioFileInfo(string fileUrl, int retryCount, TextAnalyticsRequests textAnalyticsRequests)
         {
-            FileUrl = fileUrl;
-            RetryCount = retryCount;
-            TextAnalyticsRequests = textAnalyticsRequests;
+            this.FileUrl = fileUrl;
+            this.RetryCount = retryCount;
+            this.TextAnalyticsRequests = textAnalyticsRequests;
         }
 
         public string FileUrl { get; set; }

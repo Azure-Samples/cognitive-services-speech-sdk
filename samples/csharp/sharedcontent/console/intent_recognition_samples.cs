@@ -100,12 +100,12 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an intent recognizer using file as audio input.
             // Replace with your own audio file name.
-            using (var audioInput = AudioConfig.FromWavFileInput("whatstheweatherlike.wav"))
+            using (var audioInput = AudioConfig.FromWavFileInput("YourAudioFile.wav"))
             {
                 using (var recognizer = new IntentRecognizer(config, audioInput))
                 {
                     // The TaskCompletionSource to stop recognition.
-                    var stopRecognition = new TaskCompletionSource<int>();
+                    var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                     // Creates a Language Understanding model using the app id, and adds specific intents from your model
                     var model = LanguageUnderstandingModel.FromAppId("YourLanguageUnderstandingAppId");
@@ -166,7 +166,6 @@ namespace MicrosoftSpeechSDKSamples
 
 
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-                    Console.WriteLine("Say something...");
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
                     // Waits for completion.
@@ -257,7 +256,7 @@ namespace MicrosoftSpeechSDKSamples
             // The default recognition language is "en-us".
             var config = SpeechConfig.FromSubscription(
                 "YourSubscriptionKey",
-                "YourSubscriptionRegion");
+                "YourServiceRegion");
 
             // Creates an intent recognizer using microphone as audio input.
             using (var recognizer = new IntentRecognizer(config))
@@ -396,11 +395,11 @@ namespace MicrosoftSpeechSDKSamples
             // The default recognition language is "en-us".
             var config = SpeechConfig.FromSubscription(
                 "YourSubscriptionKey",
-                "YourSubscriptionRegion");
+                "YourServiceRegion");
 
             // Creates an instance of a keyword recognition model. Update this to
             // point to the location of your keyword recognition model.
-            var keywordModel = KeywordRecognitionModel.FromFile(@"PathToKeywordModel\Keyword.table");
+            var keywordModel = KeywordRecognitionModel.FromFile(@"YourKeywordRecognitionModelFile.table");
 
             // The phrase your keyword recognition model triggers on.
             var keyword = "YourKeyword";
@@ -461,7 +460,7 @@ namespace MicrosoftSpeechSDKSamples
                 // Apply the language model collection to the recognizer.
                 recognizer.ApplyLanguageModels(modelCollection);
 
-                var stopRecognition = new TaskCompletionSource<int>();
+                var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                 // Subscribes to events.
                 recognizer.Recognizing += (s, e) =>

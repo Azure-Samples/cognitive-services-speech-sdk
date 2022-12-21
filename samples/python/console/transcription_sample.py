@@ -39,6 +39,7 @@ conversationfilename = "YourConversationWavFile"
 # Differentiation of speakers do not require voice signatures. In case more enhanced speaker identification is required,
 # please use https://signature.centralus.cts.speech.microsoft.com/UI/index.html REST API to create your own voice signatures
 def conversation_transcription_differentiate_speakers():
+    """differentiates speakers using conversation transcription service"""
     # Creates speech configuration with subscription information
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     speech_config.set_property_by_name("ConversationTranscriptionInRoomAndOnline", "true")

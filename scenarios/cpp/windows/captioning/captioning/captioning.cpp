@@ -14,16 +14,39 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
+#include <memory>
 #include <optional>
-#include <sstream>
 #include <speechapi_cxx.h>
-#include "helper.h"
+#include "binary_file_reader.h"
+#include "caption_helper.h"
+#include "string_helper.h"
+#include "user_config.h"
+#include "wav_file_reader.h"
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Speaker;
+
+// Helper functions.
+template <typename T>
+std::vector<T> concatVectors(std::vector<T>& v1, std::vector<T>& v2)
+{
+    if (0 == v1.size())
+    {
+        return std::vector<T>(v2);
+    }
+    else if (0 == v2.size())
+    {
+        return std::vector<T>(v1);
+    }
+    else
+    {
+        std::vector<T> retval(v1);
+        retval.insert(retval.end(), v2.begin(), v2.end());
+        return retval;
+    }
+}
 
 class Captioning
 {
@@ -33,65 +56,12 @@ private:
     std::shared_ptr<AudioStreamFormat> m_format = NULL;
     std::shared_ptr<BinaryFileReader> m_callback = NULL;
     std::shared_ptr<PullAudioInputStream> m_stream = NULL;
-
-    std::string TimestampFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitionResult> result)
-    {
-        std::ostringstream strTimestamp;
-        Timestamp timestamp = TimestampFromTicks(result->Offset(), result->Offset() + result->Duration());    
-        
-        std::ostringstream startSeconds_1, endSeconds_1;
-        // setw value is 2 for seconds + 1 for floating point + 3 for decimal places.
-        startSeconds_1 << std::setfill('0') << std::setw(6) << std::fixed << std::setprecision(3) << timestamp.startSeconds;
-        endSeconds_1 << std::setfill('0') << std::setw(6) << std::fixed << std::setprecision(3) << timestamp.endSeconds;    
-        
-        if (m_userConfig->useSubRipTextCaptionFormat)
-        {
-            // SRT format requires ',' as decimal separator rather than '.'.
-            std::string startSeconds_2(startSeconds_1.str());
-            std::string endSeconds_2(endSeconds_1.str());
-            replace(startSeconds_2.begin(), startSeconds_2.end(), '.', ',');
-            replace(endSeconds_2.begin(), endSeconds_2.end(), '.', ',');
-            strTimestamp << std::setfill('0') << std::setw(2) << timestamp.startHours << ":"
-                << std::setfill('0') << std::setw(2) << timestamp.startMinutes << ":" << startSeconds_2 << " --> "
-                << std::setfill('0') << std::setw(2) << timestamp.endHours << ":"
-                << std::setfill('0') << std::setw(2) << timestamp.endMinutes << ":" << endSeconds_2;
-        }
-        else
-        {
-            strTimestamp << std::setfill('0') << std::setw(2) << timestamp.startHours << ":"
-                << std::setfill('0') << std::setw(2) << timestamp.startMinutes << ":" << startSeconds_1.str() << " --> "
-                << std::setfill('0') << std::setw(2) << timestamp.endHours << ":"
-                << std::setfill('0') << std::setw(2) << timestamp.endMinutes << ":" << endSeconds_1.str();
-        }
-        
-        return strTimestamp.str ();
-    }
-
-    std::string LanguageFromSpeechRecognitionResult(std::shared_ptr<SpeechRecognitionResult> result)
-    {
-        if (m_userConfig->languageIDLanguages.has_value())
-        {
-            auto languageIDResult = AutoDetectSourceLanguageResult::FromResult(result);
-            return "[" + languageIDResult->Language + "] ";
-        }
-        else
-        {
-            return "";
-        }
-    }
-
-    std::string CaptionFromSpeechRecognitionResult(int sequenceNumber, std::shared_ptr<SpeechRecognitionResult> result)
-    {
-        std::string caption;
-        if (!m_userConfig->showRecognizingResults && m_userConfig->useSubRipTextCaptionFormat)
-        {
-            caption += sequenceNumber + "\n";
-        }
-        caption += TimestampFromSpeechRecognitionResult(result) + "\n"
-            + LanguageFromSpeechRecognitionResult(result)
-            + result->Text + "\n\n";
-        return caption;
-    }
+    int m_srtSequenceNumber = 1;
+    std::optional<Caption> m_previousCaption = std::nullopt;
+    std::optional<Timestamp> m_previousEndTime = std::nullopt;
+    bool m_previousResultIsRecognized = false;
+    std::vector<std::string> m_recognizedLines;
+    std::vector<std::shared_ptr<SpeechRecognitionResult>> m_offlineResults;
 
     void WriteToConsole(std::string text)
     {
@@ -113,11 +83,148 @@ private:
         }
     }
 
+    std::string GetTimestamp(Timestamp startTime, Timestamp endTime)
+    {
+        return StringFromTimestamp(startTime, m_userConfig->useSubRipTextCaptionFormat) + " --> " + StringFromTimestamp(endTime, m_userConfig->useSubRipTextCaptionFormat);
+    }
+
+    std::string StringFromCaption(Caption caption)
+    {
+        std::string retval;
+        if (m_userConfig->useSubRipTextCaptionFormat)
+        {
+            retval += caption.sequence + "\n";
+        }
+        retval += GetTimestamp(caption.begin, caption.end) + "\n";
+        retval += caption.text + "\n\n";
+        return retval;
+    }
+
+    std::string AdjustRealTimeCaptionText(std::string text, bool isRecognizedResult)
+    {
+        // Split the caption text into multiple lines based on maxLineLength and lines.
+        auto captionHelper = std::make_shared<CaptionHelper>(m_userConfig->language, m_userConfig->maxLineLength, m_userConfig->lines, std::vector<std::shared_ptr<RecognitionResult>>());
+        std::vector<std::string> lines = captionHelper->LinesFromText(text);
+
+        // Recognizing results can change with each new result, so we do not save previous Recognizing results.
+        // Recognized results are final, so we save them in a member value.
+        std::vector<std::string> recognizingLines;
+        if (isRecognizedResult)
+        {
+            m_recognizedLines.insert(m_recognizedLines.end(), lines.begin(), lines.end());
+        }
+        else
+        {
+            recognizingLines.insert(recognizingLines.end(), lines.begin(), lines.end());
+        }
+
+        std::vector<std::string> combinedLines = concatVectors(m_recognizedLines, recognizingLines);
+        auto combinedLinesSize = combinedLines.size();
+        int takeLast = combinedLinesSize < m_userConfig->lines ? combinedLinesSize : m_userConfig->lines;
+        std::vector<std::string> retval(combinedLines.end() - takeLast, combinedLines.end());
+        return StringHelper::Join(retval, "\n");
+    }
+
+    std::optional<std::string> CaptionFromRealTimeResult(std::shared_ptr<SpeechRecognitionResult> result, bool isRecognizedResult)
+    {
+        std::optional<std::string> retval = std::nullopt;
+
+        Timestamp startTime = TimestampFromTicks(result->Offset());
+        Timestamp endTime = TimestampFromTicks(result->Offset() + result->Duration());
+        // If the end timestamp for the previous result is later
+        // than the end timestamp for this result, drop the result.
+        // This sometimes happens when we receive a lot of Recognizing results close together.
+        if (m_previousEndTime.has_value() && CompareTimestamps(m_previousEndTime.value(), endTime) > 0)
+        {
+            // Do nothing.
+        }
+        else
+        {
+            // Record the end timestamp for this result.
+            m_previousEndTime = endTime;
+
+            // Convert the SpeechRecognitionResult to a caption.
+            // We are not ready to set the text for this caption.
+            // First we need to determine whether to clear m_recognizedLines.
+            auto caption = Caption(m_userConfig->language, m_srtSequenceNumber++, TimestampPlusMilliseconds(startTime, m_userConfig->delay), TimestampPlusMilliseconds(endTime, m_userConfig->delay), "");
+
+            // If we have a previous caption...
+            if (m_previousCaption.has_value())
+            {
+                // If the previous result was type Recognized...
+                if (m_previousResultIsRecognized)
+                {
+                    // Set the end timestamp for the previous caption to the earliest of:
+                    // - The end timestamp for the previous caption plus the remain time.
+                    // - The start timestamp for the current caption.
+                    Timestamp previousEnd = TimestampPlusMilliseconds(m_previousCaption.value().end, m_userConfig->remainTime);
+                    m_previousCaption.value().end = CompareTimestamps(previousEnd, caption.begin) < 0 ? previousEnd : caption.begin;
+                    // If the gap between the original end timestamp for the previous caption
+                    // and the start timestamp for the current caption is larger than remainTime,
+                    // clear the cached recognized lines.
+                    // Note this needs to be done before we call AdjustRealTimeCaptionText
+                    // for the current caption, because it uses m_recognizedLines.
+                    if (CompareTimestamps(previousEnd, caption.begin) < 0)
+                    {
+                        m_recognizedLines.clear();
+                    }
+                }
+                // If the previous result was type Recognizing, simply set the start timestamp
+                // for the current caption to the end timestamp for the previous caption.
+                // Note this presumes there will not be a large gap between Recognizing results,
+                // because such a gap would cause the previous Recognizing result to be succeeded
+                // by a Recognized result.
+                else
+                {
+                    caption.begin = m_previousCaption.value().end;
+                }
+
+                retval = std::optional<std::string>{ StringFromCaption(m_previousCaption.value()) };
+            }
+
+            // Break the caption text into lines if needed.
+            caption.text = AdjustRealTimeCaptionText(result->Text, isRecognizedResult);
+            // Save the current caption as the previous caption.
+            m_previousCaption = caption;
+            // Save the result type as the previous result type.
+            m_previousResultIsRecognized = isRecognizedResult;
+        }
+
+        return retval;
+    }
+
+    std::vector<Caption> CaptionsFromOfflineResults()
+    {
+        // Although SpeechRecognitionResult inherits RecognitionResult, we cannot pass
+        // std::vector<std::shared_ptr<SpeechRecognitionResult>> as a
+        // std::vector<std::shared_ptr<RecognitionResult>>.
+        std::vector<std::shared_ptr<RecognitionResult>> offlineResults(m_offlineResults.size());
+        std::transform(m_offlineResults.begin(), m_offlineResults.end(), offlineResults.begin(), [](std::shared_ptr<SpeechRecognitionResult> result) {
+            return std::static_pointer_cast<RecognitionResult>(result);
+        });
+        std::vector<Caption> captions = CaptionHelper::GetCaptions(m_userConfig->language, m_userConfig->maxLineLength, m_userConfig->lines, offlineResults);
+
+        // In offline mode, all captions come from RecognitionResults of type Recognized.
+        // Set the end timestamp for each caption to the earliest of:
+        // - The end timestamp for this caption plus the remain time.
+        // - The start timestamp for the next caption.
+        for (auto index = 0; index < captions.size() - 1; index++)
+        {
+            Caption caption_1 = captions[index];
+            Caption caption_2 = captions[index + 1];
+            Timestamp end = TimestampPlusMilliseconds(caption_1.end, m_userConfig->remainTime);
+            caption_1.end = CompareTimestamps(end, caption_2.begin) < 0 ? end : caption_2.begin;
+        }
+        Caption lastCaption = captions[captions.size() - 1];
+        lastCaption.end = TimestampPlusMilliseconds(lastCaption.end, m_userConfig->remainTime);
+        return captions;
+    }
+
     std::shared_ptr<Audio::AudioConfig> AudioConfigFromUserConfig()
     {
         if (m_userConfig->inputFile.has_value())
         {
-            if (EndsWith(m_userConfig->inputFile.value(), ".wav"))
+            if (StringHelper::EndsWith(m_userConfig->inputFile.value(), ".wav"))
             {
                 auto reader = std::make_shared<WavFileReader>(m_userConfig->inputFile.value());
                 m_format = AudioStreamFormat::GetWaveFormatPCM(reader->GetFormat().SamplesPerSec, (uint8_t)reader->GetFormat().BitsPerSample, (uint8_t)reader->GetFormat().Channels);
@@ -140,15 +247,7 @@ private:
     std::shared_ptr<SpeechConfig> SpeechConfigFromUserConfig()
     {
         std::shared_ptr<SpeechConfig> speechConfig;
-        if (m_userConfig->languageIDLanguages.has_value())
-        {
-            std::string endpoint = V2EndpointFromRegion(m_userConfig->region);
-            speechConfig = SpeechConfig::FromEndpoint(endpoint, m_userConfig->subscriptionKey);
-        }
-        else
-        {
-            speechConfig = SpeechConfig::FromSubscription(m_userConfig->subscriptionKey, m_userConfig->region);
-        }
+        speechConfig = SpeechConfig::FromSubscription(m_userConfig->subscriptionKey, m_userConfig->region);
 
         speechConfig->SetProfanity(m_userConfig->profanityOption);
 
@@ -160,6 +259,7 @@ private:
         }
         
         speechConfig->SetProperty(PropertyId::SpeechServiceResponse_PostProcessingOption, "TrueText");
+        speechConfig->SetSpeechRecognitionLanguage(m_userConfig->language);
         
         return speechConfig;
     }
@@ -179,7 +279,7 @@ public:
                 outputStream.close();            
             }
         }
-        if (!m_userConfig->useSubRipTextCaptionFormat && !m_userConfig->showRecognizingResults)
+        if (!m_userConfig->useSubRipTextCaptionFormat)
         {
             WriteToConsoleOrFile("WEBVTT\n\n");
         }
@@ -191,20 +291,14 @@ public:
         std::shared_ptr<SpeechConfig> speechConfig = SpeechConfigFromUserConfig();
         std::shared_ptr<SpeechRecognizer> speechRecognizer;
 
-        if (m_userConfig->languageIDLanguages.has_value())
-        {
-            auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages(m_userConfig->languageIDLanguages.value());
-            speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
-        }
-        else
-        {
-            speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
-        }
+        speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
 
         if (m_userConfig->phraseList.has_value())
         {
             auto grammar = PhraseListGrammar::FromRecognizer(speechRecognizer);
-            grammar->AddPhrase(m_userConfig->phraseList.value());
+            for (auto phrase : StringHelper::Split(m_userConfig->phraseList.value(), ';')) {
+                grammar->AddPhrase(phrase);
+            }
         }
         
         return speechRecognizer;
@@ -213,17 +307,21 @@ public:
     std::optional<std::string> RecognizeContinuous(std::shared_ptr<SpeechRecognizer> speechRecognizer)
     {
         std::promise<std::optional<std::string>> recognitionEnd;
-        int sequenceNumber = 0;
 
-        if (m_userConfig->showRecognizingResults) {
+        // We only use Recognizing results in real-time mode.
+        if (CaptioningMode::RealTime == m_userConfig->captioningMode)
+        {
             // Capture variables we will need inside the lambda. See:
             // https://www.cppstories.com/2020/08/lambda-capturing.html/
             speechRecognizer->Recognizing.Connect([this](const SpeechRecognitionEventArgs& e)
                 {
                     if (ResultReason::RecognizingSpeech == e.Result->Reason && e.Result->Text.length() > 0)
                     {
-                        // We don't show sequence numbers for partial results.
-                        WriteToConsole(CaptionFromSpeechRecognitionResult(0, e.Result));
+                        std::optional<std::string> caption = CaptionFromRealTimeResult(e.Result, false);
+                        if (caption.has_value())
+                        {
+                            WriteToConsoleOrFile(caption.value());
+                        }
                     }
                     else if (ResultReason::NoMatch == e.Result->Reason)
                     {
@@ -232,12 +330,22 @@ public:
                 });
         }
 
-        speechRecognizer->Recognized.Connect([this, &sequenceNumber](const SpeechRecognitionEventArgs& e)
+        speechRecognizer->Recognized.Connect([this](const SpeechRecognitionEventArgs& e)
             {
                 if (ResultReason::RecognizedSpeech == e.Result->Reason && e.Result->Text.length() > 0)
                 {
-                    sequenceNumber++;
-                    WriteToConsoleOrFile(CaptionFromSpeechRecognitionResult(sequenceNumber, e.Result));
+                    if (CaptioningMode::Offline == m_userConfig->captioningMode)
+                    {
+                        m_offlineResults.push_back(e.Result);
+                    }
+                    else
+                    {
+                        std::optional<std::string> caption = CaptionFromRealTimeResult(e.Result, true);
+                        if (caption.has_value())
+                        {
+                            WriteToConsoleOrFile(caption.value());
+                        }
+                    }
                 }
                 else if (ResultReason::NoMatch == e.Result->Reason)
                 {
@@ -290,39 +398,71 @@ public:
 
         return result;
     }
+
+    void Finish()
+    {
+        if (CaptioningMode::Offline == m_userConfig->captioningMode)
+        {
+            for (Caption caption : CaptionsFromOfflineResults())
+            {
+                WriteToConsoleOrFile(StringFromCaption(caption));
+            }
+        }
+        else if (CaptioningMode::RealTime == m_userConfig->captioningMode)
+        {
+            // Show the last "previous" caption, which is actually the last caption.
+            if (m_previousCaption.has_value())
+            {
+                m_previousCaption.value().end = TimestampPlusMilliseconds(m_previousCaption.value().end, m_userConfig->remainTime);
+                WriteToConsoleOrFile(StringFromCaption(m_previousCaption.value()));
+            }
+        }
+    }
 };
 
 int main(int argc, char* argv[])
 {
     const std::string usage = "Usage: captioning.exe [...]\n\n"
 "  HELP\n"
-"    --help                        Show this help and stop.\n\n"
+"    --help                           Show this help and stop.\n\n"
 "  CONNECTION\n"
-"    --key KEY                     Your Azure Speech service subscription key.\n"
-"    --region REGION               Your Azure Speech service region.\n"
-"                                  Examples: westus, eastus\n\n"
+"    --key KEY                        Your Azure Speech service resource key.\n"
+"                                     Overrides the SPEECH_KEY environment variable. You must set the environment variable (recommended) or use the `--key` option.\n"
+"    --region REGION                  Your Azure Speech service region.\n"
+"                                     Overrides the SPEECH_REGION environment variable. You must set the environment variable (recommended) or use the `--region` option.\n"
+"                                     Examples: westus, eastus\n\n"
 "  LANGUAGE\n"
-"    --languages LANG1;LANG2       Enable language identification for specified languages.\n"
-"                                  Example: en-US;ja-JP\n\n"
+"    --language LANG                  Specify language. This is used when breaking captions into lines.\n"
+"                                     Default value is en-US.\n"
+"                                     Examples: en-US, ja-JP\n\n"
 "  INPUT\n"
-"    --input FILE                  Input audio from file (default input is the microphone.)\n"
-"    --format FORMAT               Use compressed audio format.\n"
-"                                  If this is not present, uncompressed format (wav) is assumed.\n"
-"                                  Valid only with --file.\n"
-"                                  Valid values: alaw, any, flac, mp3, mulaw, ogg_opus\n\n"
-"  RECOGNITION\n"
-"    --recognizing                 Output Recognizing results (default output is Recognized results only.)\n"
-"                                  These are always written to the console, never to an output file.\n"
-"                                  --quiet overrides this.\n\n"
+"    --input FILE                     Input audio from file (default input is the microphone.)\n"
+"    --format FORMAT                  Use compressed audio format.\n"
+"                                     If this is not present, uncompressed format (wav) is assumed.\n"
+"                                     Valid only with --file.\n"
+"                                     Valid values: alaw, any, flac, mp3, mulaw, ogg_opus\n\n"
+"  MODE\n"
+"    --offline                        Output offline results.\n"
+"                                     Overrides --realTime.\n"
+"    --realTime                       Output real-time results.\n"
+"                                     Default output mode is offline.\n\n"
 "  ACCURACY\n"
-"    --phrases PHRASE1;PHRASE2     Example: Constoso;Jessie;Rehaan\n\n"
+"    --phrases ""PHRASE1;PHRASE2""    Example: ""Constoso;Jessie;Rehaan""\n\n"
 "  OUTPUT\n"
-"    --output FILE                 Output captions to text file.\n"
-"    --srt                         Output captions in SubRip Text format (default format is WebVTT.)\n"
-"    --quiet                       Suppress console output, except errors.\n"
-"    --profanity OPTION            Valid values: raw, remove, mask\n"
-"    --threshold NUMBER            Set stable partial result threshold.\n"
-"                                  Default value: 3\n";
+"    --output FILE                    Output captions to text file.\n"
+"    --srt                            Output captions in SubRip Text format (default format is WebVTT.)\n"
+"    --maxLineLength LENGTH           Set the maximum number of characters per line for a caption to LENGTH.\n"
+"                                     Minimum is 20. Default is 37 (30 for Chinese).\n"
+"    --lines LINES                    Set the number of lines for a caption to LINES.\n"
+"                                     Minimum is 1. Default is 2.\n"
+"    --delay MILLISECONDS             How many MILLISECONDS to delay the appearance of each caption.\n"
+"                                     Minimum is 0.0. Default is 1000.\n"
+"    --remainTime MILLISECONDS        How many MILLISECONDS a caption should remain on screen if it is not replaced by another.\n"
+"                                     Minimum is 0.0. Default is 1000.\n\n"
+"    --quiet                          Suppress console output, except errors.\n"
+"    --profanity OPTION               Valid values: raw, remove, mask\n"
+"    --threshold NUMBER               Set stable partial result threshold.\n"
+"                                     Default value: 3\n";
 
     try
     {
@@ -340,6 +480,7 @@ int main(int argc, char* argv[])
             {
                 std::cout << error.value() << std::endl;
             }
+            captioning->Finish();
             
         }
     }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:paddingHorizontal="8dp"
+        android:id="@+id/speakText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="@string/content_text"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/buttonInitSynth"/>
+
+    <Button
+        android:id="@+id/buttonInitSynth"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:drawableEnd="@drawable/ic_baseline_refresh_24"
+        android:maxLines="2"
+        android:text="@string/initialize_synth"
+        app:layout_constraintTop_toBottomOf="@id/speakText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonPlayVoice"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <Button
+        android:id="@+id/buttonPlayVoice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:drawableEnd="@drawable/ic_baseline_play_arrow_24"
+        android:text="@string/play_voice"
+        app:layout_constraintTop_toBottomOf="@id/speakText"
+        app:layout_constraintStart_toEndOf="@id/buttonInitSynth"
+        app:layout_constraintEnd_toStartOf="@id/buttonPauseVoice"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <Button
+        android:id="@+id/buttonPauseVoice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:drawableEnd="@drawable/ic_baseline_pause_24"
+        android:padding="4dp"
+        android:text="@string/pause_voice"
+        app:layout_constraintTop_toBottomOf="@id/speakText"
+        app:layout_constraintStart_toEndOf="@id/buttonPlayVoice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

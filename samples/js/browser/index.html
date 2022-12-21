@@ -517,7 +517,14 @@
 
                 // in case we have a function for getting an authorization token, call it.
                 if (typeof RequestAuthorizationToken === "function") {
-                    RequestAuthorizationToken();
+                    const renewToken = async () => {
+                        await RequestAuthorizationToken();
+                        if(!!reco) {
+                            reco.authorizationToken = authorizationToken;
+                        }
+                        setTimeout(renewToken, 600000);
+                    };
+                    await renewToken();
                 }
             });
         });
@@ -566,6 +573,12 @@
             // Multiple languages can be specified for text translation and will be returned in a map.
             if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
                 speechConfig.addTargetLanguage(languageTargetOptions.value.split("(")[1].substring(0, 5));
+
+                // If voice output is requested, set the target voice.
+                // If multiple text translations were requested, only the first one added will have audio synthesised for it.
+                if (voiceOutput.checked) {
+                    speechConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_TranslationVoice, languageTargetOptions.value);
+                }
             }
 
             speechConfig.speechRecognitionLanguage = languageOptions.value;
@@ -692,11 +705,11 @@
         }
 
         function onCanceled (sender, cancellationEventArgs) {
-            window.console.log(e);
+            window.console.log(cancellationEventArgs);
 
-            statusDiv.innerHTML += "(cancel) Reason: " + SpeechSDK.CancellationReason[e.reason];
-            if (e.reason === SpeechSDK.CancellationReason.Error) {
-                statusDiv.innerHTML += ": " + e.errorDetails;
+            statusDiv.innerHTML += "(cancel) Reason: " + SpeechSDK.CancellationReason[cancellationEventArgs.reason];
+            if (cancellationEventArgs.reason === SpeechSDK.CancellationReason.Error) {
+                statusDiv.innerHTML += ": " + cancellationEventArgs.errorDetails;
             }
             statusDiv.innerHTML += "\r\n";
         }
