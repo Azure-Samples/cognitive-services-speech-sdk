@@ -900,12 +900,11 @@ def pronunciation_assessment_continuous_from_file():
         else:
             final_accuracy_scores.append(word.accuracy_score)
     accuracy_score = sum(final_accuracy_scores) / len(final_accuracy_scores)
-
     # Re-calculate fluency score
     fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
-
     # Calculate whole completeness score
-    completeness_score = len([w for w in final_words if w.error_type == 'None']) / len(reference_words) * 100
+    completeness_score = len([w for w in recognized_words if w.error_type == "None"]) / len(reference_words) * 100
+    completeness_score = completeness_score if completeness_score <= 100 else 100
 
     print('    Paragraph accuracy score: {}, completeness score: {}, fluency score: {}'.format(
         accuracy_score, completeness_score, fluency_score
