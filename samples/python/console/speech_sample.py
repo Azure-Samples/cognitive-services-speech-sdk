@@ -816,7 +816,6 @@ def pronunciation_assessment_continuous_from_file():
 
     done = False
     recognized_words = []
-    accuracy_scores = []
     fluency_scores = []
     durations = []
 
@@ -833,9 +832,8 @@ def pronunciation_assessment_continuous_from_file():
             pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words, accuracy_scores, fluency_scores, durations
+        nonlocal recognized_words, fluency_scores, durations
         recognized_words += pronunciation_result.words
-        accuracy_scores.append(pronunciation_result.accuracy_score)
         fluency_scores.append(pronunciation_result.fluency_score)
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
@@ -857,9 +855,6 @@ def pronunciation_assessment_continuous_from_file():
         time.sleep(.5)
 
     speech_recognizer.stop_continuous_recognition()
-
-    # Re-calculate fluency score
-    fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
 
     # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
     if language == 'zh-CN':
@@ -905,9 +900,11 @@ def pronunciation_assessment_continuous_from_file():
         else:
             final_accuracy_scores.append(word.accuracy_score)
     accuracy_score = sum(final_accuracy_scores) / len(final_accuracy_scores)
-
+    # Re-calculate fluency score
+    fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
     # Calculate whole completeness score
-    completeness_score = len([w for w in final_words if w.error_type == 'None']) / len(reference_words) * 100
+    completeness_score = len([w for w in recognized_words if w.error_type == "None"]) / len(reference_words) * 100
+    completeness_score = completeness_score if completeness_score <= 100 else 100
 
     print('    Paragraph accuracy score: {}, completeness score: {}, fluency score: {}'.format(
         accuracy_score, completeness_score, fluency_score
