@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 # This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
 
 SUBSCRIPTION_KEY = os.environ.get('SPEECH_KEY')
-SERVICE_REGION = os.environ.get('SPEECH_KEY')
+SERVICE_REGION = os.environ.get('SPEECH_REGION')
 
 NAME = "Simple synthesis"
 DESCRIPTION = "Simple synthesis description"
