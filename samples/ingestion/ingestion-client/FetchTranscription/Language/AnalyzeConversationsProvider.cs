@@ -72,7 +72,6 @@ namespace Language
                     new Conversation
                     {
                         Id = $"whole transcript",
-                        Language = this.locale,
                         Modality = Modality.transcript,
                         ConversationItems = new List<ConversationItem>()
                     }
@@ -152,6 +151,7 @@ namespace Language
                     MaskedItn = topResult.MaskedITN,
                     Id = $"{turnCount}__{recognizedPhrase.Offset}__{recognizedPhrase.Channel}",
                     ParticipantId = $"{recognizedPhrase.Channel}",
+                    Role = (turnCount % 2 == 0) ? "Agent" : "Customer",
                     ConversationItemLevelTiming = new AudioTiming
                     {
                         Offset = recognizedPhrase.OffsetInTicks,
@@ -175,6 +175,7 @@ namespace Language
 
             if (this.locale != null && this.locale.StartsWith(Connector.Constants.Constants.SummarizationSupportedLocalePrefix))
             {
+                summarizationData.AnalysisInput.Conversations[0].Language = Connector.Constants.Constants.SummarizationSupportedLocalePrefix;
                 data.Add(summarizationData);
                 jobCount++;
             }
@@ -264,7 +265,7 @@ namespace Language
         /// <returns>True if all requests completed, else false.</returns>
         public async Task<bool> ConversationalRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!IsConversationalPiiEnabled() || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests != null).Any())
+            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()) || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests != null).Any())
             {
                 return true;
             }
@@ -307,8 +308,7 @@ namespace Language
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
             var errors = new List<string>();
 
-            var isConversationalPiiEnabled = IsConversationalPiiEnabled();
-            if (!isConversationalPiiEnabled)
+            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()))
             {
                 return new List<string>();
             }

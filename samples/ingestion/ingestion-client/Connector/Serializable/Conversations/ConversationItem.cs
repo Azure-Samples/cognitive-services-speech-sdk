@@ -33,5 +33,8 @@ namespace Connector.Serializable.Language.Conversations
 
         [JsonProperty("conversationItemLevelTiming")]
         public AudioTiming ConversationItemLevelTiming { get; set; }
+
+        [JsonProperty("role")]
+        public string Role { get; set; }
     }
 }
