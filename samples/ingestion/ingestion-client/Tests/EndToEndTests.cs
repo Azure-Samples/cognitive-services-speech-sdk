@@ -10,10 +10,17 @@ namespace Tests
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+
+    using Connector;
+
+    using Language;
+
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
+    using Newtonsoft.Json;
+
     using RealtimeTranscription;
 
     [TestClass]
@@ -51,6 +58,19 @@ namespace Tests
 
             var firstNBest = jsonResults.First().NBest.First();
             Assert.AreEqual(firstNBest.Lexical, "hello");
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.EndToEndTest)]
+        public async Task AnalyzeConversationTestAsync()
+        {
+            var region = testProperties["LanguageServiceRegion"].ToString();
+            var subscriptionKey = testProperties["LanguageServiceSubscriptionKey"].ToString();
+            var provider = new AnalyzeConversationsProvider("en-US", subscriptionKey, region, Logger.Object);
+            var body = File.ReadAllText(@"testFiles/transcriptSample.json");
+            var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
+            var jobIds = await provider.SubmitAnalyzeConversationsRequestAsync(transcription).ConfigureAwait(false);
+            Console.WriteLine(JsonConvert.SerializeObject(jobIds));
         }
     }
 }
