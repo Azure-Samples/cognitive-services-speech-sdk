@@ -5,6 +5,9 @@
 
 namespace Connector.Constants
 {
+    using System;
+    using System.Collections.Generic;
+
     public static class Constants
     {
         public const int MaxRetryLimit = 16;
@@ -28,5 +31,9 @@ namespace Connector.Constants
         public const int DefaultFilesPerTranscriptionJob = 100;
 
         public const int DefaultConversationAnalysisMaxChunkSize = 5000;
+
+        public const string SummarizationSupportedLocalePrefix = "en";
+
+        public static readonly IReadOnlySet<string> ValidSummaryAspects = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "issue", "resolution", "chapterTitle", "narrative" };
     }
 }
