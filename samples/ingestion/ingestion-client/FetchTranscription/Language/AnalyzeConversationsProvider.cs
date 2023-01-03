@@ -121,7 +121,7 @@ namespace Language
                                 ConversationItems = new List<ConversationItem>()
                             }
                         }),
-                        Tasks = new List<AnalyzeConversationsTask>
+                        Tasks = new[]
                         {
                             new AnalyzeConversationsTask
                             {

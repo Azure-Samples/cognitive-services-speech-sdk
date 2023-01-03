@@ -194,15 +194,22 @@
             }
         },
         "PiiRedaction": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "UtteranceAndAudioLevel"
-            ],
-            "metadata": {
-                "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
-            }
+          "defaultValue": "None",
+          "type": "String",
+          "allowedValues": [
+              "None",
+              "UtteranceAndAudioLevel"
+          ],
+          "metadata": {
+              "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
+          }
+        },
+        "ConversationSummarizationAspects": {
+          "defaultValue": "issue;resolution;chapterTitle;narrative",
+          "type": "string",
+          "metadata": {
+              "description": "A value indicating which aspects to be used for conversation summarization. Leave it as empty to disable summarization."
+          }
         },
         "SqlAdministratorLogin": {
             "type": "string",
@@ -269,6 +276,7 @@
         "ConversationPiiCategories": "",
         "ConversationPiiRedaction": "None",
         "ConversationPiiInferenceSource": "text",
+        "ConversationSummarizationAspects": "[variables('ConversationSummarizationAspects')]",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]",
@@ -941,7 +949,8 @@
                 "PiiCategories": "[variables('PiiCategories')]",
                 "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
-                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]"
+                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]",
+                "ConversationSummarizationAspects":"[variables('ConversationSummarizationAspects')]"
             }
         }
     ],
