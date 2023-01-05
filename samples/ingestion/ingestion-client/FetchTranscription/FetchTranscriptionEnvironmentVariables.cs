@@ -6,7 +6,6 @@
 namespace FetchTranscriptionFunction
 {
     using System;
-
     using Connector;
     using Connector.Constants;
     using Connector.Enums;

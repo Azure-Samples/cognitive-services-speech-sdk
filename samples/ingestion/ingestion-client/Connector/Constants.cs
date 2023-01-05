@@ -5,10 +5,6 @@
 
 namespace Connector.Constants
 {
-    using System;
-    using System.Collections.Generic;
-    using Connector.Serializable.Language.Conversations;
-
     public static class Constants
     {
         public const int MaxRetryLimit = 16;

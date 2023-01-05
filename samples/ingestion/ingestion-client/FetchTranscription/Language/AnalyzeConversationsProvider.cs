@@ -139,7 +139,7 @@ namespace Language
                                     }
                                 }
                             }
-                        },
+                        }
                     });
                 }
 
@@ -166,7 +166,7 @@ namespace Language
                 };
                 data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
 
-                // for issue resolution summarization
+                // for summarization
                 var stratergy = FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Statergy;
                 var roleKey = stratergy.Key switch
                 {
