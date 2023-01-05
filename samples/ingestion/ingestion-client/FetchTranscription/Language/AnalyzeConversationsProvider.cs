@@ -16,6 +16,7 @@ namespace Language
     using Azure.Core;
 
     using Connector;
+    using Connector.Constants;
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
@@ -82,8 +83,15 @@ namespace Language
             var count = -1;
             var jobCount = 0;
             var turnCount = 0;
+            var firstUtteranceChannel = int.MinValue;
+            var firstUtteranceSpeaker = int.MinValue;
+            if (speechTranscript.RecognizedPhrases.Count() > 0)
+            {
+                firstUtteranceChannel = speechTranscript.RecognizedPhrases.First().Channel;
+                firstUtteranceSpeaker = speechTranscript.RecognizedPhrases.First().Speaker;
+            }
 
-            foreach (var aspect in FetchTranscriptionEnvironmentVariables.ConversationSummarizationAspects.Split(Connector.Constants.Constants.Delimiter).Where(Connector.Constants.Constants.ValidSummaryAspects.Contains))
+            foreach (var aspect in FetchTranscriptionEnvironmentVariables.ConversationSummarizationAspects.Split(Constants.Delimiter).Where(Constants.ValidSummaryAspects.Contains))
             {
                 summarizationData.Tasks.Add(new AnalyzeConversationsTask
                 {
@@ -151,7 +159,6 @@ namespace Language
                     MaskedItn = topResult.MaskedITN,
                     Id = $"{turnCount}__{recognizedPhrase.Offset}__{recognizedPhrase.Channel}",
                     ParticipantId = $"{recognizedPhrase.Channel}",
-                    Role = (turnCount % 2 == 0) ? "Agent" : "Customer",
                     ConversationItemLevelTiming = new AudioTiming
                     {
                         Offset = recognizedPhrase.OffsetInTicks,
@@ -166,16 +173,31 @@ namespace Language
                         })
                 };
                 data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
+
+                static string TheOtherRole(string role) => role == Constants.Agent ? Constants.Customer : Constants.Agent;
+                utterance.Role = utterance.ParticipantId = FetchTranscriptionEnvironmentVariables.RoleAssignmentStratergy switch
+                {
+                    Constants.RoleAssignmentStratergyByChannel =>
+                        recognizedPhrase.Channel == firstUtteranceChannel
+                        ? FetchTranscriptionEnvironmentVariables.FirstChannelRole
+                        : TheOtherRole(FetchTranscriptionEnvironmentVariables.FirstChannelRole),
+                    Constants.RoleAssignmentStratergyBySpeaker =>
+                        recognizedPhrase.Speaker == firstUtteranceSpeaker
+                        ? FetchTranscriptionEnvironmentVariables.FirstSpeakerRole
+                        : TheOtherRole(FetchTranscriptionEnvironmentVariables.FirstSpeakerRole),
+                    _ => default
+                };
                 summarizationData.AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
+
                 count += textCount;
                 turnCount++;
             }
 
-            this.log.LogInformation("{0} Summarization Tasks Prepared. Locale = {1}. chars = {2}. turns = {3}.", summarizationData.Tasks.Count, this.locale, count, turnCount);
+            this.log.LogInformation($"{summarizationData.Tasks.Count} Summarization Tasks Prepared. Locale = {this.locale}. chars = {count}. turns = {turnCount}.");
 
-            if (this.locale != null && this.locale.StartsWith(Connector.Constants.Constants.SummarizationSupportedLocalePrefix))
+            if (this.locale != null && this.locale.StartsWith(Constants.SummarizationSupportedLocalePrefix))
             {
-                summarizationData.AnalysisInput.Conversations[0].Language = Connector.Constants.Constants.SummarizationSupportedLocalePrefix;
+                summarizationData.AnalysisInput.Conversations[0].Language = Constants.SummarizationSupportedLocalePrefix;
                 data.Add(summarizationData);
                 jobCount++;
             }
@@ -390,15 +412,15 @@ namespace Language
                 if (analysisResult.Tasks.InProgress == 0)
                 {
                     // all tasks completed.
-                    return (analysisResult.Tasks
+                    var piiResults = analysisResult.Tasks
                         .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults)
                         .Select(s => s as ConversationPiiItem)
-                        .Select(s => s.Results),
-                        analysisResult.Tasks
+                        .Select(s => s.Results);
+                    var summarizationResults = analysisResult.Tasks
                         .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults)
                         .Select(s => s as ConversationSummarizationItem)
-                        .Select(s => s.Results),
-                        errors);
+                        .Select(s => s.Results);
+                    return (piiResults, summarizationResults, errors);
                 }
             }
             catch (OperationCanceledException)

@@ -28,6 +28,12 @@ namespace FetchTranscriptionFunction
 
         public static readonly string ConversationSummarizationAspects = Environment.GetEnvironmentVariable(nameof(ConversationSummarizationAspects), EnvironmentVariableTarget.Process);
 
+        public static readonly string RoleAssignmentStratergy = Environment.GetEnvironmentVariable(nameof(RoleAssignmentStratergy), EnvironmentVariableTarget.Process) ?? Constants.DefaultRoleAssignmentStratergy;
+
+        public static readonly string FirstChannelRole = Environment.GetEnvironmentVariable(nameof(FirstChannelRole), EnvironmentVariableTarget.Process) ?? Constants.DefaultFirstChannelRole;
+
+        public static readonly string FirstSpeakerRole = Environment.GetEnvironmentVariable(nameof(FirstSpeakerRole), EnvironmentVariableTarget.Process) ?? Constants.DefaultFirstSpeakerRole;
+
         public static readonly bool UseSqlDatabase = bool.TryParse(Environment.GetEnvironmentVariable(nameof(UseSqlDatabase), EnvironmentVariableTarget.Process), out UseSqlDatabase) && UseSqlDatabase;
 
         public static readonly int InitialPollingDelayInMinutes = int.TryParse(Environment.GetEnvironmentVariable(nameof(InitialPollingDelayInMinutes), EnvironmentVariableTarget.Process), out InitialPollingDelayInMinutes) ? InitialPollingDelayInMinutes.ClampInt(2, Constants.MaxInitialPollingDelayInMinutes) : Constants.DefaultInitialPollingDelayInMinutes;

@@ -204,13 +204,6 @@
               "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
           }
         },
-        "ConversationSummarizationAspects": {
-          "defaultValue": "issue;resolution;chapterTitle;narrative",
-          "type": "string",
-          "metadata": {
-              "description": "A value indicating which aspects to be used for conversation summarization. Leave it as empty to disable summarization."
-          }
-        },
         "SqlAdministratorLogin": {
             "type": "string",
             "defaultValue": "",
@@ -234,7 +227,7 @@
         }
     },
     "variables": {
-        "Version": "v2.0.2",
+        "Version": "v2.0.3",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -276,7 +269,10 @@
         "ConversationPiiCategories": "",
         "ConversationPiiRedaction": "None",
         "ConversationPiiInferenceSource": "text",
-        "ConversationSummarizationAspects": "[variables('ConversationSummarizationAspects')]",
+        "ConversationSummarizationAspects": "issue;resolution;chapterTitle;narrative",
+        "RoleAssignmentStratergy": "Channel",
+        "FirstChannelRole": "Agent",
+        "FirstSpeakerRole": "Agent",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]",
@@ -950,7 +946,10 @@
                 "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
                 "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]",
-                "ConversationSummarizationAspects":"[variables('ConversationSummarizationAspects')]"
+                "ConversationSummarizationAspects":"[variables('ConversationSummarizationAspects')]",
+                "RoleAssignmentStratergy":"[variables('RoleAssignmentStratergy')]",
+                "FirstChannelRole":"[variables('FirstChannelRole')]",
+                "FirstSpeakerRole":"[variables('FirstSpeakerRole')]"
             }
         }
     ],
