@@ -1,15 +1,15 @@
 {
-  "source": "https://www.contoso.com",
-  "timestamp": "2020-06-26T15:18:35Z",
-  "durationTicks": 74800000,
-  "duration": "PT7.48S",
+  "source": "https://yuantwig202.blob.core.windows.net/audio-input/IRS24.wav?sv=2021-10-04&st=2023-01-05T22%3A34%3A00Z&se=2023-01-06T22%3A44%3A00Z&sr=b&sp=r&sig=y2bsy%2BkC6AjDameLfTcofdb3zgqaBa8mj%2Bhfjg2EjMc%3D",
+  "timeStamp": "2023-01-05T22:44:06Z",
+  "durationInTicks": 130300000,
+  "duration": "PT13.03S",
   "combinedRecognizedPhrases": [
     {
       "channel": 0,
-      "lexical": "run alabama drivers license zero zero three zero six six nine",
-      "itn": "run alabama drivers license 0030 669",
-      "maskedITN": "run alabama drivers license 0030 669",
-      "display": "Run Alabama drivers license. 0030 669"
+      "lexical": "hi hello how can i help you i am having trouble issuing a return of a game on my xbox call of duty you can bring the disk to the nearest microsoft store to return it",
+      "itn": "hi hello how can i help you i am having trouble issuing a return of a game on my xbox call of duty you can bring the disk to the nearest microsoft store to return it",
+      "maskedITN": "",
+      "display": "Hi. Hello how can I help you? I am having trouble issuing a return of a game on my Xbox Call of Duty. You can bring the disk to the nearest Microsoft Store to return it."
     }
   ],
   "recognizedPhrases": [
@@ -17,51 +17,17 @@
       "recognitionStatus": "Success",
       "channel": 0,
       "speaker": 1,
-      "offset": "PT0.04S",
-      "duration": "PT2.18S",
-      "offsetInTicks": 400000.0,
-      "durationInTicks": 21800000.0,
+      "offset": "PT0.13S",
+      "duration": "PT0.43S",
+      "offsetInTicks": 1300000,
+      "durationInTicks": 4300000,
       "nBest": [
         {
-          "confidence": 0.9509893,
-          "lexical": "run alabama drivers license",
-          "itn": "run alabama drivers license",
-          "maskedITN": "run alabama drivers license",
-          "display": "Hi!",
-          "words": [
-            {
-              "word": "run",
-              "offset": "PT0.04S",
-              "duration": "PT0.48S",
-              "offsetInTicks": 400000.0,
-              "durationInTicks": 4800000.0,
-              "confidence": 0.968795
-            },
-            {
-              "word": "alabama",
-              "offset": "PT0.52S",
-              "duration": "PT0.58S",
-              "offsetInTicks": 5200000.0,
-              "durationInTicks": 5800000.0,
-              "confidence": 0.986991
-            },
-            {
-              "word": "drivers",
-              "offset": "PT1.1S",
-              "duration": "PT0.52S",
-              "offsetInTicks": 11000000.0,
-              "durationInTicks": 5200000.0,
-              "confidence": 0.989197
-            },
-            {
-              "word": "license",
-              "offset": "PT1.62S",
-              "duration": "PT0.6S",
-              "offsetInTicks": 16200000.0,
-              "durationInTicks": 6000000.0,
-              "confidence": 0.996206
-            }
-          ]
+          "confidence": 0.87210596,
+          "lexical": "hi",
+          "itn": "hi",
+          "maskedITN": "",
+          "display": "Hi."
         }
       ]
     },
@@ -69,51 +35,17 @@
       "recognitionStatus": "Success",
       "channel": 0,
       "speaker": 2,
-      "offset": "PT2.28S",
-      "duration": "PT3.08S",
-      "offsetInTicks": 22800000.0,
-      "durationInTicks": 30800000.0,
+      "offset": "PT1.41S",
+      "duration": "PT1.58S",
+      "offsetInTicks": 14100000,
+      "durationInTicks": 15800000,
       "nBest": [
         {
-          "confidence": 0.9509893,
-          "lexical": "zero zero three zero",
-          "itn": "0030",
-          "maskedITN": "0030",
-          "display": "Hello, how can I help you?",
-          "words": [
-            {
-              "word": "zero",
-              "offset": "PT2.28S",
-              "duration": "PT0.76S",
-              "offsetInTicks": 22800000.0,
-              "durationInTicks": 7600000.0,
-              "confidence": 0.991542
-            },
-            {
-              "word": "zero",
-              "offset": "PT3.06S",
-              "duration": "PT0.74S",
-              "offsetInTicks": 30600000.0,
-              "durationInTicks": 7400000.0,
-              "confidence": 0.992899
-            },
-            {
-              "word": "three",
-              "offset": "PT3.86S",
-              "duration": "PT0.74S",
-              "offsetInTicks": 38600000.0,
-              "durationInTicks": 7400000.0,
-              "confidence": 0.99463
-            },
-            {
-              "word": "zero",
-              "offset": "PT4.62S",
-              "duration": "PT0.74S",
-              "offsetInTicks": 46200000.0,
-              "durationInTicks": 7400000.0,
-              "confidence": 0.988379
-            }
-          ]
+          "confidence": 0.9614907,
+          "lexical": "hello how can i help you",
+          "itn": "hello how can i help you",
+          "maskedITN": "",
+          "display": "Hello how can I help you?"
         }
       ]
     },
@@ -121,45 +53,172 @@
       "recognitionStatus": "Success",
       "channel": 0,
       "speaker": 1,
-      "offset": "PT5.4S",
-      "duration": "PT2.06S",
-      "offsetInTicks": 54000000.0,
-      "durationInTicks": 20600000.0,
+      "offset": "PT3.87S",
+      "duration": "PT4.23S",
+      "offsetInTicks": 38700000,
+      "durationInTicks": 42300000,
       "nBest": [
         {
-          "confidence": 0.9509893,
-          "lexical": "six six nine",
-          "itn": "669",
-          "maskedITN": "669",
-          "display": "I am having trouble issuing a return of a game on my xbox: call of duty",
-          "words": [
+          "confidence": 0.8985182,
+          "lexical": "i am having trouble issuing a return of a game on my xbox call of duty",
+          "itn": "i am having trouble issuing a return of a game on my xbox call of duty",
+          "maskedITN": "",
+          "display": "I am having trouble issuing a return of a game on my Xbox Call of Duty."
+        }
+      ]
+    },
+    {
+      "recognitionStatus": "Success",
+      "channel": 0,
+      "speaker": 2,
+      "offset": "PT8.98S",
+      "duration": "PT3.33S",
+      "offsetInTicks": 89800000,
+      "durationInTicks": 33300000,
+      "nBest": [
+        {
+          "confidence": 0.93731016,
+          "lexical": "you can bring the disk to the nearest microsoft store to return it",
+          "itn": "you can bring the disk to the nearest microsoft store to return it",
+          "maskedITN": "",
+          "display": "You can bring the disk to the nearest Microsoft Store to return it."
+        }
+      ]
+    }
+  ],
+  "conversationAnalyticsResults": {
+    "conversationPiiResults": {
+      "combinedRedactedContent": [
+        {
+          "channel": "0",
+          "lexical": "hi hello how can i help you i am having trouble issuing a return of a game on my xbox call of duty you can bring the disk to the nearest microsoft store to return it",
+          "itn": "hi hello how can i help you i am having trouble issuing a return of a game on my xbox call of duty you can bring the disk to the nearest microsoft store to return it",
+          "display": "Hi. Hello how can I help you? I am having trouble issuing a return of a game on my Xbox Call of Duty. You can bring the disk to the nearest Microsoft Store to return it."
+        }
+      ],
+      "conversations": [
+        {
+          "conversationItems": [
             {
-              "word": "six",
-              "offset": "PT5.4S",
-              "duration": "PT0.7S",
-              "offsetInTicks": 54000000.0,
-              "durationInTicks": 7000000.0,
-              "confidence": 0.988606
+              "id": "0",
+              "channel": "0",
+              "offset": "PT0.13S",
+              "redactedContent": {
+                "itn": "hi",
+                "lexical": "hi",
+                "text": "Hi.",
+                "redactedAudioTimings": []
+              },
+              "entities": []
             },
             {
-              "word": "six",
-              "offset": "PT6.16S",
-              "duration": "PT0.71S",
-              "offsetInTicks": 61600000.0,
-              "durationInTicks": 7100000.0,
-              "confidence": 0.984716
+              "id": "1",
+              "channel": "0",
+              "offset": "PT1.41S",
+              "redactedContent": {
+                "itn": "hello how can i help you",
+                "lexical": "hello how can i help you",
+                "text": "Hello how can I help you?",
+                "redactedAudioTimings": []
+              },
+              "entities": []
             },
             {
-              "word": "nine",
-              "offset": "PT6.9S",
-              "duration": "PT0.56S",
-              "offsetInTicks": 69000000.0,
-              "durationInTicks": 5600000.0,
-              "confidence": 0.994942
+              "id": "2",
+              "channel": "0",
+              "offset": "PT3.87S",
+              "redactedContent": {
+                "itn": "i am having trouble issuing a return of a game on my xbox call of duty",
+                "lexical": "i am having trouble issuing a return of a game on my xbox call of duty",
+                "text": "I am having trouble issuing a return of a game on my Xbox Call of Duty.",
+                "redactedAudioTimings": []
+              },
+              "entities": []
+            },
+            {
+              "id": "3",
+              "channel": "0",
+              "offset": "PT8.98S",
+              "redactedContent": {
+                "itn": "you can bring the disk to the nearest microsoft store to return it",
+                "lexical": "you can bring the disk to the nearest microsoft store to return it",
+                "text": "You can bring the disk to the nearest Microsoft Store to return it.",
+                "redactedAudioTimings": []
+              },
+              "entities": []
+            }
+          ],
+          "warnings": []
+        }
+      ]
+    },
+    "conversationSummarizationResults": {
+      "conversations": [
+        {
+          "summaries": [
+            {
+              "aspect": "issue",
+              "text": "Customer wants to return a game. | Customer can't return the game."
+            },
+            {
+              "aspect": "resolution",
+              "text": "Advised customer to bring the disk to the nearest Microsoft Store to return it."
+            },
+            {
+              "aspect": "chapterTitle",
+              "text": "Trouble Issuing Return of Game",
+              "contexts": [
+                {
+                  "conversationItemId": "0__PT0.13S__0",
+                  "offset": 0,
+                  "length": 3
+                },
+                {
+                  "conversationItemId": "1__PT1.41S__0",
+                  "offset": 0,
+                  "length": 25
+                },
+                {
+                  "conversationItemId": "2__PT3.87S__0",
+                  "offset": 0,
+                  "length": 71
+                },
+                {
+                  "conversationItemId": "3__PT8.98S__0",
+                  "offset": 0,
+                  "length": 67
+                }
+              ]
+            },
+            {
+              "aspect": "narrative",
+              "text": "Agent helps the customer to return a game on Xbox.",
+              "contexts": [
+                {
+                  "conversationItemId": "0__PT0.13S__0",
+                  "offset": 0,
+                  "length": 3
+                },
+                {
+                  "conversationItemId": "1__PT1.41S__0",
+                  "offset": 0,
+                  "length": 25
+                },
+                {
+                  "conversationItemId": "2__PT3.87S__0",
+                  "offset": 0,
+                  "length": 71
+                },
+                {
+                  "conversationItemId": "3__PT8.98S__0",
+                  "offset": 0,
+                  "length": 67
+                }
+              ]
             }
           ]
         }
       ]
     }
-  ]
+  }
 }

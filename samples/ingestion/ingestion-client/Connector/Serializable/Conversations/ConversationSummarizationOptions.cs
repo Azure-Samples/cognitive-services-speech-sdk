@@ -9,6 +9,10 @@ namespace Connector.Serializable.Language.Conversations
 
     public class ConversationSummarizationOptions
     {
+        public bool Enabled { get; init; }
+
+        public int InputLengthLimit { get; init; }
+
         public RoleAssignmentStratergy Statergy { get; init; }
 
         public IEnumerable<Aspect> Aspects { get; init; }

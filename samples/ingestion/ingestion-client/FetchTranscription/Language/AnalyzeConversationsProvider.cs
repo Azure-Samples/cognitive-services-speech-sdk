@@ -53,7 +53,7 @@ namespace Language
         }
 
         public static bool IsConversationalSummarizationEnabled()
-            => FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Aspects.Any();
+            => FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Enabled;
 
         /// <summary>
         /// API to submit an analyzeConversations async Request.
@@ -179,7 +179,7 @@ namespace Language
                     role = stratergy.FallbackRole;
                 }
 
-                if (role != Role.None)
+                if (role != Role.None && count + textCount < FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.InputLengthLimit)
                 {
                     utterance.Role = utterance.ParticipantId = role.ToString();
                     summarizationData.AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
