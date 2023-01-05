@@ -7,6 +7,7 @@ namespace Connector.Constants
 {
     using System;
     using System.Collections.Generic;
+    using Connector.Serializable.Language.Conversations;
 
     public static class Constants
     {
@@ -33,21 +34,5 @@ namespace Connector.Constants
         public const int DefaultConversationAnalysisMaxChunkSize = 5000;
 
         public const string SummarizationSupportedLocalePrefix = "en";
-
-        public const string DefaultRoleAssignmentStratergy = RoleAssignmentStratergyByChannel;
-
-        public const string DefaultFirstChannelRole = Agent;
-
-        public const string DefaultFirstSpeakerRole = Agent;
-
-        public const string Agent = nameof(Agent);
-
-        public const string Customer = nameof(Customer);
-
-        public const string RoleAssignmentStratergyByChannel = "Channel";
-
-        public const string RoleAssignmentStratergyBySpeaker = "Speaker";
-
-        public static readonly IReadOnlySet<string> ValidSummaryAspects = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "issue", "resolution", "chapterTitle", "narrative" };
     }
 }

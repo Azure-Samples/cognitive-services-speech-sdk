@@ -53,7 +53,7 @@ namespace Language
         }
 
         public static bool IsConversationalSummarizationEnabled()
-            => !string.IsNullOrWhiteSpace(FetchTranscriptionEnvironmentVariables.ConversationSummarizationAspects);
+            => FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Aspects.Any();
 
         /// <summary>
         /// API to submit an analyzeConversations async Request.
@@ -83,15 +83,7 @@ namespace Language
             var count = -1;
             var jobCount = 0;
             var turnCount = 0;
-            var firstUtteranceChannel = int.MinValue;
-            var firstUtteranceSpeaker = int.MinValue;
-            if (speechTranscript.RecognizedPhrases.Count() > 0)
-            {
-                firstUtteranceChannel = speechTranscript.RecognizedPhrases.First().Channel;
-                firstUtteranceSpeaker = speechTranscript.RecognizedPhrases.First().Speaker;
-            }
-
-            foreach (var aspect in FetchTranscriptionEnvironmentVariables.ConversationSummarizationAspects.Split(Constants.Delimiter).Where(Constants.ValidSummaryAspects.Contains))
+            foreach (var aspect in FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Aspects)
             {
                 summarizationData.Tasks.Add(new AnalyzeConversationsTask
                 {
@@ -100,7 +92,7 @@ namespace Language
                     Parameters = new Dictionary<string, object>
                     {
                         {
-                            "summaryAspects", new[] { aspect }
+                            "summaryAspects", new[] { aspect.ToString() }
                         },
                     }
                 });
@@ -174,28 +166,34 @@ namespace Language
                 };
                 data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
 
-                static string TheOtherRole(string role) => role == Constants.Agent ? Constants.Customer : Constants.Agent;
-                utterance.Role = utterance.ParticipantId = FetchTranscriptionEnvironmentVariables.RoleAssignmentStratergy switch
+                // for issue resolution summarization
+                var stratergy = FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Statergy;
+                var roleKey = stratergy.Key switch
                 {
-                    Constants.RoleAssignmentStratergyByChannel =>
-                        recognizedPhrase.Channel == firstUtteranceChannel
-                        ? FetchTranscriptionEnvironmentVariables.FirstChannelRole
-                        : TheOtherRole(FetchTranscriptionEnvironmentVariables.FirstChannelRole),
-                    Constants.RoleAssignmentStratergyBySpeaker =>
-                        recognizedPhrase.Speaker == firstUtteranceSpeaker
-                        ? FetchTranscriptionEnvironmentVariables.FirstSpeakerRole
-                        : TheOtherRole(FetchTranscriptionEnvironmentVariables.FirstSpeakerRole),
-                    _ => default
+                    RoleAssignmentMappingKey.Channel => recognizedPhrase.Channel,
+                    RoleAssignmentMappingKey.Speaker => recognizedPhrase.Speaker,
+                    _ => throw new ArgumentOutOfRangeException($"Unknown stratergy.Key: {stratergy.Key}"),
                 };
-                summarizationData.AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
+                if (!stratergy.Mapping.TryGetValue(roleKey, out var role))
+                {
+                    role = stratergy.FallbackRole;
+                }
+
+                if (role != Role.None)
+                {
+                    utterance.Role = utterance.ParticipantId = role.ToString();
+                    summarizationData.AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
+                }
 
                 count += textCount;
                 turnCount++;
             }
 
-            this.log.LogInformation($"{summarizationData.Tasks.Count} Summarization Tasks Prepared. Locale = {this.locale}. chars = {count}. turns = {turnCount}.");
+            this.log.LogInformation($"{summarizationData.Tasks.Count} Summarization Tasks Prepared. Locale = {this.locale}. chars = {count}. total turns = {turnCount}. turns for summarization = {summarizationData.AnalysisInput.Conversations[0].ConversationItems.Count}");
 
-            if (this.locale != null && this.locale.StartsWith(Constants.SummarizationSupportedLocalePrefix))
+            if (this.locale != null
+                && this.locale.StartsWith(Constants.SummarizationSupportedLocalePrefix)
+                && summarizationData.AnalysisInput.Conversations[0].ConversationItems.Count > 0)
             {
                 summarizationData.AnalysisInput.Conversations[0].Language = Constants.SummarizationSupportedLocalePrefix;
                 data.Add(summarizationData);

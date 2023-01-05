@@ -269,7 +269,7 @@
         "ConversationPiiCategories": "",
         "ConversationPiiRedaction": "None",
         "ConversationPiiInferenceSource": "text",
-        "ConversationSummarizationAspects": "issue;resolution;chapterTitle;narrative",
+        "ConversationSummarizationOptions": "{\"Statergy\":{\"Key\":\"Channel\",\"Mapping\":{\"0\":\"Agent\",\"1\":\"Customer\"},\"FallbackRole\":\"None\"},\"Aspects\":[\"Issue\",\"Resolution\",\"ChapterTitle\",\"Narrative\"]}",
         "RoleAssignmentStratergy": "Channel",
         "FirstChannelRole": "Agent",
         "FirstSpeakerRole": "Agent",
@@ -946,10 +946,7 @@
                 "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
                 "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]",
-                "ConversationSummarizationAspects":"[variables('ConversationSummarizationAspects')]",
-                "RoleAssignmentStratergy":"[variables('RoleAssignmentStratergy')]",
-                "FirstChannelRole":"[variables('FirstChannelRole')]",
-                "FirstSpeakerRole":"[variables('FirstSpeakerRole')]"
+                "ConversationSummarizationOptions":"[variables('ConversationSummarizationOptions')]"
             }
         }
     ],

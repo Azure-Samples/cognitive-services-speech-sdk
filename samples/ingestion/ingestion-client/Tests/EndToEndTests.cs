@@ -12,6 +12,7 @@ namespace Tests
     using System.Threading.Tasks;
 
     using Connector;
+    using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using Language;
@@ -19,7 +20,9 @@ namespace Tests
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     using Moq;
+
     using Newtonsoft.Json;
 
     using RealtimeTranscription;
@@ -65,6 +68,16 @@ namespace Tests
         [TestCategory(TestCategories.EndToEndTest)]
         public async Task AnalyzeConversationTestAsync()
         {
+            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new ConversationSummarizationOptions
+            {
+                Aspects = new HashSet<Aspect> { Aspect.Issue, Aspect.Resolution, Aspect.ChapterTitle, Aspect.Narrative },
+                Statergy = new RoleAssignmentStratergy
+                {
+                    Key = RoleAssignmentMappingKey.Channel,
+                    Mapping = new Dictionary<int, Role> { { 0, Role.Agent }, { 1, Role.Customer } },
+                    FallbackRole = Role.None,
+                }
+            }));
             var region = testProperties["LanguageServiceRegion"].ToString();
             var subscriptionKey = testProperties["LanguageServiceSubscriptionKey"].ToString();
             var provider = new AnalyzeConversationsProvider("en-US", subscriptionKey, region, Logger.Object);
@@ -87,6 +100,7 @@ namespace Tests
             var err = await provider.AddConversationalEntitiesAsync(jobIds.jobIds, transcription);
             Console.WriteLine($"annotation result: {JsonConvert.SerializeObject(transcription)}");
             Assert.AreEqual(0, err.Count());
+            Assert.AreEqual(4, transcription.ConversationAnalyticsResults.AnalyzeConversationSummarizationResults.Conversations.First().Summaries.Count());
         }
     }
 }
