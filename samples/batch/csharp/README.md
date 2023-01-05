@@ -1,6 +1,6 @@
 # C# Example to use the Speech Services Batch Transcription API
 
-Speech Services Batch Transcription is exposed through a REST API. The samples here does **NOT** require the installation of the Cognitive Service Speech SDK, but uses the REST API directly.
+Speech Services Batch Transcription is exposed through a REST API. The samples here do **NOT** require the installation of the Cognitive Service Speech SDK, but use the REST API directly.
 
 For detailed explanation see the [batch transcription documentation](https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription).
 
