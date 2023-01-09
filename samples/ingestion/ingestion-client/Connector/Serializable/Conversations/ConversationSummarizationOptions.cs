@@ -13,7 +13,7 @@ namespace Connector.Serializable.Language.Conversations
 
         public int InputLengthLimit { get; init; }
 
-        public RoleAssignmentStratergy Statergy { get; init; }
+        public RoleAssignmentStratergy Stratergy { get; init; }
 
         public IEnumerable<Aspect> Aspects { get; init; }
     }

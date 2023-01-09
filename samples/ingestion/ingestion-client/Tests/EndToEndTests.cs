@@ -71,7 +71,7 @@ namespace Tests
             Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new ConversationSummarizationOptions
             {
                 Aspects = new HashSet<Aspect> { Aspect.Issue, Aspect.Resolution, Aspect.ChapterTitle, Aspect.Narrative },
-                Statergy = new RoleAssignmentStratergy
+                Stratergy = new RoleAssignmentStratergy
                 {
                     Key = RoleAssignmentMappingKey.Channel,
                     Mapping = new Dictionary<int, Role> { { 0, Role.Agent }, { 1, Role.Customer } },

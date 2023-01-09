@@ -167,7 +167,7 @@ namespace Language
                 data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
 
                 // for summarization
-                var stratergy = FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Statergy;
+                var stratergy = FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Stratergy;
                 var roleKey = stratergy.Key switch
                 {
                     RoleAssignmentMappingKey.Channel => recognizedPhrase.Channel,

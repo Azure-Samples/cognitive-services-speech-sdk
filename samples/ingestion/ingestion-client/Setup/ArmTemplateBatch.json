@@ -269,7 +269,7 @@
         "ConversationPiiCategories": "",
         "ConversationPiiRedaction": "None",
         "ConversationPiiInferenceSource": "text",
-        "ConversationSummarizationOptions": "{\"Statergy\":{\"Key\":\"Channel\",\"Mapping\":{\"0\":\"Agent\",\"1\":\"Customer\"},\"FallbackRole\":\"None\"},\"Aspects\":[\"Issue\",\"Resolution\",\"ChapterTitle\",\"Narrative\"],\"Enabled\":false,\"InputLengthLimit\":125000}",
+        "ConversationSummarizationOptions": "{\"Stratergy\":{\"Key\":\"Channel\",\"Mapping\":{\"0\":\"Agent\",\"1\":\"Customer\"},\"FallbackRole\":\"None\"},\"Aspects\":[\"Issue\",\"Resolution\",\"ChapterTitle\",\"Narrative\"],\"Enabled\":false,\"InputLengthLimit\":125000}",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]",
