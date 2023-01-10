@@ -95,7 +95,7 @@ namespace Tests
                 Console.WriteLine($"[{DateTime.Now}]jobs are running...");
             }
 
-            Console.WriteLine($"[{DateTime.Now}]jobs done!");
+            Console.WriteLine($"[{DateTime.Now}]jobs done.");
 
             var err = await provider.AddConversationalEntitiesAsync(jobIds.jobIds, transcription);
             Console.WriteLine($"annotation result: {JsonConvert.SerializeObject(transcription)}");
