@@ -41,22 +41,22 @@
   </build>
   <repositories>
     <repository>
-      <id>maven-cognitiveservices-speech</id>
-      <name>Microsoft Cognitive Services Speech Maven Repository</name>
-      <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
-    </repository>
-    <repository>
       <id>central</id>
       <name>Maven Central</name>
       <layout>default</layout>
       <url>https://repo1.maven.org/maven2</url>
+    </repository>
+    <repository>
+        <id>maven-cognitiveservices-local-path</id>
+        <name>Microsoft Cognitive Services Local Maven Repository</name>
+        <url>file:///localplaceholder//maven//</url>
     </repository>
   </repositories>
   <dependencies>
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>1.22.0</version>
+      <version>1.25.0</version>
     </dependency>
     <dependency>
       <groupId>jakarta.json</groupId>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-text</artifactId>
-      <version>1.9</version>
+      <version>1.10.0</version>
     </dependency>
   </dependencies>
 </project>

@@ -20,7 +20,7 @@ namespace kws_xamarin.Droid
 
         public Task<bool> GetPermissionsAsync()
         {
-            tcsPermissions = new TaskCompletionSource<bool>();
+            tcsPermissions = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Permissions are required only for Marshmallow and up
             if ((int)Build.VERSION.SdkInt < 23)

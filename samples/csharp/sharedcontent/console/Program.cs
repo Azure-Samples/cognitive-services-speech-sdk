@@ -510,8 +510,8 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine("");
                 Console.WriteLine(choose);
                 Console.WriteLine("");
-                Console.WriteLine(" 1. Speech recognition with microphone input.");
-                Console.WriteLine(" 2. Speech continuous recognition with multi-lingual audio input.");
+                Console.WriteLine(" 1. Single utterance recognition with microphone input.");
+                Console.WriteLine(" 2. Continuous recognition from multi-lingual input WAV file.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -527,7 +527,7 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.D2:
                     case ConsoleKey.NumPad2:
-                        SpeechRecognitionWithLanguageIdSamples.MultiLingualRecognitionWithUniversalV2Endpiont().Wait();
+                        SpeechRecognitionWithLanguageIdSamples.MultiLingualRecognitionWithUniversalV2Endpoint().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -559,9 +559,9 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine("");
                 Console.WriteLine(choose);
                 Console.WriteLine("");
-                Console.WriteLine(" 1. Language detection with microphone input.");
-                Console.WriteLine(" 2. SingleShot language detection with file input.");
-                Console.WriteLine(" 3. Continuous language detection with multi-lingual audio input.");
+                Console.WriteLine(" 1. Single utterance language detection, with microphone input.");
+                Console.WriteLine(" 2. Single utterance language detection, with WAV file input.");
+                Console.WriteLine(" 3. Continuous language detection with multi-lingual WAV file input.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -573,7 +573,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     case ConsoleKey.D1:
                     case ConsoleKey.NumPad1:
-                        StandaloneLanguageDetectionSamples.DetectionWithMicrophoneAsync().Wait();
+                        StandaloneLanguageDetectionSamples.LanguageDetectionWithMicrophoneAsync().Wait();
                         break;
                     case ConsoleKey.D2:
                     case ConsoleKey.NumPad2:

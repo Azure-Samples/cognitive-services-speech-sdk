@@ -1,6 +1,6 @@
 # Quickstart: Using the Speech Service to Recognize intent in JavaScript on a Web Browser.
 
-This sample shows how to recognize intent with the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome. It illustrates how the SDK can be used to translate speech in one language to text in a different language.
+This sample shows how to recognize intent with the Speech Service using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 
 * See the [overview article](https://docs.microsoft.com/azure/cognitive-services/speech-service/intent-recognition) on the SDK documentation page to learn more about intent recognition using the Speech Service.
 

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RunWorkingDirectory>$(TargetDir)</RunWorkingDirectory>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="../data/keyword_computer.table" Link="data/keyword_computer.table">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="../data/speech_test.raw" Link="data/speech_test.raw">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="../data/speech_test.wav" Link="data/speech_test.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.25.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.25.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.25.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.25.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.25.0" />
+  </ItemGroup>
+
+</Project>

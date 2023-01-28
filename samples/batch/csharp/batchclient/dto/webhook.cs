@@ -7,11 +7,10 @@ namespace BatchClient
 {
     using System;
     using System.Collections.Generic;
-    
+
     public class WebHook : DtoBase
     {
         public WebHookLinks Links { get; set; }
-
 
         public WebHookProperties Properties { get; set; }
 

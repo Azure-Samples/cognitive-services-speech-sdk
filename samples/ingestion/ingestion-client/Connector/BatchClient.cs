@@ -8,15 +8,20 @@ namespace Connector
     using System;
     using System.Collections.Generic;
     using System.Net.Http;
+    using System.Net.Sockets;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Connector.Serializable.TranscriptionFiles;
     using Newtonsoft.Json;
+    using Polly;
+    using Polly.Retry;
 
     public static class BatchClient
     {
         private const string TranscriptionsBasePath = "speechtotext/v3.0/Transcriptions/";
+
+        private const int MaxNumberOfRetries = 3;
 
         private static readonly TimeSpan PostTimeout = TimeSpan.FromMinutes(1);
 
@@ -24,7 +29,12 @@ namespace Connector
 
         private static readonly TimeSpan GetFilesTimeout = TimeSpan.FromMinutes(5);
 
-        private static readonly HttpClient HttpClient = new () { Timeout = Timeout.InfiniteTimeSpan };
+        private static readonly HttpClient HttpClient = new HttpClient() { Timeout = Timeout.InfiniteTimeSpan };
+
+        private static readonly AsyncRetryPolicy RetryPolicy =
+            Policy
+                .Handle<HttpRequestException>()
+                .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(2));
 
         public static Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri)
         {
@@ -112,15 +122,26 @@ namespace Connector
             {
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(timeout);
-                var responseMessage = await HttpClient.SendAsync(httpRequestMessage, cts.Token).ConfigureAwait(false);
 
-                await responseMessage.EnsureSuccessStatusCodeAsync().ConfigureAwait(false);
+                var responseMessage = await RetryPolicy.ExecuteAsync(
+                    async (token) =>
+                    {
+                        var responseMessage = await HttpClient.SendAsync(httpRequestMessage, token).ConfigureAwait(false);
+
+                        await responseMessage.EnsureSuccessStatusCodeAsync().ConfigureAwait(false);
+                        return responseMessage;
+                    },
+                    cts.Token).ConfigureAwait(false);
 
                 return responseMessage;
             }
-            catch (OperationCanceledException)
+            catch (HttpRequestException httpRequestException)
             {
-                throw new TimeoutException($"The operation has timed out after {timeout.TotalSeconds} seconds.");
+                throw new TransientFailureException($"HttpRequestException: {httpRequestException.Message}.", httpRequestException);
+            }
+            catch (OperationCanceledException operationCanceledException)
+            {
+                throw new TransientFailureException($"Operation was canceled after {timeout.TotalSeconds} seconds.", operationCanceledException);
             }
         }
     }

@@ -18,19 +18,28 @@
   </build>
   <!-- <repositories> -->
   <repositories>
-    <repository>
-      <id>maven-cognitiveservices-speech</id>
-      <name>Microsoft Cognitive Services Speech Maven Repository</name>
-      <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
-    </repository>
-  </repositories>
+      <repository>
+          <id>central</id>
+          <name>Default Repository</name>
+          <layout>default</layout>
+          <url>https://repo1.maven.org/maven2</url>
+          <snapshots>
+          <enabled>false</enabled>
+          </snapshots>
+      </repository>
+      <repository>
+          <id>maven-cognitiveservices-local-path</id>
+          <name>Microsoft Cognitive Services Local Maven Repository</name>
+          <url>file:///localplaceholder//maven//</url>
+      </repository>
+   </repositories>
   <!-- </repositories> -->
   <!-- <dependencies> -->
   <dependencies>
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>1.22.0</version>
+      <version>1.25.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>

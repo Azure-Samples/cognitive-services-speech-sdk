@@ -4,16 +4,9 @@ package com.microsoft.cognitiveservices.speech.samples.console;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Semaphore;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 // <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
@@ -34,14 +27,14 @@ public class SpeakerRecognitionSamples {
         // The default language is "en-us".
 
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_SUBSCRIPTION_KEY";
+        String speechSubscriptionKey = "YourSubscriptionKey";
 
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_SUBSCRIPTION_REGION";
+        String serviceRegion = "YourServiceRegion";
 
-        String enrollmentFile = "ENROLLMENT_FILE.wav";
+        String enrollmentFile = "YourEnrollmentFile.wav";
 
-        String identificationFile = "IDENTIFICATION_FILE.wav";
+        String identificationFile = "YourIdentificationFile.wav";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
@@ -79,10 +72,10 @@ public class SpeakerRecognitionSamples {
         // The default language is "en-us".
 
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_SUBSCRIPTION_KEY";
+        String speechSubscriptionKey = "YourSubscriptionKey";
 
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_SUBSCRIPTION_REGION";
+        String serviceRegion = "YourServiceRegion";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
@@ -121,14 +114,14 @@ public class SpeakerRecognitionSamples {
         // The default language is "en-us".
 
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_KEY_HERE";
+        String speechSubscriptionKey = "YourSubscriptionKey";
 
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_REGION_HERE";
+        String serviceRegion = "YourServiceRegion";
 
-        String enrollmentFile = "YOUR_ENROLLMENT_FILE.wav";
+        String enrollmentFile = "YourEnrollmentFile.wav";
 
-        String verificationFile = "YOUR_VERIFICATION_FILE.wav";
+        String verificationFile = "YourVerificationFile.wav";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
@@ -163,10 +156,10 @@ public class SpeakerRecognitionSamples {
         // The default language is "en-us".
 
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_KEY_HERE";
+        String speechSubscriptionKey = "YourSubscriptionKey";
 
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_REGION_HERE";
+        String serviceRegion = "YourServiceRegion";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region

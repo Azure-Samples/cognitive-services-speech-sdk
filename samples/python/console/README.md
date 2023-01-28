@@ -27,7 +27,7 @@ This sample demonstrates various forms of speech recognition, intent recognition
 
 ## Build the sample
 
-**By using the Cognitive Services Speech SDK you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+**By using the Cognitive Services Speech SDK you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 * Install the Speech SDK Python package in your Python interpreter, typically by executing the command
   ```sh

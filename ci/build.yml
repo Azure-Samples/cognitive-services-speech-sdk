@@ -20,7 +20,7 @@ resources:
   clean: true
 
 variables:
-  SPEECHSDK_NUGET_VERSION: 4.9.4
+  SPEECHSDK_NUGET_VERSION: 6.2.1
   CG_RAN: true # we do Component Governance explicitly only in the Pre job
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
     CG_RAN: false
     DECODE_PERCENTS: true
   pool:
-    vmImage: 'ubuntu-18.04'
+    vmImage: 'ubuntu-20.04'
   timeoutInMinutes: 10
   steps:
   - bash: ./ci/check-git-head.sh
@@ -64,7 +64,7 @@ jobs:
     name: var
     displayName: Set variables
 
-- job: Windows
+- job: Windows2019
   variables:
     V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
     V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
@@ -76,6 +76,8 @@ jobs:
   steps:
   - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
     displayName: Patch samples
+  # - bash: 'dotnet workload install maui-android'
+  #   displayName: install maui-android workload.
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
@@ -85,10 +87,12 @@ jobs:
       command: restore
       vstsFeed: $(V_VSTS_FEED)
       includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
+      restoreSolution: '**\*.sln;!**\BatchIngestionClient.sln;!**\embedded-speech\*.sln;!**\BatchSynthesisSample.sln;!**\batchclient.sln;!**\maui\speech-to-text\*.sln' # Restoring everything but samples specific to .NET 6.0
   # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
     inputs:
       maximumCpuCount: true
+      solution: '**\*.sln;-:**\BatchIngestionClient.sln;-:**\embedded-speech\*.sln;-:**\BatchSynthesisSample.sln;-:**\batchclient.sln;-:**\maui\speech-to-text\*.sln' # Build everything but samples specific to .NET 6.0
     displayName: 'Build samples (*.sln)'
     # Must set this to false, otherwise a build break will be treated as warning and the task will pass.
     # This however also means that we will stop building when we hit a build break. We will not continue building other VS projects.
@@ -102,3 +106,31 @@ jobs:
     displayName: Use Java 11
   - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'
+
+- job: Windows2022
+  variables:
+    V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
+    V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
+  dependsOn: Pre
+  timeoutInMinutes: 60
+  pool:
+    vmImage: 'windows-2022'
+  steps:
+  - task: NuGetToolInstaller@0
+    displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
+    inputs:
+      versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - task: NuGetCommand@2
+    inputs:
+      command: restore
+      vstsFeed: $(V_VSTS_FEED)
+      includeNuGetOrg: $(V_INCLUDE_NUGET_ORG)
+      restoreSolution: '**\BatchIngestionClient.sln;**\BatchSynthesisSample.sln' # Restoring those samples on .net6.0
+  - task: VSBuild@1
+    inputs:
+      maximumCpuCount: true
+      solution: '**\BatchIngestionClient.sln;:**\BatchSynthesisSample.sln' # Build those samples on .net6.0
+    displayName: 'Build .net6 samples (*.sln)'
+    # Must set this to false, otherwise a build break will be treated as warning and the task will pass.
+    # This however also means that we will stop building when we hit a build break. We will not continue building other VS projects.
+    continueOnError: false
