@@ -9,9 +9,9 @@ namespace Connector.Serializable.TextAnalytics
     {
         public TextAnalyticsError(string code, string message, TextAnalyticsInnerError innerError)
         {
-            this.Code = code;
-            this.Message = message;
-            this.InnerError = innerError;
+            Code = code;
+            Message = message;
+            InnerError = innerError;
         }
 
         public string Code { get; private set; }

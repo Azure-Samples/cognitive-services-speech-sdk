@@ -11,7 +11,7 @@ This sample demonstrates how to synthesize speech with C++ using the Speech SDK 
 
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Download and extract the Speech SDK
-  * **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+  * **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
   * Run the following commands after replacing the string `/your/path` with a directory (absolute path) of your choice:
 
     ```sh

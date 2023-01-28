@@ -9,7 +9,7 @@ namespace Connector
     {
         public TranscriptionProperties(TranscriptionError error)
         {
-            this.Error = error;
+            Error = error;
         }
 
         public TranscriptionError Error { get; set; }

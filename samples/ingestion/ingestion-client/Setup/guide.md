@@ -203,7 +203,13 @@ There are several containers to distinguish between the various outputs. We sugg
 
 ## Customizing the Ingestion Client
 
-By default, the ARM template uses the newest version of the Ingestion Client which can be found in this repository. To use a custom version, edit the paths to the binaries inside the deployment template to point to a custom published version. You can find our published binaries [here](https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases?q=ingestion+client&expanded=true).
+By default, the ARM template uses the newest version of the Ingestion Client which can be found in this repository. To use a custom version, edit the paths to the binaries inside the deployment template to point to a custom published version. By default, our binaries are: 
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/FetchTranscription.zip 
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByTimer.zip
+
+* https://mspublicstorage.blob.core.windows.net/transcription-enabled-storage/StartTranscriptionByServiceBus.zip) 
 
 To publish a new version, you can use Visual Studio, right-click on the project, click **Publish** and follow the instructions.
 
@@ -213,7 +219,7 @@ Although you do not need to download or change the code, you can still download 
 
 ```
 git clone https://github.com/Azure-Samples/cognitive-services-speech-sdk
-cd cognitive-services-speech-sdk/samples/ingestion/ingestion-client
+cd cognitive-services-speech-sdk/samples/batch/transcription-enabled-storage
 ```
 
 ## Costs
@@ -222,7 +228,7 @@ The created resources their pricing and corresponding plans (where applicable) a
 
 * [Storage Pricing](https://azure.microsoft.com/pricing/details/storage/), Simple Storage
 * [Service Bus Pricing](https://azure.microsoft.com/pricing/details/service-bus/), Standard 
-* [Azure Functions Pricing](https://azure.microsoft.com/pricing/details/functions/), Premium / Consumption
+* [Azure Functions Pricing](https://azure.microsoft.com/pricing/details/functions/), Premium
 * [Key Vault Pricing](https://azure.microsoft.com/pricing/details/key-vault/)
 
 Optionally:
@@ -237,9 +243,9 @@ Assume a scenario where we are trying to transcribe 1000 mp3 files of an average
 * [Speech Transcription](https://azure.microsoft.com/services/cognitive-services/speech-to-text/) Costs are: 10k mins = **$166.60**
 * [Service Bus](https://azure.microsoft.com/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = **$0.324/daily** (standing charge) for up to 13m messages/month 
 * [Storage](https://azure.microsoft.com/services/storage/) Costs are: Write operations are $0.0175 (per 10,000), and Read operations $0.0014 (again per 10k read operations) = ($0.0175 + $0.0014)/10 (for 1000 files) = **$0.00189**
-* [Azure Functions](https://azure.microsoft.com/services/functions/) For Consumption, the costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00. For Premium functions, the base cost is: 2 instances in EP1 x 1 hour: $0.43
+* [Azure Functions](https://azure.microsoft.com/services/functions/) Costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00
 * [Key Vault](https://azure.microsoft.com/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transactions would be required per file) = **$0.003**
 
-The total for the above scenario would be **$166.60**, with the majority of the cost being on transcription. If Premium functions are hosted, there is an additional cost of **$310.54** per month.
+The total for the above scenario would be **$166.60**, with the majority of the cost being on transcription. 
 
 We hope the above scenario gives you an idea of the cost distribution. Of course will vary depending on scenario and usage pattern. Also use our [Azure Calculator](https://azure.microsoft.com/pricing/calculator/) to better understand pricing.

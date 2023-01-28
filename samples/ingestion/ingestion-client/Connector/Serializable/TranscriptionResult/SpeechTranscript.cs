@@ -15,12 +15,12 @@ namespace Connector
     {
         public SpeechTranscript(string source, string timestamp, long durationInTicks, string duration, IEnumerable<CombinedRecognizedPhrase> combinedRecognizedPhrases, IEnumerable<RecognizedPhrase> recognizedPhrases)
         {
-            this.Source = source;
-            this.Timestamp = timestamp;
-            this.DurationInTicks = durationInTicks;
-            this.Duration = duration;
-            this.CombinedRecognizedPhrases = combinedRecognizedPhrases;
-            this.RecognizedPhrases = recognizedPhrases;
+            Source = source;
+            Timestamp = timestamp;
+            DurationInTicks = durationInTicks;
+            Duration = duration;
+            CombinedRecognizedPhrases = combinedRecognizedPhrases;
+            RecognizedPhrases = recognizedPhrases;
         }
 
         [JsonProperty("source")]

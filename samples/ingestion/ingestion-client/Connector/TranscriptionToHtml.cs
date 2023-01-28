@@ -6,7 +6,6 @@
 namespace Connector
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using System.Text;
 
@@ -58,22 +57,22 @@ namespace Connector
 
                     if (isMultiChannel)
                     {
-                        htmlBuilder.Append(CultureInfo.InvariantCulture, $"<td>{recognizedPhrase.Channel}</td>");
+                        htmlBuilder.Append($"<td>{recognizedPhrase.Channel}</td>");
 
                         if (recognizedPhrase.Channel % 2 == 1)
                         {
-                            htmlBuilder.Append(CultureInfo.InvariantCulture, $"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'></a></td>");
-                            htmlBuilder.Append(CultureInfo.InvariantCulture, $"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'{confidenceIndication}>{sentence.Display}</span></a></td>");
+                            htmlBuilder.Append($"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'></a></td>");
+                            htmlBuilder.Append($"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'{confidenceIndication}>{sentence.Display}</span></a></td>");
                         }
                         else
                         {
-                            htmlBuilder.Append(CultureInfo.InvariantCulture, $"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'{confidenceIndication}>{sentence.Display}</span></a></td>");
-                            htmlBuilder.Append(CultureInfo.InvariantCulture, $"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'></a></td>");
+                            htmlBuilder.Append($"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'{confidenceIndication}>{sentence.Display}</span></a></td>");
+                            htmlBuilder.Append($"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'></a></td>");
                         }
                     }
                     else
                     {
-                        htmlBuilder.Append(CultureInfo.InvariantCulture, $"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'{confidenceIndication}>{sentence.Display}</span></a></td>");
+                        htmlBuilder.Append($"<td><a href='javascript:jumpTime({recognizedPhrase.Offset});' class='inline-decoration'{confidenceIndication}>{sentence.Display}</span></a></td>");
                     }
 
                     htmlBuilder.Append("</tr>");
