@@ -76,6 +76,8 @@ jobs:
   steps:
   - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
     displayName: Patch samples
+  - bash: 'dotnet workload install maui-android'
+    displayName: install maui-android workload.
   - task: NuGetToolInstaller@0
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
