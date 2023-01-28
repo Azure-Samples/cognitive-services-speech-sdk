@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using Android;
 using Android.App;
 using Android.OS;
-using Android.Support.Design.Widget;
-using Android.Support.V4.App;
+using AndroidX.Core.App;
+using Google.Android.Material.Snackbar;
 
 namespace helloworld.Droid
 {
@@ -20,7 +20,7 @@ namespace helloworld.Droid
 
         public Task<bool> GetPermissionsAsync()
         {
-            tcsPermissions = new TaskCompletionSource<bool>();
+            tcsPermissions = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Permissions are required only for Marshmallow and up
             if ((int)Build.VERSION.SdkInt < 23)

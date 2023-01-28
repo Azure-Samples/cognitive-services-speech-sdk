@@ -4,16 +4,9 @@ package com.microsoft.cognitiveservices.speech.samples.console;
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Semaphore;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 // <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
@@ -34,14 +27,14 @@ public class SpeakerRecognitionSamples {
         // The default language is "en-us".
 
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_SUBSCRIPTION_KEY";
+        String speechSubscriptionKey = "YourSubscriptionKey";
 
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_SUBSCRIPTION_REGION";
+        String serviceRegion = "YourServiceRegion";
 
-        String enrollmentFile = "ENROLLMENT_FILE.wav";
+        String enrollmentFile = "YourEnrollmentFile.wav";
 
-        String identificationFile = "IDENTIFICATION_FILE.wav";
+        String identificationFile = "YourIdentificationFile.wav";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
@@ -79,10 +72,10 @@ public class SpeakerRecognitionSamples {
         // The default language is "en-us".
 
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_SUBSCRIPTION_KEY";
+        String speechSubscriptionKey = "YourSubscriptionKey";
 
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_SUBSCRIPTION_REGION";
+        String serviceRegion = "YourServiceRegion";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
@@ -121,14 +114,14 @@ public class SpeakerRecognitionSamples {
         // The default language is "en-us".
 
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_KEY_HERE";
+        String speechSubscriptionKey = "YourSubscriptionKey";
 
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_REGION_HERE";
+        String serviceRegion = "YourServiceRegion";
 
-        String enrollmentFile = "YOUR_ENROLLMENT_FILE.wav";
+        String enrollmentFile = "YourEnrollmentFile.wav";
 
-        String verificationFile = "YOUR_VERIFICATION_FILE.wav";
+        String verificationFile = "YourVerificationFile.wav";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
@@ -163,10 +156,10 @@ public class SpeakerRecognitionSamples {
         // The default language is "en-us".
 
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_KEY_HERE";
+        String speechSubscriptionKey = "YourSubscriptionKey";
 
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_REGION_HERE";
+        String serviceRegion = "YourServiceRegion";
 
         // Creates an instance of a voice profile client using speech configuration with specified
         // subscription key and service region
@@ -179,7 +172,7 @@ public class SpeakerRecognitionSamples {
                 if(enrollProfileFromMicrophone(client, profile)) {
 
                     System.out.println("Enrolled successfully");
-                    System.out.println("Verification: Please say 'My Voice is my passport, verify me'");
+                    System.out.println("Verification: Please say 'I'll talk for a few seconds, so you can recognize my voice in the future.'");
 
                     verifySpeaker(speechConfig, profile, AudioConfig.fromDefaultMicrophoneInput());
                 }
@@ -209,7 +202,7 @@ public class SpeakerRecognitionSamples {
         boolean success = false;
 
         try (AudioConfig audioConfig = AudioConfig.fromDefaultMicrophoneInput()) {
-            System.out.println("Please say 'My Voice is my passport, verify me'");
+            System.out.println("Please say 'I'll talk for a few seconds, so you can recognize my voice in the future.'");
             success = enrollProfile(client, profile, audioConfig);
         }
         return success;
@@ -225,7 +218,7 @@ public class SpeakerRecognitionSamples {
                 resultReason = result.getReason();
 
                 if (result.getReason() == ResultReason.EnrollingVoiceProfile) {
-                    System.out.println("Enrolling, please repeat 'My Voice is my passport, verify me'");
+                    System.out.println("Enrolling, please repeat 'I'll talk for a few seconds, so you can recognize my voice in the future.'");
                 }
                 else if (result.getReason() == ResultReason.NoMatch) {
                     System.out.println("NOMATCH: Speech could not be recognized.");

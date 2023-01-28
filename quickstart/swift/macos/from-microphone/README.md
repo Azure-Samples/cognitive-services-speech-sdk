@@ -13,7 +13,7 @@ This sample demonstrates how to create an macOS app in Swift using the Cognitive
 
 ## Get the Speech SDK for macOS
 
-**By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+**By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 The Cognitive Services Speech SDK for macOS is distributed as a framework bundle.
 It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or downloaded directly [here](https://aka.ms/csspeech/macosbinary) and linked manually. This guide uses a CocoaPod.

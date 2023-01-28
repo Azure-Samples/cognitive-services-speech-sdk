@@ -1,10 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.microsoft.cognitiveservices.speech.samples.sdkdemo.MainActivity">
+
+  <Button
+      android:id="@+id/buttonPronunciationAssessmentStream"
+      android:layout_width="336dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
+      android:text="Pronunciation Assessment From Stream"
+      android:textAllCaps="false"
+      app:layout_constraintBottom_toTopOf="@+id/recognizedText"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.406"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/buttonPronunciationAssessment"
+      app:layout_constraintVertical_bias="1.0" />
 
   <Button
       android:id="@+id/buttonRecognize"
@@ -50,9 +66,9 @@
       android:id="@+id/buttonRecognizeIntent"
       android:layout_width="336dp"
       android:layout_height="wrap_content"
-      android:layout_marginBottom="8dp"
-      android:layout_marginEnd="8dp"
       android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
       android:text="Recognize intent"
       android:textAllCaps="false"
       app:layout_constraintBottom_toTopOf="@+id/buttonRecognizeWithKeyword"
@@ -61,31 +77,48 @@
       app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeContinuous" />
 
   <Button
+      android:id="@+id/buttonPronunciationAssessment"
+      android:layout_width="336dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
+      android:text="Pronunciation Assessment"
+      android:textAllCaps="false"
+      app:layout_constraintBottom_toTopOf="@id/buttonPronunciationAssessmentStream"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeWithKeyword" />
+
+  <Button
       android:id="@+id/buttonRecognizeWithKeyword"
       android:layout_width="336dp"
       android:layout_height="wrap_content"
-      android:layout_marginBottom="8dp"
-      android:layout_marginEnd="8dp"
       android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
       android:text="Recognize with keyword"
       android:textAllCaps="false"
-      app:layout_constraintBottom_toTopOf="@+id/recognizedText"
+      app:layout_constraintBottom_toTopOf="@+id/buttonPronunciationAssessment"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
+      app:layout_constraintHorizontal_bias="0.406"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeIntent" />
 
   <TextView
       android:id="@+id/recognizedText"
-      android:layout_width="263dp"
+      android:layout_width="0dp"
       android:layout_height="157dp"
-      android:layout_marginBottom="8dp"
-      android:layout_marginEnd="27dp"
       android:layout_marginStart="32dp"
+      android:layout_marginEnd="27dp"
+      android:layout_marginBottom="16dp"
       android:scrollbarAlwaysDrawHorizontalTrack="false"
       android:scrollbars="vertical"
       android:textAppearance="@style/TextAppearance.AppCompat.Title"
       app:layout_constraintBottom_toBottomOf="parent"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintHorizontal_bias="0.0"
-      app:layout_constraintStart_toStartOf="parent" />
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/buttonPronunciationAssessment" />
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

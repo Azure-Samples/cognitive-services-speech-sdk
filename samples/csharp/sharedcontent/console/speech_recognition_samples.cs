@@ -72,7 +72,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
- 
+
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "de-DE";
 
@@ -81,7 +81,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // If you also want word-level timing in the detailed recognition results, set the following.
             // Note that if you set the following, you can omit the previous line
-            //      "config.OutputFormat = OutputFormat.Detailed", 
+            //      "config.OutputFormat = OutputFormat.Detailed",
             // since word-level timing implies detailed recognition results.
             config.RequestWordLevelTimestamps();
 
@@ -109,7 +109,7 @@ namespace MicrosoftSpeechSDKSamples
                     // The first item in detailedResults corresponds to the recognized text
                     // (NOT the item with the highest confidence number!)
                     var detailedResults = result.Best();
-                    foreach (var item in detailedResults) 
+                    foreach (var item in detailedResults)
                     {
                         Console.WriteLine($"\tConfidence: {item.Confidence}\n\tText: {item.Text}\n\tLexicalForm: {item.LexicalForm}\n\tNormalizedForm: {item.NormalizedForm}\n\tMaskedNormalizedForm: {item.MaskedNormalizedForm}");
                         Console.WriteLine($"\tWord-level timing:");
@@ -197,7 +197,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
@@ -270,7 +270,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
@@ -347,7 +347,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             using (var pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.MP3)))
             {
@@ -437,7 +437,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
@@ -509,7 +509,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Create a push stream
             using (var pushStream = AudioInputStream.CreatePushStream())
@@ -607,7 +607,7 @@ namespace MicrosoftSpeechSDKSamples
             // The phrase your keyword recognition model triggers on.
             var keyword = "YourKeyword";
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = new SpeechRecognizer(config))
@@ -689,7 +689,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
@@ -770,7 +770,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "de-DE", "fr-FR" });
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a speech recognizer using the auto detect source language config, and the file as audio input.
             // Replace with your own audio file name.
@@ -865,7 +865,7 @@ namespace MicrosoftSpeechSDKSamples
             // Currently this feature only supports 2 different language candidates
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromSourceLanguageConfigs(sourceLanguageConfigs);
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a speech recognizer using the auto detect source language config, and the file as audio input.
             // Replace with your own audio file name.
@@ -945,7 +945,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 using (var recognizer = new KeywordRecognizer(audioInput))
                 {
-                    var model = KeywordRecognitionModel.FromFile("YourKeywordModelFilename.");
+                    var model = KeywordRecognitionModel.FromFile("YourKeywordRecognitionModelFile.table");
                     var result = await recognizer.RecognizeOnceAsync(model).ConfigureAwait(false);
                     Console.WriteLine($"got result reason as {result.Reason}");
                     if(result.Reason == ResultReason.RecognizedKeyword)
@@ -966,12 +966,15 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Pronunciation assessment with microphone as audio input.
+        // See more information at https://aka.ms/csspeech/pa
         public static async Task PronunciationAssessmentWithMicrophoneAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Replace the language with your language in BCP-47 format, e.g., en-US.
+            var language = "en-US";
 
             // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
             // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
@@ -984,7 +987,7 @@ namespace MicrosoftSpeechSDKSamples
                 GradingSystem.HundredMark, Granularity.Phoneme, true);
 
             // Creates a speech recognizer for the specified language, using microphone as audio input.
-            using (var recognizer = new SpeechRecognizer(config))
+            using (var recognizer = new SpeechRecognizer(config, language))
             {
                 while (true)
                 {
@@ -1046,11 +1049,11 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Pronunciation assessment with audio stream input.
+        // See more information at https://aka.ms/csspeech/pa
         public static void PronunciationAssessmentWithStream()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            // Note: The pronunciation assessment feature is currently only available on en-US language.
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Read audio data from file. In real scenario this can be from memory or network
@@ -1058,7 +1061,7 @@ namespace MicrosoftSpeechSDKSamples
             var audioData = new byte[audioDataWithHeader.Length - 46];
             Array.Copy(audioDataWithHeader, 46, audioData, 0, audioData.Length);
 
-            var resultReceived = new TaskCompletionSource<int>();
+            var resultReceived = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             var resultContainer = new List<string>();
 
             var startTime = DateTime.Now;
@@ -1126,7 +1129,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Create a speech resource with primary subscription key and service region.
             // Also create a speech resource with secondary subscription key and service region
-            RecognitionResult recognitionResult = await RecognizeOnceAsyncInternal("PrimarySubscriptionKey", "PrimarySubscriptionRegion");
+            RecognitionResult recognitionResult = await RecognizeOnceAsyncInternal("YourPrimarySubscriptionKey", "YourPrimaryServiceRegion");
             if (recognitionResult.Reason == ResultReason.Canceled)
             {
                 CancellationDetails details = CancellationDetails.FromResult(recognitionResult);
@@ -1134,7 +1137,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
                     || details.ErrorCode == CancellationErrorCode.ServiceTimeout)
                 {
-                    recognitionResult = await RecognizeOnceAsyncInternal("SecondarySubscriptionRegion", "SecondarySubscriptionRegion");
+                    recognitionResult = await RecognizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceRegion");
                 }
             }
             Console.WriteLine("Recognized {0}", recognitionResult.Text);
@@ -1147,7 +1150,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
             // All default enhancements from Microsoft Audio Stack are enabled.
@@ -1206,9 +1209,8 @@ namespace MicrosoftSpeechSDKSamples
                     // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                    // Waits for completion.
-                    // Use Task.WaitAny to keep the task rooted.
-                    Task.WaitAny(new[] { stopRecognition.Task });
+                    Console.WriteLine("Say something (press Enter to stop)...");
+                    Console.ReadKey();
 
                     // Stops recognition.
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
@@ -1276,7 +1278,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Approximate coordinates for a microphone array with one microphone in the center and six microphones evenly spaced
             // in a circle with radius approximately equal to 42.5 mm.
@@ -1419,7 +1421,7 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Approximate coordinates for a microphone array with one microphone in the center and six microphones evenly spaced
             // in a circle with radius approximately equal to 42.5 mm.

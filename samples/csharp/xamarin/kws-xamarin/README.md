@@ -1,15 +1,13 @@
-# Sample: Start speech recognition by using a keyword with the Speech SDK for Xamarin (Beta)
+# Sample: Start speech recognition by using a keyword with the Speech SDK for Xamarin
 
 This Speech SDK sample demonstrates how to start speech recognition by using a keyword in Universal Windows Platform (UWP), Android and iOS under [Xamarin](https://visualstudio.microsoft.com/xamarin/) under Windows PC and Visual Studio 2019.
 
 > Note:
-> The Speech SDK for Xamarin is currently in beta.
-> It supports UWP (x86, x64, ARM/ARM64), Android (x86, ARM32/64) and iOS (x64 simulator and ARM64 device).
+> The Speech SDK for Xamarin supports UWP (x86, x64, ARM/ARM64), Android (x86, x64 and ARM32/64) and iOS (x64 simulator and ARM64 device).
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* Speech SDK version 1.8.0 or later.
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
 * [Microsoft Visual Studio 2019](https://www.visualstudio.com/), Community Edition or higher is preferred.
 * [Xamarin installation to Visual Studio](https://docs.microsoft.com/xamarin/get-started/installation/?pivots=windows).
@@ -17,7 +15,6 @@ This Speech SDK sample demonstrates how to start speech recognition by using a k
 * [Xamarin iOS installation on Windows](https://docs.microsoft.com/xamarin/ios/get-started/installation/windows/?pivots=windows).
 * To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
 * To target iOS: an iOS device (ARM64) or an iOS simulator (x64) [enabled for development](https://docs.microsoft.com/xamarin/ios/get-started/installation/device-provisioning/) with a working microphone.
-* For Windows ARM64 build support, install the [optional build tools, and Windows 10 SDK for ARM/ARM64](https://blogs.windows.com/buildingapps/2018/11/15/official-support-for-windows-10-on-arm-development/).
 * Familiarize with [how to create custom wake word by using Speech Service](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-devices-sdk-create-kws)
   * The sample includes ready made keyword `Computer` model in `kws.table` file which can be found under asset/resource folders inside the Xamarin platform projects.
 * [Speech SDK recommendations for the microphone](https://aka.ms/sdsdk-microphone).
@@ -25,7 +22,7 @@ This Speech SDK sample demonstrates how to start speech recognition by using a k
 
 ## Prepare the sample
 
-* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Start Microsoft Visual Studio 2019 and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample (under quickstart\csharp-xamarin), and select the solution file contained within it.

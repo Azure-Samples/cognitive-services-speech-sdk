@@ -3,22 +3,18 @@
 This sample demonstrates how to synthesize speech with Java using the Speech SDK for Android.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-java-android) on the SDK documentation page which describes how to build this sample from scratch in Android Studio.
 
-> **Note:**
-> this sample is *not* for the Speech Devices SDK and the Roobo device.
-> If you are looking for further information on these, visit the [Speech Devices SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-devices-sdk) page.
-
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC (Windows, Linux, Mac) capable to run Android Studio.
-* Version 3.5 of [Android Studio](https://developer.android.com/studio/).
+* [Android Studio](https://developer.android.com/studio/).
 * An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working speaker, or an [Android emulator](https://developer.android.com/studio/run/emulator).
 
 ## Build the sample
 
 > Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-text-to-speech-java-android).
 
-* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Open this folder as a project in Android Studio.
 * Edit the `MainActivity` source:

@@ -53,6 +53,9 @@
     <ClCompile Include="standalone_language_detection_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="diagnostics_logging_samples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="whatstheweatherlike.wav">
@@ -67,14 +70,9 @@
     <None Include="enrollment_audio_steve.wav">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="en-us_zh-cn.wav">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="LanguageDetection_enUS.wav">
-      <Filter>Resource Files</Filter>
-    </Media>
-    <Media Include="en-us_zh-cn.wav">
-      <Filter>Resource Files</Filter>
-    </Media>
   </ItemGroup>
 </Project>

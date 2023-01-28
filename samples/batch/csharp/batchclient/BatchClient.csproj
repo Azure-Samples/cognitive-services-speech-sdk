@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <ProjectGuid>{00E5B4E3-3A13-4298-AAE3-FFA47A6740C2}</ProjectGuid>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -24,9 +24,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" version="5.2.7" PrivateAssets="All" />
-    <PackageReference Include="Newtonsoft.Json" version="12.0.1" PrivateAssets="All" />
-    <PackageReference Include="Polly" version="7.2.1" PrivateAssets="All" />
-    <PackageReference Include="System.ValueTuple" version="4.5.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" version="5.2.9" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" version="13.0.2" PrivateAssets="All" />
+    <PackageReference Include="Polly" version="7.2.3" PrivateAssets="All" />
   </ItemGroup>
 </Project>

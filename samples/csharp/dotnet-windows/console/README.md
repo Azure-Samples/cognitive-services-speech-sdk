@@ -3,8 +3,6 @@
 This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for C#.
 It runs under the .NET Framework 4.6.1 (or above) on Windows.
 
-> **Note:** this sample is also available in a version for [.NET Framework on Windows](../../dotnet-windows/console).
-
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
@@ -15,7 +13,7 @@ It runs under the .NET Framework 4.6.1 (or above) on Windows.
 
 ## Build the sample
 
-* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 
   > **Note:** make sure to download the complete set of samples, not just this directory.

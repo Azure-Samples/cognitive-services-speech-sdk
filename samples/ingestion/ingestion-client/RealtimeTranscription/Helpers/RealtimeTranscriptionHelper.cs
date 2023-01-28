@@ -40,7 +40,7 @@ namespace RealtimeTranscription
 
             var audioStreamFormat = AudioStreamFormat.GetWaveFormatPCM(sampleRate, bitsPerSample, channels);
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
             using var pushStream = AudioInputStream.CreatePushStream(audioStreamFormat);
             using (var audioInput = AudioConfig.FromStreamInput(pushStream))
             {

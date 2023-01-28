@@ -8,6 +8,9 @@
 // <toplevel>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+    #include <windows.h>
+#endif
 #include <speechapi_cxx.h>
 
 using namespace std;
@@ -158,31 +161,31 @@ void TranslationContinuousRecognition()
 
 #pragma region Language Detection related samples
 
-// Translation with microphone input.
+// Translation with microphone input, single utterance
 void TranslationAndLanguageIdWithMicrophone()
 {
     // <TranslationAndLanguageIdWithMicrophone>
-    // Creates an instance of a speech translation config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechTranslationConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Language Id feature requirement
-    // Please refer to language id document for different modes
-    config->SetProperty(PropertyId::SpeechServiceConnection_SingleLanguageIdPriority, "Latency");
+    // When you use Language ID with speech translation, you must set a v2 endpoint and use
+    // SpeechTranslationConfig::FromEndpoint() to create the SpeechTranslationConfig object.
+    // This will be fixed in a future version of Speech SDK.
+
+    // Replace "YourServiceRegion" with your service region (e.g. "westus"):
+    string speechv2Endpoint = "wss://YourServiceRegion.stt.speech.microsoft.com/speech/universal/v2";
+
+    // Replace "YourSubscriptionKey" with your speech subscription key:
+    auto config = SpeechTranslationConfig::FromEndpoint(speechv2Endpoint, "YourSubscriptionKey");
+
+    // Define the set of possible input (source) spoken languages for language detection
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
 
-    // Sets source and target languages
-    // The source language will be detected by the language detection feature. 
-    // However, the SpeechRecognitionLanguage still need to set with a locale string, but it will not be used as the source language.
-    // This will be fixed in a future version of Speech SDK.
-    auto fromLanguage = "en-US";
-    config->SetSpeechRecognitionLanguage(fromLanguage);
-    config->AddTargetLanguage("de");
+    // Define the set of target (translation) languages
+    config->AddTargetLanguage("es");
     config->AddTargetLanguage("fr");
 
     // Creates a translation recognizer using microphone as audio input.
     auto recognizer = TranslationRecognizer::FromConfig(config, autoDetectSourceLanguageConfig);
-    cout << "Say something...\n";
+    cout << "Say something in English or German...\n";
 
     // Starts translation, and returns after a single utterance is recognized. The end of a
     // single utterance is determined by listening for silence at the end or until a maximum of 15
@@ -195,7 +198,8 @@ void TranslationAndLanguageIdWithMicrophone()
     // Checks result.
     if (result->Reason == ResultReason::TranslatedSpeech)
     {
-        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        auto detectedLanguage = result->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult);
+        cout << "RECOGNIZED in " << detectedLanguage << ": Text = " << result->Text << std::endl;
 
         for (const auto& it : result->Translations)
         {
@@ -225,28 +229,27 @@ void TranslationAndLanguageIdWithMicrophone()
     // </TranslationAndLanguageIdWithMicrophone>
 }
 
-void TranslationRecognitionAndLanguageIdWithMultiLingualFile()
+void ContinuousTranslationAndLanguageIdWithMultiLingualFile()
 {
-    // Creates an instance of a speech translation config with specified subscription key and service region.
-    // Note: For multi-lingual speech recognition with language id, it only works with speech v2 endpoint, you must use FromEndpoint api in order to use the speech v2 endpoint.
-    // Replace the region with your service region
+    // When you use Language ID with speech translation, you must set a v2 endpoint and use
+    // SpeechTranslationConfig::FromEndpoint() to create the SpeechTranslationConfig object.
+    // This will be fixed in a future version of Speech SDK.
+
+    // Replace "YourServiceRegion" with your service region (e.g. "westus"):
     string speechv2Endpoint = "wss://YourServiceRegion.stt.speech.microsoft.com/speech/universal/v2";
+
+    // Replace "YourSubscriptionKey" with your speech subscription key:
     auto config = SpeechTranslationConfig::FromEndpoint(speechv2Endpoint, "YourSubscriptionKey");
 
-    // Language Id feature requirement
-    // Please refer to language id document for different modes
-    config->SetProperty(PropertyId::SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
+    // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
+    // Please refer to the documentation of Language ID for more information.
+    // https://aka.ms/speech/lid?pivots=programming-language-cpp
+    config->SetProperty(PropertyId::SpeechServiceConnection_LanguageIdMode, "Continuous");
+
+    // Define the set of possible input (source) spoken languages for language detection
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "zh-CN" });
 
-    // promise for synchronization of recognition end.
-    promise<void> recognitionEnd;
-
-    // Sets source and target languages
-    // The source language will be detected by the language detection feature. 
-    // However, the SpeechRecognitionLanguage still need to set with a locale string, but it will not be used as the source language.
-    // This will be fixed in a future version of Speech SDK.
-    auto fromLanguage = "en-US";
-    config->SetSpeechRecognitionLanguage(fromLanguage);
+    // Define the set of target (translation) languages
     config->AddTargetLanguage("de");
     config->AddTargetLanguage("fr");
 
@@ -254,12 +257,15 @@ void TranslationRecognitionAndLanguageIdWithMultiLingualFile()
     auto audioInput = AudioConfig::FromWavFileInput("en-us_zh-cn.wav");
     auto recognizer = TranslationRecognizer::FromConfig(config, autoDetectSourceLanguageConfig, audioInput);
 
+    // promise for synchronization of recognition end.
+    promise<void> recognitionEnd;
+
     // Subscribes to events.
     recognizer->Recognizing.Connect([](const TranslationRecognitionEventArgs& e)
         {
             std::string lidResult = e.Result->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult);
 
-            cout << "Recognizing in Language = "<< lidResult << ":" << e.Result->Text << std::endl;
+            cout << "Recognizing in Language = "<< lidResult << ": Text=" << e.Result->Text << std::endl;
             for (const auto& it : e.Result->Translations)
             {
                 cout << "  Translated into '" << it.first.c_str() << "': " << it.second.c_str() << std::endl;

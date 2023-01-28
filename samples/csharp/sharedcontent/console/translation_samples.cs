@@ -5,12 +5,12 @@
 
 // <toplevel>
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
-#if NET461
+#if NET462
+using System.IO;
 using System.Media;
 #endif
 // </toplevel>
@@ -28,13 +28,14 @@ namespace MicrosoftSpeechSDKSamples
             string fromLanguage = "en-US";
 
             // Voice name of synthesis output.
-            const string GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
+            const string germanVoice = "de-DE-AmalaNeural";
 
             // Creates an instance of a speech translation config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
             config.SpeechRecognitionLanguage = fromLanguage;
-            config.VoiceName = GermanVoice;
+            config.VoiceName = germanVoice;
 
             // Translation target language(s).
             // Replace with language(s) of your choice.
@@ -83,13 +84,13 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (audio.Length > 0)
                     {
-                        #if NET461
+#if NET462
                         using (var m = new MemoryStream(audio))
                         {
                             SoundPlayer simpleSound = new SoundPlayer(m);
                             simpleSound.PlaySync();
                         }
-                        #endif
+#endif
                     }
                 };
 
@@ -148,7 +149,7 @@ namespace MicrosoftSpeechSDKSamples
             config.AddTargetLanguage("de");
             config.AddTargetLanguage("fr");
 
-            var stopTranslation = new TaskCompletionSource<int>();
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a translation recognizer using file as audio input.
             // Replace with your own audio file name.
@@ -251,7 +252,7 @@ namespace MicrosoftSpeechSDKSamples
             config.AddTargetLanguage("de");
             config.AddTargetLanguage("fr");
 
-            var stopTranslation = new TaskCompletionSource<int>();
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a translation recognizer using file as audio input.
             using (var pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.MP3)))
@@ -375,7 +376,7 @@ namespace MicrosoftSpeechSDKSamples
             config.AddTargetLanguage("de");
             config.AddTargetLanguage("fr");
 
-            var stopTranslation = new TaskCompletionSource<int>();
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Create an audio stream from a wav file.
             // Replace with your own audio file name.
@@ -470,29 +471,33 @@ namespace MicrosoftSpeechSDKSamples
         // Translation from microphone.
         public static async Task TranslationWithMicrophoneAsync_withLanguageDetectionEnabled()
         {
-            // Translation source language.
-            // Replace with a language of your choice.
-            string fromLanguage = "en-US";
+            // When you use Language ID with speech translation, you must set a v2 endpoint and use
+            // SpeechTranslationConfig.FromEndpoint() to create the SpeechTranslationConfig object.
+            // This will be fixed in a future version of Speech SDK.
 
-            // Voice name of synthesis output.
-            const string GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
+            // Please replace the service region with your region (e.g. "westus").
+            var v2EndpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/universal/v2", "YourServiceRegion");
+            var v2EndpointUrl = new Uri(v2EndpointInString);
 
-            // Creates an instance of a speech translation config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-
-            // This is required, even when language id is enabled.
-            config.SpeechRecognitionLanguage = fromLanguage;
-            config.VoiceName = GermanVoice;
+            // Creates an instance of a speech translation config.
+            // Please replace the service subscription key with your subscription key.
+            var config = SpeechTranslationConfig.FromEndpoint(v2EndpointUrl, "YourSubscriptionKey");
 
             // Translation target language(s).
-            // Replace with language(s) of your choice.
+            // Replace with language(s) of your choice. You can add more lines.
             config.AddTargetLanguage("de");
 
-            // Set the language detection require property
-            // Please refer to the documentation of language id with different modes
-            config.SetProperty(PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, "Latency");
-            var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "de-DE" });
+            // Optional: If in addition to the translated text you also need the synthesized audio, then provide the voice name
+            var germanVoice = "de-DE-AmalaNeural";
+            config.VoiceName = germanVoice;
+
+            // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
+            // Please refer to the documentation of Language ID for more information.
+            // https://aka.ms/speech/lid?pivots=programming-language-csharp
+            config.SetProperty(PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous");
+
+            // Define the set of input spoken languages to detect
+            var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "es-MX" });
 
             // Creates a translation recognizer using microphone as audio input.
             using (var recognizer = new TranslationRecognizer(config, autoDetectSourceLanguageConfig))
@@ -500,7 +505,9 @@ namespace MicrosoftSpeechSDKSamples
                 // Subscribes to events.
                 recognizer.Recognizing += (s, e) =>
                 {
-                    Console.WriteLine($"RECOGNIZING Text={e.Result.Text}");
+                    var lidResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
+
+                    Console.WriteLine($"RECOGNIZING in '{lidResult}': Text={e.Result.Text}");
                     foreach (var element in e.Result.Translations)
                     {
                         Console.WriteLine($" TRANSLATING into '{element.Key}': {element.Value}");
@@ -509,9 +516,11 @@ namespace MicrosoftSpeechSDKSamples
 
                 recognizer.Recognized += (s, e) =>
                 {
+                    var lidResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
+
                     if (e.Result.Reason == ResultReason.TranslatedSpeech)
                     {
-                        Console.WriteLine($"RECOGNIZED Text={e.Result.Text}");
+                        Console.WriteLine($"RECOGNIZED in '{lidResult}': Text={e.Result.Text}");
                         foreach (var element in e.Result.Translations)
                         {
                             Console.WriteLine($"    TRANSLATED into '{element.Key}': {element.Value}");
@@ -519,7 +528,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                     else if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {
-                        Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                        Console.WriteLine($"RECOGNIZED in '{lidResult}': Text={e.Result.Text}");
                         Console.WriteLine($"    Speech not translated.");
                     }
                     else if (e.Result.Reason == ResultReason.NoMatch)
@@ -537,7 +546,7 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (audio.Length > 0)
                     {
-#if NET461
+#if NET462
                         using (var m = new MemoryStream(audio))
                         {
                             SoundPlayer simpleSound = new SoundPlayer(m);
@@ -586,7 +595,10 @@ namespace MicrosoftSpeechSDKSamples
         // Translation using multi-lingual file input.
         public static async Task TranslationWithMultiLingualFileAsync_withLanguageDetectionEnabled()
         {
-            // Offical v2 endpoint with service region
+            // When you use Language ID with speech translation, you must set a v2 endpoint and use
+            // SpeechTranslationConfig.FromEndpoint() to create the SpeechTranslationConfig object.
+            // This will be fixed in a future version of Speech SDK.
+
             // Please replace the service region with your region
             var v2EndpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/universal/v2", "YourServiceRegion");
             var v2EndpointUrl = new Uri(v2EndpointInString);
@@ -595,24 +607,20 @@ namespace MicrosoftSpeechSDKSamples
             // Please replace the service subscription key with your subscription key
             var config = SpeechTranslationConfig.FromEndpoint(v2EndpointUrl, "YourSubscriptionKey");
 
-            // Sets source languages
-            // The source language will be detected by the language detection feature. 
-            // However, the SpeechRecognitionLanguage still need to set with a locale string, but it will not be used as the source language.
-            // This will be fixed in a future version of Speech SDK.
-            string fromLanguage = "en-US";
-            config.SpeechRecognitionLanguage = fromLanguage;
-
             // Translation target language(s).
             // Replace with language(s) of your choice.
             config.AddTargetLanguage("de");
             config.AddTargetLanguage("fr");
 
-            // Setup Language id property
-            // Please refer to the documentation of language id with different modes
-            config.SetProperty(PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
+            // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
+            // Please refer to the documentation of Language ID for more information.
+            // https://aka.ms/speech/lid?pivots=programming-language-csharp
+            config.SetProperty(PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous");
+
+            // Define the set of languages to detect
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "zh-CN" });
 
-            var stopTranslation = new TaskCompletionSource<int>();
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a translation recognizer using file as audio input.
             // Replace with your own audio file name.
@@ -623,7 +631,6 @@ namespace MicrosoftSpeechSDKSamples
                     // Subscribes to events.
                     recognizer.Recognizing += (s, e) =>
                     {
-                        // Note: the detected language result only available in the v2 endpoint
                         var lidResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult);
 
                         Console.WriteLine($"RECOGNIZING in '{lidResult}': Text={e.Result.Text}");

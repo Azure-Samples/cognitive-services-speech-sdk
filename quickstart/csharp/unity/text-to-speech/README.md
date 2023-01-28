@@ -3,18 +3,16 @@
 This sample demonstrates how to synthesize speech in [Unity](https://unity3d.com/).
 
 > Note:
-> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64), iOS (x64 simulator, ARM64) and Mac (x64).
-> Speech SDK support has been built and verified for Windows and Android using Windows PC development environment for Unity and for iOS using Mac development environment for Unity.
+> The Speech SDK for Unity supports Windows Desktop (x86 and x64) or Universal Windows Platform (x86, x64, ARM/ARM64), Android (x86, ARM32/64), iOS (x64 simulator, ARM64), Mac (x64) and Linux (x64).
 
 ## Prerequisites
 
-* This sample is targeted for Unity 2018.3 or later. To install, pick an appropriate option in the [Unity store](https://store.unity.com/).
+* This sample is targeted for Unity 2020.3 or later. To install, pick an appropriate option in the [Unity store](https://store.unity.com/).
   > Note:
-  > * [UWP ARM64 support was only added in Unity 2019.1](https://blogs.unity3d.com/2019/04/16/introducing-unity-2019-1/#universal)
   > * If you are not familiar with Unity, it is recommended to study the [Unity User Manual](https://docs.unity3d.com/Manual/UnityManual.html) before starting your app development.
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working speaker.
-* A Mac device with Xcode and Unity installed for iOS development.
+* A Mac device with XCode and Unity installed for iOS development.
 * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
 * For ARM64 support, install the [optional build tools, and Windows 10 SDK for ARM/ARM64](https://blogs.windows.com/buildingapps/2018/11/15/official-support-for-windows-10-on-arm-development/)
 * To target Android: an Android device (ARM32/64, x86; API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working speaker.
@@ -22,7 +20,7 @@ This sample demonstrates how to synthesize speech in [Unity](https://unity3d.com
 
 ## Download the Speech SDK for Unity and the sample code
 
-* **By downloading the Speech SDK for Unity you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By downloading the Speech SDK for Unity you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * The Speech SDK for Unity is packaged as a Unity asset package (.unitypackage).
   Download it from [here](https://aka.ms/csspeech/unitypackage).
 * Also, [download the sample code to your development PC.](/README.md#get-the-samples)
@@ -39,9 +37,9 @@ This sample demonstrates how to synthesize speech in [Unity](https://unity3d.com
     > gets resolved in the next step by importing the Speech SDK.
 * Import the Speech SDK:
   * Import the Speech SDK by selecting **Assets** > **Import Package** > **Custom Package**.
-  * In the file picker, select the Speech SDK .unitypackage file that you downloaded before.
+  * In the file picker, select the Speech SDK `.unitypackage` file that you downloaded before.
   * Ensure that all files are selected and click **Import**.
-  * NOTE: If you have installed Unity only for specific platform e.g. Unity CloudBuild for Android, be aware that you may need to remove other 
+  * NOTE: If you have installed Unity only for specific platform e.g. Unity CloudBuild for Android, be aware that you may need to remove other
   * platform (iOS, Mac, WSA) binaries from the Speech SDK Plugins folder to avoid possible conflicts with the same library name.
 * Select the `HelloWorld` sample scene:
   * In the Project Window (bottom left by default), navigate to **Assets** > **Scenes** and double-click on the `HelloWorld` scene to open it up.
@@ -123,7 +121,7 @@ Start by running it in the Unity Editor (first option), then explore other optio
 ### Build and run the sample for iOS platform
 
 * [Get started on iOS environment setup in Unity](https://docs.unity3d.com/Manual/iphone-GettingStarted.html), and prepare iPhone device for development.
-* Open this Unity sample project on Mac. 
+* Open this Unity sample project on Mac.
 * Under **Project** > **Assets** > **SpeechSDK** > **Plugins** > **iOS**, check that `Microsoft.CognitiveServices.Speech.csharp.dll` target is enabled for `Editor` and `iOS` platforms.
 * Open **File** > **Build Settings**,
 * Select **iOS** as platform.
@@ -135,7 +133,7 @@ Start by running it in the Unity Editor (first option), then explore other optio
 * In Xcode, under **Targets** > **Unity-Phone** > **General**, check that `Identity` and `Signing` matches with your provisioning profile.
   > Note: Bitcode is enabled in the iOS plugin.
 * Connect your [developer-enabled](https://learn.unity.com/tutorial/building-for-mobile) iOS device to your Mac via USB and select that as a target in Xcode.
-* In Xcode, build and run the solution using `Play` button. 
+* In Xcode, build and run the solution using `Play` button.
 * After the build completes, the app launches on your iOS device:
   * Then, type text into the textbox and click button. The text is transmitted to the Speech service and synthesized to speech, which will playback on your speaker.
 
@@ -147,6 +145,16 @@ Start by running it in the Unity Editor (first option), then explore other optio
 * Select **PC, Mac & Linux Standalone** as platform.
 * If this wasn't the active platform before, you have to select **Switch Platform** (and wait a bit).
 * Click **Player Settings...** to open them up in the Inspector Window (on the right by default).
+* Back in the **Build Settings** window, click **Build** and create a new of the standalone app which will be generated by Unity.
+* After the build has completed, open created standalone application and launch it for the speech experience.
+
+  ### Build and run the sample for Linux platform
+
+* [Get started on Linux environment setup in Unity](https://docs.unity3d.com/Manual/linux.html).
+* Under **Project** > **Assets** > **SpeechSDK** > **Plugins** > **Linux**, check that `Microsoft.CognitiveServices.Speech.csharp.dll` target is enabled for `Editor` and `Standalone` and `Linux` platforms.
+* Open **File** > **Build Settings**,
+* Select **PC, Mac & Linux Standalone** as platform.
+* If this wasn't the active platform before, you have to select **Switch Platform** (and wait a bit).
 * Back in the **Build Settings** window, click **Build** and create a new of the standalone app which will be generated by Unity.
 * After the build has completed, open created standalone application and launch it for the speech experience.
 
