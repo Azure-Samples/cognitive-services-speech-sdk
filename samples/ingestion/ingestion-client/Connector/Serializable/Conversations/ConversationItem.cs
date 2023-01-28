@@ -28,13 +28,7 @@ namespace Connector.Serializable.Language.Conversations
         [JsonProperty("maskedItn")]
         public string MaskedItn { get; set; }
 
-        [JsonProperty("wordLevelTimings")]
+        [JsonProperty("audioTimings")]
         public IEnumerable<WordLevelAudioTiming> AudioTimings { get; set; }
-
-        [JsonProperty("conversationItemLevelTiming")]
-        public AudioTiming ConversationItemLevelTiming { get; set; }
-
-        [JsonProperty("role")]
-        public string Role { get; set; }
     }
 }

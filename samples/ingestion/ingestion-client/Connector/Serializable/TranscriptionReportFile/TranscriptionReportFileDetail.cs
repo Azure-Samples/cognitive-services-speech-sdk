@@ -11,10 +11,10 @@ namespace Connector
     {
         public TranscriptionReportFileDetail(string status, string errorKind, string errorMessage, string source)
         {
-            this.Status = status;
-            this.ErrorKind = errorKind;
-            this.ErrorMessage = errorMessage;
-            this.Source = source;
+            Status = status;
+            ErrorKind = errorKind;
+            ErrorMessage = errorMessage;
+            Source = source;
         }
 
         [JsonProperty("status")]
@@ -32,7 +32,7 @@ namespace Connector
         [JsonProperty("sourceUrl")]
         private string SourceUrl
         {
-            set { this.Source = value; }
+            set { Source = value; }
         }
     }
 }

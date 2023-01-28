@@ -16,7 +16,7 @@ Hybrid speech uses cloud speech services by default and embedded speech as a fal
 
 ## Prerequisites
 
-See the [platform requirements for installing the Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?pivots=programming-language-java).
+See the [platform requirements for installing the Speech SDK](https://learn.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?pivots=programming-language-java).
 
 Requirements specific to this embedded speech sample are as follows.
 * Android ARM-based device with **Android 7.0 (API level 24)** or higher, with a working microphone and [enabled for development](https://developer.android.com/studio/debug/dev-options).
@@ -41,7 +41,7 @@ To build:
        The model internal subfolder structure must be intact i.e. as originally delivered.
    * `EmbeddedSpeechRecognitionModelName`
      * Name of the embedded speech recognition model to be used for recognition.
-     * This must be the full name of a model (for example, `Microsoft Speech Recognizer en-US FP Model V8`).
+     * The model name can be short (see https://aka.ms/speech/sr-languages, e.g. `en-US`) or full (e.g. `Microsoft Speech Recognizer en-US FP Model V8`).
    * `EmbeddedSpeechRecognitionModelKey`
      * Decryption key of the (encrypted) embedded speech recognition model.
 1. Press **Ctrl+F9** or select **Build** \> **Make Project**.

@@ -11,10 +11,10 @@ namespace Connector.Serializable.TextAnalytics
     {
         public TextAnalyticsDocument(string id, string redactedText, TextAnalyticsConfidenceScores confidenceScores, IEnumerable<TextAnalyticsEntity> entities)
         {
-            this.Id = id;
-            this.RedactedText = redactedText;
-            this.ConfidenceScores = confidenceScores;
-            this.Entities = entities;
+            Id = id;
+            RedactedText = redactedText;
+            ConfidenceScores = confidenceScores;
+            Entities = entities;
         }
 
         public string Id { get; set; }

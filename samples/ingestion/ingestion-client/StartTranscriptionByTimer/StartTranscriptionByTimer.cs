@@ -24,20 +24,20 @@ namespace StartTranscriptionByTimer
         private static readonly ServiceBusReceiver ServiceBusReceiver = ServiceBusClient.CreateReceiver(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath, ServiceBusReceiverOptions);
 
         [FunctionName("StartTranscriptionByTimer")]
-        public static async Task Run([TimerTrigger("0 */2 * * * *")] TimerInfo timerInfo, ILogger log)
+        public static async Task Run([TimerTrigger("0 */2 * * * *")] TimerInfo myTimer, ILogger log)
         {
             if (log == null)
             {
                 throw new ArgumentNullException(nameof(log));
             }
 
-            if (timerInfo == null)
+            if (myTimer == null)
             {
-                throw new ArgumentNullException(nameof(timerInfo));
+                throw new ArgumentNullException(nameof(myTimer));
             }
 
             var startDateTime = DateTime.UtcNow;
-            log.LogInformation($"C# Timer trigger function v3 executed at: {startDateTime}. Next occurrence on {timerInfo.Schedule.GetNextOccurrence(startDateTime)}.");
+            log.LogInformation($"C# Timer trigger function v3 executed at: {startDateTime}. Next occurrence on {myTimer.Schedule.GetNextOccurrence(startDateTime)}.");
 
             var validServiceBusMessages = new List<ServiceBusReceivedMessage>();
             var transcriptionHelper = new StartTranscriptionHelper(log);

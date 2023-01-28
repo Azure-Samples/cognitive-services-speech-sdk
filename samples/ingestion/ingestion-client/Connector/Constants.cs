@@ -28,7 +28,5 @@ namespace Connector.Constants
         public const int DefaultFilesPerTranscriptionJob = 100;
 
         public const int DefaultConversationAnalysisMaxChunkSize = 5000;
-
-        public const string SummarizationSupportedLocalePrefix = "en";
     }
 }
