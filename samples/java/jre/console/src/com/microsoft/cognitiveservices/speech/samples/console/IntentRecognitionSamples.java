@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
-import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
 
@@ -128,6 +127,8 @@ public class IntentRecognitionSamples {
     public static void intentContinuousRecognitionWithFile() throws InterruptedException, ExecutionException, IOException
     {
         // <IntentContinuousRecognitionWithFile>
+        stopRecognitionSemaphore = new Semaphore(0);
+
         // Creates an instance of a speech config with specified
         // subscription key (called 'endpoint key' by the Language Understanding service)
         // and service region. Replace with your own subscription (endpoint) key
@@ -173,13 +174,15 @@ public class IntentRecognitionSamples {
                 System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                 System.out.println("CANCELED: Did you update the subscription info?");
             }
+
+            stopRecognitionSemaphore.release();
         });
 
         // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
         recognizer.startContinuousRecognitionAsync().get();
 
-        System.out.println("Press any key to stop...");
-        new Scanner(System.in).nextLine();
+        // Waits for completion.
+        stopRecognitionSemaphore.acquire();
 
         // Stops recognition.
         recognizer.stopContinuousRecognitionAsync().get();
@@ -195,7 +198,7 @@ public class IntentRecognitionSamples {
         // The default recognition language is "en-us".
         SpeechConfig config = SpeechConfig.fromSubscription(
             "YourSubscriptionKey",
-            "YourSubscriptionRegion");
+            "YourServiceRegion");
 
         // Creates an intent recognizer using microphone as audio input.
         try (IntentRecognizer recognizer = new IntentRecognizer(config))
@@ -335,11 +338,11 @@ public class IntentRecognitionSamples {
         // The default recognition language is "en-us".
         SpeechConfig config = SpeechConfig.fromSubscription(
             "YourSubscriptionKey",
-            "YourSubscriptionRegion");
+            "YourServiceRegion");
 
         // Creates an instance of a keyword recognition model. Update this to
         // point to the location of your keyword recognition model.
-        KeywordRecognitionModel keywordModel = KeywordRecognitionModel.fromFile("PathToKeywordModel\\Keyword.table");
+        KeywordRecognitionModel keywordModel = KeywordRecognitionModel.fromFile("YourKeywordRecognitionModelFile.table");
 
         // The phrase your keyword recognition model triggers on.
         String keyword = "YourKeyword";
