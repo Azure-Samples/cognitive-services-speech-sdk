@@ -943,7 +943,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Create a speech resource with primary subscription key and service region.
             // Also create a speech resource with secondary subscription key and service region
-            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("PrimarySubscriptionKey", "PrimarySubscriptionRegion" );
+            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("YourPrimarySubscriptionKey", "YourPrimaryServiceRegion" );
             if (synthesisResult.Reason == ResultReason.Canceled)
             {
                 SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
@@ -951,7 +951,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
                     || details.ErrorCode == CancellationErrorCode.ServiceTimeout)
                 {
-                    synthesisResult = await SynthesizeOnceAsyncInternal("SecondarySubscriptionKey", "SecondarySubscriptionRegion");
+                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceRegion");
                 }
             }
         }
@@ -984,8 +984,8 @@ namespace MicrosoftSpeechSDKSamples
             // Create a custom voice resource with primary subscription key and service region.
             // Also create a speech resource with secondary subscription key and service region.
             // Copy Custom Voice model from primary region to secondary region and deploy.
-            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("PrimarySubscriptionKey",
-                "PrimarySubscriptionRegion", "YourEndpointIdOnPrimaryRegion", "YourCustomVoiceName");
+            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("YourPrimarySubscriptionKey",
+                "YourPrimaryServiceRegion", "YourEndpointIdOnPrimaryRegion", "YourCustomVoiceName");
             if (synthesisResult.Reason == ResultReason.Canceled)
             {
                 SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
@@ -995,7 +995,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorDetails.Contains("Error code: 1007"))
                 {
                     // Synthesize using same custom voice model in secondary region.
-                    synthesisResult = await SynthesizeOnceAsyncInternal("SecondarySubscriptionKey", "SecondarySubscriptionRegion",
+                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceRegion",
                         "YourEndpointIdOnSecondaryRegion", "YourCustomVoiceName");
                 }
             }

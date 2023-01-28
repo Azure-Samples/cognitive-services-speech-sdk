@@ -1,6 +1,6 @@
-**C# Example to use the Speech Services Batch Transcription API**
+# C# Example to use the Speech Services Batch Transcription API
 
-Speech Service Batch Transcription is exposed through a REST API. The samples here does **NOT** require the installation of the Cognitive Service Speech SDK, but uses the REST API directly.
+Speech Services Batch Transcription is exposed through a REST API. The samples here do **NOT** require the installation of the Cognitive Service Speech SDK, but use the REST API directly.
 
 For detailed explanation see the [batch transcription documentation](https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription).
 
@@ -13,6 +13,7 @@ To successfully run this example you require
 and optionally
 
 - the references of any custom models your want to apply.
-- deploy the Azure function
+- a deployment of an Azure function to handle webhook notifications, as demonstrated in the [webhookreceiver](webhookreceiver/webhookreceiver.cs) sample.
 
 With this information, change the definitions of the appropriate constants in `program.cs`.
+

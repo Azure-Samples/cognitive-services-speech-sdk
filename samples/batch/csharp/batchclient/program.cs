@@ -7,6 +7,7 @@ namespace BatchClient
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
@@ -20,7 +21,7 @@ namespace BatchClient
         public const string Region = "YourServiceRegion";
 
         // replace with your app service name (check publish on webhook receiver project)
-        public const string WebHookAppServiceNme = "YouAppServiceName";
+        public const string WebHookAppServiceName = "YourAppServiceName";
 
         // replace with a secure secret (used for hashing)
         public const string WebHookSecret = "somethingverysecretisbesthere";
@@ -29,14 +30,14 @@ namespace BatchClient
         private const string Locale = "en-US";
         private static Uri RecordingsBlobUri = new Uri("<SAS URI pointing to an audio file stored in Azure Blob Storage>");
         //private static Uri ContentAzureBlobContainer = new Uri("<SAS URI pointing to an container in Azure Blob Storage>");
-        private static Uri WebHookCallbackUrl = new Uri($"https://{WebHookAppServiceNme}.azurewebsites.net/api/callback");
+        private static Uri WebHookCallbackUrl = new Uri($"https://{WebHookAppServiceName}.azurewebsites.net/api/callback");
 
         // For use of custom trained model:
         private static EntityReference CustomModel = null;
         //private static EntityReference CustomModel =
         //    new EntityReference { Self = new Uri($"https://{Region}.api.cognitive.microsoft.com/speechtotext/v3.0/models/<id of custom model>")};
-        private const string DisplayName = "Simple transcription";
 
+        private const string DisplayName = "Simple transcription";
 
         static void Main(string[] args)
         {
@@ -50,7 +51,7 @@ namespace BatchClient
             {
                 // uncomment next line when using web hooks
                 // await SetupWebHookAsync(client).ConfigureAwait(false);
-                
+
                 await TranscribeAsync(client).ConfigureAwait(false);
 
                 // uncomment next line when using web hooks
@@ -95,8 +96,26 @@ namespace BatchClient
                 Model = CustomModel,
                 Properties = new TranscriptionProperties
                 {
+                    TimeToLive = TimeSpan.FromDays(1),
                     IsWordLevelTimestampsEnabled = true,
-                    TimeToLive = TimeSpan.FromDays(1)
+                    IsDisplayFormWordLevelTimestampsEnabled = false,
+
+                    // uncomment the following block to enable and configure speaker separation
+                    // IsDiarizationEnabled = true,
+                    // Diarization = new DiarizationProperties
+                    // {
+                    //     Speakers = new DiarizationSpeakersProperties
+                    //     {
+                    //         MinCount = 1,
+                    //         MaxCount = 5
+                    //     }
+                    // },
+
+                    // uncomment the following block to enable and configure language identification prior to transcription
+                    // LanguageIdentification = new LanguageIdentificationProperties
+                    // {
+                    //     CandidateLocales = new CultureInfo[] { new CultureInfo("en-US"), new CultureInfo("ja-JP") },
+                    // }
                 }
             };
 

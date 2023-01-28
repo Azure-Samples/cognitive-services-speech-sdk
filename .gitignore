@@ -54,6 +54,7 @@ artifacts/
 *_i.h
 *.ilk
 *.meta
+!**/unity/**/*.cs.meta
 *.obj
 *.pch
 *.pdb

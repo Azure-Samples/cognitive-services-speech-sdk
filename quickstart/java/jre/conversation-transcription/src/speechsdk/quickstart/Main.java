@@ -69,7 +69,7 @@ public class Main {
         // Replace below with your own subscription key
         String subscriptionKey = "YourSubscriptionKey";
         // Replace below with your own service region (e.g., "centralus").
-        String serviceRegion = "YourRegion";
+        String serviceRegion = "YourServiceRegion";
 
         // The input audio wave format for voice signatures is 16-bit samples, 16 kHz sample rate, and a single channel (mono).
         // The recommended length for each sample is between thirty seconds and two minutes.

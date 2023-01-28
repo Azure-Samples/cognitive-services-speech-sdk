@@ -23,7 +23,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task RemoteConversationWithFileAsync()
         {
             string key = "YourSubscriptionKey";
-            string region = "YourSubscriptionRegion";
+            string region = "YourServiceRegion";
 
             // Upload the audio to the service
             string meetingId = await UploadAudioAndStartRemoteTranscription(key, region);
@@ -173,7 +173,7 @@ namespace MicrosoftSpeechSDKSamples
 
         private static async Task CompleteContinuousRecognition(ConversationTranscriber recognizer, string conversationId)
         {
-            TaskCompletionSource<int> m_taskCompletionSource = new TaskCompletionSource<int>();
+            TaskCompletionSource<int> m_taskCompletionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             recognizer.SessionStopped += (s, e) =>
             {

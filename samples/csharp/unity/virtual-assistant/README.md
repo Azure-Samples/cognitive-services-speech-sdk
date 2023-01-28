@@ -16,7 +16,7 @@ This sample demonstrates how to use DialogServiceConnector to connect to a bot, 
 
 ## Download Speech SDK plugin and sample
 
-* **By downloading the plugin and sample you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By downloading the plugin and sample you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * The Speech SDK for Unity is packaged as a Unity asset package (.unitypackage). Download it from [here](https://aka.ms/csspeech/unitypackage).
 * Also, [download the sample code to your development PC.](/README.md#get-the-samples)
 
@@ -89,7 +89,7 @@ Start by running it in the Unity Editor (first option), then explore other optio
 * Inside Visual Studio project, change build target to x64 or x86
 * Build DialogServiceConnectorSample solution
 * After successfull build, deploy the project
-  * NOTE: Sometimes in order to succesfully deploy, you may need to generate Visual Assets under Package.manifest, there under
+  * NOTE: Sometimes in order to successfully deploy, you may need to generate Visual Assets under Package.manifest, there under
           Visual Assets -> Asset Generator, select thumbnails as source from Assets folder and generate.
 * Launch DialogServiceConnectorSample application
   * Accept consent query for microphone

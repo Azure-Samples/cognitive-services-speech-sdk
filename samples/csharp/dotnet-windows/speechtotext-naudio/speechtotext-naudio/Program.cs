@@ -37,7 +37,7 @@ namespace speechtotext_naudio
             // Replace with your own subscription key and service region (e.g., "westus").            
             var config = SpeechConfig.FromSubscription("your key", "your region");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Create a push stream
             using (var pushStream = AudioInputStream.CreatePushStream())
