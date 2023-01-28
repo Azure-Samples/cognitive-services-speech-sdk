@@ -16,7 +16,7 @@ Hybrid speech uses cloud speech services by default and embedded speech as a fal
 
 ## Prerequisites
 
-See the [platform requirements for installing the Speech SDK for Unity](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?pivots=programming-language-csharp&tabs=windows%2Cubuntu%2Cunity%2Cjre%2Cmaven%2Cnodejs%2Cmac%2Cpypi#tabpanel_1_unity).
+See the [platform requirements for installing the Speech SDK for Unity](https://learn.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?pivots=programming-language-csharp&tabs=windows%2Cubuntu%2Cunity%2Cjre%2Cmaven%2Cnodejs%2Cmac%2Cpypi#tabpanel_1_unity).
 
 Requirements specific to this embedded speech sample are as follows.
 * Unity **2020.3** or later.
@@ -51,7 +51,7 @@ Requirements specific to this embedded speech sample are as follows.
 1. Review and update the sample code.
    * In the Project window, navigate to **Assets** > **Scripts** and double-click the `HelloWorld` C# script to edit it. (This script is used as a component of the canvas object in the HelloWorld scene.)
    * Check and adjust the values of `modelName` and `modelKey` (also `modelFiles` if Android is the target) as necessary.
-     * Use the full name of a model (for example, `Microsoft Speech Recognizer en-US FP Model V8`).
+     * The model name can be short (see https://aka.ms/speech/sr-languages, e.g. `en-US`) or full (e.g. `Microsoft Speech Recognizer en-US FP Model V8`).
 1. Build and run the sample.
    * In the Unity Editor, use the **Play** button in the toolbar.
      * For a stand-alone application, use **File** > **Build Settings**.

@@ -11,8 +11,8 @@ namespace Connector.Serializable.TextAnalytics
     {
         public TextAnalyticsResponse(IEnumerable<TextAnalyticsDocument> documents, IEnumerable<ErrorEntity> errors)
         {
-            this.Documents = documents;
-            this.Errors = errors;
+            Documents = documents;
+            Errors = errors;
         }
 
         public IEnumerable<TextAnalyticsDocument> Documents { get; private set; }

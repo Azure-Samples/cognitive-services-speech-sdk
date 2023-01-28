@@ -9,8 +9,8 @@ namespace Connector.Serializable.TextAnalytics
     {
         public ErrorEntity(string id, TextAnalyticsError error)
         {
-            this.Id = id;
-            this.Error = error;
+            Id = id;
+            Error = error;
         }
 
         public string Id { get; private set; }

@@ -13,7 +13,7 @@ It runs under the .NET Framework 4.6.1 (or above) on Windows.
 
 ## Build the sample
 
-* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 
   > **Note:** make sure to download the complete set of samples, not just this directory.
