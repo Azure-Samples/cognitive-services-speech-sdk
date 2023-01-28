@@ -14,7 +14,7 @@ Hybrid speech uses cloud speech services by default and embedded speech as a fal
 
 ## Prerequisites
 
-See the [platform requirements for installing the Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?pivots=programming-language-cpp).
+See the [platform requirements for installing the Speech SDK](https://learn.microsoft.com/azure/cognitive-services/speech-service/quickstarts/setup-platform?pivots=programming-language-cpp).
 Requirements specific to embedded speech samples are as follows.
 * Supported operating systems and architectures:
   * Windows - `x64`, `ARM64`.
@@ -23,7 +23,7 @@ Requirements specific to embedded speech samples are as follows.
 * If using Visual Studio (Windows):
   * [Microsoft Visual Studio 2022 or newer](https://www.visualstudio.com/).
 * If using the command line:
-  * Latest [NuGet client tools](https://docs.microsoft.com/nuget/install-nuget-client-tools#nugetexe-cli) (requires [Mono framework](https://www.mono-project.com/download/stable/)). Old NuGet versions included with some Linux distributions cannot restore dependencies in the sample project properly.
+  * Latest [NuGet client tools](https://learn.microsoft.com/nuget/install-nuget-client-tools#nugetexe-cli) (requires [Mono framework](https://www.mono-project.com/download/stable/)). Old NuGet versions included with some Linux distributions cannot restore dependencies in the sample project properly.
 * For speech recognition:
   * A working microphone device (and permission to access it for audio capture).
   * One or more embedded speech recognition models. See https://aka.ms/embedded-speech for the latest information on how to obtain embedded models.
@@ -69,7 +69,7 @@ Sample settings:
      The model internal subfolder structure must be intact i.e. as originally delivered.
 1. `EmbeddedSpeechRecognitionModelName` (`EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME`)
    * Name of the embedded speech recognition model to be used for recognition. If set, this overrides `SpeechRecognitionLocale` for embedded.
-   * The full name of a model must be used (for example, `Microsoft Speech Recognizer en-US FP Model V8`).
+   * The model name can be short (see https://aka.ms/speech/sr-languages, e.g. `en-US`) or full (e.g. `Microsoft Speech Recognizer en-US FP Model V8`).
 1. `EmbeddedSpeechRecognitionModelKey` (`EMBEDDED_SPEECH_RECOGNITION_MODEL_KEY`)
    * Decryption key of the (encrypted) embedded speech recognition model.
 1. `EmbeddedSpeechSynthesisVoicePath` (`EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH`)
@@ -82,7 +82,7 @@ Sample settings:
      The voice internal subfolder structure must be intact i.e. as originally delivered.
 1. `EmbeddedSpeechSynthesisVoiceName` (`EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME`)
    * Name of the embedded speech synthesis voice to be used for synthesis. If set, this overrides `SpeechSynthesisLocale` for embedded.
-   * The full name of a voice must be used (for example, `Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)`).
+   * The voice name can be short (see https://aka.ms/speech/tts-languages, e.g. `en-US-JennyNeural`) or full (e.g. `Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)`).
 1. `EmbeddedSpeechSynthesisVoiceKey` (`EMBEDDED_SPEECH_SYNTHESIS_VOICE_KEY`)
    * Decryption key of the (encrypted) embedded speech synthesis voice.
 1. `CloudSpeechSubscriptionKey` (`CLOUD_SPEECH_SUBSCRIPTION_KEY`)

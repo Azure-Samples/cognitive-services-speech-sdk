@@ -9,9 +9,9 @@ namespace Connector.Serializable
     {
         public TextAnalyticsRequest(string language, string id, string text)
         {
-            this.Language = language;
-            this.Id = id;
-            this.Text = text;
+            Language = language;
+            Id = id;
+            Text = text;
         }
 
         public string Language { get; private set; }

@@ -10,13 +10,13 @@ namespace RealtimeTranscription
 
     public sealed class JsonResult
     {
-        public JsonResult(string recognitionStatus, long offset, long duration, string speakerId, List<NBest> nbest)
+        public JsonResult(string recognitionStatus, long offset, long duration, string speakerId, List<NBest> nBest)
         {
             this.RecognitionStatus = recognitionStatus;
             this.Offset = offset;
             this.Duration = duration;
             this.SpeakerId = speakerId;
-            this.NBest = nbest;
+            this.NBest = nBest;
         }
 
         public string RecognitionStatus { get; }

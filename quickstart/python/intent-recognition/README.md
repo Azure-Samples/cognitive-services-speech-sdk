@@ -31,7 +31,7 @@ Before you get started, here's a list of prerequisites:
 
 ## Get the Speech SDK Python Package
 
-**By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+**By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 The Cognitive Services Speech SDK Python package can be installed from [pyPI](https://pypi.org/) using this command:
 

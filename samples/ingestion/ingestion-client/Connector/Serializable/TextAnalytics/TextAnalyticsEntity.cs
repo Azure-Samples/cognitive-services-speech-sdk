@@ -9,12 +9,12 @@ namespace Connector.Serializable.TextAnalytics
     {
         public TextAnalyticsEntity(string text, string category, string subCategory, int offset, int length, float score)
         {
-            this.Text = text;
-            this.Category = category;
-            this.SubCategory = subCategory;
-            this.Offset = offset;
-            this.Length = length;
-            this.Score = score;
+            Text = text;
+            Category = category;
+            SubCategory = subCategory;
+            Offset = offset;
+            Length = length;
+            Score = score;
         }
 
         public string Text { get; private set; }

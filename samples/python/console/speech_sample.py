@@ -712,10 +712,8 @@ def speech_recognize_keyword_locally_from_microphone():
 
 
 def pronunciation_assessment_from_microphone():
-    """
-    Performs one-shot pronunciation assessment asynchronously with input from microphone.
-    See more information at https://aka.ms/csspeech/pa
-    """
+    """Performs one-shot pronunciation assessment asynchronously with input from microphone.
+        See more information at https://aka.ms/csspeech/pa"""
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
@@ -785,10 +783,8 @@ def pronunciation_assessment_from_microphone():
 
 
 def pronunciation_assessment_continuous_from_file():
-    """
-    Performs continuous speech recognition asynchronously with input from an audio file
-    See more information at https://aka.ms/csspeech/pa
-    """
+    """Performs continuous pronunciation assessment asynchronously with input from and audio file.
+        See more information at https://aka.ms/csspeech/pa"""
 
     import difflib
     import json

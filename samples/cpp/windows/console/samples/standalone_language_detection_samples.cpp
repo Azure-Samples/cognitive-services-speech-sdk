@@ -15,7 +15,7 @@ using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 // </toplevel>
 
-// Standalone language detection using microphone.
+// Standalone language detection (one utterance) using microphone.
 void StandaloneLanguageDetectionWithMicrophone()
 {
     // <StandaloneLanguageDetectionWithMicrophone>
@@ -23,14 +23,12 @@ void StandaloneLanguageDetectionWithMicrophone()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Language Id feature requirement
-    // Please refer to language id document for different modes
-    config->SetProperty(PropertyId::SpeechServiceConnection_SingleLanguageIdPriority, "Latency");
-    auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
+    // Define the set of spoken languages that will need to be identified
+    auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "de-DE", "zh-CN", "en-US"});
 
-    // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
+    // Creates a speech recognizer using microphone as audio input
     auto recognizer = SourceLanguageRecognizer::FromConfig(config, autoDetectSourceLanguageConfig);
-    cout << "Say something...\n";
+    cout << "Say something in German, Chinese or English...\n";
 
     // Starts Standalone language detection, and returns after a single utterance is recognized. The end of a
     // single utterance is determined by listening for silence at the end or until a maximum of 15
@@ -65,9 +63,10 @@ void StandaloneLanguageDetectionWithMicrophone()
     // </StandaloneLanguageDetectionWithMicrophone>
 }
 
-// Standalone language detection in the specified language, using microphone, and requesting detailed output format.
-void StandaloneLanguageDetectionInSingleshotModeWithFileInput()
+// Standalone language detection (one utterance) using WAV file input.
+void StandaloneLanguageDetectionWithFileInput()
 {
+    // <StandaloneLanguageDetectionWithFileInput>
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
@@ -75,9 +74,7 @@ void StandaloneLanguageDetectionInSingleshotModeWithFileInput()
     // Request detailed output format.
     config->SetOutputFormat(OutputFormat::Detailed);
 
-    // Language Id feature requirement
-    // Please refer to language id document for different modes
-    config->SetProperty(PropertyId::SpeechServiceConnection_SingleLanguageIdPriority, "Latency");
+    // Define the set of spoken languages that will need to be identified
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
 
     auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
@@ -117,76 +114,11 @@ void StandaloneLanguageDetectionInSingleshotModeWithFileInput()
             cout << "CANCELED: Did you update the subscription info?" << std::endl;
         }
     }
+    // </StandaloneLanguageDetectionWithFileInput>
 }
 
-void StandaloneLanguageDetectionInContinuousModeWithFileInput()
-{
-    // <StandaloneLanguageDetectionInContinuousModeWithFileInput>
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Language Id feature requirement
-    // Please refer to language id document for different modes
-    config->SetProperty(PropertyId::SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
-    auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
-
-    // Creates a speech recognizer using file as audio input.
-    // Replace with your own audio file name.
-    auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
-    auto recognizer = SourceLanguageRecognizer::FromConfig(config, autoDetectSourceLanguageConfig, audioInput);
-
-    // promise for synchronization of recognition end.
-    promise<void> recognitionEnd;
-
-    // Subscribes to events.
-    recognizer->Recognized.Connect([] (const SpeechRecognitionEventArgs& e)
-    {
-        if (e.Result->Reason == ResultReason::RecognizedSpeech)
-        {
-            auto lidResult = AutoDetectSourceLanguageResult::FromResult(e.Result);
-            cout << "RECOGNIZED in " << lidResult->Language << "\n"
-                 << "  Offset=" << e.Result->Offset() << "\n"
-                 << "  Duration=" << e.Result->Duration() << std::endl;
-        }
-        else if (e.Result->Reason == ResultReason::NoMatch)
-        {
-            cout << "NOMATCH: Speech could not be recognized." << std::endl;
-        }
-    });
-
-    recognizer->Canceled.Connect([&recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
-    {
-        cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
-
-        if (e.Reason == CancellationReason::Error)
-        {
-            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << "\n"
-                 << "CANCELED: ErrorDetails=" << e.ErrorDetails << "\n"
-                 << "CANCELED: Did you update the subscription info?" << std::endl;
-
-            recognitionEnd.set_value(); // Notify to stop recognition.
-        }
-    });
-
-    recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
-    {
-        cout << "Session stopped.";
-        recognitionEnd.set_value(); // Notify to stop recognition.
-    });
-
-    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
-    recognizer->StartContinuousRecognitionAsync().get();
-
-    // Waits for recognition end.
-    recognitionEnd.get_future().get();
-
-    // Stops recognition.
-    recognizer->StopContinuousRecognitionAsync().get();
-    // </StandaloneLanguageDetectionInContinuousModeWithFileInput>
-}
-
-// Standalone language detection using a customized model.
+// Standalone language detection of continuous audio (multiple utterances), from a WAV file
 void StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput()
 {
     // <StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput>
@@ -194,16 +126,18 @@ void StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput()
     // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Language Id feature requirement
-    // Please refer to language id document for different modes
-    config->SetProperty(PropertyId::SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
+    // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
+    // Please refer to the documentation of Language ID for more information.
+    config->SetProperty(PropertyId::SpeechServiceConnection_LanguageIdMode, "Continuous");
+
+    // Define the set of languages to detect
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "zh-CN" });
 
     // Creates a speech recognizer using microphone as audio input.
     auto audioInput = AudioConfig::FromWavFileInput("en-us_zh-cn.wav");
     auto recognizer = SourceLanguageRecognizer::FromConfig(config, autoDetectSourceLanguageConfig, audioInput);
 
-    // promise for synchronization of recognition end.
+    // Promise for synchronization of recognition end.
     promise<void> recognitionEnd;
 
     // Subscribes to events.
