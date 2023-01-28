@@ -21,13 +21,13 @@ namespace Connector
             int pollingCounter,
             int failedExecutionCounter)
         {
-            this.TranscriptionLocation = transcriptionLocation;
-            this.JobName = jobName;
-            this.Locale = locale;
-            this.UsesCustomModel = usesCustomModel;
-            this.AudioFileInfos = audioFileInfos;
-            this.PollingCounter = pollingCounter;
-            this.FailedExecutionCounter = failedExecutionCounter;
+            TranscriptionLocation = transcriptionLocation;
+            JobName = jobName;
+            Locale = locale;
+            UsesCustomModel = usesCustomModel;
+            AudioFileInfos = audioFileInfos;
+            PollingCounter = pollingCounter;
+            FailedExecutionCounter = failedExecutionCounter;
         }
 
         public string TranscriptionLocation { get; set; }

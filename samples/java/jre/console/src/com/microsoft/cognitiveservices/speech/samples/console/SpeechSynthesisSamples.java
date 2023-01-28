@@ -6,7 +6,6 @@ package com.microsoft.cognitiveservices.speech.samples.console;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;

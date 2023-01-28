@@ -18,11 +18,11 @@ namespace Connector
 
     public class StorageConnector
     {
-        private readonly BlobServiceClient blobServiceClient;
+        private readonly BlobServiceClient BlobServiceClient;
 
-        private readonly string accountName;
+        private readonly string AccountName;
 
-        private readonly string accountKey;
+        private readonly string AccountKey;
 
         public StorageConnector(string storageConnectionString)
         {
@@ -31,10 +31,10 @@ namespace Connector
                 throw new ArgumentNullException(nameof(storageConnectionString));
             }
 
-            this.accountName = GetValueFromConnectionString("AccountName", storageConnectionString);
-            this.accountKey = GetValueFromConnectionString("AccountKey", storageConnectionString);
+            AccountName = GetValueFromConnectionString("AccountName", storageConnectionString);
+            AccountKey = GetValueFromConnectionString("AccountKey", storageConnectionString);
 
-            this.blobServiceClient = new BlobServiceClient(storageConnectionString);
+            BlobServiceClient = new BlobServiceClient(storageConnectionString);
         }
 
         public static string GetFileNameFromUri(Uri fileUri)
@@ -106,7 +106,7 @@ namespace Connector
 
         public async Task<byte[]> DownloadFileFromContainer(string containerName, string blobName)
         {
-            var containerClient = this.blobServiceClient.GetBlobContainerClient(containerName);
+            var containerClient = BlobServiceClient.GetBlobContainerClient(containerName);
 
             var blobClient = containerClient.GetBlobClient(blobName);
 
@@ -119,7 +119,7 @@ namespace Connector
         {
             var containerName = GetContainerNameFromUri(fileUri);
             var fileName = GetFileNameFromUri(fileUri);
-            var blobContainerClient = this.blobServiceClient.GetBlobContainerClient(containerName);
+            var blobContainerClient = BlobServiceClient.GetBlobContainerClient(containerName);
 
             var sasBuilder = new BlobSasBuilder()
             {
@@ -132,14 +132,14 @@ namespace Connector
             sasBuilder.ExpiresOn = DateTime.UtcNow.AddDays(1);
             sasBuilder.SetPermissions(BlobContainerSasPermissions.Read);
 
-            var sasToken = sasBuilder.ToSasQueryParameters(new StorageSharedKeyCredential(this.accountName, this.accountKey)).ToString();
+            var sasToken = sasBuilder.ToSasQueryParameters(new StorageSharedKeyCredential(AccountName, AccountKey)).ToString();
             return $"{blobContainerClient.GetBlobClient(fileName).Uri}?{sasToken}";
         }
 
         public async Task WriteTextFileToBlobAsync(string content, string containerName, string fileName, ILogger log)
         {
             log.LogInformation($"Writing file {fileName} to container {containerName}.");
-            var container = this.blobServiceClient.GetBlobContainerClient(containerName);
+            var container = BlobServiceClient.GetBlobContainerClient(containerName);
             var blockBlobClient = container.GetBlobClient(fileName);
 
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
@@ -150,7 +150,7 @@ namespace Connector
         {
             log.LogInformation($"Start moving file {inputFileName} from container {inputContainerName} to {outputFileName} in container {outputContainerName}.");
 
-            var inputContainerClient = this.blobServiceClient.GetBlobContainerClient(inputContainerName);
+            var inputContainerClient = BlobServiceClient.GetBlobContainerClient(inputContainerName);
             var inputBlockBlobClient = inputContainerClient.GetBlobClient(inputFileName);
 
             if (!await inputBlockBlobClient.ExistsAsync().ConfigureAwait(false))
@@ -159,7 +159,7 @@ namespace Connector
                 return;
             }
 
-            var outputContainerClient = this.blobServiceClient.GetBlobContainerClient(outputContainerName);
+            var outputContainerClient = BlobServiceClient.GetBlobContainerClient(outputContainerName);
             var outputBlockBlobClient = outputContainerClient.GetBlobClient(outputFileName);
 
             if (await outputBlockBlobClient.ExistsAsync().ConfigureAwait(false))

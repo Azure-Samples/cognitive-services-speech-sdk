@@ -14,9 +14,9 @@ namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
             IEnumerable<TextAnalyticsRequest> audioLevelRequests,
             IEnumerable<TextAnalyticsRequest> conversationRequests)
         {
-            this.UtteranceLevelRequests = utteranceLevelRequests;
-            this.AudioLevelRequests = audioLevelRequests;
-            this.ConversationRequests = conversationRequests;
+            UtteranceLevelRequests = utteranceLevelRequests;
+            AudioLevelRequests = audioLevelRequests;
+            ConversationRequests = conversationRequests;
         }
 
         public IEnumerable<TextAnalyticsRequest> UtteranceLevelRequests { get; }
