@@ -123,7 +123,6 @@
         }
     },
     "variables": {
-        "Version": "v2.0.2",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -150,9 +149,7 @@
         "AuthRuleRMK": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'),'RootManageSharedAccessKey')]",
         "AuthRuleCT": "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription')]",
         "AppServicePlanName": "[concat('AppServicePlan-', variables('InstanceId'))]",
-        "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey",
-        "BinariesRoutePrefix": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases/download/ingestion-",
-        "RealtimeTranscriptionBinary": "[concat(variables('BinariesRoutePrefix'), variables('Version'), '/RealtimeTranscription.zip')]"
+        "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey"
     },
     "resources": [
         {
@@ -569,7 +566,7 @@
                 "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
-                "FUNCTIONS_EXTENSION_VERSION": "~4",
+                "FUNCTIONS_EXTENSION_VERSION": "~3",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "JsonResultOutputContainer": "[variables('JsonResultOutputContainer')]",
                 "Locale": "[parameters('Locale')]",
@@ -577,7 +574,7 @@
                 "ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "https://ingestionclientstorage.blob.core.windows.net/binaries/17102022.0/RealtimeTranscription.zip"
+                "WEBSITE_RUN_FROM_PACKAGE": "https://mspublicstorage.blob.core.windows.net/ingestion-client/RealtimeTranscription.zip"
             }
         }
     ],

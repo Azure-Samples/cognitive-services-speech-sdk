@@ -47,7 +47,7 @@ The [SDK documentation](https://aka.ms/csspeech) has extensive sections about ge
 ## Build and run the samples
 
 > **Note: the samples make use of the Microsoft Cognitive Services Speech SDK.
-> By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+> By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 Please see the description of each individual sample for instructions on how to build and run it.
 

@@ -11,12 +11,12 @@ namespace Connector
     {
         public CombinedRecognizedPhrase(int channel, string lexical, string itn, string maskedItn, string display, Sentiment sentiment)
         {
-            this.Channel = channel;
-            this.Lexical = lexical;
-            this.ITN = itn;
-            this.MaskedITN = maskedItn;
-            this.Display = display;
-            this.Sentiment = sentiment;
+            Channel = channel;
+            Lexical = lexical;
+            ITN = itn;
+            MaskedITN = maskedItn;
+            Display = display;
+            Sentiment = sentiment;
         }
 
         [JsonProperty("channel")]

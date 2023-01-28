@@ -31,7 +31,7 @@ public class Main {
             config.addTargetLanguage("de");
 
             // Sets voice name of synthesis output.
-            String GermanVoice = "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)";
+            String GermanVoice = "de-DE-AmalaNeural";
             config.setVoiceName(GermanVoice);
             
             try (TranslationRecognizer recognizer = new TranslationRecognizer(config)) {

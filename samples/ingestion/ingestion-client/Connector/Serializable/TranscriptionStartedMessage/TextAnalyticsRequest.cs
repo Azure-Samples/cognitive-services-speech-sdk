@@ -9,8 +9,8 @@ namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
     {
         public TextAnalyticsRequest(string id, TextAnalyticsRequestStatus status)
         {
-            this.Id = id;
-            this.Status = status;
+            Id = id;
+            Status = status;
         }
 
         public enum TextAnalyticsRequestStatus

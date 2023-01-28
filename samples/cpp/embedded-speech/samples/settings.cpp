@@ -39,7 +39,7 @@ const string EmbeddedSpeechRecognitionModelPath = "YourEmbeddedSpeechRecognition
 
 // Name of the embedded speech recognition model to be used for recognition.
 // If changed from the default, this will override SpeechRecognitionLocale.
-// For example: "Microsoft Speech Recognizer en-US FP Model V8"
+// For example: "en-US" or "Microsoft Speech Recognizer en-US FP Model V8"
 const string EmbeddedSpeechRecognitionModelName = "YourEmbeddedSpeechRecognitionModelName"; // or set EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME
 
 // Decryption key of the (encrypted) embedded speech recognition model.
@@ -56,7 +56,7 @@ const string EmbeddedSpeechSynthesisVoicePath = "YourEmbeddedSpeechSynthesisVoic
 
 // Name of the embedded speech synthesis voice to be used for synthesis.
 // If changed from the default, this will override SpeechSynthesisLocale.
-// For example: "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
+// For example: "en-US-JennyNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
 const string EmbeddedSpeechSynthesisVoiceName = "YourEmbeddedSpeechSynthesisVoiceName"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME
 
 // Decryption key of the (encrypted) embedded speech synthesis voice.
