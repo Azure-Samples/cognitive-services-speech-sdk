@@ -11,6 +11,6 @@
   "license": "MIT",
   "dependencies": {
     "https-proxy-agent": "^3.0.0",
-    "microsoft-cognitiveservices-speech-sdk": "^1.22.0"
+    "microsoft-cognitiveservices-speech-sdk": "^1.25.0"
   }
 }

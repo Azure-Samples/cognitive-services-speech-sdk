@@ -33,7 +33,7 @@ This sample demonstrates various forms of speech recognition, intent recognition
 
 ## Build the sample
 
-* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * To tailor the sample to your environment, use search and replace across the whole project to update the following strings:

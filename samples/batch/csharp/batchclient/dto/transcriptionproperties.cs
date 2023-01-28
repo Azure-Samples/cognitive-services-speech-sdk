@@ -17,6 +17,9 @@ namespace BatchClient
         [JsonProperty(PropertyName = "wordLevelTimestampsEnabled")]
         public bool IsWordLevelTimestampsEnabled { get; set; }
 
+        [JsonProperty(PropertyName = "displayFormWordLevelTimestampsEnabled")]
+        public bool IsDisplayFormWordLevelTimestampsEnabled { get; set; }
+
         public string Email { get; set; }
 
         public IEnumerable<int> Channels { get; set; }
@@ -32,6 +35,10 @@ namespace BatchClient
 
         [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan TimeToLive { get; set; }
+
+        public DiarizationProperties Diarization { get; set; }
+
+        public LanguageIdentificationProperties LanguageIdentification { get; set; }
 
         public EntityError Error { get; set; }
     }

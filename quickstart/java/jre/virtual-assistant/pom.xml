@@ -7,17 +7,26 @@
     <version>0.0.1-SNAPSHOT</version>
     <repositories>
         <repository>
-            <id>maven-cognitiveservices-speech</id>
-            <name>Microsoft Cognitive Services Speech Maven Repository</name>
-            <url>https://csspeechstorage.blob.core.windows.net/maven/</url>
+            <id>central</id>
+            <name>Default Repository</name>
+            <layout>default</layout>
+            <url>https://repo1.maven.org/maven2</url>
+            <snapshots>
+              <enabled>false</enabled>
+            </snapshots>
         </repository>
-    </repositories>
+        <repository>
+            <id>maven-cognitiveservices-local-path</id>
+            <name>Microsoft Cognitive Services Local Maven Repository</name>
+            <url>file:///localplaceholder//maven//</url>
+        </repository>
+      </repositories>
     <!-- <dependencies> -->
     <dependencies>
         <dependency>
             <groupId>com.microsoft.cognitiveservices.speech</groupId>
             <artifactId>client-sdk</artifactId>
-            <version>1.22.0</version>
+            <version>1.25.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -32,17 +41,17 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.13.2.2</version>
+            <version>2.13.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
-            <version>2.13.2</version>
+            <version>2.13.4</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.13.2</version>
+            <version>2.13.4</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>

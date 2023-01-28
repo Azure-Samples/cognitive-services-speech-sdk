@@ -27,7 +27,7 @@ except ImportError:
 # Replace with your own subscription key and service region (e.g., "westus").
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
-# Specify the path to an audio file containing speech (mono WAV / PCM with a sampling rate of 16
+# Specify the path to audio files containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
 single_language_wav_file = "whatstheweatherlike.wav"
 multilingual_wav_file = "en-us_zh-cn.wav"
@@ -43,14 +43,12 @@ def speech_language_detection_once_from_mic():
     # Creates a SpeechConfig from your speech key and region
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-    # Sets the Priority (optional, defaults to 'Latency'). Either 'Latency' or 'Accuracy' is accepted.
-    speech_config.set_property(
-        property_id=speechsdk.PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, value='Latency')
-
     # Creates a source language recognizer using microphone as audio input.
     # The default language is "en-us".
     speech_language_detection = speechsdk.SourceLanguageRecognizer(
         speech_config=speech_config, auto_detect_source_language_config=auto_detect_source_language_config)
+
+    print("Say something in English or German...")
 
     # Starts speech language detection, and returns after a single utterance is recognized. The end of a
     # single utterance is determined by listening for silence at the end or until a maximum of 15
@@ -62,7 +60,6 @@ def speech_language_detection_once_from_mic():
 
     # Check the result
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
-        print("RECOGNIZED: {}".format(result))
         detected_src_lang = result.properties[
             speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult]
         print("Detected Language: {}".format(detected_src_lang))
@@ -86,11 +83,9 @@ def speech_language_detection_once_from_file():
     # Creates a SpeechConfig from your speech key and region
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-    # Sets the Priority (optional, defaults to 'Latency'). Either 'Latency' or 'Accuracy' is accepted.
-    speech_config.set_property(
-        property_id=speechsdk.PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, value='Latency')
-
+    # Creates an AudioConfig from a given WAV file
     audio_config = speechsdk.audio.AudioConfig(filename=single_language_wav_file)
+
     # Creates a source language recognizer using a file as audio input, also specify the speech language
     source_language_recognizer = speechsdk.SourceLanguageRecognizer(
         speech_config=speech_config,
@@ -107,7 +102,6 @@ def speech_language_detection_once_from_file():
 
     # Check the result
     if result.reason == speechsdk.ResultReason.RecognizedSpeech:
-        print("RECOGNIZED: {}".format(result))
         detected_src_lang = result.properties[
             speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult]
         print("Detected Language: {}".format(detected_src_lang))
@@ -131,10 +125,9 @@ def speech_language_detection_once_from_continuous():
     # Creates a SpeechConfig from your speech key and region
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-    # Set the Priority (defaults to 'Latency').
-    # At the moment only 'Latency' is supported for continuous language detection, so this line is redundant
+    # Set continuous language detection (override the default of "AtStart")
     speech_config.set_property(
-        property_id=speechsdk.PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, value='Latency')
+        property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value='Continuous')
 
     audio_config = speechsdk.audio.AudioConfig(filename=multilingual_wav_file)
 
@@ -158,7 +151,6 @@ def speech_language_detection_once_from_continuous():
         :return:
         """
         if evt.result.reason == speechsdk.ResultReason.RecognizedSpeech:
-            print("RECOGNIZED: {}".format(evt.result.properties))
             if evt.result.properties.get(
                     speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult) is None:
                 print("Unable to detect any language")

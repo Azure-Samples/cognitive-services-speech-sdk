@@ -76,7 +76,15 @@ namespace StartTranscriptionByTimer
                 var jobName = $"{startDateTime.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)}_{i}";
                 var chunk = chunkedMessages.ElementAt(i);
                 await StartBatchTranscriptionJobAsync(chunk, jobName).ConfigureAwait(false);
-                await messageReceiver.CompleteMessageAsync(chunk[i]).ConfigureAwait(false);
+
+                // Complete messages in batches of 10, process each batch in parallel:
+                var messagesInChunk = chunk.Count;
+                for (var j = 0; j < messagesInChunk; j += 10)
+                {
+                    var completionBatch = chunk.Skip(j).Take(Math.Min(10, messagesInChunk - j));
+                    var completionTasks = completionBatch.Select(sb => messageReceiver.CompleteMessageAsync(sb));
+                    await Task.WhenAll(completionTasks).ConfigureAwait(false);
+                }
 
                 // only renew lock after 2 minutes
                 if (stopwatch.Elapsed.TotalSeconds > 120)
@@ -187,7 +195,7 @@ namespace StartTranscriptionByTimer
                         audioUrls.Add(StorageConnectorInstance.CreateSas(serviceBusMessage.Data.Url));
                     }
 
-                    audioFileInfos.Add(new AudioFileInfo(serviceBusMessage.Data.Url.AbsoluteUri, serviceBusMessage.RetryCount));
+                    audioFileInfos.Add(new AudioFileInfo(serviceBusMessage.Data.Url.AbsoluteUri, serviceBusMessage.RetryCount, textAnalyticsRequests: null));
                 }
 
                 ModelIdentity modelIdentity = null;
@@ -218,9 +226,13 @@ namespace StartTranscriptionByTimer
                 var fetchingDelay = TimeSpan.FromMinutes(StartTranscriptionEnvironmentVariables.InitialPollingDelayInMinutes);
                 await ServiceBusUtilities.SendServiceBusMessageAsync(FetchSender, transcriptionMessage.CreateMessageString(), Logger, fetchingDelay).ConfigureAwait(false);
             }
+            catch (TransientFailureException e)
+            {
+                await RetryOrFailMessagesAsync(messages, $"Exception in job {jobName}: {e.Message}", isThrottled: false).ConfigureAwait(false);
+            }
             catch (TimeoutException e)
             {
-                await RetryOrFailMessagesAsync(messages, $"Timeout in job {jobName}: {e.Message}", HttpStatusCode.RequestTimeout).ConfigureAwait(false);
+                await RetryOrFailMessagesAsync(messages, $"Exception in job {jobName}: {e.Message}", isThrottled: false).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -236,7 +248,7 @@ namespace StartTranscriptionByTimer
 
                 if (httpStatusCode.HasValue && httpStatusCode.Value.IsRetryableStatus())
                 {
-                    await RetryOrFailMessagesAsync(messages, $"Error in job {jobName}: {e.Message}", httpStatusCode.Value).ConfigureAwait(false);
+                    await RetryOrFailMessagesAsync(messages, $"Error in job {jobName}: {e.Message}", isThrottled: httpStatusCode.Value == HttpStatusCode.TooManyRequests).ConfigureAwait(false);
                 }
                 else
                 {
@@ -247,14 +259,14 @@ namespace StartTranscriptionByTimer
             Logger.LogInformation($"Fetch transcription queue successfully informed about job at: {jobName}");
         }
 
-        private async Task RetryOrFailMessagesAsync(IEnumerable<ServiceBusReceivedMessage> messages, string errorMessage, HttpStatusCode statusCode)
+        private async Task RetryOrFailMessagesAsync(IEnumerable<ServiceBusReceivedMessage> messages, string errorMessage, bool isThrottled)
         {
             Logger.LogError(errorMessage);
             foreach (var message in messages)
             {
                 var sbMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(Encoding.UTF8.GetString(message.Body));
 
-                if (sbMessage.RetryCount <= StartTranscriptionEnvironmentVariables.RetryLimit || statusCode == HttpStatusCode.TooManyRequests)
+                if (sbMessage.RetryCount <= StartTranscriptionEnvironmentVariables.RetryLimit || isThrottled)
                 {
                     sbMessage.RetryCount += 1;
                     var messageDelay = GetMessageDelayTime(sbMessage.RetryCount);

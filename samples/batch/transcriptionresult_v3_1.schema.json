@@ -1,0 +1,128 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://speech.microsoft.com/transcriptionresult_v3_1.schema.json",
+    "title": "Transcription result",
+    "allOf": [{ "$ref": "https://speech.microsoft.com/transcriptionresult_v3.schema.json" }],
+    "properties": {
+        "recognizedPhrases": {
+            "$id": "#root/recognizedPhrases",
+            "title": "Recognized phrases",
+            "type": "array",
+            "default": [],
+            "items": {
+                "$id": "#root/recognizedPhrases/items",
+                "title": "Items",
+                "type": "object",
+                "required": [
+                    "nBest"
+                ],
+                "properties": {
+                    "nBest": {
+                        "$id": "#root/recognizedPhrases/items/nBest",
+                        "title": "NBest",
+                        "type": "array",
+                        "description": "possible transcriptions of the current phrase with confidences",
+                        "default": [],
+                        "items": {
+                            "$id": "#root/recognizedPhrases/items/nBest/items",
+                            "title": "Items",
+                            "type": "object",
+                            "properties": {
+                                "displayWords": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/displayWords",
+                                    "title": "DisplayWords",
+                                    "type": "array",
+                                    "default": [],
+                                    "description": "if `displayFormWordLevelTimestampsEnabled` is `true`, there will be a result for each word of the phrase, otherwise this property is not present",
+                                    "items": {
+                                        "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items",
+                                        "title": "Items",
+                                        "type": "object",
+                                        "required": [
+                                            "displayText",
+                                            "offset",
+                                            "duration",
+                                            "offsetInTicks",
+                                            "durationInTicks"
+                                        ],
+                                        "properties": {
+                                            "displayText": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items/displayText",
+                                                "title": "DisplayText",
+                                                "type": "string",
+                                                "default": "",
+                                                "description": "the display form of the recognized word",
+                                                "examples": [
+                                                    "Hello!"
+                                                ],
+                                                "pattern": "^.*$"
+                                            },
+                                            "offset": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items/offset",
+                                                "title": "Offset",
+                                                "type": "string",
+                                                "default": "",
+                                                "description": "offset in audio of this phrase, ISO 8601 encoded duration",
+                                                "examples": [
+                                                    "PT0.09S"
+                                                ],
+                                                "pattern": "^.*$"
+                                            },
+                                            "duration": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items/duration",
+                                                "title": "Duration",
+                                                "type": "string",
+                                                "default": "",
+                                                "description": "audio duration of this phrase, ISO 8601 encoded duration",
+                                                "examples": [
+                                                    "PT0.48S"
+                                                ],
+                                                "pattern": "^.*$"
+                                            },
+                                            "offsetInTicks": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items/offsetInTicks",
+                                                "title": "Offset in ticks",
+                                                "type": "integer",
+                                                "format": "int64",
+                                                "description": "offset in audio of this phrase in ticks (1 tick is 100 nanoseconds)",
+                                                "examples": [
+                                                    900000
+                                                ],
+                                                "default": 0,
+                                                "minimum": 0
+                                            },
+                                            "durationInTicks": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items/durationInTicks",
+                                                "title": "Duration in ticks",
+                                                "type": "integer",
+                                                "format": "int64",
+                                                "description": "audio duration of this phrase in ticks (1 tick is 100 nanoseconds)",
+                                                "examples": [
+                                                    4800000
+                                                ],
+                                                "default": 0,
+                                                "minimum": 0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "locale": {
+                        "$id": "#root/recognizedPhrases/items/locale",
+                        "title": "Locale",
+                        "type": "string",
+                        "default": "",
+                        "description": "The locale of the recognized segment. Only present if language identification has been requested.",
+                        "examples": [
+                            "es-VE"
+                        ],
+                        "pattern": "^[a-z]{2}-[A-Z]{2}$"
+                    }
+                }
+            }
+        }
+    }
+}

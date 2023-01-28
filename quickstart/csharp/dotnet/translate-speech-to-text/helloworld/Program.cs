@@ -25,7 +25,7 @@ namespace helloworld
             config.AddTargetLanguage("de");
 
             // Sets voice name of synthesis output.
-            const string GermanVoice = "de-DE-Hedda";
+            const string GermanVoice = "de-DE-AmalaNeural";
             config.VoiceName = GermanVoice;
             // Creates a translation recognizer using microphone as audio input.
             using (var recognizer = new TranslationRecognizer(config))

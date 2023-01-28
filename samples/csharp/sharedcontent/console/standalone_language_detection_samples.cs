@@ -21,25 +21,20 @@ namespace MicrosoftSpeechSDKSamples
         private static AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "zh-CN" });
 
         // Language detection from microphone.
-        public static async Task DetectionWithMicrophoneAsync()
+        public static async Task LanguageDetectionWithMicrophoneAsync()
         {
             // <languageDetectionWithMicrophone>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Single-Shot with Latency priority
-            // Please refer to the documentation of language id with different modes
-            config.SetProperty(PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, "Latency");
-
             // Creates a source language recognizer using microphone as audio input.
             using (var recognizer = new SourceLanguageRecognizer(config, autoDetectSourceLanguageConfig))
             {
                 // Starts recognizing.
-                Console.WriteLine("Say something...");
+                Console.WriteLine("Say something in English or Mandarin Chinese...");
 
                 // Starts language detection, and returns after a single utterance is recognized.
-                // The task returns the recognition text as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
                 // shot detection like command or query.
                 // For long-running multi-utterance detection, use StartContinuousRecognitionAsync() instead.
@@ -53,8 +48,7 @@ namespace MicrosoftSpeechSDKSamples
                 }
                 else if (result.Reason == ResultReason.NoMatch)
                 {
-
-                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                    Console.WriteLine($"NOMATCH: The spoken language could not be detected.");
                 }
                 else if (result.Reason == ResultReason.Canceled)
                 {
@@ -80,19 +74,12 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Single-Shot with Accuracy
-            // Please refer to the documentation of language id with different modes
-            config.SetProperty(PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, "Accuracy");
-
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
             using (var audioInput = AudioConfig.FromWavFileInput(@"LanguageDetection_enUS.wav"))
             {
                 using (var recognizer = new SourceLanguageRecognizer(config, autoDetectSourceLanguageConfig, audioInput))
                 {
-                    // Starts recognizing.
-                    Console.WriteLine("Say something...");
-
                     // Starts language detection, and returns after a single utterance is recognized.
                     // The task returns the recognition text as result.
                     // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
@@ -136,10 +123,12 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Please refer to the documentation of language id with different modes
-            config.SetProperty(PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
+            // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
+            // Please refer to the documentation of Language ID for more information.
+            // http://aka.ms/speech/lid?pivots=programming-language-csharp
+            config.SetProperty(PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous");
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.

@@ -20,7 +20,7 @@ This sample demonstrates how to synthesize speech in [Unity](https://unity3d.com
 
 ## Download the Speech SDK for Unity and the sample code
 
-* **By downloading the Speech SDK for Unity you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By downloading the Speech SDK for Unity you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * The Speech SDK for Unity is packaged as a Unity asset package (.unitypackage).
   Download it from [here](https://aka.ms/csspeech/unitypackage).
 * Also, [download the sample code to your development PC.](/README.md#get-the-samples)

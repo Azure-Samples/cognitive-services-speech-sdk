@@ -44,7 +44,7 @@ public class Main {
             try (SpeakerRecognizer recognizer = new SpeakerRecognizer(speechConfig, audioConfig)) {
                 try (SpeakerRecognitionResult recognitionResult = recognizer.recognizeOnceAsync(model).get()) {
                     if(recognitionResult.getReason() == ResultReason.RecognizedSpeakers) {
-                        System.out.println(String.format("The most similiar voice profile is %s with similarity score %f", recognitionResult.getProfileId(), recognitionResult.getScore()));
+                        System.out.println(String.format("The most similar voice profile is %s with similarity score %f", recognitionResult.getProfileId(), recognitionResult.getScore()));
                         String raw = recognitionResult.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
                         System.out.println("The raw json from the service is " + raw);
 
@@ -85,9 +85,9 @@ public class Main {
     // before finally deleting them
     public static void speakerIdentification() {
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_SUBSCRIPTION_KEY";
+        String speechSubscriptionKey = "YourSubscriptionKey";
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_SUBSCRIPTION_REGION";
+        String serviceRegion = "YourServiceRegion";
         String audioFile1 = "TalkForAFewSeconds16.wav";
         String audioFile2 = "TalkForAFewSeconds16.wav";
 
@@ -130,9 +130,9 @@ public class Main {
     // before finally deleting the profile
     public static void speakerVerification() {
         // Replace below with your own subscription key
-        String speechSubscriptionKey = "YOUR_SUBSCRIPTION_KEY";
+        String speechSubscriptionKey = "YourSubscriptionKey";
         // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YOUR_SUBSCRIPTION_REGION";
+        String serviceRegion = "YourServiceRegion";
         String audioFile = "TalkForAFewSeconds16.wav";
 
         // Creates an instance of a voice profile client using speech configuration with specified
