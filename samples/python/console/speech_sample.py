@@ -10,6 +10,7 @@ Speech recognition samples for the Microsoft Cognitive Services Speech SDK
 import json
 import string
 import time
+import threading
 import wave
 
 try:
@@ -356,6 +357,54 @@ def speech_recognize_continuous_from_file():
     # </SpeechContinuousRecognitionWithFile>
 
 
+def speech_recognize_continuous_async_from_microphone():
+    """performs continuous speech recognition asynchronously with input from microphone"""
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # The default language is "en-us".
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
+
+    done = False
+
+    def recognizing_cb(evt: speechsdk.SpeechRecognitionEventArgs):
+        print('RECOGNIZING: {}'.format(evt))
+
+    def recognized_cb(evt: speechsdk.SpeechRecognitionEventArgs):
+        print('RECOGNIZED: {}'.format(evt))
+
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous recognition"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
+    # Connect callbacks to the events fired by the speech recognizer
+    speech_recognizer.recognizing.connect(recognizing_cb)
+    speech_recognizer.recognized.connect(recognized_cb)
+    speech_recognizer.session_stopped.connect(stop_cb)
+    speech_recognizer.canceled.connect(stop_cb)
+
+    # Perform recognition. `start_continuous_recognition_async asynchronously initiates continuous recognition operation,
+    # Other tasks can be performed on this thread while recognition starts...
+    # wait on result_future.get() to know when initialization is done.
+    # Call stop_continuous_recognition_async() to stop recognition.
+    result_future = speech_recognizer.start_continuous_recognition_async()
+
+    result_future.get()  # wait for voidfuture, so we know engine initialization is done.
+    print('Continuous Recognition is now running, say something.')
+
+    while not done:
+        # No real sample parallel work to do on this thread, so just wait for user to type stop.
+        # Can't exit function or speech_recognizer will go out of scope and be destroyed while running.
+        print('type "stop" then enter when done')
+        stop = input()
+        if (stop.lower() == "stop"):
+            print('Stopping async recognition.')
+            speech_recognizer.stop_continuous_recognition_async()
+            break
+
+    print("recognition stopped, main thread can exit now.")
+
+
 # <SpeechRecognitionUsingKeywordModel>
 def speech_recognize_keyword_from_microphone():
     """performs keyword-triggered speech recognition with input microphone"""
@@ -485,6 +534,24 @@ def speech_recognition_with_pull_stream():
     speech_recognizer.stop_continuous_recognition()
 
 
+def push_stream_writer(stream):
+    # The number of bytes to push per buffer
+    n_bytes = 3200
+    wav_fh = wave.open(weatherfilename)
+    # start pushing data until all data has been read from the file
+    try:
+        while True:
+            frames = wav_fh.readframes(n_bytes // 2)
+            print('read {} bytes'.format(len(frames)))
+            if not frames:
+                break
+            stream.write(frames)
+            time.sleep(.1)
+    finally:
+        wav_fh.close()
+        stream.close()  # must be done to signal the end of stream
+
+
 def speech_recognition_with_push_stream():
     """gives an example how to use a push audio stream to recognize speech from a custom audio
     source"""
@@ -496,34 +563,33 @@ def speech_recognition_with_push_stream():
 
     # instantiate the speech recognizer with push stream input
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    recognition_done = threading.Event()
 
     # Connect callbacks to the events fired by the speech recognizer
+    def session_stopped_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('SESSION STOPPED: {}'.format(evt))
+        recognition_done.set()
+
     speech_recognizer.recognizing.connect(lambda evt: print('RECOGNIZING: {}'.format(evt)))
     speech_recognizer.recognized.connect(lambda evt: print('RECOGNIZED: {}'.format(evt)))
     speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
-    speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+    speech_recognizer.session_stopped.connect(session_stopped_cb)
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
 
-    # The number of bytes to push per buffer
-    n_bytes = 3200
-    wav_fh = wave.open(weatherfilename)
+    # start push stream writer thread
+    push_stream_writer_thread = threading.Thread(target=push_stream_writer, args=[stream])
+    push_stream_writer_thread.start()
 
     # start continuous speech recognition
     speech_recognizer.start_continuous_recognition()
 
-    # start pushing data until all data has been read from the file
-    try:
-        while(True):
-            frames = wav_fh.readframes(n_bytes // 2)
-            print('read {} bytes'.format(len(frames)))
-            if not frames:
-                break
+    # wait until all input processed
+    recognition_done.wait()
 
-            stream.write(frames)
-            time.sleep(.1)
-    finally:
-        # stop recognition and clean up
-        speech_recognizer.stop_continuous_recognition()
+    # stop recognition and clean up
+    speech_recognizer.stop_continuous_recognition()
+    push_stream_writer_thread.join()
 
 
 def speech_recognize_once_with_auto_language_detection_from_mic():
@@ -646,10 +712,8 @@ def speech_recognize_keyword_locally_from_microphone():
 
 
 def pronunciation_assessment_from_microphone():
-    """"
-    Performs one-shot pronunciation assessment asynchronously with input from microphone.
-    See more information at https://aka.ms/csspeech/pa
-    """
+    """Performs one-shot pronunciation assessment asynchronously with input from microphone.
+        See more information at https://aka.ms/csspeech/pa"""
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
@@ -673,11 +737,14 @@ def pronunciation_assessment_from_microphone():
     while True:
         # Receives reference text from console input.
         print('Enter reference text you want to assess, or enter empty text to exit.')
-        print('> ')
+        print('> ', end='')
 
         try:
             reference_text = input()
         except EOFError:
+            break
+
+        if not reference_text:
             break
 
         pronunciation_config.reference_text = reference_text
@@ -716,10 +783,8 @@ def pronunciation_assessment_from_microphone():
 
 
 def pronunciation_assessment_continuous_from_file():
-    """
-    Performs continuous speech recognition asynchronously with input from an audio file
-    See more information at https://aka.ms/csspeech/pa
-    """
+    """Performs continuous pronunciation assessment asynchronously with input from and audio file.
+        See more information at https://aka.ms/csspeech/pa"""
 
     import difflib
     import json
@@ -747,10 +812,8 @@ def pronunciation_assessment_continuous_from_file():
 
     done = False
     recognized_words = []
-    accuracy_scores = []
+    fluency_scores = []
     durations = []
-    valid_durations = []
-    start_offset, end_offset = None, None
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -765,19 +828,13 @@ def pronunciation_assessment_continuous_from_file():
             pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words, accuracy_scores, durations, valid_durations, start_offset, end_offset
+        nonlocal recognized_words, fluency_scores, durations
         recognized_words += pronunciation_result.words
-        accuracy_scores.append(pronunciation_result.accuracy_score)
+        fluency_scores.append(pronunciation_result.fluency_score)
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo['NBest'][0]
         durations.append(sum([int(w['Duration']) for w in nb['Words']]))
-        if start_offset is None:
-            start_offset = nb['Words'][0]['Offset']
-        end_offset = nb['Words'][-1]['Offset'] + nb['Words'][-1]['Duration'] + 100000
-        for w, d in zip(pronunciation_result.words, nb['Words']):
-            if w.error_type == 'None':
-                valid_durations.append(d['Duration'] + 100000)
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
@@ -794,12 +851,6 @@ def pronunciation_assessment_continuous_from_file():
         time.sleep(.5)
 
     speech_recognizer.stop_continuous_recognition()
-
-    # We can calculate whole accuracy and fluency scores by duration weighted averaging
-    accuracy_score = sum(i[0] * i[1] for i in zip(accuracy_scores, durations)) / sum(durations)
-    # Re-calculate fluency score
-    if start_offset is not None:
-        fluency_score = sum(valid_durations) / (end_offset - start_offset) * 100
 
     # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
     if language == 'zh-CN':
@@ -837,8 +888,19 @@ def pronunciation_assessment_continuous_from_file():
     else:
         final_words = recognized_words
 
+    # We can calculate whole accuracy by averaging
+    final_accuracy_scores = []
+    for word in final_words:
+        if word.error_type == 'Insertion':
+            continue
+        else:
+            final_accuracy_scores.append(word.accuracy_score)
+    accuracy_score = sum(final_accuracy_scores) / len(final_accuracy_scores)
+    # Re-calculate fluency score
+    fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
     # Calculate whole completeness score
-    completeness_score = len([w for w in final_words if w.error_type == 'None']) / len(reference_words) * 100
+    completeness_score = len([w for w in recognized_words if w.error_type == "None"]) / len(reference_words) * 100
+    completeness_score = completeness_score if completeness_score <= 100 else 100
 
     print('    Paragraph accuracy score: {}, completeness score: {}, fluency score: {}'.format(
         accuracy_score, completeness_score, fluency_score

@@ -6,6 +6,9 @@
 namespace Connector
 {
     using System.Collections.Generic;
+
+    using Connector.Serializable.Language.Conversations;
+
     using Newtonsoft.Json;
 
     public class SpeechTranscript
@@ -37,5 +40,8 @@ namespace Connector
 
         [JsonProperty("recognizedPhrases")]
         public IEnumerable<RecognizedPhrase> RecognizedPhrases { get; }
+
+        [JsonProperty("conversationAnalyticsResults")]
+        public ConversationAnalyticsResults ConversationAnalyticsResults { get; set; }
     }
 }

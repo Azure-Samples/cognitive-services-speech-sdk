@@ -25,13 +25,14 @@ except ImportError:
 # Replace with your own subscription key and service region (e.g., "westus").
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
-# Specify the path to an audio file containing speech (mono WAV / PCM with a sampling rate of 16
+# Specify the path to audio files containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
 weatherfilename = "whatstheweatherlike.wav"
+multilingual_wav_file = "en-us_zh-cn.wav"
 
 
 def translation_once_from_mic():
-    """performs one-shot speech translation from input from an audio file"""
+    """performs one-shot speech translation from input from the default microphone"""
     # <TranslationOnceWithMic>
     # set up translation parameters: source language and target languages
     translation_config = speechsdk.translation.SpeechTranslationConfig(
@@ -112,13 +113,13 @@ def translation_once_from_file():
 
 
 def translation_continuous():
-    """performs continuous speech translation from input from an audio file"""
+    """performs continuous speech translation from an audio file"""
     # <TranslationContinuous>
     # set up translation parameters: source language and target languages
     translation_config = speechsdk.translation.SpeechTranslationConfig(
         subscription=speech_key, region=service_region,
         speech_recognition_language='en-US',
-        target_languages=('de', 'fr'), voice_name="de-DE-Hedda")
+        target_languages=('de', 'fr'), voice_name="de-DE-KatjaNeural")
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
     # Creates a translation recognizer using and audio file as input.
@@ -127,7 +128,7 @@ def translation_continuous():
 
     def result_callback(event_type: str, evt: speechsdk.translation.TranslationRecognitionEventArgs):
         """callback to display a translation result"""
-        print("{}: {}\n\tTranslations: {}\n\tResult Json: {}".format(
+        print("{}:\n {}\n\tTranslations: {}\n\tResult Json: {}\n".format(
             event_type, evt, evt.result.translations.items(), evt.result.json))
 
     done = False
@@ -138,6 +139,10 @@ def translation_continuous():
         nonlocal done
         done = True
 
+    def canceled_cb(evt: speechsdk.translation.TranslationRecognitionCanceledEventArgs):
+        print('CANCELED:\n\tReason:{}\n'.format(evt.result.reason))
+        print('\tDetails: {} ({})'.format(evt, evt.result.cancellation_details.error_details))
+
     # connect callback functions to the events fired by the recognizer
     recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
     recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
@@ -146,7 +151,7 @@ def translation_continuous():
     # event for final result
     recognizer.recognized.connect(lambda evt: result_callback('RECOGNIZED', evt))
     # cancellation event
-    recognizer.canceled.connect(lambda evt: print('CANCELED: {} ({})'.format(evt, evt.reason)))
+    recognizer.canceled.connect(canceled_cb)
 
     # stop continuous recognition on either session stopped or canceled events
     recognizer.session_stopped.connect(stop_cb)
@@ -170,3 +175,138 @@ def translation_continuous():
 
     recognizer.stop_continuous_recognition()
     # </TranslationContinuous>
+
+
+def translation_once_with_lid_from_file():
+    """performs a one-shot speech translation from an audio file, with at-start language identification"""
+    # <TranslationOnceWithLID>
+
+    # When you use Language ID with speech translation, you must set a v2 endpoint.
+    # This will be fixed in a future version of Speech SDK.
+
+    # Set up translation parameters, including the list of target (translated) languages.
+    endpoint_string = "wss://{}.stt.speech.microsoft.com/speech/universal/v2".format(service_region)
+    translation_config = speechsdk.translation.SpeechTranslationConfig(
+        subscription=speech_key,
+        endpoint=endpoint_string,
+        target_languages=('de', 'fr'))
+    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+    # Specify the AutoDetectSourceLanguageConfig, which defines the number of possible source (input) languages
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(
+        languages=["en-US", "de-DE", "zh-CN"])
+
+    # Creates a translation recognizer using an audio file as input.
+    recognizer = speechsdk.translation.TranslationRecognizer(
+        translation_config=translation_config,
+        audio_config=audio_config,
+        auto_detect_source_language_config=auto_detect_source_language_config)
+
+    # Starts translation, with single-utterance (one-shot) recognition and language identification
+    result = recognizer.recognize_once()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.TranslatedSpeech:
+        src_lang = result.properties[speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult]
+        print("""Recognized:
+        Detected language: {}
+        Recognition result: {}
+        German translation: {}
+        French translation: {}""".format(
+            src_lang,
+            result.text,
+            result.translations['de'],
+            result.translations['fr']))
+    elif result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("Recognized:\n {}".format(result.text))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(result.no_match_details))
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        print("Translation canceled: {}".format(result.cancellation_details.reason))
+        if result.cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(result.cancellation_details.error_details))
+    # </TranslationOnceWithLID>
+
+
+def translation_continuous_with_lid_from_multilingual_file():
+    """performs continuous speech translation from a multi-lingual audio file, with continuous language identification"""
+    # <TranslationContinuousWithLID>
+
+    # When you use Language ID with speech translation, you must set a v2 endpoint.
+    # This will be fixed in a future version of Speech SDK.
+
+    # Set up translation parameters, including the list of target (translated) languages.
+    endpoint_string = "wss://{}.stt.speech.microsoft.com/speech/universal/v2".format(service_region)
+    translation_config = speechsdk.translation.SpeechTranslationConfig(
+        subscription=speech_key,
+        endpoint=endpoint_string,
+        target_languages=('de', 'fr'))
+    audio_config = speechsdk.audio.AudioConfig(filename=multilingual_wav_file)
+
+    # Since the spoken language in the input audio changes, you need to set the language identification to "Continuous" mode.
+    # (override the default value of "AtStart").
+    translation_config.set_property(
+        property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value='Continuous')
+
+    # Specify the AutoDetectSourceLanguageConfig, which defines the number of possible languages
+    auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(
+        languages=["en-US", "zh-CN"])
+
+    # Creates a translation recognizer using and audio file as input.
+    recognizer = speechsdk.translation.TranslationRecognizer(
+        translation_config=translation_config,
+        audio_config=audio_config,
+        auto_detect_source_language_config=auto_detect_source_language_config)
+
+    def result_callback(evt):
+        """callback to display a translation result"""
+        if evt.result.reason == speechsdk.ResultReason.TranslatedSpeech:
+            src_lang = evt.result.properties[speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult]
+            print("""Recognized:
+            Detected language: {}
+            Recognition result: {}
+            German translation: {}
+            French translation: {}""".format(
+                src_lang,
+                evt.result.text,
+                evt.result.translations['de'],
+                evt.result.translations['fr']))
+        elif evt.result.reason == speechsdk.ResultReason.RecognizedSpeech:
+            print("Recognized:\n {}".format(evt.result.text))
+        elif evt.result.reason == speechsdk.ResultReason.NoMatch:
+            print("No speech could be recognized: {}".format(evt.result.no_match_details))
+        elif evt.result.reason == speechsdk.ResultReason.Canceled:
+            print("Translation canceled: {}".format(evt.result.cancellation_details.reason))
+            if evt.result.cancellation_details.reason == speechsdk.CancellationReason.Error:
+                print("Error details: {}".format(evt.result.cancellation_details.error_details))
+
+    done = False
+
+    def stop_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
+    # connect callback functions to the events fired by the recognizer
+    recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+
+    # event for final result
+    recognizer.recognized.connect(lambda evt: result_callback(evt))
+
+    # cancellation event
+    recognizer.canceled.connect(lambda evt: print('CANCELED: {} ({})'.format(evt, evt.reason)))
+
+    # stop continuous recognition on either session stopped or canceled events
+    recognizer.session_stopped.connect(stop_cb)
+    recognizer.canceled.connect(stop_cb)
+
+    # start translation
+    recognizer.start_continuous_recognition()
+
+    while not done:
+        time.sleep(.5)
+
+    recognizer.stop_continuous_recognition()
+    # </TranslationContinuousWithLID>

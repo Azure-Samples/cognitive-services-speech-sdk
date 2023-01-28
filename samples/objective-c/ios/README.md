@@ -33,7 +33,7 @@ The [synthesis sample app](./synthesis-samples) shows various other techniques t
 
 ## Get the Speech SDK for iOS
 
-**By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+**By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 The Cognitive Services Speech SDK for iOS can be downloaded as a zip-file from https://aka.ms/csspeech/iosbinary. Download and unpack the files to the directory of this `README.md`, i.e. parallel to the samples directories.
 

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.io.FileInputStream;
@@ -257,6 +258,8 @@ public class SpeechRecognitionSamples {
     public static void continuousRecognitionWithFileAsync() throws InterruptedException, ExecutionException, IOException
     {
         // <recognitionContinuousWithFile>
+        stopRecognitionSemaphore = new Semaphore(0);
+
         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
@@ -290,6 +293,8 @@ public class SpeechRecognitionSamples {
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
+
+                stopRecognitionSemaphore.release();
             });
 
             recognizer.sessionStarted.addEventListener((s, e) -> {
@@ -301,11 +306,10 @@ public class SpeechRecognitionSamples {
             });
 
             // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
-            System.out.println("Say something...");
             recognizer.startContinuousRecognitionAsync().get();
 
-            System.out.println("Press any key to stop");
-            new Scanner(System.in).nextLine();
+            // Waits for completion.
+            stopRecognitionSemaphore.acquire();
 
             recognizer.stopContinuousRecognitionAsync().get();
         }
@@ -400,6 +404,8 @@ public class SpeechRecognitionSamples {
     // buffer into an PushAudioStream for speech recognition.
     public static void continuousRecognitionWithPushStream() throws InterruptedException, ExecutionException, IOException
     {
+        stopRecognitionSemaphore = new Semaphore(0);
+
         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
@@ -407,6 +413,8 @@ public class SpeechRecognitionSamples {
 
         // Replace with your own audio file name.
         // The input stream the sample will read from.
+        // The default format for a PushStream is 16Khz, 16 bit mono.
+        // You can use a different format by passing an AudioStreamFormat into createPushStream. 
         InputStream inputStream = new FileInputStream("YourAudioFile.wav");
 
         // Create the push stream to push audio to.
@@ -439,6 +447,8 @@ public class SpeechRecognitionSamples {
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
+
+                stopRecognitionSemaphore.release();
             });
 
             recognizer.sessionStarted.addEventListener((s, e) -> {
@@ -450,7 +460,6 @@ public class SpeechRecognitionSamples {
             });
 
             // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
-            System.out.println("Say something...");
             recognizer.startContinuousRecognitionAsync().get();
 
             // Arbitrary buffer size.
@@ -476,8 +485,8 @@ public class SpeechRecognitionSamples {
             pushStream.close();
             inputStream.close();
 
-            System.out.println("Press any key to stop");
-            new Scanner(System.in).nextLine();
+            // Waits for completion.
+            stopRecognitionSemaphore.acquire();
 
             recognizer.stopContinuousRecognitionAsync().get();
         }
@@ -565,6 +574,8 @@ public class SpeechRecognitionSamples {
     // Speech recognition with events from file
     public static void continuousRecognitionWithFileWithPhraseListAsync() throws InterruptedException, ExecutionException, IOException
     {
+        stopRecognitionSemaphore = new Semaphore(0);
+
         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
@@ -604,6 +615,8 @@ public class SpeechRecognitionSamples {
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
+
+                stopRecognitionSemaphore.release();
             });
 
             recognizer.sessionStarted.addEventListener((s, e) -> {
@@ -615,11 +628,10 @@ public class SpeechRecognitionSamples {
             });
 
             // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
-            System.out.println("Say something...");
             recognizer.startContinuousRecognitionAsync().get();
 
-            System.out.println("Press any key to stop");
-            new Scanner(System.in).nextLine();
+            // Waits for completion.
+            stopRecognitionSemaphore.acquire();
 
             recognizer.stopContinuousRecognitionAsync().get();
         }
@@ -639,10 +651,7 @@ public class SpeechRecognitionSamples {
         // and service region (e.g., "westus").
         SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Request at-start language identification with "Latency" as the priority. "Accuracy" is also supported.
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_AtStartLanguageIdPriority, "Latency");
-
-        // Define up to 4 expected spoken languages in the audio. Update the below with your own languages.
+        // Define a set of expected spoken languages in the audio. Update the below with your own languages.
         // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages.
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromLanguages(Arrays.asList("en-US", "es-MX", "de-DE"));
 
@@ -703,10 +712,7 @@ public class SpeechRecognitionSamples {
         // and service region (e.g., "westus").
         SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Request at-start language identification with "Latency" as the priority. "Accuracy" is also supported.
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_AtStartLanguageIdPriority, "Latency");
-
-        // Define up to 4 expected spoken languages in the audio. Update the below with your own languages.
+        // Define a set of expected spoken languages in the audio. Update the below with your own languages.
         // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages.
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromLanguages(Arrays.asList("en-US", "es-MX", "de-DE"));
 
@@ -788,10 +794,7 @@ public class SpeechRecognitionSamples {
         // and service region (e.g., "westus").
         SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Request at-start language identification with "Latency" as the priority. "Accuracy" is also supported.
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_AtStartLanguageIdPriority, "Latency");
-
-        // Define up to 4 expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
+        // Define a set of expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
         // Update the below with your own languages. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
         // for all supported languages.
         // Update the below with your own custom model endpoint IDs, or omit it if you want to use the standard model.
@@ -888,10 +891,10 @@ public class SpeechRecognitionSamples {
         SpeechConfig speechConfig = SpeechConfig.fromEndpoint(URI.create(v2EndpointUrl), "YourSubscriptionKey");
 
         // Change the default from at-start language detection to continuous language detection, since the spoken language in the audio
-        // may change. Set the mode to "Latency". This is the only supported priority mode for continuous language detected ("Accuracy" is not supported).
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
+        // may change.
+        speechConfig.setProperty(PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous");
 
-        // Define up to 10 expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
+        // Define a set of expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
         // Update the below with your own languages. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
         // for all supported languages.
         // Update the below with your own custom model endpoint IDs, or omit it if you want to use the standard model.
@@ -904,7 +907,7 @@ public class SpeechRecognitionSamples {
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromSourceLanguageConfigs(sourceLanguageConfigs);
 
         // We provide a WAV file with English and Spanish utterances as an example. Replace with your own multilingual audio file name.
-        AudioConfig audioConfig = AudioConfig.fromWavFileInput( "en-us_es-mx.wav");
+        AudioConfig audioConfig = AudioConfig.fromWavFileInput( "es-mx_en-us.wav");
 
         // Creates a speech recognizer using file as audio input and the AutoDetectSourceLanguageConfig
         SpeechRecognizer speechRecognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
@@ -1062,7 +1065,7 @@ public class SpeechRecognitionSamples {
     // This sample takes and existing file and reads it by chunk into a local buffer and then pushes the
     // buffer into an PushAudioStream for pronunciation assessment.
     // See more information at https://aka.ms/csspeech/pa
-    public static void pronunciationAssessmentWithPushStream() throws InterruptedException, IOException
+    public static void pronunciationAssessmentWithPushStream() throws InterruptedException, IOException, ExecutionException
     {
         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
@@ -1136,7 +1139,7 @@ public class SpeechRecognitionSamples {
         pronunciationConfig.applyTo(recognizer);
 
         System.out.println("Assessing...");
-        recognizer.recognizeOnceAsync();
+        Future<SpeechRecognitionResult> resultFuture = recognizer.recognizeOnceAsync();
 
         // Replace with your own audio file name.
         // The input stream the sample will read from.
@@ -1171,9 +1174,8 @@ public class SpeechRecognitionSamples {
         lastAudioUploadedTime[0] = System.currentTimeMillis();
 
         stopRecognitionSemaphore.acquire();
-
-        System.out.println("Press any key to stop");
-        new Scanner(System.in).nextLine();
+        // Wait for completion of recognizeOnceAsync
+        resultFuture.get();
 
         config.close();
         audioInput.close();
@@ -1300,6 +1302,8 @@ public class SpeechRecognitionSamples {
     // Speech recognition from multi-channel file with Microsoft Audio Stack enabled and custom microphone array geometry specified.
     public static void continuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified() throws InterruptedException, ExecutionException, IOException
     {
+        stopRecognitionSemaphore = new Semaphore(0);
+
         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
@@ -1349,6 +1353,8 @@ public class SpeechRecognitionSamples {
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
+
+                stopRecognitionSemaphore.release();
             });
 
             recognizer.sessionStarted.addEventListener((s, e) -> {
@@ -1362,8 +1368,8 @@ public class SpeechRecognitionSamples {
             // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
             recognizer.startContinuousRecognitionAsync().get();
 
-            System.out.println("Press any key to stop");
-            new Scanner(System.in).nextLine();
+            // Waits for completion.
+            stopRecognitionSemaphore.acquire();
 
             recognizer.stopContinuousRecognitionAsync().get();
         }
@@ -1432,6 +1438,8 @@ public class SpeechRecognitionSamples {
     // Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.
     public static void continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified() throws InterruptedException, ExecutionException, IOException
     {
+        stopRecognitionSemaphore = new Semaphore(0);
+
         // Creates an instance of a speech config with specified
         // subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
@@ -1488,6 +1496,8 @@ public class SpeechRecognitionSamples {
                     System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
                     System.out.println("CANCELED: Did you update the subscription info?");
                 }
+
+                stopRecognitionSemaphore.release();
             });
 
             recognizer.sessionStarted.addEventListener((s, e) -> {
@@ -1524,8 +1534,8 @@ public class SpeechRecognitionSamples {
             pushStream.close();
             inputStream.close();
 
-            System.out.println("Press any key to stop");
-            new Scanner(System.in).nextLine();
+            // Waits for completion.
+            stopRecognitionSemaphore.acquire();
 
             recognizer.stopContinuousRecognitionAsync().get();
         }

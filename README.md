@@ -47,7 +47,7 @@ The [SDK documentation](https://aka.ms/csspeech) has extensive sections about ge
 ## Build and run the samples
 
 > **Note: the samples make use of the Microsoft Cognitive Services Speech SDK.
-> By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+> By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 Please see the description of each individual sample for instructions on how to build and run it.
 
@@ -147,8 +147,6 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [C# Console app for .NET Core (Windows or Linux)](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnetcore/console)                      | Windows, Linux, macOS  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
 | [Java Console app for JRE](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/java/jre/console)                                                      | Windows, Linux, macOS | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
 | [Python Console app](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/python/console)                                                              | Windows, Linux, macOS  | Demonstrates speech recognition, speech synthesis, intent recognition, and translation |
-| [Speech-to-text WPF sample for .NET Framework on Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnet-windows/speechtotext-wpf) | Windows  | Demonstrates speech recognition |
-| [Translation WPF sample for .NET Framework on Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnet-windows/translation-wpf)     | Windows  | Demonstrates translation |
 | [Speech-to-text UWP sample](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/speechtotext-uwp)                                          | Windows  | Demonstrates speech recognition |
 | [Text-to-speech UWP sample](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/texttospeech-uwp)                                          | Windows  | Demonstrates speech synthesis |
 | [Speech recognition sample for Android](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/java/android/sdkdemo/)                                     | Android  | Demonstrates speech and intent recognition |
@@ -167,6 +165,7 @@ Samples for using the Speech Service REST API (no Speech SDK installation requir
 | Sample                                  | Description |
 | ---                                     | --- |
 | [Batch transcription](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/)  | Demonstrates usage of batch transcription from different programming languages |
+| [Batch synthesis](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-synthesis/)  | Demonstrates usage of batch synthesis from different programming languages |
 
 ## Tools
 
@@ -176,6 +175,7 @@ Samples for using the Speech Service REST API (no Speech SDK installation requir
 | Enumerate audio devices | C# .NET Framework, Windows | -"- |
 
 ## Sample data for Custom Speech
+
 - [Sample data for Custom Speech](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/customspeech)
 
 ## Resources
