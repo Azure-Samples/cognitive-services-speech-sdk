@@ -7,22 +7,18 @@ namespace Language
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text.Json;
     using System.Threading.Tasks;
-
     using Azure;
     using Azure.AI.Language.Conversations;
     using Azure.Core;
-
     using Connector;
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-
     using FetchTranscriptionFunction;
-
     using Microsoft.Extensions.Logging;
-
     using Newtonsoft.Json;
 
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
@@ -60,19 +56,36 @@ namespace Language
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
+            if (!IsConversationalPiiEnabled())
+            {
+                return (new List<string>(), new List<string>());
+            }
+
             var data = new List<AnalyzeConversationsRequest>();
-            var count = -1;
+            var previousTextElementCount = -1;
             var jobCount = 0;
             var turnCount = 0;
-            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
+            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases
+                .Where(rp => rp.NBest.FirstOrDefault() != null && !string.IsNullOrEmpty(rp.NBest.First().Display)))
             {
                 var topResult = recognizedPhrase.NBest.First();
-                var textCount = topResult.Lexical.Length;
+                var textElementCount = GetInputSize(topResult, FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource);
 
-                if (count == -1 || (count + textCount) > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
+                // We do not support cases where the content size of recognized phrases to be greater than 5000 character chunks as this would mean we need to chunk the conversation turn and our model performance degrades if the content of a recognized phrase is chunked.
+                // We will add an error in this case. We can add logic to handle this further.
+                if (textElementCount > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
                 {
-                    count = 0;
+                    var errors = new List<string> { $"The conversation contains a recognized phrase [offset : ${recognizedPhrase.Offset} channel: ${recognizedPhrase.Channel}] where the size if greater than {FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize} Text Elements. Ignoring the conversation." };
+
+                    return (null, errors);
+                }
+
+                if (previousTextElementCount == -1 || (previousTextElementCount + textElementCount) > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
+                {
+                    // create a new job
+                    previousTextElementCount = 0;
                     jobCount++;
+
                     data.Add(new AnalyzeConversationsRequest
                     {
                         DisplayName = "IngestionClient",
@@ -125,7 +138,7 @@ namespace Language
                             Offset = (long)word.OffsetInTicks
                         })
                 });
-                count += textCount;
+                previousTextElementCount += textElementCount;
                 turnCount++;
             }
 
@@ -142,53 +155,60 @@ namespace Language
         public async Task<(AnalyzeConversationPiiResults piiResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
         {
             var errors = new List<string>();
+            var piiResults = new AnalyzeConversationPiiResults();
             if (!jobIds.Any())
             {
                 return (null, errors);
             }
 
-            var tasks = jobIds.Select(async jobId => await GetConversationsOperationResults(jobId).ConfigureAwait(false));
-            var results = await Task.WhenAll(tasks).ConfigureAwait(false);
-
-            var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
-            if (piiErrors.Any())
+            try
             {
-                errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
-                return (null, errors);
-            }
+                var tasks = jobIds.Select(async jobId => await GetConversationsOperationResults(jobId).ConfigureAwait(false));
+                var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var warnings = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.Warnings);
-            var conversationItems = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.ConversationItems);
+                var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
+                if (piiErrors.Any())
+                {
+                    errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id} message: [{s.Error.Code}: {s.Error.Message}]"));
+                    return (null, errors);
+                }
 
-            var combinedRedactedContent = new List<CombinedConversationPiiResult>();
+                var warnings = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.Warnings);
+                var conversationItems = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.ConversationItems);
 
-            foreach (var group in conversationItems.GroupBy(item => item.Channel))
-            {
+                var combinedRedactedContent = new List<CombinedConversationPiiResult>();
+
+                foreach (var group in conversationItems.GroupBy(item => item.Channel))
+                {
 #pragma warning disable CA1305 // Specify IFormatProvider
-                var items = group.ToList().OrderBy(s => int.Parse(s.Id));
+                    var items = group.ToList().OrderBy(s => int.Parse(s.Id));
 #pragma warning restore CA1305 // Specify IFormatProvider
 
-                combinedRedactedContent.Add(new CombinedConversationPiiResult
-                {
-                    Channel = group.Key,
-                    Display = string.Join(" ", group.Select(s => s.RedactedContent.Text)).Trim(),
-                    ITN = string.Join(" ", group.Select(s => s.RedactedContent.Itn)).Trim(),
-                    Lexical = string.Join(" ", group.Select(s => s.RedactedContent.Lexical)).Trim(),
-                });
-            }
+                    combinedRedactedContent.Add(new CombinedConversationPiiResult
+                    {
+                        Channel = group.Key,
+                        Display = string.Join(" ", group.Select(s => s.RedactedContent.Text)).Trim(),
+                        ITN = string.Join(" ", group.Select(s => s.RedactedContent.Itn)).Trim(),
+                        Lexical = string.Join(" ", group.Select(s => s.RedactedContent.Lexical)).Trim(),
+                    });
+                }
 
-            var piiResults = new AnalyzeConversationPiiResults
-            {
-                Conversations = new List<ConversationPiiResult>
+                piiResults.Conversations = new List<ConversationPiiResult>
                 {
                     new ConversationPiiResult
                     {
                         Warnings = warnings,
                         ConversationItems = conversationItems
                     }
-                },
-                CombinedRedactedContent = combinedRedactedContent
-            };
+                };
+                piiResults.CombinedRedactedContent = combinedRedactedContent;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                errors.Add($"Exception when parsing result from TA: {ex.Message}");
+            }
 
             return (piiResults, errors);
         }
@@ -200,12 +220,15 @@ namespace Language
         /// <returns>True if all requests completed, else false.</returns>
         public async Task<bool> ConversationalRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!IsConversationalPiiEnabled() || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests != null).Any())
+            if (!IsConversationalPiiEnabled() || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null).Any())
             {
                 return true;
             }
 
-            var conversationRequests = audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running);
+            var conversationRequests = audioFileInfos
+                    .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null)
+                    .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests)
+                    .Where(text => text.Status == TextAnalyticsRequestStatus.Running);
 
             var runningJobsCount = 0;
 
@@ -269,6 +292,26 @@ namespace Language
             return errors;
         }
 
+        private static int GetInputSize(NBest topResult, string conversationPiiInferenceSource)
+        {
+            var inputString = topResult.Lexical;
+            if (conversationPiiInferenceSource.Equals("text", StringComparison.OrdinalIgnoreCase))
+            {
+                inputString = topResult.Display;
+            }
+            else if (conversationPiiInferenceSource.Equals("itn", StringComparison.OrdinalIgnoreCase))
+            {
+                inputString = topResult.ITN;
+            }
+            else if (conversationPiiInferenceSource.Equals("maskedITN", StringComparison.OrdinalIgnoreCase))
+            {
+                inputString = topResult.MaskedITN;
+            }
+
+            var stringInfo = new StringInfo(inputString);
+            return stringInfo.LengthInTextElements;
+        }
+
         private async Task<(IEnumerable<string> jobId, IEnumerable<string> errors)> SubmitConversationsAsync(IEnumerable<AnalyzeConversationsRequest> data)
         {
             var errors = new List<string>();
@@ -281,13 +324,9 @@ namespace Language
                 {
                     using var input = RequestContent.Create(JsonConvert.SerializeObject(request));
                     var operation = await ConversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
-
-                    var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
-                    using JsonDocument result = JsonDocument.Parse(response.ContentStream);
-                    var jobResults = result.RootElement;
-                    var jobId = jobResults.GetProperty("jobId");
-                    Log.LogInformation($"Submitting TA job: {jobId}");
-                    jobs.Add(jobId.ToString());
+                    operation.GetRawResponse().Headers.TryGetValue("operation-location", out var operationLocation);
+                    var jobId = new Uri(operationLocation).AbsolutePath.Split("/").Last();
+                    jobs.Add(jobId);
                 }
 
                 return (jobs, errors);
@@ -322,6 +361,14 @@ namespace Language
 
                 var analysisResult = JsonConvert.DeserializeObject<AnalyzeConversationsResult>(response.Content.ToString());
 
+                if (!string.Equals(analysisResult.Status, "succeeded", StringComparison.OrdinalIgnoreCase))
+                {
+                    var errorMessages = analysisResult.Errors.Select(e => e.Error.Message);
+                    errors.Add($"Conversation analysis request failed: {errorMessages.FirstOrDefault()}");
+                    errors.AddRange(errorMessages);
+                    return (null, errors);
+                }
+
                 if (analysisResult.Tasks.InProgress == 0)
                 {
                     // all tasks completed.
@@ -342,6 +389,7 @@ namespace Language
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 
+            Log.LogInformation($"Conversation analysis returned no result");
             return (null, errors);
         }
     }
