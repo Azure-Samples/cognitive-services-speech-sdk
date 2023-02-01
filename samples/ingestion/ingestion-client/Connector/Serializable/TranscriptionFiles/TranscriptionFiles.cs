@@ -12,8 +12,8 @@ namespace Connector.Serializable.TranscriptionFiles
     {
         public TranscriptionFiles(IEnumerable<TranscriptionFile> values, string nextLink)
         {
-            Values = values;
-            NextLink = nextLink;
+            this.Values = values;
+            this.NextLink = nextLink;
         }
 
         public IEnumerable<TranscriptionFile> Values { get; set; }

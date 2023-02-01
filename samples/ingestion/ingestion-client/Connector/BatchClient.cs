@@ -33,7 +33,7 @@ namespace Connector
 
         private static readonly AsyncRetryPolicy RetryPolicy =
             Policy
-                .Handle<HttpRequestException>()
+                .Handle<Exception>(e => e is HttpStatusCodeException || e is HttpRequestException)
                 .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(2));
 
         public static Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri)
@@ -82,41 +82,24 @@ namespace Connector
 
         private static async Task<Uri> PostAsync(string path, string subscriptionKey, string payloadString, TimeSpan timeout)
         {
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, path);
-            requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-            requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
-
-            var responseMessage = await SendHttpRequestMessage(requestMessage, timeout).ConfigureAwait(false);
-
+            var responseMessage = await SendHttpRequestMessage(HttpMethod.Post, path, subscriptionKey, payloadString, timeout).ConfigureAwait(false);
             return responseMessage.Headers.Location;
         }
 
         private static async Task DeleteAsync(string path, string subscriptionKey, TimeSpan timeout)
         {
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Delete, path);
-            if (!string.IsNullOrEmpty(subscriptionKey))
-            {
-                requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-            }
-
-            await SendHttpRequestMessage(requestMessage, timeout).ConfigureAwait(false);
+            await SendHttpRequestMessage(HttpMethod.Delete, path, subscriptionKey, payload: null, timeout: timeout).ConfigureAwait(false);
         }
 
         private static async Task<TResponse> GetAsync<TResponse>(string path, string subscriptionKey, TimeSpan timeout)
         {
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, path);
-            if (!string.IsNullOrEmpty(subscriptionKey))
-            {
-                requestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
-            }
-
-            var responseMessage = await SendHttpRequestMessage(requestMessage, timeout).ConfigureAwait(false);
+            var responseMessage = await SendHttpRequestMessage(HttpMethod.Get, path, subscriptionKey, payload: null, timeout: timeout).ConfigureAwait(false);
 
             var contentString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
             return JsonConvert.DeserializeObject<TResponse>(contentString);
         }
 
-        private static async Task<HttpResponseMessage> SendHttpRequestMessage(HttpRequestMessage httpRequestMessage, TimeSpan timeout)
+        private static async Task<HttpResponseMessage> SendHttpRequestMessage(HttpMethod httpMethod, string path, string subscriptionKey, string payload, TimeSpan timeout)
         {
             try
             {
@@ -126,6 +109,17 @@ namespace Connector
                 var responseMessage = await RetryPolicy.ExecuteAsync(
                     async (token) =>
                     {
+                        using var httpRequestMessage = new HttpRequestMessage(httpMethod, path);
+                        if (!string.IsNullOrEmpty(subscriptionKey))
+                        {
+                            httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                        }
+
+                        if (!string.IsNullOrEmpty(payload))
+                        {
+                            httpRequestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+                        }
+
                         var responseMessage = await HttpClient.SendAsync(httpRequestMessage, token).ConfigureAwait(false);
 
                         await responseMessage.EnsureSuccessStatusCodeAsync().ConfigureAwait(false);

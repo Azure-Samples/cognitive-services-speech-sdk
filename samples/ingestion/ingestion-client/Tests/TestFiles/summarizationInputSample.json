@@ -1,0 +1,224 @@
+{
+  "source": "https://www.contoso.com",
+  "timeStamp": "2023-01-05T22:44:06Z",
+  "durationInTicks": 130300000,
+  "duration": "PT13.03S",
+  "combinedRecognizedPhrases": [
+    {
+      "channel": 0,
+      "lexical": "hi hello how can i help you i am having trouble issuing a return of a game on my xbox call of duty you can bring the disk to the nearest microsoft store to return it",
+      "itn": "hi hello how can i help you i am having trouble issuing a return of a game on my xbox call of duty you can bring the disk to the nearest microsoft store to return it",
+      "maskedITN": "",
+      "display": "Hi. Hello how can I help you? I am having trouble issuing a return of a game on my Xbox Call of Duty. You can bring the disk to the nearest Microsoft Store to return it."
+    }
+  ],
+  "recognizedPhrases": [
+    {
+      "recognitionStatus": "Success",
+      "channel": 0,
+      "speaker": 1,
+      "offset": "PT0.13S",
+      "duration": "PT0.43S",
+      "offsetInTicks": 1300000,
+      "durationInTicks": 4300000,
+      "nBest": [
+        {
+          "confidence": 0.87210596,
+          "lexical": "hi",
+          "itn": "hi",
+          "maskedITN": "",
+          "display": "Hi."
+        }
+      ]
+    },
+    {
+      "recognitionStatus": "Success",
+      "channel": 0,
+      "speaker": 2,
+      "offset": "PT1.41S",
+      "duration": "PT1.58S",
+      "offsetInTicks": 14100000,
+      "durationInTicks": 15800000,
+      "nBest": [
+        {
+          "confidence": 0.9614907,
+          "lexical": "hello how can i help you",
+          "itn": "hello how can i help you",
+          "maskedITN": "",
+          "display": "Hello how can I help you?"
+        }
+      ]
+    },
+    {
+      "recognitionStatus": "Success",
+      "channel": 0,
+      "speaker": 1,
+      "offset": "PT3.87S",
+      "duration": "PT4.23S",
+      "offsetInTicks": 38700000,
+      "durationInTicks": 42300000,
+      "nBest": [
+        {
+          "confidence": 0.8985182,
+          "lexical": "i am having trouble issuing a return of a game on my xbox call of duty",
+          "itn": "i am having trouble issuing a return of a game on my xbox call of duty",
+          "maskedITN": "",
+          "display": "I am having trouble issuing a return of a game on my Xbox Call of Duty."
+        }
+      ]
+    },
+    {
+      "recognitionStatus": "Success",
+      "channel": 0,
+      "speaker": 2,
+      "offset": "PT8.98S",
+      "duration": "PT3.33S",
+      "offsetInTicks": 89800000,
+      "durationInTicks": 33300000,
+      "nBest": [
+        {
+          "confidence": 0.93731016,
+          "lexical": "you can bring the disk to the nearest microsoft store to return it",
+          "itn": "you can bring the disk to the nearest microsoft store to return it",
+          "maskedITN": "",
+          "display": "You can bring the disk to the nearest Microsoft Store to return it."
+        }
+      ]
+    }
+  ],
+  "conversationAnalyticsResults": {
+    "conversationPiiResults": {
+      "combinedRedactedContent": [
+        {
+          "channel": "0",
+          "lexical": "hi hello how can i help you i am having trouble issuing a return of a game on my xbox call of duty you can bring the disk to the nearest microsoft store to return it",
+          "itn": "hi hello how can i help you i am having trouble issuing a return of a game on my xbox call of duty you can bring the disk to the nearest microsoft store to return it",
+          "display": "Hi. Hello how can I help you? I am having trouble issuing a return of a game on my Xbox Call of Duty. You can bring the disk to the nearest Microsoft Store to return it."
+        }
+      ],
+      "conversations": [
+        {
+          "conversationItems": [
+            {
+              "id": "0",
+              "channel": "0",
+              "offset": "PT0.13S",
+              "redactedContent": {
+                "itn": "hi",
+                "lexical": "hi",
+                "text": "Hi.",
+                "redactedAudioTimings": []
+              },
+              "entities": []
+            },
+            {
+              "id": "1",
+              "channel": "0",
+              "offset": "PT1.41S",
+              "redactedContent": {
+                "itn": "hello how can i help you",
+                "lexical": "hello how can i help you",
+                "text": "Hello how can I help you?",
+                "redactedAudioTimings": []
+              },
+              "entities": []
+            },
+            {
+              "id": "2",
+              "channel": "0",
+              "offset": "PT3.87S",
+              "redactedContent": {
+                "itn": "i am having trouble issuing a return of a game on my xbox call of duty",
+                "lexical": "i am having trouble issuing a return of a game on my xbox call of duty",
+                "text": "I am having trouble issuing a return of a game on my Xbox Call of Duty.",
+                "redactedAudioTimings": []
+              },
+              "entities": []
+            },
+            {
+              "id": "3",
+              "channel": "0",
+              "offset": "PT8.98S",
+              "redactedContent": {
+                "itn": "you can bring the disk to the nearest microsoft store to return it",
+                "lexical": "you can bring the disk to the nearest microsoft store to return it",
+                "text": "You can bring the disk to the nearest Microsoft Store to return it.",
+                "redactedAudioTimings": []
+              },
+              "entities": []
+            }
+          ],
+          "warnings": []
+        }
+      ]
+    },
+    "conversationSummarizationResults": {
+      "conversations": [
+        {
+          "summaries": [
+            {
+              "aspect": "issue",
+              "text": "Customer wants to return a game. | Customer can't return the game."
+            },
+            {
+              "aspect": "resolution",
+              "text": "Advised customer to bring the disk to the nearest Microsoft Store to return it."
+            },
+            {
+              "aspect": "chapterTitle",
+              "text": "Trouble Issuing Return of Game",
+              "contexts": [
+                {
+                  "conversationItemId": "0__PT0.13S__0",
+                  "offset": 0,
+                  "length": 3
+                },
+                {
+                  "conversationItemId": "1__PT1.41S__0",
+                  "offset": 0,
+                  "length": 25
+                },
+                {
+                  "conversationItemId": "2__PT3.87S__0",
+                  "offset": 0,
+                  "length": 71
+                },
+                {
+                  "conversationItemId": "3__PT8.98S__0",
+                  "offset": 0,
+                  "length": 67
+                }
+              ]
+            },
+            {
+              "aspect": "narrative",
+              "text": "Agent helps the customer to return a game on Xbox.",
+              "contexts": [
+                {
+                  "conversationItemId": "0__PT0.13S__0",
+                  "offset": 0,
+                  "length": 3
+                },
+                {
+                  "conversationItemId": "1__PT1.41S__0",
+                  "offset": 0,
+                  "length": 25
+                },
+                {
+                  "conversationItemId": "2__PT3.87S__0",
+                  "offset": 0,
+                  "length": 71
+                },
+                {
+                  "conversationItemId": "3__PT8.98S__0",
+                  "offset": 0,
+                  "length": 67
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
