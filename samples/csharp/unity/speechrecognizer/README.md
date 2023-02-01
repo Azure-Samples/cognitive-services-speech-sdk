@@ -23,7 +23,7 @@ This sample demonstrates how to use the Microsoft Cognitive Service Speech SDK i
 
 ## Download the Speech SDK for Unity
 
-* **By downloading the Speech SDK for Unity you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+* **By downloading the Speech SDK for Unity you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * The Speech SDK for Unity is packaged as a Unity asset package (.unitypackage).
   Download it from [here](https://aka.ms/csspeech/unitypackage).
 

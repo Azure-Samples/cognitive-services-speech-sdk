@@ -31,6 +31,7 @@ proguard-rules.pro text
 *.kt text
 *.lst text
 *.m text
+*.manifest text
 *.mat text
 *.md text
 *.meta text
@@ -48,6 +49,7 @@ proguard-rules.pro text
 *.runsettings text
 *.sln text
 *.storyboard text
+*.svg text
 *.swift text
 *.ts text
 *.txt text
@@ -75,6 +77,7 @@ proguard-rules.pro text
 *.pfx binary
 *.png binary
 *.table binary
+*.ttf binary
 *.wav binary
 *.zip binary
 *.webp binary

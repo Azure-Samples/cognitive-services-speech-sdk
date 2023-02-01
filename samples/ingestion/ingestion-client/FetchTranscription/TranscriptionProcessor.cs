@@ -392,8 +392,11 @@ namespace FetchTranscriptionFunction
                 }
             }
 
-            if (textAnalyticsProvider != null && (FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None
-                    || FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None || AnalyzeConversationsProvider.IsConversationalPiiEnabled()))
+            if (textAnalyticsProvider != null &&
+                (FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None
+                || FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None
+                || AnalyzeConversationsProvider.IsConversationalPiiEnabled()
+                || AnalyzeConversationsProvider.IsConversationalSummarizationEnabled()))
             {
                 // If we already got text analytics requests in the transcript (containsTextAnalyticsRequest), add the results to the transcript.
                 // Otherwise, submit new text analytics requests.

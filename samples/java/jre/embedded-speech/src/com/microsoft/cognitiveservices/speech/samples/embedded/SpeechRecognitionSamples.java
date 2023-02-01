@@ -118,16 +118,14 @@ public class SpeechRecognitionSamples
                 // Offset and duration values are in ticks, where a single tick
                 // represents 100 nanoseconds or one ten-millionth of a second.
                 //
-                // Note that in embedded speech recognition the reported offset and
-                // duration of a phrase only indicate a time window inside of which
-                // the phrase appeared. For the accurate start and end of speech,
-                // refer to the offset of the first word and the offset + duration
-                // of the last word in a phrase. This requires enabling detailed
-                // results with word level timing info, see a configuration example
-                // in embeddedRecognitionFromWavFile() in this file.
+                // To get word level detail, set the output format to detailed.
+                // See embeddedRecognitionFromWavFile() in this source file for
+                // a configuration example.
                 //
                 // If an embedded speech recognition model does not support word
-                // timing, the word offset and duration values are always 0.
+                // timing, the word offset and duration values are always 0, and the
+                // phrase offset and duration only indicate a time window inside of
+                // which the phrase appeared, not the accurate start and end of speech.
                 /*
                 String jsonResult = e.getResult().getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
                 System.out.println("JSON result: " + jsonResult);
@@ -395,13 +393,6 @@ public class SpeechRecognitionSamples
         // See the event handler of 'recognized' event for how to read the JSON result.
         /*
         speechConfig.setSpeechRecognitionOutputFormat(OutputFormat.Detailed);
-        */
-
-        // Enables word level detail (timing, confidence) in the detailed output.
-        // Requires that OutputFormat.Detailed has been set as above.
-        // This will slightly increase CPU load in embedded speech recognition.
-        /*
-        speechConfig.setProperty(PropertyId.SpeechServiceResponse_RequestWordLevelTimestamps, "true");
         */
 
         SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, audioConfig);
