@@ -98,7 +98,7 @@ class VoiceChanger:
                 break
         if not vc_succeed:
             LOG.error("VC failed on wav: {}".format(input_audio))
-        # self._delete_blob(blob_path)
+        self._delete_blob(blob_path)
 
     def convert_audios(self, input_audio_list: List[Path], output_audio_list: List[Path]) -> None:
         assert len(input_audio_list) == len(output_audio_list)
