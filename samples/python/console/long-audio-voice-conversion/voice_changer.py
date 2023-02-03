@@ -74,9 +74,6 @@ class VoiceChanger:
         ssml_args = {"language": self.language, "name": self.name, "url": f"{self.container_url}/{blob_path}"}
         ssml_string = self.ssml_string.format(**ssml_args)
         self._upload_blob(input_audio, blob_path)
-        import time
-
-        time.sleep(5)
         vc_succeed = False
         for _ in range(3):  # retry count
             result = synthesizer.speak_ssml(ssml_string)
