@@ -1,4 +1,4 @@
-azure.cognitiveservices.speech
+azure-cognitiveservices-speech
 azure-storage-blob
 tqdm
 pydub
