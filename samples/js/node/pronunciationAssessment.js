@@ -24,7 +24,7 @@ module.exports = {
     var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream, format);
     var speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
 
-    var reference_text = "What's the weather][ like?";
+    var reference_text = "What's the weather like?";
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     const pronunciationAssessmentConfig = new sdk.PronunciationAssessmentConfig(
         reference_text,
@@ -100,13 +100,13 @@ module.exports = {
             const segment = new Segment();
             segment.useDefault();
             segment.loadDict('wildcard.txt');
-            _.map(segment.doSegment(wholelyrics, {stripPunctuation: true}), (res) => wholelyricsArry.push(res['w']))
-            _.map(segment.doSegment(resTextProcessed, {stripPunctuation: true}), (res) => resTextArray.push(res['w']))
+            _.map(segment.doSegment(wholelyrics, {stripPunctuation: true}), (res) => wholelyricsArry.push(res['w']));
+            _.map(segment.doSegment(resTextProcessed, {stripPunctuation: true}), (res) => resTextArray.push(res['w']));
         } else {
             let resTextProcessed = (resText.toLocaleLowerCase() ?? "").replace(new RegExp("[!\"#$%&()*+,-./:;<=>?@[^_`{|}~]+", "g"), " ");
-            resTextProcessed = resTextProcessed.replace(new RegExp("]+", "g"), " ")
+            resTextProcessed = resTextProcessed.replace(new RegExp("]+", "g"), " ");
             let wholelyrics = (reference_text.toLocaleLowerCase() ?? "").replace(new RegExp("[!\"#$%&()*+,-./:;<=>?@[^_`{|}~]+", "g"), " ");
-            wholelyrics = wholelyrics.replace(new RegExp("]+", "g"), " ")
+            wholelyrics = wholelyrics.replace(new RegExp("]+", "g"), " ");
             wholelyricsArry = wholelyrics.split(" ");
             resTextArray = resTextProcessed.split(" ");
         }
@@ -284,7 +284,7 @@ module.exports = {
     // Signals the end of a session with the speech service.
     reco.sessionStopped = function (s, e) {
         reco.stopContinuousRecognitionAsync();
-        reco.close()
+        reco.close();
     };
 
     reco.startContinuousRecognitionAsync();
