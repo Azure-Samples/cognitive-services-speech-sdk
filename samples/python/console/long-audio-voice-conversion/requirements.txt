@@ -1,0 +1,6 @@
+azure.cognitiveservices.speech
+azure-storage-blob
+tqdm
+pydub
+librosa
+soundfile
