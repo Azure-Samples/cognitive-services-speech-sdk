@@ -23,7 +23,7 @@ If you want to host the sample on a web server:
 
 * In case you are running the sample from your local computer, open `index.html` from the location where you have downloaded this quickstart with a JavaScript capable browser.
   * Use the input fields to set your `subscription key` and `service region`.
-  * Input a text to be synthesized in the `Text` field and press the `Start synthesis` button to start synthesizing speech.
+  * Press the `Start recognition` button to start recognizing speech.
  
 * In case you are hosting the sample on a web server, open a web browser and navigate to the full URL where you host the sample.
 
