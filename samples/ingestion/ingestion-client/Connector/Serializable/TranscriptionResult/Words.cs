@@ -11,12 +11,12 @@ namespace Connector
     {
         public Words(string word, string offset, string duration, double offsetInTicks, double durationInTicks, double confidence)
         {
-            Word = word;
-            Offset = offset;
-            Duration = duration;
-            OffsetInTicks = offsetInTicks;
-            DurationInTicks = durationInTicks;
-            Confidence = confidence;
+            this.Word = word;
+            this.Offset = offset;
+            this.Duration = duration;
+            this.OffsetInTicks = offsetInTicks;
+            this.DurationInTicks = durationInTicks;
+            this.Confidence = confidence;
         }
 
         [JsonProperty("word")]

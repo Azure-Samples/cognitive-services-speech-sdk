@@ -10,16 +10,27 @@ namespace Tests
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
+
+    using Connector;
+    using Connector.Serializable.Language.Conversations;
+    using Connector.Serializable.TranscriptionStartedServiceBusMessage;
+
+    using Language;
+
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     using Moq;
+
+    using Newtonsoft.Json;
+
     using RealtimeTranscription;
 
     [TestClass]
     public class EndToEndTests
     {
-        private static IDictionary<string, object> TestProperties;
+        private static IDictionary<string, object> testProperties;
 
         private static Mock<ILogger> Logger { get; set; }
 
@@ -27,7 +38,7 @@ namespace Tests
         public static void ClassInitialize(TestContext context)
         {
             context = context ?? throw new ArgumentNullException(nameof(context));
-            TestProperties = context.Properties;
+            testProperties = context.Properties;
             Logger = new Mock<ILogger>();
         }
 
@@ -35,8 +46,8 @@ namespace Tests
         [TestCategory(TestCategories.EndToEndTest)]
         public async Task TestMultiChannelFromSasTestAsync()
         {
-            var region = TestProperties["SpeechServicesRegion"].ToString();
-            var subscriptionKey = TestProperties["SpeechServicesSubscriptionKey"].ToString();
+            var region = testProperties["SpeechServicesRegion"].ToString();
+            var subscriptionKey = testProperties["SpeechServicesSubscriptionKey"].ToString();
             var conf = SpeechConfig.FromEndpoint(
                 new Uri($"wss://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2&initialSilenceTimeoutMs=600000&endSilenceTimeoutMs=600000"),
                 subscriptionKey);
@@ -51,6 +62,45 @@ namespace Tests
 
             var firstNBest = jsonResults.First().NBest.First();
             Assert.AreEqual(firstNBest.Lexical, "hello");
+        }
+
+        [TestMethod]
+        [TestCategory(TestCategories.EndToEndTest)]
+        public async Task AnalyzeConversationTestAsync()
+        {
+            Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(new ConversationSummarizationOptions
+            {
+                Aspects = new HashSet<Aspect> { Aspect.Issue, Aspect.Resolution, Aspect.ChapterTitle, Aspect.Narrative },
+                Stratergy = new RoleAssignmentStratergy
+                {
+                    Key = RoleAssignmentMappingKey.Channel,
+                    Mapping = new Dictionary<int, Role> { { 0, Role.Agent }, { 1, Role.Customer } },
+                    FallbackRole = Role.None,
+                }
+            }));
+            var region = testProperties["LanguageServiceRegion"].ToString();
+            var subscriptionKey = testProperties["LanguageServiceSubscriptionKey"].ToString();
+            var provider = new AnalyzeConversationsProvider("en-US", subscriptionKey, region, Logger.Object);
+            var body = File.ReadAllText(@"testFiles/summarizationInputSample.json");
+            var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
+            var jobIds = await provider.SubmitAnalyzeConversationsRequestAsync(transcription).ConfigureAwait(false);
+            Console.WriteLine("Submit");
+            Console.WriteLine(JsonConvert.SerializeObject(jobIds));
+            Assert.AreEqual(0, jobIds.errors.Count());
+            var req = jobIds.jobIds.Select(jobId => new AudioFileInfo(default, default, new TextAnalyticsRequests(default, default, new[] { new TextAnalyticsRequest(jobId, TextAnalyticsRequest.TextAnalyticsRequestStatus.Running) })));
+
+            while (!await provider.ConversationalRequestsCompleted(req).ConfigureAwait(false))
+            {
+                await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                Console.WriteLine($"[{DateTime.Now}]jobs are running...");
+            }
+
+            Console.WriteLine($"[{DateTime.Now}]jobs done.");
+
+            var err = await provider.AddConversationalEntitiesAsync(jobIds.jobIds, transcription);
+            Console.WriteLine($"annotation result: {JsonConvert.SerializeObject(transcription)}");
+            Assert.AreEqual(0, err.Count());
+            Assert.AreEqual(4, transcription.ConversationAnalyticsResults.AnalyzeConversationSummarizationResults.Conversations.First().Summaries.Count());
         }
     }
 }
