@@ -20,6 +20,7 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.DeltaType;
 import com.github.difflib.patch.Patch;
+import com.microsoft.cognitiveservices.speech.Connection;
 import com.microsoft.cognitiveservices.speech.PronunciationAssessmentConfig;
 import com.microsoft.cognitiveservices.speech.PronunciationAssessmentGradingSystem;
 import com.microsoft.cognitiveservices.speech.PronunciationAssessmentGranularity;
@@ -44,6 +45,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -137,7 +139,8 @@ public class MainActivity extends AppCompatActivity {
         final SpeechConfig speechConfig;
         final KeywordRecognitionModel kwsModel;
         try {
-            speechConfig = SpeechConfig.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
+            // speechConfig = SpeechConfig.fromSubscription(SpeechSubscriptionKey, SpeechRegion);
+            speechConfig = SpeechConfig.fromHost(new URI("wss://fetest.develop2.cris.ai"), SpeechSubscriptionKey);
             kwsModel = KeywordRecognitionModel.fromFile(copyAssetToCacheAndGetFilePath(KwsModelFile));
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
@@ -536,6 +539,53 @@ public class MainActivity extends AppCompatActivity {
                 });
 
                 reco.startContinuousRecognitionAsync();
+            } catch (Exception ex) {
+                System.out.println(ex.getMessage());
+                displayException(ex);
+            }
+        });
+
+        ///////////////////////////////////////////////////
+        // pronunciation assessment with content assessment
+        ///////////////////////////////////////////////////
+        pronunciationAssessmentButton.setOnClickListener(view -> {
+            final String logTag = "pron";
+
+            disableButtons();
+            clearTextBox();
+
+            try {
+                final AudioConfig audioConfig = AudioConfig.fromWavFileInput(copyAssetToCacheAndGetFilePath("content_assessment.wav"));
+                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioConfig);
+
+                Connection connect = Connection.fromRecognizer(reco);
+                connect.setMessageProperty("speech.context", "phraseDetection", "{\"enrichment\":{\"pronunciationAssessment\":{\"referenceText\":\"\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Word\",\"dimension\":\"Comprehensive\",\"enableMiscue\":\"False\"},\"contentAssessment\":{\"topic\":\"the season\"}}}");
+                connect.setMessageProperty("speech.context", "phraseOutput", "{\"format\":\"Detailed\",\"detailed\":{\"options\":[\"WordTimings\",\"PronunciationAssessment\",\"ContentAssessment\",\"SNR\"]}}");
+
+                reco.sessionStarted.addEventListener((o, s) -> {
+                    Log.i(logTag, "Session Id: " + s.getSessionId());
+                    AppendTextLine("Session Id: " + s.getSessionId(), true);
+                });
+
+                reco.recognized.addEventListener((o, speechRecognitionResultEventArgs) -> {
+                    final String s = speechRecognitionResultEventArgs.getResult().getText();
+                    Log.i(logTag, "Final result received: " + s);
+                    PronunciationAssessmentResult pronResult = PronunciationAssessmentResult.fromResult(speechRecognitionResultEventArgs.getResult());
+                    Log.i(logTag, "Accuracy score: " + pronResult.getAccuracyScore() +
+                            ";  pronunciation score: " +  pronResult.getPronunciationScore() +
+                            ", completeness score: " + pronResult.getCompletenessScore() +
+                            ", fluency score: " + pronResult.getFluencyScore());
+                    String jString = speechRecognitionResultEventArgs.getResult().getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                    Log.i(logTag, jString);
+                    AppendTextLine(jString, false);
+                });
+
+                reco.sessionStopped.addEventListener((o, s) -> {
+                    Log.i(logTag, "Session stopped.");
+                    enableButtons();
+                });
+
+                reco.recognizeOnceAsync();
             } catch (Exception ex) {
                 System.out.println(ex.getMessage());
                 displayException(ex);
