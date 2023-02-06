@@ -94,6 +94,8 @@ module.exports = {
         const resText = currentText.join(" ");        
         let wholelyricsArry = [];
         let resTextArray = [];
+
+        // The sample code provides only zh-CN and en-US locales
         if (["zh-cn"].includes(settings.language.toLowerCase())) {
             const resTextProcessed = (resText.toLocaleLowerCase() ?? "").replace(new RegExp("[^a-zA-Z0-9\u4E00-\u9FA5']+", "g"), " ");
             const wholelyrics = (reference_text.toLocaleLowerCase() ?? "").replace(new RegExp("[^a-zA-Z0-9\u4E00-\u9FA5']+", "g"), " ");
