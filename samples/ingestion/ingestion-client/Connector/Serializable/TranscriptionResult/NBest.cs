@@ -12,13 +12,13 @@ namespace Connector
     {
         public NBest(double confidence, string lexical, string itn, string maskedITN, string display, Sentiment sentiment, IEnumerable<Words> words)
         {
-            Confidence = confidence;
-            Lexical = lexical;
-            ITN = itn;
-            MaskedITN = maskedITN;
-            Display = display;
-            Sentiment = sentiment;
-            Words = words;
+            this.Confidence = confidence;
+            this.Lexical = lexical;
+            this.ITN = itn;
+            this.MaskedITN = maskedITN;
+            this.Display = display;
+            this.Sentiment = sentiment;
+            this.Words = words;
         }
 
         [JsonProperty("confidence")]

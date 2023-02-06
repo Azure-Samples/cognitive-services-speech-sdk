@@ -8,13 +8,21 @@ namespace FetchTranscriptionFunction
     using System;
     using System.Threading.Tasks;
     using Connector;
+
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
 
-    public static class FetchTranscription
+    public class FetchTranscription
     {
+        private readonly IServiceProvider serviceProvider;
+
+        public FetchTranscription(IServiceProvider serviceProvider)
+        {
+            this.serviceProvider = serviceProvider;
+        }
+
         [FunctionName("FetchTranscription")]
-        public static async Task Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string message, ILogger log)
+        public async Task Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string message, ILogger log)
         {
             if (log == null)
             {
@@ -30,7 +38,10 @@ namespace FetchTranscriptionFunction
             }
 
             var serviceBusMessage = TranscriptionStartedMessage.DeserializeMessage(message);
-            await TranscriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, log).ConfigureAwait(false);
+
+            var transcriptionProcessor = new TranscriptionProcessor(this.serviceProvider);
+
+            await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  log).ConfigureAwait(false);
         }
     }
 }

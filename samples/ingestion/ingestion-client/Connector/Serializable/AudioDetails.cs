@@ -11,12 +11,12 @@ namespace Connector
     {
         public AudioDetails(string fileName, DateTime createdTime, TimeSpan audioLength, int channels, double estimatedCost, string locale)
         {
-            FileName = fileName;
-            CreatedTime = createdTime;
-            AudioLength = audioLength;
-            Channels = channels;
-            EstimatedCost = estimatedCost;
-            Locale = locale;
+            this.FileName = fileName;
+            this.CreatedTime = createdTime;
+            this.AudioLength = audioLength;
+            this.Channels = channels;
+            this.EstimatedCost = estimatedCost;
+            this.Locale = locale;
         }
 
         public string FileName { get; set; }

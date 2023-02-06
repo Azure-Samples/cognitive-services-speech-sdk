@@ -12,7 +12,7 @@ namespace Connector.Serializable.Language.Conversations
     {
         public AnalysisInput(IList<Conversation> conversations)
         {
-            Conversations = conversations;
+            this.Conversations = conversations;
         }
 
         [JsonProperty("conversations")]

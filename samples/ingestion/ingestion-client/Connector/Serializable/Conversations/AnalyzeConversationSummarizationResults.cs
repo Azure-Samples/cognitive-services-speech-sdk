@@ -12,6 +12,6 @@ namespace Connector.Serializable.Language.Conversations
     public class AnalyzeConversationSummarizationResults : AnalyzeConversationResultsBase
     {
         [JsonProperty("conversations")]
-        public IEnumerable<IssueResolutionSummary> Conversations { get; set; }
+        public IEnumerable<ConversationsSummaryResult> Conversations { get; set; }
     }
 }

@@ -9,8 +9,8 @@ namespace Connector
     {
         public TranscriptionError(string code, string message)
         {
-            Code = code;
-            Message = message;
+            this.Code = code;
+            this.Message = message;
         }
 
         public string Code { get; set; }
