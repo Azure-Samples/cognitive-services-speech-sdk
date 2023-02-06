@@ -580,6 +580,12 @@ public class MainActivity extends AppCompatActivity {
                     AppendTextLine(jString, false);
                 });
 
+                reco.canceled.addEventListener((o, s) -> {
+                    String cancellationDetails = s.getErrorDetails();
+                    Log.i(logTag, cancellationDetails);
+                    AppendTextLine(cancellationDetails, false);
+                });
+
                 reco.sessionStopped.addEventListener((o, s) -> {
                     Log.i(logTag, "Session stopped.");
                     enableButtons();
