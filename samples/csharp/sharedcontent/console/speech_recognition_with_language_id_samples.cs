@@ -18,7 +18,7 @@ namespace MicrosoftSpeechSDKSamples
         /// <summary>
         /// The automatic detect source language configuration
         /// </summary>
-        private static AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "zh-CN" });
+        private static AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US" , "de-DE" });
 
         // Speech recognition from microphone.
         public static async Task RecognitionWithMicrophoneAsync()
@@ -28,18 +28,15 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-            // Please refer to the documentation of language id with different modes
-            config.SetProperty(PropertyId.SpeechServiceConnection_SingleLanguageIdPriority, "Latency");
-
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = new SpeechRecognizer(config, autoDetectSourceLanguageConfig))
             {
                 // Starts recognizing.
-                Console.WriteLine("Say something...");
+                Console.WriteLine("Say something in English or German...");
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of 15
-                // seconds of audio is processed.  The task returns the recognition text as result.
+                // seconds of audio is processed.  The task returns the recognition text and the detected language as result.
                 // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
                 // shot recognition like command or query.
                 // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
@@ -75,26 +72,29 @@ namespace MicrosoftSpeechSDKSamples
         /// Speech recognition with auto detection for source language with universal v2 endpoint
         /// We only support multi-lingual continuous recognition in universal v2 endpoint
         /// </summary>
-        public static async Task MultiLingualRecognitionWithUniversalV2Endpiont()
+        public static async Task MultiLingualRecognitionWithUniversalV2Endpoint()
         {
-            // Offical v2 endpoint
-            // Replace the region with your service region
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Note: For multi-lingual speech recognition with language id, it only works with speech v2 endpoint,
+            // you must use SpeechConfig.FromEndpoint() in order to use the speech v2 endpoint.
+
+            /// Replace YourServiceRegion with your region, for example "westus",
             var v2EndpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/universal/v2", "YourServiceRegion");
             var v2EndpointUrl = new Uri(v2EndpointInString);
 
             // Creates an instance of a speech config with specified subscription key.
-            // Replace the subscription key with your subscription key
+            // Replace YourSubscriptionKey with your subscription key
             var config = SpeechConfig.FromEndpoint(v2EndpointUrl, "YourSubscriptionKey");
 
-            // Please refer to the documentation of language id with different modes
-            config.SetProperty(PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
+            // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
+            // Please refer to the documentation of Language ID for more information.
+            // https://aka.ms/speech/lid?pivots=programming-language-csharp
+            config.SetProperty(PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous");
 
-            // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
-            // Currently this feature only supports 2 different language candidates
-            // Replace the languages to be the language candidates for your speech. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
+            // Define the set of input spoken languages to detect
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromLanguages(new string[] { "en-US", "zh-CN" });
 
-            var stopRecognition = new TaskCompletionSource<int>();
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Creates a speech recognizer using the auto detect source language config, and the file as audio input.
             // Replace with your own audio file name.

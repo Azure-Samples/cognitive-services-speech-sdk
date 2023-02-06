@@ -64,7 +64,7 @@ namespace helloworld
                 using (var recognizer = new TranslationRecognizer(config))
                 {
                     // The TaskCompletionSource to stop recognition.
-                    var stopRecognition = new TaskCompletionSource<int>();
+                    var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                     // Subscribes to events.
                     recognizer.Recognizing += (s, ee) =>
