@@ -13,6 +13,7 @@ var difflib = require('difflib');
 (function() {
 "use strict";
 
+// pronunciation assessment with audio streaming and continue mode
 module.exports = {
   main: function(settings) {
 
