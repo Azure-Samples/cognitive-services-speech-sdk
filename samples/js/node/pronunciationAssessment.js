@@ -59,7 +59,10 @@ module.exports = {
     // The event recognizing signals that an intermediate recognition result is received.
     // You will receive one or more recognizing events as a speech phrase is recognized, with each containing
     // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
-    reco.recognizing = function (s, e) {};
+    reco.recognizing = function (s, e) {
+        var str = "(recognizing) Reason: " + sdk.ResultReason[e.result.reason] + " Text: " + e.result.text;
+        console.log(str);
+    };
 
     // The event recognized signals that a final recognition result is received.
     // This is the final event that a phrase has been recognized.
