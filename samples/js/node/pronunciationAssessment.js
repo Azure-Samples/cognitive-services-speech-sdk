@@ -109,10 +109,8 @@ module.exports = {
             _.map(segment.doSegment(wholelyrics, {stripPunctuation: true}), (res) => wholelyricsArry.push(res['w']));
             _.map(segment.doSegment(resTextProcessed, {stripPunctuation: true}), (res) => resTextArray.push(res['w']));
         } else {
-            let resTextProcessed = (resText.toLocaleLowerCase() ?? "").replace(new RegExp("[!\"#$%&()*+,-./:;<=>?@[^_`{|}~]+", "g"), " ");
-            resTextProcessed = resTextProcessed.replace(new RegExp("]+", "g"), " ");
-            let wholelyrics = (reference_text.toLocaleLowerCase() ?? "").replace(new RegExp("[!\"#$%&()*+,-./:;<=>?@[^_`{|}~]+", "g"), " ");
-            wholelyrics = wholelyrics.replace(new RegExp("]+", "g"), " ");
+            let resTextProcessed = (resText.toLocaleLowerCase() ?? "").replace(new RegExp("[!\"#$%&()*+,-./:;<=>?@[^_`{|}~]+", "g"), "").replace(new RegExp("]+", "g"), "");
+            let wholelyrics = (reference_text.toLocaleLowerCase() ?? "").replace(new RegExp("[!\"#$%&()*+,-./:;<=>?@[^_`{|}~]+", "g"), "").replace(new RegExp("]+", "g"), "");
             wholelyricsArry = wholelyrics.split(" ");
             resTextArray = resTextProcessed.split(" ");
         }
