@@ -705,7 +705,6 @@ public class SpeechRecognitionSamples {
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the standard recognition model associated with the detected language.
-    // <SpeechContinuousRecognitionAndLanguageId>
     public static void continuousRecognitionFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException
     {
         // Creates an instance of a speech config with specified subscription key and service region. Replace with your own subscription key
@@ -783,8 +782,7 @@ public class SpeechRecognitionSamples {
         audioConfig.close();
         autoDetectSourceLanguageConfig.close();
     }
-    // </SpeechContinuousRecognitionAndLanguageId>
-    
+
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the appropriate custom model specified, associated with the detected language.
@@ -878,9 +876,10 @@ public class SpeechRecognitionSamples {
         autoDetectSourceLanguageConfig.close();
     }
 
+    // <SpeechContinuousRecognitionAndLanguageId>
     // Shows how to do continuous speech recognition on a multilingual audio file with continuous language detection. Here, we assume the
     // spoken language in the file can alternate between English (US), Spanish (Mexico) and German.
-    // Speech recognition will use the appropriate custom model specified, associated with the detected language.
+    // If specified, speech recognition will use the custom model associated with the detected language.
     public static void continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels() throws InterruptedException, ExecutionException, IOException
     {
         // Continuous language detection with speech recognition requires the application to set a V2 endpoint URL.
@@ -980,6 +979,7 @@ public class SpeechRecognitionSamples {
         }
         autoDetectSourceLanguageConfig.close();
     }
+    // </SpeechContinuousRecognitionAndLanguageId>
 
     // Pronunciation assessment.
     // See more information at https://aka.ms/csspeech/pa
