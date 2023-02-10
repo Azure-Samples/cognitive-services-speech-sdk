@@ -25,7 +25,7 @@ SENTIMENT_ANALYSIS_PATH = "/language/:analyze-text";
 SENTIMENT_ANALYSIS_QUERY = "?api-version=2022-05-01";
 CONVERSATION_ANALYSIS_PATH = "/language/analyze-conversations/jobs";
 CONVERSATION_ANALYSIS_QUERY = "?api-version=2022-10-01-preview";
-CONVERSATION_SUMMARY_MODEL_VERSION = latest;
+CONVERSATION_SUMMARY_MODEL_VERSION = "latest";
 
 # How long to wait while polling batch transcription and conversation analysis status.
 WAIT_SECONDS = 10
