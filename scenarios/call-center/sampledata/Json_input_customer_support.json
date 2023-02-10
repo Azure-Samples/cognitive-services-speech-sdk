@@ -181,7 +181,7 @@
          {
             "kind": "ConversationalSummarizationTask",
               "parameters": {
-                "modelVersion": "2022-05-15-preview",
+                "modelVersion": "latest",
                 "summaryAspects": [
                     "Issue",
                     "Resolution"
