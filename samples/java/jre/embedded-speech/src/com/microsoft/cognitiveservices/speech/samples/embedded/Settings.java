@@ -220,7 +220,7 @@ public class Settings
             SpeechRecognitionModel result = models.stream()
                 .filter(model ->
                     (name.isEmpty() && model.getLocales().get(0).equals(modelLocale)) ||
-                    (!name.isEmpty() && model.getName().equals(name)))
+                    (!name.isEmpty() && (model.getName().equals(name) || model.getLocales().get(0).equals(name))))
                 .findAny()
                 .orElse(null);
 
@@ -277,7 +277,7 @@ public class Settings
                 VoiceInfo result = voicesList.getVoices().stream()
                     .filter(voice ->
                         (name.isEmpty() && voice.getLocale().equals(voiceLocale)) ||
-                        (!name.isEmpty() && voice.getName().equals(name)))
+                        (!name.isEmpty() && (voice.getName().equals(name) || voice.getShortName().equals(name))))
                     .findAny()
                     .orElse(null);
 

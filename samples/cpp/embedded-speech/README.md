@@ -131,6 +131,11 @@ Sample settings:
     * Make sure that each `name=value` appears on a separate line.
     * Do not use quotation marks around the values.
     * Environment variables set in this way are only in effect when the solution configuration is **Debug**.
+    * The settings are stored in plain text in a new `samples.vcxproj.user` file in the project directory.
+* If you want to run sample scenarios that depend on the example `data` files:
+  * Open menu **Debug** \> **samples Debug Properties**.
+  * Navigate to **Configuration Properties** \> **Debugging** \> **Working Directory**.
+  * Replace `$(ProjectDir)` with `$(SolutionDir)`.
 
 The application displays a menu that you can navigate using your keyboard.
 Choose the scenarios that you are interested in.

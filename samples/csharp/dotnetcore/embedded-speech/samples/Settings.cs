@@ -220,7 +220,7 @@ namespace MicrosoftSpeechSDKSamples
 
                 var result = models.FirstOrDefault(model =>
                     (modelName == null && model.Locales[0].Equals(modelLocale)) ||
-                    (modelName != null && model.Name.Equals(modelName)));
+                    (modelName != null && (model.Name.Equals(modelName) || model.Locales[0].Equals(modelName))));
 
                 if (result != null)
                 {
@@ -274,7 +274,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     var result = voicesList.Voices.FirstOrDefault(voice =>
                         (voiceName == null && voice.Locale.Equals(voiceLocale)) ||
-                        (voiceName != null && voice.Name.Equals(voiceName)));
+                        (voiceName != null && (voice.Name.Equals(voiceName) || voice.ShortName.Equals(voiceName))));
 
                     if (result != null)
                     {
