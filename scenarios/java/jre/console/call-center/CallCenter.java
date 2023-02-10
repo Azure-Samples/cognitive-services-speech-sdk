@@ -30,14 +30,14 @@ public class CallCenter
     private UserConfig _userConfig;
     
     // This should not change unless you switch to a new version of the Speech REST API.
-    final private static String speechTranscriptionPath = "/speechtotext/v3.0/transcriptions";
+    final private static String speechTranscriptionPath = "/speechtotext/v3.1/transcriptions";
 
     // These should not change unless you switch to a new version of the Cognitive Language REST API.
     final private static String sentimentAnalysisPath = "/language/:analyze-text";
     final private static String sentimentAnalysisQuery = "?api-version=2022-05-01";
     final private static String conversationAnalysisPath = "/language/analyze-conversations/jobs";
-    final private static String conversationAnalysisQuery = "?api-version=2022-05-15-preview";
-    final public static String conversationSummaryModelVersion = "2022-05-15-preview";
+    final private static String conversationAnalysisQuery = "?api-version=2022-10-01-preview";
+    final public static String conversationSummaryModelVersion = "latest";
 
     // How long to wait while polling batch transcription and conversation analysis status.
     final private static int waitSeconds = 10;
