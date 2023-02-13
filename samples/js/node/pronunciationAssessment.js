@@ -118,7 +118,9 @@ module.exports = {
             _.filter(wholelyricsArry, (item) => !!item),
             (item) => item.trim()
         );
-
+        
+        // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
+        // We need to compare with the reference text after received all recognized words to get these error words.
         const diff = new difflib.SequenceMatcher(null, wholelyricsArryRes, resTextArray);
         const lastWords = [];
         for (const d of diff.getOpcodes()) {
