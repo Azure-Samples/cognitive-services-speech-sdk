@@ -238,7 +238,7 @@ bool VerifySettings()
                     }
                     else
                     {
-                        return model->Name.compare(modelName) == 0;
+                        return model->Name.compare(modelName) == 0 || model->Locales[0].compare(modelName) == 0;
                     }
                 });
 
@@ -298,7 +298,7 @@ bool VerifySettings()
                         }
                         else
                         {
-                            return voice->Name.compare(voiceName) == 0;
+                            return voice->Name.compare(voiceName) == 0 || voice->ShortName.compare(voiceName) == 0;
                         }
                     });
 
