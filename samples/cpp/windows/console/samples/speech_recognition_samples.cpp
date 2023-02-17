@@ -638,7 +638,12 @@ void PronunciationAssessmentWithStreamInternalAsync(shared_ptr<SpeechConfig> spe
     else
     {
         auto responseJson = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult, "");
-        resultContainer.push_back(responseJson);
+        auto responsePA = PronunciationAssessmentResult::FromResult(result);
+        auto responseResult = "RECOGNIZED : Text = " + result->Text + "\n";
+        responseResult = responseResult + "  PRONUNCIATION ASSESSMENT RESULTS : \n";
+        responseResult = responseResult + "    Accuracy score: " + std::to_string(responsePA->AccuracyScore) + ", Pronunciation score: " + std::to_string(responsePA->PronunciationScore) + ", Completeness score : " + std::to_string(responsePA->CompletenessScore) + ", FluencyScore: " + std::to_string(responsePA->FluencyScore);
+
+        resultContainer.push_back(responseResult);
     }
 
     resultReceived.set_value(1);
@@ -650,7 +655,7 @@ void PronunciationAssessmentWithStream()
 {
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechConfig::FromSubscription("c764663a778847b388ed966bcbfdc785", "westus2");
 
     // Read audio data from file. In real scenario this can be from memory or network
     std::ifstream file("whatstheweatherlike.wav", std::ios::binary | std::ios::ate);
@@ -661,17 +666,19 @@ void PronunciationAssessmentWithStream()
     file.read((char*)audioData.data(), audioData.size());
 
     std::promise<int> resultReceived;
+    std::future<int> futureResult = resultReceived.get_future();
     std::vector<std::string> resultContainer;
 
     auto startTime = std::chrono::high_resolution_clock::now();
 
     auto task = std::async(std::launch::async, PronunciationAssessmentWithStreamInternalAsync, config, "what's the weather like", audioData, std::move(resultReceived), std::ref(resultContainer));
-    task.wait();
-    const auto& resultJson = resultContainer[0];
+    
+    int result = futureResult.get();
+    const auto& resultPA = resultContainer[0];
 
     auto endTime = std::chrono::high_resolution_clock::now();
 
-    std::cout << resultJson << std::endl;
+    std::cout << resultPA << std::endl;
 
     auto timeCost = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
     std::cout << "Time cost: " << timeCost << "ms" << std::endl;
