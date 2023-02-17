@@ -637,11 +637,9 @@ void PronunciationAssessmentWithStreamInternalAsync(shared_ptr<SpeechConfig> spe
     }
     else
     {
-        auto responseJson = result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult, "");
         auto responsePA = PronunciationAssessmentResult::FromResult(result);
-        auto responseResult = "RECOGNIZED : Text = " + result->Text + "\n";
-        responseResult = responseResult + "  PRONUNCIATION ASSESSMENT RESULTS : \n";
-        responseResult = responseResult + "    Accuracy score: " + std::to_string(responsePA->AccuracyScore) + ", Pronunciation score: " + std::to_string(responsePA->PronunciationScore) + ", Completeness score : " + std::to_string(responsePA->CompletenessScore) + ", FluencyScore: " + std::to_string(responsePA->FluencyScore);
+        std::string responseResult = "PRONUNCIATION ASSESSMENT RESULTS : \n";
+        responseResult = responseResult + "  Accuracy score: " + std::to_string(responsePA->AccuracyScore) + ", Pronunciation score: " + std::to_string(responsePA->PronunciationScore) + ", Completeness score : " + std::to_string(responsePA->CompletenessScore) + ", FluencyScore: " + std::to_string(responsePA->FluencyScore);
 
         resultContainer.push_back(responseResult);
     }
