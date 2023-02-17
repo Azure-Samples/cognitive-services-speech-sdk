@@ -655,7 +655,7 @@ void PronunciationAssessmentWithStream()
 {
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("c764663a778847b388ed966bcbfdc785", "westus2");
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Read audio data from file. In real scenario this can be from memory or network
     std::ifstream file("whatstheweatherlike.wav", std::ios::binary | std::ios::ate);
