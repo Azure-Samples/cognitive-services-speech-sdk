@@ -500,12 +500,26 @@
 
     <!-- Configuration and setup common to SDK objects, including events -->
     <script>
+        function getAudioStream(audioFile, cb) {
+            var fr = new FileReader();
+            fr.readAsArrayBuffer(audioFile);
+            fr.addEventListener("loadend", (e) => {
+                var buf = e.target.result;
+                cb(buf);
+            }, false);
+        }
         function getAudioConfig() {
             // If an audio file was specified, use it. Otherwise, use the microphone.
             // Depending on browser security settings, the user may be prompted to allow microphone use. Using
             // continuous recognition allows multiple phrases to be recognized from a single use authorization.
             if (audioFile) {
-                return SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
+                let audioFormat = SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1);
+                let audioStream = SpeechSDK.AudioInputStream.createPushStream();
+                getAudioStream(audioFile, (b) => {
+                    audioStream.write(b.slice());
+                    audioStream.close();
+                });
+                return SpeechSDK.AudioConfig.fromStreamInput(audioStream, audioFormat);
             } else if (inputSourceFileRadio.checked) {
                 alert('Please choose a file when selecting file input as your audio source.');
                 return;
