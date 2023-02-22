@@ -35,7 +35,7 @@ namespace MicrosoftSpeechSDKSamples
 
         // Name of the embedded speech recognition model to be used for recognition.
         // If changed from the default, this will override SpeechRecognitionLocale.
-        // For example: "Microsoft Speech Recognizer en-US FP Model V8"
+        // For example: "en-US" or "Microsoft Speech Recognizer en-US FP Model V8"
         private static readonly string EmbeddedSpeechRecognitionModelName = "YourEmbeddedSpeechRecognitionModelName"; // or set EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME
 
         // Decryption key of the (encrypted) embedded speech recognition model.
@@ -52,7 +52,7 @@ namespace MicrosoftSpeechSDKSamples
 
         // Name of the embedded speech synthesis voice to be used for synthesis.
         // If changed from the default, this will override SpeechSynthesisLocale.
-        // For example: "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
+        // For example: "en-US-JennyNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
         private static readonly string EmbeddedSpeechSynthesisVoiceName = "YourEmbeddedSpeechSynthesisVoiceName"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME
 
         // Decryption key of the (encrypted) embedded speech synthesis voice.
@@ -220,7 +220,7 @@ namespace MicrosoftSpeechSDKSamples
 
                 var result = models.FirstOrDefault(model =>
                     (modelName == null && model.Locales[0].Equals(modelLocale)) ||
-                    (modelName != null && model.Name.Equals(modelName)));
+                    (modelName != null && (model.Name.Equals(modelName) || model.Locales[0].Equals(modelName))));
 
                 if (result != null)
                 {
@@ -274,7 +274,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     var result = voicesList.Voices.FirstOrDefault(voice =>
                         (voiceName == null && voice.Locale.Equals(voiceLocale)) ||
-                        (voiceName != null && voice.Name.Equals(voiceName)));
+                        (voiceName != null && (voice.Name.Equals(voiceName) || voice.ShortName.Equals(voiceName))));
 
                     if (result != null)
                     {

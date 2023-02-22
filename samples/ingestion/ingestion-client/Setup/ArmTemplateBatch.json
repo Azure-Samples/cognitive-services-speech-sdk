@@ -194,15 +194,15 @@
             }
         },
         "PiiRedaction": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "UtteranceAndAudioLevel"
-            ],
-            "metadata": {
-                "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
-            }
+          "defaultValue": "None",
+          "type": "String",
+          "allowedValues": [
+              "None",
+              "UtteranceAndAudioLevel"
+          ],
+          "metadata": {
+              "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
+          }
         },
         "SqlAdministratorLogin": {
             "type": "string",
@@ -227,7 +227,7 @@
         }
     },
     "variables": {
-        "Version": "v2.0.2",
+        "Version": "v2.0.3",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -269,6 +269,7 @@
         "ConversationPiiCategories": "",
         "ConversationPiiRedaction": "None",
         "ConversationPiiInferenceSource": "text",
+        "ConversationSummarizationOptions": "{\"Stratergy\":{\"Key\":\"Channel\",\"Mapping\":{\"0\":\"Agent\",\"1\":\"Customer\"},\"FallbackRole\":\"None\"},\"Aspects\":[\"Issue\",\"Resolution\",\"ChapterTitle\",\"Narrative\"],\"Enabled\":false,\"InputLengthLimit\":125000}",
         "IsAzureGovDeployment": "[or(equals(parameters('AzureSpeechServicesRegion'),'usgovarizona'), equals(parameters('AzureSpeechServicesRegion'),'usgovvirginia'))]",
         "AzureSpeechServicesEndpointUri": "[if(not(equals(parameters('CustomEndpoint'),'')), parameters('CustomEndpoint'), if(variables('IsAzureGovDeployment'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.us/'), concat('https://', parameters('AzureSpeechServicesRegion') ,'.api.cognitive.microsoft.com/')))]",
         "EndpointSuffix": "[if(variables('IsAzureGovDeployment'),'core.usgovcloudapi.net','core.windows.net')]",
@@ -941,7 +942,8 @@
                 "PiiCategories": "[variables('PiiCategories')]",
                 "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
-                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]"
+                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]",
+                "ConversationSummarizationOptions":"[variables('ConversationSummarizationOptions')]"
             }
         }
     ],

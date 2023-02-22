@@ -651,10 +651,7 @@ public class SpeechRecognitionSamples {
         // and service region (e.g., "westus").
         SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Request at-start language identification with "Latency" as the priority. "Accuracy" is also supported.
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_AtStartLanguageIdPriority, "Latency");
-
-        // Define up to 4 expected spoken languages in the audio. Update the below with your own languages.
+        // Define a set of expected spoken languages in the audio. Update the below with your own languages.
         // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages.
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromLanguages(Arrays.asList("en-US", "es-MX", "de-DE"));
 
@@ -708,17 +705,13 @@ public class SpeechRecognitionSamples {
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the standard recognition model associated with the detected language.
-    // <SpeechContinuousRecognitionAndLanguageId>
     public static void continuousRecognitionFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException
     {
         // Creates an instance of a speech config with specified subscription key and service region. Replace with your own subscription key
         // and service region (e.g., "westus").
         SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Request at-start language identification with "Latency" as the priority. "Accuracy" is also supported.
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_AtStartLanguageIdPriority, "Latency");
-
-        // Define up to 4 expected spoken languages in the audio. Update the below with your own languages.
+        // Define a set of expected spoken languages in the audio. Update the below with your own languages.
         // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages.
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromLanguages(Arrays.asList("en-US", "es-MX", "de-DE"));
 
@@ -789,8 +782,7 @@ public class SpeechRecognitionSamples {
         audioConfig.close();
         autoDetectSourceLanguageConfig.close();
     }
-    // </SpeechContinuousRecognitionAndLanguageId>
-    
+
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the appropriate custom model specified, associated with the detected language.
@@ -800,10 +792,7 @@ public class SpeechRecognitionSamples {
         // and service region (e.g., "westus").
         SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-        // Request at-start language identification with "Latency" as the priority. "Accuracy" is also supported.
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_AtStartLanguageIdPriority, "Latency");
-
-        // Define up to 4 expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
+        // Define a set of expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
         // Update the below with your own languages. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
         // for all supported languages.
         // Update the below with your own custom model endpoint IDs, or omit it if you want to use the standard model.
@@ -887,9 +876,10 @@ public class SpeechRecognitionSamples {
         autoDetectSourceLanguageConfig.close();
     }
 
+    // <SpeechContinuousRecognitionAndLanguageId>
     // Shows how to do continuous speech recognition on a multilingual audio file with continuous language detection. Here, we assume the
     // spoken language in the file can alternate between English (US), Spanish (Mexico) and German.
-    // Speech recognition will use the appropriate custom model specified, associated with the detected language.
+    // If specified, speech recognition will use the custom model associated with the detected language.
     public static void continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels() throws InterruptedException, ExecutionException, IOException
     {
         // Continuous language detection with speech recognition requires the application to set a V2 endpoint URL.
@@ -900,10 +890,10 @@ public class SpeechRecognitionSamples {
         SpeechConfig speechConfig = SpeechConfig.fromEndpoint(URI.create(v2EndpointUrl), "YourSubscriptionKey");
 
         // Change the default from at-start language detection to continuous language detection, since the spoken language in the audio
-        // may change. Set the mode to "Latency". This is the only supported priority mode for continuous language detected ("Accuracy" is not supported).
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
+        // may change.
+        speechConfig.setProperty(PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous");
 
-        // Define up to 10 expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
+        // Define a set of expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
         // Update the below with your own languages. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
         // for all supported languages.
         // Update the below with your own custom model endpoint IDs, or omit it if you want to use the standard model.
@@ -916,7 +906,7 @@ public class SpeechRecognitionSamples {
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromSourceLanguageConfigs(sourceLanguageConfigs);
 
         // We provide a WAV file with English and Spanish utterances as an example. Replace with your own multilingual audio file name.
-        AudioConfig audioConfig = AudioConfig.fromWavFileInput( "en-us_es-mx.wav");
+        AudioConfig audioConfig = AudioConfig.fromWavFileInput( "es-mx_en-us.wav");
 
         // Creates a speech recognizer using file as audio input and the AutoDetectSourceLanguageConfig
         SpeechRecognizer speechRecognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
@@ -989,6 +979,7 @@ public class SpeechRecognitionSamples {
         }
         autoDetectSourceLanguageConfig.close();
     }
+    // </SpeechContinuousRecognitionAndLanguageId>
 
     // Pronunciation assessment.
     // See more information at https://aka.ms/csspeech/pa

@@ -28,5 +28,7 @@ namespace BatchClient
         public long DurationInTicks { get; set; }
 
         public IEnumerable<NBest> NBest { get; set; }
+
+        public string Locale { get; set; }
     }
 }

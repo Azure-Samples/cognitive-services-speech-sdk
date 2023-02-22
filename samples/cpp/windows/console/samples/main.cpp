@@ -16,6 +16,7 @@ extern void SpeechContinuousRecognitionWithPullStream();
 extern void SpeechContinuousRecognitionWithPushStream();
 extern void KeywordTriggeredSpeechRecognitionWithMicrophone();
 extern void PronunciationAssessmentWithMicrophone();
+extern void PronunciationAssessmentWithStream();
 extern void SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled();
 extern void SpeechRecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
 extern void SpeechContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
@@ -60,14 +61,14 @@ extern void SpeakerIdentificationWithMicrophone();
 
 // Language Id related tests
 extern void SpeechRecognitionAndLanguageIdWithMicrophone();
+extern void SpeechRecognitionAndLanguageIdWithCustomModelsWithMicrophone();
 extern void SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile();
 
 extern void TranslationAndLanguageIdWithMicrophone();
-extern void TranslationRecognitionAndLanguageIdWithMultiLingualFile();
+extern void ContinuousTranslationAndLanguageIdWithMultiLingualFile();
 
 extern void StandaloneLanguageDetectionWithMicrophone();
-extern void StandaloneLanguageDetectionInSingleshotModeWithFileInput();
-extern void StandaloneLanguageDetectionInContinuousModeWithFileInput();
+extern void StandaloneLanguageDetectionWithFileInput();
 extern void StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput();
 
 extern void DiagnosticsLoggingFileLoggerWithoutFilter();
@@ -99,6 +100,7 @@ void SpeechSamples()
                 "    Microsoft Audio Stack enabled.\n";
         cout << "d.) Speech recognition from push stream with Microsoft Audio Stack enabled and\n"
                 "    beam-forming angles specified.\n";
+        cout << "e.) Pronunciation assessment with stream.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -150,6 +152,10 @@ void SpeechSamples()
         case 'd':
             SpeechContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
             break;
+        case 'E':
+        case 'e':
+            PronunciationAssessmentWithStream();
+            break;
         case '0':
             break;
         }
@@ -163,7 +169,8 @@ void SpeechWithLanguageIdSamples()
     {
         cout << "\nSPEECH RECOGNITION WITH LANGUAGE ID SAMPLES:\n";
         cout << "1.) Speech recognition with microphone input.\n";
-        cout << "2.) Speech continuous recognition with multi-lingual file input.\n";
+        cout << "2.) Speech recognition with custom models, with microphone input.\n";
+        cout << "3.) Continuous speech recognition with multi-lingual file input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -176,6 +183,9 @@ void SpeechWithLanguageIdSamples()
             SpeechRecognitionAndLanguageIdWithMicrophone();
             break;
         case '2':
+            SpeechRecognitionAndLanguageIdWithCustomModelsWithMicrophone();
+            break;
+        case '3':
             SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile();
             break;
         case '0':
@@ -230,10 +240,10 @@ void TranslationSamples()
     do
     {
         cout << "\nTRANSLATION SAMPLES:\n";
-        cout << "1.) Translation with microphone input.\n";
-        cout << "2.) Translation continuous recognition.\n";
-        cout << "3.) Translation with language detection using microphone input.\n";
-        cout << "4.) Translation with language detection using multi-lingual file input.\n";
+        cout << "1.) Single utterance translation with microphone input.\n";
+        cout << "2.) Continuous translation with microphone input.\n";
+        cout << "3.) Single utterance translation with language detection using microphone input.\n";
+        cout << "4.) Continuous translation with language detection using multi-lingual input file.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -252,7 +262,7 @@ void TranslationSamples()
             TranslationAndLanguageIdWithMicrophone();
             break;
         case '4':
-            TranslationRecognitionAndLanguageIdWithMultiLingualFile();
+            ContinuousTranslationAndLanguageIdWithMultiLingualFile();
             break;
         case '0':
             break;
@@ -437,10 +447,9 @@ void StandaloneLanguageDetectionSamples()
     do
     {
         cout << "\nStandalone Language Detection SAMPLES:\n";
-        cout << "1.) Standalone language detection with microphone input.\n";
-        cout << "2.) Standalone language detection in single-shot mode with file input.\n";
-        cout << "3.) Standalone language detection in continuous mode with file input.\n";
-        cout << "4.) Standalone language detection in continuous mode with multi-lingual file input.\n";
+        cout << "1.) Standalone language detection (signle utterance) with microphone input.\n";
+        cout << "2.) Standalone language detection (single utterance) with file input.\n";
+        cout << "3.) Standalone language detection (continuous, multiple utterances) with multi-lingual file input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -454,14 +463,10 @@ void StandaloneLanguageDetectionSamples()
             break;
 
         case '2':
-            StandaloneLanguageDetectionInSingleshotModeWithFileInput();
+            StandaloneLanguageDetectionWithFileInput();
             break;
 
         case '3':
-            StandaloneLanguageDetectionInContinuousModeWithFileInput();
-            break;
-
-        case '4':
             StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput();
             break;
 

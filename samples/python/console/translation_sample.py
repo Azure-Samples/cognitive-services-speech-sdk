@@ -181,13 +181,14 @@ def translation_once_with_lid_from_file():
     """performs a one-shot speech translation from an audio file, with at-start language identification"""
     # <TranslationOnceWithLID>
 
-    # Set up translation parameters: default source language and a list of target languages.
-    # Currently the v2 endpoint is required. In a future SDK release you won't need to set it.
+    # When you use Language ID with speech translation, you must set a v2 endpoint.
+    # This will be fixed in a future version of Speech SDK.
+
+    # Set up translation parameters, including the list of target (translated) languages.
     endpoint_string = "wss://{}.stt.speech.microsoft.com/speech/universal/v2".format(service_region)
     translation_config = speechsdk.translation.SpeechTranslationConfig(
         subscription=speech_key,
         endpoint=endpoint_string,
-        speech_recognition_language='en-US',
         target_languages=('de', 'fr'))
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
@@ -231,19 +232,21 @@ def translation_continuous_with_lid_from_multilingual_file():
     """performs continuous speech translation from a multi-lingual audio file, with continuous language identification"""
     # <TranslationContinuousWithLID>
 
-    # Currently the v2 endpoint is required. In a future SDK release you won't need to set it.
+    # When you use Language ID with speech translation, you must set a v2 endpoint.
+    # This will be fixed in a future version of Speech SDK.
+
+    # Set up translation parameters, including the list of target (translated) languages.
     endpoint_string = "wss://{}.stt.speech.microsoft.com/speech/universal/v2".format(service_region)
     translation_config = speechsdk.translation.SpeechTranslationConfig(
         subscription=speech_key,
         endpoint=endpoint_string,
-        speech_recognition_language='en-US',
         target_languages=('de', 'fr'))
     audio_config = speechsdk.audio.AudioConfig(filename=multilingual_wav_file)
 
     # Since the spoken language in the input audio changes, you need to set the language identification to "Continuous" mode.
-    # At the moment only 'Latency' is supported as the priority.
+    # (override the default value of "AtStart").
     translation_config.set_property(
-        property_id=speechsdk.PropertyId.SpeechServiceConnection_ContinuousLanguageIdPriority, value='Latency')
+        property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value='Continuous')
 
     # Specify the AutoDetectSourceLanguageConfig, which defines the number of possible languages
     auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(

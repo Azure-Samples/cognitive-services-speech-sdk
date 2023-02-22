@@ -10,6 +10,8 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include "wav_file_reader.h"
+#include <vector>
+#include <future>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -540,133 +542,6 @@ void KeywordTriggeredSpeechRecognitionWithMicrophone()
     recognizer->StopKeywordRecognitionAsync().get();
 }
 
-// Speech recognition with auto detection for source language
-void SpeechRecognitionWithSourceLanguageAutoDetection()
-{
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-
-     // Currently this feature only supports 2 different language candidates
-     // Replace the languages with your languages in BCP-47 format, e.g. fr-FR.
-     // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
-     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
-
-     // The recognizer uses microphone,  to use file or stream as audio input, just construct the audioInput and pass to FromConfig API as the 3rd parameter.
-     // Ex: auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioInput);
-     auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig);
-     cout << "Say something in either English or German...\n";
-
-    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    // single utterance is determined by listening for silence at the end or until a maximum of 15
-    // seconds of audio is processed.  The task returns the recognition text as result.
-    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-    // shot recognition like command or query.
-    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeOnceAsync().get();
-
-    // Checks result.
-    auto autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult::FromResult(result);
-    auto language = autoDetectSourceLanguageResult->Language;
-    if (result->Reason == ResultReason::RecognizedSpeech)
-    {
-        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
-        cout << "RECOGNIZED: Language=" << language << std::endl;
-    }
-    else if (result->Reason == ResultReason::NoMatch)
-    {
-        if (language.empty())
-        {
-            // serivce cannot detect the source language
-            cout << "NOMATCH: Service cannot detect the source language." << std::endl;
-        }
-        else
-        {
-            // serivce can detect the source language but cannot recongize the speech content
-            cout << "NOMATCH: Service can recognize the speech." << std::endl;
-        }
-    }
-    else if (result->Reason == ResultReason::Canceled)
-    {
-        auto cancellation = CancellationDetails::FromResult(result);
-        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
-
-        if (cancellation->Reason == CancellationReason::Error)
-        {
-            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
-            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
-            cout << "CANCELED: Did you update the subscription info?" << std::endl;
-        }
-    }
-}
-
-// Speech recognition with auto detection for source language and using customized model
-void SpeechRecognitionWithSourceLanguageAutoDetectionUsingCustomizedModel()
-{
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-
-    std::vector<std::shared_ptr<SourceLanguageConfig>> sourceLanguageConfigs;
-    // Replace the languages with your languages in BCP-47 format, e.g. zh-CN.
-    sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("en-US"));
-    // Replace the languages with your languages in BCP-47 format, e.g. zh-CN.
-    // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages
-    // Set the endpoint ID of your customized mode that will be used for fr-FR,  Replace with your own CRIS endpoint ID.
-    sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("fr-FR", "The Endpoint Id for custom model of fr-FR"));
-    // Construct AutoDetectSourceLanguageConfig with the 2 source language configurations
-    // Currently this feature only supports 2 different language candidates
-    auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs(sourceLanguageConfigs);
-
-    // Creates a speech recognizer using the auto detect source language config
-    // The recognizer uses microphone,  to use file or stream as audio input, just construct the audioInput and pass to FromConfig API as the 3rd parameter.
-    // Ex: auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioInput);
-    auto recognizer = SpeechRecognizer::FromConfig(config, autoDetectSourceLanguageConfig);
-    cout << "Say something in either English or French...\n";
-
-    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    // single utterance is determined by listening for silence at the end or until a maximum of 15
-    // seconds of audio is processed.  The task returns the recognition text as result.
-    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-    // shot recognition like command or query.
-    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
-    auto result = recognizer->RecognizeOnceAsync().get();
-
-    // Checks result.
-    auto autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult::FromResult(result);
-    auto language = autoDetectSourceLanguageResult->Language;
-    if (result->Reason == ResultReason::RecognizedSpeech)
-    {
-        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
-        cout << "RECOGNIZED: Language=" << language << std::endl;
-    }
-    else if (result->Reason == ResultReason::NoMatch)
-    {
-        if (language.empty())
-        {
-            // serivce cannot detect the source language
-            cout << "NOMATCH: Service cannot detect the source language." << std::endl;
-        }
-        else
-        {
-            // serivce can detect the source language but cannot recongize the speech content
-            cout << "NOMATCH: Service can recognize the speech." << std::endl;
-        }
-    }
-    else if (result->Reason == ResultReason::Canceled)
-    {
-        auto cancellation = CancellationDetails::FromResult(result);
-        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
-
-        if (cancellation->Reason == CancellationReason::Error)
-        {
-            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
-            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
-            cout << "CANCELED: Did you update the subscription info?" << std::endl;
-        }
-    }
-}
-
 // Pronunciation assessment.
 void PronunciationAssessmentWithMicrophone()
 {
@@ -740,6 +615,73 @@ void PronunciationAssessmentWithMicrophone()
     }
 }
 
+void PronunciationAssessmentWithStreamInternalAsync(shared_ptr<SpeechConfig> speechConfig, std::string referenceText, std::vector<uint8_t> audioData, std::promise<int> resultReceived, std::vector<std::string>& resultContainer)
+{
+    auto audioFormat = AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1); // This need be set based on the format of the given audio data
+    auto audioInputStream = AudioInputStream::CreatePushStream(audioFormat);
+    auto audioConfig = AudioConfig::FromStreamInput(audioInputStream);
+    auto speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
+
+    // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    auto pronAssessmentConfig = PronunciationAssessmentConfig::Create(referenceText, PronunciationAssessmentGradingSystem::HundredMark, PronunciationAssessmentGranularity::Phoneme, false);
+    pronAssessmentConfig->ApplyTo(speechRecognizer);
+
+    audioInputStream->Write(audioData.data(), static_cast<uint32_t>(audioData.size()));
+    audioInputStream->Write(nullptr, 0);// send a zero-size chunk to signal the end of stream
+
+    auto result = speechRecognizer->RecognizeOnceAsync().get();
+    if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellationDetails = CancellationDetails::FromResult(result);
+        std::cout << cancellationDetails->ErrorDetails << std::endl;
+    }
+    else
+    {
+        auto responsePA = PronunciationAssessmentResult::FromResult(result);
+        std::string responseResult = "PRONUNCIATION ASSESSMENT RESULTS : \n";
+        responseResult = responseResult + "  Accuracy score: " + std::to_string(responsePA->AccuracyScore) + ", Pronunciation score: " + std::to_string(responsePA->PronunciationScore) + ", Completeness score : " + std::to_string(responsePA->CompletenessScore) + ", FluencyScore: " + std::to_string(responsePA->FluencyScore);
+
+        resultContainer.push_back(responseResult);
+    }
+
+    resultReceived.set_value(1);
+}
+
+// Pronunciation assessment with audio stream input.
+// See more information at https://aka.ms/csspeech/pa
+void PronunciationAssessmentWithStream()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Read audio data from file. In real scenario this can be from memory or network
+    std::ifstream file("whatstheweatherlike.wav", std::ios::binary | std::ios::ate);
+    auto audioDataWithHeaderSize = file.tellg();
+    file.seekg(46);
+    auto audioData = std::vector<uint8_t>(static_cast<size_t>(audioDataWithHeaderSize) - static_cast<size_t>(46));
+
+    file.read((char*)audioData.data(), audioData.size());
+
+    std::promise<int> resultReceived;
+    std::future<int> futureResult = resultReceived.get_future();
+    std::vector<std::string> resultContainer;
+
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto task = std::async(std::launch::async, PronunciationAssessmentWithStreamInternalAsync, config, "what's the weather like", audioData, std::move(resultReceived), std::ref(resultContainer));
+    
+    int result = futureResult.get();
+    const auto& resultPA = resultContainer[0];
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+
+    std::cout << resultPA << std::endl;
+
+    auto timeCost = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+    std::cout << "Time cost: " << timeCost << "ms" << std::endl;
+}
+
 #pragma region Language Detection related samples
 
 void SpeechRecognitionAndLanguageIdWithMicrophone()
@@ -747,16 +689,17 @@ void SpeechRecognitionAndLanguageIdWithMicrophone()
     // <SpeechRecognitionAndLanguageIdWithMicrophone>
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
-    // Language Id feature requirement
-    // Please refer to language id document for different modes
-    config->SetProperty(PropertyId::SpeechServiceConnection_SingleLanguageIdPriority, "Latency");
+    // Define the set of spoken languages that will need to be identified.
+    // Replace the languages with your languages in BCP-47 format, e.g. "fr-FR".
+    // Please see https://learn.microsoft.com/azure/cognitive-services/speech-service/language-support?tabs=language-identification
+    // for the full list of supported languages
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "de-DE" });
 
     // Creates a speech recognizer using microphone as audio input.
-    auto recognizer = SpeechRecognizer::FromConfig(config, autoDetectSourceLanguageConfig);
-    cout << "Say something...\n";
+    auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig);
+    cout << "Say something in English or German...\n";
 
     // Starts speech recognition, and returns after a single utterance is recognized. The end of a
     // single utterance is determined by listening for silence at the end or until a maximum of 15
@@ -791,24 +734,102 @@ void SpeechRecognitionAndLanguageIdWithMicrophone()
     // </SpeechRecognitionAndLanguageIdWithMicrophone>
 }
 
+
+void SpeechRecognitionAndLanguageIdWithCustomModelsWithMicrophone()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    std::vector<std::shared_ptr<SourceLanguageConfig>> sourceLanguageConfigs;
+
+    // Replace the languages with your languages in BCP-47 format, e.g. zh-CN.
+    sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("en-US"));
+
+    // Replace the languages with your languages in BCP-47 format, e.g. zh-CN.
+    // Please see https://learn.microsoft.com/azure/cognitive-services/speech-service/language-support?tabs=language-identification for all supported languages.
+    // Set the endpoint ID of your customized mode that will be used for fr-FR,  Replace with your own CRIS endpoint ID.
+    sourceLanguageConfigs.push_back(SourceLanguageConfig::FromLanguage("fr-FR", "The Endpoint Id for custom model of fr-FR"));
+
+    // Construct AutoDetectSourceLanguageConfig with the 2 source language configurations
+    // Currently this feature only supports 2 different language candidates
+    auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromSourceLanguageConfigs(sourceLanguageConfigs);
+
+    // Creates a speech recognizer using the auto detect source language config
+    // The recognizer uses microphone,  to use file or stream as audio input, just construct the audioInput and pass to FromConfig API as the 3rd parameter.
+    // Ex: auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioInput);
+    auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig);
+    cout << "Say something in either English or French...\n";
+
+    // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+    // single utterance is determined by listening for silence at the end or until a maximum of 15
+    // seconds of audio is processed.  The task returns the recognition text as result.
+    // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+    // shot recognition like command or query.
+    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+    auto result = recognizer->RecognizeOnceAsync().get();
+
+    // Checks result.
+    auto autoDetectSourceLanguageResult = AutoDetectSourceLanguageResult::FromResult(result);
+    auto language = autoDetectSourceLanguageResult->Language;
+    if (result->Reason == ResultReason::RecognizedSpeech)
+    {
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl;
+        cout << "RECOGNIZED: Language=" << language << std::endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        if (language.empty())
+        {
+            // serivce cannot detect the source language
+            cout << "NOMATCH: Service cannot detect the source language." << std::endl;
+        }
+        else
+        {
+            // serivce can detect the source language but cannot recongize the speech content
+            cout << "NOMATCH: Service can recognize the speech." << std::endl;
+        }
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+    }
+}
+
+
 void SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile()
 {
     // <SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile>
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Note: For multi-lingual speech recognition with language id, it only works with speech v2 endpoint, you must use FromEndpoint api in order to use the speech v2 endpoint.
-    // Replace the region with your service region
-    string speechv2Endpoint = "wss://YourServiceRegion.stt.speech.microsoft.com/speech/universal/v2";
-    auto config = SpeechConfig::FromEndpoint(speechv2Endpoint, "YourSubscriptionKey");
 
-    // Language Id feature requirement
-    // Please refer to language id document for different modes
-    config->SetProperty(PropertyId::SpeechServiceConnection_ContinuousLanguageIdPriority, "Latency");
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Note: For multi-lingual speech recognition with language id, it only works with speech v2 endpoint,
+    // you must use FromEndpoint api in order to use the speech v2 endpoint.
+
+    // Replace YourServiceRegion with your region, for example "westus", and
+    // replace YourSubscriptionKey with your own speech key.
+    string speechv2Endpoint = "wss://YourServiceRegion.stt.speech.microsoft.com/speech/universal/v2";
+    auto speechConfig = SpeechConfig::FromEndpoint(speechv2Endpoint, "YourSubscriptionKey");
+    
+    // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
+    // Please refer to the documentation of Language ID for more information.
+    // https://aka.ms/speech/lid?pivots=programming-language-cpp
+    speechConfig->SetProperty(PropertyId::SpeechServiceConnection_LanguageIdMode, "Continuous");
+
+    // Define the set of languages to detect
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "en-US", "zh-CN" });
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
     auto audioInput = AudioConfig::FromWavFileInput("en-us_zh-cn.wav");
-    auto recognizer = SpeechRecognizer::FromConfig(config, autoDetectSourceLanguageConfig, audioInput);
+    auto recognizer = SpeechRecognizer::FromConfig(speechConfig, autoDetectSourceLanguageConfig, audioInput);
 
     // promise for synchronization of recognition end.
     promise<void> recognitionEnd;

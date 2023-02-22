@@ -16,6 +16,7 @@ namespace Language
     using Azure.Core;
 
     using Connector;
+    using Connector.Constants;
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
@@ -51,6 +52,9 @@ namespace Language
             return FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
         }
 
+        public static bool IsConversationalSummarizationEnabled()
+            => FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Enabled;
+
         /// <summary>
         /// API to submit an analyzeConversations async Request.
         /// </summary>
@@ -61,9 +65,39 @@ namespace Language
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
 
             var data = new List<AnalyzeConversationsRequest>();
+            var summarizationData = new AnalyzeConversationsRequest
+            {
+                DisplayName = "IngestionClient - Summarization",
+                AnalysisInput = new AnalysisInput(new[]
+                {
+                    new Conversation
+                    {
+                        Id = $"whole transcript",
+                        Modality = Modality.transcript,
+                        ConversationItems = new List<ConversationItem>()
+                    }
+                }),
+                Tasks = new List<AnalyzeConversationsTask>(),
+            };
+
             var count = -1;
             var jobCount = 0;
             var turnCount = 0;
+            foreach (var aspect in FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Aspects)
+            {
+                summarizationData.Tasks.Add(new AnalyzeConversationsTask
+                {
+                    TaskName = "Conversation Summarization task - " + aspect,
+                    Kind = AnalyzeConversationsTaskKind.ConversationalSummarizationTask,
+                    Parameters = new Dictionary<string, object>
+                    {
+                        {
+                            "summaryAspects", new[] { aspect.ToString() }
+                        },
+                    }
+                });
+            }
+
             foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
             {
                 var topResult = recognizedPhrase.NBest.First();
@@ -109,7 +143,7 @@ namespace Language
                     });
                 }
 
-                data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(new ConversationItem
+                var utterance = new ConversationItem
                 {
                     Text = topResult.Display,
                     Lexical = topResult.Lexical,
@@ -117,6 +151,11 @@ namespace Language
                     MaskedItn = topResult.MaskedITN,
                     Id = $"{turnCount}__{recognizedPhrase.Offset}__{recognizedPhrase.Channel}",
                     ParticipantId = $"{recognizedPhrase.Channel}",
+                    ConversationItemLevelTiming = new AudioTiming
+                    {
+                        Offset = recognizedPhrase.OffsetInTicks,
+                        Duration = recognizedPhrase.DurationInTicks,
+                    },
                     AudioTimings = topResult.Words
                         ?.Select(word => new WordLevelAudioTiming
                         {
@@ -124,9 +163,41 @@ namespace Language
                             Duration = (long)word.DurationInTicks,
                             Offset = (long)word.OffsetInTicks
                         })
-                });
+                };
+                data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
+
+                // for summarization
+                var stratergy = FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Stratergy;
+                var roleKey = stratergy.Key switch
+                {
+                    RoleAssignmentMappingKey.Channel => recognizedPhrase.Channel,
+                    RoleAssignmentMappingKey.Speaker => recognizedPhrase.Speaker,
+                    _ => throw new ArgumentOutOfRangeException($"Unknown stratergy.Key: {stratergy.Key}"),
+                };
+                if (!stratergy.Mapping.TryGetValue(roleKey, out var role))
+                {
+                    role = stratergy.FallbackRole;
+                }
+
+                if (role != Role.None && count + textCount < FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.InputLengthLimit)
+                {
+                    utterance.Role = utterance.ParticipantId = role.ToString();
+                    summarizationData.AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
+                }
+
                 count += textCount;
                 turnCount++;
+            }
+
+            this.log.LogInformation($"{summarizationData.Tasks.Count} Summarization Tasks Prepared. Locale = {this.locale}. chars = {count}. total turns = {turnCount}. turns for summarization = {summarizationData.AnalysisInput.Conversations[0].ConversationItems.Count}");
+
+            if (this.locale != null
+                && this.locale.StartsWith(Constants.SummarizationSupportedLocalePrefix)
+                && summarizationData.AnalysisInput.Conversations[0].ConversationItems.Count > 0)
+            {
+                summarizationData.AnalysisInput.Conversations[0].Language = Constants.SummarizationSupportedLocalePrefix;
+                data.Add(summarizationData);
+                jobCount++;
             }
 
             this.log.LogInformation($"Submitting {jobCount} jobs to Conversations...");
@@ -139,22 +210,22 @@ namespace Language
         /// </summary>
         /// <param name="jobIds">Enumerable of conversational jobIds.</param>
         /// <returns>Enumerable of results of conversation PII redaction and errors encountered if any.</returns>
-        public async Task<(AnalyzeConversationPiiResults piiResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
+        public async Task<(AnalyzeConversationPiiResults piiResults, AnalyzeConversationSummarizationResults summarizationResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
         {
             var errors = new List<string>();
             if (!jobIds.Any())
             {
-                return (null, errors);
+                return (null, null, errors);
             }
 
             var tasks = jobIds.Select(async jobId => await this.GetConversationsOperationResults(jobId).ConfigureAwait(false));
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var piiErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors);
-            if (piiErrors.Any())
+            var resultsErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors).Concat(results.SelectMany(result => result.summarizationResults).SelectMany(s => s.Errors));
+            if (resultsErrors.Any())
             {
-                errors.AddRange(piiErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
-                return (null, errors);
+                errors.AddRange(resultsErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
+                return (null, null, errors);
             }
 
             var warnings = results.SelectMany(result => result.piiResults).SelectMany(s => s.Conversations).SelectMany(s => s.Warnings);
@@ -190,7 +261,21 @@ namespace Language
                 CombinedRedactedContent = combinedRedactedContent
             };
 
-            return (piiResults, errors);
+            var summarizationResults = new AnalyzeConversationSummarizationResults
+            {
+                Conversations = new List<ConversationsSummaryResult>
+                {
+                    new ConversationsSummaryResult
+                    {
+                        Summaries = results.SelectMany(
+                            r => r.summarizationResults.SelectMany(
+                                s => s.Conversations.SelectMany(
+                                    c => c.Summaries)))
+                    },
+                },
+            };
+
+            return (piiResults, summarizationResults, errors);
         }
 
         /// <summary>
@@ -200,7 +285,7 @@ namespace Language
         /// <returns>True if all requests completed, else false.</returns>
         public async Task<bool> ConversationalRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!IsConversationalPiiEnabled() || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests != null).Any())
+            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()) || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests != null).Any())
             {
                 return true;
             }
@@ -243,8 +328,7 @@ namespace Language
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
             var errors = new List<string>();
 
-            var isConversationalPiiEnabled = IsConversationalPiiEnabled();
-            if (!isConversationalPiiEnabled)
+            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()))
             {
                 return new List<string>();
             }
@@ -254,16 +338,17 @@ namespace Language
                 return errors;
             }
 
-            var conversationsPiiResults = await this.GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
+            var conversationsResults = await this.GetConversationsOperationsResult(conversationJobIds).ConfigureAwait(false);
 
-            if (conversationsPiiResults.errors.Any())
+            if (conversationsResults.errors.Any())
             {
-                errors.AddRange(conversationsPiiResults.errors);
+                errors.AddRange(conversationsResults.errors);
             }
 
             speechTranscript.ConversationAnalyticsResults = new ConversationAnalyticsResults
             {
-                AnalyzeConversationPiiResults = conversationsPiiResults.piiResults,
+                AnalyzeConversationPiiResults = conversationsResults.piiResults,
+                AnalyzeConversationSummarizationResults = conversationsResults.summarizationResults,
             };
 
             return errors;
@@ -306,7 +391,7 @@ namespace Language
             return (jobs, errors);
         }
 
-        private async Task<(IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<string> errors)> GetConversationsOperationResults(string jobId)
+        private async Task<(IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<AnalyzeConversationSummarizationResults> summarizationResults, IEnumerable<string> errors)> GetConversationsOperationResults(string jobId)
         {
             var errors = new List<string>();
             try
@@ -325,10 +410,15 @@ namespace Language
                 if (analysisResult.Tasks.InProgress == 0)
                 {
                     // all tasks completed.
-                    return (analysisResult.Tasks
+                    var piiResults = analysisResult.Tasks
                         .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults)
                         .Select(s => s as ConversationPiiItem)
-                        .Select(s => s.Results), errors);
+                        .Select(s => s.Results);
+                    var summarizationResults = analysisResult.Tasks
+                        .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults)
+                        .Select(s => s as ConversationSummarizationItem)
+                        .Select(s => s.Results);
+                    return (piiResults, summarizationResults, errors);
                 }
             }
             catch (OperationCanceledException)
@@ -342,7 +432,7 @@ namespace Language
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 
-            return (null, errors);
+            return (null, null, errors);
         }
     }
 }

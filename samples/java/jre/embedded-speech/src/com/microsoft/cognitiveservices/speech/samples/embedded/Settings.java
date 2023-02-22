@@ -33,7 +33,7 @@ public class Settings
 
     // Name of the embedded speech recognition model to be used for recognition.
     // If changed from the default, this will override SpeechRecognitionLocale.
-    // For example: "Microsoft Speech Recognizer en-US FP Model V8"
+    // For example: "en-US" or "Microsoft Speech Recognizer en-US FP Model V8"
     private static final String EmbeddedSpeechRecognitionModelName = "YourEmbeddedSpeechRecognitionModelName"; // or set EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME
 
     // Decryption key of the (encrypted) embedded speech recognition model.
@@ -50,7 +50,7 @@ public class Settings
 
     // Name of the embedded speech synthesis voice to be used for synthesis.
     // If changed from the default, this will override SpeechSynthesisLocale.
-    // For example: "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
+    // For example: "en-US-JennyNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
     private static final String EmbeddedSpeechSynthesisVoiceName = "YourEmbeddedSpeechSynthesisVoiceName"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME
 
     // Decryption key of the (encrypted) embedded speech synthesis voice.
@@ -220,7 +220,7 @@ public class Settings
             SpeechRecognitionModel result = models.stream()
                 .filter(model ->
                     (name.isEmpty() && model.getLocales().get(0).equals(modelLocale)) ||
-                    (!name.isEmpty() && model.getName().equals(name)))
+                    (!name.isEmpty() && (model.getName().equals(name) || model.getLocales().get(0).equals(name))))
                 .findAny()
                 .orElse(null);
 
@@ -277,7 +277,7 @@ public class Settings
                 VoiceInfo result = voicesList.getVoices().stream()
                     .filter(voice ->
                         (name.isEmpty() && voice.getLocale().equals(voiceLocale)) ||
-                        (!name.isEmpty() && voice.getName().equals(name)))
+                        (!name.isEmpty() && (voice.getName().equals(name) || voice.getShortName().equals(name))))
                     .findAny()
                     .orElse(null);
 

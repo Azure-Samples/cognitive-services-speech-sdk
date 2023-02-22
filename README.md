@@ -47,7 +47,7 @@ The [SDK documentation](https://aka.ms/csspeech) has extensive sections about ge
 ## Build and run the samples
 
 > **Note: the samples make use of the Microsoft Cognitive Services Speech SDK.
-> By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license201809).**
+> By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 Please see the description of each individual sample for instructions on how to build and run it.
 
@@ -55,7 +55,7 @@ Please see the description of each individual sample for instructions on how to 
 
 * [Azure-Samples/Cognitive-Services-Voice-Assistant](https://github.com/Azure-Samples/Cognitive-Services-Voice-Assistant) - Additional samples and tools to help you build an application that uses Speech SDK's DialogServiceConnector for voice communication with your [Bot-Framework bot](https://dev.botframework.com/) or [Custom Command](https://docs.microsoft.com/azure/cognitive-services/speech-service/custom-commands) web application.
 
-* [microsoft/cognitive-services-speech-sdk-js](https://github.com/microsoft/cognitive-services-speech-sdk-js) - Java Script implementation of Speech SDK
+* [microsoft/cognitive-services-speech-sdk-js](https://github.com/microsoft/cognitive-services-speech-sdk-js) - JavaScript implementation of Speech SDK
 
 * [Microsoft/cognitive-services-speech-sdk-go](https://github.com/Microsoft/cognitive-services-speech-sdk-go) - Go implementation of Speech SDK
 
