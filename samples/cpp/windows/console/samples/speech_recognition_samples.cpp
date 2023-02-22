@@ -10,6 +10,8 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include "wav_file_reader.h"
+#include <vector>
+#include <future>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -611,6 +613,73 @@ void PronunciationAssessmentWithMicrophone()
             }
         }
     }
+}
+
+void PronunciationAssessmentWithStreamInternalAsync(shared_ptr<SpeechConfig> speechConfig, std::string referenceText, std::vector<uint8_t> audioData, std::promise<int> resultReceived, std::vector<std::string>& resultContainer)
+{
+    auto audioFormat = AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1); // This need be set based on the format of the given audio data
+    auto audioInputStream = AudioInputStream::CreatePushStream(audioFormat);
+    auto audioConfig = AudioConfig::FromStreamInput(audioInputStream);
+    auto speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
+
+    // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    auto pronAssessmentConfig = PronunciationAssessmentConfig::Create(referenceText, PronunciationAssessmentGradingSystem::HundredMark, PronunciationAssessmentGranularity::Phoneme, false);
+    pronAssessmentConfig->ApplyTo(speechRecognizer);
+
+    audioInputStream->Write(audioData.data(), static_cast<uint32_t>(audioData.size()));
+    audioInputStream->Write(nullptr, 0);// send a zero-size chunk to signal the end of stream
+
+    auto result = speechRecognizer->RecognizeOnceAsync().get();
+    if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellationDetails = CancellationDetails::FromResult(result);
+        std::cout << cancellationDetails->ErrorDetails << std::endl;
+    }
+    else
+    {
+        auto responsePA = PronunciationAssessmentResult::FromResult(result);
+        std::string responseResult = "PRONUNCIATION ASSESSMENT RESULTS : \n";
+        responseResult = responseResult + "  Accuracy score: " + std::to_string(responsePA->AccuracyScore) + ", Pronunciation score: " + std::to_string(responsePA->PronunciationScore) + ", Completeness score : " + std::to_string(responsePA->CompletenessScore) + ", FluencyScore: " + std::to_string(responsePA->FluencyScore);
+
+        resultContainer.push_back(responseResult);
+    }
+
+    resultReceived.set_value(1);
+}
+
+// Pronunciation assessment with audio stream input.
+// See more information at https://aka.ms/csspeech/pa
+void PronunciationAssessmentWithStream()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Read audio data from file. In real scenario this can be from memory or network
+    std::ifstream file("whatstheweatherlike.wav", std::ios::binary | std::ios::ate);
+    auto audioDataWithHeaderSize = file.tellg();
+    file.seekg(46);
+    auto audioData = std::vector<uint8_t>(static_cast<size_t>(audioDataWithHeaderSize) - static_cast<size_t>(46));
+
+    file.read((char*)audioData.data(), audioData.size());
+
+    std::promise<int> resultReceived;
+    std::future<int> futureResult = resultReceived.get_future();
+    std::vector<std::string> resultContainer;
+
+    auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto task = std::async(std::launch::async, PronunciationAssessmentWithStreamInternalAsync, config, "what's the weather like", audioData, std::move(resultReceived), std::ref(resultContainer));
+    
+    int result = futureResult.get();
+    const auto& resultPA = resultContainer[0];
+
+    auto endTime = std::chrono::high_resolution_clock::now();
+
+    std::cout << resultPA << std::endl;
+
+    auto timeCost = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+    std::cout << "Time cost: " << timeCost << "ms" << std::endl;
 }
 
 #pragma region Language Detection related samples
