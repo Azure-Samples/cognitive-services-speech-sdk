@@ -486,7 +486,7 @@
 
             enumerateMicrophones();
 
-            Initialize(function (speechSdk) {
+            Initialize(async function (speechSdk) {
                 SpeechSDK = speechSdk;
 
                 // in case we have a function for getting an authorization token, call it.
