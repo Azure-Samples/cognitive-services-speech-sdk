@@ -300,7 +300,7 @@ def speech_recognize_async_from_file():
 
     # Perform recognition. `recognize_async` does not block until recognition is complete,
     # so other tasks can be performed while recognition is running.
-    # However, recognition stops when the first utterance has bee recognized.
+    # However, recognition stops when the first utterance has been recognized.
     # For long-running recognition, use continuous recognitions instead.
     result_future = speech_recognizer.recognize_once_async()
 
