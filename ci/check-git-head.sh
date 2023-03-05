@@ -62,7 +62,7 @@ checkEmptyStdout \
 # Note: we rely on binary files being identified correctly (cf. above)
 # TODO limit to specific extensions if necessary
 checkEmptyStdout \
-  "git grep -I -l \$'\t' $gitTree | cut -d: -f2- | grep -v -e ^external/ -e \.sln$ -e /Makefile$ -e project\.pbxproj -e Info\.plist -e sampledata/.*\.txt -e public_samples/sampledata/.*\.txt" \
+  "git grep -I -l \$'\t' $gitTree | cut -d: -f2- | grep -v -e ^external/ -e \.sln$ -e /Makefile$ -e project\.pbxproj -e Info\.plist -e sampledata/.*\.txt -e public_samples/speech/sampledata/.*\.txt" \
   "text file(s) with hard tabs encountered"
 
 checkEmptyStdout \
@@ -70,7 +70,7 @@ checkEmptyStdout \
   "Shell scripts should have executable permissions set, please fix"
 
 checkEmptyStdout \
-  "git grep -I -l $'\xEF\xBB\xBF' $gitTree | cut -d: -f2 | grep -v -e sampledata/.*\.txt -e public_samples/sampledata/.*\.txt" \
+  "git grep -I -l $'\xEF\xBB\xBF' $gitTree | cut -d: -f2 | grep -v -e sampledata/.*\.txt -e public_samples/speech/sampledata/.*\.txt" \
   "BOM detected, please remove from beginning of files (or add an exception)"
 
 # Note: we rely on binary files being identified correctly (cf. above)
