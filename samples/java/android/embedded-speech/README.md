@@ -11,7 +11,7 @@ Hybrid speech uses cloud speech services by default and embedded speech as a fal
 > * Embedded speech is in [preview](https://aka.ms/embedded-speech) and details in this document and samples are subject to change.
 > * Embedded speech recognition only supports audio in the following format:
 >   * single channel
->   * 16000 Hz sample rate
+>   * 8000 or 16000 Hz sample rate
 >   * 16-bit little-endian signed integer samples
 
 ## Prerequisites
@@ -69,7 +69,7 @@ Do **not** add [client-sdk](https://mvnrepository.com/artifact/com.microsoft.cog
 **Note:** Make sure that `@aar` suffix is used when the dependency is specified in `build.gradle`. For example,
 ```
 dependencies {
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.25.0@aar'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.26.0@aar'
     ...
 ```
 
