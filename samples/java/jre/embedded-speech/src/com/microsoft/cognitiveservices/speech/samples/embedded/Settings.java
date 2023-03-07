@@ -139,9 +139,9 @@ public class Settings
             }
         }
 
-        // Enable profanity masking.
+        // Disable profanity masking.
         /*
-        config.setProfanity(ProfanityOption.Masked);
+        config.setProfanity(ProfanityOption.Raw);
         */
 
         return config;

@@ -146,9 +146,9 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
         }
     }
 
-    // Enable profanity masking.
+    // Disable profanity masking.
     /*
-    config->SetProfanity(ProfanityOption::Masked);
+    config->SetProfanity(ProfanityOption::Raw);
     */
 
     return config;
