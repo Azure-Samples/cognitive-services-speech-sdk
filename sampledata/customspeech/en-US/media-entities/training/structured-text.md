@@ -1,0 +1,1803 @@
+@ list media_title =
+- big star
+- evil papagali
+- contact
+- T 5
+- breathworks and mindfulness
+- codigo
+- wells fargo
+- titanic
+- west
+- the fire within
+- blades of glory
+- star wars the old republic
+- munich
+- deadlight
+- kelly green garden queen
+- microsoft office
+- Dude Looks Like A Lady
+- tennis court
+- subway surfer
+- overwatch
+- blank space
+- sugar
+- WWE picana
+- my home
+- sweet Caroline
+- level 4027
+- can i kick it
+- faith
+- seeing you
+- i love you
+- walk it out
+- jump into the fog
+- saturday night fever
+- holiday
+- google classroom
+- google photos
+- happy hours
+- five hours
+- let's
+- titanium
+- gabriel's oboe
+- strawberry fields forever
+- unbreakable
+- white as snow
+- just dance 2016
+- because he lives
+- the year me a beat up
+- Jana gana Mana
+- photoshop express
+- giant glory twenty sixteen advanced
+- mind
+- photos
+- hellfire
+- drive by
+- hound dog
+- paint it black
+- let it go
+- in the morning
+- wildfire
+- if i ever feel better
+- Steve Harvey Morning Show
+- seven seas of rhye
+- Pandora app
+- show box
+- five nights at freddy's
+- idc twenty seventeen
+- long live
+- someone like you
+- party in the usa
+- international love
+- thrift shop
+- tulapur know the moon from kids united
+- the avengers
+- hot cock
+- the office
+- pinky and the brain
+- office three six five
+- winzip
+- get home
+- 'Freebird'
+- slingbox
+- office
+- fried rice
+- elder scrolls
+- magic
+- gambling
+- i wanna rock
+- blue classic
+- mtv
+- millennium
+- family guy
+- spy kids
+- wheel of fortune
+- microsoft paint
+- abg
+- chrome
+- radio four
+- my favorite song
+- xactimate
+- one two three free solitaire
+- romeo and juliet
+- Budget and Cents
+- minecraft
+- dropbox
+- nursery rhymes for kids
+- later
+- with you
+- ds
+- it's my life
+- cola
+- cw
+- big hero six
+- eastenders
+- bright
+- flag
+- the flash
+- hunter x hunter opening
+- star wars theme
+- lucky fish casino
+- free cell
+- league of legends
+- gangnam style
+- dead alive ickee bring dead
+- salmo
+- netflix one
+- java
+- X
+- circles
+- purple rain
+- mean
+- the pretender
+- boogie
+- rolling in the deep
+- naruto o p fifteen
+- kill the sun
+- the name of the game
+- Madden
+- halo
+- smite
+- age of mythology extended
+- ghost of ratman
+- do it for the love
+- ampps
+- skype
+- work
+- under the bridge
+- my songs know what you did in the dark light it up
+- jealous
+- some nights
+- hello
+- putlocker
+- lemon tree
+- trap queen
+- avengers theme
+- apple
+- dragon
+- paper planes
+- rock paper scissors
+- tangled up in blue
+- midnight city
+- music beat
+- mahjong
+- nobody's home
+- stop crying your head out
+- bubble witch saga
+- google earth
+- prison life
+- candy crush saga
+- cortana
+- what does the foxy say
+- pendulum
+- star wars
+- itunes
+- its my life
+- time of your life
+- achilles tendon
+- aeroplane over the sea
+- you are my sunshine on the banjo
+- halo reach
+- teen titans go
+- black and yellow
+- don't say goodbye again
+- between the buried and me
+- party all night
+- good night
+- rather be
+- with me
+- waves
+- tmc kodi
+- chocolate
+- love me like you do
+- Disney junior
+- today
+- best day of my life
+- best of the allman brothers
+- money for nothing
+- renegade
+- call of duty
+- sword art
+- radio aalto
+- person of interest
+- stardew valley
+- grimm
+- no way
+- solitaire
+- sesame street
+- boogey
+- town called malice
+- luna
+- my father
+- yahoo messenger
+- photoshop
+- mountain music
+- pimpin man
+- atmosphere
+- boom
+- garry's mod
+- covenant
+- crystal world
+- witcher three
+- borderlands two
+- transformers four
+- oops i did it again
+- asphalt eight
+- song
+- google keep
+- onedrive
+- microsoft
+- facebook
+- google chrome
+- paradise
+- yoshimi battles pink robots
+- subway surfers
+- zero eight well i'm alive
+- geronimo
+- all right i""ll sign the papers
+- homework
+- thirteen
+- ultraviolet
+- shout out to
+- when the beat drops out
+- clubland
+- cool control
+- this war is ours
+- time to burn
+- Capital FM
+- people get ready
+- three idiots
+- for the first time in forever
+- castle clash
+- fallout four
+- clash of clans
+- legal
+- she still loves me
+- happy
+- what the water gave me
+- i want to be with you
+- end game
+- wop
+- i'm made of wax larry what are you made of
+- glee
+- wreck it ralph
+- singham returns
+- aashiqui
+- call to dance
+- daydream
+- anjaana anjaani
+- mama mia
+- listen here
+- undone
+- closer
+- royals
+- something nice to me
+- joe
+- nobody's listening
+- o valencia
+- paw patrol
+- twitter
+- sway
+- the hills
+- voyages ep
+- problem
+- wake me up
+- back to basics
+- movie game
+- ukrainian national anthem
+- 2
+- spotty
+- hotel california
+- trouble man
+- wrecking ball
+- summer
+- what my mind says
+- the motto
+- suicide squad
+- frozen
+- Mississippi
+- in the world
+- amazing grace
+- your voice
+- song for Isabelle
+- guilty
+- crazy love
+- bang bang
+- party rock
+- going to california
+- heroes of the storm
+- mad max
+- sound recorder
+- office three sixty five
+- direc tv
+- inhabitants
+- london has fallen
+- lego
+- ryse
+- youtube
+- ad block
+- watch espn
+- lococycle
+- fighter within
+- amazon music
+- age of war two
+- dora the explorer
+- dead rising 3
+- assassin's creed
+- bbc radio
+- dragon ball super
+- firefox
+- crying
+- zootopia
+- sausage party
+- sing
+- divergent
+- me and earl and the dying girl
+- hell on wheels
+- netflix
+- microsoft mahjong
+- wordpad
+- absolutely fabulous
+- there will be blood
+- blues music
+- eurodance
+- acdc
+- sonic
+- there goes rhymin simon
+- god 's not dead
+- pound the alarm
+- iheart
+- temple run
+- sid meier's civilization five
+- reality
+- Cassandra
+- spotify
+- mtv makes three
+- children of the moon
+- sensing murder
+- worst
+- just be friend
+- abc
+- we will rock you
+- fight
+- coyote
+- 24 karat magic in the air
+- take me down
+- Constantine
+- wolf of wall
+- league tips
+- take alive
+- a tale of 200
+- ahead for a dream
+- 1984
+- good girl
+- dance
+- down
+- Miami vice
+- radio 6
+- all of my love
+- bookends
+- bath
+- royal street
+- wish you were here
+- superstar
+- born to die
+- number_sign selfie
+- bbc one
+- one
+- drift
+- who's got the last laugh now
+- halo five
+- ghost protocol
+- world of warcraft
+- bohemian rap city
+- WQXR
+- anodella
+- country
+- workout
+- twenty sixteen
+- study
+- club penguin
+- planet money
+- this american life
+- deadpool
+- to kill a mockingbird
+- DBD
+- delight
+- bring me back
+- now that's what i call running
+- two states
+- all my love
+- hakuna matata
+- step it up
+- game of thrones
+- twenty fourteen
+- Warcraft
+- thriller
+- floyd mayweather's hate me now
+- floyd mayweather hate me now
+- mega lavania jewel mix
+- new music
+- kissing the lipless
+- I've got dreams
+- for me to cry
+- cold
+- public enemy
+- Slayer in mini format
+- best of rock
+- new playlist
+- south park the movie
+- Dunkirk
+- Valerian
+- top gun
+- Cars 3
+- Dead Men Tell No Tales
+- Trasnformers
+- blank
+- thor ragnorok
+- The Titanic
+- War for the Planet of the Apes
+- wonder woman
+- Heartbreak
+- king kong
+- Despicable Me 3
+- Spider-Man: Homecoming
+- Fantasia
+- Spider-man
+- 6 days
+- Professor Layton and the Eternal Diva
+- Kidnap
+- hacksaw ridge
+- shes the man
+- the shinning
+- Homecoming
+- Ace Venture: Pet detective
+- Logan
+- Training Day
+- halloween 5
+- Pretty Woman
+- Despicable Me
+- 300
+- Captain Fantastic
+- batman
+- The Shack
+- Girls Trip
+- wish upon
+- Wonderwoman
+- Taken
+- shawshank redemption
+- the hustler
+- Shutter Island
+- Girl's Trip
+- annabelle
+- tin hats
+- az utolso hazaspar
+- Baywatch
+- Shrek 2
+- Spiderman
+- minions 3
+- Mean Girls
+- the one
+- Castaway
+- Wonder Women
+- Superman
+- Beauty and the Beast
+- The Toy
+- next aisle over
+- dirch a funny man
+- Lemon
+- the dark tower
+- war of the planet of the apes
+- Annabelle Creation
+- Atomic Blonde
+- Boss Baby
+- Nut Job 2
+- Fast and Furious 8
+- Guardians of the Galaxy 2
+- minions three
+- Dark Tower
+- Shrek
+- Twilight
+- The Hobbit
+- magnolia
+- The Haulk
+- the Big Stick
+- Spiderman Homecoming
+- kill bill
+- Fantastic Beasts
+- The Hitman's Bodyguard
+- Lion King
+- Star Trek
+- iRobot
+- Moana
+- Harry Potter
+- kidnapped
+- Funny Farm
+- Arrival
+- horrible bosses
+- guardians of the galaxy
+- Mummy
+- The Emoji Movie
+- the notebook
+- Baby Driver
+- Zelda
+- kingdom of david the saga of the israelites
+- il tempo di massacro
+- Rise of the Planet of the Apes
+- Moonlight
+- Girl Trip
+- Madagascar
+- Avengers
+- A Dogs Purpose
+- Lion
+- The House
+- Cinderella
+- the mummy
+- Get Out
+- A New Hope
+- transformer
+- All Eyes On Me
+- the Terminator
+- Con Air
+- Snatched
+- stardust
+- terminator
+- Bruce Almighty
+- comedy capers das hausboot
+- az egymillio fontos banko
+- Meet the Parents
+- braveheart
+- brave
+- Toy Story 3
+- Planet of the Apes
+- Sicko
+- american made
+- the florida project
+- Cars
+- the Giver
+- steel magnolias and rocketman
+- Logan Lucky
+- John Wick
+- Robot
+- Stepbrother
+- buli a hoban
+- sudden justice
+- spider man
+- Malice
+- A Bugs Life
+- Guardians of Galaxy 2
+- Super Troopers
+- todos tus muertos
+- akash chhoa bhalobasa
+- Lord of the Rings
+- love in another town
+- Creed
+- Rough Night
+- toy story
+- Alien: Covenant
+- Trainspotting 2
+- the Hulk
+- The Pirates of The Caribbean
+- Spiderman: Homecoming
+- juan of the dead english subtitled
+- manpeda
+- fest
+- crazy in love
+- norton security with backup
+- take me out
+- black sails
+- stacy's moms
+- shut up
+- fury road
+- talk dirty
+- this is my father's world
+- stop talking
+- intervention
+- megan good
+- code
+- a little bit
+- family feud
+- fifa
+- big bang theory
+- Classic FM
+- divinity original sin
+- hey cortana
+- messenger
+- Moves Like Jagger
+- get lucky
+- bitch bad
+- my little pony
+- discord
+- summer games
+- gotham
+- creativity top five
+- mastered by Kendrick Lamar
+- this river
+- ghost adventures
+- Dinner for Fiends
+- when i'm with you
+- my dick
+- lips of an angel
+- going down
+- three seventy
+- emmerdale
+- my five nights at freddy's
+- clash royale
+- jiggy
+- try it out
+- seasons
+- new girl
+- Guild wars
+- curious george
+- instagram
+- microsoft excel
+- gta san andreas
+- gta five
+- fit bit
+- you need a budget
+- stairway to heaven
+- big town
+- internet friends vip
+- phantom of the opera
+- take it back
+- Star Trek the next generation
+- slack
+- billie jean
+- colder weather
+- i still can't stop
+- google calendar
+- fancy
+- gtav
+- gopro catcher
+- country road
+- a beautiful place
+- shivers techno mix
+- ohh god damn it
+- blue jean lady
+- swedish house mafia
+- rocket league 4
+- musically
+- sketchable
+- Purple Rain.
+- do the hustle
+- endless love
+- black beetles
+- family of the year
+- microsoft visual
+- old money
+- Bing vision
+- purple
+- Stuff you Should Know
+- happy that
+- xfinity tv
+- ride the slowest
+- steel drums
+- counter strike global offensive
+- the alpha beat
+- two forty six and two
+- wiggle
+- sing a song
+- ghost town
+- Cozi Family Organizer.
+- KCND
+- i beautiful
+- go reems
+- rocky four
+- sirius xm
+- perfect piano
+- horse with no name.
+- Radio 5
+- the sims 4
+- radio chaos
+- famous blue raincoat
+- all day
+- help
+- a b note
+- yellow rose
+- broken
+- runaway
+- sims free play
+- Radio 4
+- your stupid
+- all i want for christmas is you
+- battlefront
+- used to be
+- i love you too
+- sacred emotion
+- she's every woman
+- it will rain
+- feel this moment
+- the money program
+- my voice
+- iheartradio
+- tornadoes
+- minus the bear
+- my heart
+- house
+- it girl
+- cake by the ocean
+- me
+- twenty two
+- young black
+- what can't
+- demons
+- windows essentials
+- i put a spell on you
+- the game
+- photobeamer
+- ali baba
+- photo gallery
+- rush
+- pac man
+- Who's online
+- charms bar
+- bye bye bye
+- windows ten version fourteen three seven one
+- dangerous
+- hello can you hear me
+- counting blue cars
+- original i'm in reddish matches
+- writing on the wall
+- take a load off annie
+- survival evolved
+- cry a little
+- adore
+- no game
+- anita
+- Jolly ranchers
+- gladiator
+- wah wah wah
+- muse on the bus
+- Pandora
+- sorry
+- pretty ribbons
+- la la la
+- pokÃ©mon
+- everything is awesome
+- of martin carax
+- english men in new york
+- even rats
+- if i die young
+- fifty cent
+- 2001 a space odyssey
+- broken date
+- top 10 hits
+- itchy
+- play
+- hazards of love
+- baby house
+- holy grail
+- rushing water
+- gagman
+- celery man
+- oh
+- black betty
+- TNT
+- slacker
+- forever
+- can you feel the love tonight
+- poco yo
+- the wanderer
+- talk dirty to me
+- radio two
+- alpha airborne eight
+- league of archer losers
+- my fault
+- skyfall
+- can ' t hold us
+- neon moon
+- last night
+- pillow talk
+- married with children
+- waterways
+- punk goes pop
+- show me
+- codeccall
+- work squad
+- everybody everybody
+- nine
+- celtics game
+- el dorado
+- surah al baqarah
+- bali ninety
+- by the sea
+- raaz
+- Fox sports southwest
+- u two
+- chief
+- tic tac
+- wheels on the bus
+- casino
+- amelle
+- activex
+- duran duran's
+- housey
+- spin
+- fear of the dark
+- excel
+- use me
+- steam
+- Pandora!
+- beat it
+- idiot
+- on the way home
+- ms agent
+- accident without emergency
+- oppression
+- bake off
+- poker
+- ave maria
+- awesome mix vol one
+- the wind and the swell
+- broforce
+- prophecy
+- i need a doctor
+- all along the watchtower
+- strongs dictionary
+- awesome mix volume one
+- 7 nation army
+- something else
+- muppet movie
+- bad boy
+- beautiful
+- where do you know me from
+- i am a stone
+- dragons dogma
+- love
+- ace combat assault horizon
+- marvin and chardonnay
+- white reflection
+- radioactiv
+- grid 2
+- sunny sunny
+- owner of a lonely heart
+- hippopotamus for christmas
+- my song
+- battlefield hardline
+- sweet annie
+- Gosley
+- see me
+- walter
+- born this way
+- no way no
+- ocean explorer
+- set fire to the rain
+- marvin ' s room
+- Radio 2
+- take it and break it
+- the covenant
+- odds and ends
+- october
+- bloc party
+- hey boy hey girl
+- the miner
+- baby doll mein sone di
+- awful
+- ghost
+- my girl
+- catching
+- guitar man
+- blue moon
+- party you're disconnected
+- fool to cry
+- Chicago
+- the cup song
+- quick gps
+- lego movie
+- groove is in the heart
+- rattle that lock
+- they kill me
+- forty six and two
+- dark souls 3
+- all night
+- offspring
+- don't escape three
+- strenght of the world
+- the lonely
+- ali g
+- over and over
+- BBC Radio 4
+- lazy song
+- black opps
+- freefall
+- Beatles
+- banana pancakes
+- kung fu panda
+- arma three
+- dabangg 3
+- dark horse
+- uptown funk
+- flags
+- peace train
+- i am wrong
+- worship
+- highway to hell
+- love is blue
+- imperial march
+- Invicta FM
+- love the way you like
+- polar golfer
+- fragments
+- liner graves
+- until you
+- bang bang bang
+- back in black
+- Original songs
+- pirates of the caribbean
+- fly left
+- sims four
+- cast of
+- explorer
+- living infinite
+- critical mass
+- define the great line
+- brightness
+- Stronger
+- strong hands
+- electro
+- the capital
+- come away
+- naruto shippuden opening
+- everybody wants to rule the world
+- cortana what are my alarms
+- grant me love
+- white wall
+- oz
+- dark side of the moon
+- napoleon
+- tom
+- last song
+- blade runner
+- cubeworld
+- breakfast club
+- devil
+- hello kitty being murdered
+- lone survivor
+- Ten Thousand fists
+- hulu
+- the adjustment bureau
+- chill
+- what a time to be alive
+- heaven
+- sacred world
+- Ho Hey
+- march
+- when you are you
+- what do you want from me
+- ugly boy
+- dear mama
+- demos
+- the phoenix
+- make me better
+- don't stop believin'
+- bad grandp
+- drop box
+- top gear usa
+- bollywood
+- sweet as whole
+- easy way out
+- Blue Jay
+- i took a pill in ibiza
+- sevendust
+- the division
+- play doh
+- assassin's creed 4 black flag freedom cry
+- i'm calling you
+- stop this train
+- we go
+- xbox fittness
+- the dewey decimal
+- oss 117 cairo nest
+- mark's stuff
+- dear john
+- i surrender all
+- counting stars
+- the librarians
+- the commute
+- irava pagala
+- port of morrow
+- drama
+- you're the worst
+- three
+
+# TestIntent
+- play {@media_title}
+- watch {@media_title}
+- find {@media_title}
+- search the marketplace for {@media_title}
+- search the store for {@media_title}
+- search {@media_title} in the marketplace
+- search for {@media_title} in the store
+- find me {@media_title}
+- listen to {@media_title}
+- search {@media_title}
+- play the song {@media_title}
+- {@media_title}
+- play {@media_title} .
+- cortana play {@media_title}
+- playing {@media_title}
+- hey cortana play {@media_title}
+- i wanna hear {@media_title}
+- download {@media_title}
+- turn off {@media_title}
+- cortana can you play {@media_title}
+- play me {@media_title}
+- start playing {@media_title}
+- can you put can you play {@media_title}
+- Cortana play {@media_title} .
+- hey cortana search {@media_title}
+- play {@media_title} please
+- play {@media_title} for me
+- play something like {@media_title}
+- play it {@media_title}
+- play song {@media_title}
+- play the {@media_title}
+- Download {@media_title} .
+- search for {@media_title}
+- can i listen to {@media_title}
+- i want to hear {@media_title}
+- can you play {@media_title}
+- {@media_title} .
+- {@media_title} episodes
+- download free {@media_title}
+- play track {@media_title}
+- {@media_title} download
+- stop {@media_title}
+- Can you play {@media_title} ?
+- turn on {@media_title}
+- find {@media_title} in the store
+- i wanna watch {@media_title}
+- cortana find {@media_title}
+- download {@media_title} free
+- please play {@media_title}
+- cortana find me {@media_title}
+- put on {@media_title}
+- cortana download {@media_title}
+- play some {@media_title}
+- play my {@media_title}
+- play {@media_title} song
+- hey cortana watch {@media_title}
+- I want to watch {@media_title}
+- resume {@media_title}
+- play {@media_title} tune
+- i wanna play {@media_title}
+- open {@media_title}
+- Search for {@media_title} on YouTube
+- can you download {@media_title}
+- Play {@media_title} by.
+- i want to hear the song {@media_title}
+- play play {@media_title}
+- can you play me {@media_title}
+- play {@media_title} by
+- go to {@media_title}
+- launch {@media_title}
+- hey cortana could you play {@media_title}
+- hey cortana download {@media_title}
+- play {@media_title} play
+- play {@media_title} single
+- could you play {@media_title}
+- put {@media_title} on
+- repeat {@media_title}
+- play the {@media_title} song
+- play {@media_title} song for me
+- let's play {@media_title}
+- I want to listen to {@media_title}
+- play me a {@media_title}
+- please {@media_title}
+- get me {@media_title}
+- i would like to play {@media_title}
+- hey cortana put on {@media_title}
+- pay {@media_title}
+- please download {@media_title}
+- music play {@media_title}
+- play in the {@media_title}
+- i want to play {@media_title}
+- look up {@media_title} .
+- i wanna listen to {@media_title}
+- play a song {@media_title}
+- {@media_title} play
+- can you please play {@media_title}
+- {@media_title} downloads
+- stop playing {@media_title}
+- watch {@media_title} .
+- can you play the {@media_title}
+- play {@media_title} the song
+- Play {@media_title} online
+- play {@media_title} on
+- hey cortana start {@media_title}
+- play {@media_title} no
+- can i play {@media_title}
+- play a {@media_title}
+- cortana play {@media_title} for me please
+- where can i download {@media_title}
+- play me some {@media_title}
+- play a song like {@media_title}
+- download {@media_title} for free
+- play the {@media_title} .
+- start {@media_title}
+- hey cortana play {@media_title} on netflix
+- hey cortana can you play {@media_title}
+- please play a {@media_title} on itunes
+- hey cortana can you download {@media_title}
+- can you help me download {@media_title}
+- cortana download {@media_title} for me
+- can you play {@media_title} for me
+- take me to {@media_title}
+- play {@media_title} dot mp three
+- "play "" {@media_title} """
+- start play {@media_title}
+- play me the song {@media_title}
+- play me {@media_title} .
+- play my music {@media_title}
+- i would like to listen to {@media_title}
+- played {@media_title}
+- cortana take me to {@media_title}
+- i want to play {@media_title} .
+- plays {@media_title}
+- now play {@media_title}
+- play {@media_title} with me
+- cortana play the song {@media_title}
+- listen to music from {@media_title}
+- play songs of {@media_title}
+- play to {@media_title}
+- play {@media_title} songs
+- play {@media_title} to
+- please play {@media_title} for me
+- play {@media_title} cortana
+- play {@media_title} fuck
+- hey cortana show me {@media_title}
+- cortana play me {@media_title}
+- pause {@media_title}
+- jukebox play {@media_title}
+- cortana play the {@media_title}
+- play playlist {@media_title}
+- i want to listen {@media_title}
+- cortana play song {@media_title}
+- let me listen to {@media_title}
+- play {@media_title} soundtrack
+- Play song {@media_title} .
+- can i hear {@media_title}
+- Play a {@media_title} .
+- play from {@media_title}
+- play songs like {@media_title}
+- hey cortana open {@media_title}
+- where is {@media_title}
+- show me {@media_title}
+- {@media_title} trailer
+- demo {@media_title}
+- can you search for {@media_title} please
+- hey cortana get me {@media_title}
+- {@media_title} demo
+- i would like to download {@media_title}
+- look up {@media_title}
+- {@media_title} add-ons
+- hey cortana search for {@media_title}
+- hey cortana find {@media_title}
+- show me the trailer for {@media_title}
+- show me the {@media_title} trailer
+- hey cortana {@media_title} trailer
+- find {@media_title} for me please
+- what is {@media_title}
+- show me {@media_title} trailer
+- play {@media_title} playlist
+- play my {@media_title} playlist
+- play the album {@media_title}
+- play songs {@media_title}
+- run {@media_title}
+- Play the song {@media_title} .
+- hey cortana play {@media_title} playlist
+- Will you play {@media_title} ?
+- play the {@media_title} game
+- play music {@media_title}
+- Play {@media_title} song .
+- Play the {@media_title} song .
+- Play the song {@media_title} by.
+- Play the movie {@media_title} .
+- Play music {@media_title} .
+- Play the album {@media_title} .
+- play {@media_title} album
+- play the {@media_title} playlist
+- Play {@media_title} music .
+- music {@media_title}
+- Play album {@media_title} .
+- play a song similar to {@media_title}
+- please play the song {@media_title}
+- play {@media_title} radio
+- play the playlist {@media_title}
+- play album {@media_title}
+- hey cortana launch {@media_title}
+- Please play {@media_title} .
+- play {@media_title} music
+- listen to {@media_title} playlist
+- play my playlist {@media_title}
+- play now {@media_title}
+- play {@media_title} podcast
+- play the movie {@media_title}
+- Play music from {@media_title} .
+- play the music {@media_title}
+- hey dj play album {@media_title}
+- cortana can you please play {@media_title}
+- {@media_title} music play
+- playlist {@media_title}
+- Play {@media_title} video .
+- play me {@media_title} video
+- Play {@media_title} for me.
+- {@media_title} playlist
+- Hey Cortana play {@media_title} .
+- Play a song {@media_title} .
+- Play some {@media_title} .
+- cortana play {@media_title} playlist
+- show me reviews for {@media_title}
+- Where can I see {@media_title}
+- where is {@media_title} playing
+- Where is {@media_title} showing?
+- what are the reviews on {@media_title}
+- Reviews for {@media_title}
+- Book 2 tickets for {@media_title}
+- {@media_title} reviews
+- I'd like to know where {@media_title} is playing.
+- Reviews for {@media_title} .
+- Does {@media_title} have good reviews?
+- What are the reviews for {@media_title}
+- siri find reviews for {@media_title}
+- How many stars did {@media_title} receive?
+- What are the reviews for {@media_title} .
+- Should I watch {@media_title} ?
+- Find reviews on {@media_title}
+- find reviews for {@media_title}
+- Where is {@media_title} playing?
+- Hey Siri find me reviews for {@media_title}
+- Reviews {@media_title}
+- Show me the latest reviews for {@media_title}
+- show the reviews for {@media_title}
+- Get tickets for {@media_title}
+- Where can i see {@media_title} ?
+- find review for {@media_title}
+- Where can I watch {@media_title}
+- let me see reviews for {@media_title}
+- {@media_title} ratings
+- i want to see {@media_title} reviews
+- buy four tickets for {@media_title}
+- Can you find the reviews for {@media_title} ?
+- how many positive reviews does {@media_title} have
+- Show me the reviews for {@media_title} .
+- What are the reviews for {@media_title} ?
+- siri show me reviews for {@media_title}
+- search reviews for {@media_title}
+- Show me reviews for {@media_title} .
+- What is the rating for {@media_title} ?
+- Find me reviews for {@media_title} .
+- Get me two tickets {@media_title}
+- latest {@media_title} reviews
+- {@media_title} review
+- {@media_title} reviews please.
+- Give me reviews for {@media_title}
+- Display the reviews for {@media_title} .
+- Siri what are the reviews like for {@media_title} ?
+- Siri - find reviews for {@media_title}
+- What are the reviews like for {@media_title} ?
+- please find reviews for {@media_title}
+- Find {@media_title} near me
+- find me reviews for {@media_title}
+- purchase two tickets for tonight for {@media_title}
+- Search for {@media_title} reviews.
+- Top reviews for {@media_title}
+- Cortana I want you to find {@media_title}
+- I need to see the reviews for {@media_title}
+- Where is the nearest theater playing {@media_title} ?
+- Showtimes for {@media_title}
+- {@media_title} reviews.
+- Did {@media_title} get good reviews?
+- Hey Steve I'd like to see {@media_title} reviews.
+- Where are they showing {@media_title} ?
+- Closest showing of {@media_title}
+- find {@media_title} reviews
+- Display {@media_title} reviews.
+- {@media_title} near me
+- Review of {@media_title} .
+- I want to see the reviews for {@media_title}
+- Show {@media_title} reviews
+- Give me the reviews for the {@media_title}
+- What do the critics say about {@media_title} ?
+- please show me the reviews for {@media_title}
+- Look up reviews for {@media_title} .
+- show reviews of {@media_title}
+- search {@media_title} reviews
+- purchase one tickets to {@media_title}
+- Show reviews for {@media_title} .
+- show me {@media_title} reviews
+- {@media_title} reviews please
+- Find reviews for {@media_title} .
+- go to {@media_title} reviews
+- show me the reviews for {@media_title}
+- How are the reviews of {@media_title}
+- Siri give me reviews for {@media_title}
+- I want to see reviews for {@media_title}
+- What are the ratings for {@media_title} ?
+- Search for reviews for {@media_title} .
+- How many stars did {@media_title} get?
+- Show reviews for {@media_title}
+- Best reviews for {@media_title} .
+- what are the latest reviews for {@media_title} ?
+- Show me reviews about {@media_title}
+- what do critics say about {@media_title} ?
+- Where can I watch {@media_title} ?
+- Where is {@media_title} playing today ?
+- Where can i see {@media_title} tonight ?
+- I want to see reviews for {@media_title} .
+- review for {@media_title}
+- good reviews for {@media_title}
+- bring up reviews for {@media_title}
+- Can you send me recommendations on {@media_title}
+- Get me four fare {@media_title}
+- Search reviews for {@media_title} .
+- What score did {@media_title} get?
+- is {@media_title} good
+- Find reviews of {@media_title} .
+- show me reviews of {@media_title}
+- show times for {@media_title}
+- pull up reviews for {@media_title}
+- are there good reviews for {@media_title}
+- Where is {@media_title} playing at?
+- Cortana give me a review for {@media_title}
+- Where is {@media_title} playing.
+- Reviews of {@media_title}
+- find review on {@media_title}
+- What are people saying about {@media_title} ?
+- What did rotten tomatoes say about {@media_title} ?
+- Reviews on {@media_title}
+- is {@media_title} any good ?
+- reviews for {@media_title} please
+- show me {@media_title} 's reviews
+- where can I go to see {@media_title}
+- Get me 2 fare {@media_title}
+- {@media_title} showtimes near me
+- book a ticket for {@media_title}
+- Where is {@media_title} playing near me?
+- Hey Steve show me reviews for {@media_title} .
+- tell me where {@media_title} is playing
+- where is {@media_title} showing
+- buy tickets for {@media_title}
+- Show me a review of {@media_title} .
+- Did {@media_title} get good reviews
+- How good is {@media_title} ?
+- What reviews does {@media_title} have?
+- Get me one ticket for {@media_title}
+- What did {@media_title} get rated?
+- give me a review on {@media_title}
+- Is {@media_title} worth seeing?
+- Where is {@media_title} playing nearby ?
+- Book two tickets for {@media_title}
+- would like a review for {@media_title}
+- Can you show me the reviews of {@media_title}
+- Where is {@media_title} playing near me
+- Who is showing {@media_title} ?
+- How were the reviews for {@media_title} ?
+- please what times will {@media_title} be playing?
+- Cortana I need a review for {@media_title}
+- Where can I see {@media_title} near me?
+- Get me one tickets for {@media_title}
+- How many stars does {@media_title} have?
+- Rewind {@media_title}
+- stash playing {@media_title}
+- buy {@media_title}
+- cancel it play {@media_title}
+- hey cortana what is {@media_title}
+- play {@media_title} lyrics
+- Play {@media_title} in my with me.
+- watch {@media_title} for free
+- no i want to hear {@media_title}
+- hi cortana i need to download {@media_title}
+- {@media_title} play it
+- play {@media_title} and then she has to
+- cortana i wanna watch {@media_title}
+- find {@media_title} in the marketplace
+- Xbox redeem {@media_title}
+- i want you to rewind {@media_title}
+- who did not say i can say it play {@media_title}
+- play all of the {@media_title} .
+- show me {@media_title} episodes from november to december 2011
+- Computer please could you put {@media_title} on
+- hey i'm interested in {@media_title}
+- {@media_title} beat drop
+- {@media_title} download for windows
+- "I want to hear "" {@media_title} """
+- play {@media_title} play get lucky
+- please cortana let us play play {@media_title}
+- can i watch {@media_title} web
+- hey cortana look up {@media_title}
+- show me {@media_title} staring
+- play the show {@media_title}
+- show me recent episodes of the {@media_title}
+- i want you to play {@media_title}
+- Play the album untitled {@media_title} .
+- play {@media_title} connecting friend
+- how can i get {@media_title} in my computer
+- new episodes of {@media_title}
+- "Computer tune into "" {@media_title} ."""
+- play song {@media_title} by
+- cortana please find {@media_title}
+- play that's {@media_title}
+- play with the {@media_title}
+- play {@media_title} me girls
+- cortana hey cortana play {@media_title}
+- watch last night 's {@media_title}
+- back to {@media_title}
+- can i play {@media_title} on my surface pro
+- listen to {@media_title} again
+- play i'm {@media_title}
+- {@media_title} tune
+- play {@media_title} yeah
+- newest episode of {@media_title}
+- red {@media_title}
+- OK can you show me {@media_title}
+- find episode of {@media_title} aired on jan 26
+- i need {@media_title}
+- where can i get {@media_title}
+- can you download me a {@media_title}
+- open application {@media_title}
+- hey cortana play a {@media_title}
+- a download for {@media_title}
+- can you download do {@media_title}
+- cortana download {@media_title} icon
+- will you play {@media_title} please
+- stop hey cortana {@media_title}
+- play {@media_title} play that
+- can we watch {@media_title}
+- play more of {@media_title}
+- i need to download {@media_title}
+- {@media_title} open face
+- {@media_title} same.
+- Continue watching {@media_title}
+- hi cortana download {@media_title} from the app store
+- hey catana play {@media_title}
+- change to next song {@media_title}
+- play {@media_title} at fifteen volume
+- hey cortana download {@media_title} from the internet
+- Cortana could you please download {@media_title} .
+- play i'm so {@media_title}
+- hey cortana open play {@media_title}
+- {@media_title} launcher start
+- hey cortana can you download {@media_title} for
+- hey cortana play me {@media_title}
+- play {@media_title} to be
+- let s do {@media_title}
+- play {@media_title} i said
+- play a song that is similar to {@media_title}
+- reload {@media_title}
+- How much is {@media_title} ?
+- download {@media_title} on the store
+- sketchable cortana play {@media_title}
+- Hi Cortana I'd like to hear the song {@media_title}
+- i want to watch today 's {@media_title}
+- cortana play {@media_title} xbox play
+- audiotica play {@media_title}
+- play {@media_title} by rae and sremmurd
+- this {@media_title} .
+- cortana download for me {@media_title}
+- play landa right {@media_title}
+- can i go on {@media_title} please
+- Install {@media_title} from app store
+- cortana please play {@media_title} rain for me
+- open 2 {@media_title} .
+- "Computer I want to hear "" {@media_title} ."""
+- Please play {@media_title} I think.
+- how do i download {@media_title} to my computer
+- play {@media_title} remakes
+- playing the {@media_title}
+- Play {@media_title} please.
+- name {@media_title}
+- i wanna listen {@media_title}
+- play {@media_title} are you a n**** play.
+- play {@media_title} with my
+- play unlike {@media_title} fuck
+- You can get the new {@media_title}
+- hey cortana search for {@media_title} download
+- Play radio call sign {@media_title}
+- cortana play {@media_title} for me
+- listen to {@media_title} .
+- play file {@media_title}
+- cortana stop {@media_title}
+- cortona can i just download {@media_title}
+- cortana download {@media_title} from the app store
+- hello can you play {@media_title}
+- Stream ' {@media_title} '.
+- cortana pull up {@media_title}
+- sorry cortana please play {@media_title} no what am i talking about shut up
+- cortana stop playing {@media_title}
+- play play play {@media_title} bye bye bye bye bye.
+- the {@media_title} .
+- play {@media_title} right now
+- i like to play the song {@media_title} on my computer
+- play repeat {@media_title}
+- courtney play {@media_title}
+- open {@media_title} how
+- play {@media_title} yo yo honey singh
+- Alexa turn on {@media_title} .
+- play {@media_title} we here
+- hey cortanna play {@media_title}
+- Now let me play {@media_title}
+- download {@media_title} on
+- hey cortan play {@media_title}
+- ply {@media_title}
+- play something from {@media_title}
+- launch {@media_title} .
+- can i hear something like {@media_title}
+- play {@media_title} for free
+- okay play {@media_title}
+- cortanna play {@media_title}
+- npr one play {@media_title}
+- listen {@media_title} cortana
+- hey cortana install {@media_title}
+- play any {@media_title} .
+- play artist {@media_title}
+- play {@media_title} play my heart
+- pay their {@media_title}
+- play {@media_title} online twenty sixteen
+- hi cortana play {@media_title}
+- play me {@media_title} cortana
+- siri play {@media_title}
+- you can play {@media_title} tell us
+- {@media_title} say.
+- cortana can you please play {@media_title} .
+- cortana play {@media_title} from my music directory
+- hey cortana download {@media_title} ]
+- okay cortana download {@media_title}
+- hey cortana listen to {@media_title}
+- hey cortina i wanna download for {@media_title}
+- play the song {@media_title} the original artist
+- time to play {@media_title}
+- download {@media_title} from the windows store
+- play {@media_title} baba
+- i would like to download {@media_title} for
+- Hosh Hey Cortana watch {@media_title}
+- cortana let's play {@media_title}
+- i want to download a {@media_title}
+- {@media_title} ?
+- how do i download {@media_title} on
+- play in my phone {@media_title}
+- katryna i wanna download {@media_title}
+- i'd like to listen to {@media_title}
+- can you play {@media_title} oh
+- start the {@media_title} song
+- take me to a download page for {@media_title}
+- hi cortana i want to watch {@media_title} .
+- play i see the {@media_title}
+- i want i want to download the {@media_title} .
+- {@media_title} song
+- cortana open up {@media_title} please
+- play bounce {@media_title}
+- please play {@media_title} similarity
+- play {@media_title} today.
+- watch play {@media_title}
+- install i need to download {@media_title} app
+- And your muscles look like {@media_title}
+- put on {@media_title} .
+- Play {@media_title} in my library
+- play {@media_title} brazil twenty fourteen
+- Cortana play {@media_title} 7 times.
+- Play {@media_title} background.
+- cortona play {@media_title}
+- {@media_title} please play
+- play {@media_title} la la la la la la la la la la la
+- ah play {@media_title}
+- play {@media_title} at the start
+- could you play any song {@media_title}
+- play in {@media_title}
+- could you play the song {@media_title}
+- play songs that are like {@media_title}
+- play me {@media_title} you don't know me
+- play today's {@media_title} .
+- play {@media_title} i'm curious let me look at something cause
+- Play {@media_title} !
+- play it's {@media_title}
+- please close {@media_title}
+- Play {@media_title} you dumb b****
+- play the cd {@media_title}
+- hi stop {@media_title}
+- grail play {@media_title}
+- i'd like to play {@media_title}
+- cortana i need for you to play {@media_title}
+- happy song played {@media_title} song
+- play {@media_title} style song
+- hey cortana put up {@media_title} please
+- Cancel that was like {@media_title}
+- play back {@media_title}
+- Download {@media_title} on you.
+- continue playing {@media_title}
+- play {@media_title} faves
+- player start playing track {@media_title}
+- play {@media_title} in title
+- cortana want to watch {@media_title} with me.
+- cortana play that one {@media_title}
+- cortana put {@media_title} on
+- play {@media_title} yeah i know that
+- tina play {@media_title}
+- hey cortana can you launch {@media_title}
+- hey cortana open up {@media_title}
+- click into play {@media_title}
+- hey cortona play {@media_title}
+- listen to the ceiling {@media_title}
+- i wanna hear the song {@media_title}
+- Can you play {@media_title} in my library?
+- play same {@media_title}
+- play {@media_title} two thirty
+- play right now d {@media_title} .
+- please play {@media_title} in background
+- play {@media_title} torn
+- play {@media_title} if you can
+- Play {@media_title} on through.
+- Message to {@media_title}
+- play everybody {@media_title} that sung huh
+- play {@media_title} peas
+- i want to watch the {@media_title}
+- other {@media_title}
+- please try to play {@media_title}
+- play {@media_title} three cancel cortana cancel
+- {@media_title} play please
+- play all {@media_title}
+- open {@media_title} songs
+- Cortana watch {@media_title}
+- play something by {@media_title}
+- play {@media_title} your hannah
+- i wanna play {@media_title} hai.
+- will you play {@media_title}
+- i'm still looking play {@media_title} .
+- {@media_title} c
+- can you download {@media_title} onto this tablet
+- play {@media_title} a view to a kill song
+- will you play me some {@media_title} please
+- play {@media_title} cortana play spin
+- please may you play {@media_title}
+- download an {@media_title} programme
+- hey cortana i want to watch {@media_title}
+- hey please can you please play {@media_title}
+- i'd like to download {@media_title} .
+- Tune to {@media_title}
+- {@media_title} by
+- play {@media_title} that
+- play it on the lake {@media_title}
+- download ms download {@media_title}
+- repeat play {@media_title}
+- play {@media_title} iv
+- watch latest episode of {@media_title}
+- hey cortana play some {@media_title}
+- play something like {@media_title} but not the same song
+- play me {@media_title} song
+- play {@media_title} track two
+- play {@media_title} song i woke up today
+- be on {@media_title}
+- watch {@media_title} windows ten beta
+- cortana play a {@media_title}
+- play more {@media_title}
+- strahd playing {@media_title}
+- {@media_title} play that song
+- play all play {@media_title}
+- Play in {@media_title} .
+- play {@media_title} stop
+- play the song {@media_title} for me please
+- play {@media_title} song two
+- can you play a {@media_title} yeah
+- Cortana can you please {@media_title}
+- Cortana hello play {@media_title} .
+- what time is the {@media_title} playing
+- play {@media_title} hold on
+- restart {@media_title}
+- find {@media_title} and play
+- play storm see {@media_title} .
+- play {@media_title} on repeat
+- hey cortana love you play {@media_title}
+- play all songs that have {@media_title} in the title
+- i play {@media_title} dogfight
+- see play song {@media_title}
+- play {@media_title} with listen
+- "play"" {@media_title}"
+- put it on {@media_title}
+- can i hear a song like {@media_title}
+- play {@media_title} from my videos
+- hey cortana i wanted to hear {@media_title}
+- play i want a {@media_title}
+- Wanna hear {@media_title}
+- No play {@media_title}
+- play {@media_title} what is that song
+- {@media_title} yes
+- Best if you not come {@media_title}
+- play of {@media_title}
+- can you please play {@media_title} now
+- play five {@media_title}
+- take me to {@media_title} .
+- cbah play {@media_title}
+- play me songs like {@media_title}
+- played the song {@media_title}
+- What is on {@media_title} ?
+- player launch song {@media_title}
+- play gravity {@media_title}
+- run the {@media_title}
+- play me {@media_title} dot mp three
+- play {@media_title} 's song
+- play {@media_title} all right dog calm it down
+- play {@media_title} now
+- after my dinner can you play {@media_title} please
+- press play for {@media_title}
+- play me the song it's a {@media_title}
+- play the miner play the miner play {@media_title}
+- play {@media_title} sonf
+- what play the song {@media_title}
+- play {@media_title} i dash id
+- play play {@media_title} from the website
+- listen to song like {@media_title}
+- could you please play me {@media_title}
+- play but is {@media_title}
+- play {@media_title} stupid
+- could you play me {@media_title}
+- Leave the {@media_title}
+- jam to {@media_title}
+- Play cortana {@media_title} .
+- play {@media_title} play the cup
+- download {@media_title} feelings.
+- you can play {@media_title}
+- lets play {@media_title} again
+- play the {@media_title} soundtrack
+- Play group play {@media_title} .
+- can you play {@media_title} for me ?
+- play {@media_title} all
+- play {@media_title} how come you don't have
+- Go back to {@media_title}
+- play {@media_title} from
+- can you find me {@media_title} to download please
+- cortana play me some {@media_title}
+- try play {@media_title}
+- play {@media_title} what did you say
+- Play what do you {@media_title} .
+- play {@media_title} track
+- Can you play {@media_title} in the background?
+- play {@media_title} with me.
+- play {@media_title} ship
+- play {@media_title} sing
+- over play {@media_title}
+- Computer play {@media_title} .
+- play song called {@media_title}
+- Play {@media_title} home
+- play for the {@media_title}
+- listen to that {@media_title} song
+- play {@media_title} you gotta make it great
+- let's play a {@media_title} .
+- Cortana play the {@media_title} .
+- pancakes play the song {@media_title}
+- search {@media_title} hey
+- open {@media_title} please
+- start playing {@media_title} 2017
+- this phone play {@media_title}
+- Computer please turn on {@media_title}
+- let's play the {@media_title} .
+- listen on repeat {@media_title}
+- cortana jump play song {@media_title}
+- play me {@media_title} of flag of
+- will you please play {@media_title}
+- play when {@media_title}
+- turn on {@media_title} .
+- please can you play {@media_title} i'm still alone
+- play {@media_title} censored
+- shuffle {@media_title}
+- Play on the {@media_title} .
+- play a song from {@media_title}
+- play fullscreen {@media_title} .
+- can you play the {@media_title} for me?
+- Phone play {@media_title}
+- but i {@media_title}
+- I would like to play {@media_title} .
+- hey cortana please download {@media_title}
+- hey d j play song {@media_title}
+- open the {@media_title}
+- can you play music {@media_title}
+- play a {@media_title} song
+- play black it {@media_title}
+- Play list {@media_title} .
+- listen to the {@media_title}
+- want to listen to {@media_title}
+- play this {@media_title}
+- where is {@media_title} ?
+- {@media_title} big bang theory
+- cortana can you download {@media_title}
+- cortana show me {@media_title}
+- hi cortana get me {@media_title}

@@ -27,7 +27,7 @@ namespace FetchTranscriptionFunction
 
         public static readonly int ConversationPiiMaxChunkSize = int.TryParse(Environment.GetEnvironmentVariable(nameof(ConversationPiiMaxChunkSize), EnvironmentVariableTarget.Process), out ConversationPiiMaxChunkSize) ? ConversationPiiMaxChunkSize : Constants.DefaultConversationAnalysisMaxChunkSize;
 
-        public static readonly ConversationSummarizationOptions ConversationSummarizationOptions = System.Text.Json.JsonSerializer.Deserialize<ConversationSummarizationOptions>(Environment.GetEnvironmentVariable(nameof(ConversationSummarizationOptions), EnvironmentVariableTarget.Process));
+        public static readonly ConversationSummarizationOptions ConversationSummarizationOptions = string.IsNullOrEmpty(Environment.GetEnvironmentVariable(nameof(ConversationSummarizationOptions), EnvironmentVariableTarget.Process)) ? new ConversationSummarizationOptions() : System.Text.Json.JsonSerializer.Deserialize<ConversationSummarizationOptions>(Environment.GetEnvironmentVariable(nameof(ConversationSummarizationOptions), EnvironmentVariableTarget.Process));
 
         public static readonly bool UseSqlDatabase = bool.TryParse(Environment.GetEnvironmentVariable(nameof(UseSqlDatabase), EnvironmentVariableTarget.Process), out UseSqlDatabase) && UseSqlDatabase;
 

@@ -71,13 +71,11 @@ const string CloudSpeechServiceRegion = "YourCloudSpeechServiceRegion"; // or se
 // END OF CONFIGURABLE SETTINGS
 
 
-// Embedded speech recognition input audio format settings.
+// Embedded speech recognition default input audio format settings.
 // In addition, little-endian signed integer samples are required.
-// THIS IS THE ONLY SUPPORTED AUDIO FORMAT AT THE MOMENT. DO NOT MODIFY.
-// These settings are just included here to make them explicit and visible.
-uint32_t GetEmbeddedSpeechSamplesPerSecond() { return 16000; }
-uint8_t GetEmbeddedSpeechBitsPerSample() { return 16; }
-uint8_t GetEmbeddedSpeechChannels() { return 1; }
+uint32_t GetEmbeddedSpeechSamplesPerSecond() { return 16000; }  // or 8000
+uint8_t GetEmbeddedSpeechBitsPerSample() { return 16; }         // DO NOT MODIFY; no other format supported
+uint8_t GetEmbeddedSpeechChannels() { return 1; }               // DO NOT MODIFY; no other format supported
 
 // Get names and other properties of example files included with the sample project.
 const string GetSpeechRawAudioFileName() { return "data/speech_test.raw"; }
@@ -148,9 +146,9 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
         }
     }
 
-    // Enable profanity masking.
+    // Disable profanity masking.
     /*
-    config->SetProfanity(ProfanityOption::Masked);
+    config->SetProfanity(ProfanityOption::Raw);
     */
 
     return config;

@@ -67,13 +67,11 @@ namespace MicrosoftSpeechSDKSamples
         // END OF CONFIGURABLE SETTINGS
 
 
-        // Embedded speech recognition input audio format settings.
+        // Embedded speech recognition default input audio format settings.
         // In addition, little-endian signed integer samples are required.
-        // THIS IS THE ONLY SUPPORTED AUDIO FORMAT AT THE MOMENT. DO NOT MODIFY.
-        // These settings are just included here to make them explicit and visible.
-        public static uint GetEmbeddedSpeechSamplesPerSecond() { return 16000; }
-        public static byte GetEmbeddedSpeechBitsPerSample() { return 16; }
-        public static byte GetEmbeddedSpeechChannels() { return 1; }
+        public static uint GetEmbeddedSpeechSamplesPerSecond() { return 16000; }  // or 8000
+        public static byte GetEmbeddedSpeechBitsPerSample() { return 16; }        // DO NOT MODIFY; no other format supported
+        public static byte GetEmbeddedSpeechChannels() { return 1; }              // DO NOT MODIFY; no other format supported
 
         // Get names and other properties of example files included with the sample project.
         public static string GetSpeechRawAudioFileName() { return "data/speech_test.raw"; }
@@ -143,9 +141,9 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
 
-            // Enable profanity masking.
+            // Disable profanity masking.
             /*
-            config.SetProfanity(ProfanityOption.Masked);
+            config.SetProfanity(ProfanityOption.Raw);
             */
 
             return config;
