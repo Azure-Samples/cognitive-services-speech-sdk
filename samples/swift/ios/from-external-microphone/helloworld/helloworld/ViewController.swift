@@ -19,6 +19,10 @@ extension AVAudioPCMBuffer {
         buffer.replaceBytes(in: range, withBytes: (self.int16ChannelData![0]))
         return buffer as Data
     }
+    
+    var duration: TimeInterval {
+        format.sampleRate > 0 ? .init(frameLength) / format.sampleRate : 0
+    }
 }
 
 class ViewController: UIViewController {
@@ -80,21 +84,27 @@ class ViewController: UIViewController {
         audioEngine.inputNode.installTap(onBus: 0, bufferSize: AVAudioFrameCount(bufferSize), format: inputFormat) { (buffer, time) in
                         
             self.conversionQueue.async { [self] in
-                // Convert the microphone input to the recording format required
-                let pcmBuffer = AVAudioPCMBuffer(pcmFormat: recordingFormat!, frameCapacity: AVAudioFrameCount(bufferSize))
+                // Convert the microphone input to the recording format required                
+                let outputBufferCapacity = AVAudioFrameCount(buffer.duration * recordingFormat!.sampleRate)
+
+                guard let pcmBuffer = AVAudioPCMBuffer(pcmFormat: recordingFormat!, frameCapacity: outputBufferCapacity) else {
+                    print("Failed to create new pcm buffer")
+                    return
+                }
+                pcmBuffer.frameLength = outputBufferCapacity
                 
                 var error: NSError? = nil
                 let inputBlock: AVAudioConverterInputBlock = {inNumPackets, outStatus in
                     outStatus.pointee = AVAudioConverterInputStatus.haveData
                     return buffer
                 }
-                formatConverter.convert(to: pcmBuffer!, error: &error, withInputFrom: inputBlock)
+                formatConverter.convert(to: pcmBuffer, error: &error, withInputFrom: inputBlock)
                 
                 if error != nil {
                     print(error!.localizedDescription)
                 }
-                else if (pcmBuffer != nil) {
-                    self.pushStream.write((pcmBuffer?.data())!)
+                else {
+                    self.pushStream.write((pcmBuffer.data()))
                 }
             }
         }

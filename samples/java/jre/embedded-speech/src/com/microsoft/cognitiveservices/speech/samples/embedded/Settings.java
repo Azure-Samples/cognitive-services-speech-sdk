@@ -65,13 +65,11 @@ public class Settings
     // END OF CONFIGURABLE SETTINGS
 
 
-    // Embedded speech recognition input audio format settings.
+    // Embedded speech recognition default input audio format settings.
     // In addition, little-endian signed integer samples are required.
-    // THIS IS THE ONLY SUPPORTED AUDIO FORMAT AT THE MOMENT. DO NOT MODIFY.
-    // These settings are just included here to make them explicit and visible.
-    public static long getEmbeddedSpeechSamplesPerSecond() { return 16000; };
-    public static short getEmbeddedSpeechBitsPerSample() { return 16; };
-    public static short getEmbeddedSpeechChannels() { return 1; };
+    public static long getEmbeddedSpeechSamplesPerSecond() { return 16000; };  // or 8000
+    public static short getEmbeddedSpeechBitsPerSample() { return 16; };       // DO NOT MODIFY; no other format supported
+    public static short getEmbeddedSpeechChannels() { return 1; };             // DO NOT MODIFY; no other format supported
 
     // Get names and other properties of example files included with the sample project.
     public static String getSpeechRawAudioFileName() { return "data/speech_test.raw"; }
@@ -141,9 +139,9 @@ public class Settings
             }
         }
 
-        // Enable profanity masking.
+        // Disable profanity masking.
         /*
-        config.setProfanity(ProfanityOption.Masked);
+        config.setProfanity(ProfanityOption.Raw);
         */
 
         return config;
