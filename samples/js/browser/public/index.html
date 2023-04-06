@@ -110,6 +110,7 @@
                         <option value="translationRecognizerContinuous">Continuous translation</option>
                         <option value="pronunciationAssessmentOnce">Single-shot pronunciation assessment</option>
                         <option value="pronunciationAssessmentContinuous">Continuous pronunciation assessment</option>
+                        <option value="pronunciationAssessmentContinuousStream">Continuous pronunciation assessment stream</option>
                     </select>
                 </td>
             </tr>
@@ -354,6 +355,7 @@
                         case 'intentRecognizerRecognizeOnce':
                         case 'pronunciationAssessmentOnce': return 'recognizeOnceAsync()';
                         case 'speechRecognizerContinuous': 
+                        case 'pronunciationAssessmentContinuousStream': 
                         case 'pronunciationAssessmentContinuous': return 'startContinuousRecognitionAsync()';
                         case 'translationRecognizerContinuous': return 'startContinuousTranslation()';
                     }
@@ -401,6 +403,9 @@
                         break;
                     case 'pronunciationAssessmentContinuous':
                         doContinuousPronunciationAssessment();
+                        break;
+                    case 'pronunciationAssessmentContinuousStream':
+                        doContinuousPronunciationAssessmentFromStream();
                         break;
                 }
             });
@@ -500,6 +505,30 @@
 
     <!-- Configuration and setup common to SDK objects, including events -->
     <script>
+        function getAudioStream(audioFile, cb) {
+            var fr = new FileReader();
+            fr.readAsArrayBuffer(audioFile);
+            fr.addEventListener("loadend", (e) => {
+                var buf = e.target.result;
+                cb(buf);
+            }, false);
+        }
+
+        function getAudioConfigFromStream() {
+            if (audioFile) {
+                let audioFormat = SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1);
+                let audioStream = SpeechSDK.AudioInputStream.createPushStream();
+                getAudioStream(audioFile, (b) => {
+                    audioStream.write(b.slice());
+                    audioStream.close();
+                });
+                return SpeechSDK.AudioConfig.fromStreamInput(audioStream, audioFormat);
+            } else if (inputSourceFileRadio.checked) {
+                alert('Please choose a file when selecting file input as your audio source.');
+                return;
+            }
+        }
+
         function getAudioConfig() {
             // If an audio file was specified, use it. Otherwise, use the microphone.
             // Depending on browser security settings, the user may be prompted to allow microphone use. Using
@@ -654,7 +683,9 @@
         function onSessionStopped(sender, sessionEventArgs) {
             statusDiv.innerHTML += `(sessionStopped) SessionId: ${sessionEventArgs.sessionId}\r\n`;
 
-            if (scenarioSelection.value == 'pronunciationAssessmentContinuous') {
+            if (scenarioSelection.value == 'pronunciationAssessmentContinuous' || 
+                scenarioSelection.value == 'pronunciationAssessmentContinuousStream'
+            ) {
                 calculateOverallPronunciationScore();
             }
 
@@ -912,6 +943,30 @@
             var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
             var pronunciationAssessmentConfig = getPronunciationAssessmentConfig();
             if (!speechConfig) return;
+
+            // Create the SpeechRecognizer and set up common event handlers and PhraseList data
+            reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+            applyCommonConfigurationTo(reco);
+
+            // Apply pronunciation assessment config to recognizer.
+            pronunciationAssessmentConfig.applyTo(reco);
+
+            // Start the continuous recognition. Note that, in this continuous scenario, activity is purely event-
+            // driven, as use of continuation (as is in the single-shot sample) isn't applicable when there's not a
+            // single result.
+            reco.startContinuousRecognitionAsync();
+        }
+
+        function doContinuousPronunciationAssessmentFromStream() {
+            resetUiForScenarioStart();
+
+            var audioConfig = getAudioConfigFromStream();
+            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+            var pronunciationAssessmentConfig = getPronunciationAssessmentConfig();
+            if (!speechConfig) return;
+
+            // Setting the recognition language to English.
+            speechConfig.speechRecognitionLanguage = "en-US";
 
             // Create the SpeechRecognizer and set up common event handlers and PhraseList data
             reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);

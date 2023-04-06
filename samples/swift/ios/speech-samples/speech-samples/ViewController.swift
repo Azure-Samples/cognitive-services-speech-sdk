@@ -22,6 +22,7 @@ struct Word {
 class ViewController: UIViewController {
     var label: UILabel!
     var continuousPronunciationAssessmentButton: UIButton!
+    var pronunciationAssessmentWithStreamButton: UIButton!
 
     var sub: String!
     var region: String!
@@ -38,6 +39,13 @@ class ViewController: UIViewController {
         continuousPronunciationAssessmentButton.addTarget(self, action:#selector(self.continuousPronunciationAssessmentButtonClicked), for: .touchUpInside)
         continuousPronunciationAssessmentButton.setTitleColor(UIColor.black, for: .normal)
 
+        pronunciationAssessmentWithStreamButton = UIButton(frame: CGRect(x: 30, y: 170, width: 300, height: 50))
+        pronunciationAssessmentWithStreamButton.setTitle("Pron-Assessment With Stream", for: .normal)
+        pronunciationAssessmentWithStreamButton.addTarget(self, action: #selector(self.pronunciationAssessmentWithStreamButtonClicked), for: .touchUpInside)
+        pronunciationAssessmentWithStreamButton.setTitleColor(UIColor.black, for: .normal)
+
+
+
         label = UILabel(frame: CGRect(x: 30, y: 200, width: 300, height: 400))
         label.textColor = UIColor.black
         label.lineBreakMode = .byWordWrapping
@@ -46,6 +54,7 @@ class ViewController: UIViewController {
 
         self.view.addSubview(label)
         self.view.addSubview(continuousPronunciationAssessmentButton)
+        self.view.addSubview(pronunciationAssessmentWithStreamButton)
     }
 
     @objc func continuousPronunciationAssessmentButtonClicked() {
@@ -53,6 +62,14 @@ class ViewController: UIViewController {
             self.continuousPronunciationAssessment()
         }
     }
+
+    @objc func pronunciationAssessmentWithStreamButtonClicked(){
+        //self.updateLabel(text: "filling in the stream result", color: UIColor.black)
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.pronunciationAssessmentWithStream()
+        }
+    }
+
 
     /**
      * Continuous Pronunciation Assessment Sample.
@@ -168,6 +185,78 @@ class ViewController: UIViewController {
                 resultText += " word: \(w.word)\taccuracy score: \(w.accuracyScore)\terror type: \(w.errorType);"
             }
             self.updateLabel(text: resultText, color: UIColor.black)
+        }
+    }
+
+    func pronunciationAssessmentWithStream() {
+        // Replace with your own subscription key and service region (e.g., "westus").
+        // Creates an instance of a speech config with specified subscription key and service region.
+        let speechConfig = try! SPXSpeechConfiguration(subscription: sub, region: region)
+        
+        // Read audio data from file. In real scenario this can be from memory or network
+        //let audioDataWithHeader = try! Data(contentsOf: URL(fileURLWithPath: "whatstheweatherlike.wav"))
+        
+        let bundle = Bundle.main
+        let path = bundle.path(forResource: "whatstheweatherlike", ofType: "wav")
+        if (path == nil) {
+            print("Cannot find audio file!");
+            self.updateLabel(text: "Cannot find audio file", color: UIColor.red)
+            return;
+        }
+        print("pronunciation assessment audio file path: ", path!)
+        
+        let audioDataWithHeader = try! Data(contentsOf: URL(fileURLWithPath: path!))
+        let audioData = Array(audioDataWithHeader[46..<audioDataWithHeader.count])
+        
+        let startTime = Date()
+        
+        let audioFormat = SPXAudioStreamFormat(usingPCMWithSampleRate: 16000, bitsPerSample: 16, channels: 1)!
+        guard let audioInputStream = SPXPushAudioInputStream(audioFormat: audioFormat) else {
+            print("Error: Failed to create audio input stream.")
+            return
+        }
+        
+        guard let audioConfig = SPXAudioConfiguration(streamInput: audioInputStream) else {
+            print("Error: audioConfig is Nil")
+            return
+        }
+        
+        let speechRecognizer = try! SPXSpeechRecognizer(speechConfiguration: speechConfig, language: "en-US", audioConfiguration: audioConfig)
+        
+        let referenceText = "what's the weather like"
+        let pronAssessmentConfig = try! SPXPronunciationAssessmentConfiguration(referenceText, gradingSystem: SPXPronunciationAssessmentGradingSystem.hundredMark, granularity: SPXPronunciationAssessmentGranularity.word, enableMiscue: true)
+        try! pronAssessmentConfig.apply(to: speechRecognizer)
+        
+        audioInputStream.write(Data(audioData))
+        audioInputStream.write(Data())
+        
+        self.updateLabel(text: "Analysising", color: UIColor.black)
+        // Handle the recognition result
+        try! speechRecognizer.recognizeOnceAsync { result in
+            guard let pronunciationResult = SPXPronunciationAssessmentResult(result) else {
+                print("Error: pronunciationResult is Nil")
+                return
+            }
+            self.updateLabel(text: "generating result...", color: UIColor.black)
+            var finalResult = ""
+            let resultText = "Accuracy score: \(pronunciationResult.accuracyScore), Pronunciation score: \(pronunciationResult.pronunciationScore), Completeness Score: \(pronunciationResult.completenessScore), Fluency score: \(pronunciationResult.fluencyScore)"
+            print(resultText)
+            finalResult.append("\(resultText)\n")
+            finalResult.append("\nword    accuracyScore   errorType\n")
+            
+            if let words = pronunciationResult.words {
+                for word in words {
+                    let wordString = word.word ?? ""
+                    let errorType = word.errorType ?? ""
+                    finalResult.append("\(wordString)    \(word.accuracyScore)   \(errorType)\n")
+                }
+            }
+            
+            self.updateLabel(text: finalResult, color: UIColor.black)
+            
+            let endTime = Date()
+            let timeCost = endTime.timeIntervalSince(startTime) * 1000
+            print("Time cost: \(timeCost)ms")
         }
     }
 

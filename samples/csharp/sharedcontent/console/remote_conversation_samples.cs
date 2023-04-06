@@ -20,6 +20,11 @@ namespace MicrosoftSpeechSDKSamples
 {
     public class RemoteConversationSamples
     {
+        // This sample shows how to use real-time plus asynchronous
+        // Conversation Transcriptions. This sample does not use voice
+        // signatures. Talkers are differentiated as Guest 0 and Guest 1.
+        // For more information, including how to use voice signatures, see
+        // https://learn.microsoft.com/azure/cognitive-services/speech-service/how-to-async-conversation-transcription?pivots=programming-language-csharp
         public static async Task RemoteConversationWithFileAsync()
         {
             string key = "YourSubscriptionKey";
@@ -46,7 +51,7 @@ namespace MicrosoftSpeechSDKSamples
             {
                 Thread.Sleep(TimeSpan.FromSeconds(10));
                 Response response = await operation.UpdateStatusAsync();
-                Console.WriteLine(response.Status);
+                Console.WriteLine($"HTTP response status code: {response.Status}");
             }
 
             await operation.WaitForCompletionAsync(TimeSpan.FromSeconds(10), CancellationToken.None);
@@ -56,8 +61,8 @@ namespace MicrosoftSpeechSDKSamples
             foreach (var item in val)
             {
                 Console.WriteLine($"{item.Text}, {item.ResultId}, {item.Reason}, {item.UserId}, {item.OffsetInTicks}, {item.Duration}");
-                Console.WriteLine($"{item.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult)}");
-                Console.WriteLine();
+                // To see raw JSON result:
+                // Console.WriteLine($"{item.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult)}");
             }
         }
 
@@ -131,6 +136,10 @@ namespace MicrosoftSpeechSDKSamples
 
             var config = SpeechConfig.FromSubscription(key, region);
             config.SetProperty("ConversationTranscriptionInRoomAndOnline", "true");
+
+            // Set this to differentiate talkers (Guest 0, Guest 1, ...)
+            config.SetProperty("DifferentiateGuestSpeakers", "true");
+    
             config.SetServiceProperty("transcriptionMode", "RealTimeAndAsync", ServicePropertyChannel.UriQueryParameter);
             var waveFilePullStream = OpenWavFile(@"katiesteve.wav", out audioStreamFormat);
             var audioInput = AudioConfig.FromStreamInput(AudioInputStream.CreatePullStream(waveFilePullStream, audioStreamFormat));
@@ -161,9 +170,9 @@ namespace MicrosoftSpeechSDKSamples
                 if (e.Result.Text.Length > 0)
                 {
                     recognizedText.Add(e.Result.Text);
+                    Console.WriteLine($"TRANSCRIBED: {e.Result.Text}, {e.Result.ResultId}, {e.Result.Reason}, {e.Result.UserId}, {e.Result.OffsetInTicks}, {e.Result.Duration}");
                 }
             };
-
 
             await CompleteContinuousRecognition(recognizer, conversationId);
 
@@ -173,27 +182,29 @@ namespace MicrosoftSpeechSDKSamples
 
         private static async Task CompleteContinuousRecognition(ConversationTranscriber recognizer, string conversationId)
         {
-            TaskCompletionSource<int> m_taskCompletionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource<int> taskCompletionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             recognizer.SessionStopped += (s, e) =>
             {
-                m_taskCompletionSource.TrySetResult(0);
+                taskCompletionSource.TrySetResult(0);
             };
-            string canceled = string.Empty;
 
             recognizer.Canceled += (s, e) =>
             {
-                canceled = e.ErrorDetails;
+                Console.WriteLine($"CANCELED: Reason={e.Reason}");
                 if (e.Reason == CancellationReason.Error)
                 {
-                    m_taskCompletionSource.TrySetResult(0);
+                    Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                    Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                    Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    throw new System.ApplicationException("${e.ErrorDetails}");
                 }
+                taskCompletionSource.TrySetResult(0);
             };
 
             await recognizer.StartTranscribingAsync().ConfigureAwait(false);
-            await Task.WhenAny(m_taskCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(10)));
+            await Task.WhenAny(taskCompletionSource.Task, Task.Delay(TimeSpan.FromSeconds(10)));
             await recognizer.StopTranscribingAsync().ConfigureAwait(false);
-
         }
     }
 }

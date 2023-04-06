@@ -1082,7 +1082,8 @@ namespace MicrosoftSpeechSDKSamples
         {
             using (var audioInputStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1))) // This need be set based on the format of the given audio data
             using (var audioConfig = AudioConfig.FromStreamInput(audioInputStream))
-            using (var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig))
+            // Specify the language used for Pronunciation Assessment.
+            using (var speechRecognizer = new SpeechRecognizer(speechConfig, "en-US", audioConfig))
             {
                 // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
                 var pronAssessmentConfig = new PronunciationAssessmentConfig(referenceText, GradingSystem.HundredMark, Granularity.Phoneme, false);

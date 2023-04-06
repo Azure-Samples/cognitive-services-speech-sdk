@@ -69,7 +69,7 @@ Do **not** add [client-sdk](https://mvnrepository.com/artifact/com.microsoft.cog
 **Note:** Make sure that `@aar` suffix is used when the dependency is specified in `build.gradle`. For example,
 ```
 dependencies {
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.26.0@aar'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.27.0@aar'
     ...
 ```
 

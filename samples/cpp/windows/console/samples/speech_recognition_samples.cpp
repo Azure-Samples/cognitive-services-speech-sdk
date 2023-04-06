@@ -620,7 +620,8 @@ void PronunciationAssessmentWithStreamInternalAsync(shared_ptr<SpeechConfig> spe
     auto audioFormat = AudioStreamFormat::GetWaveFormatPCM(16000, 16, 1); // This need be set based on the format of the given audio data
     auto audioInputStream = AudioInputStream::CreatePushStream(audioFormat);
     auto audioConfig = AudioConfig::FromStreamInput(audioInputStream);
-    auto speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
+    // Specify the language used for Pronunciation Assessment
+    auto speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, "en-US", audioConfig);
 
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     auto pronAssessmentConfig = PronunciationAssessmentConfig::Create(referenceText, PronunciationAssessmentGradingSystem::HundredMark, PronunciationAssessmentGranularity::Phoneme, false);
