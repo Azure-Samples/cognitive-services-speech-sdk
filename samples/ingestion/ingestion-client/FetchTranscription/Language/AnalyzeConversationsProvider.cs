@@ -445,6 +445,8 @@ namespace Language
 
         private async Task<(IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<AnalyzeConversationSummarizationResults> summarizationResults, IEnumerable<string> errors)> GetConversationsOperationResults(string jobId)
         {
+            var piiResults = new List<AnalyzeConversationPiiResults>();
+            var summarizationResults = new List<AnalyzeConversationSummarizationResults>();
             var errors = new List<string>();
             try
             {
@@ -462,14 +464,14 @@ namespace Language
                 if (analysisResult.Tasks.InProgress == 0)
                 {
                     // all tasks completed.
-                    var piiResults = analysisResult.Tasks
+                    piiResults.AddRange(analysisResult.Tasks
                         .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults)
                         .Select(s => s as ConversationPiiItem)
-                        .Select(s => s.Results);
-                    var summarizationResults = analysisResult.Tasks
+                        .Select(s => s.Results));
+                    summarizationResults.AddRange(analysisResult.Tasks
                         .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults)
                         .Select(s => s as ConversationSummarizationItem)
-                        .Select(s => s.Results);
+                        .Select(s => s.Results));
                     return (piiResults, summarizationResults, errors);
                 }
             }
