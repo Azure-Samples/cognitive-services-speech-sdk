@@ -15,8 +15,7 @@ namespace Connector
                 statusCode == HttpStatusCode.GatewayTimeout ||
                 statusCode == HttpStatusCode.RequestTimeout ||
                 statusCode == HttpStatusCode.BadGateway ||
-                statusCode == HttpStatusCode.InternalServerError ||
-                statusCode == HttpStatusCode.Unauthorized)
+                statusCode == HttpStatusCode.InternalServerError)
             {
                 return true;
             }
