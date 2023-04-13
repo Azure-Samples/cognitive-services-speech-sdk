@@ -21,7 +21,7 @@ namespace Connector
     {
         private const string TranscriptionsBasePath = "speechtotext/v3.0/Transcriptions/";
 
-        private const int MaxNumberOfRetries = 5;
+        private const int MaxNumberOfRetries = 10;
 
         private static readonly TimeSpan PostTimeout = TimeSpan.FromMinutes(1);
 
