@@ -18,6 +18,7 @@ namespace Language
     using Connector;
     using Connector.Constants;
     using Connector.Serializable.Language.Conversations;
+    using Connector.Serializable.TextAnalytics;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using FetchTranscriptionFunction;
@@ -86,7 +87,7 @@ namespace Language
             var tasks = jobIds.Select(async jobId => await this.GetConversationsOperationResults(jobId).ConfigureAwait(false));
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var resultsErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors).Concat(results.SelectMany(result => result.summarizationResults).SelectMany(s => s.Errors));
+            var resultsErrors = GetAllErrorsFromResults(results);
             if (resultsErrors.Any())
             {
                 errors.AddRange(resultsErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
@@ -217,6 +218,43 @@ namespace Language
             };
 
             return errors;
+        }
+
+        private static IEnumerable<ErrorEntity> GetAllErrorsFromResults((IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<AnalyzeConversationSummarizationResults> summarizationResults, IEnumerable<string> errors)[] results)
+        {
+            var resultErrors = new List<ErrorEntity>();
+
+            if (results == null)
+            {
+                return resultErrors;
+            }
+
+            foreach (var result in results)
+            {
+                if (result.piiResults != null)
+                {
+                    foreach (var piiResult in result.piiResults)
+                    {
+                        if (piiResult.Errors != null)
+                        {
+                            resultErrors.AddRange(piiResult.Errors);
+                        }
+                    }
+                }
+
+                if (result.summarizationResults != null)
+                {
+                    foreach (var summarizationResult in result.summarizationResults)
+                    {
+                        if (summarizationResult.Errors != null)
+                        {
+                            resultErrors.AddRange(summarizationResult.Errors);
+                        }
+                    }
+                }
+            }
+
+            return resultErrors;
         }
 
         private void PrepareSummarizationRequest(SpeechTranscript speechTranscript, List<AnalyzeConversationsRequest> data)
@@ -420,7 +458,7 @@ namespace Language
                     var operation = await this.conversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
 
                     var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
-                    using JsonDocument result = JsonDocument.Parse(response.ContentStream);
+                    using var result = JsonDocument.Parse(response.ContentStream);
                     var jobResults = result.RootElement;
                     var jobId = jobResults.GetProperty("jobId");
                     this.log.LogInformation($"Submitting TA job: {jobId}");

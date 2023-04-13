@@ -21,7 +21,7 @@ namespace Connector
     {
         private const string TranscriptionsBasePath = "speechtotext/v3.0/Transcriptions/";
 
-        private const int MaxNumberOfRetries = 3;
+        private const int MaxNumberOfRetries = 5;
 
         private static readonly TimeSpan PostTimeout = TimeSpan.FromMinutes(1);
 
@@ -34,7 +34,7 @@ namespace Connector
         private static readonly AsyncRetryPolicy RetryPolicy =
             Policy
                 .Handle<Exception>(e => e is HttpStatusCodeException || e is HttpRequestException)
-                .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(2));
+                .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(5));
 
         public static Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri)
         {
