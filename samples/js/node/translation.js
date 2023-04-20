@@ -12,10 +12,8 @@ module.exports = {
 
     // now create the audio-config pointing to our stream and
     // the speech config specifying the language.
-    var wavFileHeader = filePushStream.readWavFileHeader(settings.filename);
-    var format = sdk.AudioStreamFormat.getWaveFormatPCM(wavFileHeader.framerate, wavFileHeader.bitsPerSample, wavFileHeader.nChannels);
     var audioStream = filePushStream.openPushStream(settings.filename);
-    var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream, format);
+    var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
     var translationConfig = sdk.SpeechTranslationConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
 
     // setting the recognition language to English.
