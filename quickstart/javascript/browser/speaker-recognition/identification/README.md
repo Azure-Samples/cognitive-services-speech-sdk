@@ -25,7 +25,8 @@ If you want to host the sample on a web server:
 
 * In case you are running the sample from your local computer, open `independent-identification.html` from the location where you have downloaded this quickstart with a JavaScript capable browser.
 * Use the input fields to set your `subscription key` and `service region`.
-* Press the `Create Profile` button to create a voice profile and enroll using the chosen enrollment file.
+* Press the `Create Profile` button to create a voice profile and enroll using the chosen enrollment file. 
+* NOTE: The enrollment file must contain the activation phrase in order to complete enrollment successfully. An example enrollment file can be found [here](https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/master/tests/input/audio/talkforafewseconds.wav)
 * Press the `Identify Speaker` button to identify a speaker using the chosen identification file.
    
 ## Running .html samples
