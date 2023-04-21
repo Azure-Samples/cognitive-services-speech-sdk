@@ -84,7 +84,7 @@ namespace Language
                 return (null, null, errors);
             }
 
-            var tasks = jobIds.Select(async jobId => await this.GetConversationsOperationResults(jobId).ConfigureAwait(false));
+            var tasks = jobIds.Select(this.GetConversationsOperationResults);
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
             var resultsErrors = GetAllErrorsFromResults(results);
@@ -524,7 +524,7 @@ namespace Language
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 
-            return (null, null, errors);
+            return (piiResults, summarizationResults, errors);
         }
     }
 }
