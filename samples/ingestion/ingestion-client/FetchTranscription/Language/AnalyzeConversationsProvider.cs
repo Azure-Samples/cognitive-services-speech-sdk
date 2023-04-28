@@ -224,33 +224,29 @@ namespace Language
         {
             var resultErrors = new List<ErrorEntity>();
 
-            if (results == null)
+            if (results == null || !results.Any())
             {
                 return resultErrors;
             }
 
-            foreach (var result in results)
+            foreach (var (piiResults, summarizationResults, errors) in results)
             {
-                if (result.piiResults != null)
+                var piiErrors = piiResults?
+                    .Where(pr => pr.Errors?.Any() ?? false)?
+                    .SelectMany(e => e.Errors);
+
+                if (piiErrors != null)
                 {
-                    foreach (var piiResult in result.piiResults)
-                    {
-                        if (piiResult.Errors != null)
-                        {
-                            resultErrors.AddRange(piiResult.Errors);
-                        }
-                    }
+                    resultErrors.AddRange(piiErrors);
                 }
 
-                if (result.summarizationResults != null)
+                var summarizeErrors = summarizationResults?
+                    .Where(sr => sr.Errors?.Any() ?? false)?
+                    .SelectMany(sr => sr.Errors);
+
+                if (summarizeErrors != null)
                 {
-                    foreach (var summarizationResult in result.summarizationResults)
-                    {
-                        if (summarizationResult.Errors != null)
-                        {
-                            resultErrors.AddRange(summarizationResult.Errors);
-                        }
-                    }
+                    resultErrors.AddRange(summarizeErrors);
                 }
             }
 
