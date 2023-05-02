@@ -19,12 +19,25 @@ public partial class MainPage : ContentPage
     private static readonly string synthesisVoiceKey    = ""; // voice decryption key
 
     // Embedded speech recognition models and synthesis voices must reside
-    // as normal individual files on the device filesystem.
-    // Model files bundled into the app package need to be copied to the
-    // application data folder before they can be used.
-    // List the files to be copied in the arrays below, with relative paths
-    // as they appear under Resources\Raw in this project.
+    // as normal individual files on the device filesystem and they need to
+    // be readable by the application process.
 
+    // Model files bundled into the app package need to be copied to the
+    // application data folder before they can be used. Note that modern
+    // Android systems may restrict access to the external storage, ref.
+    // https://developer.android.com/about/versions/11/privacy/storage
+
+    // In case it is necessary to optimize storage space consumption on the
+    // device, consider options:
+    // * Copy files on demand i.e. only the files of a model/voice that's
+    //   needed for a recognizer/synthesizer at a time; delete after use.
+    // * Do not include models/voices in the application package, instead
+    //   download additional data in a post-installation step (cf. games
+    //   with large assets or navigation apps with offline maps).
+
+    // List the files to be copied in the arrays below, with relative paths
+    // as they appear under Resources\Raw in this project. If you don't need
+    // either recognition or synthesis, leave the corresponding array empty.
     private static readonly string[] recognitionModelFiles =
     {
         /*
@@ -108,7 +121,7 @@ public partial class MainPage : ContentPage
             string[] filesToCopy = recognitionModelFiles.Concat(synthesisVoiceFiles).ToArray();
             if (filesToCopy.Length == 0)
             {
-                UpdateStatus("No files to copy!");
+                UpdateStatus("No files to copy! Embedded speech will not work.");
                 return;
             }
 
