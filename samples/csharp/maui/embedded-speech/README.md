@@ -1,7 +1,10 @@
-# Sample: Embedded speech using the CognitiveServices Speech SDK for MAUI
+# Embedded speech sample in C# for MAUI
 
-This Speech SDK sample demonstrates how to use embedded (offline, on-device) speech recognition and synthesis with Microsoft CognitiveServices Speech SDK for MAUI.
+This sample demonstrates embedded (offline, on-device) speech recognition and synthesis with the Speech SDK for .NET MAUI.
 You can choose whether to use recognition or synthesis, or both.
+
+For more advanced use cases, see the [C# .NET Core samples](../../dotnetcore/embedded-speech).
+It is recommended to try them out before this MAUI specific sample.
 
 > **Note:**
 > * Embedded speech is in [preview](https://aka.ms/embedded-speech) and details in this document and samples are subject to change.

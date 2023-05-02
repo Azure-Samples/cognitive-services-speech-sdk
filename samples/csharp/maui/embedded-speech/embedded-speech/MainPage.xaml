@@ -56,7 +56,7 @@
             <Label
                 x:Name="StatusText"
                 FontSize="Small"
-                Text="Welcome to .NET MAUI sample of Embedded Speech!"
+                Text="Welcome to the Embedded Speech sample for .NET MAUI!"
                 HorizontalTextAlignment="Center"
                 HorizontalOptions="Center" />
 

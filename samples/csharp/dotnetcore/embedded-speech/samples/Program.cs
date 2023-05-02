@@ -26,7 +26,7 @@ namespace MicrosoftSpeechSDKSamples
                     Console.WriteLine("\nSpeech recognition");
                     Console.WriteLine(" 1. List embeddded speech recognition models.");
                     Console.WriteLine(" 2. Embedded speech recognition with microphone input.");
-                    Console.WriteLine(" 3. Embedded speech recognition with microphone input, keyword triggered.");
+                    Console.WriteLine(" 3. Embedded speech recognition with microphone input, keyword-triggered.");
                     Console.WriteLine(" 4. Embedded speech recognition with WAV file input.");
                     Console.WriteLine(" 5. Embedded speech recognition with push stream input.");
                     Console.WriteLine(" 6. Embedded speech recognition with pull stream input.");
