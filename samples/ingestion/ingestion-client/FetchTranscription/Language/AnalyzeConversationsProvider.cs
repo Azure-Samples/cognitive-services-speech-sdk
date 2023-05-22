@@ -150,7 +150,7 @@ namespace Language
         /// <returns>True if all requests completed, else false.</returns>
         public async Task<bool> ConversationalRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()) || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests != null).Any())
+            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()) || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null).Any())
             {
                 return true;
             }
