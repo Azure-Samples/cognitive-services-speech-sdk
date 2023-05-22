@@ -27,7 +27,7 @@ namespace FetchTranscriptionFunction
         {
             _ = transcriptionStartedMessage ?? throw new ArgumentNullException(nameof(transcriptionStartedMessage));
 
-            if (textAnalyticsProvider == null || analyzeConversationsProvider == null)
+            if (textAnalyticsProvider == null && analyzeConversationsProvider == null)
             {
                 return TranscriptionAnalyticsJobStatus.None;
             }
@@ -40,13 +40,14 @@ namespace FetchTranscriptionFunction
                 return TranscriptionAnalyticsJobStatus.Running;
             }
 
+            // if the message already contains text analytics requests and all are in terminal state, treat jobs as completed:
             var containsTextAnalyticsRequest = transcriptionStartedMessage.AudioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any();
-            if (!containsTextAnalyticsRequest)
+            if (containsTextAnalyticsRequest)
             {
-                return TranscriptionAnalyticsJobStatus.NotStarted;
+                return TranscriptionAnalyticsJobStatus.Completed;
             }
 
-            return TranscriptionAnalyticsJobStatus.Completed;
+            return TranscriptionAnalyticsJobStatus.NotStarted;
         }
     }
 }
