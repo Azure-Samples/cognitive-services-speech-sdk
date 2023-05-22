@@ -323,27 +323,17 @@ namespace FetchTranscriptionFunction
             var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey)
                 && !string.IsNullOrEmpty(textAnalyticsRegion)
                 && !textAnalyticsRegion.Equals("none", StringComparison.OrdinalIgnoreCase);
-
             var conversationsAnalysisProvider = textAnalyticsInfoProvided ? new AnalyzeConversationsProvider(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsRegion, log) : null;
-
             var textAnalyticsProvider = textAnalyticsInfoProvided ? new TextAnalyticsProvider(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsRegion, log) : null;
 
-            // Check if there is a text analytics request already running:
-            var containsTextAnalyticsRequest = serviceBusMessage.AudioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any();
+            var transcriptionAnalyticsJobsStatus = await serviceBusMessage.GetTranscriptionAnalyticsJobsStatusAsync(textAnalyticsProvider, conversationsAnalysisProvider, log).ConfigureAwait(false);
 
-            if (containsTextAnalyticsRequest && textAnalyticsProvider != null)
+            if (transcriptionAnalyticsJobsStatus == TranscriptionAnalyticsJobStatus.Running)
             {
-                var textAnalyticsRequestCompleted = await textAnalyticsProvider.TextAnalyticsRequestsCompleted(serviceBusMessage.AudioFileInfos).ConfigureAwait(false);
-
-                var conversationalAnalyticsRequestCompleted = await conversationsAnalysisProvider.ConversationalRequestsCompleted(serviceBusMessage.AudioFileInfos).ConfigureAwait(false);
-
-                // If text analytics request is still running, re-queue message and get status again after X minutes
-                if (!textAnalyticsRequestCompleted || !conversationalAnalyticsRequestCompleted)
-                {
-                    log.LogInformation($"Text analytics request still running for job {jobName} - re-queueing message.");
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
-                    return;
-                }
+                // If transcription analytics request is still running, re-queue message and get status again after X minutes:
+                log.LogInformation($"Transcription analytics requests still running for job {jobName} - re-queueing message.");
+                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+                return;
             }
 
             var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
@@ -392,52 +382,88 @@ namespace FetchTranscriptionFunction
                 }
             }
 
-            if (textAnalyticsProvider != null &&
-                (FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None
-                || FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None
-                || AnalyzeConversationsProvider.IsConversationalPiiEnabled()
-                || AnalyzeConversationsProvider.IsConversationalSummarizationEnabled()))
+            if (transcriptionAnalyticsJobsStatus == TranscriptionAnalyticsJobStatus.Completed)
             {
-                // If we already got text analytics requests in the transcript (containsTextAnalyticsRequest), add the results to the transcript.
-                // Otherwise, submit new text analytics requests.
-                if (containsTextAnalyticsRequest)
+                foreach (var speechTranscriptMapping in speechTranscriptMappings)
                 {
-                    foreach (var speechTranscriptMapping in speechTranscriptMappings)
+                    var speechTranscript = speechTranscriptMapping.Value;
+                    var audioFileInfo = speechTranscriptMapping.Key;
+                    var fileName = audioFileInfo.FileName;
+                    if (FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None)
                     {
-                        var speechTranscript = speechTranscriptMapping.Value;
-                        var audioFileInfo = speechTranscriptMapping.Key;
-                        var fileName = audioFileInfo.FileName;
-                        if (FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None)
+                        speechTranscript.RecognizedPhrases.ToList().ForEach(phrase =>
                         {
-                            speechTranscript.RecognizedPhrases.ToList().ForEach(phrase =>
+                            if (phrase.NBest != null && phrase.NBest.Any())
                             {
-                                if (phrase.NBest != null && phrase.NBest.Any())
-                                {
-                                    var firstNBest = phrase.NBest.First();
-                                    phrase.NBest = new[] { firstNBest };
-                                }
-                            });
-                        }
+                                var firstNBest = phrase.NBest.First();
+                                phrase.NBest = new[] { firstNBest };
+                            }
+                        });
+                    }
 
+                    var textAnalyticsErrors = new List<string>();
+
+                    if (audioFileInfo.TextAnalyticsRequests.AudioLevelRequests?.Any() == true)
+                    {
+                        var audioLevelErrors = await textAnalyticsProvider.AddAudioLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.AudioLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
+                        textAnalyticsErrors.AddRange(audioLevelErrors);
+                    }
+
+                    if (audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests?.Any() == true)
+                    {
+                        var utteranceLevelErrors = await textAnalyticsProvider.AddUtteranceLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
+                        textAnalyticsErrors.AddRange(utteranceLevelErrors);
+                    }
+
+                    if (audioFileInfo.TextAnalyticsRequests.ConversationRequests?.Any() == true)
+                    {
+                        var conversationalAnalyticsErrors = await conversationsAnalysisProvider.AddConversationalEntitiesAsync(audioFileInfo.TextAnalyticsRequests.ConversationRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
+                        textAnalyticsErrors.AddRange(conversationalAnalyticsErrors);
+                    }
+
+                    if (textAnalyticsErrors.Any())
+                    {
+                        var distinctErrors = textAnalyticsErrors.Distinct();
+                        var errorMessage = $"File {(string.IsNullOrEmpty(fileName) ? "unknown" : fileName)}:\n{string.Join('\n', distinctErrors)}";
+
+                        generalErrorsStringBuilder.AppendLine(errorMessage);
+                    }
+                }
+            }
+            else if (transcriptionAnalyticsJobsStatus == TranscriptionAnalyticsJobStatus.NotStarted)
+            {
+                foreach (var speechTranscriptMapping in speechTranscriptMappings)
+                {
+                    var speechTranscript = speechTranscriptMapping.Value;
+                    var audioFileInfo = speechTranscriptMapping.Key;
+
+                    var fileName = audioFileInfo.FileName;
+
+                    if (speechTranscript.RecognizedPhrases != null && speechTranscript.RecognizedPhrases.All(phrase => phrase.RecognitionStatus.Equals("Success", StringComparison.Ordinal)))
+                    {
                         var textAnalyticsErrors = new List<string>();
 
-                        if (audioFileInfo.TextAnalyticsRequests.AudioLevelRequests?.Any() == true)
-                        {
-                            var audioLevelErrors = await textAnalyticsProvider.AddAudioLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.AudioLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
-                            textAnalyticsErrors.AddRange(audioLevelErrors);
-                        }
+                        (var utteranceLevelJobIds, var utteranceLevelErrors) = await textAnalyticsProvider.SubmitUtteranceLevelRequests(
+                            speechTranscript,
+                            FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
 
-                        if (audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests?.Any() == true)
-                        {
-                            var utteranceLevelErrors = await textAnalyticsProvider.AddUtteranceLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
-                            textAnalyticsErrors.AddRange(utteranceLevelErrors);
-                        }
+                        var utteranceLevelRequests = utteranceLevelJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
+                        textAnalyticsErrors.AddRange(utteranceLevelErrors);
 
-                        if (audioFileInfo.TextAnalyticsRequests.ConversationRequests?.Any() == true)
-                        {
-                            var conversationalAnalyticsErrors = await conversationsAnalysisProvider.AddConversationalEntitiesAsync(audioFileInfo.TextAnalyticsRequests.ConversationRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
-                            textAnalyticsErrors.AddRange(conversationalAnalyticsErrors);
-                        }
+                        (var audioLevelJobIds, var audioLevelErrors) = await textAnalyticsProvider.SubmitAudioLevelRequests(
+                            speechTranscript,
+                            FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting,
+                            FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
+
+                        var audioLevelRequests = audioLevelJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
+                        textAnalyticsErrors.AddRange(audioLevelErrors);
+
+                        (var conversationJobIds, var conversationErrors) = await conversationsAnalysisProvider.SubmitAnalyzeConversationsRequestAsync(speechTranscript).ConfigureAwait(false);
+
+                        var conversationalRequests = conversationJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
+                        textAnalyticsErrors.AddRange(conversationErrors);
+
+                        audioFileInfo.TextAnalyticsRequests = new TextAnalyticsRequests(utteranceLevelRequests, audioLevelRequests, conversationalRequests);
 
                         if (textAnalyticsErrors.Any())
                         {
@@ -448,57 +474,12 @@ namespace FetchTranscriptionFunction
                         }
                     }
                 }
-                else
-                {
-                    foreach (var speechTranscriptMapping in speechTranscriptMappings)
-                    {
-                        var speechTranscript = speechTranscriptMapping.Value;
-                        var audioFileInfo = speechTranscriptMapping.Key;
 
-                        var fileName = audioFileInfo.FileName;
+                log.LogInformation($"Added text analytics requests to service bus message - re-queueing message.");
 
-                        if (speechTranscript.RecognizedPhrases != null && speechTranscript.RecognizedPhrases.All(phrase => phrase.RecognitionStatus.Equals("Success", StringComparison.Ordinal)))
-                        {
-                            var textAnalyticsErrors = new List<string>();
-
-                            (var utteranceLevelJobIds, var utteranceLevelErrors) = await textAnalyticsProvider.SubmitUtteranceLevelRequests(
-                                speechTranscript,
-                                FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
-
-                            var utteranceLevelRequests = utteranceLevelJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
-                            textAnalyticsErrors.AddRange(utteranceLevelErrors);
-
-                            (var audioLevelJobIds, var audioLevelErrors) = await textAnalyticsProvider.SubmitAudioLevelRequests(
-                                speechTranscript,
-                                FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting,
-                                FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
-
-                            var audioLevelRequests = audioLevelJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
-                            textAnalyticsErrors.AddRange(audioLevelErrors);
-
-                            (var conversationJobIds, var conversationErrors) = await conversationsAnalysisProvider.SubmitAnalyzeConversationsRequestAsync(speechTranscript).ConfigureAwait(false);
-
-                            var conversationalRequests = conversationJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
-                            textAnalyticsErrors.AddRange(conversationErrors);
-
-                            audioFileInfo.TextAnalyticsRequests = new TextAnalyticsRequests(utteranceLevelRequests, audioLevelRequests, conversationalRequests);
-
-                            if (textAnalyticsErrors.Any())
-                            {
-                                var distinctErrors = textAnalyticsErrors.Distinct();
-                                var errorMessage = $"File {(string.IsNullOrEmpty(fileName) ? "unknown" : fileName)}:\n{string.Join('\n', distinctErrors)}";
-
-                                generalErrorsStringBuilder.AppendLine(errorMessage);
-                            }
-                        }
-                    }
-
-                    log.LogInformation($"Added text analytics requests to service bus message - re-queueing message.");
-
-                    // Poll for first time with TA request after 1 minute
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
-                    return;
-                }
+                // Poll for first time with TA request after 1 minute
+                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                return;
             }
 
             foreach (var speechTranscriptMapping in speechTranscriptMappings)
