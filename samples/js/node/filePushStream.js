@@ -46,8 +46,32 @@ function ReadString(fd, length) {
 
     module.exports = {
         openPushStream: function(filename) {
+
+            // Get the wave header for the file.
+            var wavFileHeader = module.exports.readWavFileHeader(filename);
+
+            var format;
+
+            switch (wavFileHeader.tag)
+            {
+                case 1: // PCM
+                    format = sdk.AudioFormatTag.PCM;
+                    break;
+                case 6: 
+                    format = sdk.AudioFormatTag.ALaw;
+                    break;
+                case 7:
+                    format = sdk.AudioFormatTag.MuLaw;
+                    break;
+                default:
+                    throw new Error("Wave format " + wavFileHeader.tag + " is not supported");
+            }
+
+            // Create the format for PCM Audio.
+            var format = sdk.AudioStreamFormat.getWaveFormat(wavFileHeader.framerate, wavFileHeader.bitsPerSample, wavFileHeader.nChannels, format);
+
             // create the push stream we need for the speech sdk.
-            var pushStream = sdk.AudioInputStream.createPushStream();
+            var pushStream = sdk.AudioInputStream.createPushStream(format);
 
             // open the file and push it to the push stream. 
             // Notice: we skip 44 bytes for the typical wav header.
@@ -80,7 +104,7 @@ function ReadString(fd, length) {
                 throw "Error reading .wav file header. Expected format size 16 bytes. Actual size: " + String(formatSize);
             }
             // Format tag
-            ReadUInt16(fd);
+            var tag = ReadUInt16(fd);
             var nChannels = ReadUInt16(fd);
             var framerate = ReadUInt32(fd);
             // Average bytes per second
@@ -91,7 +115,7 @@ function ReadString(fd, length) {
         
             fs.closeSync(fd);
         
-            return { framerate : framerate, bitsPerSample : bitsPerSample, nChannels : nChannels };
+            return { framerate : framerate, bitsPerSample : bitsPerSample, nChannels : nChannels, tag: tag };
         }
     }
 }());
