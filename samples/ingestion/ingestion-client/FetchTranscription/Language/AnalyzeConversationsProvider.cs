@@ -499,13 +499,13 @@ namespace Language
                 {
                     // all tasks completed.
                     piiResults.AddRange(analysisResult.Tasks
-                        .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults)
-                        .Select(s => s as ConversationPiiItem)
-                        .Select(s => s.Results));
+                        .Items
+                        .Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults && (item as ConversationPiiItem)?.Results != null)
+                        .Select(s => ((ConversationPiiItem)s).Results));
                     summarizationResults.AddRange(analysisResult.Tasks
-                        .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults)
-                        .Select(s => s as ConversationSummarizationItem)
-                        .Select(s => s.Results));
+                        .Items
+                        .Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults && (item as ConversationSummarizationItem)?.Results != null)
+                        .Select(s => ((ConversationSummarizationItem)s).Results));
                     return (piiResults, summarizationResults, errors);
                 }
             }
