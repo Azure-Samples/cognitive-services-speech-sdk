@@ -70,5 +70,10 @@ namespace FetchTranscriptionFunction
         public static readonly bool CreateAudioProcessedContainer = bool.TryParse(Environment.GetEnvironmentVariable(nameof(CreateAudioProcessedContainer), EnvironmentVariableTarget.Process), out CreateAudioProcessedContainer) && CreateAudioProcessedContainer;
 
         public static readonly string AudioProcessedContainer = Environment.GetEnvironmentVariable(nameof(AudioProcessedContainer), EnvironmentVariableTarget.Process);
+
+        // AzureOpenAI variables:
+        public static readonly string AzureOpenAIKey = Environment.GetEnvironmentVariable(nameof(AzureOpenAIKey), EnvironmentVariableTarget.Process);
+
+        public static readonly string AzureOpenAIEndpoint = Environment.GetEnvironmentVariable(nameof(AzureOpenAIEndpoint), EnvironmentVariableTarget.Process);
     }
 }

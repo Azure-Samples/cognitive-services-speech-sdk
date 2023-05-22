@@ -6,14 +6,16 @@
 namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
 {
     using System;
+    using Connector.Serializable.TranscriptionStartedMessage.AzureOpenAI;
 
     public class AudioFileInfo
     {
-        public AudioFileInfo(string fileUrl, int retryCount, TextAnalyticsRequests textAnalyticsRequests)
+        public AudioFileInfo(string fileUrl, int retryCount, TextAnalyticsRequests textAnalyticsRequests, AzureOpenAIRequests azureOpenAIRequests)
         {
             this.FileUrl = fileUrl;
             this.RetryCount = retryCount;
             this.TextAnalyticsRequests = textAnalyticsRequests;
+            this.AzureOpenAIRequests = azureOpenAIRequests;
         }
 
         public string FileUrl { get; set; }
@@ -23,5 +25,7 @@ namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
         public int RetryCount { get; set; }
 
         public TextAnalyticsRequests TextAnalyticsRequests { get; set; }
+
+        public AzureOpenAIRequests AzureOpenAIRequests { get; set; }
     }
 }

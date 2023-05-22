@@ -19,14 +19,12 @@ namespace FetchTranscriptionFunction
     using Connector.Database;
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-
-    using Language;
+    using global::FetchTranscription;
 
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
-    using TextAnalytics;
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     public class TranscriptionProcessor
@@ -40,6 +38,8 @@ namespace FetchTranscriptionFunction
         private static readonly ServiceBusClient FetchServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString);
 
         private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
+
+        private static readonly Lazy<BatchCompletionsClient> BatchCompletionsClient = new Lazy<BatchCompletionsClient>(() => new BatchCompletionsClient(FetchTranscriptionEnvironmentVariables.AzureOpenAIKey, FetchTranscriptionEnvironmentVariables.AzureOpenAIEndpoint));
 
         private readonly IServiceProvider serviceProvider;
 

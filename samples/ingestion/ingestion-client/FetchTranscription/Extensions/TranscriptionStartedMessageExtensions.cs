@@ -12,10 +12,7 @@ namespace FetchTranscriptionFunction
     using Connector;
     using Connector.Enums;
 
-    using Language;
     using Microsoft.Extensions.Logging;
-
-    using TextAnalytics;
 
     public static class TranscriptionStartedMessageExtensions
     {
