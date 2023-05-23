@@ -7,11 +7,28 @@ namespace Connector.Serializable.TranscriptionStartedMessage.AzureOpenAI
 {
     public class BatchCompletionRequest
     {
-        public BatchCompletionRequest(string operationLocation)
+        public BatchCompletionRequest(string operationLocation, BatchCompletionRequestStatus status)
         {
             this.OperationLocation = operationLocation;
+            this.Status = status;
+        }
+
+        public enum BatchCompletionRequestStatus
+        {
+            None = 0,
+            NotRunning,
+            Running,
+            Completed,
+            Failed
         }
 
         public string OperationLocation { get; set; }
+
+        public BatchCompletionRequestStatus Status { get; set; }
+
+        public static bool IsTerminatedBatchCompletionRequestStatus(BatchCompletionRequestStatus status)
+        {
+            return status == BatchCompletionRequestStatus.Completed || status == BatchCompletionRequestStatus.Failed;
+        }
     }
 }

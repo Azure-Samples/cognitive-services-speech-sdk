@@ -9,11 +9,11 @@ namespace Connector.Serializable.TranscriptionStartedMessage.AzureOpenAI
 
     public class AzureOpenAIRequests
     {
-        public AzureOpenAIRequests(IEnumerable<BatchCompletionRequest> batchCompletionRequest)
+        public AzureOpenAIRequests(IEnumerable<BatchCompletionRequest> batchCompletionRequests)
         {
-            this.BatchCompletionRequest = batchCompletionRequest;
+            this.BatchCompletionRequests = batchCompletionRequests;
         }
 
-        public IEnumerable<BatchCompletionRequest> BatchCompletionRequest { get; }
+        public IEnumerable<BatchCompletionRequest> BatchCompletionRequests { get; }
     }
 }

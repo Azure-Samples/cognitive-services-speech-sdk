@@ -7,6 +7,7 @@ namespace FetchTranscription
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using System.Net.Http;
     using System.Text;
@@ -18,6 +19,8 @@ namespace FetchTranscription
     using Microsoft.Extensions.Logging;
 
     using Newtonsoft.Json;
+
+    using static Connector.Serializable.TranscriptionStartedMessage.AzureOpenAI.BatchCompletionRequest;
 
     public sealed class BatchCompletionsClient
     {
@@ -42,8 +45,6 @@ namespace FetchTranscription
             this.inputContainer = inputContainer;
             this.targetContainer = targetContainer;
             this.storageConnector = storageConnector;
-            /////this.httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
-            /////this.httpClient.DefaultRequestHeaders.Add("api-key", key);
         }
 
         public async Task<string> SubmitBatchCompletionJobs(SpeechTranscript speechTranscript, ILogger logger)
@@ -82,21 +83,46 @@ namespace FetchTranscription
             var requestBody = new
             {
                 model = "gpt-35-turbo",
-                blob_prefix = "jvandervegtetest01",
+                blob_prefix = inputFileName,
                 content_url = inputFileUrl.ToString(),
-                target_container = "https://jvandervegteopenaitest.blob.core.windows.net/results"
+                target_container = this.storageConnector.GetFullContainerUrl(this.targetContainer).ToString(),
             };
 
             httpRequest.Content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
 
+            var response = await this.httpClient.SendAsync(httpRequest).ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+            var operationLocation = response.Headers.GetValues("operation-location").First();
+
+            return operationLocation;
         }
 
         public async Task<bool> BatchCompletionJobsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (audioFileInfos == null || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any())
+            if (audioFileInfos == null || !audioFileInfos.Where(audioFileInfo => audioFileInfo.AzureOpenAIRequests != null).Any())
             {
                 return true;
             }
+
+            var runningRequests = audioFileInfos.Where(audioFileInfo => audioFileInfo.AzureOpenAIRequests?.BatchCompletionRequests != null)
+                .SelectMany(audioFileInfo => audioFileInfo.AzureOpenAIRequests.BatchCompletionRequests)
+                .Where(batchCompletionRequest => !IsTerminatedBatchCompletionRequestStatus(batchCompletionRequest.Status));
+
+            var batchCompletionJobsCompleted = true;
+
+            foreach (var batchCompletionRequest in runningRequests)
+            {
+                var updatedStatus = await this.GetOperationStatusAsync(batchCompletionRequest.OperationLocation).ConfigureAwait(false);
+                batchCompletionRequest.Status = updatedStatus;
+
+                if (!IsTerminatedBatchCompletionRequestStatus(updatedStatus))
+                {
+                    batchCompletionJobsCompleted = false;
+                }
+            }
+
+            return batchCompletionJobsCompleted;
         }
 
         private static Func<(int channelId, int speakerId), string> GetSpeakerIdentifierFunc(SpeechTranscript speechTranscript)
@@ -120,5 +146,9 @@ namespace FetchTranscription
             return x => "Speaker";
         }
 
+        private async Task<BatchCompletionRequestStatus> GetOperationStatusAsync(string operationLocation)
+        {
+            return BatchCompletionRequestStatus.Running;
+        }
     }
 }

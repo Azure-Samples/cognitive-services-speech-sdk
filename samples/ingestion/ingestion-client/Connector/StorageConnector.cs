@@ -111,11 +111,10 @@ namespace Connector
             return blobClient.Uri;
         }
 
-        public Uri GetFullContainerUrl(string containerName, string blobName)
+        public Uri GetFullContainerUrl(string containerName)
         {
             var containerClient = this.blobServiceClient.GetBlobContainerClient(containerName);
-            var blobClient = containerClient.GetBlobClient(blobName);
-            return blobClient.Uri;
+            return containerClient.Uri;
         }
 
         public async Task<byte[]> DownloadFileFromContainer(string containerName, string blobName)
