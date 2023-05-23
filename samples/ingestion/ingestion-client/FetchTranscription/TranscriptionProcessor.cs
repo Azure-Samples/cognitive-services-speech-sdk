@@ -319,12 +319,11 @@ namespace FetchTranscriptionFunction
             log.LogInformation($"Got succeeded transcription for job {jobName}");
 
             var textAnalyticsKey = FetchTranscriptionEnvironmentVariables.TextAnalyticsKey;
-            var textAnalyticsRegion = FetchTranscriptionEnvironmentVariables.TextAnalyticsRegion;
-            var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey)
-                && !string.IsNullOrEmpty(textAnalyticsRegion)
-                && !textAnalyticsRegion.Equals("none", StringComparison.OrdinalIgnoreCase);
-            var conversationsAnalysisProvider = textAnalyticsInfoProvided ? new AnalyzeConversationsProvider(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsRegion, log) : null;
-            var textAnalyticsProvider = textAnalyticsInfoProvided ? new TextAnalyticsProvider(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsRegion, log) : null;
+            var textAnalyticsEndpoint = FetchTranscriptionEnvironmentVariables.TextAnalyticsEndpoint;
+            var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey);
+
+            var conversationsAnalysisProvider = textAnalyticsInfoProvided ? new AnalyzeConversationsProvider(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsEndpoint, log) : null;
+            var textAnalyticsProvider = textAnalyticsInfoProvided ? new TextAnalyticsProvider(serviceBusMessage.Locale, textAnalyticsKey, textAnalyticsEndpoint, log) : null;
 
             var transcriptionAnalyticsJobsStatus = await serviceBusMessage.GetTranscriptionAnalyticsJobsStatusAsync(textAnalyticsProvider, conversationsAnalysisProvider, log).ConfigureAwait(false);
 
