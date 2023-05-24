@@ -154,7 +154,7 @@
       "defaultValue": "",
       "type": "String",
       "metadata": {
-        "description": "The endpoint the Text Analytics subscription is associated with. If none is selected, no text analysis will be performed.."
+        "description": "The endpoint the Text Analytics subscription is associated withformat should be like https://{resourceName}.cognitiveservices.azure.com or https://{region}.api.cognitive.microsoft.com or similar). If empty, no text analysis will be performed."
       }
     },
     "SentimentAnalysis": {
