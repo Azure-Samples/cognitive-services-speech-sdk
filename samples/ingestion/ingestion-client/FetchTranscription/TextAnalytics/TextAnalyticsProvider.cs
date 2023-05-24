@@ -57,9 +57,9 @@ namespace TextAnalytics
 
         private readonly ILogger log;
 
-        public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log)
+        public TextAnalyticsProvider(string locale, string subscriptionKey, string endpoint, ILogger log)
         {
-            this.textAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.textAnalyticsClient = new TextAnalyticsClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
             this.locale = locale;
             this.log = log;
         }

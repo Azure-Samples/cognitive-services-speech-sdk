@@ -39,9 +39,9 @@ namespace Language
         private readonly string locale;
         private readonly ILogger log;
 
-        public AnalyzeConversationsProvider(string locale, string subscriptionKey, string region, ILogger log)
+        public AnalyzeConversationsProvider(string locale, string subscriptionKey, string endpoint, ILogger log)
         {
-            this.conversationAnalysisClient = new ConversationAnalysisClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.conversationAnalysisClient = new ConversationAnalysisClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
 
             this.locale = locale;
             this.log = log;
