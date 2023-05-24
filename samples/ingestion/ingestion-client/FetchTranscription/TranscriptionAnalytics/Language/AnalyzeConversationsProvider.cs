@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Language
+namespace FetchTranscriptionFunction
 {
     using System;
     using System.Collections.Generic;
@@ -19,8 +19,6 @@ namespace Language
     using Connector.Constants;
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-
-    using FetchTranscriptionFunction;
 
     using Microsoft.Extensions.Logging;
 
