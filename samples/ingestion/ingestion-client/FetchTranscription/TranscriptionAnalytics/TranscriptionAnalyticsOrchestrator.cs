@@ -6,11 +6,9 @@
 namespace FetchTranscription.TranscriptionAnalytics
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Azure.Messaging.ServiceBus;
 
     using Connector;
     using Connector.Enums;
@@ -32,12 +30,12 @@ namespace FetchTranscription.TranscriptionAnalytics
             ILogger logger)
         {
             var textAnalyticsKey = FetchTranscriptionEnvironmentVariables.TextAnalyticsKey;
-            var textAnalyticsRegion = FetchTranscriptionEnvironmentVariables.TextAnalyticsRegion;
-            var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey)
-                && !string.IsNullOrEmpty(textAnalyticsRegion)
-                && !textAnalyticsRegion.Equals("none", StringComparison.OrdinalIgnoreCase);
-            this.analyzeConversationsProvider = textAnalyticsInfoProvided ? new AnalyzeConversationsProvider(locale, textAnalyticsKey, textAnalyticsRegion, logger) : null;
-            this.textAnalyticsProvider = textAnalyticsInfoProvided ? new TextAnalyticsProvider(locale, textAnalyticsKey, textAnalyticsRegion, logger) : null;
+            var textAnalyticsEndpoint = FetchTranscriptionEnvironmentVariables.TextAnalyticsEndpoint;
+            var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey);
+
+            this.analyzeConversationsProvider = textAnalyticsInfoProvided ? new AnalyzeConversationsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger) : null;
+            this.textAnalyticsProvider = textAnalyticsInfoProvided ? new TextAnalyticsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger) : null;
+
             this.logger = logger;
         }
 
