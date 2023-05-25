@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace FetchTranscription.TranscriptionAnalytics
+namespace FetchTranscription
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,6 @@ namespace FetchTranscription.TranscriptionAnalytics
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
-    using FetchTranscriptionFunction;
     using Microsoft.Extensions.Logging;
 
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
@@ -44,6 +43,8 @@ namespace FetchTranscription.TranscriptionAnalytics
             {
                 return TranscriptionAnalyticsJobStatus.None;
             }
+
+            var jobStatus = this.textAnalyticsProvider != null ? await this.textAnalyticsProvider.GetTranscriptionAnalyticsJobStatusAsync(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : TranscriptionAnalyticsJobStatus.None;
 
             var textAnalyticsRequestCompleted = this.textAnalyticsProvider != null ? await this.textAnalyticsProvider.TextAnalyticsRequestsCompleted(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : true;
             var conversationalAnalyticsRequestCompleted = this.analyzeConversationsProvider != null ? await this.analyzeConversationsProvider.ConversationalRequestsCompleted(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : true;

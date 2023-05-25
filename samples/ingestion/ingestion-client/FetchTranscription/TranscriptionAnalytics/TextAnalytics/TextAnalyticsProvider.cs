@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace FetchTranscriptionFunction
+namespace FetchTranscription
 {
     using System;
     using System.Collections.Generic;
@@ -41,7 +41,7 @@ namespace FetchTranscriptionFunction
     ///         if false:
     ///             Write transcript to storage.
     /// </summary>
-    public class TextAnalyticsProvider
+    public class TextAnalyticsProvider : ITranscriptionAnalyticsProvider
     {
         private const int MaxRecordsPerRequest = 25;
 
@@ -58,6 +58,50 @@ namespace FetchTranscriptionFunction
             this.textAnalyticsClient = new TextAnalyticsClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
             this.locale = locale;
             this.log = log;
+        }
+
+        public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
+        {
+            if (audioFileInfos == null || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any())
+            {
+                return TranscriptionAnalyticsJobStatus.NotSubmitted;
+            }
+
+            var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
+
+            runningTextAnalyticsRequests.AddRange(
+                audioFileInfos
+                    .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.AudioLevelRequests != null)
+                    .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.AudioLevelRequests)
+                    .Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+
+            runningTextAnalyticsRequests.AddRange(
+                audioFileInfos
+                    .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.UtteranceLevelRequests != null)
+                    .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests)
+                    .Where(text => text.Status == TextAnalyticsRequestStatus.Running));
+
+            var status = TranscriptionAnalyticsJobStatus.Completed;
+            foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
+            {
+                var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, this.textAnalyticsClient);
+
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(RequestTimeout);
+                await operation.UpdateStatusAsync(cts.Token).ConfigureAwait(false);
+
+                if (operation.HasCompleted)
+                {
+                    textAnalyticsJob.Status = TextAnalyticsRequestStatus.Completed;
+                }
+                else
+                {
+                    // if one or more jobs are still running, report status as running:
+                    status = TranscriptionAnalyticsJobStatus.Running;
+                }
+            }
+
+            return status;
         }
 
         /// <summary>
