@@ -44,7 +44,7 @@ namespace FetchTranscriptionFunction
                 return TranscriptionAnalyticsJobStatus.Completed;
             }
 
-            return TranscriptionAnalyticsJobStatus.NotStarted;
+            return TranscriptionAnalyticsJobStatus.NotSubmitted;
         }
     }
 }
