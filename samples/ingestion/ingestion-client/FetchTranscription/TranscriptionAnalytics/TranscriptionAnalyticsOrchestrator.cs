@@ -23,7 +23,6 @@ namespace FetchTranscription.TranscriptionAnalytics
     {
         private readonly TextAnalyticsProvider textAnalyticsProvider;
         private readonly AnalyzeConversationsProvider analyzeConversationsProvider;
-        private readonly ILogger logger;
 
         public TranscriptionAnalyticsOrchestrator(
             string locale,
@@ -31,12 +30,10 @@ namespace FetchTranscription.TranscriptionAnalytics
         {
             var textAnalyticsKey = FetchTranscriptionEnvironmentVariables.TextAnalyticsKey;
             var textAnalyticsEndpoint = FetchTranscriptionEnvironmentVariables.TextAnalyticsEndpoint;
-            var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey);
+            var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey) && !string.IsNullOrEmpty(textAnalyticsEndpoint);
 
             this.analyzeConversationsProvider = textAnalyticsInfoProvided ? new AnalyzeConversationsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger) : null;
             this.textAnalyticsProvider = textAnalyticsInfoProvided ? new TextAnalyticsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger) : null;
-
-            this.logger = logger;
         }
 
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobsStatusAsync(TranscriptionStartedMessage transcriptionStartedMessage)
