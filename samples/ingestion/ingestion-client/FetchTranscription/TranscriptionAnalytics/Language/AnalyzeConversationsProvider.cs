@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Language
+namespace FetchTranscriptionFunction
 {
     using System;
     using System.Collections.Generic;
@@ -19,8 +19,6 @@ namespace Language
     using Connector.Constants;
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-
-    using FetchTranscriptionFunction;
 
     using Microsoft.Extensions.Logging;
 
@@ -39,9 +37,9 @@ namespace Language
         private readonly string locale;
         private readonly ILogger log;
 
-        public AnalyzeConversationsProvider(string locale, string subscriptionKey, string region, ILogger log)
+        public AnalyzeConversationsProvider(string locale, string subscriptionKey, string endpoint, ILogger log)
         {
-            this.conversationAnalysisClient = new ConversationAnalysisClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.conversationAnalysisClient = new ConversationAnalysisClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
 
             this.locale = locale;
             this.log = log;

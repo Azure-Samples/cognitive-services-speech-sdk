@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace TextAnalytics
+namespace FetchTranscriptionFunction
 {
     using System;
     using System.Collections.Generic;
@@ -17,10 +17,6 @@ namespace TextAnalytics
     using Connector;
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-
-    using FetchTranscriptionFunction;
-
-    using Language;
 
     using Microsoft.Extensions.Logging;
 
@@ -57,9 +53,9 @@ namespace TextAnalytics
 
         private readonly ILogger log;
 
-        public TextAnalyticsProvider(string locale, string subscriptionKey, string region, ILogger log)
+        public TextAnalyticsProvider(string locale, string subscriptionKey, string endpoint, ILogger log)
         {
-            this.textAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.textAnalyticsClient = new TextAnalyticsClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
             this.locale = locale;
             this.log = log;
         }
