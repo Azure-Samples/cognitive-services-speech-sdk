@@ -8,6 +8,7 @@ namespace FetchTranscription.TranscriptionAnalytics
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
     using System.Threading.Tasks;
 
     using Connector;
@@ -23,8 +24,11 @@ namespace FetchTranscription.TranscriptionAnalytics
     {
         private readonly TextAnalyticsProvider textAnalyticsProvider;
         private readonly AnalyzeConversationsProvider analyzeConversationsProvider;
+        private readonly BatchCompletionsClient batchCompletionsClient;
 
         public TranscriptionAnalyticsOrchestrator(
+            HttpClient httpClient,
+            StorageConnector storageConnector,
             string locale,
             ILogger logger)
         {
@@ -34,21 +38,28 @@ namespace FetchTranscription.TranscriptionAnalytics
 
             this.analyzeConversationsProvider = textAnalyticsInfoProvided ? new AnalyzeConversationsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger) : null;
             this.textAnalyticsProvider = textAnalyticsInfoProvided ? new TextAnalyticsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger) : null;
+
+            this.batchCompletionsClient = new BatchCompletionsClient(httpClient, FetchTranscriptionEnvironmentVariables.AzureOpenAIKey, FetchTranscriptionEnvironmentVariables.AzureOpenAIEndpoint, "someInputContainer", "someTargetContainer", storageConnector);
         }
 
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobsStatusAsync(TranscriptionStartedMessage transcriptionStartedMessage)
         {
             _ = transcriptionStartedMessage ?? throw new ArgumentNullException(nameof(transcriptionStartedMessage));
 
-            if (this.textAnalyticsProvider == null && this.analyzeConversationsProvider == null)
+            // First check if we have any providers configured:
+            if (this.textAnalyticsProvider == null &&
+                this.analyzeConversationsProvider == null &&
+                this.batchCompletionsClient == null)
             {
                 return TranscriptionAnalyticsJobStatus.None;
             }
 
+            // Then check if any provider indicates that the underlying job is still running:
             var textAnalyticsRequestCompleted = this.textAnalyticsProvider != null ? await this.textAnalyticsProvider.TextAnalyticsRequestsCompleted(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : true;
             var conversationalAnalyticsRequestCompleted = this.analyzeConversationsProvider != null ? await this.analyzeConversationsProvider.ConversationalRequestsCompleted(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : true;
+            var batchCompletionJobsCompleted = this.batchCompletionsClient != null ? await this.batchCompletionsClient.BatchCompletionJobsCompleted(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : true;
 
-            if (!textAnalyticsRequestCompleted || !conversationalAnalyticsRequestCompleted)
+            if (!textAnalyticsRequestCompleted || !conversationalAnalyticsRequestCompleted || !batchCompletionJobsCompleted)
             {
                 return TranscriptionAnalyticsJobStatus.Running;
             }

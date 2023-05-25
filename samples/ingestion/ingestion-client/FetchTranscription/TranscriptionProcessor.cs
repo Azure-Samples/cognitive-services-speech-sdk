@@ -19,13 +19,12 @@ namespace FetchTranscriptionFunction
     using Connector.Database;
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-    using global::FetchTranscription;
+    using global::FetchTranscription.TranscriptionAnalytics;
 
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
-    using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     public class TranscriptionProcessor
     {
@@ -39,7 +38,7 @@ namespace FetchTranscriptionFunction
 
         private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
 
-        private static readonly Lazy<BatchCompletionsClient> BatchCompletionsClient = new Lazy<BatchCompletionsClient>(() => new BatchCompletionsClient(FetchTranscriptionEnvironmentVariables.AzureOpenAIKey, FetchTranscriptionEnvironmentVariables.AzureOpenAIEndpoint));
+        private static readonly HttpClient HttpClientInstance = new HttpClient();
 
         private readonly IServiceProvider serviceProvider;
 
@@ -329,7 +328,7 @@ namespace FetchTranscriptionFunction
         {
             log.LogInformation($"Got succeeded transcription for job {jobName}");
 
-            var transcriptionAnalyticsOrchestrator = new TranscriptionAnalyticsOrchestrator(serviceBusMessage.Locale, log);
+            var transcriptionAnalyticsOrchestrator = new TranscriptionAnalyticsOrchestrator(HttpClientInstance, StorageConnectorInstance, serviceBusMessage.Locale, log);
             var transcriptionAnalyticsJobStatus = await transcriptionAnalyticsOrchestrator.GetTranscriptionAnalyticsJobsStatusAsync(serviceBusMessage).ConfigureAwait(false);
             if (transcriptionAnalyticsJobStatus == TranscriptionAnalyticsJobStatus.Running)
             {

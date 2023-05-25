@@ -87,7 +87,7 @@ namespace Tests
             Console.WriteLine("Submit");
             Console.WriteLine(JsonConvert.SerializeObject(jobIds));
             Assert.AreEqual(0, jobIds.errors.Count());
-            var req = jobIds.jobIds.Select(jobId => new AudioFileInfo(default, default, new TextAnalyticsRequests(default, default, new[] { new TextAnalyticsRequest(jobId, TextAnalyticsRequest.TextAnalyticsRequestStatus.Running) })));
+            var req = jobIds.jobIds.Select(jobId => new AudioFileInfo(default, default, new TextAnalyticsRequests(default, default, new[] { new TextAnalyticsRequest(jobId, TextAnalyticsRequest.TextAnalyticsRequestStatus.Running) }), azureOpenAIRequests: null));
 
             while (!await provider.ConversationalRequestsCompleted(req).ConfigureAwait(false))
             {

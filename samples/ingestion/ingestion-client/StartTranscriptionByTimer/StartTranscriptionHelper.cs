@@ -206,7 +206,7 @@ namespace StartTranscriptionByTimer
                         audioUrls.Add(StorageConnectorInstance.CreateSas(serviceBusMessage.Data.Url));
                     }
 
-                    audioFileInfos.Add(new AudioFileInfo(absoluteAudioUrl, serviceBusMessage.RetryCount, textAnalyticsRequests: null));
+                    audioFileInfos.Add(new AudioFileInfo(absoluteAudioUrl, serviceBusMessage.RetryCount, textAnalyticsRequests: null, azureOpenAIRequests: null));
                 }
 
                 ModelIdentity modelIdentity = null;
