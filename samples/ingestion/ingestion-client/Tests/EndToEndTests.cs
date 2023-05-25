@@ -15,7 +15,7 @@ namespace Tests
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
-    using Language;
+    using FetchTranscriptionFunction;
 
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.Extensions.Logging;
