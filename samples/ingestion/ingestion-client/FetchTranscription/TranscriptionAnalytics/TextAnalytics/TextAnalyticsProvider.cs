@@ -41,9 +41,20 @@ namespace FetchTranscription
             this.log = log;
         }
 
+        public static bool IsTextAnalyticsRequested()
+        {
+            return FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None ||
+                FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None;
+        }
+
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (audioFileInfos == null || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any())
+            if (!IsTextAnalyticsRequested())
+            {
+                return TranscriptionAnalyticsJobStatus.Completed;
+            }
+
+            if (!audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any())
             {
                 return TranscriptionAnalyticsJobStatus.NotSubmitted;
             }

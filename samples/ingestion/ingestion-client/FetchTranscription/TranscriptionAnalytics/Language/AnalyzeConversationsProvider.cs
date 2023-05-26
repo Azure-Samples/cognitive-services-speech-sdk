@@ -56,7 +56,12 @@ namespace FetchTranscription
 
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()) || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null).Any())
+            if (!IsConversationalPiiEnabled() && !IsConversationalSummarizationEnabled())
+            {
+                return TranscriptionAnalyticsJobStatus.Completed;
+            }
+
+            if (!audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null).Any())
             {
                 return TranscriptionAnalyticsJobStatus.NotSubmitted;
             }

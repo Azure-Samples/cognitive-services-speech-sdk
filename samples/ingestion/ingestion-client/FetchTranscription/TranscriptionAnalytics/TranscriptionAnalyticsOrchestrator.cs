@@ -40,11 +40,6 @@ namespace FetchTranscription
         {
             _ = transcriptionStartedMessage ?? throw new ArgumentNullException(nameof(transcriptionStartedMessage));
 
-            if (this.providers.Count == 0)
-            {
-                return TranscriptionAnalyticsJobStatus.None;
-            }
-
             foreach (var provider in this.providers)
             {
                 var providerStatus = await provider.GetTranscriptionAnalyticsJobStatusAsync(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false);
@@ -55,7 +50,7 @@ namespace FetchTranscription
                     return TranscriptionAnalyticsJobStatus.NotSubmitted;
                 }
 
-                // if any is running, return and ma
+                // if any is running, we set the status to running and fetch it again after some time:
                 if (providerStatus == TranscriptionAnalyticsJobStatus.Running)
                 {
                     return TranscriptionAnalyticsJobStatus.Running;
