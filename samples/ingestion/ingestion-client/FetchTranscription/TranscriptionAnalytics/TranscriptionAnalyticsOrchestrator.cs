@@ -36,6 +36,11 @@ namespace FetchTranscription
             }
         }
 
+        /// <summary>
+        /// Gets the merged status of all transcription analytics jobs.
+        /// </summary>
+        /// <param name="transcriptionStartedMessage">The transcription started service bus message.</param>
+        /// <returns>The merged job status.</returns>
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobsStatusAsync(TranscriptionStartedMessage transcriptionStartedMessage)
         {
             _ = transcriptionStartedMessage ?? throw new ArgumentNullException(nameof(transcriptionStartedMessage));
@@ -44,13 +49,13 @@ namespace FetchTranscription
             {
                 var providerStatus = await provider.GetTranscriptionAnalyticsJobStatusAsync(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false);
 
-                // if any is not submitted, we can safely return here since we submit all requests at the same time - therefore all other providers should not have any running requests
+                // if any is not submitted, we can safely return here since we submit all requests at the same time - therefore all other providers should not have any running requests.
                 if (providerStatus == TranscriptionAnalyticsJobStatus.NotSubmitted)
                 {
                     return TranscriptionAnalyticsJobStatus.NotSubmitted;
                 }
 
-                // if any is running, we set the status to running and fetch it again after some time:
+                // if any is running, we set the status to running and fetch it again after some time.
                 if (providerStatus == TranscriptionAnalyticsJobStatus.Running)
                 {
                     return TranscriptionAnalyticsJobStatus.Running;
@@ -60,21 +65,11 @@ namespace FetchTranscription
             return TranscriptionAnalyticsJobStatus.Completed;
         }
 
-        public async Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscripts(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
-        {
-            _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));
-
-            var errors = new List<string>();
-
-            foreach (var provider in this.providers)
-            {
-                var providerErros = await provider.AddTranscriptionAnalyticsResultsToTranscriptsAsync(speechTranscriptMappings).ConfigureAwait(false);
-                errors.AddRange(providerErros);
-            }
-
-            return errors;
-        }
-
+        /// <summary>
+        /// Submit transcription analytics jobs and adds their IDs to the audio file infos, so that they can get fetched the next time the transcription job status is polled.
+        /// </summary>
+        /// <param name="speechTranscriptMappings">The mapping from audio file infos to speech transcripts.</param>
+        /// <returns>The errors if any.</returns>
         public async Task<IEnumerable<string>> SubmitTranscriptionAnalyticsJobsAndAddToAudioFileInfos(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
         {
             _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));
@@ -84,6 +79,26 @@ namespace FetchTranscription
             foreach (var provider in this.providers)
             {
                 var providerErros = await provider.SubmitTranscriptionAnalyticsJobsAsync(speechTranscriptMappings).ConfigureAwait(false);
+                errors.AddRange(providerErros);
+            }
+
+            return errors;
+        }
+
+        /// <summary>
+        /// Adds the result of all transcription analytics jobs to the corresponding speech transcript.
+        /// </summary>
+        /// <param name="speechTranscriptMappings">The mapping from audio file infos to speech transcripts.</param>
+        /// <returns>The errors if any.</returns>
+        public async Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscripts(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
+        {
+            _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));
+
+            var errors = new List<string>();
+
+            foreach (var provider in this.providers)
+            {
+                var providerErros = await provider.AddTranscriptionAnalyticsResultsToTranscriptsAsync(speechTranscriptMappings).ConfigureAwait(false);
                 errors.AddRange(providerErros);
             }
 

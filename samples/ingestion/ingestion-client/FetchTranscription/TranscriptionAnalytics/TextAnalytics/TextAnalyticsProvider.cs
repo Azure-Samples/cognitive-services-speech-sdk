@@ -47,6 +47,7 @@ namespace FetchTranscription
                 FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None;
         }
 
+        /// <inheritdoc />
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
         {
             if (!IsTextAnalyticsRequested())
@@ -96,6 +97,7 @@ namespace FetchTranscription
             return status;
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<string>> SubmitTranscriptionAnalyticsJobsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
         {
             _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));
@@ -149,6 +151,7 @@ namespace FetchTranscription
             return errors;
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscriptsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
         {
             _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));

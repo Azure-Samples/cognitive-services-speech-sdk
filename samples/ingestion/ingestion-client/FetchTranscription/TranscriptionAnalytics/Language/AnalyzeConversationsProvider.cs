@@ -54,6 +54,7 @@ namespace FetchTranscription
         public static bool IsConversationalSummarizationEnabled()
             => FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Enabled;
 
+        /// <inheritdoc />
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
         {
             if (!IsConversationalPiiEnabled() && !IsConversationalSummarizationEnabled())
@@ -91,6 +92,7 @@ namespace FetchTranscription
             return TranscriptionAnalyticsJobStatus.Completed;
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<string>> SubmitTranscriptionAnalyticsJobsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
         {
             _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));
@@ -133,6 +135,7 @@ namespace FetchTranscription
             return errors;
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscriptsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
         {
             _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));

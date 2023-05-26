@@ -14,10 +14,25 @@ namespace FetchTranscription
 
     public interface ITranscriptionAnalyticsProvider
     {
+        /// <summary>
+        /// Gets the status of the transcription analytics jobs that are monitored by the provider
+        /// </summary>
+        /// <param name="audioFileInfos">The audio file infos with transcription analytics jobs info</param>
+        /// <returns>The overall status of all jobs monitored by the provider</returns>
         Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos);
 
+        /// <summary>
+        /// Submits transcription analytics jobs based on the transcript in speechtranscript and sets the job ids in the corresponding audio file infos.
+        /// </summary>
+        /// <param name="speechTranscriptMappings">The mapping from audio file info to transcript</param>
+        /// <returns>The errors if any.</returns>
         Task<IEnumerable<string>> SubmitTranscriptionAnalyticsJobsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings);
 
+        /// <summary>
+        /// Fetches the transcription analytics results and adds them to the corresponding speech transcript
+        /// </summary>
+        /// <param name="speechTranscriptMappings">The mapping from audio file info to transcript</param>
+        /// <returns>The errors if any.</returns>
         Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscriptsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings);
     }
 }
