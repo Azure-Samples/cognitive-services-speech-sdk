@@ -17,6 +17,7 @@ namespace FetchTranscription
 
     using Connector;
     using Connector.Constants;
+    using Connector.Enums;
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
@@ -29,7 +30,7 @@ namespace FetchTranscription
     /// <summary>
     /// Analyze Conversations async client.
     /// </summary>
-    public class AnalyzeConversationsProvider
+    public class AnalyzeConversationsProvider : ITranscriptionAnalyticsProvider
     {
         private const string DefaultInferenceSource = "lexical";
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
@@ -139,6 +140,37 @@ namespace FetchTranscription
             };
 
             return (piiResults, summarizationResults, errors);
+        }
+
+        public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
+        {
+            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()) || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null).Any())
+            {
+                return TranscriptionAnalyticsJobStatus.NotSubmitted;
+            }
+
+            var conversationRequests = audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running);
+            var runningJobsCount = 0;
+
+            foreach (var textAnalyticsJob in conversationRequests)
+            {
+                var response = await this.conversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(textAnalyticsJob.Id)).ConfigureAwait(false);
+
+                if (response.IsError)
+                {
+                    continue;
+                }
+
+                var analysisResult = JsonConvert.DeserializeObject<AnalyzeConversationsResult>(response.Content.ToString());
+
+                if (analysisResult.Tasks.InProgress != 0)
+                {
+                    // some jobs are still running.
+                    runningJobsCount++;
+                }
+            }
+
+            return runningJobsCount == 0 ? TranscriptionAnalyticsJobStatus.Completed : TranscriptionAnalyticsJobStatus.Running;
         }
 
         /// <summary>

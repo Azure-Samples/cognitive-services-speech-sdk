@@ -20,6 +20,8 @@ namespace FetchTranscription
 
     public sealed class TranscriptionAnalyticsOrchestrator
     {
+        private readonly List<ITranscriptionAnalyticsProvider> providers;
+
         private readonly TextAnalyticsProvider textAnalyticsProvider;
         private readonly AnalyzeConversationsProvider analyzeConversationsProvider;
 
@@ -31,6 +33,14 @@ namespace FetchTranscription
             var textAnalyticsEndpoint = FetchTranscriptionEnvironmentVariables.TextAnalyticsEndpoint;
             var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey) && !string.IsNullOrEmpty(textAnalyticsEndpoint);
 
+            this.providers = new List<ITranscriptionAnalyticsProvider>();
+
+            if (textAnalyticsInfoProvided)
+            {
+                this.providers.Add(new TextAnalyticsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger));
+                this.providers.Add(new AnalyzeConversationsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger));
+            }
+
             this.analyzeConversationsProvider = textAnalyticsInfoProvided ? new AnalyzeConversationsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger) : null;
             this.textAnalyticsProvider = textAnalyticsInfoProvided ? new TextAnalyticsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger) : null;
         }
@@ -39,29 +49,29 @@ namespace FetchTranscription
         {
             _ = transcriptionStartedMessage ?? throw new ArgumentNullException(nameof(transcriptionStartedMessage));
 
-            if (this.textAnalyticsProvider == null && this.analyzeConversationsProvider == null)
+            if (this.providers.Count == 0)
             {
                 return TranscriptionAnalyticsJobStatus.None;
             }
 
-            var jobStatus = this.textAnalyticsProvider != null ? await this.textAnalyticsProvider.GetTranscriptionAnalyticsJobStatusAsync(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : TranscriptionAnalyticsJobStatus.None;
-
-            var textAnalyticsRequestCompleted = this.textAnalyticsProvider != null ? await this.textAnalyticsProvider.TextAnalyticsRequestsCompleted(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : true;
-            var conversationalAnalyticsRequestCompleted = this.analyzeConversationsProvider != null ? await this.analyzeConversationsProvider.ConversationalRequestsCompleted(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false) : true;
-
-            if (!textAnalyticsRequestCompleted || !conversationalAnalyticsRequestCompleted)
+            foreach (var provider in this.providers)
             {
-                return TranscriptionAnalyticsJobStatus.Running;
+                var providerStatus = await provider.GetTranscriptionAnalyticsJobStatusAsync(transcriptionStartedMessage.AudioFileInfos).ConfigureAwait(false);
+
+                // if any is not submitted, we can safely return here since we submit all requests at the same time - therefore all other providers should not have any running requests
+                if (providerStatus == TranscriptionAnalyticsJobStatus.NotSubmitted)
+                {
+                    return TranscriptionAnalyticsJobStatus.NotSubmitted;
+                }
+
+                // if any is running, return and ma
+                if (providerStatus == TranscriptionAnalyticsJobStatus.Running)
+                {
+                    return TranscriptionAnalyticsJobStatus.Running;
+                }
             }
 
-            // if the message already contains text analytics requests and all are in terminal state, treat jobs as completed:
-            var containsTextAnalyticsRequest = transcriptionStartedMessage.AudioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any();
-            if (containsTextAnalyticsRequest)
-            {
-                return TranscriptionAnalyticsJobStatus.Completed;
-            }
-
-            return TranscriptionAnalyticsJobStatus.NotSubmitted;
+            return TranscriptionAnalyticsJobStatus.Completed;
         }
 
         public async Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscripts(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
