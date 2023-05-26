@@ -8,11 +8,16 @@ namespace FetchTranscription
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
+    using Connector;
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     public interface ITranscriptionAnalyticsProvider
     {
         Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos);
+
+        Task<IEnumerable<string>> SubmitTranscriptionAnalyticsJobsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings);
+
+        Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscripts(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings);
     }
 }
