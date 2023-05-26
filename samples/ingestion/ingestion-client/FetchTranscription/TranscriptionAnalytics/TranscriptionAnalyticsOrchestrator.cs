@@ -87,19 +87,19 @@ namespace FetchTranscription.TranscriptionAnalytics
 
                 var textAnalyticsErrors = new List<string>();
 
-                if (audioFileInfo.TextAnalyticsRequests.AudioLevelRequests?.Any() == true)
+                if (audioFileInfo.TextAnalyticsRequests?.AudioLevelRequests?.Any() == true)
                 {
                     var audioLevelErrors = await this.textAnalyticsProvider.AddAudioLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.AudioLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                     textAnalyticsErrors.AddRange(audioLevelErrors);
                 }
 
-                if (audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests?.Any() == true)
+                if (audioFileInfo.TextAnalyticsRequests?.UtteranceLevelRequests?.Any() == true)
                 {
                     var utteranceLevelErrors = await this.textAnalyticsProvider.AddUtteranceLevelEntitiesAsync(audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                     textAnalyticsErrors.AddRange(utteranceLevelErrors);
                 }
 
-                if (audioFileInfo.TextAnalyticsRequests.ConversationRequests?.Any() == true)
+                if (audioFileInfo.TextAnalyticsRequests?.ConversationRequests?.Any() == true)
                 {
                     var conversationalAnalyticsErrors = await this.analyzeConversationsProvider.AddConversationalEntitiesAsync(audioFileInfo.TextAnalyticsRequests.ConversationRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
                     textAnalyticsErrors.AddRange(conversationalAnalyticsErrors);
