@@ -19,6 +19,7 @@ namespace FetchTranscription
     using Connector.Constants;
     using Connector.Enums;
     using Connector.Serializable.Language.Conversations;
+    using Connector.Serializable.TextAnalytics;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using Microsoft.Extensions.Logging;
@@ -82,10 +83,10 @@ namespace FetchTranscription
                 return (null, null, errors);
             }
 
-            var tasks = jobIds.Select(async jobId => await this.GetConversationsOperationResults(jobId).ConfigureAwait(false));
+            var tasks = jobIds.Select(this.GetConversationsOperationResults);
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var resultsErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors).Concat(results.SelectMany(result => result.summarizationResults).SelectMany(s => s.Errors));
+            var resultsErrors = GetAllErrorsFromResults(results);
             if (resultsErrors.Any())
             {
                 errors.AddRange(resultsErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
@@ -185,9 +186,10 @@ namespace FetchTranscription
                 return true;
             }
 
-            var conversationRequests = audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running);
-
-            var runningJobsCount = 0;
+            var conversationRequests = audioFileInfos
+                .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null)
+                .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests)
+                .Where(text => text.Status == TextAnalyticsRequestStatus.Running);
 
             foreach (var textAnalyticsJob in conversationRequests)
             {
@@ -202,12 +204,11 @@ namespace FetchTranscription
 
                 if (analysisResult.Tasks.InProgress != 0)
                 {
-                    // some jobs are still running.
-                    runningJobsCount++;
+                    return false;
                 }
             }
 
-            return runningJobsCount == 0;
+            return true;
         }
 
         /// <summary>
@@ -247,6 +248,39 @@ namespace FetchTranscription
             };
 
             return errors;
+        }
+
+        private static IEnumerable<ErrorEntity> GetAllErrorsFromResults((IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<AnalyzeConversationSummarizationResults> summarizationResults, IEnumerable<string> errors)[] results)
+        {
+            var resultErrors = new List<ErrorEntity>();
+
+            if (results == null || !results.Any())
+            {
+                return resultErrors;
+            }
+
+            foreach (var (piiResults, summarizationResults, errors) in results)
+            {
+                var piiErrors = piiResults?
+                    .Where(pr => pr.Errors?.Any() ?? false)?
+                    .SelectMany(e => e.Errors);
+
+                if (piiErrors != null)
+                {
+                    resultErrors.AddRange(piiErrors);
+                }
+
+                var summarizeErrors = summarizationResults?
+                    .Where(sr => sr.Errors?.Any() ?? false)?
+                    .SelectMany(sr => sr.Errors);
+
+                if (summarizeErrors != null)
+                {
+                    resultErrors.AddRange(summarizeErrors);
+                }
+            }
+
+            return resultErrors;
         }
 
         private void PrepareSummarizationRequest(SpeechTranscript speechTranscript, List<AnalyzeConversationsRequest> data)
@@ -450,7 +484,7 @@ namespace FetchTranscription
                     var operation = await this.conversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
 
                     var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
-                    using JsonDocument result = JsonDocument.Parse(response.ContentStream);
+                    using var result = JsonDocument.Parse(response.ContentStream);
                     var jobResults = result.RootElement;
                     var jobId = jobResults.GetProperty("jobId");
                     this.log.LogInformation($"Submitting TA job: {jobId}");
@@ -475,6 +509,8 @@ namespace FetchTranscription
 
         private async Task<(IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<AnalyzeConversationSummarizationResults> summarizationResults, IEnumerable<string> errors)> GetConversationsOperationResults(string jobId)
         {
+            var piiResults = new List<AnalyzeConversationPiiResults>();
+            var summarizationResults = new List<AnalyzeConversationSummarizationResults>();
             var errors = new List<string>();
             try
             {
@@ -492,14 +528,14 @@ namespace FetchTranscription
                 if (analysisResult.Tasks.InProgress == 0)
                 {
                     // all tasks completed.
-                    var piiResults = analysisResult.Tasks
-                        .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults)
-                        .Select(s => s as ConversationPiiItem)
-                        .Select(s => s.Results);
-                    var summarizationResults = analysisResult.Tasks
-                        .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults)
-                        .Select(s => s as ConversationSummarizationItem)
-                        .Select(s => s.Results);
+                    piiResults.AddRange(analysisResult.Tasks
+                        .Items
+                        .Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults && (item as ConversationPiiItem)?.Results != null)
+                        .Select(s => ((ConversationPiiItem)s).Results));
+                    summarizationResults.AddRange(analysisResult.Tasks
+                        .Items
+                        .Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults && (item as ConversationSummarizationItem)?.Results != null)
+                        .Select(s => ((ConversationSummarizationItem)s).Results));
                     return (piiResults, summarizationResults, errors);
                 }
             }
@@ -514,7 +550,7 @@ namespace FetchTranscription
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 
-            return (null, null, errors);
+            return (piiResults, summarizationResults, errors);
         }
     }
 }
