@@ -101,7 +101,7 @@ namespace Tests
 
             Console.WriteLine($"[{DateTime.Now}]jobs done.");
 
-            var err = await provider.AddTranscriptionAnalyticsResultsToTranscripts(speechTranscriptMapping);
+            var err = await provider.AddTranscriptionAnalyticsResultsToTranscriptsAsync(speechTranscriptMapping);
             Console.WriteLine($"annotation result: {JsonConvert.SerializeObject(transcription)}");
             Assert.AreEqual(0, err.Count());
             Assert.AreEqual(4, transcription.ConversationAnalyticsResults.AnalyzeConversationSummarizationResults.Conversations.First().Summaries.Count());

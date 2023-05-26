@@ -138,7 +138,7 @@ namespace FetchTranscription
             return errors;
         }
 
-        public async Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscripts(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
+        public async Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscriptsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
         {
             _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));
 

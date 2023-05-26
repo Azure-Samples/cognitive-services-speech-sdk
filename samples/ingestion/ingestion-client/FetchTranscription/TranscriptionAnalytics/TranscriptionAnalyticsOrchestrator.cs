@@ -73,7 +73,7 @@ namespace FetchTranscription
 
             foreach (var provider in this.providers)
             {
-                var providerErros = await provider.AddTranscriptionAnalyticsResultsToTranscripts(speechTranscriptMappings).ConfigureAwait(false);
+                var providerErros = await provider.AddTranscriptionAnalyticsResultsToTranscriptsAsync(speechTranscriptMappings).ConfigureAwait(false);
                 errors.AddRange(providerErros);
             }
 
