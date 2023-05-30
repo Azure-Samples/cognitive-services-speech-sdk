@@ -61,7 +61,6 @@ namespace FetchTranscription
             }
 
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
-
             runningTextAnalyticsRequests.AddRange(
                 audioFileInfos
                     .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.AudioLevelRequests != null)

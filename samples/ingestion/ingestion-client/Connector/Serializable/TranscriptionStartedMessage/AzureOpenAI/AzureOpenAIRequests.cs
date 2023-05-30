@@ -5,15 +5,13 @@
 
 namespace Connector.Serializable.TranscriptionStartedMessage.AzureOpenAI
 {
-    using System.Collections.Generic;
-
     public class AzureOpenAIRequests
     {
-        public AzureOpenAIRequests(IEnumerable<BatchCompletionRequest> batchCompletionRequests)
+        public AzureOpenAIRequests(BatchCompletionRequest batchCompletionRequest)
         {
-            this.BatchCompletionRequests = batchCompletionRequests;
+            this.BatchCompletionRequest = batchCompletionRequest;
         }
 
-        public IEnumerable<BatchCompletionRequest> BatchCompletionRequests { get; }
+        public BatchCompletionRequest BatchCompletionRequest { get; set; }
     }
 }
