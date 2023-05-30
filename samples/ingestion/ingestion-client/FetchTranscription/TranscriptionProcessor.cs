@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace FetchTranscriptionFunction
+namespace FetchTranscription
 {
     using System;
     using System.Collections.Generic;
@@ -19,13 +19,11 @@ namespace FetchTranscriptionFunction
     using Connector.Database;
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
-    using global::FetchTranscription.TranscriptionAnalytics;
 
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
-    using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
     public class TranscriptionProcessor
     {
