@@ -7,7 +7,6 @@ namespace Connector.Enums
 {
     public enum TranscriptionAnalyticsJobStatus
     {
-        None,
         NotSubmitted,
         Running,
         Completed

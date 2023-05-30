@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace FetchTranscriptionFunction
+namespace FetchTranscription
 {
     using System;
     using System.Collections.Generic;
@@ -17,7 +17,9 @@ namespace FetchTranscriptionFunction
 
     using Connector;
     using Connector.Constants;
+    using Connector.Enums;
     using Connector.Serializable.Language.Conversations;
+    using Connector.Serializable.TextAnalytics;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using Microsoft.Extensions.Logging;
@@ -29,7 +31,7 @@ namespace FetchTranscriptionFunction
     /// <summary>
     /// Analyze Conversations async client.
     /// </summary>
-    public class AnalyzeConversationsProvider
+    public class AnalyzeConversationsProvider : ITranscriptionAnalyticsProvider
     {
         private const string DefaultInferenceSource = "lexical";
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromMinutes(3);
@@ -40,25 +42,168 @@ namespace FetchTranscriptionFunction
         public AnalyzeConversationsProvider(string locale, string subscriptionKey, string endpoint, ILogger log)
         {
             this.conversationAnalysisClient = new ConversationAnalysisClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
-
             this.locale = locale;
             this.log = log;
         }
 
         public static bool IsConversationalPiiEnabled()
         {
-            return FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != Connector.Enums.ConversationPiiSetting.None;
+            return FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != ConversationPiiSetting.None;
         }
 
         public static bool IsConversationalSummarizationEnabled()
             => FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Enabled;
+
+        /// <inheritdoc />
+        public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
+        {
+            if (!IsConversationalPiiEnabled() && !IsConversationalSummarizationEnabled())
+            {
+                return TranscriptionAnalyticsJobStatus.Completed;
+            }
+
+            if (!audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null).Any())
+            {
+                return TranscriptionAnalyticsJobStatus.NotSubmitted;
+            }
+
+            var conversationRequests = audioFileInfos
+                .Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null)
+                .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests)
+                .Where(text => text.Status == TextAnalyticsRequestStatus.Running);
+
+            foreach (var textAnalyticsJob in conversationRequests)
+            {
+                var response = await this.conversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(textAnalyticsJob.Id)).ConfigureAwait(false);
+
+                if (response.IsError)
+                {
+                    continue;
+                }
+
+                var analysisResult = JsonConvert.DeserializeObject<AnalyzeConversationsResult>(response.Content.ToString());
+
+                if (analysisResult.Tasks.InProgress != 0)
+                {
+                    return TranscriptionAnalyticsJobStatus.Running;
+                }
+            }
+
+            return TranscriptionAnalyticsJobStatus.Completed;
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<string>> SubmitTranscriptionAnalyticsJobsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
+        {
+            _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));
+
+            var errors = new List<string>();
+            foreach (var speechTranscriptMapping in speechTranscriptMappings)
+            {
+                var speechTranscript = speechTranscriptMapping.Value;
+                var audioFileInfo = speechTranscriptMapping.Key;
+
+                var fileName = audioFileInfo.FileName;
+
+                if (speechTranscript.RecognizedPhrases != null && speechTranscript.RecognizedPhrases.All(phrase => phrase.RecognitionStatus.Equals("Success", StringComparison.Ordinal)))
+                {
+                    var textAnalyticsErrors = new List<string>();
+
+                    (var conversationJobIds, var conversationErrors) = await this.SubmitAnalyzeConversationsRequestAsync(speechTranscript).ConfigureAwait(false);
+
+                    var conversationalRequests = conversationJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
+                    textAnalyticsErrors.AddRange(conversationErrors);
+
+                    if (audioFileInfo.TextAnalyticsRequests == null)
+                    {
+                        audioFileInfo.TextAnalyticsRequests = new TextAnalyticsRequests(null, null, conversationalRequests);
+                    }
+                    else
+                    {
+                        audioFileInfo.TextAnalyticsRequests.ConversationRequests = conversationalRequests;
+                    }
+
+                    if (textAnalyticsErrors.Any())
+                    {
+                        var distinctErrors = textAnalyticsErrors.Distinct();
+                        var errorMessage = $"File {(string.IsNullOrEmpty(fileName) ? "unknown" : fileName)}:\n{string.Join('\n', distinctErrors)}";
+                        errors.Add(errorMessage);
+                    }
+                }
+            }
+
+            return errors;
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<string>> AddTranscriptionAnalyticsResultsToTranscriptsAsync(Dictionary<AudioFileInfo, SpeechTranscript> speechTranscriptMappings)
+        {
+            _ = speechTranscriptMappings ?? throw new ArgumentNullException(nameof(speechTranscriptMappings));
+
+            var errors = new List<string>();
+            foreach (var speechTranscriptMapping in speechTranscriptMappings)
+            {
+                var speechTranscript = speechTranscriptMapping.Value;
+                var audioFileInfo = speechTranscriptMapping.Key;
+                var fileName = audioFileInfo.FileName;
+
+                var textAnalyticsErrors = new List<string>();
+                if (audioFileInfo.TextAnalyticsRequests?.ConversationRequests?.Any() == true)
+                {
+                    var conversationalAnalyticsErrors = await this.AddConversationalEntitiesAsync(audioFileInfo.TextAnalyticsRequests.ConversationRequests.Select(request => request.Id), speechTranscript).ConfigureAwait(false);
+                    textAnalyticsErrors.AddRange(conversationalAnalyticsErrors);
+                }
+
+                if (textAnalyticsErrors.Any())
+                {
+                    var distinctErrors = textAnalyticsErrors.Distinct();
+                    var errorMessage = $"File {(string.IsNullOrEmpty(fileName) ? "unknown" : fileName)}:\n{string.Join('\n', distinctErrors)}";
+                    errors.Add(errorMessage);
+                }
+            }
+
+            return errors;
+        }
+
+        private static IEnumerable<ErrorEntity> GetAllErrorsFromResults((IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<AnalyzeConversationSummarizationResults> summarizationResults, IEnumerable<string> errors)[] results)
+        {
+            var resultErrors = new List<ErrorEntity>();
+
+            if (results == null || !results.Any())
+            {
+                return resultErrors;
+            }
+
+            foreach (var (piiResults, summarizationResults, errors) in results)
+            {
+                var piiErrors = piiResults?
+                    .Where(pr => pr.Errors?.Any() ?? false)?
+                    .SelectMany(e => e.Errors);
+
+                if (piiErrors != null)
+                {
+                    resultErrors.AddRange(piiErrors);
+                }
+
+                var summarizeErrors = summarizationResults?
+                    .Where(sr => sr.Errors?.Any() ?? false)?
+                    .SelectMany(sr => sr.Errors);
+
+                if (summarizeErrors != null)
+                {
+                    resultErrors.AddRange(summarizeErrors);
+                }
+            }
+
+            return resultErrors;
+        }
 
         /// <summary>
         /// API to submit an analyzeConversations async Request.
         /// </summary>
         /// <param name="speechTranscript">Instance of the speech transcript.</param>
         /// <returns>An enumerable of the jobs IDs and errors if any.</returns>
-        public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitAnalyzeConversationsRequestAsync(SpeechTranscript speechTranscript)
+        private async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitAnalyzeConversationsRequestAsync(SpeechTranscript speechTranscript)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
             var data = new List<AnalyzeConversationsRequest>();
@@ -73,7 +218,7 @@ namespace FetchTranscriptionFunction
         /// </summary>
         /// <param name="jobIds">Enumerable of conversational jobIds.</param>
         /// <returns>Enumerable of results of conversation PII redaction and errors encountered if any.</returns>
-        public async Task<(AnalyzeConversationPiiResults piiResults, AnalyzeConversationSummarizationResults summarizationResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
+        private async Task<(AnalyzeConversationPiiResults piiResults, AnalyzeConversationSummarizationResults summarizationResults, IEnumerable<string> errors)> GetConversationsOperationsResult(IEnumerable<string> jobIds)
         {
             var errors = new List<string>();
             if (!jobIds.Any())
@@ -81,10 +226,10 @@ namespace FetchTranscriptionFunction
                 return (null, null, errors);
             }
 
-            var tasks = jobIds.Select(async jobId => await this.GetConversationsOperationResults(jobId).ConfigureAwait(false));
+            var tasks = jobIds.Select(this.GetConversationsOperationResults);
             var results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
-            var resultsErrors = results.SelectMany(result => result.piiResults).SelectMany(s => s.Errors).Concat(results.SelectMany(result => result.summarizationResults).SelectMany(s => s.Errors));
+            var resultsErrors = GetAllErrorsFromResults(results);
             if (resultsErrors.Any())
             {
                 errors.AddRange(resultsErrors.Select(s => $"Error thrown for conversation : {s.Id}"));
@@ -142,49 +287,12 @@ namespace FetchTranscriptionFunction
         }
 
         /// <summary>
-        /// Checks for all conversational analytics requests that were marked as running if they have completed and sets a new state accordingly.
-        /// </summary>
-        /// <param name="audioFileInfos">Enumerable for audioFiles.</param>
-        /// <returns>True if all requests completed, else false.</returns>
-        public async Task<bool> ConversationalRequestsCompleted(IEnumerable<AudioFileInfo> audioFileInfos)
-        {
-            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()) || !audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests?.ConversationRequests != null).Any())
-            {
-                return true;
-            }
-
-            var conversationRequests = audioFileInfos.SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.ConversationRequests).Where(text => text.Status == TextAnalyticsRequestStatus.Running);
-
-            var runningJobsCount = 0;
-
-            foreach (var textAnalyticsJob in conversationRequests)
-            {
-                var response = await this.conversationAnalysisClient.GetAnalyzeConversationJobStatusAsync(Guid.Parse(textAnalyticsJob.Id)).ConfigureAwait(false);
-
-                if (response.IsError)
-                {
-                    continue;
-                }
-
-                var analysisResult = JsonConvert.DeserializeObject<AnalyzeConversationsResult>(response.Content.ToString());
-
-                if (analysisResult.Tasks.InProgress != 0)
-                {
-                    // some jobs are still running.
-                    runningJobsCount++;
-                }
-            }
-
-            return runningJobsCount == 0;
-        }
-
-        /// <summary>
         /// Gets the (audio-level) results from text analytics, adds the results to the speech transcript.
         /// </summary>
         /// <param name="conversationJobIds">The conversation analysis job Ids.</param>
         /// <param name="speechTranscript">The speech transcript object.</param>
         /// <returns>The errors, if any.</returns>
-        public async Task<IEnumerable<string>> AddConversationalEntitiesAsync(
+        private async Task<IEnumerable<string>> AddConversationalEntitiesAsync(
             IEnumerable<string> conversationJobIds,
             SpeechTranscript speechTranscript)
         {
@@ -371,7 +479,7 @@ namespace FetchTranscriptionFunction
                                         "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource ?? DefaultInferenceSource
                                     },
                                     {
-                                        "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == Connector.Enums.ConversationPiiSetting.IncludeAudioRedaction
+                                        "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == ConversationPiiSetting.IncludeAudioRedaction
                                     }
                                 }
                             }
@@ -418,7 +526,7 @@ namespace FetchTranscriptionFunction
                     var operation = await this.conversationAnalysisClient.AnalyzeConversationAsync(WaitUntil.Started, input).ConfigureAwait(false);
 
                     var response = await operation.UpdateStatusAsync().ConfigureAwait(false);
-                    using JsonDocument result = JsonDocument.Parse(response.ContentStream);
+                    using var result = JsonDocument.Parse(response.ContentStream);
                     var jobResults = result.RootElement;
                     var jobId = jobResults.GetProperty("jobId");
                     this.log.LogInformation($"Submitting TA job: {jobId}");
@@ -443,6 +551,8 @@ namespace FetchTranscriptionFunction
 
         private async Task<(IEnumerable<AnalyzeConversationPiiResults> piiResults, IEnumerable<AnalyzeConversationSummarizationResults> summarizationResults, IEnumerable<string> errors)> GetConversationsOperationResults(string jobId)
         {
+            var piiResults = new List<AnalyzeConversationPiiResults>();
+            var summarizationResults = new List<AnalyzeConversationSummarizationResults>();
             var errors = new List<string>();
             try
             {
@@ -460,14 +570,14 @@ namespace FetchTranscriptionFunction
                 if (analysisResult.Tasks.InProgress == 0)
                 {
                     // all tasks completed.
-                    var piiResults = analysisResult.Tasks
-                        .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults)
-                        .Select(s => s as ConversationPiiItem)
-                        .Select(s => s.Results);
-                    var summarizationResults = analysisResult.Tasks
-                        .Items.Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults)
-                        .Select(s => s as ConversationSummarizationItem)
-                        .Select(s => s.Results);
+                    piiResults.AddRange(analysisResult.Tasks
+                        .Items
+                        .Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalPIIResults && (item as ConversationPiiItem)?.Results != null)
+                        .Select(s => ((ConversationPiiItem)s).Results));
+                    summarizationResults.AddRange(analysisResult.Tasks
+                        .Items
+                        .Where(item => item.Kind == AnalyzeConversationsTaskResultKind.conversationalSummarizationResults && (item as ConversationSummarizationItem)?.Results != null)
+                        .Select(s => ((ConversationSummarizationItem)s).Results));
                     return (piiResults, summarizationResults, errors);
                 }
             }
@@ -482,7 +592,7 @@ namespace FetchTranscriptionFunction
                 errors.Add($"Conversation analysis request failed with error: {e.Message}");
             }
 
-            return (null, null, errors);
+            return (piiResults, summarizationResults, errors);
         }
     }
 }
