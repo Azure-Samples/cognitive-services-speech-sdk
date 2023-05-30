@@ -75,5 +75,9 @@ namespace FetchTranscription
         public static readonly string AzureOpenAIKey = Environment.GetEnvironmentVariable(nameof(AzureOpenAIKey), EnvironmentVariableTarget.Process);
 
         public static readonly string AzureOpenAIEndpoint = Environment.GetEnvironmentVariable(nameof(AzureOpenAIEndpoint), EnvironmentVariableTarget.Process);
+
+        public static readonly string AzureOpenAIInputContainer = Environment.GetEnvironmentVariable(nameof(AzureOpenAIInputContainer), EnvironmentVariableTarget.Process);
+
+        public static readonly string AzureOpenAITargetContainer = Environment.GetEnvironmentVariable(nameof(AzureOpenAITargetContainer), EnvironmentVariableTarget.Process);
     }
 }

@@ -27,6 +27,8 @@ namespace FetchTranscription
 
     public sealed class BatchCompletionsClient : ITranscriptionAnalyticsProvider
     {
+        private const string ApiVersion = "2023-05-04-preview";
+
         private readonly StorageConnector storageConnector;
         private readonly HttpClient httpClient;
         private readonly string endpoint;
@@ -188,7 +190,7 @@ namespace FetchTranscription
             var inputFileUrl = this.storageConnector.GetFullBlobUrl(this.inputContainer, inputFileName);
             await this.storageConnector.WriteTextFileToBlobAsync(requestFileBuilder.ToString(), this.inputContainer, inputFileName, this.logger).ConfigureAwait(false);
 
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, new Uri($"{this.endpoint}/openai/completions:submit-batch?api-version=2023-05-04-preview"));
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, new Uri($"{this.endpoint}/openai/completions:submit-batch?api-version={ApiVersion}"));
             httpRequest.Headers.Add("api-key", this.key);
             httpRequest.Headers.Add("Content-Type", "application/json");
 

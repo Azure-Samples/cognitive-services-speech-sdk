@@ -37,6 +37,19 @@ namespace FetchTranscription
                 this.providers.Add(new TextAnalyticsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger));
                 this.providers.Add(new AnalyzeConversationsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger));
             }
+
+            var azureOpenAIEndpoint = FetchTranscriptionEnvironmentVariables.AzureOpenAIEndpoint;
+            var azureOpenAIKey = FetchTranscriptionEnvironmentVariables.AzureOpenAIKey;
+            var azureOpenAIInputContainer = FetchTranscriptionEnvironmentVariables.AzureOpenAIInputContainer;
+            var azureOpenAITargetContainer = FetchTranscriptionEnvironmentVariables.AzureOpenAITargetContainer;
+
+            if (!string.IsNullOrEmpty(azureOpenAIEndpoint) &&
+                !string.IsNullOrEmpty(azureOpenAIKey) &&
+                !string.IsNullOrEmpty(azureOpenAIInputContainer) &&
+                !string.IsNullOrEmpty(azureOpenAITargetContainer))
+            {
+                this.providers.Add(new BatchCompletionsClient(httpClient, azureOpenAIKey, azureOpenAIEndpoint, azureOpenAIInputContainer, azureOpenAITargetContainer, storageConnector, logger));
+            }
         }
 
         /// <summary>

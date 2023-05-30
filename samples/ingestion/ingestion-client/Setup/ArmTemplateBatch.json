@@ -194,6 +194,20 @@
         "description": "The administrator password of the SQL Server. If it is left empty, no SQL server/database will be created."
       }
     },
+    "AzureOpenAIKey": {
+      "defaultValue": "",
+      "type": "SecureString",
+      "metadata": {
+        "description": "The key for the Text Analytics subscription."
+      }
+    },
+    "AzureOpenAIEndpoint": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "The endpoint the Text Analytics subscription is associated with (format should be like https://{resourceName}.cognitiveservices.azure.com or https://{region}.api.cognitive.microsoft.com or similar). If empty, no text analysis will be performed."
+      }
+    },
     "DeploymentId": {
       "type": "string",
       "defaultValue": "[utcNow()]",
@@ -211,6 +225,8 @@
         "HtmlResultOutputContainer": "html-result-output",
         "ErrorReportOutputContainer": "error-report",
         "ConsolidatedFilesOutputContainer": "consolidated-files",
+        "AzureOpenAIInputContainer": "aoai-input",
+        "AzureOpenAITargetContainer": "aoai-target",
         "CreateHtmlResultFile": false,
         "CreateConsolidatedOutputFiles": false,
         "TimerBasedExecution": true,
@@ -224,6 +240,7 @@
         "InstanceId": "[parameters('DeploymentId')]",
         "StorageAccountName": "[parameters('StorageAccount')]",
         "UseSqlDatabase": "[and(not(equals(parameters('SqlAdministratorLogin'),'')), not(equals(parameters('SqlAdministratorLoginPassword'),'')))]",
+        "AzureOpenAIRequested": "[and(not(equals(parameters('AzureOpenAIKey'),'')), not(equals(parameters('AzureOpenAIEndpoint'),'')))]",
         "SqlServerName": "[concat('sqlserver', toLower(variables('InstanceId')))]",
         "DatabaseName": "[concat('Database-', toLower(variables('InstanceId')))]",
         "ServiceBusName": "[concat('ServiceBus-', variables('InstanceId'))]",
@@ -713,6 +730,34 @@
             }
         },
         {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "condition": "[variables('AzureOpenAIRequested')]",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('AzureOpenAIInputContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "condition": "[variables('AzureOpenAIRequested')]",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('StorageAccountName'), '/default/', variables('AzureOpenAITargetContainer'))]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
             "name": "[variables('EventGridSystemTopicName')]",
             "type": "Microsoft.EventGrid/systemTopics",
             "apiVersion": "2020-04-01-preview",
@@ -890,6 +935,10 @@
                 "PiiRedactionSetting": "[parameters('PiiRedaction')]",
                 "SentimentAnalysisSetting": "[parameters('SentimentAnalysis')]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
+                "AzureOpenAIInputContainer": "[variables('AzureOpenAIInputContainer')]",
+                "AzureOpenAITargetContainer": "[variables('AzureOpenAITargetContainer')]",
+                "AzureOpenAIKey": "[variables('AzureOpenAIKey')]",
+                "AzureOpenAIEndpoint": "[variables('AzureOpenAIEndpoint')]",
                 "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
                 "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
