@@ -86,7 +86,7 @@ namespace Tests
 
             var speechTranscriptMapping = new Dictionary<AudioFileInfo, SpeechTranscript>
             {
-                { new AudioFileInfo("someUrl", 0, null), transcription }
+                { new AudioFileInfo("someUrl", 0, null, null), transcription }
             };
 
             var errors = await provider.SubmitTranscriptionAnalyticsJobsAsync(speechTranscriptMapping).ConfigureAwait(false);

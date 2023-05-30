@@ -148,6 +148,10 @@ namespace FetchTranscription
 
         private async Task<BatchCompletionRequestStatus> GetOperationStatusAsync(string operationLocation)
         {
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(operationLocation));
+            httpRequest.Headers.Add("api-key", this.key);
+            var response = await this.httpClient.SendAsync(httpRequest).ConfigureAwait(false);
+
             return BatchCompletionRequestStatus.Running;
         }
     }
