@@ -75,7 +75,7 @@ namespace FetchTranscription
 
                 if (responseContent != null &&
                     responseContent.ContainsKey("status") &&
-                    Enum.TryParse<BatchCompletionRequestStatus>((string)responseContent["status"], out var parsedStatus))
+                    Enum.TryParse<BatchCompletionRequestStatus>((string)responseContent["status"], ignoreCase: true, out var parsedStatus))
                 {
                     responseStatus = parsedStatus;
                 }
@@ -233,7 +233,7 @@ namespace FetchTranscription
 
             if (responseContent != null &&
                 responseContent.ContainsKey("status") &&
-                Enum.TryParse<BatchCompletionRequestStatus>((string)responseContent["status"], out var parsedStatus))
+                Enum.TryParse<BatchCompletionRequestStatus>((string)responseContent["status"], ignoreCase: true, out var parsedStatus))
             {
                 responseStatus = parsedStatus;
             }
