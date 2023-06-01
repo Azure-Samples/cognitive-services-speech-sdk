@@ -240,7 +240,7 @@ namespace FetchTranscription
 
             if (responseStatus != BatchCompletionRequestStatus.Completed)
             {
-                errors.Add($"Unexpected or missing status code: {responseStatus}");
+                errors.Add($"Unexpected or missing status code: {responseStatus} - {responseContent}");
                 return errors;
             }
 
