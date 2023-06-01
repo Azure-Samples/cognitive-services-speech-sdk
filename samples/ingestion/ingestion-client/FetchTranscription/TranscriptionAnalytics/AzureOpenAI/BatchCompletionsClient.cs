@@ -8,6 +8,7 @@ namespace FetchTranscription
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.IO;
     using System.Linq;
     using System.Net.Http;
     using System.Text;
@@ -28,6 +29,12 @@ namespace FetchTranscription
     public sealed class BatchCompletionsClient : ITranscriptionAnalyticsProvider
     {
         private const string ApiVersion = "2023-05-04-preview";
+
+        /// <summary>
+        /// See https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models
+        /// for an overview of all supported models
+        /// </summary>
+        private const string ModelName = "text-davinci-003";
 
         private readonly StorageConnector storageConnector;
         private readonly HttpClient httpClient;
@@ -195,7 +202,7 @@ namespace FetchTranscription
 
             var requestBody = new
             {
-                model = "text-davinci-003",
+                model = ModelName,
                 blob_prefix = inputFileName,
                 content_url = inputFileUrl.ToString(),
                 target_container = this.storageConnector.GetFullContainerUrl(this.targetContainer).ToString(),
@@ -256,10 +263,11 @@ namespace FetchTranscription
             var fileName = StorageConnector.GetFileNameFromUri(contentUrl);
 
             var resultBytes = await this.storageConnector.DownloadFileFromContainer(containerName, fileName).ConfigureAwait(false);
-            var resultString = Encoding.UTF8.GetString(resultBytes);
+            using var memoryStream = new MemoryStream(resultBytes);
+            using var streamReader = new StreamReader(memoryStream);
+            var resultString = streamReader.ReadToEnd();
 
             var batchCompletionResults = new List<JObject>();
-
             foreach (var line in resultString.Split(Environment.NewLine))
             {
                 if (string.IsNullOrEmpty(line))
