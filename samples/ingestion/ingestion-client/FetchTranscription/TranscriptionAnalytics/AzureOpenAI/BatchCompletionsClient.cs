@@ -164,7 +164,7 @@ namespace FetchTranscription
         private async Task<IEnumerable<string>> SubmitBatchCompletionRequestsAndAddToAudioFileInfoAsync(SpeechTranscript speechTranscript, AudioFileInfo audioFileInfo)
         {
             var errors = new List<string>();
-            var inputFileName = audioFileInfo.FileName;
+            var inputFileName = $"{audioFileInfo.FileName}.jsonl";
             var transcriptBuilder = new StringBuilder();
 
             var speakerIdentifierFunc = GetSpeakerIdentifierFunc(speechTranscript);
@@ -173,7 +173,7 @@ namespace FetchTranscription
 
             foreach (var recognizedPhrase in orderedPhrases)
             {
-                var line = $"{speakerIdentifierFunc((recognizedPhrase.Channel, recognizedPhrase.Speaker))}: {recognizedPhrase.NBest.First().Lexical}\r\n";
+                var line = $"{speakerIdentifierFunc((recognizedPhrase.Channel, recognizedPhrase.Speaker))}: {recognizedPhrase.NBest.First().Lexical}\\r\\n";
                 transcriptBuilder.Append(line);
             }
 
@@ -192,7 +192,6 @@ namespace FetchTranscription
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, new Uri($"{this.endpoint}/openai/completions:submit-batch?api-version={ApiVersion}"));
             httpRequest.Headers.Add("api-key", this.key);
-            httpRequest.Headers.Add("Content-Type", "application/json");
 
             var requestBody = new
             {
