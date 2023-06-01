@@ -195,7 +195,7 @@ namespace FetchTranscription
 
             var requestBody = new
             {
-                model = "gpt-35-turbo",
+                model = "text-davinci-003",
                 blob_prefix = inputFileName,
                 content_url = inputFileUrl.ToString(),
                 target_container = this.storageConnector.GetFullContainerUrl(this.targetContainer).ToString(),
