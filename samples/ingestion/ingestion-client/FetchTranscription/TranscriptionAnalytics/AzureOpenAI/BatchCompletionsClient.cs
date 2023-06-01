@@ -238,7 +238,7 @@ namespace FetchTranscription
                 responseStatus = parsedStatus;
             }
 
-            if (responseStatus != BatchCompletionRequestStatus.Completed)
+            if (responseStatus != BatchCompletionRequestStatus.Succeeded)
             {
                 errors.Add($"Unexpected or missing status code: {responseStatus} - {responseContent}");
                 return errors;

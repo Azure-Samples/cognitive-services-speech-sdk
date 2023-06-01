@@ -16,9 +16,9 @@ namespace Connector.Serializable.TranscriptionStartedMessage.AzureOpenAI
         public enum BatchCompletionRequestStatus
         {
             None = 0,
-            NotRunning,
+            Canceled,
             Running,
-            Completed,
+            Succeeded,
             Failed
         }
 
@@ -28,7 +28,7 @@ namespace Connector.Serializable.TranscriptionStartedMessage.AzureOpenAI
 
         public static bool IsTerminatedBatchCompletionRequestStatus(BatchCompletionRequestStatus status)
         {
-            return status == BatchCompletionRequestStatus.Completed || status == BatchCompletionRequestStatus.Failed;
+            return status == BatchCompletionRequestStatus.Succeeded || status == BatchCompletionRequestStatus.Failed;
         }
     }
 }
