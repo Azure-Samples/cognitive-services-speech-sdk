@@ -208,6 +208,13 @@
         "description": "The endpoint the Text Analytics subscription is associated with (format should be like https://{resourceName}.cognitiveservices.azure.com or https://{region}.api.cognitive.microsoft.com or similar). If empty, no text analysis will be performed."
       }
     },
+    "AzureOpenAIModelName": {
+      "defaultValue": "gpt-35-turbo",
+      "type": "String",
+      "metadata": {
+        "description": "The model that should be used for Azure OpenAI. See all models at https://learn.microsoft.com/en-us/azure/cognitive-services/openai/concepts/models"
+      }
+    },
     "DeploymentId": {
       "type": "string",
       "defaultValue": "[utcNow()]",
@@ -939,6 +946,7 @@
                 "AzureOpenAITargetContainer": "[variables('AzureOpenAITargetContainer')]",
                 "AzureOpenAIKey": "[parameters('AzureOpenAIKey')]",
                 "AzureOpenAIEndpoint": "[parameters('AzureOpenAIEndpoint')]",
+                "AzureOpenAIModelName": "[parameters('AzureOpenAIModelName')]",
                 "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
                 "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",

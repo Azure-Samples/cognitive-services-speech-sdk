@@ -9,7 +9,7 @@ namespace FetchTranscription
     {
         public static string BuildGeneralCallCenterPrompt(string transcript)
         {
-            return "You must extract the following information from the phone conversation below:  \\r\\n" +
+            return "You must extract the following information from the phone conversation below:\\r\\n" +
                 "1. Call reason (key: reason)\\r\\n" +
                 "2. Names of all customers (Customer: name)\\r\\n" +
                 "3. A short, yet detailed summary (key: summary)\\r\\n" +
