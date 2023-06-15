@@ -725,12 +725,13 @@ def pronunciation_assessment_from_microphone():
     config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000")
 
     reference_text = ""
+    json_config = "{" + f"\"ReferenceText\": \"{reference_text}\",\
+          \"GradingSystem\": \"HundredMark\", \
+          \"Granularity\": \"Phoneme\", \
+          \"EnableMiscue\": \"True\", \
+          \"ScenarioId\": \"\"" + "}"
     # create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
-    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
-        reference_text=reference_text,
-        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
-        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
-        enable_miscue=True)
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(json_string=json_config)
 
     # Creates a speech recognizer, also specify the speech language
     recognizer = speechsdk.SpeechRecognizer(speech_config=config, language="en-US")
@@ -798,11 +799,12 @@ def pronunciation_assessment_continuous_from_file():
     reference_text = "What's the weather like?"
     # create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     enable_miscue = True
-    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
-        reference_text=reference_text,
-        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
-        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
-        enable_miscue=enable_miscue)
+    json_config = "{" + f"\"ReferenceText\": \"{reference_text}\",\
+          \"GradingSystem\": \"HundredMark\", \
+          \"Granularity\": \"Phoneme\", \
+          \"EnableMiscue\": \"{enable_miscue}\", \
+          \"ScenarioId\": \"\"" + "}"
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(json_string=json_config)
 
     # Creates a speech recognizer using a file as audio input.
     language = 'en-US'
@@ -926,12 +928,13 @@ def pronunciation_assessment_from_stream():
     audio_config = speechsdk.audio.AudioConfig(stream=stream)
 
     reference_text = "What's the weather like?"
+    json_config = "{" + f"\"ReferenceText\": \"{reference_text}\",\
+          \"GradingSystem\": \"HundredMark\", \
+          \"Granularity\": \"Phoneme\", \
+          \"EnableMiscue\": \"True\", \
+          \"ScenarioId\": \"\"" + "}"
     # create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
-    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
-        reference_text=reference_text,
-        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
-        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
-        enable_miscue=True)
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(json_string=json_config)
 
     # Creates a speech recognizer using a file as audio input.
     language = 'en-US'

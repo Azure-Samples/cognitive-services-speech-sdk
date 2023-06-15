@@ -699,7 +699,7 @@
     self->recorder = [[AudioRecorder alloc]initWithPushStream:stream];
     SPXAudioConfiguration *audioConfig = [[SPXAudioConfiguration alloc]initWithStreamInput:stream];
 
-    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioConfig];
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-US" audioConfiguration:audioConfig];
     if (!speechRecognizer) {
         NSLog(@"Could not create speech recognizer");
         [self updateRecognitionResultText:(@"Speech Recognition Error")];
@@ -707,12 +707,9 @@
     }
 
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
-    SPXPronunciationAssessmentConfiguration *pronunicationConfig =
-    [[SPXPronunciationAssessmentConfiguration alloc] init:pronunciationAssessmentReferenceText
-                                            gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark
-                                              granularity:SPXPronunciationAssessmentGranularity_Phoneme
-                                             enableMiscue:true];
-
+    NSString *jsonConfig = [NSString stringWithFormat:@"{\"ReferenceText\":\"%@\",\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":false,\"ScenarioId\":\"\"}", pronunciationAssessmentReferenceText];
+    SPXPronunciationAssessmentConfiguration *pronunicationConfig = [[SPXPronunciationAssessmentConfiguration alloc] initWithJson:jsonConfig];
+    
     [pronunicationConfig applyToRecognizer:speechRecognizer];
     [self updateRecognitionStatusText:(@"Assessing...")];
     [self->recorder record];
@@ -762,7 +759,7 @@
         return;
     }
 
-    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:pronAudioSource];
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-US" audioConfiguration:pronAudioSource];
     if (!speechRecognizer) {
         NSLog(@"Could not create speech recognizer");
         [self updateRecognitionResultText:(@"Speech Recognition Error")];
@@ -771,12 +768,9 @@
 
     // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     // The audio text is "Hello hello world! Today is a day!"
-    SPXPronunciationAssessmentConfiguration *pronunicationConfig =
-    [[SPXPronunciationAssessmentConfiguration alloc] init:@"Hello world! Today is a nice day!"
-                                            gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark
-                                              granularity:SPXPronunciationAssessmentGranularity_Phoneme
-                                             enableMiscue:true];
-
+    NSString *jsonConfig =  @"{\"ReferenceText\":\"Hello world! Today is a nice day!\",\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":false,\"ScenarioId\":\"\"}";
+    SPXPronunciationAssessmentConfiguration *pronunicationConfig = [[SPXPronunciationAssessmentConfiguration alloc] initWithJson:jsonConfig];
+    
     [pronunicationConfig applyToRecognizer:speechRecognizer];
     [self updateRecognitionStatusText:(@"Assessing...")];
 
@@ -862,7 +856,9 @@
     SPXSpeechRecognizer *speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-US" audioConfiguration:audioConfig];
 
     NSString *referenceText = @"what's the weather like";
-    SPXPronunciationAssessmentConfiguration *pronAssessmentConfig = [[SPXPronunciationAssessmentConfiguration alloc] init:referenceText gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark granularity:SPXPronunciationAssessmentGranularity_Phoneme enableMiscue:true];
+    NSString *jsonConfig = [NSString stringWithFormat:@"{\"ReferenceText\":\"%@\",\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":false,\"ScenarioId\":\"\"}", referenceText];
+    SPXPronunciationAssessmentConfiguration *pronAssessmentConfig = [[SPXPronunciationAssessmentConfiguration alloc] initWithJson:jsonConfig];
+
     [pronAssessmentConfig applyToRecognizer:speechRecognizer error:nil];
 
     [audioInputStream write:audioData];

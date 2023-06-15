@@ -1,17 +1,17 @@
 # Embedded speech samples in Java (JRE)
 
-These samples demonstrate embedded and hybrid speech recognition and synthesis using the Speech SDK for Java.
+These samples demonstrate embedded and hybrid speech using the Speech SDK for Java.
 
-Embedded speech enables offline (on-device) speech recognition and synthesis.
+Embedded speech enables offline (on-device) speech recognition, synthesis, and translation.
 Hybrid speech uses cloud speech services by default and embedded speech as a fallback in case cloud connectivity is limited.
 
 > **Note:**
 > * Embedded speech is in [preview](https://aka.ms/embedded-speech) and details in this document and samples are subject to change.
-> * Embedded speech recognition only supports audio in the following format:
+> * Embedded speech recognition and translation only support audio in the following format:
 >   * single channel
 >   * 8000 or 16000 Hz sample rate
 >   * 16-bit little-endian signed integer samples
-> * For Android, see the [Android specific example](../../android/embedded-speech) (of embedded speech recognition).
+> * For Android, see the [Android specific example](../../android/embedded-speech) (of embedded speech recognition and synthesis).
 
 ## Prerequisites
 
@@ -27,9 +27,9 @@ Requirements specific to embedded speech samples are as follows.
   * [Eclipse IDE for Java developers](https://www.eclipse.org/downloads/packages/), version 2021-12 or newer.
 * If using the command line:
   * [Maven](https://maven.apache.org/) (`mvn`). On Linux, install from the distribution repositories if available. On macOS, use `brew`.
-* For speech recognition:
+* For speech recognition or translation:
   * A working microphone device (and permission to access it for audio capture).
-  * One or more embedded speech recognition models. See https://aka.ms/embedded-speech for the latest information on how to obtain embedded models.
+  * One or more embedded speech recognition or translation models. See https://aka.ms/embedded-speech for the latest information on how to obtain embedded models.
 * For speech synthesis:
   * A working speaker device (and permission to access it for audio playback).
   * One or more embedded speech synthesis voices. See https://aka.ms/embedded-speech for the latest information on how to obtain embedded voices.
@@ -62,6 +62,9 @@ Sample settings:
 1. `SpeechSynthesisLocale` (`SPEECH_SYNTHESIS_LOCALE`)
    * Speech synthesis locale in BCP-47 format, case-sensitive. If not set, en-US will be assumed.
    * Setting `EmbeddedSpeechSynthesisVoiceName` overrides this for embedded speech.
+1. `SpeechTranslationLocale` (`SPEECH_TRANSLATION_LOCALE`)
+   * Speech translation locale (target language) in BCP-47 format, case-sensitive. If not set, en-US will be assumed.
+   * Setting `EmbeddedSpeechTranslationModelName` overrides this for embedded speech.
 1. `EmbeddedSpeechRecognitionModelPath` (`EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH`)
    * Path to the local embedded speech recognition model(s) on the device file system.
      This may be a single model folder or a top-level folder for several models.
@@ -88,6 +91,19 @@ Sample settings:
    * The voice name can be short (see https://aka.ms/speech/tts-languages, e.g. `en-US-JennyNeural`) or full (e.g. `Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)`).
 1. `EmbeddedSpeechSynthesisVoiceKey` (`EMBEDDED_SPEECH_SYNTHESIS_VOICE_KEY`)
    * Decryption key of the (encrypted) embedded speech synthesis voice.
+1. `EmbeddedSpeechTranslationModelPath` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH`)
+   * Path to the local embedded speech translation model(s) on the device file system.
+     This may be a single model folder or a top-level folder for several models.
+   * Use an absolute path or a path relative to the application working folder.
+     The path is recursively searched for model files.
+   * Files belonging to a specific model must be present as normal individual files in a model folder,
+     not inside an archive, and they must be readable by the application process.
+     The model internal subfolder structure must be intact i.e. as originally delivered.
+1. `EmbeddedSpeechTranslationModelName` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME`)
+   * Name of the embedded speech translation model to be used for translation. If set, this overrides `SpeechTranslationLocale` for embedded.
+   * The model name can be short (e.g. `en-US`) or full (e.g. `Microsoft Speech Translator Multi-to-en-US Model V1`).
+1. `EmbeddedSpeechTranslationModelKey` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY`)
+   * Decryption key of the (encrypted) embedded speech translation model.
 1. `CloudSpeechSubscriptionKey` (`CLOUD_SPEECH_SUBSCRIPTION_KEY`)
    * Cloud speech service subscription key. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
 1. `CloudSpeechServiceRegion` (`CLOUD_SPEECH_SERVICE_REGION`)

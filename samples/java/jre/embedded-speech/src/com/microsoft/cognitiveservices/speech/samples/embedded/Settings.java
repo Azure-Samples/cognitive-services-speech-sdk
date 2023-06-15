@@ -15,13 +15,17 @@ public class Settings
 {
     // START OF CONFIGURABLE SETTINGS
 
-    // Locale to be used in speech recognition (SR), cloud and embedded. In BCP-47 format, case-sensitive.
+    // Locale to be used in speech recognition, cloud and embedded. In BCP-47 format, case-sensitive.
     // If EmbeddedSpeechRecognitionModelName is changed from the default, it will override this for embedded.
     private static final String SpeechRecognitionLocale = "en-US"; // or set SPEECH_RECOGNITION_LOCALE
 
-    // Locale to be used in speech synthesis (text-to-speech, TTS), cloud and embedded. In BCP-47 format, case-sensitive.
+    // Locale to be used in speech synthesis (text-to-speech), cloud and embedded. In BCP-47 format, case-sensitive.
     // If EmbeddedSpeechSynthesisVoiceName is changed from the default, it will override this for embedded.
     private static final String SpeechSynthesisLocale = "en-US"; // or set SPEECH_SYNTHESIS_LOCALE
+
+    // Locale (target language) of speech translation. In BCP-47 format, case-sensitive.
+    // If EmbeddedSpeechTranslationModelName is changed from the default, it will override this.
+    private static final String SpeechTranslationLocale = "en-US"; // or set SPEECH_TRANSLATION_LOCALE
 
     // Path to the local embedded speech recognition model(s) on the device file system.
     // This may be a single model folder or a top-level folder for several models.
@@ -56,6 +60,23 @@ public class Settings
     // Decryption key of the (encrypted) embedded speech synthesis voice.
     // WARNING: The key may be visible in the program binary if hard-coded as a plain string.
     private static final String EmbeddedSpeechSynthesisVoiceKey = "YourEmbeddedSpeechSynthesisVoiceKey"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_KEY
+
+    // Path to the local embedded speech translation model(s) on the device file system.
+    // This may be a single model folder or a top-level folder for several models.
+    // Use an absolute path or a path relative to the application working folder.
+    // The path is recursively searched for model files.
+    // Files belonging to a specific model must be available as normal individual files in a model folder,
+    // not inside an archive, and they must be readable by the application process.
+    private static final String EmbeddedSpeechTranslationModelPath = "YourEmbeddedSpeechTranslationModelPath"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH
+
+    // Name of the embedded speech translation model to be used for translation.
+    // If changed from the default, this will override SpeechTranslationLocale.
+    // For example: "en-US" or "Microsoft Speech Translator Multi-to-en-US Model V1"
+    private static final String EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME
+
+    // Decryption key of the (encrypted) embedded speech translation model.
+    // WARNING: The key may be visible in the program binary if hard-coded as a plain string.
+    private static final String EmbeddedSpeechTranslationModelKey = "YourEmbeddedSpeechTranslationModelKey"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY
 
     // Cloud speech service subscription information.
     // This is needed with hybrid (cloud & embedded) speech configuration.
@@ -92,6 +113,39 @@ public class Settings
     private static String SpeechRecognitionModelKey;
     private static String SpeechSynthesisVoiceName;
     private static String SpeechSynthesisVoiceKey;
+    private static String SpeechTranslationModelName;
+    private static String SpeechTranslationModelKey;
+
+    // Utility functions for main menu.
+    public static boolean hasSpeechRecognitionModel()
+    {
+        if (SpeechRecognitionModelName.isEmpty())
+        {
+            System.err.println("## ERROR: No speech recognition model specified.");
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean hasSpeechSynthesisVoice()
+    {
+        if (SpeechSynthesisVoiceName.isEmpty())
+        {
+            System.err.println("## ERROR: No speech synthesis voice specified.");
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean hasSpeechTranslationModel()
+    {
+        if (SpeechTranslationModelName.isEmpty())
+        {
+            System.err.println("## ERROR: No speech translation model specified.");
+            return false;
+        }
+        return true;
+    }
 
     // Creates an instance of an embedded speech config.
     public static EmbeddedSpeechConfig createEmbeddedSpeechConfig() throws InterruptedException, ExecutionException
@@ -99,15 +153,20 @@ public class Settings
         List<String> paths = new ArrayList<>();
 
         // Add paths for offline data.
-        String modelPath = getSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
-        if (!modelPath.isEmpty() && !modelPath.equals("YourEmbeddedSpeechRecognitionModelPath"))
+        String recognitionModelPath = getSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
+        if (!recognitionModelPath.isEmpty() && !recognitionModelPath.equals("YourEmbeddedSpeechRecognitionModelPath"))
         {
-            paths.add(modelPath);
+            paths.add(recognitionModelPath);
         }
-        String voicePath = getSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
-        if (!voicePath.isEmpty() && !voicePath.equals("YourEmbeddedSpeechSynthesisVoicePath"))
+        String synthesisVoicePath = getSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
+        if (!synthesisVoicePath.isEmpty() && !synthesisVoicePath.equals("YourEmbeddedSpeechSynthesisVoicePath"))
         {
-            paths.add(voicePath);
+            paths.add(synthesisVoicePath);
+        }
+        String translationModelPath = getSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH", EmbeddedSpeechTranslationModelPath);
+        if (!translationModelPath.isEmpty() && !translationModelPath.equals("YourEmbeddedSpeechTranslationModelPath"))
+        {
+            paths.add(translationModelPath);
         }
 
         // Note, if there is only one path then you can also use EmbeddedSpeechConfig.fromPath(String).
@@ -137,6 +196,12 @@ public class Settings
                 // Embedded neural voices only support 24kHz sample rate.
                 config.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm);
             }
+        }
+
+        if (!SpeechTranslationModelName.isEmpty())
+        {
+            // Mandatory configuration for embedded speech translation.
+            config.setSpeechTranslationModel(SpeechTranslationModelName, SpeechTranslationModelKey);
         }
 
         // Disable profanity masking.
@@ -175,25 +240,32 @@ public class Settings
     public static boolean verifySettings() throws InterruptedException, ExecutionException
     {
         String cwd = System.getProperty("user.dir");
-        System.out.println("Current working directory:      " + cwd);
+        System.out.println("Current working directory: " + cwd);
 
-        String modelPath = getSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
-        if (modelPath.isEmpty() || modelPath.equals("YourEmbeddedSpeechRecognitionModelPath"))
+        String recognitionModelPath = getSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
+        if (recognitionModelPath.isEmpty() || recognitionModelPath.equals("YourEmbeddedSpeechRecognitionModelPath"))
         {
-            System.out.println("## WARNING: Embedded SR model search path is not set.");
-            modelPath = "";
+            System.out.println("## WARNING: Embedded speech recognition model search path is not set.");
+            recognitionModelPath = "";
         }
 
-        String voicePath = getSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
-        if (voicePath.isEmpty() || voicePath.equals("YourEmbeddedSpeechSynthesisVoicePath"))
+        String synthesisVoicePath = getSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
+        if (synthesisVoicePath.isEmpty() || synthesisVoicePath.equals("YourEmbeddedSpeechSynthesisVoicePath"))
         {
-            System.out.println("## WARNING: Embedded TTS voice search path is not set.");
-            voicePath = "";
+            System.out.println("## WARNING: Embedded speech synthesis voice search path is not set.");
+            synthesisVoicePath = "";
         }
 
-        if (modelPath.isEmpty() && voicePath.isEmpty())
+        String translationModelPath = getSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH", EmbeddedSpeechTranslationModelPath);
+        if (translationModelPath.isEmpty() || translationModelPath.equals("YourEmbeddedSpeechTranslationModelPath"))
         {
-            System.err.println("## ERROR: Cannot run without embedded SR models or TTS voices.");
+            System.out.println("## WARNING: Embedded speech translation model search path is not set.");
+            translationModelPath = "";
+        }
+
+        if (recognitionModelPath.isEmpty() && synthesisVoicePath.isEmpty() && translationModelPath.isEmpty())
+        {
+            System.err.println("## ERROR: Cannot run without embedded speech models.");
             return false;
         }
 
@@ -201,7 +273,7 @@ public class Settings
 
         SpeechRecognitionModelName = "";
 
-        if (!modelPath.isEmpty())
+        if (!recognitionModelPath.isEmpty())
         {
             String modelName = getSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME", EmbeddedSpeechRecognitionModelName);
             String modelLocale = getSetting("SPEECH_RECOGNITION_LOCALE", SpeechRecognitionLocale);
@@ -211,7 +283,7 @@ public class Settings
                 modelName = ""; // no name given -> search by locale
             }
 
-            EmbeddedSpeechConfig config = EmbeddedSpeechConfig.fromPath(modelPath);
+            EmbeddedSpeechConfig config = EmbeddedSpeechConfig.fromPath(recognitionModelPath);
             List<SpeechRecognitionModel> models = config.getSpeechRecognitionModels();
 
             final String name = modelName;
@@ -229,7 +301,7 @@ public class Settings
 
             if (SpeechRecognitionModelName.isEmpty())
             {
-                System.out.print("## WARNING: Cannot locate an embedded SR model by ");
+                System.out.print("## WARNING: Cannot locate an embedded speech recognition model by ");
                 if (modelName.isEmpty())
                 {
                     System.out.print("locale \"" + modelLocale + "\". ");
@@ -238,7 +310,7 @@ public class Settings
                 {
                     System.out.print("name \"" + modelName + "\". ");
                 }
-                System.out.println("Current model search path: " + modelPath);
+                System.out.println("Current recognition model search path: " + recognitionModelPath);
             }
             else
             {
@@ -255,7 +327,7 @@ public class Settings
 
         SpeechSynthesisVoiceName = "";
 
-        if (!voicePath.isEmpty())
+        if (!synthesisVoicePath.isEmpty())
         {
             String voiceName = getSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME", EmbeddedSpeechSynthesisVoiceName);
             String voiceLocale = getSetting("SPEECH_SYNTHESIS_LOCALE", SpeechSynthesisLocale);
@@ -265,7 +337,7 @@ public class Settings
                 voiceName = ""; // no name given -> search by locale
             }
 
-            EmbeddedSpeechConfig config = EmbeddedSpeechConfig.fromPath(voicePath);
+            EmbeddedSpeechConfig config = EmbeddedSpeechConfig.fromPath(synthesisVoicePath);
             SpeechSynthesizer synthesizer = new SpeechSynthesizer(config, null);
             SynthesisVoicesResult voicesList = synthesizer.getVoicesAsync("").get();
 
@@ -291,7 +363,7 @@ public class Settings
 
             if (SpeechSynthesisVoiceName.isEmpty())
             {
-                System.out.print("## WARNING: Cannot locate an embedded TTS voice by ");
+                System.out.print("## WARNING: Cannot locate an embedded speech synthesis voice by ");
                 if (voiceName.isEmpty())
                 {
                     System.out.print("locale \"" + voiceLocale + "\". ");
@@ -300,7 +372,7 @@ public class Settings
                 {
                     System.out.println("name \"" + voiceName + "\". ");
                 }
-                System.out.println("Current voice search path: " + voicePath);
+                System.out.println("Current synthesis voice search path: " + synthesisVoicePath);
             }
             else
             {
@@ -313,28 +385,93 @@ public class Settings
             }
         }
 
-        if (SpeechRecognitionModelName.isEmpty() && SpeechSynthesisVoiceName.isEmpty())
+        // Find an embedded speech translation model based on the name or locale.
+
+        SpeechTranslationModelName = "";
+
+        if (!translationModelPath.isEmpty())
         {
-            System.err.println("## ERROR: Cannot run without embedded SR models or TTS voices.");
+            String modelName = getSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME", EmbeddedSpeechTranslationModelName);
+            String modelLocale = getSetting("SPEECH_TRANSLATION_LOCALE", SpeechTranslationLocale);
+
+            if (modelName.isEmpty() || modelName.equals("YourEmbeddedSpeechTranslationModelName"))
+            {
+                modelName = ""; // no name given -> search by locale
+            }
+
+            EmbeddedSpeechConfig config = EmbeddedSpeechConfig.fromPath(translationModelPath);
+            List<SpeechTranslationModel> models = config.getSpeechTranslationModels();
+
+            final String name = modelName;
+            SpeechTranslationModel result = models.stream()
+                .filter(model ->
+                    (name.isEmpty() && model.getTargetLanguages().get(0).equals(modelLocale)) ||
+                    (!name.isEmpty() && (model.getName().equals(name) || model.getTargetLanguages().get(0).equals(name))))
+                .findAny()
+                .orElse(null);
+
+            if (result != null)
+            {
+                SpeechTranslationModelName = result.getName();
+            }
+
+            if (SpeechTranslationModelName.isEmpty())
+            {
+                System.out.print("## WARNING: Cannot locate an embedded speech translation model by ");
+                if (modelName.isEmpty())
+                {
+                    System.out.print("locale \"" + modelLocale + "\". ");
+                }
+                else
+                {
+                    System.out.print("name \"" + modelName + "\". ");
+                }
+                System.out.println("Current translation model search path: " + translationModelPath);
+            }
+            else
+            {
+                SpeechTranslationModelKey = getSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY", EmbeddedSpeechTranslationModelKey);
+                if (SpeechTranslationModelKey.isEmpty() || SpeechTranslationModelKey.equals("YourEmbeddedSpeechTranslationModelKey"))
+                {
+                    SpeechTranslationModelKey = "";
+                    System.out.println("## WARNING: The key for \"" + SpeechTranslationModelName + "\" is not set.");
+                }
+            }
+        }
+
+        if (SpeechRecognitionModelName.isEmpty() &&
+            SpeechSynthesisVoiceName.isEmpty() &&
+            SpeechTranslationModelName.isEmpty())
+        {
+            System.err.println("## ERROR: Cannot run without embedded speech models.");
             return false;
         }
 
-        System.out.println("Embedded SR model search path:  " + (modelPath.isEmpty() ? "(not set)" : modelPath));
-        if (!modelPath.isEmpty())
+        System.out.println("Embedded speech recognition\n  model search path: " + (recognitionModelPath.isEmpty() ? "(not set)" : recognitionModelPath));
+        if (!recognitionModelPath.isEmpty())
         {
-            System.out.println("Embedded SR model name:         " + (SpeechRecognitionModelName.isEmpty() ? "(not found)" : SpeechRecognitionModelName));
+            System.out.println("  model name:        " + (SpeechRecognitionModelName.isEmpty() ? "(not found)" : SpeechRecognitionModelName));
             if (!SpeechRecognitionModelName.isEmpty())
             {
-                System.out.println("Embedded SR model key:          " + (SpeechRecognitionModelKey.isEmpty() ? "(not set)" : maskValue(SpeechRecognitionModelKey)));
+                System.out.println("  model key:         " + (SpeechRecognitionModelKey.isEmpty() ? "(not set)" : maskValue(SpeechRecognitionModelKey)));
             }
         }
-        System.out.println("Embedded TTS voice search path: " + (voicePath.isEmpty() ? "(not set)" : voicePath));
-        if (!voicePath.isEmpty())
+        System.out.println("Embedded speech synthesis voice search path: " + (synthesisVoicePath.isEmpty() ? "(not set)" : synthesisVoicePath));
+        if (!synthesisVoicePath.isEmpty())
         {
-            System.out.println("Embedded TTS voice name:        " + (SpeechSynthesisVoiceName.isEmpty() ? "(not found)" : SpeechSynthesisVoiceName));
+            System.out.println("  voice name:        " + (SpeechSynthesisVoiceName.isEmpty() ? "(not found)" : SpeechSynthesisVoiceName));
             if (!SpeechSynthesisVoiceName.isEmpty())
             {
-                System.out.println("Embedded TTS voice key:         " + (SpeechSynthesisVoiceKey.isEmpty() ? "(not set)" : maskValue(SpeechSynthesisVoiceKey)));
+                System.out.println("  voice key:         " + (SpeechSynthesisVoiceKey.isEmpty() ? "(not set)" : maskValue(SpeechSynthesisVoiceKey)));
+            }
+        }
+        System.out.println("Embedded speech translation\n  model search path: " + (translationModelPath.isEmpty() ? "(not set)" : translationModelPath));
+        if (!translationModelPath.isEmpty())
+        {
+            System.out.println("  model name:        " + (SpeechTranslationModelName.isEmpty() ? "(not found)" : SpeechTranslationModelName));
+            if (!SpeechTranslationModelName.isEmpty())
+            {
+                System.out.println("  model key:         " + (SpeechTranslationModelKey.isEmpty() ? "(not set)" : maskValue(SpeechTranslationModelKey)));
             }
         }
 
