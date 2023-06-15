@@ -39,7 +39,7 @@ endif
 
 all: $(TARGET_BINARY)
 
-$(TARGET_BINARY): samples/main.cpp samples/settings.cpp samples/intent_recognition_samples.cpp samples/speech_recognition_samples.cpp samples/speech_synthesis_samples.cpp
+$(TARGET_BINARY): samples/main.cpp samples/settings.cpp samples/intent_recognition_samples.cpp samples/speech_recognition_samples.cpp samples/speech_synthesis_samples.cpp samples/speech_translation_samples.cpp
 	g++ $^ -o $@ \
 	    --std=c++14 \
 	    $(patsubst %,-I%, $(INCPATH)) \

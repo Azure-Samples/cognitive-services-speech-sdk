@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3C00A32C25F8727100512312 /* AudioRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C00A32B25F8727100512312 /* AudioRecorder.m */; };
 		3C1B8BCA2679C50600706BB3 /* pronunciation-assessment.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */; };
-		52FC64FA29CACB27000C8918 /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 52FC64F929CACB27000C8918 /* MicrosoftCognitiveServicesSpeech.xcframework */; };
 		DC2CBA04227047FB007EB18A /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC2CBA03227047EA007EB18A /* wreck-a-nice-beach.wav */; };
 		F3184E4B214674D60096193E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E4A214674D60096193E /* AppDelegate.m */; };
 		F3184E4E214674D60096193E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E4D214674D60096193E /* ViewController.m */; };
@@ -18,6 +17,8 @@
 		F3184E68214685C80096193E /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = F3184E67214685C70096193E /* whatstheweatherlike.wav */; };
 		F3D2F4A1216A516E006E5F52 /* speech-samplesUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = F3D2F4A0216A516E006E5F52 /* speech-samplesUITests.m */; };
 		F3D2F4AC216A563C006E5F52 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D2F4A8216A5538006E5F52 /* XCTest.framework */; };
+		FC40FA3229F97BB700F723DC /* MicrosoftCognitiveServicesSpeech.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FC40FA3129F97BB700F723DC /* MicrosoftCognitiveServicesSpeech.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FC40FA3329F97BC500F723DC /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FC40FA3129F97BB700F723DC /* MicrosoftCognitiveServicesSpeech.xcframework */; };
 		FCFC930029A7BC3E00A91C8F /* kws.table in Resources */ = {isa = PBXBuildFile; fileRef = FCFC92FE29A7BC3E00A91C8F /* kws.table */; };
 		FCFC930129A7BC3E00A91C8F /* kws_whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCFC92FF29A7BC3E00A91C8F /* kws_whatstheweatherlike.wav */; };
 /* End PBXBuildFile section */
@@ -39,6 +40,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				FC40FA3229F97BB700F723DC /* MicrosoftCognitiveServicesSpeech.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -49,7 +51,7 @@
 		3C00A32A25F8726500512312 /* AudioRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRecorder.h; sourceTree = "<group>"; };
 		3C00A32B25F8727100512312 /* AudioRecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioRecorder.m; sourceTree = "<group>"; };
 		3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "pronunciation-assessment.wav"; sourceTree = "<group>"; };
-		52FC64F929CACB27000C8918 /* MicrosoftCognitiveServicesSpeech.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MicrosoftCognitiveServicesSpeech.xcframework; path = "../../../../../../../../MicrosoftCognitiveServicesSpeech-XCFramework-1.28.0/MicrosoftCognitiveServicesSpeech.xcframework"; sourceTree = "<group>"; };
+		52FC64F929CACB27000C8918 /* MicrosoftCognitiveServicesSpeech.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MicrosoftCognitiveServicesSpeech.xcframework; path = "../../../../../../../../MicrosoftCognitiveServicesSpeech-XCFramework-1.29.0/MicrosoftCognitiveServicesSpeech.xcframework"; sourceTree = "<group>"; };
 		DC2CBA03227047EA007EB18A /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "./wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
 		F3184E46214674D60096193E /* speech-samples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "speech-samples.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3184E49214674D60096193E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -64,6 +66,7 @@
 		F3D2F4A0216A516E006E5F52 /* speech-samplesUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "speech-samplesUITests.m"; sourceTree = "<group>"; };
 		F3D2F4A2216A516E006E5F52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F3D2F4A8216A5538006E5F52 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		FC40FA3129F97BB700F723DC /* MicrosoftCognitiveServicesSpeech.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MicrosoftCognitiveServicesSpeech.xcframework; path = ../MicrosoftCognitiveServicesSpeech.xcframework; sourceTree = "<group>"; };
 		FCFC92FE29A7BC3E00A91C8F /* kws.table */ = {isa = PBXFileReference; lastKnownFileType = file; path = kws.table; sourceTree = "<group>"; };
 		FCFC92FF29A7BC3E00A91C8F /* kws_whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = kws_whatstheweatherlike.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -73,7 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				52FC64FA29CACB27000C8918 /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */,
+				FC40FA3329F97BC500F723DC /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,7 +94,7 @@
 		F3184E3D214674D60096193E = {
 			isa = PBXGroup;
 			children = (
-				52FC64F929CACB27000C8918 /* MicrosoftCognitiveServicesSpeech.xcframework */,
+				FC40FA3129F97BB700F723DC /* MicrosoftCognitiveServicesSpeech.xcframework */,
 				FCFC92FF29A7BC3E00A91C8F /* kws_whatstheweatherlike.wav */,
 				FCFC92FE29A7BC3E00A91C8F /* kws.table */,
 				3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */,

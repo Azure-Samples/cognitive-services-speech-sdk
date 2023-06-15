@@ -899,6 +899,7 @@ void SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled()
 
     // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
     // All default enhancements from Microsoft Audio Stack are enabled.
+    // Only works when input is from a microphone array.
     // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
     // microphone is assumed.
     auto audioProcessingOptions = AudioProcessingOptions::Create(AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT);

@@ -379,8 +379,8 @@ public class SpeechRecognitionSamples {
             recognizer.sessionStopped.addEventListener((s, e) -> {
                 System.out.println("\nSession stopped event.");
 
-                // Stops translation when session stop is detected.
-                System.out.println("\nStop translation.");
+                // Stops recognition when session stop is detected.
+                System.out.println("\nStop recognition.");
                 stopRecognitionSemaphore.release();
             });
 
@@ -414,7 +414,7 @@ public class SpeechRecognitionSamples {
         // Replace with your own audio file name.
         // The input stream the sample will read from.
         // The default format for a PushStream is 16Khz, 16 bit mono.
-        // You can use a different format by passing an AudioStreamFormat into createPushStream. 
+        // You can use a different format by passing an AudioStreamFormat into createPushStream.
         InputStream inputStream = new FileInputStream("YourAudioFile.wav");
 
         // Create the push stream to push audio to.
@@ -584,7 +584,7 @@ public class SpeechRecognitionSamples {
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
         // The audio file wreck-a-nice-beach.wav included with the C# sample contains ambigious audio.
-        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourPhraseListedAudioFile.wav");
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Create the recognizer.
@@ -1192,6 +1192,7 @@ public class SpeechRecognitionSamples {
 
         // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
         // All default enhancements from Microsoft Audio Stack are enabled.
+        // Only works when input is from a microphone array.
         // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
         // microphone is assumed.
         AudioProcessingOptions audioProcessingOptions = AudioProcessingOptions.create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT);

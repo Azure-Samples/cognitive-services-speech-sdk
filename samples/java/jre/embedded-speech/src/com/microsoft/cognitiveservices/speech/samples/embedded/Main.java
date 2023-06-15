@@ -39,6 +39,9 @@ public class Main
                 System.out.println("10. List embeddded speech synthesis voices.");
                 System.out.println("11. Embedded speech synthesis with speaker output.");
                 System.out.println("12. Hybrid (cloud & embedded) speech synthesis with speaker output.");
+                System.out.println("\nSpeech translation");
+                System.out.println("13. List embeddded speech translation models.");
+                System.out.println("14. Embedded speech translation with microphone input.");
                 System.out.print("\nChoose a number (or none for exit) and press Enter: ");
     
                 input = new Scanner(System.in).nextLine();
@@ -49,40 +52,46 @@ public class Main
                 switch (choice)
                 {
                 case 1:
-                    SpeechRecognitionSamples.listEmbeddedModels();
+                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.listEmbeddedModels();
                     break;
                 case 2:
-                    SpeechRecognitionSamples.embeddedRecognitionFromMicrophone();
+                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.embeddedRecognitionFromMicrophone();
                     break;
                 case 3:
-                    SpeechRecognitionSamples.embeddedRecognitionWithKeywordFromMicrophone();
+                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.embeddedRecognitionWithKeywordFromMicrophone();
                     break;
                 case 4:
-                    SpeechRecognitionSamples.embeddedRecognitionFromWavFile();
+                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.embeddedRecognitionFromWavFile();
                     break;
                 case 5:
-                    SpeechRecognitionSamples.embeddedRecognitionFromPushStream();
+                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.embeddedRecognitionFromPushStream();
                     break;
                 case 6:
-                    SpeechRecognitionSamples.embeddedRecognitionFromPullStream();
+                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.embeddedRecognitionFromPullStream();
                     break;
                 case 7:
-                    SpeechRecognitionSamples.hybridRecognitionFromMicrophone();
+                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.hybridRecognitionFromMicrophone();
                     break;
                 case 8:
-                    IntentRecognitionSamples.embeddedRecognitionFromMicrophone();
+                    if (Settings.hasSpeechRecognitionModel()) IntentRecognitionSamples.embeddedRecognitionFromMicrophone();
                     break;
                 case 9:
-                    IntentRecognitionSamples.embeddedRecognitionWithKeywordFromMicrophone();
+                    if (Settings.hasSpeechRecognitionModel()) IntentRecognitionSamples.embeddedRecognitionWithKeywordFromMicrophone();
                     break;
                 case 10:
-                    SpeechSynthesisSamples.listEmbeddedVoicesAsync();
+                    if (Settings.hasSpeechSynthesisVoice()) SpeechSynthesisSamples.listEmbeddedVoicesAsync();
                     break;
                 case 11:
-                    SpeechSynthesisSamples.embeddedSynthesisToSpeaker();
+                    if (Settings.hasSpeechSynthesisVoice()) SpeechSynthesisSamples.embeddedSynthesisToSpeaker();
                     break;
                 case 12:
-                    SpeechSynthesisSamples.hybridSynthesisToSpeaker();
+                    if (Settings.hasSpeechSynthesisVoice()) SpeechSynthesisSamples.hybridSynthesisToSpeaker();
+                    break;
+                case 13:
+                    if (Settings.hasSpeechTranslationModel()) SpeechTranslationSamples.listEmbeddedModels();
+                    break;
+                case 14:
+                    if (Settings.hasSpeechTranslationModel()) SpeechTranslationSamples.embeddedTranslationFromMicrophone();
                     break;
                 default:
                     break;
