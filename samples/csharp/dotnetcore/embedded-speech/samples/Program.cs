@@ -53,7 +53,7 @@ namespace MicrosoftSpeechSDKSamples
                     switch (choice)
                     {
                         case 1:
-                            if (Settings.HasSpeechRecognitionModel()) SpeechRecognitionSamples.ListEmbeddedModels();
+                            SpeechRecognitionSamples.ListEmbeddedModels();
                             break;
                         case 2:
                             if (Settings.HasSpeechRecognitionModel()) SpeechRecognitionSamples.EmbeddedRecognitionFromMicrophone();
@@ -80,7 +80,7 @@ namespace MicrosoftSpeechSDKSamples
                             if (Settings.HasSpeechRecognitionModel()) IntentRecognitionSamples.EmbeddedRecognitionWithKeywordFromMicrophone();
                             break;
                         case 10:
-                            if (Settings.HasSpeechSynthesisVoice()) SpeechSynthesisSamples.ListEmbeddedVoicesAsync().Wait();
+                            SpeechSynthesisSamples.ListEmbeddedVoicesAsync().Wait();
                             break;
                         case 11:
                             if (Settings.HasSpeechSynthesisVoice()) SpeechSynthesisSamples.EmbeddedSynthesisToSpeaker();
@@ -89,7 +89,7 @@ namespace MicrosoftSpeechSDKSamples
                             if (Settings.HasSpeechSynthesisVoice()) SpeechSynthesisSamples.HybridSynthesisToSpeaker();
                             break;
                         case 13:
-                            if (Settings.HasSpeechTranslationModel()) SpeechTranslationSamples.ListEmbeddedModels();
+                            SpeechTranslationSamples.ListEmbeddedModels();
                             break;
                         case 14:
                             if (Settings.HasSpeechTranslationModel()) SpeechTranslationSamples.EmbeddedTranslationFromMicrophone();

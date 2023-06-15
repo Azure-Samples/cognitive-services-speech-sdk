@@ -77,7 +77,7 @@ int main()
             switch (choice)
             {
             case 1:
-                if (HasSpeechRecognitionModel()) ListEmbeddedSpeechRecognitionModels();
+                ListEmbeddedSpeechRecognitionModels();
                 break;
             case 2:
                 if (HasSpeechRecognitionModel()) EmbeddedSpeechRecognitionFromMicrophone();
@@ -104,7 +104,7 @@ int main()
                 if (HasSpeechRecognitionModel()) EmbeddedIntentRecognitionWithKeywordFromMicrophone();
                 break;
             case 10:
-                if (HasSpeechSynthesisVoice()) ListEmbeddedSpeechSynthesisVoices();
+                ListEmbeddedSpeechSynthesisVoices();
                 break;
             case 11:
                 if (HasSpeechSynthesisVoice()) EmbeddedSpeechSynthesisToSpeaker();
@@ -113,7 +113,7 @@ int main()
                 if (HasSpeechSynthesisVoice()) HybridSpeechSynthesisToSpeaker();
                 break;
             case 13:
-                if (HasSpeechTranslationModel()) ListEmbeddedSpeechTranslationModels();
+                ListEmbeddedSpeechTranslationModels();
                 break;
             case 14:
                 if (HasSpeechTranslationModel()) EmbeddedSpeechTranslationFromMicrophone();

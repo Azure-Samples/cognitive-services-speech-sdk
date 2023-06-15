@@ -456,7 +456,7 @@ public class Settings
                 System.out.println("  model key:         " + (SpeechRecognitionModelKey.isEmpty() ? "(not set)" : maskValue(SpeechRecognitionModelKey)));
             }
         }
-        System.out.println("Embedded speech synthesis voice search path: " + (synthesisVoicePath.isEmpty() ? "(not set)" : synthesisVoicePath));
+        System.out.println("Embedded speech synthesis\n  voice search path: " + (synthesisVoicePath.isEmpty() ? "(not set)" : synthesisVoicePath));
         if (!synthesisVoicePath.isEmpty())
         {
             System.out.println("  voice name:        " + (SpeechSynthesisVoiceName.isEmpty() ? "(not found)" : SpeechSynthesisVoiceName));
