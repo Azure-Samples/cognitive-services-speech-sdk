@@ -48,7 +48,7 @@
       // add first participant with voice signature from enrollment step
       var voiceSignatureUser1 = "{" +
         "Version: 0," +
-        "Tag: \"<<VOICE_TAG_HERE>>\"" +
+        "Tag: \"<<VOICE_TAG_HERE>>\"," +
         "Data: \"<<VOICE_DATA_HERE>>\"" +
        "}";
       var user1 = sdk.Participant.From("user1@example.com", "en-us", voiceSignatureUser1);

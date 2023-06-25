@@ -52,7 +52,7 @@ public class Main
                 switch (choice)
                 {
                 case 1:
-                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.listEmbeddedModels();
+                    SpeechRecognitionSamples.listEmbeddedModels();
                     break;
                 case 2:
                     if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.embeddedRecognitionFromMicrophone();
@@ -79,7 +79,7 @@ public class Main
                     if (Settings.hasSpeechRecognitionModel()) IntentRecognitionSamples.embeddedRecognitionWithKeywordFromMicrophone();
                     break;
                 case 10:
-                    if (Settings.hasSpeechSynthesisVoice()) SpeechSynthesisSamples.listEmbeddedVoicesAsync();
+                    SpeechSynthesisSamples.listEmbeddedVoicesAsync();
                     break;
                 case 11:
                     if (Settings.hasSpeechSynthesisVoice()) SpeechSynthesisSamples.embeddedSynthesisToSpeaker();
@@ -88,7 +88,7 @@ public class Main
                     if (Settings.hasSpeechSynthesisVoice()) SpeechSynthesisSamples.hybridSynthesisToSpeaker();
                     break;
                 case 13:
-                    if (Settings.hasSpeechTranslationModel()) SpeechTranslationSamples.listEmbeddedModels();
+                    SpeechTranslationSamples.listEmbeddedModels();
                     break;
                 case 14:
                     if (Settings.hasSpeechTranslationModel()) SpeechTranslationSamples.embeddedTranslationFromMicrophone();

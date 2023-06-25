@@ -254,7 +254,7 @@ namespace MicrosoftSpeechSDKSamples
             var synthesisVoicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
             if (string.IsNullOrEmpty(synthesisVoicePath) || synthesisVoicePath.Equals("YourEmbeddedSpeechSynthesisVoicePath"))
             {
-                Console.WriteLine("## WARNING: Embedded TTS voice search path is not set.");
+                Console.WriteLine("## WARNING: Embedded speech synthesis voice search path is not set.");
                 synthesisVoicePath = null;
             }
 
