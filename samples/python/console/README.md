@@ -38,6 +38,10 @@ This sample demonstrates various forms of speech recognition, intent recognition
   ```sh
   pip install scipy
   ```
+* For speech synthesis with auto style sample, install the openai package in your Python interpreter by executing the command
+  ```sh
+  pip install openai
+  ```
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * To tailor the sample to your configuration, use search and replace across the whole sample directory to update the following strings:
 
