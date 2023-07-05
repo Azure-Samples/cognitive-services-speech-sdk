@@ -30,6 +30,9 @@
     <ClCompile Include="speech_synthesis_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="speech_translation_samples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="../data/keyword_computer.table">

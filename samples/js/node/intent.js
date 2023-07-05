@@ -13,10 +13,8 @@ var filePushStream = require("./filePushStream");
 
         // now create the audio-config pointing to our stream and
         // the speech config specifying the language.
-        var wavFileHeader = filePushStream.readWavFileHeader(settings.filename);
-        var format = sdk.AudioStreamFormat.getWaveFormatPCM(wavFileHeader.framerate, wavFileHeader.bitsPerSample, wavFileHeader.nChannels);
         var audioStream = filePushStream.openPushStream(settings.filename);
-        var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream, format);
+        var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
         var intentConfig = sdk.SpeechConfig.fromSubscription(settings.luSubscriptionKey, settings.luServiceRegion);
 
         // setting the recognition language to English.

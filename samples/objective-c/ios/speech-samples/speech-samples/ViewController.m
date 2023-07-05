@@ -23,6 +23,7 @@
 @property (strong, nonatomic) IBOutlet UIButton *recognizeWithAutoLanguageDetectionButton;
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromMicButton;
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromFileButton;
+@property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromStreamButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeKeywordFromFileButton;
 
 @property (strong, nonatomic) IBOutlet UILabel *recognitionResultLabel;
@@ -36,6 +37,7 @@
 - (IBAction)recognizeKeywordFromFileButtonTapped:(UIButton *)sender;
 - (IBAction)pronunciationAssessFromMicButtonTapped:(UIButton *)sender;
 - (IBAction)pronunciationAssessFromFileButtonTapped:(UIButton *)sender;
+- (IBAction)pronunciationAssessFromStreamButtonTapped:(UIButton *)sender;
 @end
 
 @implementation ViewController
@@ -115,7 +117,16 @@
     self.pronunciationAssessFromFileButton.accessibilityIdentifier = @"pronunciation_assessment_file_button";
     [self.view addSubview:self.pronunciationAssessFromFileButton];
 
-    self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 430.0, 300.0, 300.0)];
+    self.pronunciationAssessFromStreamButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.pronunciationAssessFromStreamButton addTarget:self action:@selector(pronunciationAssessFromStreamButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.pronunciationAssessFromStreamButton setTitle:@"Start pronunciation assessment from stream." forState:UIControlStateNormal];
+    [self.pronunciationAssessFromStreamButton titleLabel].lineBreakMode = NSLineBreakByWordWrapping;
+    [self.pronunciationAssessFromStreamButton titleLabel].textAlignment = NSTextAlignmentCenter;
+    [self.pronunciationAssessFromStreamButton setFrame:CGRectMake(50.0, 430.0, 300.0, 40.0)];
+    self.pronunciationAssessFromStreamButton.accessibilityIdentifier = @"pronunciation_assessment_stream_button";
+    [self.view addSubview:self.pronunciationAssessFromStreamButton];
+    
+    self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 470.0, 300.0, 300.0)];
     self.recognitionResultLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.recognitionResultLabel.numberOfLines = 0;
     self.recognitionResultLabel.accessibilityIdentifier = @"result_label";
@@ -184,6 +195,12 @@
 - (IBAction)pronunciationAssessFromFileButtonTapped:(UIButton *)sender {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
         [self pronunciationAssessFromFile];
+    });
+}
+
+- (IBAction)pronunciationAssessFromStreamButtonTapped:(UIButton *)sender {
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
+        [self pronunciationAssessFromStream];
     });
 }
 
@@ -682,7 +699,7 @@
     self->recorder = [[AudioRecorder alloc]initWithPushStream:stream];
     SPXAudioConfiguration *audioConfig = [[SPXAudioConfiguration alloc]initWithStreamInput:stream];
 
-    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:audioConfig];
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-US" audioConfiguration:audioConfig];
     if (!speechRecognizer) {
         NSLog(@"Could not create speech recognizer");
         [self updateRecognitionResultText:(@"Speech Recognition Error")];
@@ -690,12 +707,9 @@
     }
 
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
-    SPXPronunciationAssessmentConfiguration *pronunicationConfig =
-    [[SPXPronunciationAssessmentConfiguration alloc] init:pronunciationAssessmentReferenceText
-                                            gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark
-                                              granularity:SPXPronunciationAssessmentGranularity_Phoneme
-                                             enableMiscue:true];
-
+    NSString *jsonConfig = [NSString stringWithFormat:@"{\"ReferenceText\":\"%@\",\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":false,\"ScenarioId\":\"\"}", pronunciationAssessmentReferenceText];
+    SPXPronunciationAssessmentConfiguration *pronunicationConfig = [[SPXPronunciationAssessmentConfiguration alloc] initWithJson:jsonConfig];
+    
     [pronunicationConfig applyToRecognizer:speechRecognizer];
     [self updateRecognitionStatusText:(@"Assessing...")];
     [self->recorder record];
@@ -745,7 +759,7 @@
         return;
     }
 
-    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig audioConfiguration:pronAudioSource];
+    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-US" audioConfiguration:pronAudioSource];
     if (!speechRecognizer) {
         NSLog(@"Could not create speech recognizer");
         [self updateRecognitionResultText:(@"Speech Recognition Error")];
@@ -754,12 +768,9 @@
 
     // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     // The audio text is "Hello hello world! Today is a day!"
-    SPXPronunciationAssessmentConfiguration *pronunicationConfig =
-    [[SPXPronunciationAssessmentConfiguration alloc] init:@"Hello world! Today is a nice day!"
-                                            gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark
-                                              granularity:SPXPronunciationAssessmentGranularity_Phoneme
-                                             enableMiscue:true];
-
+    NSString *jsonConfig =  @"{\"ReferenceText\":\"Hello world! Today is a nice day!\",\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":false,\"ScenarioId\":\"\"}";
+    SPXPronunciationAssessmentConfiguration *pronunicationConfig = [[SPXPronunciationAssessmentConfiguration alloc] initWithJson:jsonConfig];
+    
     [pronunicationConfig applyToRecognizer:speechRecognizer];
     [self updateRecognitionStatusText:(@"Assessing...")];
 
@@ -806,6 +817,82 @@
         NSString *resultText = [NSString stringWithFormat:@"Assessment finished. \nOverall accuracy score: %.2f, fluency score: %.2f.", sumAccuracy / sumWords, sumFluency / sumWords];
         [self updateRecognitionResultText:resultText];
     }
+}
+
+/*
+ * Performs pronunciation assessment from stream.
+ */
+- (void)pronunciationAssessFromStream {
+    [self updateRecognitionResultText:@"Stream Result"];
+    // Creates an instance of a speech config with specified subscription key and service region.
+    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSString *path = [bundle pathForResource:@"whatstheweatherlike" ofType:@"wav"];
+    if (!path) {
+        NSLog(@"Cannot find audio file!");
+        [self updateRecognitionErrorText:@"Cannot find audio file"];
+        return;
+    }
+    NSLog(@"pronunciation assessment audio file path: %@", path);
+
+    NSData *audioDataWithHeader = [NSData dataWithContentsOfFile:path];
+    NSData *audioData = [audioDataWithHeader subdataWithRange:NSMakeRange(46, audioDataWithHeader.length - 46)];
+
+    NSDate *startTime = [NSDate date];
+
+    SPXAudioStreamFormat *audioFormat = [[SPXAudioStreamFormat alloc] initUsingPCMWithSampleRate:16000 bitsPerSample:16 channels:1];
+    SPXPushAudioInputStream *audioInputStream = [[SPXPushAudioInputStream alloc] initWithAudioFormat:audioFormat];
+    if (!audioInputStream) {
+        NSLog(@"Error: Failed to create audio input stream.");
+        return;
+    }
+
+    SPXAudioConfiguration *audioConfig = [[SPXAudioConfiguration alloc] initWithStreamInput:audioInputStream];
+    if (!audioConfig) {
+        NSLog(@"Error: audioConfig is Nil");
+        return;
+    }
+
+    SPXSpeechRecognizer *speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-US" audioConfiguration:audioConfig];
+
+    NSString *referenceText = @"what's the weather like";
+    NSString *jsonConfig = [NSString stringWithFormat:@"{\"ReferenceText\":\"%@\",\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":false,\"ScenarioId\":\"\"}", referenceText];
+    SPXPronunciationAssessmentConfiguration *pronAssessmentConfig = [[SPXPronunciationAssessmentConfiguration alloc] initWithJson:jsonConfig];
+
+    [pronAssessmentConfig applyToRecognizer:speechRecognizer error:nil];
+
+    [audioInputStream write:audioData];
+    [audioInputStream write:[NSData data]];
+
+    [self updateRecognitionResultText:@"Analysising"];
+
+    // Handle the recognition result
+    [speechRecognizer recognizeOnceAsync:^(SPXSpeechRecognitionResult * _Nullable result) {
+        SPXPronunciationAssessmentResult *pronunciationResult = [[SPXPronunciationAssessmentResult alloc] init:result];
+        if (!pronunciationResult) {
+            NSLog(@"Error: pronunciationResult is Nil");
+            return;
+        }
+        
+        [self updateRecognitionResultText:@"generating result..."];
+        NSMutableString *mResult = [[NSMutableString alloc] init];
+        NSString *resultText = [NSString stringWithFormat:@"Accuracy score: %.2f, Pronunciation score: %.2f, Completeness Score: %.2f, Fluency score: %.2f", pronunciationResult.accuracyScore, pronunciationResult.pronunciationScore, pronunciationResult.completenessScore, pronunciationResult.fluencyScore];
+        NSLog(@"%@", resultText);
+        [mResult appendString:resultText];
+        [mResult appendString:@"\n\nword  accuracyScore   errorType\n"];
+        for(SPXWordLevelTimingResult *word in pronunciationResult.words){
+            NSString *wordLevel = [NSString stringWithFormat:@"%@   %.2f  %@\n", word.word, word.accuracyScore, word.errorType];
+            [mResult appendString:wordLevel];
+            NSLog(@"%@", wordLevel);
+        }
+        NSString *finalResult = [NSString stringWithString:mResult];
+        NSLog(@"%@", finalResult);
+        [self updateRecognitionResultText:finalResult];
+        
+        NSDate *endTime = [NSDate date];
+        double timeCost = [endTime timeIntervalSinceDate:startTime] * 1000;
+        NSLog(@"Time cost: %fms", timeCost);
+    }];
 }
 
 - (void)updateRecognitionResultText:(NSString *) resultText {

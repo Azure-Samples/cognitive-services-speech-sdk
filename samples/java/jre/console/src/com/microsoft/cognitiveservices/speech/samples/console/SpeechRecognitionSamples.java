@@ -379,8 +379,8 @@ public class SpeechRecognitionSamples {
             recognizer.sessionStopped.addEventListener((s, e) -> {
                 System.out.println("\nSession stopped event.");
 
-                // Stops translation when session stop is detected.
-                System.out.println("\nStop translation.");
+                // Stops recognition when session stop is detected.
+                System.out.println("\nStop recognition.");
                 stopRecognitionSemaphore.release();
             });
 
@@ -414,7 +414,7 @@ public class SpeechRecognitionSamples {
         // Replace with your own audio file name.
         // The input stream the sample will read from.
         // The default format for a PushStream is 16Khz, 16 bit mono.
-        // You can use a different format by passing an AudioStreamFormat into createPushStream. 
+        // You can use a different format by passing an AudioStreamFormat into createPushStream.
         InputStream inputStream = new FileInputStream("YourAudioFile.wav");
 
         // Create the push stream to push audio to.
@@ -584,7 +584,7 @@ public class SpeechRecognitionSamples {
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
         // The audio file wreck-a-nice-beach.wav included with the C# sample contains ambigious audio.
-        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourPhraseListedAudioFile.wav");
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Create the recognizer.
@@ -705,7 +705,6 @@ public class SpeechRecognitionSamples {
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the standard recognition model associated with the detected language.
-    // <SpeechContinuousRecognitionAndLanguageId>
     public static void continuousRecognitionFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException
     {
         // Creates an instance of a speech config with specified subscription key and service region. Replace with your own subscription key
@@ -783,8 +782,7 @@ public class SpeechRecognitionSamples {
         audioConfig.close();
         autoDetectSourceLanguageConfig.close();
     }
-    // </SpeechContinuousRecognitionAndLanguageId>
-    
+
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the appropriate custom model specified, associated with the detected language.
@@ -878,9 +876,10 @@ public class SpeechRecognitionSamples {
         autoDetectSourceLanguageConfig.close();
     }
 
+    // <SpeechContinuousRecognitionAndLanguageId>
     // Shows how to do continuous speech recognition on a multilingual audio file with continuous language detection. Here, we assume the
     // spoken language in the file can alternate between English (US), Spanish (Mexico) and German.
-    // Speech recognition will use the appropriate custom model specified, associated with the detected language.
+    // If specified, speech recognition will use the custom model associated with the detected language.
     public static void continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels() throws InterruptedException, ExecutionException, IOException
     {
         // Continuous language detection with speech recognition requires the application to set a V2 endpoint URL.
@@ -980,6 +979,7 @@ public class SpeechRecognitionSamples {
         }
         autoDetectSourceLanguageConfig.close();
     }
+    // </SpeechContinuousRecognitionAndLanguageId>
 
     // Pronunciation assessment.
     // See more information at https://aka.ms/csspeech/pa
@@ -1192,6 +1192,7 @@ public class SpeechRecognitionSamples {
 
         // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
         // All default enhancements from Microsoft Audio Stack are enabled.
+        // Only works when input is from a microphone array.
         // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
         // microphone is assumed.
         AudioProcessingOptions audioProcessingOptions = AudioProcessingOptions.create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT);

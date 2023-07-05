@@ -47,7 +47,7 @@ def transcribe_from_single_blob(uri, properties):
     return transcription_definition
 
 
-def transcribe_with_custom_model(api, uri, properties):
+def transcribe_with_custom_model(client, uri, properties):
     """
     Transcribe a single audio file located at `uri` using the settings specified in `properties`
     using the base model for the specified locale.
@@ -57,7 +57,7 @@ def transcribe_with_custom_model(api, uri, properties):
         logging.error("Custom model ids must be set when using custom models")
         sys.exit()
 
-    model = api.get_model(MODEL_REFERENCE)
+    model = {'self': f'{client.configuration.host}/models/{MODEL_REFERENCE}'}
 
     transcription_definition = swagger_client.Transcription(
         display_name=NAME,
@@ -162,7 +162,7 @@ def transcribe():
     transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URI, properties)
 
     # Uncomment this block to use custom models for transcription.
-    # transcription_definition = transcribe_with_custom_model(api, RECORDINGS_BLOB_URI, properties)
+    # transcription_definition = transcribe_with_custom_model(client, RECORDINGS_BLOB_URI, properties)
 
     # uncomment the following block to enable and configure language identification prior to transcription
     # Uncomment this block to transcribe all files from a container.

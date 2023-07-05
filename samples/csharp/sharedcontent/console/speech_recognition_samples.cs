@@ -1082,7 +1082,8 @@ namespace MicrosoftSpeechSDKSamples
         {
             using (var audioInputStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1))) // This need be set based on the format of the given audio data
             using (var audioConfig = AudioConfig.FromStreamInput(audioInputStream))
-            using (var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig))
+            // Specify the language used for Pronunciation Assessment.
+            using (var speechRecognizer = new SpeechRecognizer(speechConfig, "en-US", audioConfig))
             {
                 // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
                 var pronAssessmentConfig = new PronunciationAssessmentConfig(referenceText, GradingSystem.HundredMark, Granularity.Phoneme, false);
@@ -1154,6 +1155,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
             // All default enhancements from Microsoft Audio Stack are enabled.
+            // Only works when input is from a microphone array.
             // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
             // microphone is assumed.
             using (var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT))

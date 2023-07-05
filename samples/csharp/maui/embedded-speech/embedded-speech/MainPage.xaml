@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="EmbeddedSpeechSample.MainPage"
+             Loaded="ContentPage_Loaded"
+             Unloaded="ContentPage_Unloaded">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Spacing="15"
+            Padding="10,0"
+            VerticalOptions="Start">
+
+            <Image
+                Source="dotnet_bot.png"
+                SemanticProperties.Description="Cute dot net bot waving hi to you!"
+                HeightRequest="120"
+                Margin="10"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="CopyFilesBtn"
+                Text="Copy model files"
+                SemanticProperties.Hint="Copies bundled model files to the app data directory"
+                Clicked="OnCopyFilesButtonClicked"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="InitObjectsBtn"
+                Text="Initialize objects"
+                SemanticProperties.Hint="Initializes Speech SDK objects"
+                Clicked="OnInitObjectsButtonClicked"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="RecognizeSpeechBtn"
+                Text="Recognize speech"
+                SemanticProperties.Hint="Starts speech recognition"
+                Clicked="OnRecognitionButtonClicked"
+                HorizontalOptions="Center" />
+
+            <Entry
+                x:Name="SynthesisInputEntry"
+                Placeholder="Enter text you wish to be spoken"
+                SemanticProperties.Hint="Text input for speech synthesis"
+                HorizontalTextAlignment="Center"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="SynthesizeSpeechBtn"
+                Text="Synthesize speech"
+                SemanticProperties.Hint="Starts speech synthesis"
+                Clicked="OnSynthesisButtonClicked"
+                HorizontalOptions="Center" />
+
+            <Label
+                x:Name="StatusText"
+                FontSize="Small"
+                Text="Welcome to the Embedded Speech sample for .NET MAUI!"
+                HorizontalTextAlignment="Center"
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
