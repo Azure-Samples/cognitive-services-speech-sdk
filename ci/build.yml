@@ -64,7 +64,7 @@ jobs:
     name: var
     displayName: Set variables
 
-- job: Windows2022-SDK
+- job: Windows2022SDK
   variables:
     V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
     V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
@@ -107,7 +107,7 @@ jobs:
   - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'
 
-- job: Windows2022-Batch
+- job: Windows2022Batch
   variables:
     V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
     V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
