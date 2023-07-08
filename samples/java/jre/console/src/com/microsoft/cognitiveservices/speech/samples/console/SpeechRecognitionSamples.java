@@ -1182,6 +1182,67 @@ public class SpeechRecognitionSamples {
         recognizer.close();
     }
 
+    // Pronunciation assessment configured with json
+    // See more information at https://aka.ms/csspeech/pa
+    public static void pronunciationAssessmentConfiguredWithJson() throws ExecutionException, InterruptedException {
+        // Creates an instance of a speech config with specified subscription key and service region.
+        // Replace with your own subscription key and service region (e.g., "westus").
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Replace the language with your language in BCP-47 format, e.g., en-US.
+        String lang = "en-US";
+
+        // Creates a speech recognizer using wav file.
+        AudioConfig audioInput = AudioConfig.fromWavFileOutput("YourAudioFile.wav");
+
+        String referenceText = "Hello world";
+        // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+        String jsonConfig = "{\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":true,\"ScenarioId\":\"[scenario ID will be assigned by product team]\"}";
+        PronunciationAssessmentConfig pronunciationConfig = PronunciationAssessmentConfig.fromJson(jsonConfig);
+        pronunciationConfig.setReferenceText(referenceText);
+
+        // Creates a speech recognizer for the specified language
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, lang, audioInput);
+        {
+            pronunciationConfig.applyTo(recognizer);
+
+            // Starts speech recognition, and returns after a single utterance is recognized.
+            // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+            SpeechRecognitionResult result = recognizer.recognizeOnceAsync().get();
+
+            // Checks result.
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
+                System.out.println("RECOGNIZED: Text=" + result.getText());
+                System.out.println("  PRONUNCIATION ASSESSMENT RESULTS:");
+
+                PronunciationAssessmentResult pronunciationResult = PronunciationAssessmentResult.fromResult(result);
+                System.out.println(
+                    String.format(
+                        "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
+                        pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
+                        pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
+            }
+            else if (result.getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
+            }
+            else if (result.getReason() == ResultReason.Canceled) {
+                CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                    System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+            }
+
+            result.close();
+            recognizer.close();
+        }
+
+        pronunciationConfig.close();
+        config.close();
+    }
+
     // Speech recognition from default microphone with Microsoft Audio Stack enabled.
     public static void continuousRecognitionFromDefaultMicrophoneWithMASEnabled() throws InterruptedException, ExecutionException, IOException
     {

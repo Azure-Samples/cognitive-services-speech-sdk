@@ -1220,6 +1220,72 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
+        // Pronunciation assessment configured with json
+        // See more information at https://aka.ms/csspeech/pa
+        public static async Task PronunciationAssessmentConfiguredWithJson()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Replace the language with your language in BCP-47 format, e.g., en-US.
+            var language = "en-US";
+
+            // Creates an instance of audio config from an audio file
+            var audioConfig = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav");
+
+            var referenceText = "what's the weather like";
+            // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+            string json_config = "{\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":true, \"ScenarioId\":\"[scenario ID will be assigned by product team]\"}";
+            var pronunciationConfig = PronunciationAssessmentConfig.FromJson(json_config);
+            pronunciationConfig.ReferenceText = referenceText;
+
+            // Creates a speech recognizer for the specified language
+            using (var recognizer = new SpeechRecognizer(config, language, audioConfig))
+            {
+                // Starts recognizing.
+                pronunciationConfig.ApplyTo(recognizer);
+
+                // Starts speech recognition, and returns after a single utterance is recognized.
+                // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                // Checks result.
+                if (result.Reason == ResultReason.RecognizedSpeech)
+                {
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine("  PRONUNCIATION ASSESSMENT RESULTS:");
+
+                    var pronunciationResult = PronunciationAssessmentResult.FromResult(result);
+                    Console.WriteLine(
+                        $"    Accuracy score: {pronunciationResult.AccuracyScore}, Pronunciation score: {pronunciationResult.PronunciationScore}, Completeness score : {pronunciationResult.CompletenessScore}, FluencyScore: {pronunciationResult.FluencyScore}");
+
+                    Console.WriteLine("  Word-level details:");
+
+                    foreach (var word in pronunciationResult.Words)
+                    {
+                        Console.WriteLine($"    Word: {word.Word}, Accuracy score: {word.AccuracyScore}, Error type: {word.ErrorType}.");
+                    }
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
+                }              
+            }
+        }
+
         // Speech recognition from a microphone with Microsoft Audio Stack enabled and pre-defined microphone array geometry specified.
         public static async Task RecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified()
         {

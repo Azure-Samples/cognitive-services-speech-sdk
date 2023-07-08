@@ -34,6 +34,7 @@ samples = OrderedDict([
         speech_sample.pronunciation_assessment_from_microphone,
         speech_sample.pronunciation_assessment_continuous_from_file,
         speech_sample.pronunciation_assessment_from_stream,
+        speech_sample.pronunciation_assessment_configured_with_json,
     ]), (intent_sample, [
         intent_sample.recognize_intent_once_from_mic,
         intent_sample.recognize_intent_once_async_from_mic,
