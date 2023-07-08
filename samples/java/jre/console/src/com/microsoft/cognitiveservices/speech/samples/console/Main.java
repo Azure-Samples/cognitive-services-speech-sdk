@@ -61,6 +61,7 @@ public class Main {
         System.out.println("44. Continuous speech recognition from file, with at-start language detection.");
         System.out.println("45. Continuous speech recognition from file, with at-start language detection with custom model.");
         System.out.println("46. Continuous speech recognition from file, with continuous language detection with custom models.");
+        System.out.println("47. Pronunciation assessment configured with JSON.");
 
         System.out.print(prompt);
 
@@ -207,6 +208,9 @@ public class Main {
                     break;
                 case "46":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels();
+                    break;
+                case "47":
+                    SpeechRecognitionSamples.pronunciationAssessmentConfiguredWithJson();
                     break;
                 case "0":
                     System.out.println("Exiting...");
