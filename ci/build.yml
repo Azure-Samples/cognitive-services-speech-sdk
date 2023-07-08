@@ -72,7 +72,7 @@ jobs:
   dependsOn: Pre
   timeoutInMinutes: 60
   pool:
-    vmImage: 'windows-2019'
+    name: SkymanWS2019Hosted
   steps:
   - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
     displayName: Patch samples
