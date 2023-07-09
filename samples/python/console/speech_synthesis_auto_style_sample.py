@@ -37,7 +37,8 @@ SPEECH_KEY = os.getenv("SPEECH_KEY")
 # Set the voice you want to use
 VOICE = "en-US-JennyNeural"
 
-# paste or read the text you want to synthesize
+# Paste or read the text you want to synthesize
+# The following demo text is from `The Project Gutenberg eBook of Pride and prejudice` (https://www.gutenberg.org/files/1342/1342-h/1342-h.htm)
 TEXT = """Elizabeth Bennet had been obliged, by the scarcity of gentlemen, to sit down for two dances; and during part of that time, Mr. Darcy had been standing near enough for her to overhear a conversation between him and Mr. Bingley, who came from the dance for a few minutes to press his friend to join it.
 
 “Come, Darcy,” said he, “I must have you dance. I hate to see you standing about by yourself in this stupid manner. You had much better dance.”
