@@ -25,10 +25,9 @@ If you want to host the sample on a web server:
 
 * In case you are running the sample from your local computer, open `independent-identification.html` from the location where you have downloaded this quickstart with a JavaScript capable browser.
 * Use the input fields to set your `subscription key` and `service region`.
-* Press the `Create Profile` button to create voice profiles and enroll using the chosen enrollment files. 
-* NOTE: The enrollment file must contain the activation phrase in order to complete enrollment successfully. An example enrollment files can be found [here](https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/master/sampledata/audiofiles/speakerid/activationphrase). You can select multiple files for enrolling multiple profiles. 
-* Press the `Identify Speaker` button to identify a speaker using the chosen identification file. An example identification files can be found [here](https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/master/sampledata/audiofiles/speakerid/independent-identification). 
-* Press the `List Activation Phrases` button in order to check the activation phrase for currently selected locale. The locales supported for Speaker recognition is listed [here](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/language-support?tabs=speaker-recognition#supported-languages). 
+* Press the `Create Profile` button to create a voice profile and enroll using the chosen enrollment file. 
+* NOTE: The enrollment file must contain the activation phrase in order to complete enrollment successfully. An example enrollment file can be found [here](https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/master/tests/input/audio/talkforafewseconds.wav)
+* Press the `Identify Speaker` button to identify a speaker using the chosen identification file.
    
 ## Running .html samples
 * In case you are hosting the sample on a web server, open a web browser and navigate to the full URL where you host the sample.
