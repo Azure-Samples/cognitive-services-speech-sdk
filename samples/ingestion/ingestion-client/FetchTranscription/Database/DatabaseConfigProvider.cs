@@ -3,15 +3,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-using FetchTranscription;
+using FetchTranscription.Database;
 
 using Microsoft.Azure.WebJobs.Hosting;
 
 [assembly: WebJobsStartup(typeof(DatabaseInitializationService), "DatabaseInitialize")]
 
-namespace FetchTranscription
+namespace FetchTranscription.Database
 {
     using Connector.Database;
+
+    using FetchTranscriptionFunction;
 
     using Microsoft.Azure.WebJobs.Description;
     using Microsoft.Azure.WebJobs.Host.Config;

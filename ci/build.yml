@@ -64,7 +64,7 @@ jobs:
     name: var
     displayName: Set variables
 
-- job: Windows2019
+- job: Windows2022SDK
   variables:
     V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
     V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]
@@ -72,7 +72,7 @@ jobs:
   dependsOn: Pre
   timeoutInMinutes: 60
   pool:
-    vmImage: 'windows-2019'
+    name: SkymanWS2022Compliant
   steps:
   - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
     displayName: Patch samples
@@ -107,7 +107,7 @@ jobs:
   - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'
 
-- job: Windows2022
+- job: Windows2022Batch
   variables:
     V_VSTS_FEED: $[dependencies.Pre.outputs['var.V_VSTS_FEED']]
     V_INCLUDE_NUGET_ORG: $[dependencies.Pre.outputs['var.V_INCLUDE_NUGET_ORG']]

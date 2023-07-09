@@ -17,6 +17,7 @@ extern void SpeechContinuousRecognitionWithPushStream();
 extern void KeywordTriggeredSpeechRecognitionWithMicrophone();
 extern void PronunciationAssessmentWithMicrophone();
 extern void PronunciationAssessmentWithStream();
+extern void PronunciationAssessmentConfiguredWithJson();
 extern void SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled();
 extern void SpeechRecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
 extern void SpeechContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
@@ -101,6 +102,7 @@ void SpeechSamples()
         cout << "d.) Speech recognition from push stream with Microsoft Audio Stack enabled and\n"
                 "    beam-forming angles specified.\n";
         cout << "e.) Pronunciation assessment with stream.\n";
+        cout << "f.) Pronunciation assessment configured with json.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -155,6 +157,10 @@ void SpeechSamples()
         case 'E':
         case 'e':
             PronunciationAssessmentWithStream();
+            break;
+        case 'F':
+        case 'f':
+            PronunciationAssessmentConfiguredWithJson();
             break;
         case '0':
             break;
