@@ -7,7 +7,7 @@ android {
     compileSdkVersion 31
 
     defaultConfig {
-        applicationId "com.microsoft.cognitiveservices.speech.samples.speechsynthesis.pauseexample"
+        applicationId "com.microsoft.cognitiveservices.speech.samples.continuous_reco"
         minSdkVersion 23
         targetSdkVersion 31
         versionCode 1
@@ -27,7 +27,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    namespace 'com.microsoft.cognitiveservices.speech.samples.speechsynthesis.pauseexample'
+    namespace 'com.microsoft.cognitiveservices.speech.samples.continuous_reco'
 }
 
 dependencies {

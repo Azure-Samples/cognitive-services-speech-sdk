@@ -2,7 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
-package com.microsoft.cognitiveservices.speech.samples.speechsynthesis.continuous_reco
+package com.microsoft.cognitiveservices.speech.samples.continuous_reco
 
 import android.Manifest.permission
 import android.os.Bundle
@@ -11,9 +11,9 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.microsoft.cognitiveservices.speech.*
+import com.microsoft.cognitiveservices.speech.SpeechConfig
+import com.microsoft.cognitiveservices.speech.SpeechRecognizer
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig
-import com.microsoft.cognitiveservices.speech.samples.speechsynthesis.pauseexample.R
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {

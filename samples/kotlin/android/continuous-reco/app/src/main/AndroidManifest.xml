@@ -14,7 +14,7 @@
         tools:targetApi="31">
 
         <activity
-            android:name="com.microsoft.cognitiveservices.speech.samples.speechsynthesis.continuous_reco.MainActivity"
+            android:name="com.microsoft.cognitiveservices.speech.samples.continuous_reco.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
