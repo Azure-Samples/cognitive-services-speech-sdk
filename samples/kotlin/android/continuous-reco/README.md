@@ -1,6 +1,6 @@
 # Continuous recognition sample for Android
 
-This sample demonstrates how to use continuous recognition with Kotlin using the Speech SDK for Android with, stopping the one final results.
+This sample demonstrates how to use continuous recognition with Kotlin using the Speech SDK for Android stopping on the first final result.
 
 > **Note:**
 > this sample is *not* for the Speech Devices SDK and the Roobo device.
