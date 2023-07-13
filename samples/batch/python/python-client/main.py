@@ -138,7 +138,7 @@ def transcribe():
     client = swagger_client.ApiClient(configuration)
 
     # create an instance of the transcription api class
-    api = swagger_client.CustomSpeechTranscriptionsApi(api_client=client)
+    api = swagger_client.DefaultApi(api_client=self.client)
 
     # Specify transcription properties by passing a dict to the properties parameter. See
     # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options
@@ -151,11 +151,13 @@ def transcribe():
     # properties.destination_container_url = "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>"
     # properties.time_to_live = "PT1H"
 
-    # uncomment the following block to enable and configure speaker separation
+    # uncomment the following block to enable and configure speaker separation.
+    # take note that audios only can have 1 channel
     # properties.diarization_enabled = True
     # properties.diarization = swagger_client.DiarizationProperties(
     #     swagger_client.DiarizationSpeakersProperties(min_count=1, max_count=5))
 
+    # take not that you will still need the 'locale' property as passed above
     # properties.language_identification = swagger_client.LanguageIdentificationProperties(["en-US", "ja-JP"])
 
     # Use base models for transcription. Comment this block if you are using a custom model.
