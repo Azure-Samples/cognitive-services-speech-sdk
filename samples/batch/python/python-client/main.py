@@ -138,7 +138,7 @@ def transcribe():
     client = swagger_client.ApiClient(configuration)
 
     # create an instance of the transcription api class
-    api = swagger_client.DefaultApi(api_client=self.client)
+    api = swagger_client.DefaultApi(api_client=client)
 
     # Specify transcription properties by passing a dict to the properties parameter. See
     # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options
