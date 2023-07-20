@@ -14,6 +14,12 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            Properties properties = new Properties()
+            properties.load(project.rootProject.file('local.properties').newDataInputStream())
+            buildConfigField "String" , "SUBSCRIPTION_KEY", properties.getProperty('SUBSCRIPTION_KEY')
+            buildConfigField "String", "SERVICE_REGION", properties.getProperty('SERVICE_REGION')
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
