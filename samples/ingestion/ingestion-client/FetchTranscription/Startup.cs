@@ -13,6 +13,8 @@ namespace FetchTranscription
 
     using Connector.Database;
 
+    using FetchTranscriptionFunction;
+
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
