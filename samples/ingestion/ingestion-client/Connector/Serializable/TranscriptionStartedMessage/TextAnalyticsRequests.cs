@@ -14,15 +14,15 @@ namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
             IEnumerable<TextAnalyticsRequest> audioLevelRequests,
             IEnumerable<TextAnalyticsRequest> conversationRequests)
         {
-            this.UtteranceLevelRequests = utteranceLevelRequests ?? new List<TextAnalyticsRequest>();
-            this.AudioLevelRequests = audioLevelRequests ?? new List<TextAnalyticsRequest>();
-            this.ConversationRequests = conversationRequests ?? new List<TextAnalyticsRequest>();
+            this.UtteranceLevelRequests = utteranceLevelRequests;
+            this.AudioLevelRequests = audioLevelRequests;
+            this.ConversationRequests = conversationRequests;
         }
 
-        public IEnumerable<TextAnalyticsRequest> UtteranceLevelRequests { get; set; }
+        public IEnumerable<TextAnalyticsRequest> UtteranceLevelRequests { get; }
 
-        public IEnumerable<TextAnalyticsRequest> AudioLevelRequests { get; set; }
+        public IEnumerable<TextAnalyticsRequest> AudioLevelRequests { get; }
 
-        public IEnumerable<TextAnalyticsRequest> ConversationRequests { get; set; }
+        public IEnumerable<TextAnalyticsRequest> ConversationRequests { get; }
     }
 }
