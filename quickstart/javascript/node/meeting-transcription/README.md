@@ -21,7 +21,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
   * Add voice signature data for all participants
-  * Replace the string `YourAudioFile.wav` with a path to a `.wav` file on your disk **(required format: 1-channel or 8-channel)**.
+  * Replace the string `YourAudioFile.wav` with a path to a `.wav` file on your disk **(required format: 8-channel)**.
 
 ## Run the sample
 

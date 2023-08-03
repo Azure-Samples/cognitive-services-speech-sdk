@@ -8,7 +8,7 @@ This sample demonstrates how to transcribe a meeting from a file using the Speec
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC or Mac.
 * User voice samples [See User voice samples for Meeting Transcription](https://docs.microsoft.com/azure/cognitive-services/speech-service/meeting-transcription#expected-inputs)
-* A 1-channel or an 8-channel wav file.
+* 8-channel wav file.
 * A text editor.
 * Optionally, a web server that supports hosting PHP scripts.
 

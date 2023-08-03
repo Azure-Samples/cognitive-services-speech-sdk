@@ -14,7 +14,7 @@
   // through the meeting transcriber.
   var subscriptionKey = "YourSubscriptionKey";
   var serviceRegion = "YourServiceRegion"; // e.g., "centralus"
-  var filename = "YourAudioFile.wav"; // single channel or 8-channel audio
+  var filename = "YourAudioFile.wav"; // 8-channel audio
   
   // create the push stream we need for the speech sdk.
   var pushStream = sdk.AudioInputStream.createPushStream();
