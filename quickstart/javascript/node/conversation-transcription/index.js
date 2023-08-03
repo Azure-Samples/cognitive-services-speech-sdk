@@ -14,7 +14,7 @@
   // through the conversation transcriber.
   var subscriptionKey = "YourSubscriptionKey";
   var serviceRegion = "YourServiceRegion"; // e.g., "centralus"
-  var filename = "YourAudioFile.wav"; // 8-channel audio
+  var filename = "YourAudioFile.wav";
   
   // create the push stream we need for the speech sdk.
   var pushStream = sdk.AudioInputStream.createPushStream();

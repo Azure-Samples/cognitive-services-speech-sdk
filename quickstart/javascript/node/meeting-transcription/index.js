@@ -17,7 +17,7 @@
   var filename = "YourAudioFile.wav"; // 8-channel audio
   
   // create the push stream we need for the speech sdk.
-  var pushStream = sdk.AudioInputStream.createPushStream();
+  var pushStream = sdk.AudioInputStream.createPushStream(sdk.AudioStreamFormat.getWaveFormatPCM(16000, 16, 8))
   
   // open the file and push it to the push stream.
   fs.createReadStream(filename).on('data', function(arrayBuffer) {
