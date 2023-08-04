@@ -407,20 +407,6 @@ def speech_recognize_continuous_async_from_microphone():
 
 # <SpeechRecognitionUsingKeywordModel>
 def speech_recognize_keyword_from_microphone():
-    """performs keyword-triggered speech recognition with input microphone"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-
-    # Creates an instance of a keyword recognition model. Update this to
-    # point to the location of your keyword recognition model.
-    model = speechsdk.KeywordRecognitionModel("YourKeywordRecognitionModelFile.table")
-
-    # The phrase your keyword recognition model triggers on.
-    keyword = "YourKeyword"
-
-    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
-
-    done = False
-
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
@@ -442,6 +428,20 @@ def speech_recognize_keyword_from_microphone():
             print('RECOGNIZED: {}'.format(evt))
         elif evt.result.reason == speechsdk.ResultReason.NoMatch:
             print('NOMATCH: {}'.format(evt))
+
+    """performs keyword-triggered speech recognition with input microphone"""
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+    # Creates an instance of a keyword recognition model. Update this to
+    # point to the location of your keyword recognition model.
+    model = speechsdk.KeywordRecognitionModel("YourKeywordRecognitionModelFile.table")
+
+    # The phrase your keyword recognition model triggers on.
+    keyword = "YourKeyword"
+
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
+
+    done = False
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognizing.connect(recognizing_cb)
@@ -493,6 +493,12 @@ def speech_recognition_with_pull_stream():
             """close callback function"""
             self._file_h.close()
 
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
     # specify the audio format
@@ -508,12 +514,6 @@ def speech_recognition_with_pull_stream():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
     done = False
-
-    def stop_cb(evt: speechsdk.SessionEventArgs):
-        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        print('CLOSING on {}'.format(evt))
-        nonlocal done
-        done = True
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognizing.connect(lambda evt: print('RECOGNIZING: {}'.format(evt)))
@@ -553,6 +553,11 @@ def push_stream_writer(stream):
 
 
 def speech_recognition_with_push_stream():
+    def session_stopped_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('SESSION STOPPED: {}'.format(evt))
+        recognition_done.set()
+
     """gives an example how to use a push audio stream to recognize speech from a custom audio
     source"""
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
@@ -566,10 +571,6 @@ def speech_recognition_with_push_stream():
     recognition_done = threading.Event()
 
     # Connect callbacks to the events fired by the speech recognizer
-    def session_stopped_cb(evt):
-        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        print('SESSION STOPPED: {}'.format(evt))
-        recognition_done.set()
 
     speech_recognizer.recognizing.connect(lambda evt: print('RECOGNIZING: {}'.format(evt)))
     speech_recognizer.recognized.connect(lambda evt: print('RECOGNIZED: {}'.format(evt)))
@@ -653,20 +654,6 @@ def speech_recognize_with_auto_language_detection_UsingCustomizedModel():
 
 
 def speech_recognize_keyword_locally_from_microphone():
-    """runs keyword spotting locally, with direct access to the result audio"""
-
-    # Creates an instance of a keyword recognition model. Update this to
-    # point to the location of your keyword recognition model.
-    model = speechsdk.KeywordRecognitionModel("YourKeywordRecognitionModelFile.table")
-
-    # The phrase your keyword recognition model triggers on.
-    keyword = "YourKeyword"
-
-    # Create a local keyword recognizer with the default microphone device for input.
-    keyword_recognizer = speechsdk.KeywordRecognizer()
-
-    done = False
-
     def recognized_cb(evt: speechsdk.SpeechRecognitionEventArgs):
         # Only a keyword phrase is recognized. The result cannot be 'NoMatch'
         # and there is no timeout. The recognizer runs until a keyword phrase
@@ -684,6 +671,20 @@ def speech_recognize_keyword_locally_from_microphone():
             print('CANCELED: {}'.format(result.cancellation_details.reason))
         nonlocal done
         done = True
+
+    """runs keyword spotting locally, with direct access to the result audio"""
+
+    # Creates an instance of a keyword recognition model. Update this to
+    # point to the location of your keyword recognition model.
+    model = speechsdk.KeywordRecognitionModel("YourKeywordRecognitionModelFile.table")
+
+    # The phrase your keyword recognition model triggers on.
+    keyword = "YourKeyword"
+
+    # Create a local keyword recognizer with the default microphone device for input.
+    keyword_recognizer = speechsdk.KeywordRecognizer()
+
+    done = False
 
     # Connect callbacks to the events fired by the keyword recognizer.
     keyword_recognizer.recognized.connect(recognized_cb)
@@ -788,6 +789,27 @@ def pronunciation_assessment_continuous_from_file():
     import difflib
     import json
 
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
+    def recognized(evt: speechsdk.SpeechRecognitionEventArgs):
+        print('pronunciation assessment for: {}'.format(evt.result.text))
+        pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
+        print('    Accuracy score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}'.format(
+            pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
+            pronunciation_result.completeness_score, pronunciation_result.fluency_score
+        ))
+        nonlocal recognized_words, fluency_scores, durations
+        recognized_words += pronunciation_result.words
+        fluency_scores.append(pronunciation_result.fluency_score)
+        json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
+        jo = json.loads(json_result)
+        nb = jo['NBest'][0]
+        durations.append(sum([int(w['Duration']) for w in nb['Words']]))
+
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
     # Note: The sample is for en-US language.
@@ -813,27 +835,6 @@ def pronunciation_assessment_continuous_from_file():
     recognized_words = []
     fluency_scores = []
     durations = []
-
-    def stop_cb(evt: speechsdk.SessionEventArgs):
-        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        print('CLOSING on {}'.format(evt))
-        nonlocal done
-        done = True
-
-    def recognized(evt: speechsdk.SpeechRecognitionEventArgs):
-        print('pronunciation assessment for: {}'.format(evt.result.text))
-        pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
-        print('    Accuracy score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}'.format(
-            pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
-            pronunciation_result.completeness_score, pronunciation_result.fluency_score
-        ))
-        nonlocal recognized_words, fluency_scores, durations
-        recognized_words += pronunciation_result.words
-        fluency_scores.append(pronunciation_result.fluency_score)
-        json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
-        jo = json.loads(json_result)
-        nb = jo['NBest'][0]
-        durations.append(sum([int(w['Duration']) for w in nb['Words']]))
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)

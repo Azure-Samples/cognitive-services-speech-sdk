@@ -113,6 +113,28 @@ def translation_once_from_file():
 
 
 def translation_continuous():
+    def result_callback(event_type: str, evt: speechsdk.translation.TranslationRecognitionEventArgs):
+        """callback to display a translation result"""
+        print("{}:\n {}\n\tTranslations: {}\n\tResult Json: {}\n".format(
+            event_type, evt, evt.result.translations.items(), evt.result.json))
+
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
+    def canceled_cb(evt: speechsdk.translation.TranslationRecognitionCanceledEventArgs):
+        print('CANCELED:\n\tReason:{}\n'.format(evt.result.reason))
+        print('\tDetails: {} ({})'.format(evt, evt.result.cancellation_details.error_details))
+
+    def synthesis_callback(evt: speechsdk.translation.TranslationRecognitionEventArgs):
+        """
+        callback for the synthesis event
+        """
+        print('SYNTHESIZING {}\n\treceived {} bytes of audio. Reason: {}'.format(
+            evt, len(evt.result.audio), evt.result.reason))
+
     """performs continuous speech translation from an audio file"""
     # <TranslationContinuous>
     # set up translation parameters: source language and target languages
@@ -126,22 +148,7 @@ def translation_continuous():
     recognizer = speechsdk.translation.TranslationRecognizer(
         translation_config=translation_config, audio_config=audio_config)
 
-    def result_callback(event_type: str, evt: speechsdk.translation.TranslationRecognitionEventArgs):
-        """callback to display a translation result"""
-        print("{}:\n {}\n\tTranslations: {}\n\tResult Json: {}\n".format(
-            event_type, evt, evt.result.translations.items(), evt.result.json))
-
     done = False
-
-    def stop_cb(evt: speechsdk.SessionEventArgs):
-        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        print('CLOSING on {}'.format(evt))
-        nonlocal done
-        done = True
-
-    def canceled_cb(evt: speechsdk.translation.TranslationRecognitionCanceledEventArgs):
-        print('CANCELED:\n\tReason:{}\n'.format(evt.result.reason))
-        print('\tDetails: {} ({})'.format(evt, evt.result.cancellation_details.error_details))
 
     # connect callback functions to the events fired by the recognizer
     recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
@@ -156,13 +163,6 @@ def translation_continuous():
     # stop continuous recognition on either session stopped or canceled events
     recognizer.session_stopped.connect(stop_cb)
     recognizer.canceled.connect(stop_cb)
-
-    def synthesis_callback(evt: speechsdk.translation.TranslationRecognitionEventArgs):
-        """
-        callback for the synthesis event
-        """
-        print('SYNTHESIZING {}\n\treceived {} bytes of audio. Reason: {}'.format(
-            evt, len(evt.result.audio), evt.result.reason))
 
     # connect callback to the synthesis event
     recognizer.synthesizing.connect(synthesis_callback)
@@ -229,6 +229,34 @@ def translation_once_with_lid_from_file():
 
 
 def translation_continuous_with_lid_from_multilingual_file():
+    def result_callback(evt):
+        """callback to display a translation result"""
+        if evt.result.reason == speechsdk.ResultReason.TranslatedSpeech:
+            src_lang = evt.result.properties[speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult]
+            print("""Recognized:
+            Detected language: {}
+            Recognition result: {}
+            German translation: {}
+            French translation: {}""".format(
+                src_lang,
+                evt.result.text,
+                evt.result.translations['de'],
+                evt.result.translations['fr']))
+        elif evt.result.reason == speechsdk.ResultReason.RecognizedSpeech:
+            print("Recognized:\n {}".format(evt.result.text))
+        elif evt.result.reason == speechsdk.ResultReason.NoMatch:
+            print("No speech could be recognized: {}".format(evt.result.no_match_details))
+        elif evt.result.reason == speechsdk.ResultReason.Canceled:
+            print("Translation canceled: {}".format(evt.result.cancellation_details.reason))
+            if evt.result.cancellation_details.reason == speechsdk.CancellationReason.Error:
+                print("Error details: {}".format(evt.result.cancellation_details.error_details))
+
+    def stop_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
     """performs continuous speech translation from a multi-lingual audio file, with continuous language identification"""
     # <TranslationContinuousWithLID>
 
@@ -258,35 +286,7 @@ def translation_continuous_with_lid_from_multilingual_file():
         audio_config=audio_config,
         auto_detect_source_language_config=auto_detect_source_language_config)
 
-    def result_callback(evt):
-        """callback to display a translation result"""
-        if evt.result.reason == speechsdk.ResultReason.TranslatedSpeech:
-            src_lang = evt.result.properties[speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult]
-            print("""Recognized:
-            Detected language: {}
-            Recognition result: {}
-            German translation: {}
-            French translation: {}""".format(
-                src_lang,
-                evt.result.text,
-                evt.result.translations['de'],
-                evt.result.translations['fr']))
-        elif evt.result.reason == speechsdk.ResultReason.RecognizedSpeech:
-            print("Recognized:\n {}".format(evt.result.text))
-        elif evt.result.reason == speechsdk.ResultReason.NoMatch:
-            print("No speech could be recognized: {}".format(evt.result.no_match_details))
-        elif evt.result.reason == speechsdk.ResultReason.Canceled:
-            print("Translation canceled: {}".format(evt.result.cancellation_details.reason))
-            if evt.result.cancellation_details.reason == speechsdk.CancellationReason.Error:
-                print("Error details: {}".format(evt.result.cancellation_details.error_details))
-
     done = False
-
-    def stop_cb(evt):
-        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        print('CLOSING on {}'.format(evt))
-        nonlocal done
-        done = True
 
     # connect callback functions to the events fired by the recognizer
     recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))

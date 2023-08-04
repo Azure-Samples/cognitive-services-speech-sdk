@@ -39,6 +39,12 @@ conversationfilename = "YourConversationWavFile"
 # Differentiation of speakers do not require voice signatures. In case more enhanced speaker identification is required,
 # please use https://signature.centralus.cts.speech.microsoft.com/UI/index.html REST API to create your own voice signatures
 def conversation_transcription_differentiate_speakers():
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous transcription upon receiving an event `evt`"""
+        print('CLOSING {}'.format(evt))
+        nonlocal done
+        done = True
+
     """differentiates speakers using conversation transcription service"""
     # Creates speech configuration with subscription information
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
@@ -60,12 +66,6 @@ def conversation_transcription_differentiate_speakers():
     transcriber = speechsdk.transcription.ConversationTranscriber(audio_config)
 
     done = False
-
-    def stop_cb(evt: speechsdk.SessionEventArgs):
-        """callback that signals to stop continuous transcription upon receiving an event `evt`"""
-        print('CLOSING {}'.format(evt))
-        nonlocal done
-        done = True
 
     # Subscribe to the events fired by the conversation transcriber
     transcriber.transcribed.connect(lambda evt: print('TRANSCRIBED: {}'.format(evt)))

@@ -124,19 +124,6 @@ def recognize_intent_once_from_file():
 
 
 def recognize_intent_once_async_from_mic():
-    """performs one-shot asynchronous intent recognition from input from the default microphone"""
-    # Set up the config for the intent recognizer
-    intent_config = speechsdk.SpeechConfig(subscription=intent_key, region=intent_service_region)
-    audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
-
-    # Set up the intent recognizer
-    intent_recognizer = speechsdk.intent.IntentRecognizer(speech_config=intent_config, audio_config=audio_config)
-
-    # Add callbacks to the recognition events
-
-    # Set up a flag to mark when asynchronous recognition is done
-    done = False
-
     def recognized_callback(evt: speechsdk.intent.IntentRecognitionEventArgs):
         """
         Callback that is called on successful recognition of a full utterance by both speech
@@ -160,6 +147,19 @@ def recognize_intent_once_async_from_mic():
         """Callback that is called on intermediate results from speech transcription"""
         result = evt.result
         print("Intermediate transcription: \"{}\"".format(result.text))
+
+    """performs one-shot asynchronous intent recognition from input from the default microphone"""
+    # Set up the config for the intent recognizer
+    intent_config = speechsdk.SpeechConfig(subscription=intent_key, region=intent_service_region)
+    audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
+
+    # Set up the intent recognizer
+    intent_recognizer = speechsdk.intent.IntentRecognizer(speech_config=intent_config, audio_config=audio_config)
+
+    # Add callbacks to the recognition events
+
+    # Set up a flag to mark when asynchronous recognition is done
+    done = False
 
     # Connect the callbacks
     intent_recognizer.recognized.connect(recognized_callback)
@@ -192,6 +192,12 @@ def recognize_intent_once_async_from_mic():
 
 
 def recognize_intent_continuous():
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
     """performs continuous intent recognition from input from an audio file"""
     # <IntentContinuousRecognitionWithFile>
     intent_config = speechsdk.SpeechConfig(subscription=intent_key, region=intent_service_region)
@@ -214,12 +220,6 @@ def recognize_intent_continuous():
 
     # Connect callback functions to the signals the intent recognizer fires.
     done = False
-
-    def stop_cb(evt: speechsdk.SessionEventArgs):
-        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        print('CLOSING on {}'.format(evt))
-        nonlocal done
-        done = True
 
     intent_recognizer.session_started.connect(lambda evt: print("SESSION_START: {}".format(evt)))
     intent_recognizer.speech_end_detected.connect(lambda evt: print("SPEECH_END_DETECTED: {}".format(evt)))
