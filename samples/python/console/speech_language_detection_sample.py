@@ -116,28 +116,6 @@ def speech_language_detection_once_from_file():
 
 
 def speech_language_detection_once_from_continuous():
-    """performs continuous speech language detection with input from an audio file"""
-    # <SpeechContinuousLanguageDetectionWithFile>
-    # Creates an AutoDetectSourceLanguageConfig, which defines a number of possible spoken languages
-    auto_detect_source_language_config = \
-        speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["zh-CN", "en-US"])
-
-    # Creates a SpeechConfig from your speech key and region
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-
-    # Set continuous language detection (override the default of "AtStart")
-    speech_config.set_property(
-        property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value='Continuous')
-
-    audio_config = speechsdk.audio.AudioConfig(filename=multilingual_wav_file)
-
-    source_language_recognizer = speechsdk.SourceLanguageRecognizer(
-        speech_config=speech_config,
-        auto_detect_source_language_config=auto_detect_source_language_config,
-        audio_config=audio_config)
-
-    done = False
-
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
@@ -170,6 +148,28 @@ def speech_language_detection_once_from_continuous():
                       f"Duration = {duration} (in units of hundreds of nanoseconds (HNS))")
                 global language_detected
                 language_detected = True
+
+    """performs continuous speech language detection with input from an audio file"""
+    # <SpeechContinuousLanguageDetectionWithFile>
+    # Creates an AutoDetectSourceLanguageConfig, which defines a number of possible spoken languages
+    auto_detect_source_language_config = \
+        speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["zh-CN", "en-US"])
+
+    # Creates a SpeechConfig from your speech key and region
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+    # Set continuous language detection (override the default of "AtStart")
+    speech_config.set_property(
+        property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value='Continuous')
+
+    audio_config = speechsdk.audio.AudioConfig(filename=multilingual_wav_file)
+
+    source_language_recognizer = speechsdk.SourceLanguageRecognizer(
+        speech_config=speech_config,
+        auto_detect_source_language_config=auto_detect_source_language_config,
+        audio_config=audio_config)
+
+    done = False
 
     # Connect callbacks to the events fired by the speech recognizer
     source_language_recognizer.recognized.connect(audio_recognized)
