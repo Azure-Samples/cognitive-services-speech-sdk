@@ -101,9 +101,9 @@ jobs:
   # gradle 7.0+ needs Java 11
   - task: JavaToolInstaller@0
     inputs:
-      versionSpec: '11'
+      versionSpec: '17'
       jdkArchitectureOption: 'x64'
       jdkSourceOption: 'PreInstalled'
-    displayName: Use Java 11
+    displayName: Use Java 17
   - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'
