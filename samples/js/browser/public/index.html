@@ -574,7 +574,7 @@
             // Defines the language(s) that speech should be translated to.
             // Multiple languages can be specified for text translation and will be returned in a map.
             if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
-                speechConfig.addTargetLanguage(languageTargetOptions.value.split("(")[1].substring(0, 5));
+                speechConfig.addTargetLanguage(languageTargetOptions.value.substring(0, 5));
             }
 
             speechConfig.speechRecognitionLanguage = languageOptions.value;

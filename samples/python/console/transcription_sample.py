@@ -35,17 +35,13 @@ speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 conversationfilename = "YourConversationWavFile"
 
 
-# This sample demonstrates how to differentiate speakers using conversation transcription service.
-# Differentiation of speakers do not require voice signatures. In case more enhanced speaker identification is required,
-# please use https://signature.centralus.cts.speech.microsoft.com/UI/index.html REST API to create your own voice signatures
-def conversation_transcription_differentiate_speakers():
-    """differentiates speakers using conversation transcription service"""
+# This sample demonstrates how to use conversation transcription.
+def conversation_transcription():
+    """transcribes a conversation"""
     # Creates speech configuration with subscription information
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-    speech_config.set_property_by_name("ConversationTranscriptionInRoomAndOnline", "true")
-    speech_config.set_property_by_name("DifferentiateGuestSpeakers", "true")
 
-    channels = 8
+    channels = 1
     bits_per_sample = 16
     samples_per_second = 16000
 
@@ -54,10 +50,7 @@ def conversation_transcription_differentiate_speakers():
     stream = speechsdk.audio.PushAudioInputStream(stream_format=wave_format)
     audio_config = speechsdk.audio.AudioConfig(stream=stream)
 
-    # Conversation identifier is required when creating conversation.
-    conversation_id = str(uuid.uuid4())
-    conversation = speechsdk.transcription.Conversation(speech_config, conversation_id)
-    transcriber = speechsdk.transcription.ConversationTranscriber(audio_config)
+    transcriber = speechsdk.transcription.ConversationTranscriber(speech_config, audio_config)
 
     done = False
 
@@ -76,15 +69,6 @@ def conversation_transcription_differentiate_speakers():
     transcriber.session_stopped.connect(stop_cb)
     transcriber.canceled.connect(stop_cb)
 
-    # Add participants to the conversation.
-    # Note user voice signatures are not required for speaker differentiation.
-    # Use voice signatures when adding participants when more enhanced speaker identification is required.
-    katie = speechsdk.transcription.Participant("katie@example.com", "en-us")
-    stevie = speechsdk.transcription.Participant("stevie@example.com", "en-us")
-
-    conversation.add_participant_async(katie)
-    conversation.add_participant_async(stevie)
-    transcriber.join_conversation_async(conversation).get()
     transcriber.start_transcribing_async()
 
     # Read the whole wave files at once and stream it to sdk
@@ -95,3 +79,40 @@ def conversation_transcription_differentiate_speakers():
         time.sleep(.5)
 
     transcriber.stop_transcribing_async()
+
+
+# This sample demonstrates how to use conversation transcription.
+def conversation_transcription_from_microphone():
+    """transcribes a conversation"""
+    # Creates speech configuration with subscription information
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    transcriber = speechsdk.transcription.ConversationTranscriber(speech_config)
+
+    done = False
+
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous transcription upon receiving an event `evt`"""
+        print('CLOSING {}'.format(evt))
+        nonlocal done
+        done = True
+
+    # Subscribe to the events fired by the conversation transcriber
+    transcriber.transcribed.connect(lambda evt: print('TRANSCRIBED: {}'.format(evt)))
+    transcriber.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    transcriber.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+    transcriber.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+    # stop continuous transcription on either session stopped or canceled events
+    transcriber.session_stopped.connect(stop_cb)
+    transcriber.canceled.connect(stop_cb)
+
+    transcriber.start_transcribing_async()
+
+    while not done:
+        # No real sample parallel work to do on this thread, so just wait for user to type stop.
+        # Can't exit function or transcriber will go out of scope and be destroyed while running.
+        print('type "stop" then enter when done')
+        stop = input()
+        if (stop.lower() == "stop"):
+            print('Stopping async recognition.')
+            transcriber.stop_transcribing_async()
+            break
