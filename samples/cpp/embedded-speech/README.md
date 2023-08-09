@@ -59,9 +59,6 @@ Sample settings:
 1. `SpeechSynthesisLocale` (`SPEECH_SYNTHESIS_LOCALE`)
    * Speech synthesis locale in BCP-47 format, case-sensitive. If not set, en-US will be assumed.
    * Setting `EmbeddedSpeechSynthesisVoiceName` overrides this for embedded speech.
-1. `SpeechTranslationLocale` (`SPEECH_TRANSLATION_LOCALE`)
-   * Speech translation locale (target language) in BCP-47 format, case-sensitive. If not set, en-US will be assumed.
-   * Setting `EmbeddedSpeechTranslationModelName` overrides this for embedded speech.
 1. `EmbeddedSpeechRecognitionModelPath` (`EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH`)
    * Path to the local embedded speech recognition model(s) on the device file system.
      This may be a single model folder or a top-level folder for several models.
@@ -97,8 +94,8 @@ Sample settings:
      not inside an archive, and they must be readable by the application process.
      The model internal subfolder structure must be intact i.e. as originally delivered.
 1. `EmbeddedSpeechTranslationModelName` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME`)
-   * Name of the embedded speech translation model to be used for translation. If set, this overrides `SpeechTranslationLocale` for embedded.
-   * The model name can be short (e.g. `en-US`) or full (e.g. `Microsoft Speech Translator Multi-to-en-US Model V1`).
+   * Name of the embedded speech translation model to be used for translation.
+   * The full model name must be given (e.g. `Microsoft Speech Translator Multi-to-en-US Model V1`).
 1. `EmbeddedSpeechTranslationModelKey` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY`)
    * Decryption key of the (encrypted) embedded speech translation model.
 1. `CloudSpeechSubscriptionKey` (`CLOUD_SPEECH_SUBSCRIPTION_KEY`)

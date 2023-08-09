@@ -21,15 +21,20 @@ void ListEmbeddedSpeechTranslationModels()
 {
     // Creates an instance of an embedded speech config.
     auto speechConfig = CreateEmbeddedSpeechConfig();
+    if (!speechConfig)
+    {
+        return;
+    }
 
     // Gets a list of models.
     auto models = speechConfig->GetSpeechTranslationModels();
 
     if (!models.empty())
     {
-        cout << "Models found:" << endl;
+        cout << "Models found [" << models.size() << "]:" << endl;
         for (const auto& model : models)
         {
+            cout << endl;
             cout << model->Name << endl;
             cout << " Source language(s) [" << model->SourceLanguages.size() << "]: ";
             for (const auto& sourceLang : model->SourceLanguages)
@@ -37,17 +42,10 @@ void ListEmbeddedSpeechTranslationModels()
                 cout << sourceLang << " ";
             }
             cout << endl;
-            cout << " Target language(s): ";
+            cout << " Target language(s) [" << model->TargetLanguages.size() << "]: ";
             for (const auto& targetLang : model->TargetLanguages)
             {
                 cout << targetLang << " ";
-                auto pos = targetLang.find("-");
-                if (pos != std::string::npos)
-                {
-                    // The language code before the locale dash separator.
-                    // Translation results include a language code in this format.
-                    cout << "[" << targetLang.substr(0, pos) << "] ";
-                }
             }
             cout << endl;
             cout << " Path: " << model->Path << endl;

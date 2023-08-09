@@ -29,6 +29,10 @@ void ListEmbeddedSpeechRecognitionModels()
 {
     // Creates an instance of an embedded speech config.
     auto speechConfig = CreateEmbeddedSpeechConfig();
+    if (!speechConfig)
+    {
+        return;
+    }
 
     // Gets a list of models.
     auto models = speechConfig->GetSpeechRecognitionModels();

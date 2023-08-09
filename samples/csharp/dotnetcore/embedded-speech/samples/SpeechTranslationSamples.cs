@@ -21,15 +21,20 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of an embedded speech config.
             var speechConfig = Settings.CreateEmbeddedSpeechConfig();
+            if (speechConfig == null)
+            {
+                return;
+            }
 
             // Gets a list of models.
             var models = speechConfig.GetSpeechTranslationModels();
 
             if (models.Count > 0)
             {
-                Console.WriteLine("Models found:");
+                Console.WriteLine($"Models found [{models.Count}]:");
                 foreach (var model in models)
                 {
+                    Console.WriteLine();
                     Console.WriteLine(model.Name);
                     Console.Write($" Source language(s) [{model.SourceLanguages.Length}]: ");
                     foreach (var sourceLang in model.SourceLanguages)
@@ -37,17 +42,10 @@ namespace MicrosoftSpeechSDKSamples
                         Console.Write($"{sourceLang} ");
                     }
                     Console.WriteLine();
-                    Console.Write(" Target language(s): ");
+                    Console.Write($" Target language(s) [{model.TargetLanguages.Length}]: ");
                     foreach (var targetLang in model.TargetLanguages)
                     {
                         Console.Write($"{targetLang} ");
-                        var pos = targetLang.IndexOf('-');
-                        if (pos != -1)
-                        {
-                            // The language code before the locale dash separator.
-                            // Translation results include a language code in this format.
-                            Console.Write($"[{targetLang.Substring(0, pos)}] ");
-                        }
                     }
                     Console.WriteLine();
                     Console.WriteLine($" Path: {model.Path}");
