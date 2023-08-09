@@ -32,15 +32,20 @@ public class SpeechTranslationSamples
     {
         // Creates an instance of an embedded speech config.
         EmbeddedSpeechConfig speechConfig = Settings.createEmbeddedSpeechConfig();
+        if (speechConfig == null)
+        {
+            return;
+        }
 
         // Gets a list of models.
         List<SpeechTranslationModel> models = speechConfig.getSpeechTranslationModels();
 
         if (!models.isEmpty())
         {
-            System.out.println("Models found:");
+            System.out.println("Models found [" + models.size() + "]:");
             for (SpeechTranslationModel model : models)
             {
+                System.out.println();
                 System.out.println(model.getName());
                 System.out.print(" Source language(s) [" + model.getSourceLanguages().size() + "]: ");
                 for (String sourceLang : model.getSourceLanguages())
@@ -48,17 +53,10 @@ public class SpeechTranslationSamples
                     System.out.print(sourceLang + " ");
                 }
                 System.out.println();
-                System.out.print(" Target language(s): ");
+                System.out.print(" Target language(s) [" + model.getTargetLanguages().size() + "]: ");
                 for (String targetLang : model.getTargetLanguages())
                 {
                     System.out.print(targetLang + " ");
-                    int pos = targetLang.indexOf("-");
-                    if (pos != -1)
-                    {
-                        // The language code before the locale dash separator.
-                        // Translation results include a language code in this format.
-                        System.out.print("[" + targetLang.substring(0, pos) + "] ");
-                    }
                 }
                 System.out.println();
                 System.out.println(" Path: " + model.getPath());

@@ -29,10 +29,6 @@ const string SpeechRecognitionLocale = "en-US"; // or set SPEECH_RECOGNITION_LOC
 // If EmbeddedSpeechSynthesisVoiceName is changed from the default, it will override this for embedded.
 const string SpeechSynthesisLocale = "en-US"; // or set SPEECH_SYNTHESIS_LOCALE
 
-// Locale (target language) of speech translation. In BCP-47 format, case-sensitive.
-// If EmbeddedSpeechTranslationModelName is changed from the default, it will override this.
-const string SpeechTranslationLocale = "en-US"; // or set SPEECH_TRANSLATION_LOCALE
-
 // Path to the local embedded speech recognition model(s) on the device file system.
 // This may be a single model folder or a top-level folder for several models.
 // Use an absolute path or a path relative to the application working folder.
@@ -76,8 +72,7 @@ const string EmbeddedSpeechSynthesisVoiceKey = "YourEmbeddedSpeechSynthesisVoice
 const string EmbeddedSpeechTranslationModelPath = "YourEmbeddedSpeechTranslationModelPath"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH
 
 // Name of the embedded speech translation model to be used for translation.
-// If changed from the default, this will override SpeechTranslationLocale.
-// For example: "en-US" or "Microsoft Speech Translator Multi-to-en-US Model V1"
+// For example: "Microsoft Speech Translator Multi-to-en-US Model V1"
 const string EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME
 
 // Decryption key of the (encrypted) embedded speech translation model.
@@ -176,6 +171,12 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
         paths.push_back(translationModelPath);
     }
 
+    if (paths.size() == 0)
+    {
+        cerr << "## ERROR: No model path(s) specified.\n";
+        return nullptr;
+    }
+
     // Note, if there is only one path then you can also use EmbeddedSpeechConfig::FromPath(string).
     // All paths must be valid directory paths on the file system, otherwise e.g. initialization of
     // embedded speech synthesis will fail.
@@ -261,28 +262,19 @@ bool VerifySettings()
     auto recognitionModelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
     if (recognitionModelPath.empty() || recognitionModelPath.compare("YourEmbeddedSpeechRecognitionModelPath") == 0)
     {
-        cout << "## WARNING: Embedded speech recognition model search path is not set.\n";
         recognitionModelPath.clear();
     }
 
     auto synthesisVoicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
     if (synthesisVoicePath.empty() || synthesisVoicePath.compare("YourEmbeddedSpeechSynthesisVoicePath") == 0)
     {
-        cout << "## WARNING: Embedded speech synthesis voice search path is not set.\n";
         synthesisVoicePath.clear();
     }
 
     auto translationModelPath = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH", EmbeddedSpeechTranslationModelPath);
     if (translationModelPath.empty() || translationModelPath.compare("YourEmbeddedSpeechTranslationModelPath") == 0)
     {
-        cout << "## WARNING: Embedded speech translation model search path is not set.\n";
         translationModelPath.clear();
-    }
-
-    if (recognitionModelPath.empty() && synthesisVoicePath.empty() && translationModelPath.empty())
-    {
-        cerr << "## ERROR: Cannot run without embedded speech models.\n";
-        return false;
     }
 
     // Find an embedded speech recognition model based on the name or locale.
@@ -402,16 +394,10 @@ bool VerifySettings()
         }
     }
 
-    // Find an embedded speech translation model based on the name or locale.
+    // Find an embedded speech translation model based on the name.
     if (!translationModelPath.empty())
     {
         auto modelName = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME", EmbeddedSpeechTranslationModelName);
-        auto modelLocale = GetSetting("SPEECH_TRANSLATION_LOCALE", SpeechTranslationLocale);
-
-        if (modelName.empty() || modelName.compare("YourEmbeddedSpeechTranslationModelName") == 0)
-        {
-            modelName.clear(); // no name given -> search by locale
-        }
 
         auto config = EmbeddedSpeechConfig::FromPath(translationModelPath);
         auto models = config->GetSpeechTranslationModels();
@@ -419,14 +405,7 @@ bool VerifySettings()
         auto result =
             find_if(models.begin(), models.end(), [&](shared_ptr<SpeechTranslationModel> model)
                 {
-                    if (modelName.empty())
-                    {
-                        return model->TargetLanguages[0].compare(modelLocale) == 0;
-                    }
-                    else
-                    {
-                        return model->Name.compare(modelName) == 0 || model->TargetLanguages[0].compare(modelName) == 0;
-                    }
+                    return model->Name.compare(modelName) == 0;
                 });
 
         if (result != models.end())
@@ -437,14 +416,7 @@ bool VerifySettings()
         if (SpeechTranslationModelName.empty())
         {
             cout << "## WARNING: Cannot locate an embedded speech translation model by ";
-            if (modelName.empty())
-            {
-                cout << "locale \"" << modelLocale << "\". ";
-            }
-            else
-            {
-                cout << "name \"" << modelName << "\". ";
-            }
+            cout << "name \"" << modelName << "\". ";
             cout << "Current translation model search path: " << translationModelPath << endl;
         }
         else
@@ -456,14 +428,6 @@ bool VerifySettings()
                 cout << "## WARNING: The key for \"" << SpeechTranslationModelName << "\" is not set.\n";
             }
         }
-    }
-
-    if (SpeechRecognitionModelName.empty() &&
-        SpeechSynthesisVoiceName.empty() &&
-        SpeechTranslationModelName.empty())
-    {
-        cerr << "## ERROR: Cannot run without embedded speech models.\n";
-        return false;
     }
 
     auto maskValue = [](const string& value)

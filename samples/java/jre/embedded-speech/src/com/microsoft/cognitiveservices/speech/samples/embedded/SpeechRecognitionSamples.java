@@ -30,6 +30,10 @@ public class SpeechRecognitionSamples
     {
         // Creates an instance of an embedded speech config.
         EmbeddedSpeechConfig speechConfig = Settings.createEmbeddedSpeechConfig();
+        if (speechConfig == null)
+        {
+            return;
+        }
 
         // Gets a list of models.
         List<SpeechRecognitionModel> models = speechConfig.getSpeechRecognitionModels();

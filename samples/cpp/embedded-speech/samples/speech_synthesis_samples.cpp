@@ -19,6 +19,10 @@ void ListEmbeddedSpeechSynthesisVoices()
 {
     // Creates an instance of an embedded speech config.
     auto speechConfig = CreateEmbeddedSpeechConfig();
+    if (!speechConfig)
+    {
+        return;
+    }
 
     // Creates a speech synthesizer.
     auto synthesizer = SpeechSynthesizer::FromConfig(speechConfig, nullptr);
