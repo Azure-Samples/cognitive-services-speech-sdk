@@ -7,7 +7,7 @@
 using Azure;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
-using Microsoft.CognitiveServices.Speech.RemoteConversation;
+using Microsoft.CognitiveServices.Speech.RemoteMeeting;
 using Microsoft.CognitiveServices.Speech.Transcription;
 using System;
 using System.Collections.Generic;
@@ -18,14 +18,14 @@ using System.Threading.Tasks;
 
 namespace MicrosoftSpeechSDKSamples
 {
-    public class RemoteConversationSamples
+    public class RemoteMeetingSamples
     {
         // This sample shows how to use real-time plus asynchronous
-        // Conversation Transcriptions. This sample does not use voice
+        // Meeting Transcriptions. This sample does not use voice
         // signatures. Talkers are differentiated as Guest 0 and Guest 1.
         // For more information, including how to use voice signatures, see
-        // https://learn.microsoft.com/azure/cognitive-services/speech-service/how-to-async-conversation-transcription?pivots=programming-language-csharp
-        public static async Task RemoteConversationWithFileAsync()
+        // https://learn.microsoft.com/azure/cognitive-services/speech-service/how-to-async-meeting-transcription?pivots=programming-language-csharp
+        public static async Task RemoteMeetingWithFileAsync()
         {
             string key = "YourSubscriptionKey";
             string region = "YourServiceRegion";
@@ -40,12 +40,12 @@ namespace MicrosoftSpeechSDKSamples
         private static void TestRemoteTranscription(string key, string region, string meetingId)
         {
             SpeechConfig config = SpeechConfig.FromSubscription(key, region);
-            RemoteConversationTranscriptionClient client = new RemoteConversationTranscriptionClient(config);
-            RemoteConversationTranscriptionOperation operation = new RemoteConversationTranscriptionOperation(meetingId, client);
+            RemoteMeetingTranscriptionClient client = new RemoteMeetingTranscriptionClient(config);
+            RemoteMeetingTranscriptionOperation operation = new RemoteMeetingTranscriptionOperation(meetingId, client);
             WaitForCompletion(operation).Wait();
         }
 
-        private static async Task WaitForCompletion(RemoteConversationTranscriptionOperation operation)
+        private static async Task WaitForCompletion(RemoteMeetingTranscriptionOperation operation)
         {
             while (!operation.HasCompleted)
             {
@@ -57,7 +57,7 @@ namespace MicrosoftSpeechSDKSamples
             await operation.WaitForCompletionAsync(TimeSpan.FromSeconds(10), CancellationToken.None);
 
             Console.WriteLine($"Id = {operation.Value.Id}");
-            var val = operation.Value.ConversationTranscriptionResults;
+            var val = operation.Value.MeetingTranscriptionResults;
             foreach (var item in val)
             {
                 Console.WriteLine($"{item.Text}, {item.ResultId}, {item.Reason}, {item.UserId}, {item.OffsetInTicks}, {item.Duration}");
@@ -121,7 +121,7 @@ namespace MicrosoftSpeechSDKSamples
             return new BinaryAudioStreamReader(reader);
         }
 
-        private static ConversationTranscriber TrackSessionId(ConversationTranscriber recognizer)
+        private static MeetingTranscriber TrackSessionId(MeetingTranscriber recognizer)
         {
             recognizer.SessionStarted += (s, e) =>
             {
@@ -145,24 +145,24 @@ namespace MicrosoftSpeechSDKSamples
             var audioInput = AudioConfig.FromStreamInput(AudioInputStream.CreatePullStream(waveFilePullStream, audioStreamFormat));
 
             var meetingId = Guid.NewGuid().ToString();
-            using (var conversation = await Conversation.CreateConversationAsync(config, meetingId))
+            using (var meeting = await Meeting.CreateMeetingAsync(config, meetingId))
             {
-                using (var conversationTranscriber = TrackSessionId(new ConversationTranscriber(audioInput)))
+                using (var meetingTranscriber = TrackSessionId(new MeetingTranscriber(audioInput)))
                 {
-                    await conversationTranscriber.JoinConversationAsync(conversation);
+                    await meetingTranscriber.JoinMeetingAsync(meeting);
 
-                    await conversation.AddParticipantAsync("OneUserByUserId");
+                    await meeting.AddParticipantAsync("OneUserByUserId");
 
                     var user = User.FromUserId("CreateUserFromId and then add it");
-                    await conversation.AddParticipantAsync(user);
+                    await meeting.AddParticipantAsync(user);
 
-                    var result = await GetRecognizerResult(conversationTranscriber, meetingId);
+                    var result = await GetRecognizerResult(meetingTranscriber, meetingId);
                 }
             }
             return meetingId;
         }
 
-        private static async Task<List<string>> GetRecognizerResult(ConversationTranscriber recognizer, string conversationId)
+        private static async Task<List<string>> GetRecognizerResult(MeetingTranscriber recognizer, string meetingId)
         {
             List<string> recognizedText = new List<string>();
             recognizer.Transcribed += (s, e) =>
@@ -174,13 +174,13 @@ namespace MicrosoftSpeechSDKSamples
                 }
             };
 
-            await CompleteContinuousRecognition(recognizer, conversationId);
+            await CompleteContinuousRecognition(recognizer, meetingId);
 
             recognizer.Dispose();
             return recognizedText;
         }
 
-        private static async Task CompleteContinuousRecognition(ConversationTranscriber recognizer, string conversationId)
+        private static async Task CompleteContinuousRecognition(MeetingTranscriber recognizer, string meetingId)
         {
             TaskCompletionSource<int> taskCompletionSource = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 

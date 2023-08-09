@@ -50,10 +50,16 @@ extern void SpeechSynthesisGetAvailableVoices();
 extern void SpeechSynthesisVisemeEvent();
 extern void SpeechSynthesisBookmarkEvent();
 
-extern void ConversationTranscriptionWithMicrophoneUsingAudioProcessingOptions();
-extern void ConversationTranscriptionWithPullAudioStreamUsingMultichannelAudio();
-extern void ConversationTranscriptionWithPushAudioStreamUsingMultichannelAudio();
-extern void ConversationTranscriptionWithMultichannelAudioFile();
+extern void ConversationTranscriptionWithMicrophone();
+extern void ConversationTranscriptionWithFile();
+extern void ConversationTranscriptionWithPullAudioStream();
+extern void ConversationTranscriptionWithPushAudioStream();
+extern void ConversationTranscriptionAndLanguageIdWithMicrophone();
+
+extern void MeetingTranscriptionWithMicrophoneUsingAudioProcessingOptions();
+extern void MeetingTranscriptionWithPullAudioStreamUsingMultichannelAudio();
+extern void MeetingTranscriptionWithPushAudioStreamUsingMultichannelAudio();
+extern void MeetingTranscriptionWithMultichannelAudioFile();
 
 extern void SpeakerVerificationWithMicrophone();
 extern void SpeakerVerificationWithPushStream();
@@ -373,10 +379,11 @@ void ConversationTranscriberSamples()
     do
     {
         cout << "\nConversationTranscriber SAMPLES:\n";
-        cout << "1.) ConversationTranscriber with microphone using audio processing options.\n";
-        cout << "2.) ConversationTranscriber with pull audio stream using multichannel audio.\n";
-        cout << "3.) ConversationTranscriber with push audio stream using multichannel audio.\n";
-        cout << "4.) ConversationTranscriber with audio file using multichannel audio.\n";
+        cout << "1.) ConversationTranscriber with microphone.\n";
+        cout << "2.) ConversationTranscriber with file.\n";
+        cout << "3.) ConversationTranscriber with pull audio stream.\n";
+        cout << "4.) ConversationTranscriber with push audio stream.\n";
+        cout << "5.) ConversationTranscriber with micrphone using language detection.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -386,23 +393,67 @@ void ConversationTranscriberSamples()
         switch (input[0])
         {
         case '1':
-            ConversationTranscriptionWithMicrophoneUsingAudioProcessingOptions();
+            ConversationTranscriptionWithMicrophone();
             break;
 
         case '2':
-            ConversationTranscriptionWithPullAudioStreamUsingMultichannelAudio();
+            ConversationTranscriptionWithFile();
             break;
 
         case '3':
-            ConversationTranscriptionWithPushAudioStreamUsingMultichannelAudio();
+            ConversationTranscriptionWithPullAudioStream();
             break;
 
         case '4':
-            ConversationTranscriptionWithMultichannelAudioFile();
+            ConversationTranscriptionWithPushAudioStream();
             break;
 
         case '5':
+            ConversationTranscriptionAndLanguageIdWithMicrophone();
             break;
+
+        case '0':
+            break;            
+        }
+    } while (input[0] != '0');
+}
+
+void MeetingTranscriberSamples()
+{
+    string input;
+    do
+    {
+        cout << "\nMeetingTranscriber SAMPLES:\n";
+        cout << "1.) MeetingTranscriber with microphone using audio processing options.\n";
+        cout << "2.) MeetingTranscriber with pull audio stream using multichannel audio.\n";
+        cout << "3.) MeetingTranscriber with push audio stream using multichannel audio.\n";
+        cout << "4.) MeetingTranscriber with audio file using multichannel audio.\n";
+        cout << "\nChoice (0 for MAIN MENU): ";
+        cout.flush();
+
+        input.clear();
+        getline(cin, input);
+
+        switch (input[0])
+        {
+        case '1':
+            MeetingTranscriptionWithMicrophoneUsingAudioProcessingOptions();
+            break;
+
+        case '2':
+            MeetingTranscriptionWithPullAudioStreamUsingMultichannelAudio();
+            break;
+
+        case '3':
+            MeetingTranscriptionWithPushAudioStreamUsingMultichannelAudio();
+            break;
+
+        case '4':
+            MeetingTranscriptionWithMultichannelAudioFile();
+            break;
+
+        case '0':
+            break;            
         }
     } while (input[0] != '0');
 }
@@ -537,46 +588,60 @@ int main(int argc, char **argv)
         cout << "3.) Translation samples.\n";
         cout << "4.) Speech synthesis samples.\n";
         cout << "5.) Conversation transcriber samples.\n";
-        cout << "6.) Speaker recognition samples.\n";
-        cout << "7.) Standalone language detection samples.\n";
-        cout << "8.) Speech recognition with language detection samples.\n";
-        cout << "9.) Diagnostics logging samples (trace logging).\n";
+        cout << "6.) Meeting transcriber samples.\n";
+        cout << "7.) Speaker recognition samples.\n";
+        cout << "8.) Standalone language detection samples.\n";
+        cout << "9.) Speech recognition with language detection samples.\n";
+        cout << "10.) Diagnostics logging samples (trace logging).\n";
         cout << "\nChoice (0 to Exit): ";
         cout.flush();
 
         input.clear();
         getline(cin, input);
 
-        switch (input[0])
+        int choice = -1;
+
+        try
         {
-        case '1':
+            choice = stoi(input);
+        }
+        catch (exception&)
+        {
+        }
+
+        switch (choice)
+        {
+        case 1:
             SpeechSamples();
             break;
-        case '2':
+        case 2:
             IntentSamples();
             break;
-        case '3':
+        case 3:
             TranslationSamples();
             break;
-        case '4':
+        case 4:
             SpeechSynthesisSamples();
             break;
-        case '5':
+        case 5:
             ConversationTranscriberSamples();
             break;
-        case '6':
+        case 6:
+            MeetingTranscriberSamples();
+            break;
+        case 7:
             SpeakerRecognitionSamples();
             break;
-        case '7':
+        case 8:
             StandaloneLanguageDetectionSamples();
             break;
-        case '8':
+        case 9:
             SpeechWithLanguageIdSamples();
             break;
-        case '9':
+        case 10:
             DiagnosticsLoggingSamples();
             break;
-        case '0':
+        case 0:
             break;
         }
     } while (input[0] != '0');
