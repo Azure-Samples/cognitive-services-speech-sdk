@@ -12,6 +12,7 @@ import speech_language_detection_sample
 import speech_sample
 import speech_synthesis_sample
 import transcription_sample
+import meeting_transcription_sample
 import translation_sample
 
 eofkey = 'Ctrl-Z' if "Windows" == platform.system() else 'Ctrl-D'
@@ -34,6 +35,7 @@ samples = OrderedDict([
         speech_sample.pronunciation_assessment_from_microphone,
         speech_sample.pronunciation_assessment_continuous_from_file,
         speech_sample.pronunciation_assessment_from_stream,
+        speech_sample.pronunciation_assessment_configured_with_json,
     ]), (intent_sample, [
         intent_sample.recognize_intent_once_from_mic,
         intent_sample.recognize_intent_once_async_from_mic,
@@ -46,7 +48,10 @@ samples = OrderedDict([
         translation_sample.translation_once_with_lid_from_file,
         translation_sample.translation_continuous_with_lid_from_multilingual_file,
     ]), (transcription_sample, [
-        transcription_sample.conversation_transcription_differentiate_speakers,
+        transcription_sample.conversation_transcription,
+        transcription_sample.conversation_transcription_from_microphone,
+    ]), (meeting_transcription_sample, [
+        meeting_transcription_sample.meeting_transcription_differentiate_speakers,
     ]), (speech_synthesis_sample, [
         speech_synthesis_sample.speech_synthesis_to_speaker,
         speech_synthesis_sample.speech_synthesis_with_language,

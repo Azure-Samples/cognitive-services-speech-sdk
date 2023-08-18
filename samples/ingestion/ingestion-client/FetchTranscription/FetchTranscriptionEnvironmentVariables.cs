@@ -59,7 +59,7 @@ namespace FetchTranscriptionFunction
 
         public static readonly string TextAnalyticsKey = Environment.GetEnvironmentVariable(nameof(TextAnalyticsKey), EnvironmentVariableTarget.Process);
 
-        public static readonly string TextAnalyticsEndpoint = Environment.GetEnvironmentVariable(nameof(TextAnalyticsEndpoint), EnvironmentVariableTarget.Process);
+        public static readonly string TextAnalyticsRegion = Environment.GetEnvironmentVariable(nameof(TextAnalyticsRegion), EnvironmentVariableTarget.Process);
 
         public static readonly string PiiCategories = Environment.GetEnvironmentVariable(nameof(PiiCategories), EnvironmentVariableTarget.Process);
 

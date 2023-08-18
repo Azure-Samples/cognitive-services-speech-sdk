@@ -15,7 +15,7 @@
     <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_with_token_sample.cs" Link="speech_synthesis_with_token_sample.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_server_scenario_sample.cs" Link="speech_synthesis_server_scenario_sample.cs" />
     <Compile Include="..\..\..\sharedcontent\console\translation_samples.cs" Link="translation_samples.cs" />
-    <Compile Include="..\..\..\sharedcontent\console\remote_conversation_samples.cs" Link="remote_conversation_samples.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\remote_meeting_samples.cs" Link="remote_meeting_samples.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_language_id_samples.cs">
       <Link>speech_recognition_with_language_id_samples.cs</Link>
     </Compile>
@@ -52,8 +52,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.28.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.28.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.31.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.31.0" />
   </ItemGroup>
 
 

@@ -18,7 +18,7 @@
           </tr>
           <tr>
               <td></td>
-              <td><h2 style="font-weight:400;"><b>(INPUT FILE MUST BE 8-CHANNEL WAV FILE)</b></h2></td>
+              <td><h2 style="font-weight:400;"><b>Different PCM formats (1ch, stereo, 4ch, 8ch) with different sampling rates (8KHz, 16KHz, 48KHz) are supported.</b></h2></td>
           </tr>
           <tr>
               <td align="right"><a href="https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started" target="_blank">Subscription</a>:</td>
@@ -36,11 +36,11 @@
           </tr>
           <tr>
               <td></td>
-              <td><button id="createTranscriberButton">Start transcribing conversation</button></td>
+              <td><button id="startTranscriberButton">Start transcribing conversation</button></td>
           </tr>
           <tr>
               <td></td>
-              <td><button id="leaveConversationButton">Leave conversation</button></td>
+              <td><button id="stopTrancriberButton">Stop transcribing conversation</button></td>
           </tr>
           <tr>
               <td align="right" valign="top">Input Text</td>
@@ -59,19 +59,19 @@
     // status fields and start button in UI
     var phraseDiv;
     var resultDiv;
-    var createTranscriberButton, leaveButton, filePicker;
+    var startTranscriberButton, stopTrancriberButton, filePicker;
 
     // subscription key and region for speech services.
     var subscriptionKey, serviceRegion;
     var SpeechSDK;
-    var transcriber, conversation;
+    var transcriber;
     var audioFile;
 
 
     document.addEventListener("DOMContentLoaded", 
       () => {
-        createTranscriberButton = document.getElementById("createTranscriberButton");
-        leaveButton = document.getElementById("leaveConversationButton");
+        startTranscriberButton = document.getElementById("startTranscriberButton");
+        stopTranscriberButton = document.getElementById("stopTrancriberButton");
         subscriptionKey = document.getElementById("subscriptionKey");
         serviceRegion = document.getElementById("serviceRegion");
         phraseDiv = document.getElementById("phraseDiv");
@@ -84,7 +84,7 @@
             audioFile = filePicker.files[0];
           });
 
-        createTranscriberButton.addEventListener("click", 
+        startTranscriberButton.addEventListener("click", 
           () => {
             phraseDiv.innerHTML = "";
             resultDiv.innerHTML = "";
@@ -92,106 +92,69 @@
 
             if (!subscriptionKey.value || subscriptionKey.value === "subscription") {
                 alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
-                createTranscriberButton.disabled = false;
+                startTranscriberButton.disabled = false;
                 return;
             }
             var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
 
             var audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
 
-            var randomId = Math.floor((1 + Math.random()) * 0x10000)
-                .toString(16)
-                .substring(1);
+            transcriber = new SpeechSDK.ConversationTranscriber(speechConfig, audioConfig);
+            transcriber.sessionStarted = function (s, e) {
+                window.console.log(e);
+            }
+            transcriber.sessionStopped = function (s, e) {
+                window.console.log(e);
+                startTranscriberButton.disabled = false;
+            }
+            transcriber.canceled = function (s, e) {
+                window.console.log(e);
+            }
+            transcriber.transcribing = function (s, e) {
+                // Uncomment line below to see intermediate results in console
+                // window.console.log(e);
+            };
 
-            conversation = SpeechSDK.Conversation.createConversationAsync(speechConfig, randomId);
-            window.console.log("conversation created, id: " + randomId);
-            transcriber = new SpeechSDK.ConversationTranscriber(audioConfig);
-            transcriber.joinConversationAsync(conversation, () => {
-                var voiceSignatureUser1 = `{ 
-                  Version: 0,
-                    Tag: "<<VOICE_TAG_HERE>>",
-                    Data: "<<VOICE_DATA_HERE>>"
-                 }`;
-                var voiceSignatureUser2 = `{ 
-                  Version: 0,
-                  Tag: "<<VOICE_TAG_HERE>>",
-                  Data: "<<VOICE_DATA_HERE>>"
-                 }`;
-                // creates a participant
-                var user1 = SpeechSDK.Participant.From("user1@example.com", "en-us", voiceSignatureUser1);
+            // The event recognized signals that a final recognition result is received.
+            // This is the final event that a phrase has been recognized.
+            // For transcription, you will get one recognized event for each phrase recognized.
+            transcriber.transcribed = function (s, e) {
+                window.console.log(e);
 
-                // creates another participant
-                var user2 = SpeechSDK.Participant.From("user2@example.com", "en-us", voiceSignatureUser2);
-
-                // Adds user1 as a participant to the conversation.
-                conversation.addParticipantAsync(user1);
-
-                // Adds user2 as a participant to the conversation.
-                conversation.addParticipantAsync(user2);
-
-                transcriber.sessionStarted = function (s, e) {
-                    window.console.log(e);
+                // Indicates that recognizable speech was not detected, and that recognition is done.
+                if (e.result.reason === SpeechSDK.ResultReason.NoMatch) {
+                    var noMatchDetail = SpeechSDK.NoMatchDetails.fromResult(e.result);
+                    resultDiv.innerHTML += "(transcribed)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " NoMatchReason: " + SpeechSDK.NoMatchReason[noMatchDetail.reason] + "\r\n";
+                } else {
+                    resultDiv.innerHTML += "(transcribed)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + "\r\n";
+                    resultDiv.innerHTML += "(transcribed)  SpeakerId: " + e.result.speakerId + "\r\n";
                 }
-                transcriber.sessionStopped = function (s, e) {
-                    window.console.log(e);
-                    createTranscriberButton.disabled = false;
-                }
-                transcriber.canceled = function (s, e) {
-                    window.console.log(e);
-                }
-                transcriber.transcribing = function (s, e) {
-                    // Uncomment line below to see intermediate results in console
-                    // window.console.log(e);
-                };
 
-                // The event recognized signals that a final recognition result is received.
-                // This is the final event that a phrase has been recognized.
-                // For transcription, you will get one recognized event for each phrase recognized.
-                transcriber.transcribed = function (s, e) {
-                    window.console.log(e);
+                lastRecognized += e.result.text + "\r\n";
+                phraseDiv.innerHTML = lastRecognized;
+            };
 
-                    // Indicates that recognizable speech was not detected, and that recognition is done.
-                    if (e.result.reason === SpeechSDK.ResultReason.NoMatch) {
-                        var noMatchDetail = SpeechSDK.NoMatchDetails.fromResult(e.result);
-                        resultDiv.innerHTML += "(transcribed)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " NoMatchReason: " + SpeechSDK.NoMatchReason[noMatchDetail.reason] + "\r\n";
-                    } else {
-                        resultDiv.innerHTML += "(transcribed)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + "\r\n";
-                        resultDiv.innerHTML += "(transcribed)  SpeakerId: " + e.result.speakerId + "\r\n";
-                    }
-
-                    lastRecognized += e.result.text + "\r\n";
-                    phraseDiv.innerHTML = lastRecognized;
-                };
-
-                transcriber.startTranscribingAsync(
-                    () => {
-                        window.console.log("startTranscribing complete");
-                    });
-                createTranscriberButton.disabled = true;
-                leaveButton.disabled = false;
-            });
+            transcriber.startTranscribingAsync(
+                () => {
+                    window.console.log("startTranscribing complete");
+                });
+            startTranscriberButton.disabled = true;
+            stopTranscriberButton.disabled = false;
         });
-        leaveButton.addEventListener("click", function () {
+        stopTranscriberButton.addEventListener("click", function () {
             transcriber.stopTranscribingAsync(
               () => {
-                transcriber.leaveConversationAsync(
-                  () => {
-                    conversation.endConversationAsync(
-                      () => {
-                        transcriber.close();
-                        conversation = undefined;
-                        transcriber = undefined;
-                        createTranscriberButton.disabled = false;
-                        leaveButton.disabled = true;
-                      });
-                  });
+                  transcriber.close();
+                  transcriber = undefined;
+                  startTranscriberButton.disabled = false;
+                  stopTranscriberButton.disabled = true;
               });
         });
 
         if (!!window.SpeechSDK) {
             SpeechSDK = window.SpeechSDK;
-            createTranscriberButton.disabled = false;
-            leaveButton.disabled = true;
+            startTranscriberButton.disabled = false;
+            stopTranscriberButton.disabled = true;
 
             document.getElementById('content').style.display = 'block';
             document.getElementById('warning').style.display = 'none';

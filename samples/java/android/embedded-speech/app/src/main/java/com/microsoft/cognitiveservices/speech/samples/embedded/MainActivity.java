@@ -30,9 +30,9 @@ public class MainActivity extends AppCompatActivity
 
     // Enter the names and keys of your embedded speech recognition model and synthesis voice.
     // If either recognition or synthesis is not needed, leave the corresponding default values unchanged.
-    private static final String EmbeddedSpeechRecognitionModelName = "YourRecognitionModelName"; // e.g. "en-US" or "Microsoft Speech Recognizer en-US FP Model V8.1"
+    private static final String EmbeddedSpeechRecognitionModelName = ""; // e.g. "en-US" or "Microsoft Speech Recognizer en-US FP Model V8.1"
     private static final String EmbeddedSpeechRecognitionModelKey  = ""; // model decryption key
-    private static final String EmbeddedSpeechSynthesisVoiceName   = "YourSynthesisVoiceName"; // e.g. "en-US-AriaNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
+    private static final String EmbeddedSpeechSynthesisVoiceName   = ""; // e.g. "en-US-AriaNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
     private static final String EmbeddedSpeechSynthesisVoiceKey    = ""; // voice decryption key
 
     // Embedded speech recognition models and synthesis voices must reside
@@ -98,33 +98,35 @@ public class MainActivity extends AppCompatActivity
             // Creates an instance of embedded speech config.
             EmbeddedSpeechConfig speechConfig = EmbeddedSpeechConfig.fromPath(EmbeddedSpeechModelsRootPath);
 
-            // Selects embedded speech models to use.
-            speechConfig.setSpeechRecognitionModel(EmbeddedSpeechRecognitionModelName, EmbeddedSpeechRecognitionModelKey);
-            speechConfig.setSpeechSynthesisVoice(EmbeddedSpeechSynthesisVoiceName, EmbeddedSpeechSynthesisVoiceKey);
-
-            if (EmbeddedSpeechSynthesisVoiceName.contains("Neural"))
-            {
-                // Embedded neural voices only support 24 kHz sample rate.
-                speechConfig.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm);
-            }
-
             StringBuilder sb = new StringBuilder("Initialized");
 
-            // Creates a speech recognizer instance using the device default
-            // microphone for audio input.
-            // With embedded speech, this can take a moment due to loading
-            // of the model. To avoid unnecessary delays when recognition is
-            // started, create the recognizer well in advance.
             if (!EmbeddedSpeechRecognitionModelName.isEmpty() && !EmbeddedSpeechRecognitionModelKey.isEmpty())
             {
+                // Selects the embedded speech recognition model to use.
+                speechConfig.setSpeechRecognitionModel(EmbeddedSpeechRecognitionModelName, EmbeddedSpeechRecognitionModelKey);
+
+                // Creates a speech recognizer instance using the device default
+                // microphone for audio input.
+                // With embedded speech, this can take a moment due to loading
+                // of the model. To avoid unnecessary delays when recognition is
+                // started, create the recognizer well in advance.
                 recognizer = new SpeechRecognizer(speechConfig);
                 sb.append(" recognizer");
             }
 
-            // Creates a speech synthesizer instance using the device default
-            // speaker for audio output.
             if (!EmbeddedSpeechSynthesisVoiceName.isEmpty() && !EmbeddedSpeechSynthesisVoiceKey.isEmpty())
             {
+                // Selects the embedded speech synthesis voice to use.
+                speechConfig.setSpeechSynthesisVoice(EmbeddedSpeechSynthesisVoiceName, EmbeddedSpeechSynthesisVoiceKey);
+
+                if (EmbeddedSpeechSynthesisVoiceName.contains("Neural"))
+                {
+                    // Embedded neural voices only support 24 kHz sample rate.
+                    speechConfig.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm);
+                }
+
+                // Creates a speech synthesizer instance using the device default
+                // speaker for audio output.
                 synthesizer = new SpeechSynthesizer(speechConfig);
                 if (recognizer != null)
                 {

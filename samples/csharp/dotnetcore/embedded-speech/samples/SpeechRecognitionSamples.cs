@@ -20,6 +20,10 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of an embedded speech config.
             var speechConfig = Settings.CreateEmbeddedSpeechConfig();
+            if (speechConfig == null)
+            {
+                return;
+            }
 
             // Gets a list of models.
             var models = speechConfig.GetSpeechRecognitionModels();

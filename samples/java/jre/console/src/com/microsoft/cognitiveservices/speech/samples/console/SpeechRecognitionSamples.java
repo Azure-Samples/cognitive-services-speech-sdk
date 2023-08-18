@@ -379,8 +379,8 @@ public class SpeechRecognitionSamples {
             recognizer.sessionStopped.addEventListener((s, e) -> {
                 System.out.println("\nSession stopped event.");
 
-                // Stops translation when session stop is detected.
-                System.out.println("\nStop translation.");
+                // Stops recognition when session stop is detected.
+                System.out.println("\nStop recognition.");
                 stopRecognitionSemaphore.release();
             });
 
@@ -414,7 +414,7 @@ public class SpeechRecognitionSamples {
         // Replace with your own audio file name.
         // The input stream the sample will read from.
         // The default format for a PushStream is 16Khz, 16 bit mono.
-        // You can use a different format by passing an AudioStreamFormat into createPushStream. 
+        // You can use a different format by passing an AudioStreamFormat into createPushStream.
         InputStream inputStream = new FileInputStream("YourAudioFile.wav");
 
         // Create the push stream to push audio to.
@@ -584,7 +584,7 @@ public class SpeechRecognitionSamples {
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
         // The audio file wreck-a-nice-beach.wav included with the C# sample contains ambigious audio.
-        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourPhraseListedAudioFile.wav");
         SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
         {
             // Create the recognizer.
@@ -1182,6 +1182,67 @@ public class SpeechRecognitionSamples {
         recognizer.close();
     }
 
+    // Pronunciation assessment configured with json
+    // See more information at https://aka.ms/csspeech/pa
+    public static void pronunciationAssessmentConfiguredWithJson() throws ExecutionException, InterruptedException {
+        // Creates an instance of a speech config with specified subscription key and service region.
+        // Replace with your own subscription key and service region (e.g., "westus").
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Replace the language with your language in BCP-47 format, e.g., en-US.
+        String lang = "en-US";
+
+        // Creates a speech recognizer using wav file.
+        AudioConfig audioInput = AudioConfig.fromWavFileOutput("YourAudioFile.wav");
+
+        String referenceText = "Hello world";
+        // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+        String jsonConfig = "{\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":true,\"ScenarioId\":\"[scenario ID will be assigned by product team]\"}";
+        PronunciationAssessmentConfig pronunciationConfig = PronunciationAssessmentConfig.fromJson(jsonConfig);
+        pronunciationConfig.setReferenceText(referenceText);
+
+        // Creates a speech recognizer for the specified language
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, lang, audioInput);
+        {
+            pronunciationConfig.applyTo(recognizer);
+
+            // Starts speech recognition, and returns after a single utterance is recognized.
+            // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+            SpeechRecognitionResult result = recognizer.recognizeOnceAsync().get();
+
+            // Checks result.
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
+                System.out.println("RECOGNIZED: Text=" + result.getText());
+                System.out.println("  PRONUNCIATION ASSESSMENT RESULTS:");
+
+                PronunciationAssessmentResult pronunciationResult = PronunciationAssessmentResult.fromResult(result);
+                System.out.println(
+                    String.format(
+                        "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
+                        pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
+                        pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
+            }
+            else if (result.getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
+            }
+            else if (result.getReason() == ResultReason.Canceled) {
+                CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                    System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+            }
+
+            result.close();
+            recognizer.close();
+        }
+
+        pronunciationConfig.close();
+        config.close();
+    }
+
     // Speech recognition from default microphone with Microsoft Audio Stack enabled.
     public static void continuousRecognitionFromDefaultMicrophoneWithMASEnabled() throws InterruptedException, ExecutionException, IOException
     {
@@ -1192,6 +1253,7 @@ public class SpeechRecognitionSamples {
 
         // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
         // All default enhancements from Microsoft Audio Stack are enabled.
+        // Only works when input is from a microphone array.
         // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
         // microphone is assumed.
         AudioProcessingOptions audioProcessingOptions = AudioProcessingOptions.create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT);

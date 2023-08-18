@@ -2,8 +2,8 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>quick-start</groupId>
-    <artifactId>quick-start</artifactId>
+    <groupId>com.microsoft.cognitiveservices.speech.quickstart</groupId>
+    <artifactId>virtual-assistant-quickstart</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <repositories>
         <repository>
@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.microsoft.cognitiveservices.speech</groupId>
             <artifactId>client-sdk</artifactId>
-            <version>1.28.0</version>
+            <version>1.31.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -55,13 +55,13 @@
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.70</version>
+            <artifactId>bcprov-jdk15to18</artifactId>
+            <version>1.74</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.0.1-jre</version>
+            <version>32.1.0-jre</version>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>

@@ -32,7 +32,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 2. Speech translation samples.");
                 Console.WriteLine(" 3. Intent recognition samples.");
                 Console.WriteLine(" 4. Speech synthesis samples.");
-                Console.WriteLine(" 5. Conversation transcriber samples.");
+                Console.WriteLine(" 5. Meeting transcriber samples.");
                 Console.WriteLine(" 6. Speech recognition with language detection enabled samples");
                 Console.WriteLine(" 7. Standalone language detection samples.");
                 Console.WriteLine(" 8. Speech recognition with Microsoft Audio Stack (MAS) samples.");
@@ -64,7 +64,7 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.D5:
                     case ConsoleKey.NumPad5:
-                        ConversationTranscriber();
+                        MeetingTranscriber();
                         break;
                     case ConsoleKey.D6:
                     case ConsoleKey.NumPad6:
@@ -455,18 +455,18 @@ namespace MicrosoftSpeechSDKSamples
             } while (x.Key != ConsoleKey.D0);
         }
 
-        private static void ConversationTranscriber()
+        private static void MeetingTranscriber()
         {
             ConsoleKeyInfo x;
 
             do
             {
                 Console.WriteLine("");
-                Console.WriteLine(" Speech SDK - Conversation Transcriber Samples");
+                Console.WriteLine(" Speech SDK - Meeting Transcriber Samples");
                 Console.WriteLine("");
                 Console.WriteLine(choose);
                 Console.WriteLine("");
-                Console.WriteLine(" 1. Remote Conversation for an async job.");
+                Console.WriteLine(" 1. Remote Meeting for an async job.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -478,7 +478,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     case ConsoleKey.D1:
                     case ConsoleKey.NumPad1:
-                        RemoteConversationSamples.RemoteConversationWithFileAsync().Wait();
+                        RemoteMeetingSamples.RemoteMeetingWithFileAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -794,6 +794,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine("");
                 Console.WriteLine(" 1. Pronunciation assessment with microphone input.");
                 Console.WriteLine(" 2. Pronunciation assessment with stream input.");
+                Console.WriteLine(" 3. Pronunciation assessment configured with json.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -810,6 +811,10 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D2:
                     case ConsoleKey.NumPad2:
                         SpeechRecognitionSamples.PronunciationAssessmentWithStream();
+                        break;
+                    case ConsoleKey.D3:
+                    case ConsoleKey.NumPad3:
+                        SpeechRecognitionSamples.PronunciationAssessmentConfiguredWithJson().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:

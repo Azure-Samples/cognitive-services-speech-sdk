@@ -94,8 +94,8 @@
       <Link>translation_samples.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\..\..\sharedcontent\console\remote_conversation_samples.cs">
-      <Link>remote_conversation_samples.cs</Link>
+    <Compile Include="..\..\..\sharedcontent\console\remote_meeting_samples.cs">
+      <Link>remote_meeting_samples.cs</Link>
     </Compile>
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_language_id_samples.cs">
       <Link>speech_recognition_with_language_id_samples.cs</Link>
@@ -137,8 +137,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.28.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.28.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.31.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.31.0" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

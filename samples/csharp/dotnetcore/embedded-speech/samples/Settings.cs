@@ -17,11 +17,11 @@ namespace MicrosoftSpeechSDKSamples
     {
         // START OF CONFIGURABLE SETTINGS
 
-        // Locale to be used in speech recognition (SR), cloud and embedded. In BCP-47 format, case-sensitive.
+        // Locale to be used in speech recognition, cloud and embedded. In BCP-47 format, case-sensitive.
         // If EmbeddedSpeechRecognitionModelName is changed from the default, it will override this for embedded.
         private static readonly string SpeechRecognitionLocale = "en-US"; // or set SPEECH_RECOGNITION_LOCALE
 
-        // Locale to be used in speech synthesis (text-to-speech, TTS), cloud and embedded. In BCP-47 format, case-sensitive.
+        // Locale to be used in speech synthesis (text-to-speech), cloud and embedded. In BCP-47 format, case-sensitive.
         // If EmbeddedSpeechSynthesisVoiceName is changed from the default, it will override this for embedded.
         private static readonly string SpeechSynthesisLocale = "en-US"; // or set SPEECH_SYNTHESIS_LOCALE
 
@@ -59,6 +59,22 @@ namespace MicrosoftSpeechSDKSamples
         // WARNING: The key may be visible in the program binary if hard-coded as a plain string.
         private static readonly string EmbeddedSpeechSynthesisVoiceKey = "YourEmbeddedSpeechSynthesisVoiceKey"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_KEY
 
+        // Path to the local embedded speech translation model(s) on the device file system.
+        // This may be a single model folder or a top-level folder for several models.
+        // Use an absolute path or a path relative to the application working folder.
+        // The path is recursively searched for model files.
+        // Files belonging to a specific model must be available as normal individual files in a model folder,
+        // not inside an archive, and they must be readable by the application process.
+        private static readonly string EmbeddedSpeechTranslationModelPath = "YourEmbeddedSpeechTranslationModelPath"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH
+
+        // Name of the embedded speech translation model to be used for translation.
+        // For example: "Microsoft Speech Translator Multi-to-en-US Model V1"
+        private static readonly string EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME
+
+        // Decryption key of the (encrypted) embedded speech translation model.
+        // WARNING: The key may be visible in the program binary if hard-coded as a plain string.
+        private static readonly string EmbeddedSpeechTranslationModelKey = "YourEmbeddedSpeechTranslationModelKey"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY
+
         // Cloud speech service subscription information.
         // This is needed with hybrid (cloud & embedded) speech configuration.
         private static readonly string CloudSpeechSubscriptionKey = "YourCloudSpeechSubscriptionKey"; // or set CLOUD_SPEECH_SUBSCRIPTION_KEY
@@ -94,6 +110,39 @@ namespace MicrosoftSpeechSDKSamples
         private static string SpeechRecognitionModelKey;
         private static string SpeechSynthesisVoiceName;
         private static string SpeechSynthesisVoiceKey;
+        private static string SpeechTranslationModelName;
+        private static string SpeechTranslationModelKey;
+
+        // Utility functions for main menu.
+        public static bool HasSpeechRecognitionModel()
+        {
+            if (string.IsNullOrEmpty(SpeechRecognitionModelName))
+            {
+                Console.Error.WriteLine("## ERROR: No speech recognition model specified.");
+                return false;
+            }
+            return true;
+        }
+
+        public static bool HasSpeechSynthesisVoice()
+        {
+            if (string.IsNullOrEmpty(SpeechSynthesisVoiceName))
+            {
+                Console.Error.WriteLine("## ERROR: No speech synthesis voice specified.");
+                return false;
+            }
+            return true;
+        }
+
+        public static bool HasSpeechTranslationModel()
+        {
+            if (string.IsNullOrEmpty(SpeechTranslationModelName))
+            {
+                Console.Error.WriteLine("## ERROR: No speech translation model specified.");
+                return false;
+            }
+            return true;
+        }
 
         // Creates an instance of an embedded speech config.
         public static EmbeddedSpeechConfig CreateEmbeddedSpeechConfig()
@@ -101,15 +150,26 @@ namespace MicrosoftSpeechSDKSamples
             List<string> paths = new List<string>();
 
             // Add paths for offline data.
-            var modelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
-            if (!string.IsNullOrEmpty(modelPath) && !modelPath.Equals("YourEmbeddedSpeechRecognitionModelPath"))
+            var recognitionModelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
+            if (!string.IsNullOrEmpty(recognitionModelPath) && !recognitionModelPath.Equals("YourEmbeddedSpeechRecognitionModelPath"))
             {
-                paths.Add(modelPath);
+                paths.Add(recognitionModelPath);
             }
-            var voicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
-            if (!string.IsNullOrEmpty(voicePath) && !voicePath.Equals("YourEmbeddedSpeechSynthesisVoicePath"))
+            var synthesisVoicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
+            if (!string.IsNullOrEmpty(synthesisVoicePath) && !synthesisVoicePath.Equals("YourEmbeddedSpeechSynthesisVoicePath"))
             {
-                paths.Add(voicePath);
+                paths.Add(synthesisVoicePath);
+            }
+            var translationModelPath = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH", EmbeddedSpeechTranslationModelPath);
+            if (!string.IsNullOrEmpty(translationModelPath) && !translationModelPath.Equals("YourEmbeddedSpeechTranslationModelPath"))
+            {
+                paths.Add(translationModelPath);
+            }
+
+            if (paths.Count == 0)
+            {
+                Console.Error.WriteLine("## ERROR: No model path(s) specified.");
+                return null;
             }
 
             // Note, if there is only one path then you can also use EmbeddedSpeechConfig.FromPath(string).
@@ -139,6 +199,12 @@ namespace MicrosoftSpeechSDKSamples
                     // Embedded neural voices only support 24kHz sample rate.
                     config.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm);
                 }
+            }
+
+            if (!string.IsNullOrEmpty(SpeechTranslationModelName))
+            {
+                // Mandatory configuration for embedded speech translation.
+                config.SetSpeechTranslationModel(SpeechTranslationModelName, SpeechTranslationModelKey);
             }
 
             // Disable profanity masking.
@@ -177,33 +243,31 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task<bool> VerifySettingsAsync()
         {
             string cwd = System.IO.Directory.GetCurrentDirectory();
-            Console.WriteLine($"Current working directory:      {cwd}");
+            Console.WriteLine($"Current working directory: {cwd}");
 
-            var modelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
-            if (string.IsNullOrEmpty(modelPath) || modelPath.Equals("YourEmbeddedSpeechRecognitionModelPath"))
+            var recognitionModelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
+            if (string.IsNullOrEmpty(recognitionModelPath) || recognitionModelPath.Equals("YourEmbeddedSpeechRecognitionModelPath"))
             {
-                Console.WriteLine("## WARNING: Embedded SR model search path is not set.");
-                modelPath = null;
+                recognitionModelPath = null;
             }
 
-            var voicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
-            if (string.IsNullOrEmpty(voicePath) || voicePath.Equals("YourEmbeddedSpeechSynthesisVoicePath"))
+            var synthesisVoicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
+            if (string.IsNullOrEmpty(synthesisVoicePath) || synthesisVoicePath.Equals("YourEmbeddedSpeechSynthesisVoicePath"))
             {
-                Console.WriteLine("## WARNING: Embedded TTS voice search path is not set.");
-                voicePath = null;
+                synthesisVoicePath = null;
             }
 
-            if (modelPath == null && voicePath == null)
+            var translationModelPath = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH", EmbeddedSpeechTranslationModelPath);
+            if (string.IsNullOrEmpty(translationModelPath) || translationModelPath.Equals("YourEmbeddedSpeechTranslationModelPath"))
             {
-                Console.Error.WriteLine("## ERROR: Cannot run without embedded SR models or TTS voices.");
-                return false;
+                translationModelPath = null;
             }
 
             // Find an embedded speech recognition model based on the name or locale.
 
             SpeechRecognitionModelName = null;
 
-            if (modelPath != null)
+            if (recognitionModelPath != null)
             {
                 var modelName = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME", EmbeddedSpeechRecognitionModelName);
                 var modelLocale = GetSetting("SPEECH_RECOGNITION_LOCALE", SpeechRecognitionLocale);
@@ -213,7 +277,7 @@ namespace MicrosoftSpeechSDKSamples
                     modelName = null; // no name given -> search by locale
                 }
 
-                var config = EmbeddedSpeechConfig.FromPath(modelPath);
+                var config = EmbeddedSpeechConfig.FromPath(recognitionModelPath);
                 var models = config.GetSpeechRecognitionModels();
 
                 var result = models.FirstOrDefault(model =>
@@ -227,7 +291,7 @@ namespace MicrosoftSpeechSDKSamples
 
                 if (string.IsNullOrEmpty(SpeechRecognitionModelName))
                 {
-                    Console.Write("## WARNING: Cannot locate an embedded SR model by ");
+                    Console.Write("## WARNING: Cannot locate an embedded speech recognition model by ");
                     if (modelName == null)
                     {
                         Console.Write($"locale \"{modelLocale}\". ");
@@ -236,7 +300,7 @@ namespace MicrosoftSpeechSDKSamples
                     {
                         Console.Write($"name \"{modelName}\". ");
                     }
-                    Console.WriteLine($"Current model search path: {modelPath}");
+                    Console.WriteLine($"Current recognition model search path: {recognitionModelPath}");
                 }
                 else
                 {
@@ -253,7 +317,7 @@ namespace MicrosoftSpeechSDKSamples
 
             SpeechSynthesisVoiceName = null;
 
-            if (voicePath != null)
+            if (synthesisVoicePath != null)
             {
                 var voiceName = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME", EmbeddedSpeechSynthesisVoiceName);
                 var voiceLocale = GetSetting("SPEECH_SYNTHESIS_LOCALE", SpeechSynthesisLocale);
@@ -263,7 +327,7 @@ namespace MicrosoftSpeechSDKSamples
                     voiceName = null; // no name given -> search by locale
                 }
 
-                var config = EmbeddedSpeechConfig.FromPath(voicePath);
+                var config = EmbeddedSpeechConfig.FromPath(synthesisVoicePath);
 
                 using var synthesizer = new SpeechSynthesizer(config, null);
                 using var voicesList = await synthesizer.GetVoicesAsync("");
@@ -282,7 +346,7 @@ namespace MicrosoftSpeechSDKSamples
 
                 if (string.IsNullOrEmpty(SpeechSynthesisVoiceName))
                 {
-                    Console.Write("## WARNING: Cannot locate an embedded TTS voice by ");
+                    Console.Write("## WARNING: Cannot locate an embedded speech synthesis voice by ");
                     if (voiceName == null)
                     {
                         Console.Write($"locale \"{voiceLocale}\". ");
@@ -291,7 +355,7 @@ namespace MicrosoftSpeechSDKSamples
                     {
                         Console.Write($"name \"{voiceName}\". ");
                     }
-                    Console.WriteLine($"Current voice search path: {voicePath}");
+                    Console.WriteLine($"Current synthesis voice search path: {synthesisVoicePath}");
                 }
                 else
                 {
@@ -304,10 +368,40 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
 
-            if (string.IsNullOrEmpty(SpeechRecognitionModelName) && string.IsNullOrEmpty(SpeechSynthesisVoiceName))
+            // Find an embedded speech translation model based on the name.
+
+            SpeechTranslationModelName = null;
+
+            if (translationModelPath != null)
             {
-                Console.Error.WriteLine("## ERROR: Cannot run without embedded SR models or TTS voices.");
-                return false;
+                var modelName = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME", EmbeddedSpeechTranslationModelName);
+
+                var config = EmbeddedSpeechConfig.FromPath(translationModelPath);
+                var models = config.GetSpeechTranslationModels();
+
+                var result = models.FirstOrDefault(model =>
+                    (modelName != null && model.Name.Equals(modelName)));
+
+                if (result != null)
+                {
+                    SpeechTranslationModelName = result.Name;
+                }
+
+                if (string.IsNullOrEmpty(SpeechTranslationModelName))
+                {
+                    Console.Write("## WARNING: Cannot locate an embedded speech translation model by ");
+                    Console.Write($"name \"{modelName}\". ");
+                    Console.WriteLine($"Current translation model search path: {translationModelPath}");
+                }
+                else
+                {
+                    SpeechTranslationModelKey = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY", EmbeddedSpeechTranslationModelKey);
+                    if (string.IsNullOrEmpty(SpeechTranslationModelKey) || SpeechTranslationModelKey.Equals("YourEmbeddedSpeechTranslationModelKey"))
+                    {
+                        SpeechTranslationModelKey = null;
+                        Console.WriteLine($"## WARNING: The key for \"{SpeechTranslationModelName}\" is not set.");
+                    }
+                }
             }
 
             Func<string, string> maskValue = (string value) =>
@@ -318,22 +412,31 @@ namespace MicrosoftSpeechSDKSamples
                 return masked;
             };
 
-            Console.WriteLine($"Embedded SR model search path:  {(modelPath == null ? "(not set)" : modelPath)}");
-            if (modelPath != null)
+            Console.WriteLine($"Embedded speech recognition\n  model search path: {(recognitionModelPath == null ? "(not set)" : recognitionModelPath)}");
+            if (recognitionModelPath != null)
             {
-                Console.WriteLine($"Embedded SR model name:         {(string.IsNullOrEmpty(SpeechRecognitionModelName) ? "(not found)" : SpeechRecognitionModelName)}");
+                Console.WriteLine($"  model name:        {(string.IsNullOrEmpty(SpeechRecognitionModelName) ? "(not found)" : SpeechRecognitionModelName)}");
                 if (!string.IsNullOrEmpty(SpeechRecognitionModelName))
                 {
-                    Console.WriteLine($"Embedded SR model key:          {(string.IsNullOrEmpty(SpeechRecognitionModelKey) ? "(not set)" : maskValue(SpeechRecognitionModelKey))}");
+                    Console.WriteLine($"  model key:         {(string.IsNullOrEmpty(SpeechRecognitionModelKey) ? "(not set)" : maskValue(SpeechRecognitionModelKey))}");
                 }
             }
-            Console.WriteLine($"Embedded TTS voice search path: {(voicePath == null ? "(not set)" : voicePath)}");
-            if (voicePath != null)
+            Console.WriteLine($"Embedded speech synthesis\n  voice search path: {(synthesisVoicePath == null ? "(not set)" : synthesisVoicePath)}");
+            if (synthesisVoicePath != null)
             {
-                Console.WriteLine($"Embedded TTS voice name:        {(string.IsNullOrEmpty(SpeechSynthesisVoiceName) ? "(not found)" : SpeechSynthesisVoiceName)}");
+                Console.WriteLine($"  voice name:        {(string.IsNullOrEmpty(SpeechSynthesisVoiceName) ? "(not found)" : SpeechSynthesisVoiceName)}");
                 if (!string.IsNullOrEmpty(SpeechSynthesisVoiceName))
                 {
-                    Console.WriteLine($"Embedded TTS voice key:         {(string.IsNullOrEmpty(SpeechSynthesisVoiceKey) ? "(not set)" : maskValue(SpeechSynthesisVoiceKey))}");
+                    Console.WriteLine($"  voice key:         {(string.IsNullOrEmpty(SpeechSynthesisVoiceKey) ? "(not set)" : maskValue(SpeechSynthesisVoiceKey))}");
+                }
+            }
+            Console.WriteLine($"Embedded speech translation\n  model search path: {(translationModelPath == null ? "(not set)" : translationModelPath)}");
+            if (translationModelPath != null)
+            {
+                Console.WriteLine($"  model name:        {(string.IsNullOrEmpty(SpeechTranslationModelName) ? "(not found)" : SpeechTranslationModelName)}");
+                if (!string.IsNullOrEmpty(SpeechTranslationModelName))
+                {
+                    Console.WriteLine($"  model key:         {(string.IsNullOrEmpty(SpeechTranslationModelKey) ? "(not set)" : maskValue(SpeechTranslationModelKey))}");
                 }
             }
 

@@ -562,7 +562,7 @@ void PronunciationAssessmentWithMicrophone()
         PronunciationAssessmentGranularity::Phoneme, true);
 
     // Creates a speech recognizer using microphone as audio input.
-    auto recognizer = SpeechRecognizer::FromConfig(config);
+    auto recognizer = SpeechRecognizer::FromConfig(config, "en-US");
 
     while (true)
     {
@@ -681,6 +681,62 @@ void PronunciationAssessmentWithStream()
 
     auto timeCost = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
     std::cout << "Time cost: " << timeCost << "ms" << std::endl;
+}
+
+// Pronunciation assessment configured with json
+void PronunciationAssessmentConfiguredWithJson()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Creates a speech recognizer from an audio file
+    auto audioConfig = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
+
+    std::string referenceText = "what's the weather like";
+
+    // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    std::string json_config = "{\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":true, \"ScenarioId\":\"[scenario ID will be assigned by product team]\"}";
+    auto pronunciationConfig = PronunciationAssessmentConfig::CreateFromJson(json_config);
+    pronunciationConfig->SetReferenceText(referenceText);
+
+    // Creates a speech recognizer.
+    auto recognizer = SpeechRecognizer::FromConfig(config, "en-US", audioConfig);
+
+    pronunciationConfig->ApplyTo(recognizer);
+
+    // Starts speech recognition, and returns after a single utterance is recognized.
+    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+    auto result = recognizer->RecognizeOnceAsync().get();
+
+    // Checks result.
+    if (result->Reason == ResultReason::RecognizedSpeech)
+    {
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl
+            << "  PRONUNCIATION ASSESSMENT RESULTS:";
+
+        auto pronunciationResult = PronunciationAssessmentResult::FromResult(result);
+
+        cout << "    Accuracy score: " << pronunciationResult->AccuracyScore << ", Pronunciation score: "
+            << pronunciationResult->PronunciationScore << ", Completeness score : " << pronunciationResult->CompletenessScore
+            << ", FluencyScore: " << pronunciationResult->FluencyScore << endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+    }
 }
 
 #pragma region Language Detection related samples
@@ -899,6 +955,7 @@ void SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled()
 
     // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
     // All default enhancements from Microsoft Audio Stack are enabled.
+    // Only works when input is from a microphone array.
     // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
     // microphone is assumed.
     auto audioProcessingOptions = AudioProcessingOptions::Create(AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT);
