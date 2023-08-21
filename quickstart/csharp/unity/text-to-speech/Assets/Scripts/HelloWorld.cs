@@ -4,14 +4,16 @@
 //
 // <code>
 using System;
+using System.Collections;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using Microsoft.CognitiveServices.Speech;
 
 public class HelloWorld : MonoBehaviour
 {
-    // Hook up the three properties below with a Text, InputField and Button object in your UI.
+    // Hook up the four properties below with a Text, InputField, Button and AudioSource object in your UI.
     public Text outputText;
     public InputField inputField;
     public Button speakButton;
@@ -23,8 +25,6 @@ public class HelloWorld : MonoBehaviour
 
     private const int SampleRate = 24000;
 
-    private object threadLocker = new object();
-    private bool waitingForSpeak;
     private bool audioSourceNeedStop;
     private string message;
 
@@ -33,72 +33,76 @@ public class HelloWorld : MonoBehaviour
 
     public void ButtonClick()
     {
-        lock (threadLocker)
-        {
-            waitingForSpeak = true;
-        }
+        // We can't await the task without blocking the main Unity thread, so we'll call a coroutine to
+        // monitor completion and play audio when it's ready.
+        var speakTask = synthesizer.StartSpeakingTextAsync(inputField.text);
+        StartCoroutine(SpeakRoutine(speakTask));
+    }
 
-        string newMessage = null;
+    IEnumerator SpeakRoutine(Task<SpeechSynthesisResult> speakTask)
+    {
         var startTime = DateTime.Now;
 
-        // Starts speech synthesis, and returns once the synthesis is started.
-        using (var result = synthesizer.StartSpeakingTextAsync(inputField.text).Result)
+        while (!speakTask.IsCompleted)
         {
-            // Native playback is not supported on Unity yet (currently only supported on Windows/Linux Desktop).
-            // Use the Unity API to play audio here as a short term solution.
-            // Native playback support will be added in the future release.
-            var audioDataStream = AudioDataStream.FromResult(result);
-            var isFirstAudioChunk = true;
-            var audioClip = AudioClip.Create(
-                "Speech",
-                SampleRate * 600, // Can speak 10mins audio as maximum
-                1,
-                SampleRate,
-                true,
-                (float[] audioChunk) =>
-                {
-                    var chunkSize = audioChunk.Length;
-                    var audioChunkBytes = new byte[chunkSize * 2];
-                    var readBytes = audioDataStream.ReadData(audioChunkBytes);
-                    if (isFirstAudioChunk && readBytes > 0)
-                    {
-                        var endTime = DateTime.Now;
-                        var latency = endTime.Subtract(startTime).TotalMilliseconds;
-                        newMessage = $"Speech synthesis succeeded!\nLatency: {latency} ms.";
-                        isFirstAudioChunk = false;
-                    }
-
-                    for (int i = 0; i < chunkSize; ++i)
-                    {
-                        if (i < readBytes / 2)
-                        {
-                            audioChunk[i] = (short)(audioChunkBytes[i * 2 + 1] << 8 | audioChunkBytes[i * 2]) / 32768.0F;
-                        }
-                        else
-                        {
-                            audioChunk[i] = 0.0f;
-                        }
-                    }
-
-                    if (readBytes == 0)
-                    {
-                        Thread.Sleep(200); // Leave some time for the audioSource to finish playback
-                        audioSourceNeedStop = true;
-                    }
-                });
-
-            audioSource.clip = audioClip;
-            audioSource.Play();
+            yield return null;
         }
 
-        lock (threadLocker)
+        var result = speakTask.Result;
         {
-            if (newMessage != null)
+            if (result.Reason == ResultReason.SynthesizingAudioStarted)
             {
-                message = newMessage;
-            }
+                // Native playback is not supported on Unity yet (currently only supported on Windows/Linux Desktop).
+                // Use the Unity API to play audio here as a short term solution.
+                // Native playback support will be added in the future release.
+                var audioDataStream = AudioDataStream.FromResult(result);
+                while (!audioDataStream.CanReadData(4092 * 2)) // audio clip requires 4096 samples before it's ready to play
+                {
+                    yield return null;
+                }
 
-            waitingForSpeak = false;
+                var isFirstAudioChunk = true;
+                var audioClip = AudioClip.Create(
+                    "Speech",
+                    SampleRate * 600, // Can speak 10mins audio as maximum
+                    1,
+                    SampleRate,
+                    true,
+                    (float[] audioChunk) =>
+                    {
+                        var chunkSize = audioChunk.Length;
+                        var audioChunkBytes = new byte[chunkSize * 2];
+                        var readBytes = audioDataStream.ReadData(audioChunkBytes);
+                        if (isFirstAudioChunk && readBytes > 0)
+                        {
+                            var endTime = DateTime.Now;
+                            var latency = endTime.Subtract(startTime).TotalMilliseconds;
+                            message = $"Speech synthesis succeeded!\nLatency: {latency} ms.";
+                            isFirstAudioChunk = false;
+                        }
+
+                        for (int i = 0; i < chunkSize; ++i)
+                        {
+                            if (i < readBytes / 2)
+                            {
+                                audioChunk[i] = (short)(audioChunkBytes[i * 2 + 1] << 8 | audioChunkBytes[i * 2]) / 32768.0F;
+                            }
+                            else
+                            {
+                                audioChunk[i] = 0.0f;
+                            }
+                        }
+
+                        if (readBytes == 0)
+                        {
+                            Thread.Sleep(200); // Leave some time for the audioSource to finish playback
+                            audioSourceNeedStop = true;
+                        }
+                    });
+
+                audioSource.clip = audioClip;
+                audioSource.Play();
+            }
         }
     }
 
@@ -147,23 +151,15 @@ public class HelloWorld : MonoBehaviour
 
     void Update()
     {
-        lock (threadLocker)
+        if (outputText != null)
         {
-            if (speakButton != null)
-            {
-                speakButton.interactable = !waitingForSpeak;
-            }
+            outputText.text = message;
+        }
 
-            if (outputText != null)
-            {
-                outputText.text = message;
-            }
-
-            if (audioSourceNeedStop)
-            {
-                audioSource.Stop();
-                audioSourceNeedStop = false;
-            }
+        if (audioSourceNeedStop)
+        {
+            audioSource.Stop();
+            audioSourceNeedStop = false;
         }
     }
 
