@@ -95,7 +95,7 @@ Sample settings:
      The model internal subfolder structure must be intact i.e. as originally delivered.
 1. `EmbeddedSpeechTranslationModelName` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME`)
    * Name of the embedded speech translation model to be used for translation.
-   * The full model name must be given (e.g. `Microsoft Speech Translator Multi-to-en-US Model V1`).
+   * The full model name must be given (e.g. `Microsoft Speech Translator Many-to-English Model V2`).
 1. `EmbeddedSpeechTranslationModelKey` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY`)
    * Decryption key of the (encrypted) embedded speech translation model.
 1. `CloudSpeechSubscriptionKey` (`CLOUD_SPEECH_SUBSCRIPTION_KEY`)

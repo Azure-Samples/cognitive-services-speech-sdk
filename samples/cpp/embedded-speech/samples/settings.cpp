@@ -72,7 +72,7 @@ const string EmbeddedSpeechSynthesisVoiceKey = "YourEmbeddedSpeechSynthesisVoice
 const string EmbeddedSpeechTranslationModelPath = "YourEmbeddedSpeechTranslationModelPath"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH
 
 // Name of the embedded speech translation model to be used for translation.
-// For example: "Microsoft Speech Translator Multi-to-en-US Model V1"
+// For example: "Microsoft Speech Translator Many-to-English Model V2"
 const string EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME
 
 // Decryption key of the (encrypted) embedded speech translation model.

@@ -77,7 +77,7 @@ public class SpeechTranslationSamples
             // Intermediate result (hypothesis).
             // Note that embedded "many-to-1" translation models support only one
             // target language (the model native output language). For example, a
-            // "Multi-to-en(-US)" model generates only output in English.
+            // "Many-to-English" model generates only output in English.
             // At the moment embedded translation cannot provide transcription or
             // language ID of the source language.
             if (e.getResult().getReason() == ResultReason.TranslatingSpeech)
