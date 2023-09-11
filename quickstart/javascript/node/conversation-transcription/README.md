@@ -6,7 +6,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* User voice samples [See User voice samples for Conversation Transcription](https://docs.microsoft.com/azure/cognitive-services/speech-service/conversation-transcription#expected-inputs)
 * A [Node.js](https://nodejs.org) compatible device.
 
 ## Prepare the sample
@@ -20,8 +19,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
-  * Add voice signature data for all participants
-  * Replace the string `YourAudioFile.wav` with a path to a `.wav` file on your disk **(required format: 8-channel)**.
+  * Replace the string `YourAudioFile.wav` with a path to a `.wav` file on your disk.
 
 ## Run the sample
 

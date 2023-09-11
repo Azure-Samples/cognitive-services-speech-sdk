@@ -5,6 +5,7 @@
         <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
+        <WindowsPackageType>None</WindowsPackageType>
         <OutputType>Exe</OutputType>
         <RootNamespace>speech_to_text</RootNamespace>
         <UseMaui>true</UseMaui>
@@ -53,7 +54,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.25.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.32.1" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
     </ItemGroup>
 

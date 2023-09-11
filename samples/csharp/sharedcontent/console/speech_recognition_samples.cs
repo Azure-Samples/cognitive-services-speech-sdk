@@ -1082,7 +1082,8 @@ namespace MicrosoftSpeechSDKSamples
         {
             using (var audioInputStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1))) // This need be set based on the format of the given audio data
             using (var audioConfig = AudioConfig.FromStreamInput(audioInputStream))
-            using (var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig))
+            // Specify the language used for Pronunciation Assessment.
+            using (var speechRecognizer = new SpeechRecognizer(speechConfig, "en-US", audioConfig))
             {
                 // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
                 var pronAssessmentConfig = new PronunciationAssessmentConfig(referenceText, GradingSystem.HundredMark, Granularity.Phoneme, false);
@@ -1154,6 +1155,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
             // All default enhancements from Microsoft Audio Stack are enabled.
+            // Only works when input is from a microphone array.
             // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
             // microphone is assumed.
             using (var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT))
@@ -1215,6 +1217,72 @@ namespace MicrosoftSpeechSDKSamples
                     // Stops recognition.
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
+            }
+        }
+
+        // Pronunciation assessment configured with json
+        // See more information at https://aka.ms/csspeech/pa
+        public static async Task PronunciationAssessmentConfiguredWithJson()
+        {
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            // Replace the language with your language in BCP-47 format, e.g., en-US.
+            var language = "en-US";
+
+            // Creates an instance of audio config from an audio file
+            var audioConfig = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav");
+
+            var referenceText = "what's the weather like";
+            // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+            string json_config = "{\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":true, \"ScenarioId\":\"[scenario ID will be assigned by product team]\"}";
+            var pronunciationConfig = PronunciationAssessmentConfig.FromJson(json_config);
+            pronunciationConfig.ReferenceText = referenceText;
+
+            // Creates a speech recognizer for the specified language
+            using (var recognizer = new SpeechRecognizer(config, language, audioConfig))
+            {
+                // Starts recognizing.
+                pronunciationConfig.ApplyTo(recognizer);
+
+                // Starts speech recognition, and returns after a single utterance is recognized.
+                // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                // Checks result.
+                if (result.Reason == ResultReason.RecognizedSpeech)
+                {
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                    Console.WriteLine("  PRONUNCIATION ASSESSMENT RESULTS:");
+
+                    var pronunciationResult = PronunciationAssessmentResult.FromResult(result);
+                    Console.WriteLine(
+                        $"    Accuracy score: {pronunciationResult.AccuracyScore}, Pronunciation score: {pronunciationResult.PronunciationScore}, Completeness score : {pronunciationResult.CompletenessScore}, FluencyScore: {pronunciationResult.FluencyScore}");
+
+                    Console.WriteLine("  Word-level details:");
+
+                    foreach (var word in pronunciationResult.Words)
+                    {
+                        Console.WriteLine($"    Word: {word.Word}, Accuracy score: {word.AccuracyScore}, Error type: {word.ErrorType}.");
+                    }
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
+                }              
             }
         }
 

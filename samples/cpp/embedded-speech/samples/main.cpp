@@ -9,6 +9,9 @@
 using namespace std;
 
 extern bool VerifySettings();
+extern bool HasSpeechRecognitionModel();
+extern bool HasSpeechSynthesisVoice();
+extern bool HasSpeechTranslationModel();
 
 extern void ListEmbeddedSpeechRecognitionModels();
 extern void EmbeddedSpeechRecognitionFromMicrophone();
@@ -24,6 +27,9 @@ extern void EmbeddedIntentRecognitionWithKeywordFromMicrophone();
 extern void ListEmbeddedSpeechSynthesisVoices();
 extern void EmbeddedSpeechSynthesisToSpeaker();
 extern void HybridSpeechSynthesisToSpeaker();
+
+extern void ListEmbeddedSpeechTranslationModels();
+extern void EmbeddedSpeechTranslationFromMicrophone();
 
 
 int main()
@@ -54,6 +60,9 @@ int main()
             cout << "10. List embeddded speech synthesis voices.\n";
             cout << "11. Embedded speech synthesis with speaker output.\n";
             cout << "12. Hybrid (cloud & embedded) speech synthesis with speaker output.\n";
+            cout << "\nSpeech translation\n";
+            cout << "13. List embeddded speech translation models.\n";
+            cout << "14. Embedded speech translation with microphone input.\n";
             cout << "\nChoose a number (or none for exit) and press Enter: ";
             cout.flush();
 
@@ -71,37 +80,43 @@ int main()
                 ListEmbeddedSpeechRecognitionModels();
                 break;
             case 2:
-                EmbeddedSpeechRecognitionFromMicrophone();
+                if (HasSpeechRecognitionModel()) EmbeddedSpeechRecognitionFromMicrophone();
                 break;
             case 3:
-                EmbeddedSpeechRecognitionWithKeywordFromMicrophone();
+                if (HasSpeechRecognitionModel()) EmbeddedSpeechRecognitionWithKeywordFromMicrophone();
                 break;
             case 4:
-                EmbeddedSpeechRecognitionFromWavFile();
+                if (HasSpeechRecognitionModel()) EmbeddedSpeechRecognitionFromWavFile();
                 break;
             case 5:
-                EmbeddedSpeechRecognitionFromPushStream();
+                if (HasSpeechRecognitionModel()) EmbeddedSpeechRecognitionFromPushStream();
                 break;
             case 6:
-                EmbeddedSpeechRecognitionFromPullStream();
+                if (HasSpeechRecognitionModel()) EmbeddedSpeechRecognitionFromPullStream();
                 break;
             case 7:
-                HybridSpeechRecognitionFromMicrophone();
+                if (HasSpeechRecognitionModel()) HybridSpeechRecognitionFromMicrophone();
                 break;
             case 8:
-                EmbeddedIntentRecognitionFromMicrophone();
+                if (HasSpeechRecognitionModel()) EmbeddedIntentRecognitionFromMicrophone();
                 break;
             case 9:
-                EmbeddedIntentRecognitionWithKeywordFromMicrophone();
+                if (HasSpeechRecognitionModel()) EmbeddedIntentRecognitionWithKeywordFromMicrophone();
                 break;
             case 10:
                 ListEmbeddedSpeechSynthesisVoices();
                 break;
             case 11:
-                EmbeddedSpeechSynthesisToSpeaker();
+                if (HasSpeechSynthesisVoice()) EmbeddedSpeechSynthesisToSpeaker();
                 break;
             case 12:
-                HybridSpeechSynthesisToSpeaker();
+                if (HasSpeechSynthesisVoice()) HybridSpeechSynthesisToSpeaker();
+                break;
+            case 13:
+                ListEmbeddedSpeechTranslationModels();
+                break;
+            case 14:
+                if (HasSpeechTranslationModel()) EmbeddedSpeechTranslationFromMicrophone();
                 break;
             default:
                 break;

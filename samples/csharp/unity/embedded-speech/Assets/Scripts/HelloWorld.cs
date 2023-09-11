@@ -3,48 +3,63 @@
 // Licensed under the MIT license. See https://aka.ms/csspeech/license for the full license information.
 //
 
-using UnityEngine;
-using UnityEngine.UI;
 using Microsoft.CognitiveServices.Speech;
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using System.Text;
+using UnityEngine;
 #if PLATFORM_ANDROID
 using UnityEngine.Android;
 #endif
-using System.IO;
-using System.Collections;
 using UnityEngine.Networking; // for UnityWebRequest
+using UnityEngine.UI;
 
 public class HelloWorld : MonoBehaviour
 {
-    // Hook up the two properties below with a Text and Button object in your UI.
-    public Text outputText;
-    public Button startRecoButton;
-
-    private object threadLocker = new object();
-    private bool waitingForReco;
-    private string message;
-
-    private bool micPermissionGranted = false;
+    /**********************************
+     * START OF CONFIGURABLE SETTINGS *
+     **********************************/
+    private static readonly string recognitionModelName = ""; // e.g. "en-US" or "Microsoft Speech Recognizer en-US FP Model V8.1"
+    private static readonly string recognitionModelKey  = ""; // model decryption key
+    private static readonly string synthesisVoiceName   = ""; // e.g. "en-US-AriaNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
+    private static readonly string synthesisVoiceKey    = ""; // voice decryption key
 
 #if PLATFORM_ANDROID
-    // Required to manifest microphone permission, cf.
-    // https://docs.unity3d.com/Manual/android-manifest.html
-    private Microphone mic;
-#endif
+    // Embedded speech recognition models and synthesis voices must reside
+    // as normal individual files on the device filesystem and they need to
+    // be readable by the application process.
 
-    private static SpeechRecognizer recognizer = null;
-
-    private static readonly string modelName = "YourEmbeddedSpeechRecognitionModelName";
-    private static readonly string modelKey = "YourEmbeddedSpeechRecognitionModelKey";
-
-#if PLATFORM_ANDROID
-    // Embedded speech recognition models (and synthesis voices) must be
-    // located as normal individual files on the device filesystem.
     // On Android, the model files in streaming assets are contained in a
     // compressed .jar file and need to be copied to e.g. the application
-    // persistent data path before they can be used. List the files to be
-    // copied in the array below, with relative paths as they appear under
-    // StreamingAssets in the Unity Editor.
-    private static readonly string[] modelFiles =
+    // persistent data path before they can be used. Note that modern
+    // Android systems may restrict access to the external storage, ref.
+    // https://developer.android.com/about/versions/11/privacy/storage
+
+    // In case it is necessary to optimize storage space consumption on the
+    // device, consider options:
+    // * Copy files on demand i.e. only the files of a model/voice that's
+    //   needed for a recognizer/synthesizer at a time; delete after use.
+    // * Do not include models/voices in the application package, instead
+    //   download additional data in a post-installation step (cf. games
+    //   with large assets or navigation apps with offline maps).
+
+    // List the files to be copied in the arrays below, with relative paths
+    // as they appear under StreamingAssets in the Unity Editor. If either
+    // recognition or synthesis is not needed, leave the corresponding array
+    // empty.
+    private static readonly string[] recognitionModelFiles =
+    {
+        /*
+        "relative/path/to/file1",
+        "relative/path/to/file2",
+         ...
+        "relative/path/to/fileN"
+        */
+    };
+
+    private static readonly string[] synthesisVoiceFiles =
     {
         /*
         "relative/path/to/file1",
@@ -54,64 +69,73 @@ public class HelloWorld : MonoBehaviour
         */
     };
 #endif
+    /********************************
+     * END OF CONFIGURABLE SETTINGS *
+     ********************************/
 
-    public async void ButtonClick()
+    private static SpeechRecognizer recognizer = null;
+    private static SpeechSynthesizer synthesizer = null;
+
+#if PLATFORM_ANDROID
+    private static readonly string modelSubFolder = "EmbeddedSpeechModels"; // in Application.persistentDataPath
+#endif
+
+    // Hook up the properties below with objects in your UI.
+    public Text statusOutput;
+    public Button copyFilesButton;
+    public Button initObjectsButton;
+    public Button recognizeButton;
+    public InputField synthesisInput;
+    public Button synthesizeButton;
+
+    private string statusMessage;
+    private bool enableCopyFilesButton;
+    private bool enableInitObjectsButton;
+    private bool enableRecognitionButton;
+    private bool enableSynthesisButton;
+
+    private object threadLocker = new object();
+
+    private bool micPermissionGranted = false;
+
+#if PLATFORM_ANDROID
+    // Required to manifest microphone permission, cf.
+    // https://docs.unity3d.com/Manual/android-manifest.html
+    private Microphone mic;
+#endif
+
+    public void OnCopyFilesButtonClicked()
     {
         lock (threadLocker)
         {
-            waitingForReco = true;
+            enableCopyFilesButton = false;
         }
-
-        // Starts speech recognition and returns after a single utterance is
-        // recognized. The task returns the recognition text (or NoMatch) as
-        // result.
-        // Note: Since RecognizeOnceAsync() returns only a single utterance,
-        // it is best suited for single-shot recognition, like a command or
-        // query. For long-running multi-utterance recognition, use
-        // StartContinuousRecognitionAsync() instead (see general C# samples).
-        var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-
-        // Check the result.
-        string newMessage = string.Empty;
-        if (result.Reason == ResultReason.RecognizedSpeech)
-        {
-            newMessage = result.Text;
-        }
-        else if (result.Reason == ResultReason.NoMatch)
-        {
-            newMessage = "NO MATCH: Speech could not be recognized.";
-        }
-        else if (result.Reason == ResultReason.Canceled)
-        {
-            var cancellation = CancellationDetails.FromResult(result);
-            newMessage = $"CANCELED: Reason={cancellation.Reason} ErrorDetails={cancellation.ErrorDetails}";
-        }
-
-        lock (threadLocker)
-        {
-            message = newMessage;
-            waitingForReco = false;
-        }
+        StartCoroutine(CopyFilesAsync());
     }
 
-    IEnumerator InitRecognizerAsync()
+    IEnumerator CopyFilesAsync()
     {
 #if PLATFORM_ANDROID
-        // Copy model files from streaming assets in the compressed .jar file
-        // to the application persistent data path (on the device filesystem).
-        foreach (string file in modelFiles)
-        {
-            string fromFilePath = Application.streamingAssetsPath + Path.DirectorySeparatorChar + file;
-            string toFilePath = Application.persistentDataPath + Path.DirectorySeparatorChar + file;
-            UnityEngine.Debug.Log($"EmbeddedSpeechSamples fromFilePath: {fromFilePath}");
-            UnityEngine.Debug.Log($"EmbeddedSpeechSamples toFilePath:   {toFilePath}");
+        // Copy embedded speech model files from streaming assets in the
+        // compressed .jar file to the application persistent data path
+        // on the device filesystem.
 
-            // Copy files only the first time the sample is run.
-            if (File.Exists(toFilePath))
-            {
-                UnityEngine.Debug.Log($"EmbeddedSpeechSamples file {file} already exists, skipped");
-                continue;
-            }
+        string[] filesToCopy = recognitionModelFiles.Concat(synthesisVoiceFiles).ToArray();
+        if (filesToCopy.Length == 0)
+        {
+            statusMessage = "No files to copy! Embedded speech will not work.";
+            UnityEngine.Debug.LogError(statusMessage);
+            yield break;
+        }
+
+        var modelRootPath = Application.persistentDataPath + Path.DirectorySeparatorChar + modelSubFolder;
+
+        foreach (string file in filesToCopy)
+        {
+            statusMessage = $"Copying {file}...";
+            string fromFilePath = Application.streamingAssetsPath + Path.DirectorySeparatorChar + file;
+            string toFilePath = modelRootPath + Path.DirectorySeparatorChar + file;
+            UnityEngine.Debug.Log($"EmbeddedSpeechSamples Copying {fromFilePath} to {toFilePath}");
 
             UnityWebRequest downloader = UnityWebRequest.Get(fromFilePath);
             yield return downloader.SendWebRequest();
@@ -125,34 +149,202 @@ public class HelloWorld : MonoBehaviour
             File.WriteAllBytes(toFilePath, handler.data);
         }
 
-        string modelRootPath = Application.persistentDataPath;
+        statusMessage = $"Copied files to {modelRootPath}";
 #else
+        statusMessage = "No need to copy files on this platform.";
         yield return new WaitForSeconds(0.0f); // coroutine must have a yield statement
-        string modelRootPath = Application.streamingAssetsPath;
 #endif
 
-        // Creates an instance of an embedded speech config.
-        var config = EmbeddedSpeechConfig.FromPath(modelRootPath);
-        config.SetSpeechRecognitionModel(modelName, modelKey);
+        enableCopyFilesButton = true;
+        enableInitObjectsButton = true; // in case initialization was tried before copying and it failed
+    }
 
-        // Creates an instance of a speech recognizer.
-        // When embedded speech config is used, this can take a moment due to
-        // loading of the embedded model. Therefore it should be done well in
-        // advance before recognition is started.
+    public void OnInitObjectsButtonClicked()
+    {
         try
         {
-            recognizer = new SpeechRecognizer(config);
+            lock (threadLocker)
+            {
+                enableInitObjectsButton = false;
+                statusMessage = "Initializing...";
+            }
+
+#if PLATFORM_ANDROID
+            var modelRootPath = Application.persistentDataPath + Path.DirectorySeparatorChar + modelSubFolder;
+#else
+            // Files in streaming assets can be used directly.
+            var modelRootPath = Application.streamingAssetsPath;
+#endif
+
+            // Creates an instance of embedded speech config.
+            var config = EmbeddedSpeechConfig.FromPath(modelRootPath);
+
+            // Selects embedded speech models to use.
+            config.SetSpeechRecognitionModel(recognitionModelName, recognitionModelKey);
+            config.SetSpeechSynthesisVoice(synthesisVoiceName, synthesisVoiceKey);
+
+            if (synthesisVoiceName.Contains("Neural"))
+            {
+                // Embedded neural voices only support 24 kHz sample rate.
+                config.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Initialized");
+
+            // Creates a speech recognizer instance using the device default
+            // microphone for audio input.
+            // With embedded speech, this can take a moment due to loading
+            // of the model. To avoid unnecessary delays when recognition is
+            // started, create the recognizer well in advance.
+            if (!string.IsNullOrEmpty(recognitionModelName) && !string.IsNullOrEmpty(recognitionModelKey))
+            {
+                recognizer = new SpeechRecognizer(config);
+                sb.Append(" recognizer");
+            }
+
+            // Creates a speech synthesizer instance using the device default
+            // speaker for audio output.
+            if (!string.IsNullOrEmpty(synthesisVoiceName) && !string.IsNullOrEmpty(synthesisVoiceKey))
+            {
+                synthesizer = new SpeechSynthesizer(config);
+                if (recognizer != null)
+                {
+                    sb.Append(" and");
+                }
+                sb.Append(" synthesizer");
+            }
+
+            if (recognizer == null && synthesizer == null)
+            {
+                statusMessage = "Cannot initialize recognizer or synthesizer!";
+                UnityEngine.Debug.LogError(statusMessage);
+            }
+            else
+            {
+                sb.Append(".");
+                statusMessage = sb.ToString();
+            }
+
+            enableInitObjectsButton = true;
         }
-        catch (System.Exception e)
+        catch (Exception ex)
         {
-            message = e.ToString();
-            UnityEngine.Debug.LogError(message);
-            yield break;
+            statusMessage = "Exception: " + ex.ToString();
+            UnityEngine.Debug.LogError(statusMessage);
+        }
+    }
+
+    public async void OnRecognizeButtonClicked()
+    {
+        if (recognizer == null)
+        {
+            statusMessage = "Recognizer is not initialized!";
+            UnityEngine.Debug.LogError(statusMessage);
+            return;
         }
 
-        // Ready to start recognition.
-        message = "Click the button to recognize speech.";
-        waitingForReco = false;
+        try
+        {
+            lock (threadLocker)
+            {
+                enableRecognitionButton = false;
+                statusMessage = "Recognizing...";
+            }
+
+            // Starts speech recognition and returns after a single utterance is
+            // recognized. The task returns the recognition text as result.
+            // Note: Since RecognizeOnceAsync() returns only a single utterance,
+            // it is best suited for single-shot recognition, like a command or
+            // short query. For long-running multi-utterance recognition, use
+            // StartContinuousRecognitionAsync() instead (see general C# samples).
+            var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+            // Checks result.
+            StringBuilder sb = new StringBuilder();
+            if (result.Reason == ResultReason.RecognizedSpeech)
+            {
+                sb.Append($"RECOGNIZED: Text={result.Text}");
+            }
+            else if (result.Reason == ResultReason.NoMatch)
+            {
+                var nomatch = NoMatchDetails.FromResult(result);
+                sb.Append($"NO MATCH: Reason={nomatch.Reason}");
+            }
+            else if (result.Reason == ResultReason.Canceled)
+            {
+                var cancellation = CancellationDetails.FromResult(result);
+                sb.Append($"CANCELED: Reason={cancellation.Reason}");
+
+                if (cancellation.Reason == CancellationReason.Error)
+                {
+                    sb.Append($" ErrorCode={cancellation.ErrorCode}");
+                    sb.Append($" ErrorDetails={cancellation.ErrorDetails}");
+                }
+            }
+
+            statusMessage = sb.ToString();
+            enableRecognitionButton = true;
+        }
+        catch (Exception ex)
+        {
+            statusMessage = "Exception: " + ex.ToString();
+            UnityEngine.Debug.LogError(statusMessage);
+        }
+    }
+
+    public async void OnSynthesizeButtonClicked()
+    {
+        if (synthesizer == null)
+        {
+            statusMessage = "Synthesizer is not initialized!";
+            UnityEngine.Debug.LogError(statusMessage);
+            return;
+        }
+        if (string.IsNullOrEmpty(synthesisInput.text))
+        {
+            statusMessage = "Missing text input for synthesis!";
+            UnityEngine.Debug.LogError(statusMessage);
+            return;
+        }
+
+        try
+        {
+            lock (threadLocker)
+            {
+                enableSynthesisButton = false;
+                statusMessage = "Synthesizing...";
+            }
+
+            // Synthesizes speech.
+            using var result = await synthesizer.SpeakTextAsync(synthesisInput.text).ConfigureAwait(false);
+
+            // Checks result.
+            StringBuilder sb = new StringBuilder();
+            if (result.Reason == ResultReason.SynthesizingAudioCompleted)
+            {
+                sb.Append("Synthesis completed.");
+            }
+            else if (result.Reason == ResultReason.Canceled)
+            {
+                var cancellation = SpeechSynthesisCancellationDetails.FromResult(result);
+                sb.Append($"CANCELED: Reason={cancellation.Reason}");
+
+                if (cancellation.Reason == CancellationReason.Error)
+                {
+                    sb.Append($" ErrorCode={cancellation.ErrorCode}");
+                    sb.Append($" ErrorDetails={cancellation.ErrorDetails}");
+                }
+            }
+
+            statusMessage = sb.ToString();
+            enableSynthesisButton = true;
+        }
+        catch (Exception ex)
+        {
+            statusMessage = "Exception: " + ex.ToString();
+            UnityEngine.Debug.LogError(statusMessage);
+        }
     }
 
     void Start()
@@ -160,30 +352,22 @@ public class HelloWorld : MonoBehaviour
         UnityEngine.Debug.Log($"EmbeddedSpeechSamples streamingAssetsPath: {Application.streamingAssetsPath}");
         UnityEngine.Debug.Log($"EmbeddedSpeechSamples persistentDataPath:  {Application.persistentDataPath}");
 
-        if (outputText == null)
+        if (statusOutput == null ||
+            copyFilesButton == null ||
+            initObjectsButton == null ||
+            recognizeButton == null ||
+            synthesisInput == null ||
+            synthesizeButton == null)
         {
-            message = "outputText property is null! Assign a UI Text element to it.";
-            UnityEngine.Debug.LogError(message);
+            statusMessage = "One or more properties are null! Assign UI objects to them.";
+            UnityEngine.Debug.LogError(statusMessage);
         }
-        else if (startRecoButton == null)
-        {
-            message = "startRecoButton property is null! Assign a UI Button to it.";
-            UnityEngine.Debug.LogError(message);
-        }
-#if PLATFORM_ANDROID
-        else if (modelFiles.Length == 0)
-        {
-            message = "modelFiles is empty! Specify the model files to be copied.";
-            UnityEngine.Debug.LogError(message);
-        }
-#endif
         else
         {
-            // Continue with normal initialization, Text and Button objects are present.
+            // Continue with normal initialization.
 #if PLATFORM_ANDROID
-            // Request to use the microphone, cf.
+            // Request to use the microphone, ref.
             // https://docs.unity3d.com/Manual/android-RequestingPermissions.html
-            message = "Waiting for microphone permission";
             if (!Permission.HasUserAuthorizedPermission(Permission.Microphone))
             {
                 Permission.RequestUserPermission(Permission.Microphone);
@@ -191,11 +375,17 @@ public class HelloWorld : MonoBehaviour
 #else
             micPermissionGranted = true;
 #endif
-            waitingForReco = true;
-            message = "Initializing the recognizer, please wait...";
-            StartCoroutine(InitRecognizerAsync());
+            enableCopyFilesButton = true;
+            enableInitObjectsButton = true;
+            enableRecognitionButton = true;
+            enableSynthesisButton = true;
 
-            startRecoButton.onClick.AddListener(ButtonClick);
+            copyFilesButton.onClick.AddListener(OnCopyFilesButtonClicked);
+            initObjectsButton.onClick.AddListener(OnInitObjectsButtonClicked);
+            recognizeButton.onClick.AddListener(OnRecognizeButtonClicked);
+            synthesizeButton.onClick.AddListener(OnSynthesizeButtonClicked);
+
+            statusMessage = "Welcome to the Embedded Speech sample for Unity!";
         }
     }
 
@@ -205,6 +395,10 @@ public class HelloWorld : MonoBehaviour
         {
             recognizer.Dispose();
         }
+        if (synthesizer != null)
+        {
+            synthesizer.Dispose();
+        }
     }
 
     void Update()
@@ -213,19 +407,30 @@ public class HelloWorld : MonoBehaviour
         if (!micPermissionGranted && Permission.HasUserAuthorizedPermission(Permission.Microphone))
         {
             micPermissionGranted = true;
-            message = "Click button to recognize speech";
         }
 #endif
 
         lock (threadLocker)
         {
-            if (startRecoButton != null)
+            if (copyFilesButton != null)
             {
-                startRecoButton.interactable = !waitingForReco && micPermissionGranted;
+                copyFilesButton.interactable = enableCopyFilesButton;
             }
-            if (outputText != null)
+            if (initObjectsButton != null)
             {
-                outputText.text = message;
+                initObjectsButton.interactable = enableInitObjectsButton;
+            }
+            if (recognizeButton != null)
+            {
+                recognizeButton.interactable = enableRecognitionButton && micPermissionGranted;
+            }
+            if (synthesizeButton != null)
+            {
+                synthesizeButton.interactable = enableSynthesisButton;
+            }
+            if (statusOutput != null)
+            {
+                statusOutput.text = statusMessage;
             }
         }
     }

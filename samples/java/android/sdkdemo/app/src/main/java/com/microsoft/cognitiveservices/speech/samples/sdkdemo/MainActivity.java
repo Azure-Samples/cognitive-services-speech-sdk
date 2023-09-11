@@ -160,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 // In general, if the device default microphone is used then it is enough
                 // to either have AudioConfig.fromDefaultMicrophoneInput or omit the audio
-                // config altogether. 
+                // config altogether.
                 // AudioConfig.fromStreamInput is specifically needed if you want to use an
                 // external microphone (including Bluetooth that couldn't be otherwise used)
                 // or mix audio from some other source to microphone audio.
@@ -435,7 +435,8 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 final AudioConfig audioConfig = AudioConfig.fromWavFileInput(copyAssetToCacheAndGetFilePath("pronunciation_assessment.wav"));
-                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioConfig);
+                // Switch to other languages for example Spanish, change language "en-US" to "es-ES". Language name is not case sensitive.
+                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, "en-US", audioConfig);
 
                 String referenceText =  "Hello world hello. Today is a nice day.";
                 PronunciationAssessmentConfig pronConfig =
@@ -621,7 +622,8 @@ public class MainActivity extends AppCompatActivity {
             try {
                  createMicrophoneStream();
                 final AudioConfig audioConfig = AudioConfig.fromStreamInput(createMicrophoneStream());
-                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, audioConfig);
+                // Switch to other languages for example Spanish, change language "en-US" to "es-ES". Language name is not case sensitive.
+                final SpeechRecognizer reco = new SpeechRecognizer(speechConfig, "en-US", audioConfig);
 
                 // Replace this referenceText to match your input.
                 String referenceText =  "Today is a nice day.";

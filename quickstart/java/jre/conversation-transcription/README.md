@@ -1,6 +1,6 @@
 # Quickstart: Transcribe conversation from a file input stream in Java on Windows, macOS, or Linux
 
-This sample demonstrates how to enroll participant's voice signatures and transcribe conversation with 2 participants with the Speech SDK for Java on Windows, macOS or Linux.
+This sample demonstrates how to transcribe conversation with the Speech SDK for Java on Windows, macOS or Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-conversation-transcription) on the SDK documentation page which describes details about conversation transcription service.
 
 > **Note:**

@@ -3,12 +3,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
 
     defaultConfig {
         applicationId "com.microsoft.cognitiveservices.speech.samples.speechsynthesis"
         minSdkVersion 23
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 1
         versionName "1.0"
     }
@@ -23,13 +23,14 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    namespace 'com.microsoft.cognitiveservices.speech.samples.speechsynthesis'
 }
 
 dependencies {
     // Speech SDK
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.25.0'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.32.1'
 
-    implementation 'androidx.appcompat:appcompat:1.4.0'
-    implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }

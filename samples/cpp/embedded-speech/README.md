@@ -1,15 +1,15 @@
 # Embedded speech samples in C++
 
-These samples demonstrate embedded and hybrid speech recognition and synthesis using the Speech SDK for C++.
+These samples demonstrate embedded and hybrid speech using the Speech SDK for C++.
 
-Embedded speech enables offline (on-device) speech recognition and synthesis.
+Embedded speech enables offline (on-device) speech recognition, synthesis, and translation.
 Hybrid speech uses cloud speech services by default and embedded speech as a fallback in case cloud connectivity is limited.
 
 > **Note:**
 > * Embedded speech is in [preview](https://aka.ms/embedded-speech) and details in this document and samples are subject to change.
-> * Embedded speech recognition only supports audio in the following format:
+> * Embedded speech recognition and translation only support audio in the following format:
 >   * single channel
->   * 16000 Hz sample rate
+>   * 8000 or 16000 Hz sample rate
 >   * 16-bit little-endian signed integer samples
 
 ## Prerequisites
@@ -24,9 +24,9 @@ Requirements specific to embedded speech samples are as follows.
   * [Microsoft Visual Studio 2022 or newer](https://www.visualstudio.com/).
 * If using the command line:
   * Latest [NuGet client tools](https://learn.microsoft.com/nuget/install-nuget-client-tools#nugetexe-cli) (requires [Mono framework](https://www.mono-project.com/download/stable/)). Old NuGet versions included with some Linux distributions cannot restore dependencies in the sample project properly.
-* For speech recognition:
+* For speech recognition or translation:
   * A working microphone device (and permission to access it for audio capture).
-  * One or more embedded speech recognition models. See https://aka.ms/embedded-speech for the latest information on how to obtain embedded models.
+  * One or more embedded speech recognition or translation models. See https://aka.ms/embedded-speech for the latest information on how to obtain embedded models.
 * For speech synthesis:
   * A working speaker device (and permission to access it for audio playback).
   * One or more embedded speech synthesis voices. See https://aka.ms/embedded-speech for the latest information on how to obtain embedded voices.
@@ -85,6 +85,19 @@ Sample settings:
    * The voice name can be short (see https://aka.ms/speech/tts-languages, e.g. `en-US-JennyNeural`) or full (e.g. `Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)`).
 1. `EmbeddedSpeechSynthesisVoiceKey` (`EMBEDDED_SPEECH_SYNTHESIS_VOICE_KEY`)
    * Decryption key of the (encrypted) embedded speech synthesis voice.
+1. `EmbeddedSpeechTranslationModelPath` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH`)
+   * Path to the local embedded speech translation model(s) on the device file system.
+     This may be a single model folder or a top-level folder for several models.
+   * Use an absolute path or a path relative to the application working folder.
+     The path is recursively searched for model files.
+   * Files belonging to a specific model must be present as normal individual files in a model folder,
+     not inside an archive, and they must be readable by the application process.
+     The model internal subfolder structure must be intact i.e. as originally delivered.
+1. `EmbeddedSpeechTranslationModelName` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME`)
+   * Name of the embedded speech translation model to be used for translation.
+   * The full model name must be given (e.g. `Microsoft Speech Translator Many-to-English Model V2`).
+1. `EmbeddedSpeechTranslationModelKey` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY`)
+   * Decryption key of the (encrypted) embedded speech translation model.
 1. `CloudSpeechSubscriptionKey` (`CLOUD_SPEECH_SUBSCRIPTION_KEY`)
    * Cloud speech service subscription key. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
 1. `CloudSpeechServiceRegion` (`CLOUD_SPEECH_SERVICE_REGION`)
@@ -131,6 +144,11 @@ Sample settings:
     * Make sure that each `name=value` appears on a separate line.
     * Do not use quotation marks around the values.
     * Environment variables set in this way are only in effect when the solution configuration is **Debug**.
+    * The settings are stored in plain text in a new `samples.vcxproj.user` file in the project directory.
+* If you want to run sample scenarios that depend on the example `data` files:
+  * Open menu **Debug** \> **samples Debug Properties**.
+  * Navigate to **Configuration Properties** \> **Debugging** \> **Working Directory**.
+  * Replace `$(ProjectDir)` with `$(SolutionDir)`.
 
 The application displays a menu that you can navigate using your keyboard.
 Choose the scenarios that you are interested in.
@@ -168,13 +186,13 @@ For a new project from scratch, install the following Speech SDK packages as nee
 * [Microsoft.CognitiveServices.Speech](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech)
   * mandatory for using the Speech SDK
 * [Microsoft.CognitiveServices.Speech.Extension.Embedded.SR](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Embedded.SR)
-  * required for embedded speech recognition
+  * required for embedded speech recognition and translation
 * [Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS)
   * required for embedded speech synthesis
 * [Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime)
-  * required by embedded speech recognition and synthesis
+  * required by embedded speech
 * [Microsoft.CognitiveServices.Speech.Extension.Telemetry](https://www.nuget.org/packages/Microsoft.CognitiveServices.Speech.Extension.Telemetry)
-  * required by embedded speech recognition and synthesis
+  * required by embedded speech
 
 ## References
 

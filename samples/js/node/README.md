@@ -28,7 +28,7 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 The sample demonstrates the speech, intent, and translation recognizers, as well as speech synthesizer. You can start them individually by calling:
 
 ```shell
-node index.js [speech|intent|translate|synthesis] {filename}
+node index.js [speech|intent|translate|synthesis|pronunciationAssessment|pronunciationAssessmentContinue] {filename}
 ```
 
 ## Run the Microphone Streaming sample for node.js

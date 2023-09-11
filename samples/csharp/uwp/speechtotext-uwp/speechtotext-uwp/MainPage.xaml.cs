@@ -202,7 +202,8 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
             StorageFile file = await picker.PickSingleFileAsync();
             if (file == null)
             {
-                string s = string.Format(CultureInfo.InvariantCulture, "Can't open {0} !", file.Path);
+                // When you click "Cancel" in the file picker Window
+                string s = string.Format(CultureInfo.InvariantCulture, "You need to select a WAV file!");
                 NotifyUser(s, NotifyType.ErrorMessage);
                 return;
             }

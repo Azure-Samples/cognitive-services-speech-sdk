@@ -21,11 +21,11 @@ using namespace Microsoft::CognitiveServices::Speech;
 
 // START OF CONFIGURABLE SETTINGS
 
-// Locale to be used in speech recognition (SR), cloud and embedded. In BCP-47 format, case-sensitive.
+// Locale to be used in speech recognition, cloud and embedded. In BCP-47 format, case-sensitive.
 // If EmbeddedSpeechRecognitionModelName is changed from the default, it will override this for embedded.
 const string SpeechRecognitionLocale = "en-US"; // or set SPEECH_RECOGNITION_LOCALE
 
-// Locale to be used in speech synthesis (text-to-speech, TTS), cloud and embedded. In BCP-47 format, case-sensitive.
+// Locale to be used in speech synthesis (text-to-speech), cloud and embedded. In BCP-47 format, case-sensitive.
 // If EmbeddedSpeechSynthesisVoiceName is changed from the default, it will override this for embedded.
 const string SpeechSynthesisLocale = "en-US"; // or set SPEECH_SYNTHESIS_LOCALE
 
@@ -63,6 +63,22 @@ const string EmbeddedSpeechSynthesisVoiceName = "YourEmbeddedSpeechSynthesisVoic
 // WARNING: The key may be visible in the program binary if hard-coded as a plain string.
 const string EmbeddedSpeechSynthesisVoiceKey = "YourEmbeddedSpeechSynthesisVoiceKey"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_KEY
 
+// Path to the local embedded speech translation model(s) on the device file system.
+// This may be a single model folder or a top-level folder for several models.
+// Use an absolute path or a path relative to the application working folder.
+// The path is recursively searched for model files.
+// Files belonging to a specific model must be available as normal individual files in a model folder,
+// not inside an archive, and they must be readable by the application process.
+const string EmbeddedSpeechTranslationModelPath = "YourEmbeddedSpeechTranslationModelPath"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH
+
+// Name of the embedded speech translation model to be used for translation.
+// For example: "Microsoft Speech Translator Many-to-English Model V2"
+const string EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME
+
+// Decryption key of the (encrypted) embedded speech translation model.
+// WARNING: The key may be visible in the program binary if hard-coded as a plain string.
+const string EmbeddedSpeechTranslationModelKey = "YourEmbeddedSpeechTranslationModelKey"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY
+
 // Cloud speech service subscription information.
 // This is needed with hybrid (cloud & embedded) speech configuration.
 const string CloudSpeechSubscriptionKey = "YourCloudSpeechSubscriptionKey"; // or set CLOUD_SPEECH_SUBSCRIPTION_KEY
@@ -71,13 +87,11 @@ const string CloudSpeechServiceRegion = "YourCloudSpeechServiceRegion"; // or se
 // END OF CONFIGURABLE SETTINGS
 
 
-// Embedded speech recognition input audio format settings.
+// Embedded speech recognition default input audio format settings.
 // In addition, little-endian signed integer samples are required.
-// THIS IS THE ONLY SUPPORTED AUDIO FORMAT AT THE MOMENT. DO NOT MODIFY.
-// These settings are just included here to make them explicit and visible.
-uint32_t GetEmbeddedSpeechSamplesPerSecond() { return 16000; }
-uint8_t GetEmbeddedSpeechBitsPerSample() { return 16; }
-uint8_t GetEmbeddedSpeechChannels() { return 1; }
+uint32_t GetEmbeddedSpeechSamplesPerSecond() { return 16000; }  // or 8000
+uint8_t GetEmbeddedSpeechBitsPerSample() { return 16; }         // DO NOT MODIFY; no other format supported
+uint8_t GetEmbeddedSpeechChannels() { return 1; }               // DO NOT MODIFY; no other format supported
 
 // Get names and other properties of example files included with the sample project.
 const string GetSpeechRawAudioFileName() { return "data/speech_test.raw"; }
@@ -101,6 +115,39 @@ string SpeechRecognitionModelName;
 string SpeechRecognitionModelKey;
 string SpeechSynthesisVoiceName;
 string SpeechSynthesisVoiceKey;
+string SpeechTranslationModelName;
+string SpeechTranslationModelKey;
+
+// Utility functions for main menu.
+bool HasSpeechRecognitionModel()
+{
+    if (SpeechRecognitionModelName.empty())
+    {
+        cerr << "## ERROR: No speech recognition model specified.\n";
+        return false;
+    }
+    return true;
+}
+
+bool HasSpeechSynthesisVoice()
+{
+    if (SpeechSynthesisVoiceName.empty())
+    {
+        cerr << "## ERROR: No speech synthesis voice specified.\n";
+        return false;
+    }
+    return true;
+}
+
+bool HasSpeechTranslationModel()
+{
+    if (SpeechTranslationModelName.empty())
+    {
+        cerr << "## ERROR: No speech translation model specified.\n";
+        return false;
+    }
+    return true;
+}
 
 // Creates an instance of an embedded speech config.
 shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
@@ -108,15 +155,26 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
     vector<string> paths;
 
     // Add paths for offline data.
-    auto modelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
-    if (!modelPath.empty() && modelPath.compare("YourEmbeddedSpeechRecognitionModelPath") != 0)
+    auto recognitionModelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
+    if (!recognitionModelPath.empty() && recognitionModelPath.compare("YourEmbeddedSpeechRecognitionModelPath") != 0)
     {
-        paths.push_back(modelPath);
+        paths.push_back(recognitionModelPath);
     }
-    auto voicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
-    if (!voicePath.empty() && voicePath.compare("YourEmbeddedSpeechSynthesisVoicePath") != 0)
+    auto synthesisVoicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
+    if (!synthesisVoicePath.empty() && synthesisVoicePath.compare("YourEmbeddedSpeechSynthesisVoicePath") != 0)
     {
-        paths.push_back(voicePath);
+        paths.push_back(synthesisVoicePath);
+    }
+    auto translationModelPath = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH", EmbeddedSpeechTranslationModelPath);
+    if (!translationModelPath.empty() && translationModelPath.compare("YourEmbeddedSpeechTranslationModelPath") != 0)
+    {
+        paths.push_back(translationModelPath);
+    }
+
+    if (paths.size() == 0)
+    {
+        cerr << "## ERROR: No model path(s) specified.\n";
+        return nullptr;
     }
 
     // Note, if there is only one path then you can also use EmbeddedSpeechConfig::FromPath(string).
@@ -148,9 +206,15 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
         }
     }
 
-    // Enable profanity masking.
+    if (!SpeechTranslationModelName.empty())
+    {
+        // Mandatory configuration for embedded speech translation.
+        config->SetSpeechTranslationModel(SpeechTranslationModelName, SpeechTranslationModelKey);
+    }
+
+    // Disable profanity masking.
     /*
-    config->SetProfanity(ProfanityOption::Masked);
+    config->SetProfanity(ProfanityOption::Raw);
     */
 
     return config;
@@ -188,35 +252,33 @@ bool VerifySettings()
 
     if (GetCurrentDir(cwd.data(), FILENAME_MAX))
     {
-        cout << "Current working directory:      " << cwd.data() << endl;
+        cout << "Current working directory: " << cwd.data() << endl;
     }
     else
     {
         cout << "## WARNING: Cannot get the current working directory, errno=" << errno << endl;
     }
 
-    auto modelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
-    if (modelPath.empty() || modelPath.compare("YourEmbeddedSpeechRecognitionModelPath") == 0)
+    auto recognitionModelPath = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH", EmbeddedSpeechRecognitionModelPath);
+    if (recognitionModelPath.empty() || recognitionModelPath.compare("YourEmbeddedSpeechRecognitionModelPath") == 0)
     {
-        cout << "## WARNING: Embedded SR model search path is not set.\n";
-        modelPath.clear();
+        recognitionModelPath.clear();
     }
 
-    auto voicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
-    if (voicePath.empty() || voicePath.compare("YourEmbeddedSpeechSynthesisVoicePath") == 0)
+    auto synthesisVoicePath = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH", EmbeddedSpeechSynthesisVoicePath);
+    if (synthesisVoicePath.empty() || synthesisVoicePath.compare("YourEmbeddedSpeechSynthesisVoicePath") == 0)
     {
-        cout << "## WARNING: Embedded TTS voice search path is not set.\n";
-        voicePath.clear();
+        synthesisVoicePath.clear();
     }
 
-    if (modelPath.empty() && voicePath.empty())
+    auto translationModelPath = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH", EmbeddedSpeechTranslationModelPath);
+    if (translationModelPath.empty() || translationModelPath.compare("YourEmbeddedSpeechTranslationModelPath") == 0)
     {
-        cerr << "## ERROR: Cannot run without embedded SR models or TTS voices.\n";
-        return false;
+        translationModelPath.clear();
     }
 
     // Find an embedded speech recognition model based on the name or locale.
-    if (!modelPath.empty())
+    if (!recognitionModelPath.empty())
     {
         auto modelName = GetSetting("EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME", EmbeddedSpeechRecognitionModelName);
         auto modelLocale = GetSetting("SPEECH_RECOGNITION_LOCALE", SpeechRecognitionLocale);
@@ -226,7 +288,7 @@ bool VerifySettings()
             modelName.clear(); // no name given -> search by locale
         }
 
-        auto config = EmbeddedSpeechConfig::FromPath(modelPath);
+        auto config = EmbeddedSpeechConfig::FromPath(recognitionModelPath);
         auto models = config->GetSpeechRecognitionModels();
 
         auto result =
@@ -238,7 +300,7 @@ bool VerifySettings()
                     }
                     else
                     {
-                        return model->Name.compare(modelName) == 0;
+                        return model->Name.compare(modelName) == 0 || model->Locales[0].compare(modelName) == 0;
                     }
                 });
 
@@ -249,7 +311,7 @@ bool VerifySettings()
 
         if (SpeechRecognitionModelName.empty())
         {
-            cout << "## WARNING: Cannot locate an embedded SR model by ";
+            cout << "## WARNING: Cannot locate an embedded speech recognition model by ";
             if (modelName.empty())
             {
                 cout << "locale \"" << modelLocale << "\". ";
@@ -258,7 +320,7 @@ bool VerifySettings()
             {
                 cout << "name \"" << modelName << "\". ";
             }
-            cout << "Current model search path: " << modelPath << endl;
+            cout << "Current recognition model search path: " << recognitionModelPath << endl;
         }
         else
         {
@@ -272,7 +334,7 @@ bool VerifySettings()
     }
 
     // Find an embedded speech synthesis voice based on the name or locale.
-    if (!voicePath.empty())
+    if (!synthesisVoicePath.empty())
     {
         auto voiceName = GetSetting("EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME", EmbeddedSpeechSynthesisVoiceName);
         auto voiceLocale = GetSetting("SPEECH_SYNTHESIS_LOCALE", SpeechSynthesisLocale);
@@ -282,7 +344,7 @@ bool VerifySettings()
             voiceName.clear(); // no name given -> search by locale
         }
 
-        auto config = EmbeddedSpeechConfig::FromPath(voicePath);
+        auto config = EmbeddedSpeechConfig::FromPath(synthesisVoicePath);
         auto synthesizer = SpeechSynthesizer::FromConfig(config, nullptr);
         const auto voicesList = synthesizer->GetVoicesAsync("").get();
 
@@ -298,7 +360,7 @@ bool VerifySettings()
                         }
                         else
                         {
-                            return voice->Name.compare(voiceName) == 0;
+                            return voice->Name.compare(voiceName) == 0 || voice->ShortName.compare(voiceName) == 0;
                         }
                     });
 
@@ -310,7 +372,7 @@ bool VerifySettings()
 
         if (SpeechSynthesisVoiceName.empty())
         {
-            cout << "## WARNING: Cannot locate an embedded TTS voice by ";
+            cout << "## WARNING: Cannot locate an embedded speech synthesis voice by ";
             if (voiceName.empty())
             {
                 cout << "locale \"" << voiceLocale << "\". ";
@@ -319,7 +381,7 @@ bool VerifySettings()
             {
                 cout << "name \"" << voiceName << "\". ";
             }
-            cout << "Current voice search path: " << voicePath << endl;
+            cout << "Current synthesis voice search path: " << synthesisVoicePath << endl;
         }
         else
         {
@@ -332,10 +394,40 @@ bool VerifySettings()
         }
     }
 
-    if (SpeechRecognitionModelName.empty() && SpeechSynthesisVoiceName.empty())
+    // Find an embedded speech translation model based on the name.
+    if (!translationModelPath.empty())
     {
-        cerr << "## ERROR: Cannot run without embedded SR models or TTS voices.\n";
-        return false;
+        auto modelName = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME", EmbeddedSpeechTranslationModelName);
+
+        auto config = EmbeddedSpeechConfig::FromPath(translationModelPath);
+        auto models = config->GetSpeechTranslationModels();
+
+        auto result =
+            find_if(models.begin(), models.end(), [&](shared_ptr<SpeechTranslationModel> model)
+                {
+                    return model->Name.compare(modelName) == 0;
+                });
+
+        if (result != models.end())
+        {
+            SpeechTranslationModelName = (*result)->Name;
+        }
+
+        if (SpeechTranslationModelName.empty())
+        {
+            cout << "## WARNING: Cannot locate an embedded speech translation model by ";
+            cout << "name \"" << modelName << "\". ";
+            cout << "Current translation model search path: " << translationModelPath << endl;
+        }
+        else
+        {
+            SpeechTranslationModelKey = GetSetting("EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY", EmbeddedSpeechTranslationModelKey);
+            if (SpeechTranslationModelKey.empty() || SpeechTranslationModelKey.compare("YourEmbeddedSpeechTranslationModelKey") == 0)
+            {
+                SpeechTranslationModelKey.clear();
+                cout << "## WARNING: The key for \"" << SpeechTranslationModelName << "\" is not set.\n";
+            }
+        }
     }
 
     auto maskValue = [](const string& value)
@@ -347,22 +439,31 @@ bool VerifySettings()
         return masked;
     };
 
-    cout << "Embedded SR model search path:  " << (modelPath.empty() ? "(not set)" : modelPath) << endl;
-    if (!modelPath.empty())
+    cout << "Embedded speech recognition\n  model search path: " << (recognitionModelPath.empty() ? "(not set)" : recognitionModelPath) << endl;
+    if (!recognitionModelPath.empty())
     {
-        cout << "Embedded SR model name:         " << (SpeechRecognitionModelName.empty() ? "(not found)" : SpeechRecognitionModelName) << endl;
+        cout << "  model name:        " << (SpeechRecognitionModelName.empty() ? "(not found)" : SpeechRecognitionModelName) << endl;
         if (!SpeechRecognitionModelName.empty())
         {
-            cout << "Embedded SR model key:          " << (SpeechRecognitionModelKey.empty() ? "(not set)" : maskValue(SpeechRecognitionModelKey)) << endl;
+            cout << "  model key:         " << (SpeechRecognitionModelKey.empty() ? "(not set)" : maskValue(SpeechRecognitionModelKey)) << endl;
         }
     }
-    cout << "Embedded TTS voice search path: " << (voicePath.empty() ? "(not set)" : voicePath) << endl;
-    if (!voicePath.empty())
+    cout << "Embedded speech synthesis\n  voice search path: " << (synthesisVoicePath.empty() ? "(not set)" : synthesisVoicePath) << endl;
+    if (!synthesisVoicePath.empty())
     {
-        cout << "Embedded TTS voice name:        " << (SpeechSynthesisVoiceName.empty() ? "(not found)" : SpeechSynthesisVoiceName) << endl;
+        cout << "  voice name:        " << (SpeechSynthesisVoiceName.empty() ? "(not found)" : SpeechSynthesisVoiceName) << endl;
         if (!SpeechSynthesisVoiceName.empty())
         {
-            cout << "Embedded TTS voice key:         " << (SpeechSynthesisVoiceKey.empty() ? "(not set)" : maskValue(SpeechSynthesisVoiceKey)) << endl;
+            cout << "  voice key:         " << (SpeechSynthesisVoiceKey.empty() ? "(not set)" : maskValue(SpeechSynthesisVoiceKey)) << endl;
+        }
+    }
+    cout << "Embedded speech translation\n  model search path: " << (translationModelPath.empty() ? "(not set)" : translationModelPath) << endl;
+    if (!translationModelPath.empty())
+    {
+        cout << "  model name:        " << (SpeechTranslationModelName.empty() ? "(not found)" : SpeechTranslationModelName) << endl;
+        if (!SpeechTranslationModelName.empty())
+        {
+            cout << "  model key:         " << (SpeechTranslationModelKey.empty() ? "(not set)" : maskValue(SpeechTranslationModelKey)) << endl;
         }
     }
 

@@ -9,6 +9,9 @@
     var intent = require("./intent");
     var translate = require("./translation");
     var synthesis = require("./synthesis");
+    var pronunciationAssessmentContinue = require("./pronunciationAssessmentContinue");
+    var pronunciationAssessment = require("./pronunciationAssessment");
+    var pronunciationAssessmentConfiguredWithJson = require("./pronunciationAssessmentConfiguredWithJson");
     
     if (process.argv.length > 3) {
         settings.filename = process.argv[3];
@@ -30,6 +33,21 @@
                 console.log("Now synthesizing to: " + settings.filename);
                 synthesis.main(settings, settings.filename);
                 break;
+            
+            case "pronunciationAssessmentContinue":
+                console.log("Now pronunciation assessment to: " + settings.filename);
+                pronunciationAssessmentContinue.main(settings);
+                break;
+
+            case "pronunciationAssessment":
+                console.log("Now pronunciation assessment to: " + settings.filename);
+                pronunciationAssessment.main(settings);
+                break;
+
+            case "pronunciationAssessmentConfiguredWithJson":
+                console.log("Now pronunciation assessment to: " + settings.filename);
+                pronunciationAssessmentConfiguredWithJson.main(settings);
+                break;
     
             case "speech":
             default:
@@ -39,7 +57,7 @@
         }
     }
     else {
-        console.log("usage: index.js [speech|intent|translate|synthesis] {filename}");
+        console.log("usage: index.js [speech|intent|translate|synthesis|pronunciationAssessment|pronunciationAssessmentContinue|pronunciationAssessmentConfiguredWithJson] {filename}");
     }
 }());
     

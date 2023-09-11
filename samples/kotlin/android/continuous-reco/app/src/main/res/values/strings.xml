@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Continuous Reco Sample</string>
+    <string name="button_label_start_reco">Start</string>
+    <string name="button_label_stop_reco">Stop</string>
+</resources>
