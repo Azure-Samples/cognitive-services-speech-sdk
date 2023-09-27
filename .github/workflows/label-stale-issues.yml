@@ -2,7 +2,7 @@ name: label-stale-issues
 run-name: Issue freshness check
 on:
   schedule:
-    - cron: '0 2 * * 1-5'
+    - cron: '0/20 * * * 1-5'
 
 jobs:
   check_freshness_job:
@@ -94,7 +94,7 @@ jobs:
           # delete-branch: # optional, default is false
           # The date used to skip the stale action on issue/pull request created before it (ISO 8601 or RFC 2822).
             # optional
-          start-date: '2022‐03‐26T02:00:00Z'
+          start-date: '2023-06-26T09:30:00.000Z'
           # The assignees which exempt an issue or a pull request from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2").
           # exempt-assignees: # optional, default is 
           # The assignees which exempt an issue from being marked as stale. Separate multiple assignees with commas (eg. "user1,user2"). Override "exempt-assignees" option regarding only the issues.
