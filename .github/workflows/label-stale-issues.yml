@@ -2,16 +2,17 @@ name: label-stale-issues
 run-name: Issue freshness check
 on:
   schedule:
-    - cron: '0/20 * * * 1-5'
+    - cron: '0/5 * * * 1-5'
 
+permissions:
+  issues: write
+  
 jobs:
   check_freshness_job:
     runs-on: ubuntu-latest
     steps:
-      - name: Label stale Issues
-      # You may pin to the exact commit or the version.
-      # uses: alxarno/stale@1eb09fee607a400034d3ec0dce41e749e9dd79f2
-        uses: alxarno/stale@0.0.10
+      - name: Close Stale Issues
+        uses: actions/stale@v4.1.1
         with:
           # Token for the repository. Can be passed in using `{{ secrets.GITHUB_TOKEN }}`.
           # repo-token: # optional, default is ${{ github.token }}
@@ -24,20 +25,20 @@ jobs:
           # The message to post on the pull request when closing it. If none provided, will not comment when closing a pull requests.
           # close-pr-message: # optional
           # The number of days old an issue or a pull request can be before marking it stale. Set to -1 to never mark issues or pull requests as stale automatically.
+            # optional, default is 60
           days-before-stale: 19
           # The number of days old an issue can be before marking it stale. Set to -1 to never mark issues as stale automatically. Override "days-before-stale" option regarding only the issues.
-          days-before-issue-stale: 19
+          # days-before-issue-stale: # optional
           # The number of days old a pull request can be before marking it stale. Set to -1 to never mark pull requests as stale automatically. Override "days-before-stale" option regarding only the pull requests.
+            # optional
           days-before-pr-stale: -1
-          # The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests. 
-            # Optional, default is 7
+          # The number of days to wait to close an issue or a pull request after it being marked stale. Set to -1 to never close stale issues or pull requests.
+            # optional, default is 7
           days-before-close: -1
           # The number of days to wait to close an issue after it being marked stale. Set to -1 to never close stale issues. Override "days-before-close" option regarding only the issues.
-            # Optional
-          days-before-issue-close: -1 
+          # days-before-issue-close: # optional
           # The number of days to wait to close a pull request after it being marked stale. Set to -1 to never close stale pull requests. Override "days-before-close" option regarding only the pull requests.
-            # Optional
-          days-before-pr-close: -1 
+          # days-before-pr-close: # optional
           # The label to apply when an issue is stale.
             # optional, default is Stale
           stale-issue-label: 'update needed'
@@ -78,15 +79,13 @@ jobs:
           # The maximum number of operations per run, used to control rate limiting (GitHub API CRUD related).
           # operations-per-run: # optional, default is 30
           # Remove stale labels from issues and pull requests when they are updated or commented on.
-            # optional, default is true
-          remove-stale-when-updated: true
+          # remove-stale-when-updated: # optional, default is true
           # Remove stale labels from issues when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the issues.
-            # optional
-          remove-issue-stale-when-updated: true
+          # remove-issue-stale-when-updated: # optional, default is 
           # Remove stale labels from pull requests when they are updated or commented on. Override "remove-stale-when-updated" option regarding only the pull requests.
           # remove-pr-stale-when-updated: # optional, default is 
           # Run the processor in debug mode without actually performing any operations on live issues.
-            # Optional, default is false
+            # optional, default is false
           debug-only: true
           # The order to get issues or pull requests. Defaults to false, which is descending.
           # ascending: # optional, default is false
@@ -110,8 +109,7 @@ jobs:
           # Exempt draft pull requests from being marked as stale. Default to false.
           # exempt-draft-pr: # optional, default is false
           # Display some statistics at the end regarding the stale workflow (only when the logs are enabled).
-             # optional, default is true
-          enable-statistics: true
+          # enable-statistics: # optional, default is true
           # A comma delimited list of labels to add when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.
           # labels-to-add-when-unstale: # optional, default is 
           # A comma delimited list of labels to remove when a stale issue or pull request receives activity and has the stale-issue-label or stale-pr-label removed from it.
@@ -119,15 +117,6 @@ jobs:
           # Any update (update/comment) can reset the stale idle time on the issues and pull requests.
           # ignore-updates: # optional, default is false
           # Any update (update/comment) can reset the stale idle time on the issues. Override "ignore-updates" option regarding only the issues.
-            # optional
-          ignore-issue-updates: false
+          # ignore-issue-updates: # optional, default is 
           # Any update (update/comment) can reset the stale idle time on the pull requests. Override "ignore-updates" option regarding only the pull requests.
           # ignore-pr-updates: # optional, default is 
-          # Required labels
-          # required-labels: # optional, default is 
-          # Exemption labels
-          # exemption-labels: # optional, default is 
-          # Required labels message
-          # required-labels-message: # optional, default is 
-          # Label for already checked required labels
-          # required-issue-already-marked-label: # optional, default is 
