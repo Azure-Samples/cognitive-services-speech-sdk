@@ -2,7 +2,7 @@ name: label-stale-issues
 run-name: Issue freshness check
 on:
   schedule:
-    - cron: '0 2 * * 1-5'
+    - cron: '0/20 * * * 1-5'
 
 jobs:
   check_freshness_job:
