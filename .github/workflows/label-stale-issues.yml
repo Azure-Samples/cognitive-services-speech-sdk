@@ -2,7 +2,7 @@ name: label-stale-issues
 run-name: Issue freshness check
 on:
   schedule:
-    - cron: '0/5 * * * 1-5'
+    - cron: '0 2 * * 1-5'
 
 permissions:
   issues: write
@@ -86,7 +86,7 @@ jobs:
           # remove-pr-stale-when-updated: # optional, default is 
           # Run the processor in debug mode without actually performing any operations on live issues.
             # optional, default is false
-          debug-only: true
+          # debug-only: true
           # The order to get issues or pull requests. Defaults to false, which is descending.
           # ascending: # optional, default is false
           # Delete the git branch after closing a stale pull request.
