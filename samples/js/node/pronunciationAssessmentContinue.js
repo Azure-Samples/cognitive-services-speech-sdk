@@ -76,7 +76,7 @@ module.exports = {
             "fluency score: ", pronunciation_result.fluencyScore
         );
 
-        jo = eval("(" + e.result.properties.getProperty(sdk.PropertyId.SpeechServiceResponse_JsonResult) + ")");
+        jo = JSON.parse(e.result.properties.getProperty(sdk.PropertyId.SpeechServiceResponse_JsonResult));
         const nb = jo["NBest"][0];
         startOffset = nb.Words[0].Offset;
         const localtext = _.map(nb.Words, (item) => item.Word.toLowerCase());
