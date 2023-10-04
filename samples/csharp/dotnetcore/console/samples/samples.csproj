@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp7</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -32,6 +32,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.wav" Link="whatstheweatherlike.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.opus" Link="whatstheweatherlike.opus">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.mp3" Link="whatstheweatherlike.mp3">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\..\..\sharedcontent\console\wreck-a-nice-beach.wav">

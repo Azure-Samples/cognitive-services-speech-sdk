@@ -430,6 +430,98 @@ namespace MicrosoftSpeechSDKSamples
             // </recognitionWithCompressedInputPushStreamAudio>
         }
 
+       public static async Task SpeechRecognitionWithCompressedInputPushStreamAudio_OPUS()
+        {
+            // <recognitionWithCompressedInputPushStreamAudio>
+            // Creates an instance of a speech config with specified subscription key and service region.
+            // Replace with your own subscription key and service region (e.g., "westus").
+            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+            config.SetProperty("SPEECH-CompressedPassthrough", "true");
+
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            using (var pushStream = AudioInputStream.CreatePushStream(AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.OGG_OPUS)))
+            {
+                using (var audioInput = AudioConfig.FromStreamInput(pushStream))
+                {
+                    // Creates a speech recognizer using audio stream input.
+                    using (var recognizer = new SpeechRecognizer(config, audioInput))
+                    {
+                        // Subscribes to events.
+                        recognizer.Recognizing += (s, e) =>
+                        {
+                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                        };
+
+                        recognizer.Recognized += (s, e) =>
+                        {
+                            if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                            {
+                                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            }
+                            else if (e.Result.Reason == ResultReason.NoMatch)
+                            {
+                                Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                            }
+                        };
+
+                        recognizer.Canceled += (s, e) =>
+                        {
+                            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                            if (e.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        recognizer.SessionStarted += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession started event.");
+                        };
+
+                        recognizer.SessionStopped += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession stopped event.");
+                            Console.WriteLine("\nStop recognition.");
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                        await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                        using (BinaryAudioStreamReader reader = Helper.CreateBinaryFileReader(@"whatstheweatherlike.opus"))
+                        {
+                            byte[] buffer = new byte[1000];
+                            while (true)
+                            {
+                                var readSamples = reader.Read(buffer, (uint)buffer.Length);
+                                if (readSamples == 0)
+                                {
+                                    break;
+                                }
+                                pushStream.Write(buffer, readSamples);
+                            }
+                        }
+                        pushStream.Close();
+
+                        // Waits for completion.
+                        // Use Task.WaitAny to keep the task rooted.
+                        Task.WaitAny(new[] { stopRecognition.Task });
+
+                        // Stops recognition.
+                        await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+            // </recognitionWithCompressedInputPushStreamAudio>
+        }
+
         // Speech recognition with audio stream
         public static async Task RecognitionWithPullAudioStreamAsync()
         {
