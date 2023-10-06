@@ -25,14 +25,14 @@ class CallCenter
 {
 private:
     // This should not change unless you switch to a new version of the Speech REST API.
-    const std::string speechTranscriptionPath = "/speechtotext/v3.0/transcriptions";
+    const std::string speechTranscriptionPath = "/speechtotext/v3.1/transcriptions";
 
     // These should not change unless you switch to a new version of the Cognitive Language REST API.
     const std::string sentimentAnalysisPath = "/language/:analyze-text";
     const std::string sentimentAnalysisQuery = "?api-version=2022-05-01";
     const std::string conversationAnalysisPath = "/language/analyze-conversations/jobs";
-    const std::string conversationAnalysisQuery = "?api-version=2022-05-15-preview";
-    const std::string conversationSummaryModelVersion = "2022-05-15-preview";
+    const std::string conversationAnalysisQuery = "?api-version=2022-10-01-preview";
+    const std::string conversationSummaryModelVersion = "latest";
 
     // How long to wait while polling batch transcription and conversation analysis status.
     const int waitSeconds = 10;
