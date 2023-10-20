@@ -1,0 +1,4 @@
+input_audio_language,input_audio_file,input_content_encoding,input_content_type,verify_audio_converted_status,verify_audio_converted_text
+en-US,en-US5secsGoodQuality2.wav,base64,"text/plain",Success,"Hey, it's Dad. Nothing urgent talk to you tonight."
+es-MX,es-MX.txt,base64,"text/plain",Success,"Aloelli bueno, ahora no me contestas, pero ya leí tus mensajes, soy pamela, tu prima, mira, yo te voy a dar un número si tú gustas todavía hablar conmigo, llámame a este número. Marcas los códigos para llamar aquí a un teléfono fijo de Perú y es 650. 4935654935 me llamas a participe de las 9:30 de la noche, Chao Chao."
+ja-JP,ja-JP.txt,base64,"text/plain",Success,"こんにちは元気ですか？昨日映画を見に行きましたよ。またね。"

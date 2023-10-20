@@ -1,0 +1,21 @@
+{
+  "pass_through_data": {
+    "message_id": "{{context.headers['Message-Id']}}",
+    "x_cns_language": "{{context.x_cns_language}}",
+    "x_voice_writer": "{{context.headers['X-CNS-Voice-Writer']}}",
+    "subject": "{{context.headers.Subject}}"
+  },
+  "metadata": {
+    "language": "{{context.language}}",
+    "language_configuration": {
+      "en-US": {
+        "min_confidence_percentage": "55",
+        "max_audio_length_secs": "240"
+      },
+      "es-US": {
+        "min_confidence_percentage": "60",
+        "max_audio_length_secs": "120"
+      }
+    }
+  }
+}

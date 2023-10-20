@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<conversionResponse>
+  <scrid>{{request.scrid}}</scrid>
+  <externalRequestID>{{request.headers['X-Reference']}}</externalRequestID>
+  <reasonStatus>{{request.status}}</reasonStatus>
+  {% if request.status == "Success" -%}
+  <recognitionStatus>{{request.recognition_result.conversion_status}}</recognitionStatus>
+  <convertedText>{{request.recognition_result.text}}</convertedText>
+  <displayText>{{request.recognition_result.display_text}}</displayText>
+  <itnText>{{request.recognition_result.itn_text}}</itnText>
+  <globalConfidenceScore>{{request.recognition_result.global_confidence_score}}</globalConfidenceScore>
+  <rtf>{{request.recognition_result.rtf}}</rtf>
+  <recognitionDuration>{{request.recognition_result.duration}}</recognitionDuration>
+  <audioDurationSecs>{{request.recognition_result.final_audio_length_secs}}</audioDurationSecs>
+  <audioDurationMSecs>{{request.recognition_result.final_audio_length_msecs}}</audioDurationMSecs>
+  <audioTruncated>{{request.recognition_result.audio_truncated}}</audioTruncated>
+  <requestedLanguages>{{request.recognition_result.requested_languages}}</requestedLanguages>
+  {% if request.recognition_result.lid_enabled -%}
+  <lidEnabled>true</lidEnabled>
+  <detectedLanguages>{{request.recognition_result.detected_languages}}</detectedLanguages>
+  {%- endif -%}
+  {%- else -%}
+  <notes>{{request.notes}}</notes>
+  {%- endif %}
+</conversionResponse>

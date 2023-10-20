@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smtp-deployment
+  labels:
+    app: smtp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smtp
+  template:
+    metadata:
+      labels:
+        app: smtp
+    spec:
+      containers:
+      - name: smtp-container
+        image: $DEPLOY_IMAGE_NAME
+        imagePullPolicy: Never
+        envFrom:
+          - configMapRef:
+              name: smtp-configmap-file
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "500Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        ports:
+        - containerPort: $v2tic_port
+        command: ["python", "servers/smtp_server.py"]
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smtp-service
+spec:
+  type: NodePort
+  selector:
+    app: smtp
+  ports:
+    - protocol: TCP
+      port: $v2tic_port
+      targetPort: $v2tic_port
+      nodePort: $v2tic_nodeport

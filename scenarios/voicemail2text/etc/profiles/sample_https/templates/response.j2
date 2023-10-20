@@ -1,0 +1,19 @@
+{
+   "return_url": "{{request.headers['X-Return-Url']}}",
+   "verify_ssl": "false",
+   "headers": {
+     "Content-Type": "application/xml; charset=utf-8",
+      "X-Reference": "{{request.scrid}}",
+      {% if request.status == "Success" -%}
+         "X-RTF": "{{request.recognition_result.rtf}}",
+         {% if(request.recognition_result.conversion_status == "Transcribed" and request.recognition_result.lid_enabled) -%}
+         "X-Detected-Language-Constellation": "{{request.recognition_result.detected_languages}}",
+         {%- endif %}
+      {%- endif %}
+     "Connection": "close"
+   },
+   "body": {
+      "import": "response_body.j2",
+      "encoding": "utf-8"
+   }
+}

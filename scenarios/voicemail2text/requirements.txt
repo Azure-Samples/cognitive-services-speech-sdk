@@ -1,0 +1,18 @@
+azure-cognitiveservices-speech
+Jinja2
+aiohttp == 3.8.5
+aiosmtplib
+aiosmtpd
+python-dateutil
+tenacity
+timelength
+fastapi[all]
+requests
+certifi == 2023.7.22
+pytest
+pytest-csv
+pytest-mock
+pytest-asyncio
+anyio
+pytest-html
+allure-pytest

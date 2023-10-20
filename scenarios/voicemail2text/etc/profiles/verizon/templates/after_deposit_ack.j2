@@ -1,0 +1,16 @@
+{
+   "mail_from": "<>",
+   "rcpt_to": "{{request.headers['Reply-To']}}",
+   "headers": {
+     "To": "{{request.headers['Reply-To']}}",
+     "From": "{{request.headers.To}}",
+     "Subject": "Delivery Notification (Success)",
+     "MIME-Version": "1.0",
+     "Content-Type": "Multipart/Report; report-type=delivery-status; boundary=nuanceBoundary",
+     "Message-Id": "{{request.headers['Message-Id']}}"
+   },
+   "body": {
+      "import": "after_deposit_ack_body.j2",
+      "encoding": "us-ascii"
+   }
+}

@@ -1,0 +1,22 @@
+--nuanceBoundary
+Content-Type: text/plain; charset=us-ascii
+
+Your message was successfully delivered to "{{request.headers.To}}"
+
+--nuanceBoundary
+Content-Type: message/Delivery-Status
+
+Reporting-MTA: dns; nuancevm.com
+Final-Recipient: rfc822; "{{request.headers.To}}"
+Action: delivered
+Status: 2.0.0
+
+--nuanceBoundary
+Content-Type: message/rfc822
+
+X-ref-num: "{{request.scrid}}"
+Message-Id: "{{request.headers['Message-Id']}}"
+X-rcv-time: "{{request.headers.Date}}"
+X-dsn-snd-time: "{{request.pass_through_data.x_notification_snd_time}}"
+
+--nuanceBoundary--

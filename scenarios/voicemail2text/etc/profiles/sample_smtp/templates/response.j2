@@ -1,0 +1,23 @@
+{
+   {# optionally put response_address or will default to configured smtp.response_host:smtp.reponse_port
+   "response_address": "",
+   #}
+
+   {# if start_tls is not configured, will default to false #}
+   "start_tls": "false",
+
+   {# fetch required metadata from pass_through_data or from original request headers #}
+   "mail_from": "{{request.pass_through_data.mail_from}}",
+   "rcpt_to": "{{request.headers.From}}",
+
+   "headers": {
+     "Content-Type": "text/plain; charset=utf-8",
+     "Subject": "{{request.pass_through_data.message_id}}",
+     "X-Reference": "{{request.headers['X-Reference']}}",
+     "Connection": "close"
+   },
+   "body": {
+      "import": "response_body.j2",
+      "encoding": "utf-8"
+   }
+}

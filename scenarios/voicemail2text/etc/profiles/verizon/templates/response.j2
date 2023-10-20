@@ -1,0 +1,24 @@
+{
+  "mail_from": "{{request.headers.To}}",
+  "rcpt_to": "{{request.headers['Reply-To']}}",
+  "headers": {
+    "From": "{{request.headers.To}}",
+    "To": "{{request.headers['Reply-To']}}",
+    "Mime-Version": "1.0",
+    "Date": "{{request.headers.Date}}",
+    "Message-Id": "{{request.pass_through_data.message_id}}",
+    "Delivered-To": "{{request.headers['Delivered-To']}}",
+    "Content-Type": "text/plain; charset=us-ascii",
+    "Content-Transfer-Encoding": "7bit",
+    "X-CNS-Interface-Version": "{{request.headers['X-CNS-Interface-Version']}}",
+    "X-Error-Code": "{{request.pass_through_data.x_error_code}}",
+    "X-language": "{{request.metadata.language}}",
+    "X-rcv-time": "{{request.headers.Date}}",
+    "X-snd-time": "{{request.pass_through_data.x_response_snd_time}}",
+    "X-full-msg-trans": "{{request.recognition_result.audio_truncated}}",
+    "X-Trans-Text": {
+      "import": "trans_text.j2",
+      "encoding": "utf-8"
+    }
+  }
+}
