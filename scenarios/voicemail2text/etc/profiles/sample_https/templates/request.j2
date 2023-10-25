@@ -1,0 +1,34 @@
+{
+  "pass_through_data": {
+    "external_id": "{{context.headers['X-Reference']}}",
+    "called_number": "Anonymous",
+    "calling_number": "{{context.headers['X-Caller']}}"
+  },
+  "metadata": {
+     "log_transcriptions_enabled": "False",
+     "language": "{{context.headers['X-Language']}}",
+     "language_configuration": {
+        "en-US": {
+           "min_confidence_percentage": "60",
+           "max_audio_length_secs": "240"
+        },
+        "es-US": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        },
+        "lid": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        },
+        "default": {
+           "min_confidence_percentage": "55",
+           "max_audio_length_secs": "240"
+        }
+     },
+     "acs_client": {
+        "lid_enabled": "True",
+        "lid_mode": "AtStartHighAccuracy",
+        "profanity_option": "Masked"
+      }
+  }
+}

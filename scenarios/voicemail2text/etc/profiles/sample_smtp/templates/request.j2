@@ -1,0 +1,29 @@
+{
+  "pass_through_data": {
+    "external_id": "{{context.headers['X-Reference']}}",
+    "from": "{{context.headers.From}}",
+    "to": "{{context.headers.To}}",
+    "mail_from": "{{context.headers['Reply-To']}}",
+    "reply_to": "{{context.headers.From}}",
+    "message_id": "{{context.headers['Message-Id']}}"
+	},
+  "metadata": {
+    "log_transcriptions_enabled": "True",
+    "language": "{{context.headers['X-Language']}}",
+    "language_configuration": {
+      "en-US": {
+        "min_confidence_percentage": "60",
+        "max_audio_length_secs": "240"
+      },
+      "es-US": {
+        "min_confidence_percentage": "55",
+        "max_audio_length_secs": "240"
+      }
+		},
+	  "acs_client": {
+  	  "lid_enabled": "True",
+      "lid_mode": "AtStartHighAccuracy",
+      "profanity_option": "Masked"
+    }
+  }
+}

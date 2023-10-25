@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <link rel="stylesheet" href="/docs/styles.css">
+
+</head>
+
+
+<body>
+
+<h1>About Voicemail to Text Integration Container (V2TIC)</h1>
+
+<p>Voicemail to Text (V2T) is a speech recognition service that transcribes voice messages from a voicemail server into text, allowing the end user to read their voice messages instead of listening to them. </p>
+
+<p>Voicemail to Text Integration Container (V2TIC) is an integration container that emulates existing integrations between voicemail servers and the Nuance-managed Voicemail to Text (V2T) service. Instead of employing on-premises Nuance V2T, the backend recognition technology uses <a href="https://learn.microsoft.com/en-us/azure/ai-services/what-are-ai-services">Azure AI services</a>. This emulation eliminates the need for reintegrating existing voicemail servers to a new transcription service for Nuance V2T clients moving to cloud technologies.</p>
+
+<p>The project contains the files for building and deploying V2TIC, as well as sample files for running basic deployments or to base your own deployments on.</p>
+
+<p>
+This documentation is for technical users of existing Nuance V2T integrations, and assumes readers are familiar with the tools and languages used for setting up and deploying V2TIC. Such as:
+
+<ul>
+    <li>Developers</li>
+    <li>Technical Support Personnel</li>
+    <li>System Administrators</li>
+</ul>
+</p>
+    
+<p>
+Users can assess how to adapt these examples to their own container orchestration framework. 
+</p>
+
+<h2>Benefits for end users</h2>
+
+<p>
+    V2TIC's benefits to end users include:
+    
+    <ul>
+        <li>No need to write messages down – a paperless environment.</li>
+        <li>Read messages in email or visual voicemail applications.</li>
+        <li>Automatically capture caller details.</li>
+        <li>Screen calls and determine the urgency of a response.</li>
+        <li>Reply directly in the same channel.</li>
+        <li>React quickly to messages.</li>
+        <li>No navigation through voicemail menus.</li>
+        <li>Zero maintenance mailbox.</li>
+    </ul>
+</p>
+
+<h2>Benefits for partners</h2>
+
+<p>V2TIC is flexible and can quickly and easily be integrated with a broad range of platforms and services. Using HTTPS and TLS v1.3, voice messages are securely transferred to the Azure AI Services (ACS) speech-to-text for processing, with the resulting transcription returned in a secure manner.</p>
+
+<h2>Use cases</h2>
+
+<p>
+    Voicemail to Text fits all situations such as:
+    
+    <ul>
+        <li>Discreetly review who called and what they said.</li>
+        <li>Easily respond or forward messages to others.</li>
+        <li>Never miss an important message while in a meeting or on the phone.</li>
+        <li>Manage voicemails the same way you manage your email: file voicemails for future reference, flag for follow up, or mark as spam.</li>
+    </ul>
+</p>
+
+
+<p><a href="/docs/index.html">Return to table of contents</a></p>
+</body></html>

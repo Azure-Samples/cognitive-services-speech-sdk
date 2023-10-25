@@ -1,0 +1,2 @@
+input_audio_language,input_audio_file,input_content_encoding,input_content_type,verify_audio_converted_status,verify_recognition_status,verify_audio_converted_text
+en-US,en-US.txt,base64,"text/plain",Success,Transcribed,"Hey, just did you find me a job yet? You must not want me to come. Very bad. I get out at three. Call me. Bye."

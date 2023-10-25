@@ -1,0 +1,75 @@
+p, ol, ul, figure, table {
+    color: #000000;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: normal;
+    line-height: 1.2em;
+    word-wrap: break-word;
+    font-size: 12px;
+    padding-top: 2px;
+    text-align: left;
+}
+
+p.tt {
+    color: #000000;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: normal;
+    line-height: 1.2em;
+    word-wrap: break-word;
+    font-size: 12px;
+    padding-top: 2px;
+    text-align: left;
+}
+
+h1 {
+    color: #000000;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: bold;
+    line-height: 1.2em;
+    word-wrap: break-word;
+    font-size: 24px;
+    padding-top: 2px;
+    text-align: left;
+}
+
+h2 {
+    color: #000000;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: bold;
+    line-height: 1.2em;
+    word-wrap: break-word;
+    font-size: 19px;
+    padding-top: 2px;
+    text-align: left;
+}
+
+h3 {
+    color: #000000;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: bold;
+    line-height: 1.2em;
+    word-wrap: break-word;
+    font-size: 16px;
+    padding-top: 2px;
+    text-align: left;
+}
+
+h4 {
+    color: #000000;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: bold;
+    line-height: 1.2em;
+    word-wrap: break-word;
+    font-size: 14px;
+    padding-top: 2px;
+    text-align: left;
+}
+
+code {
+
+    background: rgb(234, 233, 233);
+    padding: 0;
+    font-style: bold;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12;
+    white-space: pre-line; /* collapse WS, preserve LB */
+  }

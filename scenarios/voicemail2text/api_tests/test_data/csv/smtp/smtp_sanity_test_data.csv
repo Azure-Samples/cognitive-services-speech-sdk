@@ -1,0 +1,2 @@
+input_audio_language,input_audio_file,input_sender_email,input_receiver_email,input_email_subject,verify_email_response_from,verify_response_email_subject,verify_response_recognition_status,verify_response_email_X-Reference,verify_response_email_audio_converted_text
+en-US,en-US5secsGoodQuality2.wav,test@test.com,receiver@example.com,Test Email,replyto@nuance.com,Nuance V2T Conversion,Success,20230519004356-epsvaibhav-4130-91405," Hey, it's Dad. Nothing urgent talk to you tonight."

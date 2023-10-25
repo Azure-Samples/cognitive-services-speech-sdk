@@ -1,0 +1,28 @@
+{% if request.status == "Success" -%}
+{{request.recognition_result.text}}
+{%- endif %}
+------------------------------------------
+Transcribed using V2TIC
+
+scrid: {{request.scrid}}
+external_request_id: {{request.pass_through_data.external_id}}
+{%- if request.status == "Success" -%}
+conversion_status: {{request.recognition_result.conversion_status}}
+recognition_status: {{request.recognition_result.status}}
+converted_text: {{request.recognition_result.text}}
+display_text: {{request.recognition_result.display_text}}
+itn_text: {{request.recognition_result.itn_text}}
+global_confidence_score: {{request.recognition_result.global_confidence_score}}
+rtf: {{request.recognition_result.rtf}}
+recognition_duration: {{request.recognition_result.duration}}
+audio_duration_secs: {{request.recognition_result.final_audio_length_secs}}
+audio_duration_mSecs: {{request.recognition_result.final_audio_length_msecs}}
+audio_truncated: {{request.recognition_result.audio_truncated}}
+requested_languages: {{request.recognition_result.requested_languages}}
+{%- if request.recognition_result.lid_enabled -%}
+lid_enabled: true
+detected_languages: {{request.recognition_result.detected_languages}}
+{%- endif -%}
+{%- else -%}
+notes: {{request.notes}}
+{%- endif -%}

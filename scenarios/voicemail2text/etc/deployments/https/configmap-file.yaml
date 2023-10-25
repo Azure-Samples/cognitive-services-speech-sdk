@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: https-configmap-file
+data:
+
+  v2tic_logging_level: info
+  v2tic_nodeport: "31000"
+  v2tic_port: "9443"
+  v2tic_host: 0.0.0.0
+  v2tic_cert_file: /app/etc/certs/certificate.pem
+  v2tic_key_file: /app/etc/certs/private_key.pem
+  v2tic_consume_request_timeout: 5 seconds
+  v2tic_coroutine_execution_default_timeout: 10 seconds
+
+  profiles_folder: /app/etc/profiles/sample_https
+  profiles_profile: etc.profiles.sample_https.profile.SampleHttpsProfile
+
+  # only applicable in linux
+  transcoder_terminate_after: 10 seconds
+  # only applicable in linux .. 2 seconds after the initial 10
+  transcoder_kill_after: 2 seconds
+
+  metadata_default_language: "en-US"
+  metadata_default_lid_languages: "['en-US', 'es-US']"
+  metadata_default_thresholds: "{'min_confidence_percentage': '60', 'max_audio_length_secs': '240'}"
+  metadata_default_lid_thresholds: "{'min_confidence_percentage': '55', 'max_audio_length_secs': '240'}"
+  metadata_log_transcriptions_enabled: "False"
+  metadata_truncate_lenghty_transcriptions_enabled: "False"
+  metadata_max_transcription_length: "5000"
+
+  ejector_retry_max_attempts: "3"
+  ejector_retry_wait_exponential_backoff: "[0.5, 1, 2]"
+  # ejector_retry_on_exception example for http exceptions:OSError,http.client.HTTPException
+  # ejector_retry_on_exception example for smtp exceptions:ValueError,aiosmtplib.SMTPException
+  ejector_retry_on_exception: Exception
+
+  acs_client_lid_enabled: "True"
+  acs_client_default_language: en-US
+  acs_client_default_languages: "['en-US', 'es-MX']"
+  acs_client_speech_key: $SPEECH_KEY
+  acs_client_end_point: $END_POINT
+
+  acs_client_audio_multiplier: "5"
+  # Continuous or AtStart or AtStartHighAccuracy
+  acs_client_lid_mode: AtStartHighAccuracy
+  acs_client_max_workers: "72"
+  # Masked, Removed, Raw
+  acs_client_profanity_option: "Masked"
+  acs_client_is_tagged: "False"
+  acs_client_tag_value: "test run 1"
