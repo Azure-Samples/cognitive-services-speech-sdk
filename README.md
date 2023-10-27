@@ -13,7 +13,7 @@ name: "Microsoft Cognitive Services Speech SDK Samples"
 description: "Learn how to use the Microsoft Cognitive Services Speech SDK to add speech-enabled features to your apps."
 products:
 - azure
-- azure-cognitive-services
+- ai-services
 ---
 
 # Sample Repository for the Microsoft Cognitive Services Speech SDK
