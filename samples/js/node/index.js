@@ -12,6 +12,7 @@
     var pronunciationAssessmentContinue = require("./pronunciationAssessmentContinue");
     var pronunciationAssessment = require("./pronunciationAssessment");
     var pronunciationAssessmentConfiguredWithJson = require("./pronunciationAssessmentConfiguredWithJson");
+    var pronunciationAssessmentFromMicrophone = require("./pronunciationAssessmentFromMicrophone");
     
     if (process.argv.length > 3) {
         settings.filename = process.argv[3];
@@ -48,7 +49,11 @@
                 console.log("Now pronunciation assessment to: " + settings.filename);
                 pronunciationAssessmentConfiguredWithJson.main(settings);
                 break;
-    
+
+            case "pronunciationAssessmentFromMicrophone":
+                pronunciationAssessmentFromMicrophone.main(settings);
+                break;
+
             case "speech":
             default:
                 console.log("Now recognizing speech from: " + settings.filename);
@@ -57,7 +62,7 @@
         }
     }
     else {
-        console.log("usage: index.js [speech|intent|translate|synthesis|pronunciationAssessment|pronunciationAssessmentContinue|pronunciationAssessmentConfiguredWithJson] {filename}");
+        console.log("usage: index.js [speech|intent|translate|synthesis|pronunciationAssessment|pronunciationAssessmentContinue|pronunciationAssessmentConfiguredWithJson|pronunciationAssessmentFromMicrophone] {filename}");
     }
 }());
     
