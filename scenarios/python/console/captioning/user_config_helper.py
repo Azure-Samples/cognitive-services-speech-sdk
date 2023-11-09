@@ -55,7 +55,7 @@ def get_compressed_audio_format() -> speechsdk.AudioStreamContainerFormat :
         elif "mp3" == value : return speechsdk.AudioStreamContainerFormat.MP3
         elif "mulaw" == value : return speechsdk.AudioStreamContainerFormat.MULAW
         elif "ogg_opus" == value : return speechsdk.AudioStreamContainerFormat.OGG_OPUS
-        else : return speechsdk.AudioStreamContainerFormat.ANY;
+        else : return speechsdk.AudioStreamContainerFormat.ANY
 
 def get_profanity_option() -> speechsdk.ProfanityOption :
     value = get_cmd_option("--profanity")
