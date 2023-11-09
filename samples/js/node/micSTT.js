@@ -4,7 +4,7 @@
 import * as MicToSpeech from "mic-to-speech";
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import * as wav from "wav";
-import * as settings from './settings';
+import * as settings from "./settings.js";
 
 const API_KEY = settings.subscriptionKey;
 const region = settings.serviceRegion;
