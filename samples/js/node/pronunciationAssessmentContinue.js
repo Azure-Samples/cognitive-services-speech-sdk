@@ -2,16 +2,13 @@
 // Licensed under the MIT license.
 
 // pull in the required packages.
-var sdk = require("microsoft-cognitiveservices-speech-sdk");
-const filePushStream = require("./filePushStream");
-const _ = require('lodash') ;
-const forEach = require('lodash.foreach');
-const Segment = require('segment');
-var difflib = require('difflib');
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as filePushStream from "./filePushStream";
+import * as _ from 'lodash' ;
+import * as forEach from 'lodash.foreach';
+import * as Segment from 'segment';
+import * as difflib from 'difflib';
 
-
-(function() {
-"use strict";
 
 // pronunciation assessment with audio streaming and continue mode
 module.exports = {
@@ -297,8 +294,5 @@ module.exports = {
     };
 
     reco.startContinuousRecognitionAsync();
-        
   }
-
 }
-}());

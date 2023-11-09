@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-const MicToSpeech = require("mic-to-speech");
-const sdk = require("microsoft-cognitiveservices-speech-sdk");
-const wav = require("wav");
-const settings = require('./settings');
+import * as MicToSpeech from "mic-to-speech";
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as wav from "wav";
+import * as settings from './settings';
 
 const API_KEY = settings.subscriptionKey;
 const region = settings.serviceRegion;

@@ -2,11 +2,8 @@
 // Licensed under the MIT license.
 
 // pull in the required packages.
-var sdk = require("microsoft-cognitiveservices-speech-sdk");
-const filePushStream = require("./filePushStream");
-
-(function() {
-"use strict";
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as filePushStream from "./filePushStream";
 
 module.exports = {
   main: function(settings) {
@@ -99,4 +96,3 @@ module.exports = {
   }
 
 }
-}());

@@ -2,11 +2,8 @@
 // Licensed under the MIT license.
 
 // pull in the required packages.
-var sdk = require("microsoft-cognitiveservices-speech-sdk");
-var readline = require("readline");
-
-(function() {
-"use strict";
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as readline from "readline";
 
 module.exports = {
     main: function(settings, filename) {
@@ -90,4 +87,3 @@ module.exports = {
         });
     }
 }
-}());

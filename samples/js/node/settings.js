@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-(function() {
-"use strict";
-  
   module.exports = {
   
     // Replace with your own subscription key, service region (e.g., "westus"),
@@ -21,5 +18,4 @@
     luServiceRegion:   "YourLanguageUnderstandingServiceRegion",
     luAppId:           "YourLanguageUnderstandingAppId",
   };
-  }());
     

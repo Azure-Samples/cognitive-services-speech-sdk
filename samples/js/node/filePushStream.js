@@ -2,11 +2,8 @@
 // Licensed under the MIT license.
 
 // pull in the required packages.
-var sdk = require("microsoft-cognitiveservices-speech-sdk");
-var fs = require("fs");
-
-(function() {
-"use strict";
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as fs from "fs";
 
 function ReadInt32(fd) {
     var buffer = Buffer.alloc(4);
@@ -118,4 +115,4 @@ function ReadString(fd, length) {
             return { framerate : framerate, bitsPerSample : bitsPerSample, nChannels : nChannels, tag: tag };
         }
     }
-}());
+ 
