@@ -309,7 +309,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Speech synthesis a plain text file to MP3 file. It can support a long text file with more than 10 minutes limit.
-        // the audio output will be put into one file that can be played continuously  
+        // the audio output will be put into one file that can be played continuously
         public static async Task SynthesisFileToMp3FileAsync()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
@@ -322,8 +322,8 @@ namespace MicrosoftSpeechSDKSamples
             // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
             config.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3);
 
-            // here is plain text file. A simple logic is to split by lines which is a paragraph. 
-            // we assume a paragraph won't exceed 10 min limit here. 
+            // here is plain text file. A simple logic is to split by lines which is a paragraph.
+            // we assume a paragraph won't exceed 10 min limit here.
             string[] paragraphs = System.IO.File.ReadAllLines("test.txt");
             int RetryCount = 10;
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
@@ -998,6 +998,55 @@ namespace MicrosoftSpeechSDKSamples
                     synthesisResult = await SynthesizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceRegion",
                         "YourEndpointIdOnSecondaryRegion", "YourCustomVoiceName");
                 }
+            }
+        }
+
+        public static async Task AvatarSynthesisSample()
+        {
+            // Create a speech config with subscription key and service region and avatar enabled.
+            var config = SpeechConfig.FromEndpoint(new Uri("wss://YourServiceRegion.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true"), "YourSubscriptionKey");
+
+            // Creates a speech synthesizer
+            using (var synthesizer = new SpeechSynthesizer(config, null as AudioConfig))
+            {
+                using var connection = Connection.FromSpeechSynthesizer(synthesizer);
+                // Set the synthesis config payload to enable talking avatar.
+                string videoConfigPayload = @"{ ""synthesis"": {""video"": {
+                                        ""protocol"": {
+                                            ""name"": ""WebRTC"",
+                                            ""webrtcConfig"": {
+                                                ""clientDescription"": ""<WebRTC client description, base64 encoded>"",
+                                                ""iceServers"": [{
+                                                    ""urls"": [""<ICE URL, e.g., turn:relay.communication.microsoft.com:3478>""],
+                                                    ""username"": ""<ICE Username>"",
+                                                    ""credential"": ""<ICE credential>""
+                                                }]
+                                            },
+                                        ""format"":{
+                                            ""codec"": ""H264"",
+                                            ""bitrate"": 2000000
+                                        },
+                                        ""talkingAvatar"": {
+                                            ""background"": {},
+                                            ""character"": ""lisa"",
+                                            ""style"": ""casual-sitting""
+                                        }
+                                    }
+                                } } }";
+
+                connection.SetMessageProperty("speech.config", "context", videoConfigPayload);
+                // Speak empty text to trigger the WebRTC connection handshake.
+                using var result = await synthesizer.SpeakTextAsync("");
+
+                var extraMessage = synthesizer.Properties.GetProperty("SpeechSDKInternal-ExtraTurnStartMessage");
+
+                Console.WriteLine(extraMessage);
+                Console.WriteLine("Paste the WebRTC SDP answer into your browser and wait for the connection to be established.");
+                Console.WriteLine("Press Enter to continue...");
+                Console.ReadLine();
+                Console.WriteLine("Type the text you want to speak and press Enter.");
+                string text = Console.ReadLine();
+                await synthesizer.SpeakTextAsync(text);
             }
         }
     }

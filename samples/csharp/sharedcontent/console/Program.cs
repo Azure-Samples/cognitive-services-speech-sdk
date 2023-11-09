@@ -233,6 +233,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" k. Speech synthesis to speaker output with custom voice and fallback to standard voice.");
                 Console.WriteLine(" l. Speech synthesis to speaker output with custom voice and fallback to secondary region.");
                 Console.WriteLine(" m. Speech synthesis from a long text file into mp3 file");
+                Console.WriteLine(" n. Avatar Synthesis");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -316,6 +317,9 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.M:
                         SpeechSynthesisSamples.SynthesisFileToMp3FileAsync().Wait();
+                        break;
+                    case ConsoleKey.N:
+                        SpeechSynthesisSamples.AvatarSynthesisSample().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
