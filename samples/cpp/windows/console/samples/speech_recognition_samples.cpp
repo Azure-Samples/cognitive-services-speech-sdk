@@ -225,6 +225,8 @@ void SpeechRecognitionUsingCustomizedModel()
     // Replace with your own CRIS endpoint ID.
     config->SetEndpointId("YourEndpointId");
 
+    config->SetSpeechRecognitionLanguage("en-US");
+
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = SpeechRecognizer::FromConfig(config);
 

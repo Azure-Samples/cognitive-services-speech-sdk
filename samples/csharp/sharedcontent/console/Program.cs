@@ -795,6 +795,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 1. Pronunciation assessment with microphone input.");
                 Console.WriteLine(" 2. Pronunciation assessment with stream input.");
                 Console.WriteLine(" 3. Pronunciation assessment configured with json.");
+                Console.WriteLine(" 4. Pronunciation assessment continuous with file.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -815,6 +816,10 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D3:
                     case ConsoleKey.NumPad3:
                         SpeechRecognitionSamples.PronunciationAssessmentConfiguredWithJson().Wait();
+                        break;
+                    case ConsoleKey.D4:
+                    case ConsoleKey.NumPad4:
+                        SpeechRecognitionSamples.PronunciationAssessmentContinuousWithFile().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:

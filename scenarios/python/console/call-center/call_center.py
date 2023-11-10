@@ -21,11 +21,11 @@ import user_config_helper
 SPEECH_TRANSCRIPTION_PATH = "/speechtotext/v3.0/transcriptions"
 
 # These should not change unless you switch to a new version of the Cognitive Language REST API.
-SENTIMENT_ANALYSIS_PATH = "/language/:analyze-text";
-SENTIMENT_ANALYSIS_QUERY = "?api-version=2022-05-01";
-CONVERSATION_ANALYSIS_PATH = "/language/analyze-conversations/jobs";
-CONVERSATION_ANALYSIS_QUERY = "?api-version=2022-05-15-preview";
-CONVERSATION_SUMMARY_MODEL_VERSION = "2022-05-15-preview";
+SENTIMENT_ANALYSIS_PATH = "/language/:analyze-text"
+SENTIMENT_ANALYSIS_QUERY = "?api-version=2022-05-01"
+CONVERSATION_ANALYSIS_PATH = "/language/analyze-conversations/jobs"
+CONVERSATION_ANALYSIS_QUERY = "?api-version=2022-05-15-preview"
+CONVERSATION_SUMMARY_MODEL_VERSION = "2022-05-15-preview"
 
 # How long to wait while polling batch transcription and conversation analysis status.
 WAIT_SECONDS = 10
@@ -94,7 +94,7 @@ def create_transcription(user_config : helper.Read_Only_Dict) -> str :
     # https://westus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0/operations/CreateTranscription
     transcription_uri = response["json"]["self"]
     # The transcription ID is at the end of the transcription URI.
-    transcription_id = transcription_uri.split("/")[-1];
+    transcription_id = transcription_uri.split("/")[-1]
     # Verify the transcription ID is a valid GUID.
     try :
         uuid.UUID(transcription_id)
@@ -404,7 +404,7 @@ def run() -> None :
         # For stereo audio, the phrases are sorted by channel number, so resort them by offset.
         transcription["recognizedPhrases"] = sorted(transcription["recognizedPhrases"], key=lambda phrase : phrase["offsetInTicks"])
         phrases = get_transcription_phrases(transcription, user_config)
-        sentiment_analysis_results = get_sentiment_analysis(phrases, user_config);
+        sentiment_analysis_results = get_sentiment_analysis(phrases, user_config)
         sentiment_confidence_scores = get_sentiment_confidence_scores(sentiment_analysis_results)
         conversation_items = transcription_phrases_to_conversation_items(phrases)
         # NOTE: Conversation summary is currently in gated public preview. You can sign up here:

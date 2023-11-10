@@ -2,44 +2,40 @@
 // Licensed under the MIT license.
 
 // pull in the required packages.
-var sdk = require("microsoft-cognitiveservices-speech-sdk");
-var filePushStream = require("./filePushStream");
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as filePushStream from "./filePushStream.js";
 
-(function() {
-"use strict";
+export const main = (settings) => {
 
-    module.exports = {
-    main: function(settings) {
+    // now create the audio-config pointing to our stream and
+    // the speech config specifying the language.
+    var audioStream = filePushStream.openPushStream(settings.filename);
+    var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
+    var intentConfig = sdk.SpeechConfig.fromSubscription(settings.luSubscriptionKey, settings.luServiceRegion);
 
-        // now create the audio-config pointing to our stream and
-        // the speech config specifying the language.
-        var audioStream = filePushStream.openPushStream(settings.filename);
-        var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
-        var intentConfig = sdk.SpeechConfig.fromSubscription(settings.luSubscriptionKey, settings.luServiceRegion);
+    // setting the recognition language to English.
+    intentConfig.speechRecognitionLanguage = settings.language;
 
-        // setting the recognition language to English.
-        intentConfig.speechRecognitionLanguage = settings.language;
+    // create the translation recognizer.
+    var recognizer = new sdk.IntentRecognizer(intentConfig, audioConfig);
 
-        // create the translation recognizer.
-        var recognizer = new sdk.IntentRecognizer(intentConfig, audioConfig);
-
-        // Set up a Language Understanding Model from Language Understanding Intelligent Service (LUIS).
-        // See https://www.luis.ai/home for more information on LUIS.
-        if (settings.luAppId !== "" && settings.luAppId !== "YourLanguageUnderstandingAppId") {
+    // Set up a Language Understanding Model from Language Understanding Intelligent Service (LUIS).
+    // See https://www.luis.ai/home for more information on LUIS.
+    if (settings.luAppId !== "" && settings.luAppId !== "YourLanguageUnderstandingAppId") {
         var lm = sdk.LanguageUnderstandingModel.fromAppId(settings.luAppId);
 
         recognizer.addAllIntents(lm);
-        }
-    
-        // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
+    }
 
-        // The event recognizing signals that an intermediate recognition result is received.
-        // You will receive one or more recognizing events as a speech phrase is recognized, with each containing
-        // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
-        recognizer.recognizing = function (s, e) {
+    // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
+
+    // The event recognizing signals that an intermediate recognition result is received.
+    // You will receive one or more recognizing events as a speech phrase is recognized, with each containing
+    // more recognized speech. The event will contain the text for the recognition since the last phrase was recognized.
+    recognizer.recognizing = function (s, e) {
         var str = "(recognizing) Reason: " + sdk.ResultReason[e.result.reason] + " Text: " + e.result.text;
         console.log(str);
-        };
+    };
 
     // The event signals that the service has stopped processing speech.
     // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
@@ -114,14 +110,11 @@ var filePushStream = require("./filePushStream");
     // start the recognizer and wait for a result.
     recognizer.recognizeOnceAsync(
         function (result) {
-        recognizer.close();
-        recognizer = undefined;
+            recognizer.close();
+            recognizer = undefined;
         },
         function (err) {
-        recognizer.close();
-        recognizer = undefined;
+            recognizer.close();
+            recognizer = undefined;
         });
-    }
-
-    }
-}());
+};
