@@ -18,6 +18,7 @@ proguard-rules.pro text
 *.cpp text
 *.cs text
 *.csproj text
+*.css text
 *.editorconfig text
 *.entitlements text
 *.go text
