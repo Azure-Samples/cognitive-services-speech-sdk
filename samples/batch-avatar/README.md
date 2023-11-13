@@ -13,4 +13,4 @@ Available samples:
 
 ## Note
 
-Refer to [placeholder link] for real time avatar synthesis.
+Refer to [this](../js/browser/avatar/README.md) for real time avatar synthesis.
