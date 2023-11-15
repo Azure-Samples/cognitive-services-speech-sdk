@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Quickstart for the Microsoft Speech SDK on Node.js",
   "main": "dependent-verification.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,6 +12,6 @@
   "license": "MIT",
   "dependencies": {
     "https-proxy-agent": "^3.0.0",
-    "microsoft-cognitiveservices-speech-sdk": "^1.32.1"
+    "microsoft-cognitiveservices-speech-sdk": "^1.33.1"
   }
 }
