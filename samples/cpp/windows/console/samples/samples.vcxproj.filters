@@ -56,6 +56,9 @@
     <ClCompile Include="diagnostics_logging_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="meeting_transcriber_samples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="whatstheweatherlike.wav">
@@ -74,5 +77,13 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="katiesteve_mono.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="pronunciation_assessment_fall.wav">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
 </Project>

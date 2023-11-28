@@ -997,9 +997,11 @@ public class SpeechRecognitionSamples {
         config.setProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
 
         String referenceText = "";
-        // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+        // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
         PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
             PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Phoneme, true);
+        
+        pronunciationConfig.enableProsodyAssessment();
 
         while (true)
         {
@@ -1034,8 +1036,8 @@ public class SpeechRecognitionSamples {
                     PronunciationAssessmentResult pronunciationResult = PronunciationAssessmentResult.fromResult(result);
                     System.out.println(
                         String.format(
-                            "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
-                            pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
+                            "    Accuracy score: %f, Prosody score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
+                            pronunciationResult.getAccuracyScore(), pronunciationResult.getProsodyScore(), pronunciationResult.getPronunciationScore(),
                             pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
                 }
                 else if (result.getReason() == ResultReason.NoMatch) {
@@ -1100,8 +1102,8 @@ public class SpeechRecognitionSamples {
                 PronunciationAssessmentResult pronunciationResult = PronunciationAssessmentResult.fromResult(e.getResult());
                 System.out.println(
                         String.format(
-                                "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
-                                pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
+                                "    Accuracy score: %f, Prosody score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
+                                pronunciationResult.getAccuracyScore(), pronunciationResult.getProsodyScore(), pronunciationResult.getPronunciationScore(),
                                 pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
                 long resultReceivedTime = System.currentTimeMillis();
                 System.out.println(String.format("Latency: %d ms", resultReceivedTime - lastAudioUploadedTime[0]));
@@ -1133,9 +1135,12 @@ public class SpeechRecognitionSamples {
         });
 
         String referenceText = "Hello world";
-        // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+        // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
         PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
                 PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Phoneme, true);
+        
+        pronunciationConfig.enableProsodyAssessment();
+        
         pronunciationConfig.applyTo(recognizer);
 
         System.out.println("Assessing...");
@@ -1195,10 +1200,12 @@ public class SpeechRecognitionSamples {
         AudioConfig audioInput = AudioConfig.fromWavFileOutput("YourAudioFile.wav");
 
         String referenceText = "Hello world";
-        // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+        // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
         String jsonConfig = "{\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":true,\"ScenarioId\":\"[scenario ID will be assigned by product team]\"}";
         PronunciationAssessmentConfig pronunciationConfig = PronunciationAssessmentConfig.fromJson(jsonConfig);
         pronunciationConfig.setReferenceText(referenceText);
+        
+        pronunciationConfig.enableProsodyAssessment();
 
         // Creates a speech recognizer for the specified language
         SpeechRecognizer recognizer = new SpeechRecognizer(config, lang, audioInput);
@@ -1217,8 +1224,8 @@ public class SpeechRecognitionSamples {
                 PronunciationAssessmentResult pronunciationResult = PronunciationAssessmentResult.fromResult(result);
                 System.out.println(
                     String.format(
-                        "    Accuracy score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
-                        pronunciationResult.getAccuracyScore(), pronunciationResult.getPronunciationScore(),
+                        "    Accuracy score: %f, Prosody score: %f, Pronunciation score: %f, Completeness score : %f, FluencyScore: %f",
+                        pronunciationResult.getAccuracyScore(), pronunciationResult.getProsodyScore(), pronunciationResult.getPronunciationScore(),
                         pronunciationResult.getCompletenessScore(), pronunciationResult.getFluencyScore()));
             }
             else if (result.getReason() == ResultReason.NoMatch) {
@@ -1241,6 +1248,94 @@ public class SpeechRecognitionSamples {
 
         pronunciationConfig.close();
         config.close();
+    }
+
+    // Pronunciation assessment with content score
+    // See more information at https://aka.ms/csspeech/pa
+    public static void pronunciationAssessmentWithContentAssessment() throws ExecutionException, InterruptedException {
+        // Creates an instance of a speech config with specified subscription key and service region.
+        // Replace with your own subscription key and service region (e.g., "westus").
+        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Replace the language with your language in BCP-47 format, e.g., en-US.
+        String lang = "en-US";
+
+        // Creates a speech recognizer using wav file.
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+
+        stopRecognitionSemaphore = new Semaphore(0);
+        List<String> recognizedTexts = new ArrayList<>();
+        List<ContentAssessmentResult> contentResults = new ArrayList<>();
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, lang, audioInput);
+        {
+            // Subscribes to events.
+            recognizer.recognized.addEventListener((s, e) -> {
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    String text = e.getResult().getText();
+                    if(text != null && !text.equals(".")) {
+                        recognizedTexts.add(text);
+                    }
+
+                    PronunciationAssessmentResult pronResult = PronunciationAssessmentResult.fromResult(e.getResult());
+                    contentResults.add(pronResult.getContentAssessmentResult());
+                }
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
+                }
+            });
+
+            recognizer.canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
+
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+
+                stopRecognitionSemaphore.release();
+            });
+
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\n    Session started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\n    Session stopped event.");
+            });
+
+            // The topic matches the input waveform named YourAudioFile.wav.
+            String theTopic = "the season of the fall";
+            // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+            PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig("",
+                    PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Phoneme, false);
+
+            pronunciationConfig.enableProsodyAssessment();
+            pronunciationConfig.enableContentAssessmentWithTopic(theTopic);
+
+            pronunciationConfig.applyTo(recognizer);
+
+            // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
+            recognizer.startContinuousRecognitionAsync().get();
+
+            // Waits for completion.
+            stopRecognitionSemaphore.acquire();
+
+            recognizer.stopContinuousRecognitionAsync().get();
+
+            System.out.println("Content assessment for: " + String.join(" ", recognizedTexts));
+            if (!contentResults.isEmpty()) {
+                ContentAssessmentResult result = contentResults.get(contentResults.size() - 1);
+                System.out.println(String.format(
+                        "Assessment Result: Grammar score: %f, Vocabulary score: %f, Topic score: %f",
+                        result.getGrammarScore(), result.getVocabularyScore(), result.getTopicScore()));
+            } else {
+                System.out.println("The contentResult list is empty!");
+            }
+        }
+        config.close();
+        audioInput.close();
+        recognizer.close();
     }
 
     // Speech recognition from default microphone with Microsoft Audio Stack enabled.
