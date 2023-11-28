@@ -3,12 +3,11 @@
 
 // pull in the required packages.
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
-import * as MicToSpeech from "mic-to-speech";
 import * as wav from "wav";
-import * as _ from "lodash";
 import * as readline from "readline";
 import { exit } from "process";
-
+import MicToSpeech from "mic-to-speech";
+import _ from "lodash";
 
 // pronunciation assessment with audio file
 export const main = (settings) => {
@@ -21,7 +20,8 @@ export const main = (settings) => {
         console.log(" Accuracy score: ", pronunciation_result.accuracyScore, '\n',
             "pronunciation score: ", pronunciation_result.pronunciationScore, '\n',
             "completeness score : ", pronunciation_result.completenessScore, '\n',
-            "fluency score: ", pronunciation_result.fluencyScore
+            "fluency score: ", pronunciation_result.fluencyScore, '\n',
+            "prosody score: ", pronunciation_result.prosodyScore
         );
         console.log("  Word-level details:");
         _.forEach(pronunciation_result.detailResult.Words, (word, idx) => {
@@ -51,6 +51,7 @@ export const main = (settings) => {
                 sdk.PronunciationAssessmentGranularity.Phoneme,
                 true
             );
+            pronunciationAssessmentConfig.enableProsodyAssessment = true;
 
             // create the speech recognizer.
             var reco = new sdk.SpeechRecognizer(speechConfig, audioConfig);
