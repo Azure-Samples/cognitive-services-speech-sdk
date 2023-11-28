@@ -4,7 +4,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 """
-Chatting with pronunciation assessment samples for the Microsoft Cognitive Services Speech SDK
+Chatting with Azure OAI and Azure Pronunciation Assessment samples for the Microsoft Cognitive Services Speech SDK
 """
 
 import json
@@ -31,10 +31,10 @@ except ImportError:
     sys.exit(1)
 
 
-# Set up the subscription info for the Speech Service
+Set up the subscription info for the Speech Service
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
-# Set up the parameters for Azure OpenAI Services
+# Set up the parameters for Azure OAI Services
 oai_resource_name = "YourOaiResourceName"
 oai_deployment_name = "YourOaiDeploymentName"
 oai_api_version = "YourOaiApiVersion"
@@ -108,11 +108,11 @@ def strip_end_silence(file_path):
 
 
 def chatting_from_file():
-    """Performs chatting with GPT and Azure Pronunciation Assessment asynchronously from audio files.
+    """Performs chatting with Azure OAI and Azure Pronunciation Assessment asynchronously from audio files.
         See more information at https://aka.ms/csspeech/pa"""
 
     topic = "describe working dogs"
-    input_files = ["chatting_resources/chat_input_1.wav", "chatting_resources/chat_input_2.wav"]
+    input_files = ["resources/chat_input_1.wav", "resources/chat_input_2.wav"]
     reference_text = ""
 
     def stt(filename):
@@ -463,3 +463,7 @@ def chatting_from_file():
         tts(call_gpt(stt(file)), f"output/gpt_output_{idx+1}.wav", "GPT output")
     print("Generate the final report ......")
     pronunciation_assessment()
+
+
+if __name__ == "__main__":
+    chatting_from_file()
