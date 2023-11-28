@@ -64,6 +64,11 @@
       <version>2.0.1</version>
     </dependency>
     <dependency>
+      <groupId>io.github.java-diff-utils</groupId>
+      <artifactId>java-diff-utils</artifactId>
+      <version>4.12</version>
+    </dependency>
+    <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>jakarta.json</artifactId>
       <version>2.0.1</version>
