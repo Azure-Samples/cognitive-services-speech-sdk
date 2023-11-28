@@ -7,6 +7,7 @@
 import platform
 from collections import OrderedDict
 
+import chatting_sample
 import intent_sample
 import speech_language_detection_sample
 import speech_sample
@@ -75,6 +76,8 @@ samples = OrderedDict([
         speech_language_detection_sample.speech_language_detection_once_from_mic,
         speech_language_detection_sample.speech_language_detection_once_from_file,
         speech_language_detection_sample.speech_language_detection_once_from_continuous,
+    ]), (chatting_sample, [
+        chatting_sample.chatting_from_file,
     ])
 ])
 

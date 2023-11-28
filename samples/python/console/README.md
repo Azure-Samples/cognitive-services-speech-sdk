@@ -38,6 +38,10 @@ This sample demonstrates various forms of speech recognition, intent recognition
   ```sh
   pip install scipy
   ```
+* For chatting sample, install the requests, numpy and soundfile packages in your Python interpreter by executing the command
+  ```sh
+  pip install requests numpy soundfile
+  ```
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * To tailor the sample to your configuration, use search and replace across the whole sample directory to update the following strings:
 
@@ -51,6 +55,11 @@ This sample demonstrates various forms of speech recognition, intent recognition
   * The following settings apply to keyword-triggered recognition:
     * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
     * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.
+  * The following settings apply to chatting powered by the [Pronunciation Assessment](https://aka.ms/csspeech/pa):
+    * `YourOaiResourceName`: replace with the name of your Azure OpenAI Resource.
+    * `YourOaiDeploymentName`: replace with the name of your model deployment. You're required to first deploy a model before you can make calls.
+    * `YourOaiApiVersion`: replace with the [API version](https://learn.microsoft.com/en-US/azure/ai-services/openai/reference#chat-completions) to use for this operation. For example, `2023-05-15`.
+    * `YourOaiApiKey`: replace with the Azure OpenAI resource key.
   * Some samples require audio files to be present. Put appropriate audio files somewhere on your file system and adapt the paths in the Python source files.
 
 ## Run the samples
