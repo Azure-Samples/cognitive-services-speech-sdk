@@ -10,6 +10,7 @@ import * as pronunciationAssessmentContinue from "./pronunciationAssessmentConti
 import * as pronunciationAssessment from "./pronunciationAssessment.js";
 import * as pronunciationAssessmentConfiguredWithJson from "./pronunciationAssessmentConfiguredWithJson.js";
 import * as pronunciationAssessmentFromMicrophone from "./pronunciationAssessmentFromMicrophone.js";
+import * as pronunciationAssessmentGetContentResult from "./pronunciationAssessmentGetContentResult.js";
 
 if (process.argv.length > 3) {
     settings.filename = process.argv[3];
@@ -49,6 +50,10 @@ if (process.argv.length > 2) {
 
         case "pronunciationAssessmentFromMicrophone":
             pronunciationAssessmentFromMicrophone.main(settings);
+            break;
+
+        case "pronunciationAssessmentWithContentAssessment":
+            pronunciationAssessmentGetContentResult.main(settings);
             break;
 
         case "speech":
