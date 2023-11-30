@@ -11,14 +11,14 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
         * Region - the region of your Azure speech resource.
         * Subscription Key - the subscription key of your Azure speech resource.
     * ICE Server
-        * URL - the ICE server URL for WebRTC. e.g. `turn:relay.communication.microsoft.com:3478`. You can get the ICE server from ACS ([Azure Communication Services](https://learn.microsoft.com/azure/communication-services/overview)): you need follow [Create communication resource](https://learn.microsoft.com/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp) to create ACS resource, and then follow [Getting the relay configuration](https://learn.microsoft.com/azure/communication-services/quickstarts/relay-token?pivots=programming-language-python#getting-the-relay-configuration) to get ICE server url, ICE server username, and ICE server credential. For ICE server url, please make sure to use prefix `turn:`, instead of `stun:`.
+        * URL - the ICE server URL for WebRTC. e.g. `turn:relay.communication.microsoft.com:3478`. You can get the ICE server from ACS ([Azure Communication Services](https://learn.microsoft.com/azure/communication-services/overview)): you need follow [Create communication resource](https://learn.microsoft.com/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp) to create ACS resource, and then follow [Getting the relay configuration](https://learn.microsoft.com/azure/communication-services/quickstarts/relay-token?pivots=programming-language-python#getting-the-relay-configuration) to get ICE server URL, ICE server username, and ICE server credential. For ICE server URL, please make sure to use prefix `turn:`, instead of `stun:`.
         * IceServerUsername - the username of the ICE server, which is provided together with the ICE server URL (see above).
         * IceServerCredential - the credential (password) of the ICE server, which is provided together with the ICE server URL (see above).
     * TTS Configuration
         * TTS Voice - the voice of the TTS. Here is the [available TTS voices list](https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages)
         * Custom Voice Deployment ID (Endpoint ID) - the deployment ID (also called endpoint ID) of your custom voice. If you are not using a custom voice, please leave it empty.
     * Avatar Configuration
-        * Avatar Character - The character of the avatar. By default it's 'lisa', and you can update this value to use a different avatar.
+        * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
         * Background Color - The color of the avatar background.
         * Custom Avatar - Check this if you are using a custom avatar.
@@ -51,7 +51,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * API Key - the API key of your Azure Cognitive Search resource, which can be found in the `Keys` section of your Azure Cognitive Search resource in Azure portal. Please make sure to use the `Admin Key` instead of `Query Key`.
         * Index Name - the name of your Azure Cognitive Search index, which can be found in the `Indexes` section of your Azure Cognitive Search resource in Azure portal.
     * ICE Server
-        * URL - the ICE server URL for WebRTC. e.g. `turn:relay.communication.microsoft.com:3478`. You can get the ICE server from ACS ([Azure Communication Services](https://learn.microsoft.com/azure/communication-services/overview)): you need follow [Create communication resource](https://learn.microsoft.com/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp) to create ACS resource, and then follow [Getting the relay configuration](https://learn.microsoft.com/azure/communication-services/quickstarts/relay-token?pivots=programming-language-python#getting-the-relay-configuration) to get ICE server url, ICE server username, and ICE server credential. For ICE server url, please make sure to use prefix `turn:`, instead of `stun:`.
+        * URL - the ICE server URL for WebRTC. e.g. `turn:relay.communication.microsoft.com:3478`. You can get the ICE server from ACS ([Azure Communication Services](https://learn.microsoft.com/azure/communication-services/overview)): you need follow [Create communication resource](https://learn.microsoft.com/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp) to create ACS resource, and then follow [Getting the relay configuration](https://learn.microsoft.com/azure/communication-services/quickstarts/relay-token?pivots=programming-language-python#getting-the-relay-configuration) to get ICE server URL, ICE server username, and ICE server credential. For ICE server URL, please make sure to use prefix `turn:`, instead of `stun:`.
         * IceServerUsername - the username of the ICE server, which is provided together with the ICE server URL (see above).
         * IceServerCredential - the credential (password) of the ICE server, which is provided together with the ICE server URL (see above).
     * STT / TTS Configuration
@@ -59,7 +59,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * TTS Voice - the voice of the TTS. Here is the [available TTS voices list](https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages)
         * Custom Voice Deployment ID (Endpoint ID) - the deployment ID (also called endpoint ID) of your custom voice. If you are not using a custom voice, please leave it empty.
     * Avatar Configuration
-        * Avatar Character - The character of the avatar. By default it's 'lisa', and you can update this value to use a different avatar.
+        * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
         * Custom Avatar - Check this if you are using a custom avatar.
 
@@ -67,7 +67,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
 
 * Step 4: Click `Start Microphone` button to start microphone (make sure to allow the microphone access tip box popping up in the browser), and then you can start chatting with the avatar with speech. The chat history (the text of what you said, and the response text by the Azure OpenAI chat API) will be shown beside the avatar. The avatar will then speak out the response of the chat API.
 
-* Step 5: If you want to clear the chat history and start a new round of chat, you can click `Clear Chat History` button. And if you want to stop the avatar service, please click `Close Video Connection` button to close the connection with avatar service. 
+* Step 5: If you want to clear the chat history and start a new round of chat, you can click `Clear Chat History` button. And if you want to stop the avatar service, please click `Close Video Connection` button to close the connection with avatar service.
 
 # Additional Tip(s)
 
