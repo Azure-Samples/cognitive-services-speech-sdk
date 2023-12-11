@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Talking Avatar Chat Demo</title>
     <link href="./css/styles.css" rel="stylesheet">
-    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+    <script src="./js/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
     <script src="./js/chat.js"></script>
 </head>
 <body>
@@ -15,19 +15,19 @@
   <label style="font-size: medium;" for="region">Region:</label>
   <select id="region" style="font-size: medium;">
     <option value="westus2">West US 2</option>
-    <option value="westeurope">West Europe</option>
+    <option value="westeurope" selected>West Europe</option>
     <option value="southeastasia">Southeast Asia</option>
   </select>
   <label style="font-size: medium;" for="subscriptionKey">Subscription Key:</label>
-  <input id="subscriptionKey" type="password" size="32" style="font-size: medium;" /><br />
+  <input id="subscriptionKey" type="password" size="32" style="font-size: medium;" value="642aa913091e453389515857cc619dd0" /><br />
 
   <h2 style="background-color: white; width: 300px;">Azure OpenAI Resource</h2>
   <label style="font-size: medium;" for="azureOpenAIEndpoint">Endpoint:</label>
-  <input id="azureOpenAIEndpoint" type="text" size="64" style="font-size: medium;"></input><br />
+  <input id="azureOpenAIEndpoint" type="text" size="64" style="font-size: medium;" value="https://avena-oai.openai.azure.com/"></input><br />
   <label style="font-size: medium;" for="azureOpenAIApiKey">API Key:</label>
-  <input id="azureOpenAIApiKey" type="password" size="32" style="font-size: medium;" /><br />
+  <input id="azureOpenAIApiKey" type="password" size="32" style="font-size: medium;" value="beb932ae048c4ad4a1a1f8e3e9fa93ce" /><br />
   <label style="font-size: medium;" for="azureOpenAIDeploymentName">Deployment Name:</label>
-  <input id="azureOpenAIDeploymentName" type="text" size="32" style="font-size: medium;" /><br />
+  <input id="azureOpenAIDeploymentName" type="text" size="32" style="font-size: medium;" value="gpt-35-turbo" /><br />
   <div style="background-color: white; width: 300px;">
     <input type="checkbox" id="enableByod" onchange="window.updataEnableByod()">Enable BYOD (Bring Your Own Data)</input><br />
   </div>
@@ -48,16 +48,16 @@
   <label style="font-size: medium;" for="iceServerUrl">URL:</label>
   <input id="iceServerUrl" type="text" size="64" style="font-size: medium;" value="turn:relay.communication.microsoft.com:3478"></input><br />
   <label style="font-size: medium;" for="iceServerUsername">Username:</label>
-  <input id="iceServerUsername" type="text" size="64" style="font-size: medium;" /><br />
+  <input id="iceServerUsername" type="text" size="64" style="font-size: medium;" value="BQAASMwZOoAB2g5XvrxdcvE7JKo7CIOaG6+G/KKTjBYAAAAMARA2sy/T85dMEJ9ZsjU8QILlAhAAAAAcKufWzpsqY71FYB7mIgXpPLWw7YJBQnSLpEhFsebFAwM=" /><br />
   <label style="font-size: medium;" for="iceServerCredential">Credential:</label>
-  <input id="iceServerCredential" type="password" size="32" style="font-size: medium;" /><br />
+  <input id="iceServerCredential" type="password" size="32" style="font-size: medium;" value="kzKoKyFZrvblRqh320UVQoPk/Gc=" /><br />
   <br />
 
   <h2 style="background-color: white; width: 300px;">STT / TTS Configuration</h2>
-  <label style="font-size: medium;" for="sttLocale">STT Locale:</label>
-  <input id="sttLocale" type="text" size="32" style="font-size: medium;" value="en-US"></input><br />
+  <label style="font-size: medium;" for="sttLocale">STT Locale(s):</label>
+  <input id="sttLocales" type="text" size="64" style="font-size: medium;" value="en-US,de-DE,es-ES,fr-FR,it-IT,ja-JP,ko-KR,zh-CN"></input><br />
   <label style="font-size: medium;" for="ttsVoice">TTS Voice:</label>
-  <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyNeural"></input><br />
+  <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyMultilingualV2Neural"></input><br />
   <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
   <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
   <br />

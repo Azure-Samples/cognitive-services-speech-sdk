@@ -236,9 +236,11 @@ window.startSession = () => {
         console.log("Event received: " + e.description + offsetMessage)
     }
 
-    const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
-    speechRecognitionConfig.speechRecognitionLanguage = document.getElementById('sttLocale').value
-    speechRecognizer = new SpeechSDK.SpeechRecognizer(speechRecognitionConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
+    const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${cogSvcRegion}.stt.speech.microsoft.com/speech/universal/v2`), cogSvcSubKey)
+    speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
+    var sttLocales = document.getElementById('sttLocales').value.split(',')
+    var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
+    speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
 
     const azureOpenAIEndpoint = document.getElementById('azureOpenAIEndpoint').value
     const azureOpenAIApiKey = document.getElementById('azureOpenAIApiKey').value
