@@ -141,10 +141,14 @@ public class SpeechRecognitionSamples {
 
                     // Word-level timing
                     JsonArray wordsArray = nbestItem.getJsonArray("Words");
-                    System.out.println("\t\tWord | Offset | Duration");
-                    for (int j = 0; j < wordsArray.size(); j++) {
-                        JsonObject wordItem = wordsArray.getJsonObject(j);
-                        System.out.println("\t\t" + wordItem.getString("Word") + " " + wordItem.getJsonNumber("Offset") + " " + wordItem.getJsonNumber("Duration"));
+                    if (wordsArray != null) {
+                        System.out.println("\t\tWord | Offset | Duration");
+                        for (int j = 0; j < wordsArray.size(); j++) {
+                            JsonObject wordItem = wordsArray.getJsonObject(j);
+                            System.out.println("\t\t" + wordItem.getString("Word") + " " + wordItem.getJsonNumber("Offset") + " " + wordItem.getJsonNumber("Duration"));
+                        }
+                    } else {
+                        System.out.println("\t\tNo word-level timing information available.");
                     }
                 }
 

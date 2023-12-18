@@ -12,7 +12,7 @@ See [this information on the Speech SDK for JavaScript](https://github.com/micro
 
 ## Get the sample
 
-* **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
+* **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 
 ## Run the sample

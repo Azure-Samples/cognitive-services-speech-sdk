@@ -13,7 +13,7 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 
 ## Build the sample
 
-* **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
+* **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 
 If you want to host the sample on a web server, the web server must be able to run Node. Follow these steps:
