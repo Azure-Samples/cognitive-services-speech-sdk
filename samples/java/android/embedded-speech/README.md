@@ -7,7 +7,6 @@ For more advanced use cases, see the [Java JRE samples](../../jre/embedded-speec
 It is recommended to try them out before this Android specific sample.
 
 > **Note:**
-> * Embedded speech is in [preview](https://aka.ms/embedded-speech) and details in this document and samples are subject to change.
 > * Embedded speech recognition only supports audio in the following format:
 >   * single channel
 >   * 8000 or 16000 Hz sample rate
@@ -82,7 +81,7 @@ Do **not** add [client-sdk](https://mvnrepository.com/artifact/com.microsoft.cog
 **Note:** Make sure that `@aar` suffix is used when the dependency is specified in `build.gradle`. For example,
 ```
 dependencies {
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.33.0@aar'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.34.0@aar'
     ...
 ```
 

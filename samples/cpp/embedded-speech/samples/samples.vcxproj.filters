@@ -38,6 +38,9 @@
     <None Include="../data/keyword_computer.table">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="../data/performance_test.wav">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="../data/speech_test.raw">
       <Filter>Resource Files</Filter>
     </None>
