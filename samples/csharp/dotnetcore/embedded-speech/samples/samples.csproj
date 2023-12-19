@@ -12,6 +12,9 @@
     <Content Include="../data/keyword_computer.table" Link="data/keyword_computer.table">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="../data/performance_test.wav" Link="data/performance_test.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="../data/speech_test.raw" Link="data/speech_test.raw">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -21,11 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.33.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.33.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.33.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.33.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.33.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.34.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.34.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.34.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.34.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.34.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>

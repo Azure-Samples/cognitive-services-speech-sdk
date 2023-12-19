@@ -15,10 +15,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
 
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.audio.*;
@@ -78,8 +74,8 @@ public class SpeechTranslationSamples
             // Note that embedded "many-to-1" translation models support only one
             // target language (the model native output language). For example, a
             // "Many-to-English" model generates only output in English.
-            // At the moment embedded translation cannot provide transcription or
-            // language ID of the source language.
+            // At the moment embedded translation cannot provide transcription of
+            // the source language.
             if (e.getResult().getReason() == ResultReason.TranslatingSpeech)
             {
                 for (Map.Entry<String, String> translation : e.getResult().getTranslations().entrySet())
