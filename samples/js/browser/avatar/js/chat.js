@@ -7,9 +7,12 @@ var avatarSynthesizer
 var peerConnection
 var messages = []
 var dataSources = []
+var sentenceLevelPunctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ]
 var enableQuickReply = false
 var quickReplies = [ 'Let me take a look.', 'Let me check.', 'One moment, please.' ]
-var speakingThreads = 0
+var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
+var isSpeaking = false
+var spokenTextQueue = []
 
 // Logger
 const log = msg => {
@@ -165,29 +168,34 @@ function htmlEncode(text) {
 
 // Speak the given text
 function speak(text, endingSilenceMs = 0) {
-    let ttsVoice = document.getElementById('ttsVoice').value
-    let chatHistoryTextArea = document.getElementById('chatHistory')
-    chatHistoryTextArea.innerHTML += `Assistant: ${text}\n\n`
-    chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
-
-    // If there is any speaking thread, stop it
-    if (speakingThreads > 0) {
-        stopSpeaking()
+    if (isSpeaking) {
+        spokenTextQueue.push(text)
+        return
     }
 
-    speakingThreads++
+    speakNext(text, endingSilenceMs)
+}
+
+function speakNext(text, endingSilenceMs = 0) {
+    let ttsVoice = document.getElementById('ttsVoice').value
     let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
     if (endingSilenceMs > 0) {
         ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></voice></speak>`
     }
 
+    isSpeaking = true
     avatarSynthesizer.speakSsmlAsync(ssml).then(
         (result) => {
-            speakingThreads--
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
                 console.log(`Speech synthesized to speaker for text [ ${text} ]`)
             } else {
                 console.log(`Error occurred while speaking the SSML.`)
+            }
+
+            if (spokenTextQueue.length > 0) {
+                speakNext(spokenTextQueue.shift())
+            } else {
+                isSpeaking = false
             }
         }).catch(
             (error) => {
@@ -197,6 +205,7 @@ function speak(text, endingSilenceMs = 0) {
 }
 
 function stopSpeaking() {
+    spokenTextQueue = []
     avatarSynthesizer.stopSpeakingAsync().then(
         log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
     ).catch(
@@ -312,6 +321,11 @@ window.startMicrophone = () => {
             chatHistoryTextArea.innerHTML += "User: " + userQuery + '\n\n'
             chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
+            // Stop previous speaking if there is any
+            if (isSpeaking) {
+                stopSpeaking()
+            }
+
             // For 'bring your data' scenario, chat API currently has long (4s+) latency
             // We return some quick reply here before the chat API returns to mitigate.
             if (dataSources.length > 0 && enableQuickReply) {
@@ -324,16 +338,23 @@ window.startMicrophone = () => {
 
             let url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/chat/completions?api-version=2023-03-15-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
             let body = JSON.stringify({
-                messages: messages
+                messages: messages,
+                stream: true
             })
 
             if (dataSources.length > 0) {
                 url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/extensions/chat/completions?api-version=2023-06-01-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
                 body = JSON.stringify({
+                    dataSources: dataSources,
                     messages: messages,
-                    dataSources: dataSources
+                    stream: true
                 })
             }
+
+            let assistantReply = ''
+            let toolContent = ''
+            let spokenSentence = ''
+            let displaySentence = ''
 
             fetch(url, {
                 method: 'POST',
@@ -343,28 +364,125 @@ window.startMicrophone = () => {
                 },
                 body: body
             })
-            .then(response => response.json())
-            .then(data => {
-                let reply = ''
-                if (dataSources.length === 0) {
-                    reply = data.choices[0].message.content
-                } else {
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Chat API response status: ${response.status} ${response.statusText}`)
+                }
+
+                let chatHistoryTextArea = document.getElementById('chatHistory')
+                chatHistoryTextArea.innerHTML += 'Assistant: '
+
+                const reader = response.body.getReader()
+
+                // Function to recursively read chunks from the stream
+                function read(previousChunkString = '') {
+                    return reader.read().then(({ value, done }) => {
+                        // Check if there is still data to read
+                        if (done) {
+                            // Stream complete
+                            return
+                        }
+
+                        // Process the chunk of data (value)
+                        let chunkString = new TextDecoder().decode(value, { stream: true })
+                        if (previousChunkString !== '') {
+                            // Concatenate the previous chunk string in case it is incomplete
+                            chunkString = previousChunkString + chunkString
+                        }
+
+                        if (!chunkString.includes('\n\n')) {
+                            // This is a incomplete chunk, read the next chunk
+                            return read(chunkString)
+                        }
+
+                        chunkString.split('\n\n').forEach((line) => {
+                            if (line.startsWith('data:') && !line.endsWith('[DONE]')) {
+                                const responseJson = JSON.parse(line.substring(5).trim())
+                                let responseToken = undefined
+                                if (dataSources.length === 0) {
+                                    responseToken = responseJson.choices[0].delta.content
+                                } else {
+                                    let role = responseJson.choices[0].messages[0].delta.role
+                                    if (role === 'tool') {
+                                        toolContent = responseJson.choices[0].messages[0].delta.content
+                                    } else {
+                                        responseToken = responseJson.choices[0].messages[0].delta.content
+                                        if (responseToken !== undefined) {
+                                            if (byodDocRegex.test(responseToken)) {
+                                                responseToken = responseToken.replace(byodDocRegex, '').trim()
+                                            }
+
+                                            if (responseToken === '[DONE]') {
+                                                responseToken = undefined
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (responseToken !== undefined) {
+                                    assistantReply += responseToken // build up the assistant message
+                                    displaySentence += responseToken // build up the display sentence
+
+                                    // console.log(`Current token: ${responseToken}`)
+
+                                    if (responseToken === '\n' || responseToken === '\n\n') {
+                                        speak(spokenSentence.trim())
+                                        spokenSentence = ''
+                                    } else {
+                                        responseToken = responseToken.replace(/\n/g, '')
+                                        spokenSentence += responseToken // build up the spoken sentence
+
+                                        if (responseToken.length === 1 || responseToken.length === 2) {
+                                            for (let i = 0; i < sentenceLevelPunctuations.length; ++i) {
+                                                let sentenceLevelPunctuation = sentenceLevelPunctuations[i]
+                                                if (responseToken.startsWith(sentenceLevelPunctuation)) {
+                                                    speak(spokenSentence.trim())
+                                                    spokenSentence = ''
+                                                    break
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        })
+
+                        chatHistoryTextArea.innerHTML += `${displaySentence}`
+                        chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+                        displaySentence = ''
+
+                        // Continue reading the next chunk
+                        return read()
+                    })
+                }
+
+                // Start reading the stream
+                return read()
+            })
+            .then(() => {
+                let chatHistoryTextArea = document.getElementById('chatHistory')
+                chatHistoryTextArea.innerHTML += '\n\n'
+
+                if (spokenSentence !== '') {
+                    speak(spokenSentence.trim())
+                    spokenSentence = ''
+                }
+
+                if (dataSources.length > 0) {
                     let toolMessage = {
                         role: 'tool',
-                        content: data.choices[0].messages[0].content
+                        content: toolContent
                     }
 
                     messages.push(toolMessage)
-                    reply = data.choices[0].messages[1].content
                 }
 
                 let assistantMessage = {
                     role: 'assistant',
-                    content: reply
+                    content: assistantReply
                 }
 
                 messages.push(assistantMessage)
-                speak(reply.replace(/\[doc(\d+)\]/g, '').trim())
             })
         }
     }

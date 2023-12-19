@@ -12,12 +12,11 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.audio.*;
@@ -137,26 +136,24 @@ public class SpeechRecognitionSamples
                 // Word level detail (if enabled in speech config).
                 /*
                 // Convert the JSON string to a JSON object.
-                JsonReader jsonReader = Json.createReader(new StringReader(jsonResult));
+                JSONObject json = new JSONObject(jsonResult);
 
                 // Extract word level detail from the JSON.
-                JsonArray nbestArray = jsonReader.readObject().getJsonArray("NBest");
-                if (nbestArray != null && nbestArray.size() > 0)
+                JSONArray nbestArray = json.getJSONArray("NBest");
+                if (nbestArray != null && nbestArray.length() > 0)
                 {
-                    JsonObject bestResult = nbestArray.getJsonObject(0);
-                    JsonArray wordsArray = bestResult.getJsonArray("Words");
+                    JSONObject bestResult = nbestArray.getJSONObject(0);
+                    JSONArray wordsArray = bestResult.getJSONArray("Words");
 
-                    for (int i = 0; i < wordsArray.size(); i++)
+                    for (int i = 0; i < wordsArray.length(); i++)
                     {
-                        JsonObject wordItem = wordsArray.getJsonObject(i);
+                        JSONObject word = wordsArray.getJSONObject(i);
                         System.out.println(
-                            "Word: \"" + wordItem.getString("Word") + "\" | " +
-                            "Offset: " + wordItem.getJsonNumber("Offset").longValue() / 10000 + "ms | " +
-                            "Duration: " + wordItem.getJsonNumber("Duration").longValue() / 10000 + "ms");
+                            "Word: \"" + word.getString("Word") + "\" | " +
+                            "Offset: " + word.getLong("Offset") / 10000 + "ms | " +
+                            "Duration: " + word.getLong("Duration") / 10000 + "ms");
                     }
                 }
-
-                jsonReader.close();
                 */
             }
             else if (e.getResult().getReason() == ResultReason.NoMatch)
@@ -465,6 +462,73 @@ public class SpeechRecognitionSamples
 
         SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, audioConfig);
         recognizeSpeechAsync(recognizer, useKeyword, waitForUser);
+
+        recognizer.close();
+        audioConfig.close();
+        speechConfig.close();
+    }
+
+
+    // Measures the device performance when running embedded speech recognition.
+    public static void embeddedRecognitionPerformanceTest() throws InterruptedException, ExecutionException
+    {
+        EmbeddedSpeechConfig speechConfig = Settings.createEmbeddedSpeechConfig();
+        AudioConfig audioConfig = AudioConfig.fromWavFileInput(Settings.getPerfTestAudioFileName());
+
+        // Enables performance metrics to be included with recognition results.
+        speechConfig.setProperty(PropertyId.EmbeddedSpeech_EnablePerformanceMetrics, "true");
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+        Semaphore recognitionEnd = new Semaphore(0);
+        AtomicInteger resultCount = new AtomicInteger(0);
+
+        // Subscribes to events.
+        recognizer.speechStartDetected.addEventListener((s, e) ->
+        {
+            System.out.println("Processing, please wait...");
+        });
+
+        recognizer.recognized.addEventListener((s, e) ->
+        {
+            if (e.getResult().getReason() == ResultReason.RecognizedSpeech)
+            {
+                System.out.println("[" + resultCount.incrementAndGet() + "] RECOGNIZED: Text=" + e.getResult().getText());
+
+                // Recognition results in JSON format.
+                String jsonResult = e.getResult().getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                JSONObject json = new JSONObject(jsonResult);
+
+                if (json.has("PerformanceCounters"))
+                {
+                    JSONArray perfCounters = json.getJSONArray("PerformanceCounters");
+                    System.out.println("[" + resultCount + "] PerformanceCounters: " + perfCounters.toString(4));
+                }
+                else
+                {
+                    System.err.println("ERROR: No performance counters data found.");
+                }
+            }
+        });
+
+        recognizer.canceled.addEventListener((s, e) ->
+        {
+            if (e.getReason() == CancellationReason.Error)
+            {
+                System.err.println("CANCELED: ErrorCode=" + e.getErrorCode() + " ErrorDetails=" + e.getErrorDetails());
+            }
+        });
+
+        recognizer.sessionStopped.addEventListener((s, e) ->
+        {
+            System.out.println("All done! Please go to https://aka.ms/embedded-speech for information on how to evaluate the results.");
+            recognitionEnd.release();
+        });
+
+        // Runs continuous recognition.
+        recognizer.startContinuousRecognitionAsync().get();
+        recognitionEnd.acquire();
+        recognizer.stopContinuousRecognitionAsync().get();
 
         recognizer.close();
         audioConfig.close();

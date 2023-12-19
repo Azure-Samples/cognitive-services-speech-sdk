@@ -20,7 +20,7 @@
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>1.33.0</version>
+      <version>1.34.0</version>
     </dependency>
   </dependencies>
   <repositories>
