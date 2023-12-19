@@ -7,7 +7,6 @@ For more advanced use cases, see the [C# .NET Core samples](../../dotnetcore/emb
 It is recommended to try them out before this Unity specific sample.
 
 > **Note:**
-> * Embedded speech is in [preview](https://aka.ms/embedded-speech) and details in this document and samples are subject to change.
 > * Embedded speech recognition only supports audio in the following format:
 >   * single channel
 >   * 8000 or 16000 Hz sample rate

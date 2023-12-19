@@ -6,6 +6,7 @@
 #include <iostream>
 #include <thread>
 #include <speechapi_cxx.h>
+#include <nlohmann/json.hpp>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -22,9 +23,10 @@ extern const string GetSpeechRawAudioFileName();
 extern const string GetSpeechWavAudioFileName();
 extern const string GetKeywordModelFileName();
 extern const string GetKeywordPhrase();
+extern const string GetPerfTestAudioFileName();
 
 
-// Lists available embeddded speech recognition models.
+// Lists available embedded speech recognition models.
 void ListEmbeddedSpeechRecognitionModels()
 {
     // Creates an instance of an embedded speech config.
@@ -454,4 +456,68 @@ void HybridSpeechRecognitionFromMicrophone()
 
     auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
     RecognizeSpeech(recognizer, useKeyword, waitForUser);
+}
+
+
+// Measures the device performance when running embedded speech recognition.
+void EmbeddedSpeechRecognitionPerformanceTest()
+{
+    auto speechConfig = CreateEmbeddedSpeechConfig();
+    auto audioConfig = AudioConfig::FromWavFileInput(GetPerfTestAudioFileName());
+
+    // Enables performance metrics to be included with recognition results.
+    speechConfig->SetProperty(PropertyId::EmbeddedSpeech_EnablePerformanceMetrics, "true");
+
+    auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
+
+    promise<void> recognitionEnd;
+    int resultCount = 0;
+
+    // Subscribes to events.
+    recognizer->SpeechStartDetected += [](const RecognitionEventArgs&)
+    {
+        cout << "Processing, please wait...\n";
+    };
+
+    recognizer->Recognized += [&resultCount](const SpeechRecognitionEventArgs& e)
+    {
+        if (e.Result->Reason == ResultReason::RecognizedSpeech)
+        {
+            resultCount++;
+            cout << "[" << resultCount << "] RECOGNIZED: Text=" << e.Result->Text << endl;
+
+            // Recognition results in JSON format.
+            string jsonResult = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+            auto json = nlohmann::json::parse(jsonResult);
+
+            if (json.contains("PerformanceCounters"))
+            {
+                const auto& perfCounters = json["PerformanceCounters"];
+                cout << "[" << resultCount << "] PerformanceCounters: " << perfCounters.dump(4) << endl;
+            }
+            else
+            {
+                cerr << "ERROR: No performance counters data found.\n";
+            }
+        }
+    };
+
+    recognizer->Canceled += [](const SpeechRecognitionCanceledEventArgs& e)
+    {
+        if (e.Reason == CancellationReason::Error)
+        {
+            cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << " ErrorDetails=" << e.ErrorDetails << endl;
+        }
+    };
+
+    recognizer->SessionStopped += [&recognitionEnd](const SessionEventArgs&)
+    {
+        cout << "All done! Please go to https://aka.ms/embedded-speech for information on how to evaluate the results.\n";
+        recognitionEnd.set_value();
+    };
+
+    // Runs continuous recognition.
+    recognizer->StartContinuousRecognitionAsync().get();
+    recognitionEnd.get_future().get();
+    recognizer->StopContinuousRecognitionAsync().get();
 }

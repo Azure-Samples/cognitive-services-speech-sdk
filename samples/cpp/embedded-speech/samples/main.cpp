@@ -31,6 +31,8 @@ extern void HybridSpeechSynthesisToSpeaker();
 extern void ListEmbeddedSpeechTranslationModels();
 extern void EmbeddedSpeechTranslationFromMicrophone();
 
+extern void EmbeddedSpeechRecognitionPerformanceTest();
+
 
 int main()
 {
@@ -46,7 +48,7 @@ int main()
         {
             cout << "\nEMBEDDED SPEECH SAMPLES\n";
             cout << "\nSpeech recognition\n";
-            cout << " 1. List embeddded speech recognition models.\n";
+            cout << " 1. List embedded speech recognition models.\n";
             cout << " 2. Embedded speech recognition with microphone input.\n";
             cout << " 3. Embedded speech recognition with microphone input, keyword-triggered.\n";
             cout << " 4. Embedded speech recognition with WAV file input.\n";
@@ -57,12 +59,14 @@ int main()
             cout << " 8. Embedded intent recognition with microphone input.\n";
             cout << " 9. Embedded intent recognition with microphone input, keyword-triggered.\n";
             cout << "\nSpeech synthesis\n";
-            cout << "10. List embeddded speech synthesis voices.\n";
+            cout << "10. List embedded speech synthesis voices.\n";
             cout << "11. Embedded speech synthesis with speaker output.\n";
             cout << "12. Hybrid (cloud & embedded) speech synthesis with speaker output.\n";
             cout << "\nSpeech translation\n";
-            cout << "13. List embeddded speech translation models.\n";
+            cout << "13. List embedded speech translation models.\n";
             cout << "14. Embedded speech translation with microphone input.\n";
+            cout << "\nDevice performance measurement\n";
+            cout << "15. Embedded speech recognition.\n";
             cout << "\nChoose a number (or none for exit) and press Enter: ";
             cout.flush();
 
@@ -117,6 +121,9 @@ int main()
                 break;
             case 14:
                 if (HasSpeechTranslationModel()) EmbeddedSpeechTranslationFromMicrophone();
+                break;
+            case 15:
+                if (HasSpeechRecognitionModel()) EmbeddedSpeechRecognitionPerformanceTest();
                 break;
             default:
                 break;

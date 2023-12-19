@@ -16,7 +16,7 @@ extern shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig();
 extern shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig();
 
 
-// Lists available embeddded speech translation models.
+// Lists available embedded speech translation models.
 void ListEmbeddedSpeechTranslationModels()
 {
     // Creates an instance of an embedded speech config.
@@ -67,8 +67,8 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
         // Note that embedded "many-to-1" translation models support only one
         // target language (the model native output language). For example, a
         // "Many-to-English" model generates only output in English.
-        // At the moment embedded translation cannot provide transcription or
-        // language ID of the source language.
+        // At the moment embedded translation cannot provide transcription of
+        // the source language.
         if (e.Result->Reason == ResultReason::TranslatingSpeech)
         {
             for (const auto& translation : e.Result->Translations)
