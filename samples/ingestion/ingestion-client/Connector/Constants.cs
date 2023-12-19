@@ -30,5 +30,7 @@ namespace Connector.Constants
         public const int DefaultConversationAnalysisMaxChunkSize = 5000;
 
         public const string SummarizationSupportedLocalePrefix = "en";
+
+        public static readonly int[] Channels = new int[] { 0, 1 };
     }
 }

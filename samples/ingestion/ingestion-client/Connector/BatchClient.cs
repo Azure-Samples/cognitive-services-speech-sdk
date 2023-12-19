@@ -13,6 +13,7 @@ namespace Connector
     using System.Threading;
     using System.Threading.Tasks;
     using Connector.Serializable.TranscriptionFiles;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Polly;
     using Polly.Retry;
@@ -72,11 +73,11 @@ namespace Connector
             return DeleteAsync(transcriptionLocation, subscriptionKey, DefaultTimeout);
         }
 
-        public static async Task<Uri> PostTranscriptionAsync(TranscriptionDefinition transcriptionDefinition, string hostName, string subscriptionKey)
+        public static async Task<Uri> PostTranscriptionAsync(TranscriptionDefinition transcriptionDefinition, string hostName, string subscriptionKey, ILogger? logger)
         {
             var path = $"{hostName}{TranscriptionsBasePath}";
             var payloadString = JsonConvert.SerializeObject(transcriptionDefinition);
-
+            logger.LogInformation($"Sending payload {payloadString} to {path}");
             return await PostAsync(path, subscriptionKey, payloadString, PostTimeout).ConfigureAwait(false);
         }
 

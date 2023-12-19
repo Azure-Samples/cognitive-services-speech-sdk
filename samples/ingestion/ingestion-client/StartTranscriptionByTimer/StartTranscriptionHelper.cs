@@ -221,7 +221,8 @@ namespace StartTranscriptionByTimer
                 var transcriptionLocation = await BatchClient.PostTranscriptionAsync(
                     transcriptionDefinition,
                     StartTranscriptionEnvironmentVariables.AzureSpeechServicesEndpointUri,
-                    this.subscriptionKey).ConfigureAwait(false);
+                    this.subscriptionKey,
+                    this.logger).ConfigureAwait(false);
 
                 this.logger.LogInformation($"Location: {transcriptionLocation}");
 
@@ -309,9 +310,9 @@ namespace StartTranscriptionByTimer
             }
         }
 
-        private Dictionary<string, string> GetTranscriptionPropertyBag()
+        private Dictionary<string, object> GetTranscriptionPropertyBag()
         {
-            var properties = new Dictionary<string, string>();
+            var properties = new Dictionary<string, object>();
 
             var profanityFilterMode = StartTranscriptionEnvironmentVariables.ProfanityFilterMode;
             properties.Add("ProfanityFilterMode", profanityFilterMode);
@@ -330,6 +331,9 @@ namespace StartTranscriptionByTimer
             properties.Add("WordLevelTimestampsEnabled", addWordLevelTimestamps.ToString(CultureInfo.InvariantCulture));
             this.logger.LogInformation($"Setting word level timestamps enabled to {addWordLevelTimestamps}");
 
+            var channels = StartTranscriptionEnvironmentVariables.Channels;
+            properties.Add("Channels", channels);
+            this.logger.LogInformation($"Setting channels to {string.Join(",", channels)}");
             return properties;
         }
 
