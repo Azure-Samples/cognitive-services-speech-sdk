@@ -24,8 +24,8 @@ harbor architects llc	HARBOR ARCHITECTS LLC
 a bit of everything	A bit of Everything
 
 # profanity
-fakeword
-maskedword
+fake word
+masked word
 
 
 # test
@@ -34,7 +34,7 @@ do you like dog nine	Do you like dog 9
 twenty to thirty K	20-30 cadence
 thirty to forty K	30-40 cadence
 how about the performance of end to end speech recognition system	How about the performance of E2E speech recognition system
-profanity word fakeword and maskedword should be masked	Profanity word ******** and ********** should be masked
+profanity word fake word and masked word should be masked	Profanity word **** **** and ****** **** should be masked
 navigate to bergerson construction incorporated	Navigate to Bergerson Construction, Inc
 navigate to bridge & tunnel bottleshop & taproom	Navigate to Bridge & Tunnel Bottleshop & Taproom
 navigate to oregon gypsy-gallery	Navigate to Oregon Gypsy-gallery
