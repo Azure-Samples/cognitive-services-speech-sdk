@@ -396,10 +396,11 @@
                     scenarioSelection.value == 'translationRecognizerContinuous' ? '' : 'none';
                 
                 document.getElementById('pronunciationAssessmentReferenceTextRow').style.display =
-                    scenarioSelection.value.includes('pronunciation') ? '' : 'none';
+                    scenarioSelection.value.includes('pronunciation') 
+                    && scenarioSelection.value != 'pronunciationAssessmentWithContentAssessment' ? '' : 'none';
 
                 document.getElementById('contentAssessmentTopicTextRow').style.display =
-                    scenarioSelection.value.includes('content') ? '' : 'none';
+                    scenarioSelection.value == 'pronunciationAssessmentWithContentAssessment' ? '' : 'none';
             }
 
             scenarioSelection.addEventListener("change", function () {
@@ -609,7 +610,7 @@
             var pronunciationAssessmentConfig = new SpeechSDK.PronunciationAssessmentConfig(referenceText.value,
                 SpeechSDK.PronunciationAssessmentGradingSystem.HundredMark,
                 SpeechSDK.PronunciationAssessmentGranularity.Word, true);
-            pronunciationAssessmentConfig.enableProsodyAssessment()
+            pronunciationAssessmentConfig.enableProsodyAssessment = true;
             return pronunciationAssessmentConfig;
         }
 
@@ -681,7 +682,7 @@
                         var displayText = detailedResultJson['DisplayText'];
                         phraseDiv.innerHTML += `Detailed result for "${displayText}":\r\n`
                         + `${JSON.stringify(detailedResultJson, null, 2)}\r\n`;
-                    } else if (result.text) {
+                    } else if (result.text && result.text != ".") {
                         phraseDiv.innerHTML += `${result.text}\r\n`;
                     }
 
@@ -701,11 +702,16 @@
 
                     if (scenarioSelection.value.includes('pronunciation')) {
                         var pronunciationAssessmentResult = SpeechSDK.PronunciationAssessmentResult.fromResult(result);
-                        phraseDiv.innerHTML += 
-                        `[Pronunciation result] Accuracy: ${pronunciationAssessmentResult.accuracyScore}; 
-                       Fluency: ${pronunciationAssessmentResult.fluencyScore};
-                       Completeness: ${pronunciationAssessmentResult.completenessScore}.\n`;
-                        pronunciationAssessmentResults.push(pronunciationAssessmentResult);
+                        if (pronunciationAssessmentResult.detailResult.Display != '.') {
+                            phraseDiv.innerHTML += 
+                            `[Pronunciation result]
+                           Accuracy: ${pronunciationAssessmentResult.accuracyScore}.
+                           Fluency: ${pronunciationAssessmentResult.fluencyScore}.
+                           Prosody: ${pronunciationAssessmentResult.prosodyScore}.
+                           ${referenceText.value != '' ? `Completeness: ${pronunciationAssessmentResult.completenessScore}.` : ``}\n`;
+                            pronunciationAssessmentResults.push(pronunciationAssessmentResult);
+                        }
+                        
                     }
 
                     if (scenarioSelection.value == 'pronunciationAssessmentWithContentAssessment') {
@@ -731,7 +737,8 @@
             statusDiv.innerHTML += `(sessionStopped) SessionId: ${sessionEventArgs.sessionId}\r\n`;
 
             if (scenarioSelection.value == 'pronunciationAssessmentContinuous' || 
-                scenarioSelection.value == 'pronunciationAssessmentContinuousStream'
+                scenarioSelection.value == 'pronunciationAssessmentContinuousStream' ||
+                scenarioSelection.value == 'pronunciationAssessmentWithContentAssessment'
             ) {
                 calculateOverallPronunciationScore();
             }
@@ -815,6 +822,8 @@
             var sumDuration = 0;
             var sumAccuracy = 0;
             var sumFluency = 0;
+            var sumProsody = 0;
+            var countProsody = 0;
             for (const result of pronunciationAssessmentResults) {
                 var duration = 0;
                 for (const word of result.detailResult.Words) {
@@ -824,11 +833,14 @@
                 sumDuration += duration;
                 sumAccuracy += duration * result.accuracyScore;
                 sumFluency += duration * result.fluencyScore;
+                sumProsody += result.prosodyScore;
+                countProsody++;
             }
 
             // weighted accuracy and fluency scores
             var accuracy = sumAccuracy / sumDuration;
             var fluency = sumFluency / sumDuration;
+            var prosody = sumProsody / countProsody;
 
             var diff = new difflib.SequenceMatcher(null, referenceWords, recognizedWords);
             diffWordsNum = 0;
@@ -841,16 +853,18 @@
             var completeness = (1 - diffWordsNum / referenceWords.length) * 100;
 
             phraseDiv.innerHTML +=
-                `[Overall Pronunciation result] Accuracy: ${accuracy}; 
-                       Fluency: ${fluency};
-                       Completeness: ${completeness}.\n`;
+                `[Overall Pronunciation result]
+                        Accuracy: ${accuracy}.
+                        Fluency: ${fluency}.
+                        Prosody: ${prosody}.
+                        ${referenceText.value != '' ? `Completeness: ${completeness}.` : ``}\n`;
         }
 
         function getContentResult() {
-            phraseDiv.innerHTML = `[content assessment result] \n
-                \tvocabulary score: ${contentResults.vocabularyScore} '\n'
-                \tgrammar score: ${contentResults.grammarScore} '\n'
-                \ttopic score: ${contentResults.topicScore}`
+            phraseDiv.innerHTML += `[content assessment result]
+                \tvocabulary score: ${contentResults[contentResults.length-1].vocabularyScore}.
+                \tgrammar score: ${contentResults[contentResults.length-1].grammarScore}.
+                \ttopic score: ${contentResults[contentResults.length-1].topicScore}.`
         }
     </script>
 

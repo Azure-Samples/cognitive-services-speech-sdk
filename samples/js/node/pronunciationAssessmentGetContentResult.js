@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 // pull in the required packages.
-// Please install the required packages from https://github.com/microsoft/cognitive-services-speech-sdk-js
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
 import fs from 'fs';
 import _ from 'lodash';

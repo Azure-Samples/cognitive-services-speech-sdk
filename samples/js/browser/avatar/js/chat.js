@@ -200,6 +200,12 @@ function speakNext(text, endingSilenceMs = 0) {
         }).catch(
             (error) => {
                 console.log(`Error occurred while speaking the SSML: [ ${error} ]`)
+
+                if (spokenTextQueue.length > 0) {
+                    speakNext(spokenTextQueue.shift())
+                } else {
+                    isSpeaking = false
+                }
             }
         )
 }
@@ -207,7 +213,10 @@ function speakNext(text, endingSilenceMs = 0) {
 function stopSpeaking() {
     spokenTextQueue = []
     avatarSynthesizer.stopSpeakingAsync().then(
-        log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
+        () => {
+            isSpeaking = false
+            log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
+        }
     ).catch(
         (error) => {
             console.log("Error occurred while stopping speaking: " + error)
@@ -318,6 +327,10 @@ window.startMicrophone = () => {
 
             messages.push(chatMessage)
             let chatHistoryTextArea = document.getElementById('chatHistory')
+            if (chatHistoryTextArea.innerHTML !== '' && !chatHistoryTextArea.innerHTML.endsWith('\n\n')) {
+                chatHistoryTextArea.innerHTML += '\n\n'
+            }
+
             chatHistoryTextArea.innerHTML += "User: " + userQuery + '\n\n'
             chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
@@ -390,60 +403,65 @@ window.startMicrophone = () => {
                             chunkString = previousChunkString + chunkString
                         }
 
-                        if (!chunkString.includes('\n\n')) {
+                        if (!chunkString.endsWith('}}]}\n\n') && !chunkString.endsWith('[DONE]\n\n')) {
                             // This is a incomplete chunk, read the next chunk
                             return read(chunkString)
                         }
 
                         chunkString.split('\n\n').forEach((line) => {
-                            if (line.startsWith('data:') && !line.endsWith('[DONE]')) {
-                                const responseJson = JSON.parse(line.substring(5).trim())
-                                let responseToken = undefined
-                                if (dataSources.length === 0) {
-                                    responseToken = responseJson.choices[0].delta.content
-                                } else {
-                                    let role = responseJson.choices[0].messages[0].delta.role
-                                    if (role === 'tool') {
-                                        toolContent = responseJson.choices[0].messages[0].delta.content
+                            try {
+                                if (line.startsWith('data:') && !line.endsWith('[DONE]')) {
+                                    const responseJson = JSON.parse(line.substring(5).trim())
+                                    let responseToken = undefined
+                                    if (dataSources.length === 0) {
+                                        responseToken = responseJson.choices[0].delta.content
                                     } else {
-                                        responseToken = responseJson.choices[0].messages[0].delta.content
-                                        if (responseToken !== undefined) {
-                                            if (byodDocRegex.test(responseToken)) {
-                                                responseToken = responseToken.replace(byodDocRegex, '').trim()
-                                            }
+                                        let role = responseJson.choices[0].messages[0].delta.role
+                                        if (role === 'tool') {
+                                            toolContent = responseJson.choices[0].messages[0].delta.content
+                                        } else {
+                                            responseToken = responseJson.choices[0].messages[0].delta.content
+                                            if (responseToken !== undefined) {
+                                                if (byodDocRegex.test(responseToken)) {
+                                                    responseToken = responseToken.replace(byodDocRegex, '').trim()
+                                                }
 
-                                            if (responseToken === '[DONE]') {
-                                                responseToken = undefined
+                                                if (responseToken === '[DONE]') {
+                                                    responseToken = undefined
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                if (responseToken !== undefined) {
-                                    assistantReply += responseToken // build up the assistant message
-                                    displaySentence += responseToken // build up the display sentence
+                                    if (responseToken !== undefined) {
+                                        assistantReply += responseToken // build up the assistant message
+                                        displaySentence += responseToken // build up the display sentence
 
-                                    // console.log(`Current token: ${responseToken}`)
+                                        // console.log(`Current token: ${responseToken}`)
 
-                                    if (responseToken === '\n' || responseToken === '\n\n') {
-                                        speak(spokenSentence.trim())
-                                        spokenSentence = ''
-                                    } else {
-                                        responseToken = responseToken.replace(/\n/g, '')
-                                        spokenSentence += responseToken // build up the spoken sentence
+                                        if (responseToken === '\n' || responseToken === '\n\n') {
+                                            speak(spokenSentence.trim())
+                                            spokenSentence = ''
+                                        } else {
+                                            responseToken = responseToken.replace(/\n/g, '')
+                                            spokenSentence += responseToken // build up the spoken sentence
 
-                                        if (responseToken.length === 1 || responseToken.length === 2) {
-                                            for (let i = 0; i < sentenceLevelPunctuations.length; ++i) {
-                                                let sentenceLevelPunctuation = sentenceLevelPunctuations[i]
-                                                if (responseToken.startsWith(sentenceLevelPunctuation)) {
-                                                    speak(spokenSentence.trim())
-                                                    spokenSentence = ''
-                                                    break
+                                            if (responseToken.length === 1 || responseToken.length === 2) {
+                                                for (let i = 0; i < sentenceLevelPunctuations.length; ++i) {
+                                                    let sentenceLevelPunctuation = sentenceLevelPunctuations[i]
+                                                    if (responseToken.startsWith(sentenceLevelPunctuation)) {
+                                                        speak(spokenSentence.trim())
+                                                        spokenSentence = ''
+                                                        break
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
+                            } catch (error) {
+                                console.log(`Error occurred while parsing the response: ${error}`)
+                                console.log(chunkString)
                             }
                         })
 
@@ -460,9 +478,6 @@ window.startMicrophone = () => {
                 return read()
             })
             .then(() => {
-                let chatHistoryTextArea = document.getElementById('chatHistory')
-                chatHistoryTextArea.innerHTML += '\n\n'
-
                 if (spokenSentence !== '') {
                     speak(spokenSentence.trim())
                     spokenSentence = ''
