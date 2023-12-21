@@ -90,7 +90,7 @@ public class SpeechSynthesisScenarioSamples {
         /**
          * A thread-safe method to synthesize content
          * @param content The text to synthesize
-         * @param voice The voice name, e.g. en-US-JennyNeural
+         * @param voice The voice name, e.g. en-US-AndrewNeural
          * @return The first byte latency and processing time, in millisecond.
          */
         public long[] synthesis(String content, String voice) {
@@ -149,7 +149,7 @@ public class SpeechSynthesisScenarioSamples {
             System.out.printf("Turn: %d%n", finalTurn);
 
             IntStream.range(0, 64).parallel().forEach(i -> {
-                long[] latency = service.synthesis(String.format("today is a nice day. %d%d", finalTurn, i), "en-US-JennyNeural");
+                long[] latency = service.synthesis(String.format("today is a nice day. %d%d", finalTurn, i), "en-US-AndrewNeural");
                 if (finalTurn > 0) {
                     latencies.add(latency[0]);
                     processingTimes.add(latency[1]);
