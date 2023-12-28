@@ -14,11 +14,6 @@ var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
 var isSpeaking = false
 var spokenTextQueue = []
 
-// Logger
-const log = msg => {
-    document.getElementById('logging').innerHTML += msg + '<br>'
-}
-
 // Setup WebRTC
 function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // Create WebRTC peer connection
@@ -47,7 +42,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             audioElement.autoplay = true
 
             audioElement.onplaying = () => {
-                log(`WebRTC ${event.track.kind} channel connected.`)
+                console.log(`WebRTC ${event.track.kind} channel connected.`)
             }
 
             document.getElementById('remoteVideo').appendChild(audioElement)
@@ -61,9 +56,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.playsInline = true
 
             videoElement.onplaying = () => {
-                log(`WebRTC ${event.track.kind} channel connected.`)
-                document.getElementById('startMicrophone').disabled = false
+                console.log(`WebRTC ${event.track.kind} channel connected.`)
+                document.getElementById('microphone').disabled = false
                 document.getElementById('stopSession').disabled = false
+                document.getElementById('chatHistory').hidden = false
+                document.getElementById('showTypeMessage').disabled = false
             }
 
             document.getElementById('remoteVideo').appendChild(videoElement)
@@ -98,7 +95,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
                     console.log(cancellationDetails.errorDetails)
                 };
-                log("Unable to start avatar: " + cancellationDetails.errorDetails);
+
+                console.log("Unable to start avatar: " + cancellationDetails.errorDetails);
             }
             document.getElementById('startSession').disabled = false;
             document.getElementById('configuration').hidden = false;
@@ -184,6 +182,7 @@ function speakNext(text, endingSilenceMs = 0) {
     }
 
     isSpeaking = true
+    document.getElementById('stopSpeaking').disabled = false
     avatarSynthesizer.speakSsmlAsync(ssml).then(
         (result) => {
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
@@ -196,6 +195,7 @@ function speakNext(text, endingSilenceMs = 0) {
                 speakNext(spokenTextQueue.shift())
             } else {
                 isSpeaking = false
+                document.getElementById('stopSpeaking').disabled = true
             }
         }).catch(
             (error) => {
@@ -205,6 +205,7 @@ function speakNext(text, endingSilenceMs = 0) {
                     speakNext(spokenTextQueue.shift())
                 } else {
                     isSpeaking = false
+                    document.getElementById('stopSpeaking').disabled = true
                 }
             }
         )
@@ -215,13 +216,196 @@ function stopSpeaking() {
     avatarSynthesizer.stopSpeakingAsync().then(
         () => {
             isSpeaking = false
-            log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
+            document.getElementById('stopSpeaking').disabled = true
+            console.log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
         }
     ).catch(
         (error) => {
             console.log("Error occurred while stopping speaking: " + error)
         }
     )
+}
+
+function handleUserQuery(userQuery) {
+    let chatMessage = {
+        role: 'user',
+        content: userQuery
+    }
+
+    messages.push(chatMessage)
+    let chatHistoryTextArea = document.getElementById('chatHistory')
+    if (chatHistoryTextArea.innerHTML !== '' && !chatHistoryTextArea.innerHTML.endsWith('\n\n')) {
+        chatHistoryTextArea.innerHTML += '\n\n'
+    }
+
+    chatHistoryTextArea.innerHTML += "User: " + userQuery + '\n\n'
+    chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+
+    // Stop previous speaking if there is any
+    if (isSpeaking) {
+        stopSpeaking()
+    }
+
+    // For 'bring your data' scenario, chat API currently has long (4s+) latency
+    // We return some quick reply here before the chat API returns to mitigate.
+    if (dataSources.length > 0 && enableQuickReply) {
+        speak(getQuickReply(), 2000)
+    }
+
+    const azureOpenAIEndpoint = document.getElementById('azureOpenAIEndpoint').value
+    const azureOpenAIApiKey = document.getElementById('azureOpenAIApiKey').value
+    const azureOpenAIDeploymentName = document.getElementById('azureOpenAIDeploymentName').value
+
+    let url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/chat/completions?api-version=2023-03-15-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
+    let body = JSON.stringify({
+        messages: messages,
+        stream: true
+    })
+
+    if (dataSources.length > 0) {
+        url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/extensions/chat/completions?api-version=2023-06-01-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
+        body = JSON.stringify({
+            dataSources: dataSources,
+            messages: messages,
+            stream: true
+        })
+    }
+
+    let assistantReply = ''
+    let toolContent = ''
+    let spokenSentence = ''
+    let displaySentence = ''
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'api-key': azureOpenAIApiKey,
+            'Content-Type': 'application/json'
+        },
+        body: body
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Chat API response status: ${response.status} ${response.statusText}`)
+        }
+
+        let chatHistoryTextArea = document.getElementById('chatHistory')
+        chatHistoryTextArea.innerHTML += 'Assistant: '
+
+        const reader = response.body.getReader()
+
+        // Function to recursively read chunks from the stream
+        function read(previousChunkString = '') {
+            return reader.read().then(({ value, done }) => {
+                // Check if there is still data to read
+                if (done) {
+                    // Stream complete
+                    return
+                }
+
+                // Process the chunk of data (value)
+                let chunkString = new TextDecoder().decode(value, { stream: true })
+                if (previousChunkString !== '') {
+                    // Concatenate the previous chunk string in case it is incomplete
+                    chunkString = previousChunkString + chunkString
+                }
+
+                if (!chunkString.endsWith('}}]}\n\n') && !chunkString.endsWith('[DONE]\n\n')) {
+                    // This is a incomplete chunk, read the next chunk
+                    return read(chunkString)
+                }
+
+                chunkString.split('\n\n').forEach((line) => {
+                    try {
+                        if (line.startsWith('data:') && !line.endsWith('[DONE]')) {
+                            const responseJson = JSON.parse(line.substring(5).trim())
+                            let responseToken = undefined
+                            if (dataSources.length === 0) {
+                                responseToken = responseJson.choices[0].delta.content
+                            } else {
+                                let role = responseJson.choices[0].messages[0].delta.role
+                                if (role === 'tool') {
+                                    toolContent = responseJson.choices[0].messages[0].delta.content
+                                } else {
+                                    responseToken = responseJson.choices[0].messages[0].delta.content
+                                    if (responseToken !== undefined) {
+                                        if (byodDocRegex.test(responseToken)) {
+                                            responseToken = responseToken.replace(byodDocRegex, '').trim()
+                                        }
+
+                                        if (responseToken === '[DONE]') {
+                                            responseToken = undefined
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (responseToken !== undefined) {
+                                assistantReply += responseToken // build up the assistant message
+                                displaySentence += responseToken // build up the display sentence
+
+                                // console.log(`Current token: ${responseToken}`)
+
+                                if (responseToken === '\n' || responseToken === '\n\n') {
+                                    speak(spokenSentence.trim())
+                                    spokenSentence = ''
+                                } else {
+                                    responseToken = responseToken.replace(/\n/g, '')
+                                    spokenSentence += responseToken // build up the spoken sentence
+
+                                    if (responseToken.length === 1 || responseToken.length === 2) {
+                                        for (let i = 0; i < sentenceLevelPunctuations.length; ++i) {
+                                            let sentenceLevelPunctuation = sentenceLevelPunctuations[i]
+                                            if (responseToken.startsWith(sentenceLevelPunctuation)) {
+                                                speak(spokenSentence.trim())
+                                                spokenSentence = ''
+                                                break
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.log(`Error occurred while parsing the response: ${error}`)
+                        console.log(chunkString)
+                    }
+                })
+
+                chatHistoryTextArea.innerHTML += `${displaySentence}`
+                chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+                displaySentence = ''
+
+                // Continue reading the next chunk
+                return read()
+            })
+        }
+
+        // Start reading the stream
+        return read()
+    })
+    .then(() => {
+        if (spokenSentence !== '') {
+            speak(spokenSentence.trim())
+            spokenSentence = ''
+        }
+
+        if (dataSources.length > 0) {
+            let toolMessage = {
+                role: 'tool',
+                content: toolContent
+            }
+
+            messages.push(toolMessage)
+        }
+
+        let assistantMessage = {
+            role: 'assistant',
+            content: assistantReply
+        }
+
+        messages.push(assistantMessage)
+    })
 }
 
 function getQuickReply() {
@@ -298,7 +482,7 @@ window.startSession = () => {
 
 window.stopSession = () => {
     document.getElementById('startSession').disabled = false
-    document.getElementById('startMicrophone').disabled = true
+    document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
     speechRecognizer.stopContinuousRecognitionAsync()
     speechRecognizer.close()
@@ -310,8 +494,23 @@ window.clearChatHistory = () => {
     initMessages()
 }
 
-window.startMicrophone = () => {
-    document.getElementById('startMicrophone').disabled = true
+window.microphone = () => {
+    if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
+        // Stop microphone
+        document.getElementById('microphone').disabled = true
+        speechRecognizer.stopContinuousRecognitionAsync(
+            () => {
+                document.getElementById('microphone').innerHTML = 'Start Microphone'
+                document.getElementById('microphone').disabled = false
+            }, (err) => {
+                console.log("Failed to stop continuous recognition:", err)
+                document.getElementById('microphone').disabled = false
+            })
+
+        return
+    }
+
+    document.getElementById('microphone').disabled = true
     document.getElementById('audioPlayer').play()
     speechRecognizer.recognized = async (s, e) => {
         if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
@@ -320,189 +519,31 @@ window.startMicrophone = () => {
                 return
             }
 
-            let chatMessage = {
-                role: 'user',
-                content: userQuery
-            }
-
-            messages.push(chatMessage)
-            let chatHistoryTextArea = document.getElementById('chatHistory')
-            if (chatHistoryTextArea.innerHTML !== '' && !chatHistoryTextArea.innerHTML.endsWith('\n\n')) {
-                chatHistoryTextArea.innerHTML += '\n\n'
-            }
-
-            chatHistoryTextArea.innerHTML += "User: " + userQuery + '\n\n'
-            chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
-
-            // Stop previous speaking if there is any
-            if (isSpeaking) {
-                stopSpeaking()
-            }
-
-            // For 'bring your data' scenario, chat API currently has long (4s+) latency
-            // We return some quick reply here before the chat API returns to mitigate.
-            if (dataSources.length > 0 && enableQuickReply) {
-                speak(getQuickReply(), 2000)
-            }
-
-            const azureOpenAIEndpoint = document.getElementById('azureOpenAIEndpoint').value
-            const azureOpenAIApiKey = document.getElementById('azureOpenAIApiKey').value
-            const azureOpenAIDeploymentName = document.getElementById('azureOpenAIDeploymentName').value
-
-            let url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/chat/completions?api-version=2023-03-15-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
-            let body = JSON.stringify({
-                messages: messages,
-                stream: true
-            })
-
-            if (dataSources.length > 0) {
-                url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/extensions/chat/completions?api-version=2023-06-01-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
-                body = JSON.stringify({
-                    dataSources: dataSources,
-                    messages: messages,
-                    stream: true
-                })
-            }
-
-            let assistantReply = ''
-            let toolContent = ''
-            let spokenSentence = ''
-            let displaySentence = ''
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'api-key': azureOpenAIApiKey,
-                    'Content-Type': 'application/json'
-                },
-                body: body
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Chat API response status: ${response.status} ${response.statusText}`)
-                }
-
-                let chatHistoryTextArea = document.getElementById('chatHistory')
-                chatHistoryTextArea.innerHTML += 'Assistant: '
-
-                const reader = response.body.getReader()
-
-                // Function to recursively read chunks from the stream
-                function read(previousChunkString = '') {
-                    return reader.read().then(({ value, done }) => {
-                        // Check if there is still data to read
-                        if (done) {
-                            // Stream complete
-                            return
-                        }
-
-                        // Process the chunk of data (value)
-                        let chunkString = new TextDecoder().decode(value, { stream: true })
-                        if (previousChunkString !== '') {
-                            // Concatenate the previous chunk string in case it is incomplete
-                            chunkString = previousChunkString + chunkString
-                        }
-
-                        if (!chunkString.endsWith('}}]}\n\n') && !chunkString.endsWith('[DONE]\n\n')) {
-                            // This is a incomplete chunk, read the next chunk
-                            return read(chunkString)
-                        }
-
-                        chunkString.split('\n\n').forEach((line) => {
-                            try {
-                                if (line.startsWith('data:') && !line.endsWith('[DONE]')) {
-                                    const responseJson = JSON.parse(line.substring(5).trim())
-                                    let responseToken = undefined
-                                    if (dataSources.length === 0) {
-                                        responseToken = responseJson.choices[0].delta.content
-                                    } else {
-                                        let role = responseJson.choices[0].messages[0].delta.role
-                                        if (role === 'tool') {
-                                            toolContent = responseJson.choices[0].messages[0].delta.content
-                                        } else {
-                                            responseToken = responseJson.choices[0].messages[0].delta.content
-                                            if (responseToken !== undefined) {
-                                                if (byodDocRegex.test(responseToken)) {
-                                                    responseToken = responseToken.replace(byodDocRegex, '').trim()
-                                                }
-
-                                                if (responseToken === '[DONE]') {
-                                                    responseToken = undefined
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    if (responseToken !== undefined) {
-                                        assistantReply += responseToken // build up the assistant message
-                                        displaySentence += responseToken // build up the display sentence
-
-                                        // console.log(`Current token: ${responseToken}`)
-
-                                        if (responseToken === '\n' || responseToken === '\n\n') {
-                                            speak(spokenSentence.trim())
-                                            spokenSentence = ''
-                                        } else {
-                                            responseToken = responseToken.replace(/\n/g, '')
-                                            spokenSentence += responseToken // build up the spoken sentence
-
-                                            if (responseToken.length === 1 || responseToken.length === 2) {
-                                                for (let i = 0; i < sentenceLevelPunctuations.length; ++i) {
-                                                    let sentenceLevelPunctuation = sentenceLevelPunctuations[i]
-                                                    if (responseToken.startsWith(sentenceLevelPunctuation)) {
-                                                        speak(spokenSentence.trim())
-                                                        spokenSentence = ''
-                                                        break
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (error) {
-                                console.log(`Error occurred while parsing the response: ${error}`)
-                                console.log(chunkString)
-                            }
-                        })
-
-                        chatHistoryTextArea.innerHTML += `${displaySentence}`
-                        chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
-                        displaySentence = ''
-
-                        // Continue reading the next chunk
-                        return read()
+            // Auto stop microphone when a phrase is recognized, when it's not continuous conversation mode
+            if (!document.getElementById('continuousConversation').checked) {
+                document.getElementById('microphone').disabled = true
+                speechRecognizer.stopContinuousRecognitionAsync(
+                    () => {
+                        document.getElementById('microphone').innerHTML = 'Start Microphone'
+                        document.getElementById('microphone').disabled = false
+                    }, (err) => {
+                        console.log("Failed to stop continuous recognition:", err)
+                        document.getElementById('microphone').disabled = false
                     })
-                }
+            }
 
-                // Start reading the stream
-                return read()
-            })
-            .then(() => {
-                if (spokenSentence !== '') {
-                    speak(spokenSentence.trim())
-                    spokenSentence = ''
-                }
-
-                if (dataSources.length > 0) {
-                    let toolMessage = {
-                        role: 'tool',
-                        content: toolContent
-                    }
-
-                    messages.push(toolMessage)
-                }
-
-                let assistantMessage = {
-                    role: 'assistant',
-                    content: assistantReply
-                }
-
-                messages.push(assistantMessage)
-            })
+            handleUserQuery(userQuery)
         }
     }
 
-    speechRecognizer.startContinuousRecognitionAsync()
+    speechRecognizer.startContinuousRecognitionAsync(
+        () => {
+            document.getElementById('microphone').innerHTML = 'Stop Microphone'
+            document.getElementById('microphone').disabled = false
+        }, (err) => {
+            console.log("Failed to start continuous recognition:", err)
+            document.getElementById('microphone').disabled = false
+        })
 }
 
 window.updataEnableByod = () => {
@@ -510,5 +551,22 @@ window.updataEnableByod = () => {
         document.getElementById('cogSearchConfig').hidden = false
     } else {
         document.getElementById('cogSearchConfig').hidden = true
+    }
+}
+
+window.updateTypeMessageBox = () => {
+    if (document.getElementById('showTypeMessage').checked) {
+        document.getElementById('userMessageBox').hidden = false
+        document.getElementById('userMessageBox').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                const userQuery = document.getElementById('userMessageBox').value
+                if (userQuery !== '') {
+                    handleUserQuery(userQuery.trim('\n'))
+                    document.getElementById('userMessageBox').value = ''
+                }
+            }
+        })
+    } else {
+        document.getElementById('userMessageBox').hidden = true
     }
 }

@@ -28,6 +28,8 @@
   <input id="azureOpenAIApiKey" type="password" size="32" style="font-size: medium;" /><br />
   <label style="font-size: medium;" for="azureOpenAIDeploymentName">Deployment Name:</label>
   <input id="azureOpenAIDeploymentName" type="text" size="32" style="font-size: medium;" /><br />
+  <label style="font-size: medium;"  for="prompt">System Prompt:</label><br/>
+  <textarea id="prompt" style="width: 640px;">You are an AI assistant that helps people find information.</textarea>
   <div style="background-color: white; width: 300px;">
     <input type="checkbox" id="enableByod" onchange="window.updataEnableByod()">Enable BYOD (Bring Your Own Data)</input><br />
   </div>
@@ -60,6 +62,9 @@
   <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyMultilingualV2Neural"></input><br />
   <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
   <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <div style="background-color: white; width: 300px;">
+    <input type="checkbox" id="continuousConversation">Continuous Conversation</input><br />
+  </div>
   <br />
 
   <h2 style="background-color: white; width: 300px;">Avatar Configuration</h2>
@@ -73,17 +78,12 @@
   <br />
 </div>
 
-<h2 style="background-color: white; width: 400px;">Avatar Conversation Control Panel</h2>
-<label for="prompt">System Prompt</label><br/>
-<textarea id="prompt">You are an AI assistant that helps people find information.</textarea>
-<br/>
-
 <button id="startSession" onclick="window.startSession()">Open Video Connection</button>
-<button id="startMicrophone" onclick="window.startMicrophone()" disabled>Start Microphone</button>
+<button id="microphone" onclick="window.microphone()" disabled>Start Microphone</button>
+<button id="stopSpeaking" onclick="stopSpeaking()" disabled>Stop Speaking</button>
 <button id="clearChatHistory" onclick="window.clearChatHistory()">Clear Chat History</button>
 <button id="stopSession" onclick="window.stopSession()" disabled>Close Video Connection</button>
 
-<h2 style="background-color: white; width: 100px;">Video</h2>
 <div id="videoContainer" style="position: relative; width: 960px;">
   <div id="overlayArea" style="position: absolute;">
     <textarea id="chatHistory" style="
@@ -93,12 +93,12 @@
         border: none;
         resize: none;
         background-color: transparent;
-        overflow: hidden;"></textarea>
+        overflow: hidden;" hidden></textarea>
   </div>
   <div id="remoteVideo"></div>
 </div>
 
-<h2 style="background-color: white; width: 100px;">Logs</h2>
-<div id="logging"></div>
+<input type="checkbox" id="showTypeMessage" onchange="window.updateTypeMessageBox()" disabled>Type Message</input><br />
+<textarea id="userMessageBox" style="width: 960px; height: 40px" hidden></textarea><br/>
 </body>
 </html>
