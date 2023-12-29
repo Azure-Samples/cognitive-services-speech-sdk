@@ -6,6 +6,7 @@ var speechRecognizer
 var avatarSynthesizer
 var peerConnection
 var messages = []
+var messageInitiated = false
 var dataSources = []
 var sentenceLevelPunctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ]
 var enableQuickReply = false
@@ -489,7 +490,11 @@ window.startSession = () => {
         }
     }
 
-    initMessages()
+    // Only initialize messages once
+    if (!messageInitiated) {
+        initMessages()
+        messageInitiated = true
+    }
 
     const iceServerUrl = document.getElementById('iceServerUrl').value
     const iceServerUsername = document.getElementById('iceServerUsername').value
