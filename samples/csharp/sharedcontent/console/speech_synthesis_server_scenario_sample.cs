@@ -113,7 +113,7 @@ namespace MicrosoftSpeechSDKSamples
             speechConfig.SetSpeechSynthesisOutputFormat(outputFormat);
 
             // pool should be a single instance to handle all request. In real scenario, this could be put as a static class member
-            pool = new SynthesizerPool(() => new SpeechSynthesizer(speechConfig, null), concurrency);
+            pool = new SynthesizerPool(() => new SpeechSynthesizer(speechConfig, null), concurrency, concurrency + 1);
             latencyList = new List<double>();
             processingTimeList = new List<double>();
         }
@@ -252,19 +252,31 @@ namespace MicrosoftSpeechSDKSamples
         private const string subscriptionKey = "YourSubscriptionKey";
         private const string region = "YourServiceRegion";
 
-        private const int concurrency = 64;
+        // you can use this sample to run load test on azure tts.
+        // here is load test guideline https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-lower-speech-synthesis-latency?pivots=programming-language-csharp#load-test-guideline
+        // try to start load with smaller concurrency first, then increase to target load
+        // also, pls make sure to run load test on a cloud VMs which has less bandwidth limits. 
+
+        // default cognitive service speech resource has max 200 TPS. if you need run over that, please contact the support.
+        private const int concurrency = 100;
+
+        // round of runs
+        private const int rounds = 3;
+
         public static void SpeechSynthesizeWithPool()
         {
             SynthesisServer server = new SynthesisServer(subscriptionKey, region,
                     "en-US-JennyNeural", SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3, concurrency);
 
-            for (var turn = 0; turn < 3; turn++)
+            for (var turn = 0; turn < rounds; turn++)
             {
                 Console.WriteLine("turn: {0}", turn);
 
                 Parallel.For(0, concurrency, (i) =>
                 {
-                    server.Synthesize($"today is a nice day. {turn}{i}");
+                    // speak random guid string here.  it can be replaced to your load test script if needed.
+                    Guid guid = Guid.NewGuid();
+                    server.Synthesize(guid.ToString());
                 });
 
                 Thread.Sleep(2000);
