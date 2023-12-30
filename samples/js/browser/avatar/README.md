@@ -64,6 +64,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
         * Custom Avatar - Check this if you are using a custom avatar.
+        * Auto Reconnect - Check this if you want to enable auto reconnect. If this is checked, the avatar video stream is automatically reconnected once the connection is lost.
 
 * Step 3: Click `Open Video Connection` button to setup video connection with Azure TTS Talking Avatar service. If everything goes well, you should see a live video with an avatar being shown on the web page.
 

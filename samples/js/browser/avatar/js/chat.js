@@ -6,6 +6,7 @@ var speechRecognizer
 var avatarSynthesizer
 var peerConnection
 var messages = []
+var messageInitiated = false
 var dataSources = []
 var sentenceLevelPunctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ]
 var enableQuickReply = false
@@ -13,6 +14,7 @@ var quickReplies = [ 'Let me take a look.', 'Let me check.', 'One moment, please
 var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
 var isSpeaking = false
 var spokenTextQueue = []
+var sessionActive = false
 
 // Setup WebRTC
 function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
@@ -49,6 +51,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         }
 
         if (event.track.kind === 'video') {
+            document.getElementById('remoteVideo').style.width = '0.1px'
+            document.getElementById('chatHistory').hidden = true
+
             let videoElement = document.createElement('video')
             videoElement.id = 'videoPlayer'
             videoElement.srcObject = event.streams[0]
@@ -59,8 +64,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
                 document.getElementById('microphone').disabled = false
                 document.getElementById('stopSession').disabled = false
+                document.getElementById('remoteVideo').style.width = '960px'
                 document.getElementById('chatHistory').hidden = false
                 document.getElementById('showTypeMessage').disabled = false
+
+                setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
 
             document.getElementById('remoteVideo').appendChild(videoElement)
@@ -70,14 +78,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {
         console.log("WebRTC status: " + peerConnection.iceConnectionState)
-
-        if (peerConnection.iceConnectionState === 'connected') {
-            document.getElementById('configuration').hidden = true
-        }
-
-        if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
-            document.getElementById('configuration').hidden = false
-        }
     }
 
     // Offer to receive 1 audio, and 1 video track
@@ -412,6 +412,31 @@ function getQuickReply() {
     return quickReplies[Math.floor(Math.random() * quickReplies.length)]
 }
 
+function checkHung() {
+    // Check whether the avatar video stream is hung, by checking whether the video time is advancing
+    let videoElement = document.getElementById('videoPlayer')
+    if (videoElement !== null && videoElement !== undefined && sessionActive) {
+        let videoTime = videoElement.currentTime
+        setTimeout(() => {
+            // Check whether the video time is advancing
+            if (videoElement.currentTime === videoTime) {
+                // Check whether the session is active to avoid duplicatedly triggering reconnect
+                if (sessionActive) {
+                    sessionActive = false
+                    if (document.getElementById('autoReconnectAvatar').checked) {
+                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                        window.startSession()
+                    }
+                }
+            }
+        }, 5000)
+    }
+}
+
+window.onload = () => {
+    setInterval(() => { checkHung() }, 5000) // Check session activity every 5 seconds
+}
+
 window.startSession = () => {
     const cogSvcRegion = document.getElementById('region').value
     const cogSvcSubKey = document.getElementById('subscriptionKey').value
@@ -465,7 +490,11 @@ window.startSession = () => {
         }
     }
 
-    initMessages()
+    // Only initialize messages once
+    if (!messageInitiated) {
+        initMessages()
+        messageInitiated = true
+    }
 
     const iceServerUrl = document.getElementById('iceServerUrl').value
     const iceServerUsername = document.getElementById('iceServerUsername').value
@@ -476,6 +505,7 @@ window.startSession = () => {
     }
 
     document.getElementById('startSession').disabled = true
+    document.getElementById('configuration').hidden = true
 
     setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
 }
@@ -484,9 +514,15 @@ window.stopSession = () => {
     document.getElementById('startSession').disabled = false
     document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
-    speechRecognizer.stopContinuousRecognitionAsync()
-    speechRecognizer.close()
+    document.getElementById('configuration').hidden = false
+
     avatarSynthesizer.close()
+    if (speechRecognizer !== undefined) {
+        speechRecognizer.stopContinuousRecognitionAsync()
+        speechRecognizer.close()
+    }
+
+    sessionActive = false
 }
 
 window.clearChatHistory = () => {
