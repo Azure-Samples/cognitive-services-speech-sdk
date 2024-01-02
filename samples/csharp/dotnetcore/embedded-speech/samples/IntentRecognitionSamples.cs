@@ -175,7 +175,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     // NoMatch occurs when no speech was recognized.
                     var reason = NoMatchDetails.FromResult(e.Result).Reason;
-                    Console.WriteLine($"NOMATCH: Reason={reason}");
+                    Console.WriteLine($"NO MATCH: Reason={reason}");
                 }
             };
 
