@@ -153,7 +153,7 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
         {
             // NoMatch occurs when no speech phrase was recognized.
             auto reason = NoMatchDetails::FromResult(e.Result)->Reason;
-            cout << "NOMATCH: Reason=";
+            cout << "NO MATCH: Reason=";
             switch (reason)
             {
             case NoMatchReason::NotRecognized:
