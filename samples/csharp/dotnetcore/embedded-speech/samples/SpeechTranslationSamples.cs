@@ -71,32 +71,42 @@ namespace MicrosoftSpeechSDKSamples
                 // the source language.
                 if (e.Result.Reason == ResultReason.TranslatingSpeech)
                 {
+                    // Source (input) language identification is enabled when TranslationRecognizer
+                    // is created with an AutoDetectSourceLanguageConfig argument.
+                    // In case the model does not support this functionality or the language cannot
+                    // be identified, the result Language is "Unknown".
+                    var sourceLangResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                    var sourceLang = sourceLangResult.Language;
+
                     foreach (var translation in e.Result.Translations)
                     {
                         var targetLang = translation.Key;
                         var outputText = translation.Value;
-                        Console.WriteLine($"Translating [{targetLang}]: {outputText}");
+                        Console.WriteLine($"Translating [{sourceLang} -> {targetLang}]: {outputText}");
                     }
                 }
             };
 
             recognizer.Recognized += (s, e) =>
             {
+                // Final result. May differ from the last intermediate result.
                 if (e.Result.Reason == ResultReason.TranslatedSpeech)
                 {
-                    // Final result. May differ from the last intermediate result.
+                    var sourceLangResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                    var sourceLang = sourceLangResult.Language;
+
                     foreach (var translation in e.Result.Translations)
                     {
                         var targetLang = translation.Key;
                         var outputText = translation.Value;
-                        Console.WriteLine($"TRANSLATED [{targetLang}]: {outputText}");
+                        Console.WriteLine($"TRANSLATED [{sourceLang} -> {targetLang}]: {outputText}");
                     }
                 }
                 else if (e.Result.Reason == ResultReason.NoMatch)
                 {
                     // NoMatch occurs when no speech was recognized.
                     var reason = NoMatchDetails.FromResult(e.Result).Reason;
-                    Console.WriteLine($"NOMATCH: Reason={reason}");
+                    Console.WriteLine($"NO MATCH: Reason={reason}");
                 }
             };
 
@@ -146,9 +156,10 @@ namespace MicrosoftSpeechSDKSamples
         public static void EmbeddedTranslationFromMicrophone()
         {
             var speechConfig = Settings.CreateEmbeddedSpeechConfig();
+            var sourceLangConfig = AutoDetectSourceLanguageConfig.FromOpenRange(); // optional, for input language identification
             using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
 
-            using var recognizer = new TranslationRecognizer(speechConfig, audioConfig);
+            using var recognizer = new TranslationRecognizer(speechConfig, sourceLangConfig, audioConfig);
             TranslateSpeechAsync(recognizer).Wait();
         }
     }
