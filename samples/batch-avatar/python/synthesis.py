@@ -42,7 +42,7 @@ def submit_synthesis():
         'description': DESCRIPTION,
         "textType": "PlainText",
         'synthesisConfig': {
-            "voice": "en-US-JennyNeural",
+            "voice": "en-US-AndrewNeural",
         },
         # Replace with your custom voice name and deployment ID if you want to use custom voice.
         # Multiple voices are supported, the mixture of custom voices and platform voices is allowed.
