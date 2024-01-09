@@ -90,7 +90,7 @@ public class SpeechSynthesisScenarioSamples {
         /**
          * A thread-safe method to synthesize content
          * @param content The text to synthesize
-         * @param voice The voice name, e.g. en-US-AndrewNeural
+         * @param voice The voice name, e.g. en-US-AvaNeural
          * @return The first byte latency and processing time, in millisecond.
          */
         public long[] synthesis(String content, String voice) {

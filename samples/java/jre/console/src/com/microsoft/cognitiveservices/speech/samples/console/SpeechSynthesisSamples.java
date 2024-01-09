@@ -126,7 +126,7 @@ public class SpeechSynthesisSamples {
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
         // Sets the voice name.
-        // e.g. "en-US-AndrewNeural".
+        // e.g. "en-US-AvaNeural".
         // The full list of supported voices can be found here:
         // https://aka.ms/csspeech/voicenames
         // And, you can try getVoicesAsync method to get all available voices (see synthesisGetAvailableVoicesAsync() sample below).
@@ -864,7 +864,7 @@ public class SpeechSynthesisSamples {
         new Scanner(System.in).nextLine();
 
         // Bookmark tag is needed in the SSML, e.g.
-        String ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
+        String ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AndrewNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
 
         SpeechSynthesisResult result = synthesizer.SpeakSsmlAsync(ssml).get();
 
