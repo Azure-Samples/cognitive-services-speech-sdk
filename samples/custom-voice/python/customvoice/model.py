@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+
 from enum import Enum
 import json
 import requests
@@ -14,7 +20,7 @@ class RecipeKind(Enum):
     Default = 1
     CrossLingual = 2
     MultiStyle = 3
-    # Lite = 4
+    Lite = 4
 
 
 class Model(StatusObject):
