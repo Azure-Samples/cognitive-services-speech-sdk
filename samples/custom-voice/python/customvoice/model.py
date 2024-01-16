@@ -20,7 +20,7 @@ class RecipeKind(Enum):
     Default = 1
     CrossLingual = 2
     MultiStyle = 3
-    Lite = 4
+    # Lite = 4
 
 
 class Model(StatusObject):

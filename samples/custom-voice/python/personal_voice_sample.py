@@ -66,6 +66,11 @@ def speech_synthesis_to_wave_file(text: str, output_file_path: str, speaker_prof
             print("result id: {}".format(result.result_id))
 
 
+def clean_up(project_id: str, consent_id: str, personal_voice_id: str):
+    customvoice.PersonalVoice.delete(config, personal_voice_id)
+    customvoice.Consent.delete(config, consent_id)
+    customvoice.Project.delete(config, project_id)
+
 
 region = 'eastus' # eastus, westeurope, southeastasia
 key = '<put your speech accout key here>'
@@ -100,9 +105,11 @@ audio_folder = r'D:\CNV_API\SampleAudios_14'
 speaker_profile_id = create_personal_voice(project_id, 
                                            consent_id, consent_file_path, voice_talent_name, company_name,
                                            personal_voice_id, audio_folder)
-speaker_profile_id = '693c7bb4-5945-4e99-bde9-1c06f95b46fb'
 
 # step 2: synthesis wave
 text = 'This is zero shot voice. Test 2.'
 output_wave_file_path = 'D:\CNV_API\output_1.wav'
 speech_synthesis_to_wave_file(text, output_wave_file_path, speaker_profile_id)
+
+# Optional step 3: clean up, if you don't need this voice to synthesis more content.
+clean_up(project_id, consent_id, personal_voice_id)
