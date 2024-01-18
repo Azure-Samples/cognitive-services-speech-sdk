@@ -24,7 +24,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     Console.WriteLine("\nEMBEDDED SPEECH SAMPLES");
                     Console.WriteLine("\nSpeech recognition");
-                    Console.WriteLine(" 1. List embeddded speech recognition models.");
+                    Console.WriteLine(" 1. List embedded speech recognition models.");
                     Console.WriteLine(" 2. Embedded speech recognition with microphone input.");
                     Console.WriteLine(" 3. Embedded speech recognition with microphone input, keyword-triggered.");
                     Console.WriteLine(" 4. Embedded speech recognition with WAV file input.");
@@ -35,12 +35,14 @@ namespace MicrosoftSpeechSDKSamples
                     Console.WriteLine(" 8. Embedded intent recognition with microphone input.");
                     Console.WriteLine(" 9. Embedded intent recognition with microphone input, keyword-triggered.");
                     Console.WriteLine("\nSpeech synthesis");
-                    Console.WriteLine("10. List embeddded speech synthesis voices.");
+                    Console.WriteLine("10. List embedded speech synthesis voices.");
                     Console.WriteLine("11. Embedded speech synthesis with speaker output.");
                     Console.WriteLine("12. Hybrid (cloud & embedded) speech synthesis with speaker output.");
                     Console.WriteLine("\nSpeech translation");
-                    Console.WriteLine("13. List embeddded speech translation models.");
+                    Console.WriteLine("13. List embedded speech translation models.");
                     Console.WriteLine("14. Embedded speech translation with microphone input.");
+                    Console.WriteLine("\nDevice performance measurement");
+                    Console.WriteLine("15. Embedded speech recognition.");
                     Console.Write("\nChoose a number (or none for exit) and press Enter: ");
 
                     input = Console.ReadLine();
@@ -93,6 +95,9 @@ namespace MicrosoftSpeechSDKSamples
                             break;
                         case 14:
                             if (Settings.HasSpeechTranslationModel()) SpeechTranslationSamples.EmbeddedTranslationFromMicrophone();
+                            break;
+                        case 15:
+                            if (Settings.HasSpeechRecognitionModel()) SpeechRecognitionSamples.EmbeddedSpeechRecognitionPerformanceTest().Wait();
                             break;
                         default:
                             break;

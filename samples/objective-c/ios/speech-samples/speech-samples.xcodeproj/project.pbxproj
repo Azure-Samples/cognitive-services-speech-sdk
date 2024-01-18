@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3C00A32C25F8727100512312 /* AudioRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C00A32B25F8727100512312 /* AudioRecorder.m */; };
 		3C1B8BCA2679C50600706BB3 /* pronunciation-assessment.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */; };
+		52CF43E72AEF743E00227EF3 /* pronunciation_assessment_fall.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52CF43E62AEF743E00227EF3 /* pronunciation_assessment_fall.wav */; };
 		DC2CBA04227047FB007EB18A /* wreck-a-nice-beach.wav in Resources */ = {isa = PBXBuildFile; fileRef = DC2CBA03227047EA007EB18A /* wreck-a-nice-beach.wav */; };
 		F3184E4B214674D60096193E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E4A214674D60096193E /* AppDelegate.m */; };
 		F3184E4E214674D60096193E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E4D214674D60096193E /* ViewController.m */; };
@@ -51,7 +52,8 @@
 		3C00A32A25F8726500512312 /* AudioRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRecorder.h; sourceTree = "<group>"; };
 		3C00A32B25F8727100512312 /* AudioRecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioRecorder.m; sourceTree = "<group>"; };
 		3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "pronunciation-assessment.wav"; sourceTree = "<group>"; };
-		52FC64F929CACB27000C8918 /* MicrosoftCognitiveServicesSpeech.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MicrosoftCognitiveServicesSpeech.xcframework; path = "../../../../../../../../MicrosoftCognitiveServicesSpeech-XCFramework-1.33.0/MicrosoftCognitiveServicesSpeech.xcframework"; sourceTree = "<group>"; };
+		52CF43E62AEF743E00227EF3 /* pronunciation_assessment_fall.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pronunciation_assessment_fall.wav; sourceTree = "<group>"; };
+		52FC64F929CACB27000C8918 /* MicrosoftCognitiveServicesSpeech.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MicrosoftCognitiveServicesSpeech.xcframework; path = "../../../../../../../../MicrosoftCognitiveServicesSpeech-XCFramework-1.34.0/MicrosoftCognitiveServicesSpeech.xcframework"; sourceTree = "<group>"; };
 		DC2CBA03227047EA007EB18A /* wreck-a-nice-beach.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = "wreck-a-nice-beach.wav"; path = "./wreck-a-nice-beach.wav"; sourceTree = "<group>"; };
 		F3184E46214674D60096193E /* speech-samples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "speech-samples.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3184E49214674D60096193E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -94,6 +96,7 @@
 		F3184E3D214674D60096193E = {
 			isa = PBXGroup;
 			children = (
+				52CF43E62AEF743E00227EF3 /* pronunciation_assessment_fall.wav */,
 				FC40FA3129F97BB700F723DC /* MicrosoftCognitiveServicesSpeech.xcframework */,
 				FCFC92FF29A7BC3E00A91C8F /* kws_whatstheweatherlike.wav */,
 				FCFC92FE29A7BC3E00A91C8F /* kws.table */,
@@ -232,6 +235,7 @@
 			files = (
 				FCFC930029A7BC3E00A91C8F /* kws.table in Resources */,
 				3C1B8BCA2679C50600706BB3 /* pronunciation-assessment.wav in Resources */,
+				52CF43E72AEF743E00227EF3 /* pronunciation_assessment_fall.wav in Resources */,
 				FCFC930129A7BC3E00A91C8F /* kws_whatstheweatherlike.wav in Resources */,
 				DC2CBA04227047FB007EB18A /* wreck-a-nice-beach.wav in Resources */,
 				F3184E68214685C80096193E /* whatstheweatherlike.wav in Resources */,

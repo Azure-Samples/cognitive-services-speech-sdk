@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Talking Avatar Service Demo</title>
+    <link href="./css/styles.css" rel="stylesheet">
+    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+    <script src="./js/basic.js"></script>
+</head>
+<body>
+<h1>Talking Avatar Service Demo</h1>
+
+<div id="configuration">
+  <h2 style="background-color: white; width: 300px;">Azure Speech Resource</h2>
+  <label style="font-size: medium;" for="region">Region:</label>
+  <select id="region" style="font-size: medium;">
+    <option value="westus2">West US 2</option>
+    <option value="westeurope">West Europe</option>
+    <option value="southeastasia">Southeast Asia</option>
+  </select>
+  <label style="font-size: medium;" for="subscriptionKey">Subscription Key:</label>
+  <input id="subscriptionKey" type="password" size="32" style="font-size: medium;" /><br />
+
+  <h2 style="background-color: white; width: 300px;">ICE Server</h2>
+  <label style="font-size: medium;" for="iceServerUrl">URL:</label>
+  <input id="iceServerUrl" type="text" size="64" style="font-size: medium;"
+    value="turn:relay.communication.microsoft.com:3478"></input><br />
+  <label style="font-size: medium;" for="iceServerUsername">Username:</label>
+  <input id="iceServerUsername" type="text" size="64" style="font-size: medium;" /><br />
+  <label style="font-size: medium;" for="iceServerCredential">Credential:</label>
+  <input id="iceServerCredential" type="password" size="32" style="font-size: medium;" /><br />
+  <br />
+
+  <h2 style="background-color: white; width: 300px;">TTS Configuration</h2>
+  <label style="font-size: medium;" for="ttsVoice">TTS Voice:</label>
+  <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyMultilingualV2Neural"></input><br />
+  <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
+  <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <br />
+
+  <h2 style="background-color: white; width: 300px;">Avatar Configuration</h2>
+  <label style="font-size: medium;" for="talkingAvatarCharacter">Avatar Character:</label>
+  <input id="talkingAvatarCharacter" type="text" size="16" style="font-size: medium;" value="lisa"></input><br />
+  <label style="font-size: medium;" for="talkingAvatarStyle">Avatar Style:</label>
+  <input id="talkingAvatarStyle" type="text" size="16" style="font-size: medium;" value="casual-sitting"></input><br />
+  <label style="font-size: medium;" for="backgroundColor">Background Color:</label>
+  <input id="backgroundColor" type="text" size="16" style="font-size: medium;" value="#FFFFFFFF"></input><br />
+  <div style="background-color: white; width: 200px;">
+    <input type="checkbox" id="customizedAvatar">Custom Avatar</input><br />
+    <input type="checkbox" id="transparentBackground" onchange="window.updataTransparentBackground()">Transparent
+    Background</input><br />
+    <input type="checkbox" id="videoCrop">Video Crop</input><br />
+  </div>
+  <br />
+</div>
+
+<h2 style="background-color: white; width: 300px;">Avatar Control Panel</h2>
+<label style="font-size: medium;" for="spokenText">Spoken Text:</label><br/>
+<textarea id="spokenText" style="height:40px">Hello world!</textarea><br/>
+<button id="startSession" onclick="window.startSession()">Start Session</button>
+<button id="speak" onclick="window.speak()" disabled="disabled">Speak</button>
+<button id="stopSpeaking" onclick="window.stopSpeaking()" disabled="disabled">Stop Speaking</button>
+<button id="stopSession" onclick="window.stopSession()" disabled="disabled">Stop Session</button>
+<br/>
+
+<h2 id="videoLabel" style="background-color: white; width: 300px;">Avatar Video</h2>
+<div id="videoContainer" style="position: relative; width: 960px;">
+  <div id="overlayArea" style="position: absolute;" hidden="hidden">
+    <!-- Add your text or image controls here -->
+    <p id="overlayText" style="font-size: large;">Live Video</p>
+    <!-- <img id="overlayImage" src="your-image-source.png" alt="Overlay Image"> -->
+  </div>
+  <div id="remoteVideo"></div>
+  <canvas id="canvas" width="1920" height="1080" style="background-color: transparent;" hidden="hidden"></canvas>
+  <canvas id="tmpCanvas" width="1920" height="1080" hidden="hidden"></canvas>
+</div>
+<br/>
+
+<h2 style="background-color: white; width: 300px;">Logs</h2>
+<div id="logging" style="background-color: white;"></div>
+</body>
+</html>
