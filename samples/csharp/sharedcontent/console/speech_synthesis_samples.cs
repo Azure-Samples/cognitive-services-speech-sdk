@@ -1021,7 +1021,8 @@ namespace MicrosoftSpeechSDKSamples
                                                     ""username"": ""<ICE Username>"",
                                                     ""credential"": ""<ICE credential>""
                                                 }]
-                                            },
+                                            }
+                                        },
                                         ""format"":{
                                             ""codec"": ""H264"",
                                             ""bitrate"": 2000000
@@ -1032,7 +1033,7 @@ namespace MicrosoftSpeechSDKSamples
                                             ""style"": ""casual-sitting""
                                         }
                                     }
-                                } } }";
+                                } }";
 
                 connection.SetMessageProperty("speech.config", "context", videoConfigPayload);
                 // Speak empty text to trigger the WebRTC connection handshake.
