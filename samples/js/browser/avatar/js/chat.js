@@ -15,6 +15,95 @@ var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
 var isSpeaking = false
 var spokenTextQueue = []
 var sessionActive = false
+var lastSpeakTime
+
+// Connect to avatar service
+function connectAvatar() {
+    const cogSvcRegion = document.getElementById('region').value
+    const cogSvcSubKey = document.getElementById('subscriptionKey').value
+    if (cogSvcSubKey === '') {
+        alert('Please fill in the subscription key of your speech resource.')
+        return
+    }
+
+    const speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
+    speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
+    speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
+
+    const talkingAvatarCharacter = document.getElementById('talkingAvatarCharacter').value
+    const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
+    const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle)
+    avatarConfig.customized = document.getElementById('customizedAvatar').checked
+    avatarSynthesizer = new SpeechSDK.AvatarSynthesizer(speechSynthesisConfig, avatarConfig)
+    avatarSynthesizer.avatarEventReceived = function (s, e) {
+        var offsetMessage = ", offset from session start: " + e.offset / 10000 + "ms."
+        if (e.offset === 0) {
+            offsetMessage = ""
+        }
+
+        console.log("Event received: " + e.description + offsetMessage)
+    }
+
+    const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${cogSvcRegion}.stt.speech.microsoft.com/speech/universal/v2`), cogSvcSubKey)
+    speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
+    var sttLocales = document.getElementById('sttLocales').value.split(',')
+    var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
+    speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
+
+    const azureOpenAIEndpoint = document.getElementById('azureOpenAIEndpoint').value
+    const azureOpenAIApiKey = document.getElementById('azureOpenAIApiKey').value
+    const azureOpenAIDeploymentName = document.getElementById('azureOpenAIDeploymentName').value
+    if (azureOpenAIEndpoint === '' || azureOpenAIApiKey === '' || azureOpenAIDeploymentName === '') {
+        alert('Please fill in the Azure OpenAI endpoint, API key and deployment name.')
+        return
+    }
+
+    dataSources = []
+    if (document.getElementById('enableByod').checked) {
+        const azureCogSearchEndpoint = document.getElementById('azureCogSearchEndpoint').value
+        const azureCogSearchApiKey = document.getElementById('azureCogSearchApiKey').value
+        const azureCogSearchIndexName = document.getElementById('azureCogSearchIndexName').value
+        if (azureCogSearchEndpoint === "" || azureCogSearchApiKey === "" || azureCogSearchIndexName === "") {
+            alert('Please fill in the Azure Cognitive Search endpoint, API key and index name.')
+            return
+        } else {
+            setDataSources(azureCogSearchEndpoint, azureCogSearchApiKey, azureCogSearchIndexName)
+        }
+    }
+
+    // Only initialize messages once
+    if (!messageInitiated) {
+        initMessages()
+        messageInitiated = true
+    }
+
+    const iceServerUrl = document.getElementById('iceServerUrl').value
+    const iceServerUsername = document.getElementById('iceServerUsername').value
+    const iceServerCredential = document.getElementById('iceServerCredential').value
+    if (iceServerUrl === '' || iceServerUsername === '' || iceServerCredential === '') {
+        alert('Please fill in the ICE server URL, username and credential.')
+        return
+    }
+
+    document.getElementById('startSession').disabled = true
+    document.getElementById('configuration').hidden = true
+
+    setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+}
+
+// Disconnect from avatar service
+function disconnectAvatar() {
+    if (avatarSynthesizer !== undefined) {
+        avatarSynthesizer.close()
+    }
+
+    if (speechRecognizer !== undefined) {
+        speechRecognizer.stopContinuousRecognitionAsync()
+        speechRecognizer.close()
+    }
+
+    sessionActive = false
+}
 
 // Setup WebRTC
 function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
@@ -52,7 +141,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
         if (event.track.kind === 'video') {
             document.getElementById('remoteVideo').style.width = '0.1px'
-            document.getElementById('chatHistory').hidden = true
+            if (!document.getElementById('useLocalVideoForIdle').checked) {
+                document.getElementById('chatHistory').hidden = true
+            }
 
             let videoElement = document.createElement('video')
             videoElement.id = 'videoPlayer'
@@ -68,6 +159,13 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 document.getElementById('chatHistory').hidden = false
                 document.getElementById('showTypeMessage').disabled = false
 
+                if (document.getElementById('useLocalVideoForIdle').checked) {
+                    document.getElementById('localVideo').hidden = true
+                    if (lastSpeakTime === undefined) {
+                        lastSpeakTime = new Date()
+                    }
+                }
+
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
 
@@ -78,6 +176,13 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {
         console.log("WebRTC status: " + peerConnection.iceConnectionState)
+        if (peerConnection.iceConnectionState === 'disconnected') {
+            sessionActive = false
+            if (document.getElementById('useLocalVideoForIdle').checked) {
+                document.getElementById('localVideo').hidden = false
+                document.getElementById('remoteVideo').style.width = '0.1px'
+            }
+        }
     }
 
     // Offer to receive 1 audio, and 1 video track
@@ -181,12 +286,14 @@ function speakNext(text, endingSilenceMs = 0) {
         ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></voice></speak>`
     }
 
+    lastSpeakTime = new Date()
     isSpeaking = true
     document.getElementById('stopSpeaking').disabled = false
     avatarSynthesizer.speakSsmlAsync(ssml).then(
         (result) => {
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
                 console.log(`Speech synthesized to speaker for text [ ${text} ]`)
+                lastSpeakTime = new Date()
             } else {
                 console.log(`Error occurred while speaking the SSML.`)
             }
@@ -425,7 +532,7 @@ function checkHung() {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
                         console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
-                        window.startSession()
+                        connectAvatar()
                     }
                 }
             }
@@ -433,81 +540,43 @@ function checkHung() {
     }
 }
 
+function checkLastSpeak() {
+    if (lastSpeakTime === undefined) {
+        return
+    }
+
+    let currentTime = new Date()
+    if (currentTime - lastSpeakTime > 15000) {
+        if (document.getElementById('useLocalVideoForIdle').checked && sessionActive && !isSpeaking) {
+            disconnectAvatar()
+            document.getElementById('localVideo').hidden = false
+            document.getElementById('remoteVideo').style.width = '0.1px'
+            sessionActive = false
+        }
+    }
+}
+
 window.onload = () => {
-    setInterval(() => { checkHung() }, 5000) // Check session activity every 5 seconds
+    setInterval(() => {
+        checkHung()
+        checkLastSpeak()
+    }, 5000) // Check session activity every 5 seconds
 }
 
 window.startSession = () => {
-    const cogSvcRegion = document.getElementById('region').value
-    const cogSvcSubKey = document.getElementById('subscriptionKey').value
-    if (cogSvcSubKey === '') {
-        alert('Please fill in the subscription key of your speech resource.')
+    if (document.getElementById('useLocalVideoForIdle').checked) {
+        document.getElementById('startSession').disabled = true
+        document.getElementById('configuration').hidden = true
+        document.getElementById('microphone').disabled = false
+        document.getElementById('stopSession').disabled = false
+        document.getElementById('localVideo').hidden = false
+        document.getElementById('remoteVideo').style.width = '0.1px'
+        document.getElementById('chatHistory').hidden = false
+        document.getElementById('showTypeMessage').disabled = false
         return
     }
 
-    const speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
-    speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
-    speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
-
-    const talkingAvatarCharacter = document.getElementById('talkingAvatarCharacter').value
-    const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
-    const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle)
-    avatarConfig.customized = document.getElementById('customizedAvatar').checked
-    avatarSynthesizer = new SpeechSDK.AvatarSynthesizer(speechSynthesisConfig, avatarConfig)
-    avatarSynthesizer.avatarEventReceived = function (s, e) {
-        var offsetMessage = ", offset from session start: " + e.offset / 10000 + "ms."
-        if (e.offset === 0) {
-            offsetMessage = ""
-        }
-
-        console.log("Event received: " + e.description + offsetMessage)
-    }
-
-    const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${cogSvcRegion}.stt.speech.microsoft.com/speech/universal/v2`), cogSvcSubKey)
-    speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
-    var sttLocales = document.getElementById('sttLocales').value.split(',')
-    var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
-    speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
-
-    const azureOpenAIEndpoint = document.getElementById('azureOpenAIEndpoint').value
-    const azureOpenAIApiKey = document.getElementById('azureOpenAIApiKey').value
-    const azureOpenAIDeploymentName = document.getElementById('azureOpenAIDeploymentName').value
-    if (azureOpenAIEndpoint === '' || azureOpenAIApiKey === '' || azureOpenAIDeploymentName === '') {
-        alert('Please fill in the Azure OpenAI endpoint, API key and deployment name.')
-        return
-    }
-
-    dataSources = []
-    if (document.getElementById('enableByod').checked) {
-        const azureCogSearchEndpoint = document.getElementById('azureCogSearchEndpoint').value
-        const azureCogSearchApiKey = document.getElementById('azureCogSearchApiKey').value
-        const azureCogSearchIndexName = document.getElementById('azureCogSearchIndexName').value
-        if (azureCogSearchEndpoint === "" || azureCogSearchApiKey === "" || azureCogSearchIndexName === "") {
-            alert('Please fill in the Azure Cognitive Search endpoint, API key and index name.')
-            return
-        } else {
-            setDataSources(azureCogSearchEndpoint, azureCogSearchApiKey, azureCogSearchIndexName)
-        }
-    }
-
-    // Only initialize messages once
-    if (!messageInitiated) {
-        initMessages()
-        messageInitiated = true
-    }
-
-    const iceServerUrl = document.getElementById('iceServerUrl').value
-    const iceServerUsername = document.getElementById('iceServerUsername').value
-    const iceServerCredential = document.getElementById('iceServerCredential').value
-    if (iceServerUrl === '' || iceServerUsername === '' || iceServerCredential === '') {
-        alert('Please fill in the ICE server URL, username and credential.')
-        return
-    }
-
-    document.getElementById('startSession').disabled = true
-    document.getElementById('configuration').hidden = true
-
-    setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+    connectAvatar()
 }
 
 window.stopSession = () => {
@@ -515,14 +584,11 @@ window.stopSession = () => {
     document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
     document.getElementById('configuration').hidden = false
-
-    avatarSynthesizer.close()
-    if (speechRecognizer !== undefined) {
-        speechRecognizer.stopContinuousRecognitionAsync()
-        speechRecognizer.close()
+    if (document.getElementById('useLocalVideoForIdle').checked) {
+        document.getElementById('localVideo').hidden = true
     }
 
-    sessionActive = false
+    disconnectAvatar()
 }
 
 window.clearChatHistory = () => {
@@ -546,8 +612,19 @@ window.microphone = () => {
         return
     }
 
+    if (document.getElementById('useLocalVideoForIdle').checked) {
+        if (!sessionActive) {
+            connectAvatar()
+        }
+
+        setTimeout(() => {
+            document.getElementById('audioPlayer').play()
+        }, 5000)
+    } else {
+        document.getElementById('audioPlayer').play()
+    }
+
     document.getElementById('microphone').disabled = true
-    document.getElementById('audioPlayer').play()
     speechRecognizer.recognized = async (s, e) => {
         if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
             let userQuery = e.result.text.trim()
