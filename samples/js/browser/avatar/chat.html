@@ -79,7 +79,7 @@
     <input type="checkbox" id="autoReconnectAvatar">Auto Reconnect</input><br />
   </div>
   <div style="background-color: white; width: 200px;">
-    <input type="checkbox" id="useLocalVideoForIdle">Use Local Video for Idle</input><br />
+    <input type="checkbox" id="useLocalVideoForIdle" onchange="window.updateLocalVideoForIdle()">Use Local Video for Idle</input><br />
   </div>
   <br />
 </div>
@@ -107,7 +107,9 @@
   <div id="remoteVideo"></div>
 </div>
 
-<input type="checkbox" id="showTypeMessage" onchange="window.updateTypeMessageBox()" disabled>Type Message</input><br />
+<div id="showTypeMessageCheckbox">
+  <input type="checkbox" id="showTypeMessage" onchange="window.updateTypeMessageBox()" disabled>Type Message</input><br />
+</div>
 <textarea id="userMessageBox" style="width: 960px; height: 40px" hidden></textarea><br/>
 </body>
 </html>

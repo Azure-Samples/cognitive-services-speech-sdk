@@ -177,7 +177,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     peerConnection.oniceconnectionstatechange = e => {
         console.log("WebRTC status: " + peerConnection.iceConnectionState)
         if (peerConnection.iceConnectionState === 'disconnected') {
-            sessionActive = false
             if (document.getElementById('useLocalVideoForIdle').checked) {
                 document.getElementById('localVideo').hidden = false
                 document.getElementById('remoteVideo').style.width = '0.1px'
@@ -685,5 +684,13 @@ window.updateTypeMessageBox = () => {
         })
     } else {
         document.getElementById('userMessageBox').hidden = true
+    }
+}
+
+window.updateLocalVideoForIdle = () => {
+    if (document.getElementById('useLocalVideoForIdle').checked) {
+        document.getElementById('showTypeMessageCheckbox').hidden = true
+    } else {
+        document.getElementById('showTypeMessageCheckbox').hidden = false
     }
 }
