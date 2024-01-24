@@ -67,7 +67,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * Auto Reconnect - Check this if you want to enable auto reconnect. If this is checked, the avatar video stream is automatically reconnected once the connection is lost.
         * Use Local Video for Idle - Check this if you want to use local video for idle part. If this is checked, the avatar video stream is replaced by local video when the avatar is idle. To use this feature, you need to prepare a local video file. Usually, you can record a video of the avatar doing idle action. [Here](https://ttspublic.blob.core.windows.net/sampledata/video/avatar/lisa-casual-sitting-idle.mp4) is a sample video for lisa-casual-sitting avatar idle status. You can download it and put it to `video/lisa-casual-sitting-idle.mp4` under the same folder of `chat.html`.
 
-* Step 3: Click `Open Video Connection` button to setup video connection with Azure TTS Talking Avatar service. If everything goes well, you should see a live video with an avatar being shown on the web page.
+* Step 3: Click `Open Avatar Session` button to setup video connection with Azure TTS Talking Avatar service. If everything goes well, you should see a live video with an avatar being shown on the web page.
 
 * Step 4: Click `Start Microphone` button to start microphone (make sure to allow the microphone access tip box popping up in the browser), and then you can start chatting with the avatar with speech. The chat history (the text of what you said, and the response text by the Azure OpenAI chat API) will be shown beside the avatar. The avatar will then speak out the response of the chat API.
 
@@ -75,6 +75,6 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
 
 * If you want to enforce the avatar to stop speaking before the avatar finishes the utterance, you can click `Stop Speaking` button. This is useful when you want to interrupt the avatar speaking.
 
-* If you want to clear the chat history and start a new round of chat, you can click `Clear Chat History` button. And if you want to stop the avatar service, please click `Close Video Connection` button to close the connection with avatar service.
+* If you want to clear the chat history and start a new round of chat, you can click `Clear Chat History` button. And if you want to stop the avatar service, please click `Close Avatar Session` button to close the connection with avatar service.
 
 * If you want to type your query message instead of speaking, you can check the `Type Message` checkbox, and then type your query message in the text box showing up below the checkbox.

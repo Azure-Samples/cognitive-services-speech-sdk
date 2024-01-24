@@ -584,6 +584,10 @@ window.stopSession = () => {
     document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
     document.getElementById('configuration').hidden = false
+    document.getElementById('chatHistory').hidden = true
+    document.getElementById('showTypeMessage').checked = false
+    document.getElementById('showTypeMessage').disabled = true
+    document.getElementById('userMessageBox').hidden = true
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('localVideo').hidden = true
     }
