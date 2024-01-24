@@ -38,7 +38,7 @@ var synthesisJobs = await synthesisClient.GetAllSynthesesAsync().ConfigureAwait(
 
 // Create a new synthesis task with plain text
 var newSynthesisUri = await synthesisClient.CreateSynthesisAsync(
-    "en-US-JennyNeural",
+    "en-US-AndrewNeural",
     "sample batch synthesis",
     "sample description",
     sampleScript,

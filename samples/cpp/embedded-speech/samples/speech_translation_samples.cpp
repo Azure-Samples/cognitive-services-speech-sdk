@@ -71,32 +71,42 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
         // the source language.
         if (e.Result->Reason == ResultReason::TranslatingSpeech)
         {
+            // Source (input) language identification is enabled when TranslationRecognizer
+            // is created with an AutoDetectSourceLanguageConfig argument.
+            // In case the model does not support this functionality or the language cannot
+            // be identified, the result Language is "Unknown".
+            auto sourceLangResult = AutoDetectSourceLanguageResult::FromResult(e.Result);
+            const auto& sourceLang = sourceLangResult->Language;
+
             for (const auto& translation : e.Result->Translations)
             {
                 auto targetLang = translation.first;
                 auto outputText = translation.second;
-                cout << "Translating [" << targetLang << "]: " << outputText << endl;
+                cout << "Translating [" << sourceLang << " -> " << targetLang << "]: " << outputText << endl;
             }
         }
     };
 
     recognizer->Recognized += [](const TranslationRecognitionEventArgs& e)
     {
+        // Final result. May differ from the last intermediate result.
         if (e.Result->Reason == ResultReason::TranslatedSpeech)
         {
-            // Final result. May differ from the last intermediate result.
+            auto sourceLangResult = AutoDetectSourceLanguageResult::FromResult(e.Result);
+            const auto& sourceLang = sourceLangResult->Language;
+
             for (const auto& translation : e.Result->Translations)
             {
                 auto targetLang = translation.first;
                 auto outputText = translation.second;
-                cout << "TRANSLATED [" << targetLang << "]: " << outputText << endl;
+                cout << "TRANSLATED [" << sourceLang << " -> " << targetLang << "]: " << outputText << endl;
             }
         }
         else if (e.Result->Reason == ResultReason::NoMatch)
         {
             // NoMatch occurs when no speech phrase was recognized.
             auto reason = NoMatchDetails::FromResult(e.Result)->Reason;
-            cout << "NOMATCH: Reason=";
+            cout << "NO MATCH: Reason=";
             switch (reason)
             {
             case NoMatchReason::NotRecognized:
@@ -182,8 +192,9 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
 void EmbeddedSpeechTranslationFromMicrophone()
 {
     auto speechConfig = CreateEmbeddedSpeechConfig();
+    auto sourceLangConfig = AutoDetectSourceLanguageConfig::FromOpenRange(); // optional, for input language identification
     auto audioConfig = AudioConfig::FromDefaultMicrophoneInput();
 
-    auto recognizer = TranslationRecognizer::FromConfig(speechConfig, audioConfig);
+    auto recognizer = TranslationRecognizer::FromConfig(speechConfig, sourceLangConfig, audioConfig);
     TranslateSpeech(recognizer);
 }

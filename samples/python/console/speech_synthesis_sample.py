@@ -87,12 +87,12 @@ def speech_synthesis_with_voice():
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     # Sets the synthesis voice name.
-    # e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
+    # e.g. "en-US-AndrewNeural".
     # The full list of supported voices can be found here:
     # https://aka.ms/csspeech/voicenames
     # And, you can try get_voices_async method to get all available voices.
     # See speech_synthesis_get_available_voices() sample below.
-    voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
+    voice = "en-US-AndrewNeural"
     speech_config.speech_synthesis_voice_name = voice
     # Creates a speech synthesizer for the specified voice,
     # using the default speaker as audio output.

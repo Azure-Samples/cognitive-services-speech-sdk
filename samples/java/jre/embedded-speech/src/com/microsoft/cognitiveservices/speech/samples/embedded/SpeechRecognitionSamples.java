@@ -160,7 +160,7 @@ public class SpeechRecognitionSamples
             {
                 // NoMatch occurs when no speech was recognized.
                 NoMatchReason reason = NoMatchDetails.fromResult(e.getResult()).getReason();
-                System.out.println("NOMATCH: Reason=" + reason);
+                System.out.println("NO MATCH: Reason=" + reason);
             }
         });
 

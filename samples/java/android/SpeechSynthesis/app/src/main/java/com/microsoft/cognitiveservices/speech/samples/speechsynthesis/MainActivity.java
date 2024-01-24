@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         // Use 24k Hz format for higher quality.
         speechConfig.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm);
         // Set voice name.
-        speechConfig.setSpeechSynthesisVoiceName("en-US-JennyNeural");
+        speechConfig.setSpeechSynthesisVoiceName("en-US-AndrewNeural");
         synthesizer = new SpeechSynthesizer(speechConfig, null);
         connection = Connection.fromSpeechSynthesizer(synthesizer);
 
