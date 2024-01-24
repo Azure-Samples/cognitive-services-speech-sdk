@@ -78,6 +78,9 @@
   <div style="background-color: white; width: 200px;">
     <input type="checkbox" id="autoReconnectAvatar">Auto Reconnect</input><br />
   </div>
+  <div style="background-color: white; width: 200px;">
+    <input type="checkbox" id="useLocalVideoForIdle">Use Local Video for Idle</input><br />
+  </div>
   <br />
 </div>
 
@@ -97,6 +100,9 @@
         resize: none;
         background-color: transparent;
         overflow: hidden;" hidden></textarea>
+  </div>
+  <div id="localVideo" hidden>
+    <video src="video/lisa-casual-sitting-idle.mp4" autoplay loop muted></video>
   </div>
   <div id="remoteVideo"></div>
 </div>
