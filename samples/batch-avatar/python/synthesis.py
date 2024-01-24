@@ -62,7 +62,7 @@ def submit_synthesis():
             "videoFormat": "mp4",  # mp4 or webm, webm is required for transparent background
             "videoCodec": "h264",  # hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
             "subtitleType": "soft_embedded",
-            "backgroundColor": "#FFFFFFFF",
+            "backgroundColor": "#FFFFFFFF", # background color in RGBA format, default is white; can be set to 'transparent' for transparent background
         }
     }
 
