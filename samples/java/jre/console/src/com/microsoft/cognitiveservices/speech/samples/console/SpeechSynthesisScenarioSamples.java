@@ -149,7 +149,7 @@ public class SpeechSynthesisScenarioSamples {
             System.out.printf("Turn: %d%n", finalTurn);
 
             IntStream.range(0, 64).parallel().forEach(i -> {
-                long[] latency = service.synthesis(String.format("today is a nice day. %d%d", finalTurn, i), "en-US-AndrewNeural");
+                long[] latency = service.synthesis(String.format("today is a nice day. %d%d", finalTurn, i), "en-US-AvaNeural");
                 if (finalTurn > 0) {
                     latencies.add(latency[0]);
                     processingTimes.add(latency[1]);

@@ -92,7 +92,7 @@ def speech_synthesis_with_voice():
     # https://aka.ms/csspeech/voicenames
     # And, you can try get_voices_async method to get all available voices.
     # See speech_synthesis_get_available_voices() sample below.
-    voice = "en-US-AndrewNeural"
+    voice = "en-US-AvaNeural"
     speech_config.speech_synthesis_voice_name = voice
     # Creates a speech synthesizer for the specified voice,
     # using the default speaker as audio output.
@@ -522,7 +522,7 @@ def speech_synthesis_bookmark_event():
     # Bookmark tag is needed in the SSML, e.g.
     ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' " \
            "xmlns:mstts='http://www.w3.org/2001/mstts'>" \
-           "<voice name='en-US-AndrewNeural'>" \
+           "<voice name='en-US-AvaNeural'>" \
            "<bookmark mark='bookmark_one'/> one. " \
            "<bookmark mark='bookmark_two'/> two. three. four.</voice></speak> "
 
