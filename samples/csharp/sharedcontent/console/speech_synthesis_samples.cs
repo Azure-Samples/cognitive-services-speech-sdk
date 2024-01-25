@@ -803,7 +803,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.ReadLine();
 
                 // Bookmark tag is needed in the SSML, e.g.
-                var ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
+                var ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='en-US-AvaNeural'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
 
                 using (var result = await synthesizer.SpeakSsmlAsync(ssml))
                 {
@@ -971,7 +971,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorCode == CancellationErrorCode.ServiceTimeout
                     || details.ErrorDetails.Contains("Error code: 1007"))
                 {
-                    // Synthesize using a standard platform voice, e.g. en-US-AndrewNeural
+                    // Synthesize using a standard platform voice, e.g. en-US-AvaNeural
                     synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey", "YourServiceRegion", null, "YourPlatformVoiceName");
                 }
             }

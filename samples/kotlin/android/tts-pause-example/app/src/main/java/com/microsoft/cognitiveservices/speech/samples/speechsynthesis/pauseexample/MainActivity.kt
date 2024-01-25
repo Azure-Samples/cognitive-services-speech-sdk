@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
         // Use 24k Hz format for higher quality.
         speechConfig?.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm)
         // Set voice name.
-        speechConfig?.speechSynthesisVoiceName = "en-US-AndrewNeural"
+        speechConfig?.speechSynthesisVoiceName = "en-US-AvaNeural"
         synthesizer = SpeechSynthesizer(speechConfig, null)
         connection = Connection.fromSpeechSynthesizer(synthesizer)
 
