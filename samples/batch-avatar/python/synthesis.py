@@ -42,7 +42,7 @@ def submit_synthesis():
         'description': DESCRIPTION,
         "textType": "PlainText",
         'synthesisConfig': {
-            "voice": "en-US-AndrewNeural",
+            "voice": "en-US-JennyNeural",
         },
         # Replace with your custom voice name and deployment ID if you want to use custom voice.
         # Multiple voices are supported, the mixture of custom voices and platform voices is allowed.
@@ -59,10 +59,10 @@ def submit_synthesis():
             "customized": False, # set to True if you want to use customized avatar
             "talkingAvatarCharacter": "lisa",  # talking avatar character
             "talkingAvatarStyle": "graceful-sitting",  # talking avatar style, required for prebuilt avatar, optional for custom avatar
-            "videoFormat": "webm",  # mp4 or webm, webm is required for transparent background
-            "videoCodec": "vp9",  # hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
+            "videoFormat": "mp4",  # mp4 or webm, webm is required for transparent background
+            "videoCodec": "h264",  # hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
             "subtitleType": "soft_embedded",
-            "backgroundColor": "transparent",
+            "backgroundColor": "#FFFFFFFF", # background color in RGBA format, default is white; can be set to 'transparent' for transparent background
         }
     }
 

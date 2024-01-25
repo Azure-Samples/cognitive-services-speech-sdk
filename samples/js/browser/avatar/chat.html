@@ -78,14 +78,17 @@
   <div style="background-color: white; width: 200px;">
     <input type="checkbox" id="autoReconnectAvatar">Auto Reconnect</input><br />
   </div>
+  <div style="background-color: white; width: 200px;">
+    <input type="checkbox" id="useLocalVideoForIdle" onchange="window.updateLocalVideoForIdle()">Use Local Video for Idle</input><br />
+  </div>
   <br />
 </div>
 
-<button id="startSession" onclick="window.startSession()">Open Video Connection</button>
+<button id="startSession" onclick="window.startSession()">Open Avatar Session</button>
 <button id="microphone" onclick="window.microphone()" disabled>Start Microphone</button>
 <button id="stopSpeaking" onclick="stopSpeaking()" disabled>Stop Speaking</button>
 <button id="clearChatHistory" onclick="window.clearChatHistory()">Clear Chat History</button>
-<button id="stopSession" onclick="window.stopSession()" disabled>Close Video Connection</button>
+<button id="stopSession" onclick="window.stopSession()" disabled>Close Avatar Session</button>
 
 <div id="videoContainer" style="position: relative; width: 960px;">
   <div id="overlayArea" style="position: absolute;">
@@ -98,10 +101,15 @@
         background-color: transparent;
         overflow: hidden;" hidden></textarea>
   </div>
+  <div id="localVideo" hidden>
+    <video src="video/lisa-casual-sitting-idle.mp4" autoplay loop muted></video>
+  </div>
   <div id="remoteVideo"></div>
 </div>
 
-<input type="checkbox" id="showTypeMessage" onchange="window.updateTypeMessageBox()" disabled>Type Message</input><br />
+<div id="showTypeMessageCheckbox">
+  <input type="checkbox" id="showTypeMessage" onchange="window.updateTypeMessageBox()" disabled>Type Message</input><br />
+</div>
 <textarea id="userMessageBox" style="width: 960px; height: 40px" hidden></textarea><br/>
 </body>
 </html>
