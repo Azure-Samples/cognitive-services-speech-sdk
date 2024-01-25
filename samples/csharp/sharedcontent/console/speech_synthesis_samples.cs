@@ -115,11 +115,11 @@ namespace MicrosoftSpeechSDKSamples
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Sets the voice name.
-            // e.g. "en-US-AvaNeural".
+            // e.g. "en-US-AndrewNeural".
             // The full list of supported voices can be found here:
             // https://aka.ms/csspeech/voicenames
             // And, you can try GetVoicesAsync method to get all available voices (see SynthesisGetAvailableVoicesAsync() sample below).
-            var voice = "en-US-AvaNeural";
+            var voice = "en-US-AndrewNeural";
             config.SpeechSynthesisVoiceName = voice;
 
             // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.

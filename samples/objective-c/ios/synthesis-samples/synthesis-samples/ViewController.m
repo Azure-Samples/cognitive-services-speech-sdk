@@ -149,11 +149,11 @@
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
     speechConfig.speechSynthesisLanguage = @"en-GB";
     // Sets the voice name
-    // e.g. "en-US-AvaNeural".
+    // e.g. "en-GB-RyanNeural".
     // The full list of supported voices can be found here:
     // https://aka.ms/csspeech/voicenames
     // And, you can try getVoices method to get all available voices.
-    speechConfig.speechSynthesisVoiceName = @"Microsoft Server Speech Text to Speech Voice (en-GB, RyanNeural)";
+    speechConfig.speechSynthesisVoiceName = @"en-GB-RyanNeural";
     // Sets the synthesis output format.
     // The full list of supported format can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
