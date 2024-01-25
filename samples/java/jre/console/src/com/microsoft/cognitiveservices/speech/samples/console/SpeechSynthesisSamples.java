@@ -864,7 +864,7 @@ public class SpeechSynthesisSamples {
         new Scanner(System.in).nextLine();
 
         // Bookmark tag is needed in the SSML, e.g.
-        String ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='Microsoft Server Speech Text to Speech Voice (en-US, AndrewNeural)'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
+        String ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='en-US-AndrewNeural'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
 
         SpeechSynthesisResult result = synthesizer.SpeakSsmlAsync(ssml).get();
 
