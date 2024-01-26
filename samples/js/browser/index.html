@@ -143,7 +143,7 @@
                         <option value="en-CA-ClaraNeural">English - CA</option>
                         <option value="en-GB-NoahNeural">English - GB</option>
                         <option value="en-IN-NeerjaNeural">English - IN</option>
-                        <option value="en-US-AmberNeural">English - US</option>
+                        <option value="en-US-AvaNeural">English - US</option>
                         <option value="es-ES-ElviraNeural">Spanish - ES</option>
                         <option value="es-MX-LibertoNeural">Spanish - MX</option>
                         <option value="fi-FI-HarriNeural">Finnish - FI</option>
@@ -486,7 +486,7 @@
 
             enumerateMicrophones();
 
-            Initialize(function (speechSdk) {
+            Initialize(async function (speechSdk) {
                 SpeechSDK = speechSdk;
 
                 // in case we have a function for getting an authorization token, call it.
@@ -546,7 +546,7 @@
             // Defines the language(s) that speech should be translated to.
             // Multiple languages can be specified for text translation and will be returned in a map.
             if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
-                speechConfig.addTargetLanguage(languageTargetOptions.value.split("(")[1].substring(0, 5));
+                speechConfig.addTargetLanguage(languageTargetOptions.value.substring(0, 5));
 
                 // If voice output is requested, set the target voice.
                 // If multiple text translations were requested, only the first one added will have audio synthesised for it.

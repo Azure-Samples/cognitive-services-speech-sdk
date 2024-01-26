@@ -1,0 +1,5 @@
+target 'conversation-transcription' do
+    platform :ios, '11.0'
+    pod 'MicrosoftCognitiveServicesSpeech-iOS', '~> 1.31'
+    use_frameworks!
+end

@@ -12,7 +12,7 @@ This [speech sample app](./speech-samples) shows various other techniques, curre
 ## Prerequisites
 
 - A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-- A Mac with Xcode 10.3 or later installed as iOS development environment. These samples target iOS versions 9.3 or later.
+- A Mac with Xcode installed as iOS development environment. These samples target iOS versions 11.0 or later.
 
 ## Get the code for the samples
 

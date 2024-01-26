@@ -16,6 +16,7 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
   * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with. For example, `westus` or `northeurope`.
   * Your language for speech recognition, if you want to change the default `en-us` (American English).
   * `YourAudioFile.wav`: An audio file with speech to be recognized. The format is 16khz sample rate, mono, 16-bit per sample PCM. See for example a file named `whatstheweatherlike.wav` located in several folders in this repository. Make sure the above language settings matches the language spoken in the WAV file. Note: This sample assumes there is a 44 bit wav header on the file and skips those bytes in the stream.
+  * `YourTopic`: replace with your topic.
   * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
     * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
@@ -28,7 +29,7 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 The sample demonstrates the speech, intent, and translation recognizers, as well as speech synthesizer. You can start them individually by calling:
 
 ```shell
-node index.js [speech|intent|translate|synthesis] {filename}
+node index.js [speech|intent|translate|synthesis|pronunciationAssessment|pronunciationAssessmentContinue] {filename}
 ```
 
 ## Run the Microphone Streaming sample for node.js

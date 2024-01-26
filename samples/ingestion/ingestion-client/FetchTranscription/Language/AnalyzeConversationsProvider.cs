@@ -63,145 +63,10 @@ namespace Language
         public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitAnalyzeConversationsRequestAsync(SpeechTranscript speechTranscript)
         {
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
-
             var data = new List<AnalyzeConversationsRequest>();
-            var summarizationData = new AnalyzeConversationsRequest
-            {
-                DisplayName = "IngestionClient - Summarization",
-                AnalysisInput = new AnalysisInput(new[]
-                {
-                    new Conversation
-                    {
-                        Id = $"whole transcript",
-                        Modality = Modality.transcript,
-                        ConversationItems = new List<ConversationItem>()
-                    }
-                }),
-                Tasks = new List<AnalyzeConversationsTask>(),
-            };
-
-            var count = -1;
-            var jobCount = 0;
-            var turnCount = 0;
-            foreach (var aspect in FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Aspects)
-            {
-                summarizationData.Tasks.Add(new AnalyzeConversationsTask
-                {
-                    TaskName = "Conversation Summarization task - " + aspect,
-                    Kind = AnalyzeConversationsTaskKind.ConversationalSummarizationTask,
-                    Parameters = new Dictionary<string, object>
-                    {
-                        {
-                            "summaryAspects", new[] { aspect.ToString() }
-                        },
-                    }
-                });
-            }
-
-            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
-            {
-                var topResult = recognizedPhrase.NBest.First();
-                var textCount = topResult.Lexical.Length;
-
-                if (count == -1 || (count + textCount) > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
-                {
-                    count = 0;
-                    jobCount++;
-                    data.Add(new AnalyzeConversationsRequest
-                    {
-                        DisplayName = "IngestionClient",
-                        AnalysisInput = new AnalysisInput(new[]
-                        {
-                            new Conversation
-                            {
-                                Id = $"{jobCount}",
-                                Language = this.locale,
-                                Modality = Modality.transcript,
-                                ConversationItems = new List<ConversationItem>()
-                            }
-                        }),
-                        Tasks = new[]
-                        {
-                            new AnalyzeConversationsTask
-                            {
-                                TaskName = "Conversation PII task",
-                                Kind = AnalyzeConversationsTaskKind.ConversationalPIITask,
-                                Parameters = new Dictionary<string, object>
-                                {
-                                    {
-                                        "piiCategories", FetchTranscriptionEnvironmentVariables.ConversationPiiCategories.ToList()
-                                    },
-                                    {
-                                        "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource ?? DefaultInferenceSource
-                                    },
-                                    {
-                                        "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == Connector.Enums.ConversationPiiSetting.IncludeAudioRedaction
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-
-                var utterance = new ConversationItem
-                {
-                    Text = topResult.Display,
-                    Lexical = topResult.Lexical,
-                    Itn = topResult.ITN,
-                    MaskedItn = topResult.MaskedITN,
-                    Id = $"{turnCount}__{recognizedPhrase.Offset}__{recognizedPhrase.Channel}",
-                    ParticipantId = $"{recognizedPhrase.Channel}",
-                    ConversationItemLevelTiming = new AudioTiming
-                    {
-                        Offset = recognizedPhrase.OffsetInTicks,
-                        Duration = recognizedPhrase.DurationInTicks,
-                    },
-                    AudioTimings = topResult.Words
-                        ?.Select(word => new WordLevelAudioTiming
-                        {
-                            Word = word.Word,
-                            Duration = (long)word.DurationInTicks,
-                            Offset = (long)word.OffsetInTicks
-                        })
-                };
-                data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
-
-                // for summarization
-                var stratergy = FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Stratergy;
-                var roleKey = stratergy.Key switch
-                {
-                    RoleAssignmentMappingKey.Channel => recognizedPhrase.Channel,
-                    RoleAssignmentMappingKey.Speaker => recognizedPhrase.Speaker,
-                    _ => throw new ArgumentOutOfRangeException($"Unknown stratergy.Key: {stratergy.Key}"),
-                };
-                if (!stratergy.Mapping.TryGetValue(roleKey, out var role))
-                {
-                    role = stratergy.FallbackRole;
-                }
-
-                if (role != Role.None && count + textCount < FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.InputLengthLimit)
-                {
-                    utterance.Role = utterance.ParticipantId = role.ToString();
-                    summarizationData.AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
-                }
-
-                count += textCount;
-                turnCount++;
-            }
-
-            this.log.LogInformation($"{summarizationData.Tasks.Count} Summarization Tasks Prepared. Locale = {this.locale}. chars = {count}. total turns = {turnCount}. turns for summarization = {summarizationData.AnalysisInput.Conversations[0].ConversationItems.Count}");
-
-            if (this.locale != null
-                && this.locale.StartsWith(Constants.SummarizationSupportedLocalePrefix)
-                && summarizationData.AnalysisInput.Conversations[0].ConversationItems.Count > 0)
-            {
-                summarizationData.AnalysisInput.Conversations[0].Language = Constants.SummarizationSupportedLocalePrefix;
-                data.Add(summarizationData);
-                jobCount++;
-            }
-
-            this.log.LogInformation($"Submitting {jobCount} jobs to Conversations...");
-
+            this.PrepareSummarizationRequest(speechTranscript, data);
+            this.PreparePiiRequest(speechTranscript, data);
+            this.log.LogInformation($"Submitting {data.Count} jobs to Conversations...");
             return await this.SubmitConversationsAsync(data).ConfigureAwait(false);
         }
 
@@ -352,6 +217,193 @@ namespace Language
             };
 
             return errors;
+        }
+
+        private void PrepareSummarizationRequest(SpeechTranscript speechTranscript, List<AnalyzeConversationsRequest> data)
+        {
+            if (!IsConversationalSummarizationEnabled())
+            {
+                this.log.LogInformation("Skip prepare summarization request because disabled");
+                return;
+            }
+
+            this.log.LogInformation("Prepare summarization request start");
+
+            if (this.locale != null
+                && this.locale.StartsWith(Constants.SummarizationSupportedLocalePrefix))
+            {
+                this.log.LogInformation($"Expected local {this.locale}");
+            }
+            else
+            {
+                this.log.LogInformation($"Unexpected local {this.locale}. Skip prepare summarization request.");
+            }
+
+            var summarizationData = new AnalyzeConversationsRequest
+            {
+                DisplayName = "IngestionClient - Summarization",
+                AnalysisInput = new AnalysisInput(new[]
+                {
+                    new Conversation
+                    {
+                        Id = $"whole transcript",
+                        Modality = Modality.transcript,
+                        ConversationItems = new List<ConversationItem>()
+                    }
+                }),
+                Tasks = new List<AnalyzeConversationsTask>(),
+            };
+
+            foreach (var aspect in FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Aspects)
+            {
+                summarizationData.Tasks.Add(new AnalyzeConversationsTask
+                {
+                    TaskName = "Conversation Summarization task - " + aspect,
+                    Kind = AnalyzeConversationsTaskKind.ConversationalSummarizationTask,
+                    Parameters = new Dictionary<string, object>
+                    {
+                        {
+                            "summaryAspects", new[] { aspect.ToString() }
+                        },
+                    }
+                });
+            }
+
+            var turnCount = 0;
+            var count = 0;
+            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
+            {
+                var topResult = recognizedPhrase.NBest.First();
+                var utterance = new ConversationItem
+                {
+                    Text = topResult.Display,
+                    Lexical = topResult.Lexical,
+                    Itn = topResult.ITN,
+                    MaskedItn = topResult.MaskedITN,
+                    Id = $"{turnCount++}__{recognizedPhrase.Offset}__{recognizedPhrase.Channel}",
+                    ParticipantId = $"{recognizedPhrase.Channel}",
+                    ConversationItemLevelTiming = new AudioTiming
+                    {
+                        Offset = recognizedPhrase.OffsetInTicks,
+                        Duration = recognizedPhrase.DurationInTicks,
+                    },
+                    AudioTimings = topResult.Words
+                        ?.Select(word => new WordLevelAudioTiming
+                        {
+                            Word = word.Word,
+                            Duration = (long)word.DurationInTicks,
+                            Offset = (long)word.OffsetInTicks
+                        })
+                };
+
+                var stratergy = FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Stratergy;
+                var roleKey = stratergy.Key switch
+                {
+                    RoleAssignmentMappingKey.Channel => recognizedPhrase.Channel,
+                    RoleAssignmentMappingKey.Speaker => recognizedPhrase.Speaker,
+                    _ => throw new ArgumentOutOfRangeException($"Unknown stratergy.Key: {stratergy.Key}"),
+                };
+                if (!stratergy.Mapping.TryGetValue(roleKey, out var role))
+                {
+                    role = stratergy.FallbackRole;
+                }
+
+                if (role != Role.None && count + utterance.Text.Length < FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.InputLengthLimit)
+                {
+                    utterance.Role = utterance.ParticipantId = role.ToString();
+                    summarizationData.AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
+                }
+
+                count += utterance.Text.Length;
+                turnCount++;
+            }
+
+            this.log.LogInformation($"{summarizationData.Tasks.Count} Summarization Tasks Prepared. Locale = {this.locale}. chars = {count}. total turns = {turnCount}. turns for summarization = {summarizationData.AnalysisInput.Conversations[0].ConversationItems.Count}");
+            data.Add(summarizationData);
+        }
+
+        private void PreparePiiRequest(SpeechTranscript speechTranscript, List<AnalyzeConversationsRequest> data)
+        {
+            if (!IsConversationalPiiEnabled())
+            {
+                this.log.LogInformation("Skip prepare pii request");
+                return;
+            }
+
+            this.log.LogInformation("Start prepare pii request");
+
+            var count = -1;
+            var jobCount = 0;
+            var turnCount = 0;
+
+            foreach (var recognizedPhrase in speechTranscript.RecognizedPhrases)
+            {
+                var topResult = recognizedPhrase.NBest.First();
+                var textCount = topResult.Lexical.Length;
+
+                if (count == -1 || (count + textCount) > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
+                {
+                    count = 0;
+                    jobCount++;
+                    data.Add(new AnalyzeConversationsRequest
+                    {
+                        DisplayName = "IngestionClient",
+                        AnalysisInput = new AnalysisInput(new[]
+                        {
+                            new Conversation
+                            {
+                                Id = $"{jobCount}",
+                                Language = this.locale,
+                                Modality = Modality.transcript,
+                                ConversationItems = new List<ConversationItem>()
+                            }
+                        }),
+                        Tasks = new[]
+                        {
+                            new AnalyzeConversationsTask
+                            {
+                                TaskName = "Conversation PII task",
+                                Kind = AnalyzeConversationsTaskKind.ConversationalPIITask,
+                                Parameters = new Dictionary<string, object>
+                                {
+                                    {
+                                        "piiCategories", FetchTranscriptionEnvironmentVariables.ConversationPiiCategories.ToList()
+                                    },
+                                    {
+                                        "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource ?? DefaultInferenceSource
+                                    },
+                                    {
+                                        "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == Connector.Enums.ConversationPiiSetting.IncludeAudioRedaction
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+
+                var utterance = new ConversationItem
+                {
+                    Text = topResult.Display,
+                    Lexical = topResult.Lexical,
+                    Itn = topResult.ITN,
+                    MaskedItn = topResult.MaskedITN,
+                    Id = $"{turnCount}__{recognizedPhrase.Offset}__{recognizedPhrase.Channel}",
+                    ParticipantId = $"{recognizedPhrase.Channel}",
+                    ConversationItemLevelTiming = new AudioTiming
+                    {
+                        Offset = recognizedPhrase.OffsetInTicks,
+                        Duration = recognizedPhrase.DurationInTicks,
+                    },
+                    AudioTimings = topResult.Words
+                        ?.Select(word => new WordLevelAudioTiming
+                        {
+                            Word = word.Word,
+                            Duration = (long)word.DurationInTicks,
+                            Offset = (long)word.OffsetInTicks
+                        })
+                };
+                data.Last().AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
+            }
         }
 
         private async Task<(IEnumerable<string> jobId, IEnumerable<string> errors)> SubmitConversationsAsync(IEnumerable<AnalyzeConversationsRequest> data)

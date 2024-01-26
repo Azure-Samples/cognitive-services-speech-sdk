@@ -12,6 +12,7 @@ import string
 import time
 import threading
 import wave
+import utils
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -34,6 +35,8 @@ speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 # kHz).
 weatherfilename = "whatstheweatherlike.wav"
 weatherfilenamemp3 = "whatstheweatherlike.mp3"
+weatherfilenamemulaw = "whatstheweatherlike-mulaw.wav"
+seasonsfilename = "pronunciation_assessment_fall.wav"
 
 
 def speech_recognize_once_from_mic():
@@ -300,7 +303,7 @@ def speech_recognize_async_from_file():
 
     # Perform recognition. `recognize_async` does not block until recognition is complete,
     # so other tasks can be performed while recognition is running.
-    # However, recognition stops when the first utterance has bee recognized.
+    # However, recognition stops when the first utterance has been recognized.
     # For long-running recognition, use continuous recognitions instead.
     result_future = speech_recognizer.recognize_once_async()
 
@@ -344,7 +347,7 @@ def speech_recognize_continuous_from_file():
     speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
-    # stop continuous recognition on either session stopped or canceled events
+    # Stop continuous recognition on either session stopped or canceled events
     speech_recognizer.session_stopped.connect(stop_cb)
     speech_recognizer.canceled.connect(stop_cb)
 
@@ -449,7 +452,7 @@ def speech_recognize_keyword_from_microphone():
     speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
-    # stop continuous recognition on either session stopped or canceled events
+    # Stop continuous recognition on either session stopped or canceled events
     speech_recognizer.session_stopped.connect(stop_cb)
     speech_recognizer.canceled.connect(stop_cb)
 
@@ -495,16 +498,16 @@ def speech_recognition_with_pull_stream():
 
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-    # specify the audio format
+    # Specify the audio format
     wave_format = speechsdk.audio.AudioStreamFormat(samples_per_second=16000, bits_per_sample=16,
                                                     channels=1)
 
-    # setup the audio stream
+    # Setup the audio stream
     callback = WavFileReaderCallback(weatherfilename)
     stream = speechsdk.audio.PullAudioInputStream(callback, wave_format)
     audio_config = speechsdk.audio.AudioConfig(stream=stream)
 
-    # instantiate the speech recognizer with pull stream input
+    # Instantiate the speech recognizer with pull stream input
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
     done = False
@@ -521,7 +524,7 @@ def speech_recognition_with_pull_stream():
     speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
-    # stop continuous recognition on either session stopped or canceled events
+    # Stop continuous recognition on either session stopped or canceled events
     speech_recognizer.session_stopped.connect(stop_cb)
     speech_recognizer.canceled.connect(stop_cb)
 
@@ -534,11 +537,19 @@ def speech_recognition_with_pull_stream():
     speech_recognizer.stop_continuous_recognition()
 
 
+def read_wave_header(file_path):
+    with wave.open(file_path, 'rb') as audio_file:
+        framerate = audio_file.getframerate()
+        bits_per_sample = audio_file.getsampwidth() * 8
+        num_channels = audio_file.getnchannels()
+        return framerate, bits_per_sample, num_channels
+
+
 def push_stream_writer(stream):
     # The number of bytes to push per buffer
     n_bytes = 3200
     wav_fh = wave.open(weatherfilename)
-    # start pushing data until all data has been read from the file
+    # Start pushing data until all data has been read from the file
     try:
         while True:
             frames = wav_fh.readframes(n_bytes // 2)
@@ -557,11 +568,11 @@ def speech_recognition_with_push_stream():
     source"""
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-    # setup the audio stream
+    # Setup the audio stream
     stream = speechsdk.audio.PushAudioInputStream()
     audio_config = speechsdk.audio.AudioConfig(stream=stream)
 
-    # instantiate the speech recognizer with push stream input
+    # Instantiate the speech recognizer with push stream input
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
     recognition_done = threading.Event()
 
@@ -577,26 +588,76 @@ def speech_recognition_with_push_stream():
     speech_recognizer.session_stopped.connect(session_stopped_cb)
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
 
-    # start push stream writer thread
+    # Start push stream writer thread
     push_stream_writer_thread = threading.Thread(target=push_stream_writer, args=[stream])
     push_stream_writer_thread.start()
 
-    # start continuous speech recognition
+    # Start continuous speech recognition
     speech_recognizer.start_continuous_recognition()
 
-    # wait until all input processed
+    # Wait until all input processed
     recognition_done.wait()
 
-    # stop recognition and clean up
+    # Stop recognition and clean up
     speech_recognizer.stop_continuous_recognition()
     push_stream_writer_thread.join()
+
+
+def speech_recognition_with_push_stream_mulaw():
+    """gives an example how to use a push mulaw audio stream to recognize speech from a custom audio
+    source"""
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+    # Setup the audio stream
+    audio_format = speechsdk.audio.AudioStreamFormat(samples_per_second=16000,
+                                                     bits_per_sample=8,
+                                                     channels=1, 
+                                                     wave_stream_format=speechsdk.AudioStreamWaveFormat.MULAW)
+    stream = speechsdk.audio.PushAudioInputStream(stream_format=audio_format)
+    audio_config = speechsdk.audio.AudioConfig(stream=stream)
+
+    # Instantiate the speech recognizer with push stream input
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    recognition_done = threading.Event()
+
+    # Connect callbacks to the events fired by the speech recognizer
+    def session_stopped_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('SESSION STOPPED: {}'.format(evt))
+        recognition_done.set()
+
+    speech_recognizer.recognizing.connect(lambda evt: print('RECOGNIZING: {}'.format(evt)))
+    speech_recognizer.recognized.connect(lambda evt: print('RECOGNIZED: {}'.format(evt)))
+    speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    speech_recognizer.session_stopped.connect(session_stopped_cb)
+    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+
+    # Start continuous speech recognition
+    speech_recognizer.start_continuous_recognition()
+    
+    # Open the wav file and push it to the push stream.
+    # NOTE the wav header must be skipped before pushing the data to the stream.
+    with open(weatherfilenamemulaw, 'rb') as audio_file:
+        wav_header_size = utils.get_wav_header_size(weatherfilenamemulaw)
+        # Read the wave header
+        header = audio_file.read(wav_header_size)
+        # Read the audio data
+        audio_data = audio_file.read()
+        stream.write(audio_data)
+        stream.close()
+
+    # Wait until all input processed
+    recognition_done.wait()
+
+    # Stop recognition and clean up
+    speech_recognizer.stop_continuous_recognition()
 
 
 def speech_recognize_once_with_auto_language_detection_from_mic():
     """performs one-shot speech recognition from the default microphone with auto language detection"""
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-    # create the auto detection language configuration with the potential source language candidates
+    # Create the auto detection language configuration with the potential source language candidates
     auto_detect_source_language_config = \
         speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
     speech_recognizer = speechsdk.SpeechRecognizer(
@@ -629,7 +690,7 @@ def speech_recognize_with_auto_language_detection_UsingCustomizedModel():
     # Set the endpoint ID of your customized mode that will be used for fr-FR.
     # Replace with your own CRIS endpoint ID.
     fr_language_config = speechsdk.languageconfig.SourceLanguageConfig("fr-FR", "myendpointId")
-    # create the auto detection language configuration with the source language configurations
+    # Create the auto detection language configuration with the source language configurations
     auto_detect_source_language_config = speechsdk.languageconfig.AutoDetectSourceLanguageConfig(
         sourceLanguageConfigs=[en_language_config, fr_language_config])
 
@@ -725,14 +786,14 @@ def pronunciation_assessment_from_microphone():
     config.set_property(speechsdk.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "3000")
 
     reference_text = ""
-    # create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     pronunciation_config = speechsdk.PronunciationAssessmentConfig(
         reference_text=reference_text,
         grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
         granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
         enable_miscue=True)
+    pronunciation_config.enable_prosody_assessment()
 
-    # Creates a speech recognizer, also specify the speech language
+    # Create a speech recognizer, also specify the speech language
     recognizer = speechsdk.SpeechRecognizer(speech_config=config, language="en-US")
     while True:
         # Receives reference text from console input.
@@ -764,8 +825,8 @@ def pronunciation_assessment_from_microphone():
             print('  Pronunciation Assessment Result:')
 
             pronunciation_result = speechsdk.PronunciationAssessmentResult(result)
-            print('    Accuracy score: {}, Pronunciation score: {}, Completeness score : {}, FluencyScore: {}'.format(
-                pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
+            print('    Accuracy score: {}, Prosody score: {}, Pronunciation score: {}, Completeness score : {}, FluencyScore: {}'.format(
+                pronunciation_result.accuracy_score, pronunciation_result.prosody_score, pronunciation_result.pronunciation_score,
                 pronunciation_result.completeness_score, pronunciation_result.fluency_score
             ))
             print('  Word-level details:')
@@ -783,7 +844,7 @@ def pronunciation_assessment_from_microphone():
 
 
 def pronunciation_assessment_continuous_from_file():
-    """Performs continuous pronunciation assessment asynchronously with input from and audio file.
+    """Performs continuous pronunciation assessment asynchronously with input from an audio file.
         See more information at https://aka.ms/csspeech/pa"""
 
     import difflib
@@ -791,27 +852,31 @@ def pronunciation_assessment_continuous_from_file():
 
     # Creates an instance of a speech config with specified subscription key and service region.
     # Replace with your own subscription key and service region (e.g., "westus").
-    # Note: The pronunciation assessment feature is currently only available on en-US language.
+    # Note: The sample is for en-US language.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
     reference_text = "What's the weather like?"
-    # create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     enable_miscue = True
+    enable_prosody_assessment = True
     pronunciation_config = speechsdk.PronunciationAssessmentConfig(
         reference_text=reference_text,
         grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
         granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
         enable_miscue=enable_miscue)
+    if enable_prosody_assessment:
+        pronunciation_config.enable_prosody_assessment()
 
     # Creates a speech recognizer using a file as audio input.
     language = 'en-US'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
-    # apply pronunciation assessment config to speech recognizer
+    # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
 
     done = False
     recognized_words = []
+    prosody_scores = []
     fluency_scores = []
     durations = []
 
@@ -822,26 +887,28 @@ def pronunciation_assessment_continuous_from_file():
         done = True
 
     def recognized(evt: speechsdk.SpeechRecognitionEventArgs):
-        print('pronunciation assessment for: {}'.format(evt.result.text))
+        print("pronunciation assessment for: {}".format(evt.result.text))
         pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
-        print('    Accuracy score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}'.format(
-            pronunciation_result.accuracy_score, pronunciation_result.pronunciation_score,
+        print("    Accuracy score: {}, prosody score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}".format(
+            pronunciation_result.accuracy_score, pronunciation_result.prosody_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words, fluency_scores, durations
+        nonlocal recognized_words, prosody_scores, fluency_scores, durations
         recognized_words += pronunciation_result.words
         fluency_scores.append(pronunciation_result.fluency_score)
+        if pronunciation_result.prosody_score is not None:
+            prosody_scores.append(pronunciation_result.prosody_score)
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
-        nb = jo['NBest'][0]
-        durations.append(sum([int(w['Duration']) for w in nb['Words']]))
+        nb = jo["NBest"][0]
+        durations.append(sum([int(w["Duration"]) for w in nb["Words"]]))
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
     speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
-    # stop continuous recognition on either session stopped or canceled events
+    # Stop continuous recognition on either session stopped or canceled events
     speech_recognizer.session_stopped.connect(stop_cb)
     speech_recognizer.canceled.connect(stop_cb)
 
@@ -852,7 +919,7 @@ def pronunciation_assessment_continuous_from_file():
 
     speech_recognizer.stop_continuous_recognition()
 
-    # we need to convert the reference text to lower case, and split to words, then remove the punctuations.
+    # We need to convert the reference text to lower case, and split to words, then remove the punctuations.
     if language == 'zh-CN':
         # Use jieba package to split words for Chinese
         import jieba
@@ -866,7 +933,7 @@ def pronunciation_assessment_continuous_from_file():
     # even if miscue is enabled.
     # We need to compare with the reference text after received all recognized words to get these error words.
     if enable_miscue:
-        diff = difflib.SequenceMatcher(None, reference_words, [x.word for x in recognized_words])
+        diff = difflib.SequenceMatcher(None, reference_words, [x.word.lower() for x in recognized_words])
         final_words = []
         for tag, i1, i2, j1, j2 in diff.get_opcodes():
             if tag in ['insert', 'replace']:
@@ -896,17 +963,198 @@ def pronunciation_assessment_continuous_from_file():
         else:
             final_accuracy_scores.append(word.accuracy_score)
     accuracy_score = sum(final_accuracy_scores) / len(final_accuracy_scores)
+    # Re-calculate the prosody score by averaging
+    if len(prosody_scores) == 0:
+        prosody_score = float("nan")
+    else:
+        prosody_score = sum(prosody_scores) / len(prosody_scores)
     # Re-calculate fluency score
     fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
     # Calculate whole completeness score
     completeness_score = len([w for w in recognized_words if w.error_type == "None"]) / len(reference_words) * 100
     completeness_score = completeness_score if completeness_score <= 100 else 100
 
-    print('    Paragraph accuracy score: {}, completeness score: {}, fluency score: {}'.format(
-        accuracy_score, completeness_score, fluency_score
+    print('    Paragraph accuracy score: {}, prosody score: {}, completeness score: {}, fluency score: {}'.format(
+        accuracy_score, prosody_score, completeness_score, fluency_score
     ))
 
     for idx, word in enumerate(final_words):
         print('    {}: word: {}\taccuracy score: {}\terror type: {};'.format(
             idx + 1, word.word, word.accuracy_score, word.error_type
         ))
+
+
+def pronunciation_assessment_from_stream():
+    """Performs pronunciation assessment asynchronously with input from an audio stream.
+        See more information at https://aka.ms/csspeech/pa"""
+
+    # Creates an instance of a speech config with specified subscription key and service region.
+    # Replace with your own subscription key and service region (e.g., "westus").
+    # Note: The sample is for en-US language.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+    # Setup the audio stream
+    framerate, bits_per_sample, num_channels = read_wave_header(weatherfilename)
+    format = speechsdk.audio.AudioStreamFormat(samples_per_second=framerate, bits_per_sample=bits_per_sample, channels=num_channels)
+    stream = speechsdk.audio.PushAudioInputStream(format)
+    audio_config = speechsdk.audio.AudioConfig(stream=stream)
+
+    reference_text = "What's the weather like?"
+    # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
+        reference_text=reference_text,
+        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
+        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
+        enable_miscue=True)
+    pronunciation_config.enable_prosody_assessment()
+
+    # Create a speech recognizer using a file as audio input.
+    language = 'en-US'
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
+    # Apply pronunciation assessment config to speech recognizer
+    pronunciation_config.apply_to(speech_recognizer)
+
+    # Start push stream writer thread
+    push_stream_writer_thread = threading.Thread(target=push_stream_writer, args=[stream])
+    push_stream_writer_thread.start()
+    result = speech_recognizer.recognize_once_async().get()
+    push_stream_writer_thread.join()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print('pronunciation assessment for: {}'.format(result.text))
+        pronunciation_result = speechsdk.PronunciationAssessmentResult(result)
+        print('    Accuracy score: {}, prosody score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}'.format(
+            pronunciation_result.accuracy_score, pronunciation_result.prosody_score, pronunciation_result.pronunciation_score,
+            pronunciation_result.completeness_score, pronunciation_result.fluency_score
+        ))
+        print('  Word-level details:')
+        for idx, word in enumerate(pronunciation_result.words):
+            print('    {}: word: {}\taccuracy score: {}\terror type: {};'.format(
+                idx + 1, word.word, word.accuracy_score, word.error_type
+            ))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized")
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+
+
+def pronunciation_assessment_configured_with_json():
+    """Performs pronunciation assessment asynchronously with input from an audio file.
+        See more information at https://aka.ms/csspeech/pa"""
+
+    # Creates an instance of a speech config with specified subscription key and service region.
+    # Replace with your own subscription key and service region (e.g., "westus").
+    # Note: The sample is for en-US language.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+    reference_text = "What's the weather like?"
+    # Create pronunciation assessment config with json string (JSON format is not recommended)
+    enable_miscue, enable_prosody = True, True
+    config_json = {
+        "GradingSystem": "HundredMark",
+        "Granularity": "Phoneme",
+        "Dimension": "Comprehensive",
+        "ScenarioId": "",  # "" is the default scenario or ask product team for a customized one
+        "EnableMiscue": enable_miscue,
+        "EnableProsodyAssessment": enable_prosody,
+        "NBestPhonemeCount": 0,  # > 0 to enable "spoken phoneme" mode, 0 to disable
+    }
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(json_string=json.dumps(config_json))
+    pronunciation_config.reference_text = reference_text
+
+    # Create a speech recognizer using a file as audio input.
+    language = 'en-US'
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
+    # Apply pronunciation assessment config to speech recognizer
+    pronunciation_config.apply_to(speech_recognizer)
+
+    result = speech_recognizer.recognize_once_async().get()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print('pronunciation assessment for: {}'.format(result.text))
+        pronunciation_result = json.loads(result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult))
+        print('assessment results:\n{}'.format(json.dumps(pronunciation_result, indent=4)))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized")
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+
+
+def pronunciation_assessment_with_content_assessment():
+    """Performs content assessment asynchronously with input from an audio file.
+        See more information at https://aka.ms/csspeech/pa"""
+
+    # Create an instance of a speech config with specified subscription key and service region.
+    # Replace with your own subscription key and service region (e.g., "westus").
+    # Note: The sample is for en-US language.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Generally, the waveform should longer than 20s and the content should be more than 3 sentences.
+    audio_config = speechsdk.audio.AudioConfig(filename=seasonsfilename)
+
+    # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    topic = "the season of the fall"
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
+        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
+        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
+        enable_miscue=False)
+    pronunciation_config.enable_prosody_assessment()
+    pronunciation_config.enable_content_assessment_with_topic(topic)
+
+    # Create a speech recognizer using a file as audio input.
+    language = 'en-US'
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, language=language, audio_config=audio_config)
+    # Apply pronunciation assessment config to speech recognizer
+    pronunciation_config.apply_to(speech_recognizer)
+
+    done = False
+    pron_results = []
+    recognized_text = ""
+
+    def stop_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print("CLOSING on {}".format(evt))
+        nonlocal done
+        done = True
+
+    def recognized(evt):
+        nonlocal pron_results, recognized_text
+        if (evt.result.reason == speechsdk.ResultReason.RecognizedSpeech or
+                evt.result.reason == speechsdk.ResultReason.NoMatch):
+            pron_results.append(speechsdk.PronunciationAssessmentResult(evt.result))
+            if evt.result.text.strip().rstrip(".") != "":
+                print(f"Recognizing: {evt.result.text}")
+                recognized_text += " " + evt.result.text.strip()
+
+    # Connect callbacks to the events fired by the speech recognizer
+    speech_recognizer.recognized.connect(recognized)
+    speech_recognizer.session_started.connect(lambda evt: print("SESSION STARTED: {}".format(evt)))
+    speech_recognizer.session_stopped.connect(lambda evt: print("SESSION STOPPED {}".format(evt)))
+    speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
+    # Stop continuous recognition on either session stopped or canceled events
+    speech_recognizer.session_stopped.connect(stop_cb)
+    speech_recognizer.canceled.connect(stop_cb)
+
+    # Start continuous pronunciation assessment
+    speech_recognizer.start_continuous_recognition()
+    while not done:
+        time.sleep(.5)
+    speech_recognizer.stop_continuous_recognition()
+
+    # Content assessment result is in the last pronunciation assessment block
+    assert pron_results[-1].content_assessment_result is not None
+    content_result = pron_results[-1].content_assessment_result
+    print(f"Content Assessment for: {recognized_text.strip()}")
+    print("Content Assessment results:\n"
+          f"\tGrammar score: {content_result.grammar_score:.1f}\n"
+          f"\tVocabulary score: {content_result.vocabulary_score:.1f}\n"
+          f"\tTopic score: {content_result.topic_score:.1f}")

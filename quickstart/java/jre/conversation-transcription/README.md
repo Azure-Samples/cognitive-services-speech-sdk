@@ -1,6 +1,6 @@
 # Quickstart: Transcribe conversation from a file input stream in Java on Windows, macOS, or Linux
 
-This sample demonstrates how to enroll participant's voice signatures and transcribe conversation with 2 participants with the Speech SDK for Java on Windows, macOS or Linux.
+This sample demonstrates how to transcribe conversation with the Speech SDK for Java on Windows, macOS or Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-conversation-transcription) on the SDK documentation page which describes details about conversation transcription service.
 
 > **Note:**
@@ -37,7 +37,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 > Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre).
 
-* **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
+* **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * Edit the `Main` source:

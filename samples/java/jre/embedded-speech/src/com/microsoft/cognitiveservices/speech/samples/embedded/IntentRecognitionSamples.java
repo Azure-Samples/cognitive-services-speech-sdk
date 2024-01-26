@@ -31,7 +31,7 @@ public class IntentRecognitionSamples
 
         // Make the keyword optional (surround with [ and ] in the pattern string)
         // in case the pattern matching model is used without keyword recognition.
-        String patternKeywordOptional = "[" + Settings.getKeywordPhrase() + "][,]";
+        String patternKeywordOptional = "[" + Settings.getKeywordPhrase() + "]";
 
         // Specify some intents to add. Example inputs:
         // - "Turn on the radio."
@@ -174,7 +174,7 @@ public class IntentRecognitionSamples
             {
                 // NoMatch occurs when no speech was recognized.
                 NoMatchReason reason = NoMatchDetails.fromResult(e.getResult()).getReason();
-                System.out.println("NOMATCH: Reason=" + reason);
+                System.out.println("NO MATCH: Reason=" + reason);
             }
         });
 

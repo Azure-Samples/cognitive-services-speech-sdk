@@ -18,6 +18,10 @@ public class SpeechSynthesisSamples
     {
         // Creates an instance of an embedded speech config.
         EmbeddedSpeechConfig speechConfig = Settings.createEmbeddedSpeechConfig();
+        if (speechConfig == null)
+        {
+            return;
+        }
 
         // Creates a speech synthesizer.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null);

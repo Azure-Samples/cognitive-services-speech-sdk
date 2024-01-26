@@ -28,7 +28,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Make the keyword optional (surround with [ and ] in the pattern string)
             // in case the pattern matching model is used without keyword recognition.
-            string patternKeywordOptional = "[" + Settings.GetKeywordPhrase() + "][,]";
+            string patternKeywordOptional = "[" + Settings.GetKeywordPhrase() + "]";
 
             // Specify some intents to add. Example inputs:
             // - "Turn on the radio."
@@ -175,7 +175,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     // NoMatch occurs when no speech was recognized.
                     var reason = NoMatchDetails.FromResult(e.Result).Reason;
-                    Console.WriteLine($"NOMATCH: Reason={reason}");
+                    Console.WriteLine($"NO MATCH: Reason={reason}");
                 }
             };
 

@@ -108,8 +108,11 @@
                         <option value="speechRecognizerContinuous">Continuous speech-to-text</option>
                         <option value="intentRecognizerRecognizeOnce">Single-shot intent recognition</option>
                         <option value="translationRecognizerContinuous">Continuous translation</option>
-                        <option value="pronunciationAssessmentOnce">Single-shot pronunciation assessment</option>
-                        <option value="pronunciationAssessmentContinuous">Continuous pronunciation assessment</option>
+                        <option value="pronunciationAssessmentOnce">pronunciation assessment Single-shot</option>
+                        <option value="pronunciationAssessmentContinuous">pronunciation assessment Continuous</option>
+                        <option value="pronunciationAssessmentContinuousStream">pronunciation assessment stream Continuous</option>
+                        <option value="pronunciationAssessmentConfiguredWithJson">pronunciation assessment configured with json</option>
+                        <option value="pronunciationAssessmentWithContentAssessment">pronunciation assessment with content assessment</option>
                     </select>
                 </td>
             </tr>
@@ -144,7 +147,7 @@
                         <option value="en-CA-ClaraNeural">English - CA</option>
                         <option value="en-GB-NoahNeural">English - GB</option>
                         <option value="en-IN-NeerjaNeural">English - IN</option>
-                        <option value="en-US-AmberNeural">English - US</option>
+                        <option value="en-US-AvaNeural">English - US</option>
                         <option value="es-ES-ElviraNeural">Spanish - ES</option>
                         <option value="es-MX-LibertoNeural">Spanish - MX</option>
                         <option value="fi-FI-HarriNeural">Finnish - FI</option>
@@ -187,6 +190,18 @@
                         size="60"
                         value=""
                         placeholder="optional: semicolon-delimited list;of;words">
+                </td>
+            </tr>
+            <tr id="contentAssessmentTopicTextRow">
+                <td align="right">
+                    Topic:
+                </td>
+                <td>
+                    <input id="topic"
+                        type="text"
+                        size="60"
+                        value=""
+                        placeholder="topic.">
                 </td>
             </tr>
             <tr id="pronunciationAssessmentReferenceTextRow">
@@ -285,7 +300,9 @@
         var audioFile;
         var microphoneId;
         var referenceText;
+        var topic;
         var pronunciationAssessmentResults;
+        var contentResults;
 
         var thingsToDisableDuringSession;
 
@@ -309,6 +326,7 @@
             statusDiv.innerHTML = "";
             useDetailedResults = document.querySelector('input[name="formatOption"]:checked').value === "Detailed";
             pronunciationAssessmentResults = [];
+            contentResults = [];
         }
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -332,6 +350,7 @@
             formatSimpleRadio = document.getElementById('formatSimpleRadio');
             formatDetailedRadio = document.getElementById('formatDetailedRadio');
             referenceText = document.getElementById('referenceText');
+            topic = document.getElementById('topic');
 
             thingsToDisableDuringSession = [
                 key,
@@ -352,8 +371,11 @@
                     switch (scenarioSelection.value) {
                         case 'speechRecognizerRecognizeOnce':
                         case 'intentRecognizerRecognizeOnce':
+                        case 'pronunciationAssessmentConfiguredWithJson':
                         case 'pronunciationAssessmentOnce': return 'recognizeOnceAsync()';
                         case 'speechRecognizerContinuous': 
+                        case 'pronunciationAssessmentContinuousStream': 
+                        case 'pronunciationAssessmentWithContentAssessment':
                         case 'pronunciationAssessmentContinuous': return 'startContinuousRecognitionAsync()';
                         case 'translationRecognizerContinuous': return 'startContinuousTranslation()';
                     }
@@ -374,7 +396,11 @@
                     scenarioSelection.value == 'translationRecognizerContinuous' ? '' : 'none';
                 
                 document.getElementById('pronunciationAssessmentReferenceTextRow').style.display =
-                    scenarioSelection.value.includes('pronunciation') ? '' : 'none';
+                    scenarioSelection.value.includes('pronunciation') 
+                    && scenarioSelection.value != 'pronunciationAssessmentWithContentAssessment' ? '' : 'none';
+
+                document.getElementById('contentAssessmentTopicTextRow').style.display =
+                    scenarioSelection.value == 'pronunciationAssessmentWithContentAssessment' ? '' : 'none';
             }
 
             scenarioSelection.addEventListener("change", function () {
@@ -401,6 +427,15 @@
                         break;
                     case 'pronunciationAssessmentContinuous':
                         doContinuousPronunciationAssessment();
+                        break;
+                    case 'pronunciationAssessmentContinuousStream':
+                        doContinuousPronunciationAssessmentFromStream();
+                        break;
+                    case 'pronunciationAssessmentConfiguredWithJson':
+                        pronunciationAssessmentConfiguredWithJson();
+                        break;
+                    case 'pronunciationAssessmentWithContentAssessment':
+                        pronunciationAssessmentWithContentAssessment();
                         break;
                 }
             });
@@ -500,6 +535,30 @@
 
     <!-- Configuration and setup common to SDK objects, including events -->
     <script>
+        function getAudioStream(audioFile, cb) {
+            var fr = new FileReader();
+            fr.readAsArrayBuffer(audioFile);
+            fr.addEventListener("loadend", (e) => {
+                var buf = e.target.result;
+                cb(buf);
+            }, false);
+        }
+
+        function getAudioConfigFromStream() {
+            if (audioFile) {
+                let audioFormat = SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1);
+                let audioStream = SpeechSDK.AudioInputStream.createPushStream();
+                getAudioStream(audioFile, (b) => {
+                    audioStream.write(b.slice());
+                    audioStream.close();
+                });
+                return SpeechSDK.AudioConfig.fromStreamInput(audioStream, audioFormat);
+            } else if (inputSourceFileRadio.checked) {
+                alert('Please choose a file when selecting file input as your audio source.');
+                return;
+            }
+        }
+
         function getAudioConfig() {
             // If an audio file was specified, use it. Otherwise, use the microphone.
             // Depending on browser security settings, the user may be prompted to allow microphone use. Using
@@ -540,7 +599,7 @@
             // Defines the language(s) that speech should be translated to.
             // Multiple languages can be specified for text translation and will be returned in a map.
             if (sdkConfigType == SpeechSDK.SpeechTranslationConfig) {
-                speechConfig.addTargetLanguage(languageTargetOptions.value.split("(")[1].substring(0, 5));
+                speechConfig.addTargetLanguage(languageTargetOptions.value.substring(0, 5));
             }
 
             speechConfig.speechRecognitionLanguage = languageOptions.value;
@@ -551,6 +610,19 @@
             var pronunciationAssessmentConfig = new SpeechSDK.PronunciationAssessmentConfig(referenceText.value,
                 SpeechSDK.PronunciationAssessmentGradingSystem.HundredMark,
                 SpeechSDK.PronunciationAssessmentGranularity.Word, true);
+            pronunciationAssessmentConfig.enableProsodyAssessment = true;
+            return pronunciationAssessmentConfig;
+        }
+
+        function getPronunciationAssessmentConfigFromJson() {
+            var pronunciationAssessmentConfig = new SpeechSDK.PronunciationAssessmentConfig.fromJSON(
+                "{\"GradingSystem\": \"HundredMark\", \
+                \"Granularity\": \"Phoneme\", \
+                \"EnableMiscue\": \"True\", \
+                \"EnableProsodyAssessment\": \"True\", \
+                \"ScenarioId\": \"[scenario ID will be assigned by product team]\"}"
+            );
+            pronunciationAssessmentConfig.referenceText = referenceText.value;
             return pronunciationAssessmentConfig;
         }
 
@@ -610,7 +682,7 @@
                         var displayText = detailedResultJson['DisplayText'];
                         phraseDiv.innerHTML += `Detailed result for "${displayText}":\r\n`
                         + `${JSON.stringify(detailedResultJson, null, 2)}\r\n`;
-                    } else if (result.text) {
+                    } else if (result.text && result.text != ".") {
                         phraseDiv.innerHTML += `${result.text}\r\n`;
                     }
 
@@ -630,11 +702,21 @@
 
                     if (scenarioSelection.value.includes('pronunciation')) {
                         var pronunciationAssessmentResult = SpeechSDK.PronunciationAssessmentResult.fromResult(result);
-                        phraseDiv.innerHTML += 
-                        `[Pronunciation result] Accuracy: ${pronunciationAssessmentResult.accuracyScore}; 
-                       Fluency: ${pronunciationAssessmentResult.fluencyScore};
-                       Completeness: ${pronunciationAssessmentResult.completenessScore}.\n`;
-                        pronunciationAssessmentResults.push(pronunciationAssessmentResult);
+                        if (pronunciationAssessmentResult.detailResult.Display != '.') {
+                            phraseDiv.innerHTML += 
+                            `[Pronunciation result]
+                           Accuracy: ${pronunciationAssessmentResult.accuracyScore}.
+                           Fluency: ${pronunciationAssessmentResult.fluencyScore}.
+                           Prosody: ${pronunciationAssessmentResult.prosodyScore}.
+                           ${referenceText.value != '' ? `Completeness: ${pronunciationAssessmentResult.completenessScore}.` : ``}\n`;
+                            pronunciationAssessmentResults.push(pronunciationAssessmentResult);
+                        }
+                        
+                    }
+
+                    if (scenarioSelection.value == 'pronunciationAssessmentWithContentAssessment') {
+                        var result = SpeechSDK.PronunciationAssessmentResult.fromResult(result);
+                        contentResults.push(result.contentAssessmentResult);
                     }
                     break;
             }
@@ -654,8 +736,15 @@
         function onSessionStopped(sender, sessionEventArgs) {
             statusDiv.innerHTML += `(sessionStopped) SessionId: ${sessionEventArgs.sessionId}\r\n`;
 
-            if (scenarioSelection.value == 'pronunciationAssessmentContinuous') {
+            if (scenarioSelection.value == 'pronunciationAssessmentContinuous' || 
+                scenarioSelection.value == 'pronunciationAssessmentContinuousStream' ||
+                scenarioSelection.value == 'pronunciationAssessmentWithContentAssessment'
+            ) {
                 calculateOverallPronunciationScore();
+            }
+
+            if (scenarioSelection.value == 'pronunciationAssessmentWithContentAssessment') {
+                getContentResult();
             }
 
             for (const thingToDisableDuringSession of thingsToDisableDuringSession) {
@@ -733,6 +822,8 @@
             var sumDuration = 0;
             var sumAccuracy = 0;
             var sumFluency = 0;
+            var sumProsody = 0;
+            var countProsody = 0;
             for (const result of pronunciationAssessmentResults) {
                 var duration = 0;
                 for (const word of result.detailResult.Words) {
@@ -742,11 +833,14 @@
                 sumDuration += duration;
                 sumAccuracy += duration * result.accuracyScore;
                 sumFluency += duration * result.fluencyScore;
+                sumProsody += result.prosodyScore;
+                countProsody++;
             }
 
             // weighted accuracy and fluency scores
             var accuracy = sumAccuracy / sumDuration;
             var fluency = sumFluency / sumDuration;
+            var prosody = sumProsody / countProsody;
 
             var diff = new difflib.SequenceMatcher(null, referenceWords, recognizedWords);
             diffWordsNum = 0;
@@ -759,9 +853,18 @@
             var completeness = (1 - diffWordsNum / referenceWords.length) * 100;
 
             phraseDiv.innerHTML +=
-                `[Overall Pronunciation result] Accuracy: ${accuracy}; 
-                       Fluency: ${fluency};
-                       Completeness: ${completeness}.\n`;
+                `[Overall Pronunciation result]
+                        Accuracy: ${accuracy}.
+                        Fluency: ${fluency}.
+                        Prosody: ${prosody}.
+                        ${referenceText.value != '' ? `Completeness: ${completeness}.` : ``}\n`;
+        }
+
+        function getContentResult() {
+            phraseDiv.innerHTML += `[content assessment result]
+                \tvocabulary score: ${contentResults[contentResults.length-1].vocabularyScore}.
+                \tgrammar score: ${contentResults[contentResults.length-1].grammarScore}.
+                \ttopic score: ${contentResults[contentResults.length-1].topicScore}.`
         }
     </script>
 
@@ -911,6 +1014,82 @@
             var audioConfig = getAudioConfig();
             var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
             var pronunciationAssessmentConfig = getPronunciationAssessmentConfig();
+            if (!speechConfig) return;
+
+            // Create the SpeechRecognizer and set up common event handlers and PhraseList data
+            reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+            applyCommonConfigurationTo(reco);
+
+            // Apply pronunciation assessment config to recognizer.
+            pronunciationAssessmentConfig.applyTo(reco);
+
+            // Start the continuous recognition. Note that, in this continuous scenario, activity is purely event-
+            // driven, as use of continuation (as is in the single-shot sample) isn't applicable when there's not a
+            // single result.
+            reco.startContinuousRecognitionAsync();
+        }
+
+        function doContinuousPronunciationAssessmentFromStream() {
+            resetUiForScenarioStart();
+
+            var audioConfig = getAudioConfigFromStream();
+            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+            var pronunciationAssessmentConfig = getPronunciationAssessmentConfig();
+            if (!speechConfig) return;
+
+            // Create the SpeechRecognizer and set up common event handlers and PhraseList data
+            reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+            applyCommonConfigurationTo(reco);
+
+            // Apply pronunciation assessment config to recognizer.
+            pronunciationAssessmentConfig.applyTo(reco);
+
+            // Start the continuous recognition. Note that, in this continuous scenario, activity is purely event-
+            // driven, as use of continuation (as is in the single-shot sample) isn't applicable when there's not a
+            // single result.
+            reco.startContinuousRecognitionAsync();
+        }
+
+        function pronunciationAssessmentConfiguredWithJson() {
+            resetUiForScenarioStart();
+
+            var audioConfig = getAudioConfig();
+            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+            var pronunciationAssessmentConfig = getPronunciationAssessmentConfigFromJson();
+            if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
+
+            // Create the SpeechRecognizer and set up common event handlers and PhraseList data
+            reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+            applyCommonConfigurationTo(reco);
+
+            // Apply pronunciation assessment config to recognizer.
+            pronunciationAssessmentConfig.applyTo(reco);
+
+            // Note: in this scenario sample, the 'recognized' event is not being set to instead demonstrate
+            // continuation on the 'recognizeOnceAsync' call. 'recognized' can be set in much the same way as
+            // 'recognizing' if an event-driven approach is preferable.
+            reco.recognized = undefined;
+
+            // Note: this scenario sample demonstrates result handling via continuation on the recognizeOnceAsync call.
+            // The 'recognized' event handler can be used in a similar fashion.
+            reco.recognizeOnceAsync(
+                function (successfulResult) {
+                    onRecognizedResult(successfulResult);
+                },
+                function (err) {
+                    window.console.log(err);
+                    phraseDiv.innerHTML += "ERROR: " + err;
+                }
+            );
+        }
+
+        function pronunciationAssessmentWithContentAssessment() {
+            resetUiForScenarioStart();
+
+            var audioConfig = getAudioConfig();
+            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+            var pronunciationAssessmentConfig = getPronunciationAssessmentConfig();
+            pronunciationAssessmentConfig.enableContentAssessmentWithTopic(topic.value)
             if (!speechConfig) return;
 
             // Create the SpeechRecognizer and set up common event handlers and PhraseList data

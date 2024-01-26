@@ -94,8 +94,8 @@
       <Link>translation_samples.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\..\..\sharedcontent\console\remote_conversation_samples.cs">
-      <Link>remote_conversation_samples.cs</Link>
+    <Compile Include="..\..\..\sharedcontent\console\remote_meeting_samples.cs">
+      <Link>remote_meeting_samples.cs</Link>
     </Compile>
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_language_id_samples.cs">
       <Link>speech_recognition_with_language_id_samples.cs</Link>
@@ -111,6 +111,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\..\sharedcontent\console\pronunciation_assessment_fall.wav">
+      <Link>pronunciation_assessment_fall.wav</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.wav">
       <Link>whatstheweatherlike.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -137,8 +141,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.25.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.25.0" />
+    <PackageReference Include="DiffPlex">
+      <Version>1.7.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.34.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.34.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.34.0" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
