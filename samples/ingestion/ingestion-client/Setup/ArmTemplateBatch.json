@@ -136,6 +136,13 @@
                 "description": "A value indicating whether diarization (speaker separation) is requested."
             }
         },
+        "Channels": {
+            "defaultValue": "1",
+            "type": "int",
+            "metadata": {
+                "description": "A value indicating whether multiple channels are processed. 0 - Mono, 1 - Stereo ."
+            }
+        },
         "AddWordLevelTimestamps": {
             "defaultValue": false,
             "type": "bool",
@@ -150,35 +157,11 @@
                 "description": "The key for the Text Analytics subscription."
             }
         },
-        "TextAnalyticsRegion": {
-            "defaultValue": "None",
+        "TextAnalyticsEndpoint": {
+            "defaultValue": "",
             "type": "String",
-            "allowedValues": [
-                "None",
-                "centralus",
-                "eastus",
-                "eastus2",
-                "northcentralus",
-                "southcentralus",
-                "westcentralus",
-                "westus",
-                "westus2",
-                "canadacentral",
-                "brazilsouth",
-                "eastasia",
-                "southeastasia",
-                "australiaeast",
-                "centralindia",
-                "japaneast",
-                "japanwest",
-                "koreacentral",
-                "northeurope",
-                "westeurope",
-                "francecentral",
-                "uksouth"
-            ],
             "metadata": {
-                "description": "The region the Text Analytics subscription is associated with. If none is selected, no text analysis will be performed."
+                "description": "The endpoint the Text Analytics subscription is associated with (format should be like https://{resourceName}.cognitiveservices.azure.com or https://{region}.api.cognitive.microsoft.com or similar). If empty, no text analysis will be performed."
             }
         },
         "SentimentAnalysis": {
@@ -194,15 +177,15 @@
             }
         },
         "PiiRedaction": {
-          "defaultValue": "None",
-          "type": "String",
-          "allowedValues": [
-              "None",
-              "UtteranceAndAudioLevel"
-          ],
-          "metadata": {
-              "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
-          }
+            "defaultValue": "None",
+            "type": "String",
+            "allowedValues": [
+                "None",
+                "UtteranceAndAudioLevel"
+            ],
+            "metadata": {
+                "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
+            }
         },
         "SqlAdministratorLogin": {
             "type": "string",
@@ -227,7 +210,7 @@
         }
     },
     "variables": {
-        "Version": "v2.0.5",
+        "Version": "v2.0.12",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -844,6 +827,7 @@
             },
             "properties": {
                 "AddDiarization": "[parameters('AddDiarization')]",
+                "Channels": "[parameters('Channels')]",
                 "AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",
                 "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
@@ -932,7 +916,7 @@
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
-                "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
+                "TextAnalyticsEndpoint": "[parameters('TextAnalyticsEndpoint')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
                 "WEBSITE_RUN_FROM_PACKAGE": "[variables('FetchTranscriptionBinary')]",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
@@ -942,8 +926,8 @@
                 "PiiCategories": "[variables('PiiCategories')]",
                 "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
-                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]",
-                "ConversationSummarizationOptions":"[variables('ConversationSummarizationOptions')]"
+                "ConversationPiiSetting": "[variables('ConversationPiiRedaction')]",
+                "ConversationSummarizationOptions": "[variables('ConversationSummarizationOptions')]"
             }
         }
     ],
