@@ -416,7 +416,7 @@ function handleUserQuery(userQuery) {
                     chunkString = previousChunkString + chunkString
                 }
 
-                if (!chunkString.endsWith('}}]}\n\n') && !chunkString.endsWith('[DONE]\n\n')) {
+                if (!chunkString.endsWith('}\n\n') && !chunkString.endsWith('[DONE]\n\n')) {
                     // This is a incomplete chunk, read the next chunk
                     return read(chunkString)
                 }
