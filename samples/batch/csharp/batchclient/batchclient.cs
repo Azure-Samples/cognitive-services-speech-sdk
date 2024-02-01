@@ -33,7 +33,7 @@ namespace BatchClient
         private BatchClient(HttpClient client)
         {
             this.client = client;
-            speechToTextBasePath = "speechtotext/v3.1/";
+            speechToTextBasePath = "speechtotext/v3.2-preview.2/";
         }
 
         public static BatchClient CreateApiV3Client(string key, string hostName)

@@ -132,7 +132,7 @@ def transcribe():
     # configure API key authorization: subscription_key
     configuration = swagger_client.Configuration()
     configuration.api_key["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY
-    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.1"
+    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.2-preview.2"
 
     # create the client object and authenticate
     client = swagger_client.ApiClient(configuration)
