@@ -46,7 +46,7 @@ def speech_synthesis_to_wave_file(text: str, output_file_path: str, speaker_prof
 
     ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' " \
            "xmlns:mstts='http://www.w3.org/2001/mstts'>" \
-           "<voice name='PhoenixV2Neural'>" \
+           "<voice name='DragonLatestNeural'>" \
            "<mstts:ttsembedding speakerProfileId='%s'/>" \
            "<mstts:express-as style='Prompt'>" \
            "<lang xml:lang='en-US'> %s </lang>" \
