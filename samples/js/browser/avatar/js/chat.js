@@ -191,9 +191,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // start avatar, establish WebRTC connection
     avatarSynthesizer.startAvatarAsync(peerConnection).then((r) => {
         if (r.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-            console.log("[" + (new Date()).toISOString() + "] Avatar started.")
+            console.log("[" + (new Date()).toISOString() + "] Avatar started. Result ID: " + r.resultId)
         } else {
-            console.log("[" + (new Date()).toISOString() + "] Unable to start avatar.")
+            console.log("[" + (new Date()).toISOString() + "] Unable to start avatar. Result ID: " + r.resultId)
             if (r.reason === SpeechSDK.ResultReason.Canceled) {
                 let cancellationDetails = SpeechSDK.CancellationDetails.fromResult(r)
                 if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
@@ -291,10 +291,10 @@ function speakNext(text, endingSilenceMs = 0) {
     avatarSynthesizer.speakSsmlAsync(ssml).then(
         (result) => {
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-                console.log(`Speech synthesized to speaker for text [ ${text} ]`)
+                console.log(`Speech synthesized to speaker for text [ ${text} ]. Result ID: ${result.resultId}`)
                 lastSpeakTime = new Date()
             } else {
-                console.log(`Error occurred while speaking the SSML.`)
+                console.log(`Error occurred while speaking the SSML. Result ID: ${result.resultId}`)
             }
 
             if (spokenTextQueue.length > 0) {
