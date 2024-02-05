@@ -2,20 +2,14 @@
 // Licensed under the MIT license.
 
 // pull in the required packages.
-var sdk = require("microsoft-cognitiveservices-speech-sdk");
-const filePushStream = require("./filePushStream");
-const _ = require('lodash') ;
-const forEach = require('lodash.foreach');
-const Segment = require('segment');
-var difflib = require('difflib');
-
-
-(function() {
-"use strict";
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as filePushStream from "./filePushStream.js";
+import * as Segment from "segment";
+import * as difflib from "difflib";
+import _ from "lodash";
 
 // pronunciation assessment with audio streaming and continue mode
-module.exports = {
-  main: function(settings) {
+export const main = (settings) => {
 
     // now create the audio-config pointing to our stream and
     // the speech config specifying the language.
@@ -33,6 +27,7 @@ module.exports = {
         sdk.PronunciationAssessmentGranularity.Phoneme,
         true
     );
+    pronunciationAssessmentConfig.enableProsodyAssessment = true;
 
     // setting the recognition language to English.
     speechConfig.speechRecognitionLanguage = settings.language;
@@ -40,17 +35,19 @@ module.exports = {
     // create the speech recognizer.
     var reco = new sdk.SpeechRecognizer(speechConfig, audioConfig);
     pronunciationAssessmentConfig.applyTo(reco);
-    
+
     const scoreNumber = {
         accuracyScore: 0,
         fluencyScore: 0,
         compScore: 0,
+        prosodyScore: 0,
     };
     const allWords = [];
     var currentText = [];
     var startOffset = 0;
     var recognizedWords = [];
     var fluencyScores = [];
+    var prosodyScores = [];
     var durations = [];
     var jo = {};
         
@@ -73,15 +70,17 @@ module.exports = {
         console.log(" Accuracy score: ", pronunciation_result.accuracyScore, '\n',
             "pronunciation score: ", pronunciation_result.pronunciationScore, '\n',
             "completeness score : ", pronunciation_result.completenessScore, '\n',
-            "fluency score: ", pronunciation_result.fluencyScore
+            "fluency score: ", pronunciation_result.fluencyScore, '\n',
+            "prosody score: ", pronunciation_result.prosodyScore
         );
 
-        jo = eval("(" + e.result.properties.getProperty(sdk.PropertyId.SpeechServiceResponse_JsonResult) + ")");
+        jo = JSON.parse(e.result.properties.getProperty(sdk.PropertyId.SpeechServiceResponse_JsonResult));
         const nb = jo["NBest"][0];
         startOffset = nb.Words[0].Offset;
         const localtext = _.map(nb.Words, (item) => item.Word.toLowerCase());
         currentText = currentText.concat(localtext);
         fluencyScores.push(nb.PronunciationAssessment.FluencyScore);
+        prosodyScores.push(nb.PronunciationAssessment.ProsodyScore);
         const isSucceeded = jo.RecognitionStatus === 'Success';
         const nBestWords = jo.NBest[0].Words;
         const durationList = [];
@@ -129,32 +128,32 @@ module.exports = {
             if (d[0] == "insert" || d[0] == "replace") {
                 if (["zh-cn"].includes(settings.language.toLowerCase())) {
                     for (let j = d[3], count = 0; j < d[4]; count++) {
-                    let len = 0;
-                    let bfind = false;
-                    _.map(allWords, (item, index) => {
-                        if (
-                        (len == j ||
-                            (index + 1 < allWords.length &&
-                            allWords[index].Word.length > 1 &&
-                            j > len &&
-                            j < len + allWords[index + 1].Word.length)) &&
-                        !bfind
-                        ) {
-                        const wordNew = _.cloneDeep(allWords[index]);
-                        if (
-                            allWords &&
-                            allWords.length > 0 &&
-                            allWords[index].PronunciationAssessment.ErrorType !== "Insertion"
-                        ) {
-                            wordNew.PronunciationAssessment.ErrorType = "Insertion";
-                        }
-                        lastWords.push(wordNew);
-                        bfind = true;
-                        j += allWords[index].Word.length;
-                        }
-                        len = len + item.Word.length;
-                    });
-                }
+                        let len = 0;
+                        let bfind = false;
+                        _.map(allWords, (item, index) => {
+                            if (
+                                (len == j ||
+                                    (index + 1 < allWords.length &&
+                                    allWords[index].Word.length > 1 &&
+                                    j > len &&
+                                    j < len + allWords[index + 1].Word.length)) &&
+                                !bfind
+                            ) {
+                                const wordNew = _.cloneDeep(allWords[index]);
+                                if (
+                                    allWords &&
+                                    allWords.length > 0 &&
+                                    allWords[index].PronunciationAssessment.ErrorType !== "Insertion"
+                                ) {
+                                    wordNew.PronunciationAssessment.ErrorType = "Insertion";
+                                }
+                                lastWords.push(wordNew);
+                                bfind = true;
+                                j += allWords[index].Word.length;
+                            }
+                            len = len + item.Word.length;
+                        });
+                    }
                 } else {
                     for (let j = d[3]; j < d[4]; j++) {
                         if (allWords && allWords.length > 0 && allWords[j].PronunciationAssessment.ErrorType !== "Insertion") {
@@ -214,10 +213,10 @@ module.exports = {
             reference_words = wholelyricsArryRes;
         }
 
-        let recognizedWordsRes = []
+        let recognizedWordsRes = [];
         _.forEach(recognizedWords, (word) => {
             if (word.PronunciationAssessment.ErrorType == "None") {
-                recognizedWordsRes.push(word)
+                recognizedWordsRes.push(word);
             }
         });
         
@@ -243,6 +242,8 @@ module.exports = {
             scoreNumber.fluencyScore = _.sum(sumRes) / _.sum(durations);
         }
 
+        scoreNumber.prosodyScore = _.sum(prosodyScores) / prosodyScores.length;
+
         const sortScore = Object.keys(scoreNumber).sort(function (a, b) {
             return scoreNumber[a] - scoreNumber[b];
         });
@@ -253,17 +254,18 @@ module.exports = {
             scoreNumber.pronScore = Number(
                 (
                     scoreNumber[sortScore["0"]] * 0.4 +
-                    scoreNumber[sortScore["1"]] * 0.4 +
-                    scoreNumber[sortScore["2"]] * 0.2
+                    scoreNumber[sortScore["1"]] * 0.2 +
+                    scoreNumber[sortScore["2"]] * 0.2 +
+                    scoreNumber[sortScore["3"]] * 0.2
                 ).toFixed(0)
             );
         } else {
             scoreNumber.pronScore = Number(
-                (scoreNumber.accuracyScore * 0.5 + scoreNumber.fluencyScore * 0.5).toFixed(0)
+                (scoreNumber.accuracyScore * 0.6 + scoreNumber.fluencyScore * 0.2 + scoreNumber.prosodyScore * 0.2).toFixed(0)
             );
         }
 
-        console.log("    Paragraph accuracy score: ", scoreNumber.accuracyScore, ", completeness score: ", scoreNumber.compScore, ", fluency score: ", scoreNumber.fluencyScore);        
+        console.log("    Paragraph accuracy score: ", scoreNumber.accuracyScore, ", completeness score: ", scoreNumber.compScore, ", fluency score: ", scoreNumber.fluencyScore, ", prosody score: ", scoreNumber.prosodyScore);        
 
         _.forEach(lastWords, (word, ind) => {
             console.log("    ", ind + 1, ": word: ", word.Word, "\taccuracy score: ", word.PronunciationAssessment.AccuracyScore, "\terror type: ", word.PronunciationAssessment.ErrorType, ";");
@@ -297,8 +299,4 @@ module.exports = {
     };
 
     reco.startContinuousRecognitionAsync();
-        
-  }
-
 }
-}());

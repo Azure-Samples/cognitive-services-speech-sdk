@@ -68,7 +68,7 @@ namespace MicrosoftSpeechSDKSamples
         private static readonly string EmbeddedSpeechTranslationModelPath = "YourEmbeddedSpeechTranslationModelPath"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH
 
         // Name of the embedded speech translation model to be used for translation.
-        // For example: "Microsoft Speech Translator Multi-to-en-US Model V1"
+        // For example: "Microsoft Speech Translator Many-to-English Model V2"
         private static readonly string EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME
 
         // Decryption key of the (encrypted) embedded speech translation model.
@@ -92,6 +92,8 @@ namespace MicrosoftSpeechSDKSamples
         // Get names and other properties of example files included with the sample project.
         public static string GetSpeechRawAudioFileName() { return "data/speech_test.raw"; }
         public static string GetSpeechWavAudioFileName() { return "data/speech_test.wav"; }
+        public static string GetPerfTestAudioFileName() { return "data/performance_test.wav"; }
+
         // For more information about keyword recognition and models, see
         // https://docs.microsoft.com/azure/cognitive-services/speech-service/keyword-recognition-overview
         public static string GetKeywordModelFileName() { return "data/keyword_computer.table"; }

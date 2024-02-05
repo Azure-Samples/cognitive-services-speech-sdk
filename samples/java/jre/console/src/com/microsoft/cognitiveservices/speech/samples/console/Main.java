@@ -56,12 +56,14 @@ public class Main {
         System.out.println("39. Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.");
         System.out.println("40. Pronunciation assessment with microphone input.");
         System.out.println("41. Pronunciation assessment with stream input.");
-        System.out.println("42. Speech synthesis to audio and SRT files.");
-        System.out.println("43. Recognize once from file, with at-start language detection.");
-        System.out.println("44. Continuous speech recognition from file, with at-start language detection.");
-        System.out.println("45. Continuous speech recognition from file, with at-start language detection with custom model.");
-        System.out.println("46. Continuous speech recognition from file, with continuous language detection with custom models.");
-        System.out.println("47. Pronunciation assessment configured with JSON.");
+        System.out.println("42. Pronunciation assessment continuous with file.");
+        System.out.println("43. Pronunciation assessment configured with JSON.");
+        System.out.println("44. Pronunciation assessment with content assessment.");
+        System.out.println("45. Speech synthesis to audio and SRT files.");
+        System.out.println("46. Recognize once from file, with at-start language detection.");
+        System.out.println("47. Continuous speech recognition from file, with at-start language detection.");
+        System.out.println("48. Continuous speech recognition from file, with at-start language detection with custom model.");
+        System.out.println("49. Continuous speech recognition from file, with continuous language detection with custom models.");
 
         System.out.print(prompt);
 
@@ -195,22 +197,28 @@ public class Main {
                     SpeechRecognitionSamples.pronunciationAssessmentWithPushStream();
                     break;
                 case "42":
-                    SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
+                    SpeechRecognitionSamples.pronunciationAssessmentContinuousWithFile();;
                     break;
                 case "43":
-                    SpeechRecognitionSamples.recognizeOnceFromFileWithAtStartLanguageDetection();
+                    SpeechRecognitionSamples.pronunciationAssessmentConfiguredWithJson();
                     break;
                 case "44":
-                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetection();
+                    SpeechRecognitionSamples.pronunciationAssessmentWithContentAssessment();
                     break;
                 case "45":
-                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels();
+                    SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
                     break;
                 case "46":
-                    SpeechRecognitionSamples.continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels();
+                    SpeechRecognitionSamples.recognizeOnceFromFileWithAtStartLanguageDetection();
                     break;
                 case "47":
-                    SpeechRecognitionSamples.pronunciationAssessmentConfiguredWithJson();
+                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetection();
+                    break;
+                case "48":
+                    SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels();
+                    break;
+                case "49":
+                    SpeechRecognitionSamples.continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels();
                     break;
                 case "0":
                     System.out.println("Exiting...");

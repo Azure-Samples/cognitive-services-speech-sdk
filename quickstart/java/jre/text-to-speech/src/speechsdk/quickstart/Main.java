@@ -30,7 +30,7 @@ public class Main {
         try (SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion)) {
             // Set the voice name, refer to https://aka.ms/speech/voices/neural for full
             // list.
-            config.setSpeechSynthesisVoiceName("en-US-AriaNeural");
+            config.setSpeechSynthesisVoiceName("en-US-AvaNeural");
             try (SpeechSynthesizer synth = new SpeechSynthesizer(config)) {
 
                 assert (config != null);
