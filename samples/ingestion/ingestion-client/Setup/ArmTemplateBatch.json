@@ -1,208 +1,243 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-  "parameters": {
-    "StorageAccount": {
-      "type": "String",
-      "metadata": {
-        "description": "The name of the storage account. It must be unique across all existing storage account names in Azure, between 3 and 24 characters long, and can contain only lowercase letters and numbers."
-      }
+    "parameters":
+    {
+        "StorageAccount":
+        {
+            "type": "String",
+            "metadata":
+            {
+                "description": "The name of the storage account. It must be unique across all existing storage account names in Azure, between 3 and 24 characters long, and can contain only lowercase letters and numbers."
+            }
+        },
+        "Locale":
+        {
+            "defaultValue": "en-US | English (United States)",
+            "type": "String",
+            "allowedValues": [
+                "ar-BH | Arabic (Bahrain)",
+                "ar-EG | Arabic (Egypt)",
+                "ar-SY | Arabic (Syria)",
+                "ca-ES | Catalan",
+                "da-DK | Danish (Denmark)",
+                "de-DE | German (Germany)",
+                "en-AU | English (Australia)",
+                "en-CA | English (Canada)",
+                "en-GB | English (United Kingdom)",
+                "en-IN | English (India)",
+                "en-NZ | English (New Zealand)",
+                "en-US | English (United States)",
+                "es-ES | Spanish (Spain)",
+                "es-MX | Spanish (Mexico)",
+                "fi-FI | Finnish (Finland)",
+                "fr-CA | French (Canada)",
+                "fr-FR | French (France)",
+                "gu-IN | Gujarati (Indian)",
+                "hi-IN | Hindi (India)",
+                "it-IT | Italian (Italy)",
+                "ja-JP | Japanese (Japan)",
+                "ko-KR | Korean (Korea)",
+                "mr-IN | Marathi (India)",
+                "nb-NO | Norwegian (Bokmål)",
+                "nl-NL | Dutch (Netherlands)",
+                "pl-PL | Polish (Poland)",
+                "pt-BR | Portuguese (Brazil)",
+                "pt-PT | Portuguese (Portugal)",
+                "ru-RU | Russian (Russia)",
+                "sv-SE | Swedish (Sweden)",
+                "ta-IN | Tamil (India)",
+                "te-IN | Telugu (India)",
+                "th-TH | Thai (Thailand)",
+                "tr-TR | Turkish (Turkey)",
+                "zh-CN | Chinese (Mandarin, simplified)",
+                "zh-HK | Chinese (Cantonese, Traditional)",
+                "zh-TW | Chinese (Taiwanese Mandarin)"
+            ]
+        },
+        "CustomModelId":
+        {
+            "defaultValue": "",
+            "type": "String",
+            "metadata":
+            {
+                "description": "The id of the custom model for transcription. If empty, the base model will be selected."
+            }
+        },
+        "AzureSpeechServicesKey":
+        {
+            "type": "SecureString",
+            "metadata":
+            {
+                "description": "The key for the Azure Speech Services subscription."
+            }
+        },
+        "AzureSpeechServicesRegion":
+        {
+            "defaultValue": "westus",
+            "type": "String",
+            "allowedValues": [
+                "centralus",
+                "eastus",
+                "eastus2",
+                "northcentralus",
+                "southcentralus",
+                "westcentralus",
+                "westus",
+                "westus2",
+                "canadacentral",
+                "brazilsouth",
+                "eastasia",
+                "southeastasia",
+                "australiaeast",
+                "centralindia",
+                "japaneast",
+                "japanwest",
+                "koreacentral",
+                "northeurope",
+                "westeurope",
+                "francecentral",
+                "uksouth",
+                "usgovarizona",
+                "usgovvirginia"
+            ],
+            "metadata":
+            {
+                "description": "The region the Azure speech services subscription is associated with."
+            }
+        },
+        "CustomEndpoint":
+        {
+            "defaultValue": "",
+            "type": "String",
+            "metadata":
+            {
+                "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
+            }
+        },
+        "ProfanityFilterMode":
+        {
+            "defaultValue": "None",
+            "type": "String",
+            "allowedValues": [
+                "None",
+                "Removed",
+                "Tags",
+                "Masked"
+            ],
+            "metadata":
+            {
+                "description": "The requested profanity filter mode."
+            }
+        },
+        "PunctuationMode":
+        {
+            "defaultValue": "DictatedAndAutomatic",
+            "type": "String",
+            "allowedValues": [
+                "None",
+                "Dictated",
+                "Automatic",
+                "DictatedAndAutomatic"
+            ],
+            "metadata":
+            {
+                "description": "The requested punctuation mode."
+            }
+        },
+        "AddDiarization":
+        {
+            "defaultValue": false,
+            "type": "bool",
+            "metadata":
+            {
+                "description": "A value indicating whether diarization (speaker separation) is requested."
+            }
+        },
+        "AddWordLevelTimestamps":
+        {
+            "defaultValue": false,
+            "type": "bool",
+            "metadata":
+            {
+                "description": "A value indicating whether word level timestamps are requested."
+            }
+        },
+        "TextAnalyticsKey":
+        {
+            "defaultValue": "",
+            "type": "SecureString",
+            "metadata":
+            {
+                "description": "The key for the Text Analytics subscription."
+            }
+        },
+        "TextAnalyticsEndpoint":
+        {
+            "defaultValue": "",
+            "type": "String",
+            "metadata":
+            {
+                "description": "The endpoint the Text Analytics subscription is associated with (format should be like https://{resourceName}.cognitiveservices.azure.com or https://{region}.api.cognitive.microsoft.com or similar). If empty, no text analysis will be performed."
+            }
+        },
+        "SentimentAnalysis":
+        {
+            "defaultValue": "None",
+            "type": "String",
+            "allowedValues": [
+                "None",
+                "UtteranceLevel",
+                "AudioLevel"
+            ],
+            "metadata":
+            {
+                "description": "A value indicating whether sentiment analysis is requested (either per utterance or per audio). Will only be performed if a Text Analytics Key and Region is provided."
+            }
+        },
+        "PiiRedaction":
+        {
+            "defaultValue": "None",
+            "type": "String",
+            "allowedValues": [
+                "None",
+                "UtteranceAndAudioLevel"
+            ],
+            "metadata":
+            {
+                "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
+            }
+        },
+        "SqlAdministratorLogin":
+        {
+            "type": "string",
+            "defaultValue": "",
+            "metadata":
+            {
+                "description": "The administrator username of the SQL Server, which is used to gain insights of the audio with the provided PowerBI scripts. If it is left empty, no SQL server/database will be created."
+            }
+        },
+        "SqlAdministratorLoginPassword":
+        {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata":
+            {
+                "description": "The administrator password of the SQL Server. If it is left empty, no SQL server/database will be created."
+            }
+        },
+        "DeploymentId":
+        {
+            "type": "string",
+            "defaultValue": "[utcNow()]",
+            "metadata":
+            {
+                "description": "Id that will be suffixed to all created resources to identify resources of a certain deployment. Leave as is to use timestamp as deployment id."
+            }
+        }
     },
-    "Locale": {
-      "defaultValue": "en-US | English (United States)",
-      "type": "String",
-      "allowedValues": [
-        "ar-BH | Arabic (Bahrain)",
-        "ar-EG | Arabic (Egypt)",
-        "ar-SY | Arabic (Syria)",
-        "ca-ES | Catalan",
-        "da-DK | Danish (Denmark)",
-        "de-DE | German (Germany)",
-        "en-AU | English (Australia)",
-        "en-CA | English (Canada)",
-        "en-GB | English (United Kingdom)",
-        "en-IN | English (India)",
-        "en-NZ | English (New Zealand)",
-        "en-US | English (United States)",
-        "es-ES | Spanish (Spain)",
-        "es-MX | Spanish (Mexico)",
-        "fi-FI | Finnish (Finland)",
-        "fr-CA | French (Canada)",
-        "fr-FR | French (France)",
-        "gu-IN | Gujarati (Indian)",
-        "hi-IN | Hindi (India)",
-        "it-IT | Italian (Italy)",
-        "ja-JP | Japanese (Japan)",
-        "ko-KR | Korean (Korea)",
-        "mr-IN | Marathi (India)",
-        "nb-NO | Norwegian (Bokmål)",
-        "nl-NL | Dutch (Netherlands)",
-        "pl-PL | Polish (Poland)",
-        "pt-BR | Portuguese (Brazil)",
-        "pt-PT | Portuguese (Portugal)",
-        "ru-RU | Russian (Russia)",
-        "sv-SE | Swedish (Sweden)",
-        "ta-IN | Tamil (India)",
-        "te-IN | Telugu (India)",
-        "th-TH | Thai (Thailand)",
-        "tr-TR | Turkish (Turkey)",
-        "zh-CN | Chinese (Mandarin, simplified)",
-        "zh-HK | Chinese (Cantonese, Traditional)",
-        "zh-TW | Chinese (Taiwanese Mandarin)"
-      ]
-    },
-    "CustomModelId": {
-      "defaultValue": "",
-      "type": "String",
-      "metadata": {
-        "description": "The id of the custom model for transcription. If empty, the base model will be selected."
-      }
-    },
-    "AzureSpeechServicesKey": {
-      "type": "SecureString",
-      "metadata": {
-        "description": "The key for the Azure Speech Services subscription."
-      }
-    },
-    "AzureSpeechServicesRegion": {
-      "defaultValue": "westus",
-      "type": "String",
-      "allowedValues": [
-        "centralus",
-        "eastus",
-        "eastus2",
-        "northcentralus",
-        "southcentralus",
-        "westcentralus",
-        "westus",
-        "westus2",
-        "canadacentral",
-        "brazilsouth",
-        "eastasia",
-        "southeastasia",
-        "australiaeast",
-        "centralindia",
-        "japaneast",
-        "japanwest",
-        "koreacentral",
-        "northeurope",
-        "westeurope",
-        "francecentral",
-        "uksouth",
-        "usgovarizona",
-        "usgovvirginia"
-      ],
-      "metadata": {
-        "description": "The region the Azure speech services subscription is associated with."
-      }
-    },
-    "CustomEndpoint": {
-      "defaultValue": "",
-      "type": "String",
-      "metadata": {
-        "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
-      }
-    },
-    "ProfanityFilterMode": {
-      "defaultValue": "None",
-      "type": "String",
-      "allowedValues": [
-        "None",
-        "Removed",
-        "Tags",
-        "Masked"
-      ],
-      "metadata": {
-        "description": "The requested profanity filter mode."
-      }
-    },
-    "PunctuationMode": {
-      "defaultValue": "DictatedAndAutomatic",
-      "type": "String",
-      "allowedValues": [
-        "None",
-        "Dictated",
-        "Automatic",
-        "DictatedAndAutomatic"
-      ],
-      "metadata": {
-        "description": "The requested punctuation mode."
-      }
-    },
-    "AddDiarization": {
-      "defaultValue": false,
-      "type": "bool",
-      "metadata": {
-        "description": "A value indicating whether diarization (speaker separation) is requested."
-      }
-    },
-    "AddWordLevelTimestamps": {
-      "defaultValue": false,
-      "type": "bool",
-      "metadata": {
-        "description": "A value indicating whether word level timestamps are requested."
-      }
-    },
-    "TextAnalyticsKey": {
-      "defaultValue": "",
-      "type": "SecureString",
-      "metadata": {
-        "description": "The key for the Text Analytics subscription."
-      }
-    },
-    "TextAnalyticsEndpoint": {
-      "defaultValue": "",
-      "type": "String",
-      "metadata": {
-        "description": "The endpoint the Text Analytics subscription is associated with (format should be like https://{resourceName}.cognitiveservices.azure.com or https://{region}.api.cognitive.microsoft.com or similar). If empty, no text analysis will be performed."
-      }
-    },
-    "SentimentAnalysis": {
-      "defaultValue": "None",
-      "type": "String",
-      "allowedValues": [
-        "None",
-        "UtteranceLevel",
-        "AudioLevel"
-      ],
-      "metadata": {
-        "description": "A value indicating whether sentiment analysis is requested (either per utterance or per audio). Will only be performed if a Text Analytics Key and Region is provided."
-      }
-    },
-    "PiiRedaction": {
-      "defaultValue": "None",
-      "type": "String",
-      "allowedValues": [
-        "None",
-        "UtteranceAndAudioLevel"
-      ],
-      "metadata": {
-        "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
-      }
-    },
-    "SqlAdministratorLogin": {
-      "type": "string",
-      "defaultValue": "",
-      "metadata": {
-        "description": "The administrator username of the SQL Server, which is used to gain insights of the audio with the provided PowerBI scripts. If it is left empty, no SQL server/database will be created."
-      }
-    },
-    "SqlAdministratorLoginPassword": {
-      "type": "securestring",
-      "defaultValue": "",
-      "metadata": {
-        "description": "The administrator password of the SQL Server. If it is left empty, no SQL server/database will be created."
-      }
-    },
-    "DeploymentId": {
-      "type": "string",
-      "defaultValue": "[utcNow()]",
-      "metadata": {
-        "description": "Id that will be suffixed to all created resources to identify resources of a certain deployment. Leave as is to use timestamp as deployment id."
-      }
-    }
-  },
-    "variables": {
+    "variables":
+    {
         "Version": "v2.0.12",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
@@ -257,12 +292,14 @@
             "apiVersion": "2020-02-02-preview",
             "name": "[variables('AppInsightsName')]",
             "location": "[resourceGroup().location]",
-            "tags": {
+            "tags":
+            {
                 "applicationType": "web",
                 "applicationName": "TranscriptionInsights"
             },
             "kind": "web",
-            "properties": {
+            "properties":
+            {
                 "Application_Type": "web"
             }
         },
@@ -271,11 +308,13 @@
             "apiVersion": "2018-01-01-preview",
             "name": "[variables('ServiceBusName')]",
             "location": "[resourceGroup().location]",
-            "sku": {
+            "sku":
+            {
                 "name": "Standard",
                 "tier": "Standard"
             },
-            "properties": {
+            "properties":
+            {
                 "zoneRedundant": false
             }
         },
@@ -288,7 +327,8 @@
                 "[resourceId('Microsoft.Web/sites', variables('StartTranscriptionFunctionName'))]",
                 "[resourceId('Microsoft.Web/sites', variables('FetchTranscriptionFunctionName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "enabledForDeployment": "true",
                 "enabledForDiskEncryption": "false",
                 "enabledForTemplateDeployment": "false",
@@ -297,7 +337,8 @@
                     {
                         "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('StartTranscriptionFunctionName')), '2019-08-01', 'full').identity.principalId]",
                         "tenantId": "[reference(resourceId('Microsoft.Web/sites', variables('StartTranscriptionFunctionName')), '2019-08-01', 'full').identity.tenantId]",
-                        "permissions": {
+                        "permissions":
+                        {
                             "secrets": [
                                 "get",
                                 "list"
@@ -307,7 +348,8 @@
                     {
                         "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('FetchTranscriptionFunctionName')), '2019-08-01', 'full').identity.principalId]",
                         "tenantId": "[reference(resourceId('Microsoft.Web/sites', variables('FetchTranscriptionFunctionName')), '2019-08-01', 'full').identity.tenantId]",
-                        "permissions": {
+                        "permissions":
+                        {
                             "secrets": [
                                 "get",
                                 "list"
@@ -315,11 +357,13 @@
                         }
                     }
                 ],
-                "sku": {
+                "sku":
+                {
                     "name": "Standard",
                     "family": "A"
                 },
-                "networkAcls": {
+                "networkAcls":
+                {
                     "defaultAction": "Allow",
                     "bypass": "AzureServices"
                 }
@@ -333,7 +377,8 @@
             "dependsOn": [
                 "[concat('Microsoft.KeyVault/vaults/', variables('KeyVaultName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "value": "[parameters('AzureSpeechServicesKey')]"
             }
         },
@@ -345,7 +390,8 @@
             "dependsOn": [
                 "[concat('Microsoft.KeyVault/vaults/', variables('KeyVaultName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "value": "[if(empty(parameters('TextAnalyticsKey')), 'NULL', parameters('TextAnalyticsKey'))]"
             }
         },
@@ -358,7 +404,8 @@
                 "[concat('Microsoft.KeyVault/vaults/', variables('KeyVaultName'))]",
                 "[variables('SqlServerName')]"
             ],
-            "properties": {
+            "properties":
+            {
                 "value": "[if(variables('UseSqlDatabase'), concat('Server=tcp:',reference(variables('SqlServerName'), '2014-04-01-preview').fullyQualifiedDomainName,',1433;Initial Catalog=',variables('DatabaseName'),';Persist Security Info=False;User ID=',parameters('SqlAdministratorLogin'),';Password=',parameters('SqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'), 'NULL')]"
             }
         },
@@ -368,10 +415,12 @@
             "type": "Microsoft.Sql/servers",
             "apiVersion": "2021-02-01-preview",
             "location": "[resourceGroup().location]",
-            "tags": {
+            "tags":
+            {
                 "displayName": "SqlServer"
             },
-            "properties": {
+            "properties":
+            {
                 "administratorLogin": "[parameters('SqlAdministratorLogin')]",
                 "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
                 "version": "12.0"
@@ -383,10 +432,12 @@
                     "type": "databases",
                     "apiVersion": "2015-01-01",
                     "location": "[resourceGroup().location]",
-                    "tags": {
+                    "tags":
+                    {
                         "displayName": "Database"
                     },
-                    "properties": {
+                    "properties":
+                    {
                         "edition": "Basic",
                         "collation": "SQL_Latin1_General_CP1_CI_AS",
                         "requestedServiceObjectiveName": "Basic"
@@ -402,7 +453,8 @@
                             "type": "transparentDataEncryption",
                             "apiVersion": "2014-04-01-preview",
                             "location": "[resourceGroup().location]",
-                            "properties": {
+                            "properties":
+                            {
                                 "status": "Enabled"
                             },
                             "dependsOn": [
@@ -420,7 +472,8 @@
                         "[variables('SqlServerName')]",
                         "[variables('StorageAccountName')]"
                     ],
-                    "properties": {
+                    "properties":
+                    {
                         "state": "Enabled",
                         "storageEndpoint": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2018-03-01-preview').PrimaryEndpoints.Blob]",
                         "storageAccountAccessKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), '2018-03-01-preview').keys[0].value]",
@@ -435,7 +488,8 @@
                     "type": "firewallrules",
                     "apiVersion": "2014-04-01",
                     "location": "[resourceGroup().location]",
-                    "properties": {
+                    "properties":
+                    {
                         "endIpAddress": "0.0.0.0",
                         "startIpAddress": "0.0.0.0"
                     },
@@ -450,26 +504,33 @@
             "apiVersion": "2019-06-01",
             "name": "[variables('StorageAccountName')]",
             "location": "[resourceGroup().location]",
-            "sku": {
+            "sku":
+            {
                 "name": "Standard_GRS",
                 "tier": "Standard"
             },
             "kind": "StorageV2",
-            "properties": {
-                "networkAcls": {
+            "properties":
+            {
+                "networkAcls":
+                {
                     "bypass": "AzureServices",
                     "virtualNetworkRules": [],
                     "ipRules": [],
                     "defaultAction": "Allow"
                 },
                 "supportsHttpsTrafficOnly": true,
-                "encryption": {
-                    "services": {
-                        "file": {
+                "encryption":
+                {
+                    "services":
+                    {
+                        "file":
+                        {
                             "keyType": "Account",
                             "enabled": true
                         },
-                        "blob": {
+                        "blob":
+                        {
                             "keyType": "Account",
                             "enabled": true
                         }
@@ -487,7 +548,8 @@
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "rights": [
                     "Listen",
                     "Manage",
@@ -503,7 +565,8 @@
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "lockDuration": "PT4M",
                 "maxSizeInMegabytes": 5120,
                 "requiresDuplicateDetection": false,
@@ -527,7 +590,8 @@
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "lockDuration": "PT5M",
                 "maxSizeInMegabytes": 5120,
                 "requiresDuplicateDetection": false,
@@ -551,14 +615,18 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "sku": {
+            "sku":
+            {
                 "name": "Standard_GRS"
             },
-            "properties": {
-                "cors": {
+            "properties":
+            {
+                "cors":
+                {
                     "corsRules": []
                 },
-                "deleteRetentionPolicy": {
+                "deleteRetentionPolicy":
+                {
                     "enabled": false
                 }
             }
@@ -571,11 +639,14 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "sku": {
+            "sku":
+            {
                 "name": "Standard_GRS"
             },
-            "properties": {
-                "cors": {
+            "properties":
+            {
+                "cors":
+                {
                     "corsRules": []
                 }
             }
@@ -590,7 +661,8 @@
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]",
                 "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey')]"
             ],
-            "properties": {
+            "properties":
+            {
                 "rights": [
                     "Listen",
                     "Send"
@@ -607,7 +679,8 @@
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]",
                 "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey')]"
             ],
-            "properties": {
+            "properties":
+            {
                 "rights": [
                     "Listen",
                     "Send"
@@ -623,7 +696,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "publicAccess": "None"
             }
         },
@@ -636,7 +710,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "publicAccess": "None"
             }
         },
@@ -650,7 +725,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "publicAccess": "None"
             }
         },
@@ -664,7 +740,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "publicAccess": "None"
             }
         },
@@ -678,7 +755,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "publicAccess": "None"
             }
         },
@@ -691,7 +769,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "publicAccess": "None"
             }
         },
@@ -704,7 +783,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "publicAccess": "None"
             }
         },
@@ -717,7 +797,8 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('StorageAccountName'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
             ],
-            "properties": {
+            "properties":
+            {
                 "source": "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
                 "topicType": "Microsoft.Storage.StorageAccounts"
             }
@@ -732,14 +813,18 @@
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues', variables('ServiceBusName'), 'start_transcription_queue')]"
             ],
-            "properties": {
-                "destination": {
+            "properties":
+            {
+                "destination":
+                {
                     "endpointType": "ServiceBusQueue",
-                    "properties": {
+                    "properties":
+                    {
                         "resourceId": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name,'/providers/Microsoft.ServiceBus/namespaces/', variables('ServiceBusName'),'/queues/start_transcription_queue')]"
                     }
                 },
-                "filter": {
+                "filter":
+                {
                     "includedEventTypes": [
                         "Microsoft.Storage.BlobCreated"
                     ],
@@ -775,7 +860,8 @@
             "location": "[resourceGroup().location]",
             "properties": {},
             "dependsOn": [],
-            "sku": {
+            "sku":
+            {
                 "name": "EP1"
             }
         },
@@ -788,11 +874,13 @@
                 "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]"
             ],
             "kind": "functionapp",
-            "properties": {
+            "properties":
+            {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]",
                 "httpsOnly": "true"
             },
-            "identity": {
+            "identity":
+            {
                 "type": "SystemAssigned"
             }
         },
@@ -811,15 +899,17 @@
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription')]",
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription')]"
             ],
-            "tags": {
+            "tags":
+            {
                 "displayName": "WebAppSettings"
             },
-            "properties": {
+            "properties":
+            {
                 "AddDiarization": "[parameters('AddDiarization')]",
                 "AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",
                 "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
-                "AzureServiceBus": "AzureServiceBus": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]",
+                "AzureServiceBus": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
                 "AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
                 "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
@@ -854,11 +944,13 @@
                 "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]"
             ],
             "kind": "functionapp",
-            "properties": {
+            "properties":
+            {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]",
                 "httpsOnly": "true"
             },
-            "identity": {
+            "identity":
+            {
                 "type": "SystemAssigned"
             }
         },
@@ -878,10 +970,12 @@
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription')]",
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription')]"
             ],
-            "tags": {
+            "tags":
+            {
                 "displayName": "WebAppSettings"
             },
-            "properties": {
+            "properties":
+            {
                 "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
                 "PiiRedactionSetting": "[parameters('PiiRedaction')]",
                 "SentimentAnalysisSetting": "[parameters('SentimentAnalysis')]",
@@ -914,17 +1008,20 @@
                 "PiiCategories": "[variables('PiiCategories')]",
                 "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
-                "ConversationPiiSetting":"[variables('ConversationPiiRedaction')]",
-                "ConversationSummarizationOptions":"[variables('ConversationSummarizationOptions')]"
+                "ConversationPiiSetting": "[variables('ConversationPiiRedaction')]",
+                "ConversationSummarizationOptions": "[variables('ConversationSummarizationOptions')]"
             }
         }
     ],
-    "outputs": {
-        "StartTranscriptionFunctionId": {
+    "outputs":
+    {
+        "StartTranscriptionFunctionId":
+        {
             "type": "string",
             "value": "[variables('StartTranscriptionFunctionId')]"
         },
-        "FetchTranscriptionFunctionId": {
+        "FetchTranscriptionFunctionId":
+        {
             "type": "string",
             "value": "[variables('FetchTranscriptionFunctionId')]"
         }
