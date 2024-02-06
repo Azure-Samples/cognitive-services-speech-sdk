@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # The endpoint would be like: https://<region>.api.cognitive.microsoft.com or https://<custom_domain>.cognitiveservices.azure.com
 SPEECH_ENDPOINT = os.environ.get('SPEECH_ENDPOINT')
 # We recommend to use passwordless authentication with Azure Identity here; meanwhile, you can also use a subscription key instead
-PASSWORDLESS_AUTHENTICATION = True
+PASSWORDLESS_AUTHENTICATION = False
 API_VERSION = "2024-04-01-preview"
 
 
