@@ -1,233 +1,209 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "StorageAccount": {
-            "type": "String",
-            "metadata": {
-                "description": "The name of the storage account. It must be unique across all existing storage account names in Azure, between 3 and 24 characters long, and can contain only lowercase letters and numbers."
-            }
-        },
-        "Locale": {
-            "defaultValue": "en-US | English (United States)",
-            "type": "String",
-            "allowedValues": [
-                "ar-BH | Arabic (Bahrain)",
-                "ar-EG | Arabic (Egypt)",
-                "ar-SY | Arabic (Syria)",
-                "ca-ES | Catalan",
-                "da-DK | Danish (Denmark)",
-                "de-DE | German (Germany)",
-                "en-AU | English (Australia)",
-                "en-CA | English (Canada)",
-                "en-GB | English (United Kingdom)",
-                "en-IN | English (India)",
-                "en-NZ | English (New Zealand)",
-                "en-US | English (United States)",
-                "es-ES | Spanish (Spain)",
-                "es-MX | Spanish (Mexico)",
-                "fi-FI | Finnish (Finland)",
-                "fr-CA | French (Canada)",
-                "fr-FR | French (France)",
-                "gu-IN | Gujarati (Indian)",
-                "hi-IN | Hindi (India)",
-                "it-IT | Italian (Italy)",
-                "ja-JP | Japanese (Japan)",
-                "ko-KR | Korean (Korea)",
-                "mr-IN | Marathi (India)",
-                "nb-NO | Norwegian (Bokmål)",
-                "nl-NL | Dutch (Netherlands)",
-                "pl-PL | Polish (Poland)",
-                "pt-BR | Portuguese (Brazil)",
-                "pt-PT | Portuguese (Portugal)",
-                "ru-RU | Russian (Russia)",
-                "sv-SE | Swedish (Sweden)",
-                "ta-IN | Tamil (India)",
-                "te-IN | Telugu (India)",
-                "th-TH | Thai (Thailand)",
-                "tr-TR | Turkish (Turkey)",
-                "zh-CN | Chinese (Mandarin, simplified)",
-                "zh-HK | Chinese (Cantonese, Traditional)",
-                "zh-TW | Chinese (Taiwanese Mandarin)"
-            ]
-        },
-        "CustomModelId": {
-            "defaultValue": "",
-            "type": "String",
-            "metadata": {
-                "description": "The id of the custom model for transcription. If empty, the base model will be selected."
-            }
-        },
-        "AzureSpeechServicesKey": {
-            "type": "SecureString",
-            "metadata": {
-                "description": "The key for the Azure Speech Services subscription."
-            }
-        },
-        "AzureSpeechServicesRegion": {
-            "defaultValue": "westus",
-            "type": "String",
-            "allowedValues": [
-                "centralus",
-                "eastus",
-                "eastus2",
-                "northcentralus",
-                "southcentralus",
-                "westcentralus",
-                "westus",
-                "westus2",
-                "canadacentral",
-                "brazilsouth",
-                "eastasia",
-                "southeastasia",
-                "australiaeast",
-                "centralindia",
-                "japaneast",
-                "japanwest",
-                "koreacentral",
-                "northeurope",
-                "westeurope",
-                "francecentral",
-                "uksouth",
-                "usgovarizona",
-                "usgovvirginia"
-            ],
-            "metadata": {
-                "description": "The region the Azure speech services subscription is associated with."
-            }
-        },
-        "CustomEndpoint": {
-            "defaultValue": "",
-            "type": "String",
-            "metadata": {
-                "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
-            }
-        },
-        "ProfanityFilterMode": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "Removed",
-                "Tags",
-                "Masked"
-            ],
-            "metadata": {
-                "description": "The requested profanity filter mode."
-            }
-        },
-        "PunctuationMode": {
-            "defaultValue": "DictatedAndAutomatic",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "Dictated",
-                "Automatic",
-                "DictatedAndAutomatic"
-            ],
-            "metadata": {
-                "description": "The requested punctuation mode."
-            }
-        },
-        "AddDiarization": {
-            "defaultValue": false,
-            "type": "bool",
-            "metadata": {
-                "description": "A value indicating whether diarization (speaker separation) is requested."
-            }
-        },
-        "AddWordLevelTimestamps": {
-            "defaultValue": false,
-            "type": "bool",
-            "metadata": {
-                "description": "A value indicating whether word level timestamps are requested."
-            }
-        },
-        "TextAnalyticsKey": {
-            "defaultValue": "",
-            "type": "SecureString",
-            "metadata": {
-                "description": "The key for the Text Analytics subscription."
-            }
-        },
-        "TextAnalyticsRegion": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "centralus",
-                "eastus",
-                "eastus2",
-                "northcentralus",
-                "southcentralus",
-                "westcentralus",
-                "westus",
-                "westus2",
-                "canadacentral",
-                "brazilsouth",
-                "eastasia",
-                "southeastasia",
-                "australiaeast",
-                "centralindia",
-                "japaneast",
-                "japanwest",
-                "koreacentral",
-                "northeurope",
-                "westeurope",
-                "francecentral",
-                "uksouth"
-            ],
-            "metadata": {
-                "description": "The region the Text Analytics subscription is associated with. If none is selected, no text analysis will be performed."
-            }
-        },
-        "SentimentAnalysis": {
-            "defaultValue": "None",
-            "type": "String",
-            "allowedValues": [
-                "None",
-                "UtteranceLevel",
-                "AudioLevel"
-            ],
-            "metadata": {
-                "description": "A value indicating whether sentiment analysis is requested (either per utterance or per audio). Will only be performed if a Text Analytics Key and Region is provided."
-            }
-        },
-        "PiiRedaction": {
-          "defaultValue": "None",
-          "type": "String",
-          "allowedValues": [
-              "None",
-              "UtteranceAndAudioLevel"
-          ],
-          "metadata": {
-              "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
-          }
-        },
-        "SqlAdministratorLogin": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "The administrator username of the SQL Server, which is used to gain insights of the audio with the provided PowerBI scripts. If it is left empty, no SQL server/database will be created."
-            }
-        },
-        "SqlAdministratorLoginPassword": {
-            "type": "securestring",
-            "defaultValue": "",
-            "metadata": {
-                "description": "The administrator password of the SQL Server. If it is left empty, no SQL server/database will be created."
-            }
-        },
-        "DeploymentId": {
-            "type": "string",
-            "defaultValue": "[utcNow()]",
-            "metadata": {
-                "description": "Id that will be suffixed to all created resources to identify resources of a certain deployment. Leave as is to use timestamp as deployment id."
-            }
-        }
+  "parameters": {
+    "StorageAccount": {
+      "type": "String",
+      "metadata": {
+        "description": "The name of the storage account. It must be unique across all existing storage account names in Azure, between 3 and 24 characters long, and can contain only lowercase letters and numbers."
+      }
     },
+    "Locale": {
+      "defaultValue": "en-US | English (United States)",
+      "type": "String",
+      "allowedValues": [
+        "ar-BH | Arabic (Bahrain)",
+        "ar-EG | Arabic (Egypt)",
+        "ar-SY | Arabic (Syria)",
+        "ca-ES | Catalan",
+        "da-DK | Danish (Denmark)",
+        "de-DE | German (Germany)",
+        "en-AU | English (Australia)",
+        "en-CA | English (Canada)",
+        "en-GB | English (United Kingdom)",
+        "en-IN | English (India)",
+        "en-NZ | English (New Zealand)",
+        "en-US | English (United States)",
+        "es-ES | Spanish (Spain)",
+        "es-MX | Spanish (Mexico)",
+        "fi-FI | Finnish (Finland)",
+        "fr-CA | French (Canada)",
+        "fr-FR | French (France)",
+        "gu-IN | Gujarati (Indian)",
+        "hi-IN | Hindi (India)",
+        "it-IT | Italian (Italy)",
+        "ja-JP | Japanese (Japan)",
+        "ko-KR | Korean (Korea)",
+        "mr-IN | Marathi (India)",
+        "nb-NO | Norwegian (Bokmål)",
+        "nl-NL | Dutch (Netherlands)",
+        "pl-PL | Polish (Poland)",
+        "pt-BR | Portuguese (Brazil)",
+        "pt-PT | Portuguese (Portugal)",
+        "ru-RU | Russian (Russia)",
+        "sv-SE | Swedish (Sweden)",
+        "ta-IN | Tamil (India)",
+        "te-IN | Telugu (India)",
+        "th-TH | Thai (Thailand)",
+        "tr-TR | Turkish (Turkey)",
+        "zh-CN | Chinese (Mandarin, simplified)",
+        "zh-HK | Chinese (Cantonese, Traditional)",
+        "zh-TW | Chinese (Taiwanese Mandarin)"
+      ]
+    },
+    "CustomModelId": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "The id of the custom model for transcription. If empty, the base model will be selected."
+      }
+    },
+    "AzureSpeechServicesKey": {
+      "type": "SecureString",
+      "metadata": {
+        "description": "The key for the Azure Speech Services subscription."
+      }
+    },
+    "AzureSpeechServicesRegion": {
+      "defaultValue": "westus",
+      "type": "String",
+      "allowedValues": [
+        "centralus",
+        "eastus",
+        "eastus2",
+        "northcentralus",
+        "southcentralus",
+        "westcentralus",
+        "westus",
+        "westus2",
+        "canadacentral",
+        "brazilsouth",
+        "eastasia",
+        "southeastasia",
+        "australiaeast",
+        "centralindia",
+        "japaneast",
+        "japanwest",
+        "koreacentral",
+        "northeurope",
+        "westeurope",
+        "francecentral",
+        "uksouth",
+        "usgovarizona",
+        "usgovvirginia"
+      ],
+      "metadata": {
+        "description": "The region the Azure speech services subscription is associated with."
+      }
+    },
+    "CustomEndpoint": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
+      }
+    },
+    "ProfanityFilterMode": {
+      "defaultValue": "None",
+      "type": "String",
+      "allowedValues": [
+        "None",
+        "Removed",
+        "Tags",
+        "Masked"
+      ],
+      "metadata": {
+        "description": "The requested profanity filter mode."
+      }
+    },
+    "PunctuationMode": {
+      "defaultValue": "DictatedAndAutomatic",
+      "type": "String",
+      "allowedValues": [
+        "None",
+        "Dictated",
+        "Automatic",
+        "DictatedAndAutomatic"
+      ],
+      "metadata": {
+        "description": "The requested punctuation mode."
+      }
+    },
+    "AddDiarization": {
+      "defaultValue": false,
+      "type": "bool",
+      "metadata": {
+        "description": "A value indicating whether diarization (speaker separation) is requested."
+      }
+    },
+    "AddWordLevelTimestamps": {
+      "defaultValue": false,
+      "type": "bool",
+      "metadata": {
+        "description": "A value indicating whether word level timestamps are requested."
+      }
+    },
+    "TextAnalyticsKey": {
+      "defaultValue": "",
+      "type": "SecureString",
+      "metadata": {
+        "description": "The key for the Text Analytics subscription."
+      }
+    },
+    "TextAnalyticsEndpoint": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "The endpoint the Text Analytics subscription is associated with (format should be like https://{resourceName}.cognitiveservices.azure.com or https://{region}.api.cognitive.microsoft.com or similar). If empty, no text analysis will be performed."
+      }
+    },
+    "SentimentAnalysis": {
+      "defaultValue": "None",
+      "type": "String",
+      "allowedValues": [
+        "None",
+        "UtteranceLevel",
+        "AudioLevel"
+      ],
+      "metadata": {
+        "description": "A value indicating whether sentiment analysis is requested (either per utterance or per audio). Will only be performed if a Text Analytics Key and Region is provided."
+      }
+    },
+    "PiiRedaction": {
+      "defaultValue": "None",
+      "type": "String",
+      "allowedValues": [
+        "None",
+        "UtteranceAndAudioLevel"
+      ],
+      "metadata": {
+        "description": "A value indicating whether personally identifiable information (PII) redaction is requested. Will only be performed if a Text Analytics Key and Region is provided."
+      }
+    },
+    "SqlAdministratorLogin": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The administrator username of the SQL Server, which is used to gain insights of the audio with the provided PowerBI scripts. If it is left empty, no SQL server/database will be created."
+      }
+    },
+    "SqlAdministratorLoginPassword": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The administrator password of the SQL Server. If it is left empty, no SQL server/database will be created."
+      }
+    },
+    "DeploymentId": {
+      "type": "string",
+      "defaultValue": "[utcNow()]",
+      "metadata": {
+        "description": "Id that will be suffixed to all created resources to identify resources of a certain deployment. Leave as is to use timestamp as deployment id."
+      }
+    }
+  },
     "variables": {
-        "Version": "v2.0.5",
+        "Version": "v2.0.12",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -258,9 +234,6 @@
         "StartTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('StartTranscriptionFunctionName'))]",
         "FetchTranscriptionFunctionName": "[take(concat('FetchTranscriptionFunction-', variables('InstanceId')),60)]",
         "FetchTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('FetchTranscriptionFunctionName'))]",
-        "AuthRuleRMK": "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'),'RootManageSharedAccessKey')]",
-        "AuthRuleFT": "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription')]",
-        "AuthRuleCT": "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription')]",
         "AppServicePlanName": "[concat('AppServicePlan-', variables('InstanceId'))]",
         "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey",
         "TextAnalyticsKeySecretName": "TextAnalyticsKey",
@@ -507,7 +480,7 @@
             }
         },
         {
-            "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+            "type": "Microsoft.ServiceBus/namespaces/authorizationRules",
             "apiVersion": "2017-04-01",
             "name": "[concat(variables('ServiceBusName'), '/RootManageSharedAccessKey')]",
             "location": "[resourceGroup().location]",
@@ -615,8 +588,7 @@
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues', variables('ServiceBusName'), 'fetch_transcription_queue')]",
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]",
-                "[variables('AuthRuleRMK')]",
-                "[variables('AuthRuleCT')]"
+                "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey')]"
             ],
             "properties": {
                 "rights": [
@@ -633,7 +605,7 @@
             "dependsOn": [
                 "[resourceId('Microsoft.ServiceBus/namespaces/queues', variables('ServiceBusName'), 'start_transcription_queue')]",
                 "[resourceId('Microsoft.ServiceBus/namespaces', variables('ServiceBusName'))]",
-                "[variables('AuthRuleRMK')]"
+                "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey')]"
             ],
             "properties": {
                 "rights": [
@@ -835,9 +807,9 @@
                 "[concat('Microsoft.Web/sites/', variables('StartTranscriptionFunctionName'))]",
                 "[resourceId('Microsoft.KeyVault/vaults', variables('KeyVaultName'))]",
                 "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), variables('AzureSpeechServicesKeySecretName'))]",
-                "[variables('AuthRuleRMK')]",
-                "[variables('AuthRuleFT')]",
-                "[variables('AuthRuleCT')]"
+                "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey')]",
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription')]",
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription')]"
             ],
             "tags": {
                 "displayName": "WebAppSettings"
@@ -847,7 +819,7 @@
                 "AddWordLevelTimestamps": "[parameters('AddWordLevelTimestamps')]",
                 "APPLICATIONINSIGHTS_CONNECTION_STRING": "[reference(resourceId('Microsoft.Insights/components', variables('AppInsightsName')), '2020-02-02-preview').ConnectionString]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
-                "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
+                "AzureServiceBus": "AzureServiceBus": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
                 "AzureSpeechServicesRegion": "[parameters('AzureSpeechServicesRegion')]",
                 "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
@@ -855,7 +827,7 @@
                 "CustomModelId": "[parameters('CustomModelId')]",
                 "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
-                "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleFT'),'2015-08-01').primaryConnectionString]",
+                "FetchTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription'), '2017-04-01').primaryConnectionString]",
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
                 "FUNCTIONS_EXTENSION_VERSION": "~4",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
@@ -869,7 +841,7 @@
                 "ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
-                "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
+                "StartTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription'), '2017-04-01').primaryConnectionString]",
                 "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'), variables('StartTranscriptionByTimerBinary'), variables('StartTranscriptionByServiceBusBinary'))]"
             }
         },
@@ -902,9 +874,9 @@
                 "[resourceId('Microsoft.KeyVault/vaults', variables('KeyVaultName'))]",
                 "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), variables('AzureSpeechServicesKeySecretName'))]",
                 "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), variables('TextAnalyticsKeySecretName'))]",
-                "[variables('AuthRuleRMK')]",
-                "[variables('AuthRuleFT')]",
-                "[variables('AuthRuleCT')]"
+                "[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey')]",
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription')]",
+                "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription')]"
             ],
             "tags": {
                 "displayName": "WebAppSettings"
@@ -914,7 +886,7 @@
                 "PiiRedactionSetting": "[parameters('PiiRedaction')]",
                 "SentimentAnalysisSetting": "[parameters('SentimentAnalysis')]",
                 "AudioInputContainer": "[variables('AudioInputContainer')]",
-                "AzureServiceBus": "[listKeys(variables('AuthRuleRMK'),'2015-08-01').primaryConnectionString]",
+                "AzureServiceBus": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey'), '2017-04-01').primaryConnectionString]",
                 "AzureSpeechServicesKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('AzureSpeechServicesKeySecretName'), ')')]",
                 "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
                 "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('StorageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).keys[0].value, ';EndpointSuffix=', variables('EndpointSuffix'))]",
@@ -922,7 +894,7 @@
                 "DatabaseConnectionString": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('DatabaseConnectionStringSecretName'), ')')]",
                 "ErrorFilesOutputContainer": "[variables('ErrorFilesOutputContainer')]",
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
-                "FetchTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleFT'),'2015-08-01').primaryConnectionString]",
+                "FetchTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription'), '2017-04-01').primaryConnectionString]",
                 "FUNCTIONS_EXTENSION_VERSION": "~4",
                 "FUNCTIONS_WORKER_RUNTIME": "dotnet",
                 "HtmlResultOutputContainer": "[variables('HtmlResultOutputContainer')]",
@@ -930,9 +902,9 @@
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "JsonResultOutputContainer": "[variables('JsonResultOutputContainer')]",
                 "RetryLimit": "[variables('RetryLimit')]",
-                "StartTranscriptionServiceBusConnectionString": "[listKeys(variables('AuthRuleCT'),'2015-08-01').primaryConnectionString]",
+                "StartTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription'), '2017-04-01').primaryConnectionString]",
                 "TextAnalyticsKey": "[concat('@Microsoft.KeyVault(VaultName=', variables('KeyVaultName'), ';SecretName=', variables('TextAnalyticsKeySecretName'), ')')]",
-                "TextAnalyticsRegion": "[parameters('TextAnalyticsRegion')]",
+                "TextAnalyticsEndpoint": "[parameters('TextAnalyticsEndpoint')]",
                 "UseSqlDatabase": "[variables('UseSqlDatabase')]",
                 "WEBSITE_RUN_FROM_PACKAGE": "[variables('FetchTranscriptionBinary')]",
                 "CreateConsolidatedOutputFiles": "[variables('CreateConsolidatedOutputFiles')]",
