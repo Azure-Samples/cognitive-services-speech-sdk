@@ -157,7 +157,7 @@ def transcribe():
     #     swagger_client.DiarizationSpeakersProperties(min_count=1, max_count=5))
 
     # uncomment the following block to enable and configure language identification prior to transcription. Available modes are "single" and "continuous".
-    properties.language_identification = swagger_client.LanguageIdentificationProperties(mode="single", candidate_locales=["en-US", "ja-JP"])
+    # properties.language_identification = swagger_client.LanguageIdentificationProperties(mode="single", candidate_locales=["en-US", "ja-JP"])
 
     # Use base models for transcription. Comment this block if you are using a custom model.
     transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URI, properties)
