@@ -12,11 +12,14 @@
     const bodyParser = require('body-parser');
     const pino = require('express-pino-logger')();
     const cors = require('cors');
+    const path = require('path');
 
     const app = express();
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(pino);
     app.use(cors());
+
+    app.use(express.static(path.join(__dirname, "../public")));
 
     app.get('/api/get-speech-token', async (req, res, next) => {
         res.setHeader('Content-Type', 'application/json');
