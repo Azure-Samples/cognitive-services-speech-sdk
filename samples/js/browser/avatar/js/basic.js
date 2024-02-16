@@ -94,9 +94,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // start avatar, establish WebRTC connection
     avatarSynthesizer.startAvatarAsync(peerConnection).then((r) => {
         if (r.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-            console.log("[" + (new Date()).toISOString() + "] Avatar started.")
+            console.log("[" + (new Date()).toISOString() + "] Avatar started. Result ID: " + r.resultId)
         } else {
-            console.log("[" + (new Date()).toISOString() + "] Unable to start avatar.")
+            console.log("[" + (new Date()).toISOString() + "] Unable to start avatar. Result ID: " + r.resultId)
             if (r.reason === SpeechSDK.ResultReason.Canceled) {
                 let cancellationDetails = SpeechSDK.CancellationDetails.fromResult(r)
                 if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
