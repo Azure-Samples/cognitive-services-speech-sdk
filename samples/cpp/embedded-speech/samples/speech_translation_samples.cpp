@@ -114,18 +114,10 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
                 cout << "NotRecognized" << endl;
                 break;
             case NoMatchReason::InitialSilenceTimeout:
-                // Input audio was silent and the initial silence timeout expired.
+                // Input audio was silent and the (initial) silence timeout expired.
                 // In continuous recognition this can happen multiple times during
                 // a session, not just at the very beginning.
                 cout << "InitialSilenceTimeout" << endl;
-                break;
-            case NoMatchReason::EndSilenceTimeout:
-                // Input audio was silent and the end silence timeout expired.
-                // This can happen in continuous recognition after a phrase is
-                // recognized (a final result is generated) and it is followed
-                // by silence. If the silence continues long enough there will
-                // be InitialSilenceTimeout after this.
-                cout << "EndSilenceTimeout" << endl;
                 break;
             default:
                 // Other reasons are not supported in embedded speech at the moment.
