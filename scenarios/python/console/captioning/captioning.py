@@ -219,7 +219,7 @@ class Captioning(object) :
                 "audio_stream_format" : None,
                 "pull_input_audio_stream_callback" : None,
                 "pull_input_audio_stream" : None
-            });
+            })
         else :
             audio_stream_format = None
             if not self._user_config["use_compressed_audio"] :
