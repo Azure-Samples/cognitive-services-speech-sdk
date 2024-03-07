@@ -362,14 +362,14 @@ function handleUserQuery(userQuery) {
     const azureOpenAIApiKey = document.getElementById('azureOpenAIApiKey').value
     const azureOpenAIDeploymentName = document.getElementById('azureOpenAIDeploymentName').value
 
-    let url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/chat/completions?api-version=2023-12-01-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
+    let url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/chat/completions?api-version=2023-06-01-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
     let body = JSON.stringify({
         messages: messages,
         stream: true
     })
 
     if (dataSources.length > 0) {
-        url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/extensions/chat/completions?api-version=2023-12-01-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
+        url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/extensions/chat/completions?api-version=2023-06-01-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
         body = JSON.stringify({
             dataSources: dataSources,
             messages: messages,
@@ -429,15 +429,11 @@ function handleUserQuery(userQuery) {
                             if (dataSources.length === 0) {
                                 responseToken = responseJson.choices[0].delta.content
                             } else {
-                                let role = responseJson.choices[0].delta.role
-                                if (role === undefined && responseJson.choices[0].delta.context !== undefined) {
-                                    role = responseJson.choices[0].delta.context.messages[0].role
-                                }
-
+                                let role = responseJson.choices[0].messages[0].delta.role
                                 if (role === 'tool') {
-                                    toolContent = responseJson.choices[0].delta.context.messages[0].content
+                                    toolContent = responseJson.choices[0].messages[0].delta.content
                                 } else {
-                                    responseToken = responseJson.choices[0].delta.content
+                                    responseToken = responseJson.choices[0].messages[0].delta.content
                                     if (responseToken !== undefined) {
                                         if (byodDocRegex.test(responseToken)) {
                                             responseToken = responseToken.replace(byodDocRegex, '').trim()
