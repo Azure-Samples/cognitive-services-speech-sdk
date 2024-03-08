@@ -10,6 +10,8 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
     * Azure Speech Resource
         * Region - the region of your Azure speech resource.
         * Subscription Key - the subscription key of your Azure speech resource.
+        * Enable Private Endpoint - If you check this, you need to fill EndPoint section below.
+        * EndPoint - the endpoint of your Azure speech resource, please follow [here](https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link) to get endpoint.
     * ICE Server
         * URL - the ICE server URL for WebRTC. e.g. `turn:relay.communication.microsoft.com:3478`. You can get the ICE server from ACS ([Azure Communication Services](https://learn.microsoft.com/azure/communication-services/overview)): you need follow [Create communication resource](https://learn.microsoft.com/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp) to create ACS resource, and then follow [Getting the relay configuration](https://learn.microsoft.com/azure/communication-services/quickstarts/relay-token?pivots=programming-language-python#getting-the-relay-configuration) to get ICE server URL, ICE server username, and ICE server credential. For ICE server URL, please make sure to use prefix `turn:`, instead of `stun:`.
         * IceServerUsername - the username of the ICE server, which is provided together with the ICE server URL (see above).
@@ -17,6 +19,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
     * TTS Configuration
         * TTS Voice - the voice of the TTS. Here is the [available TTS voices list](https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages)
         * Custom Voice Deployment ID (Endpoint ID) - the deployment ID (also called endpoint ID) of your custom voice. If you are not using a custom voice, please leave it empty.
+        * Personal Voice Speaker Profile ID - the Personal Voice Speaker Profile ID of you personal voice. Please follow [here](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/personal-voice-overview) to view and create personal voice.
     * Avatar Configuration
         * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
@@ -41,6 +44,8 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
     * Azure Speech Resource
         * Region - the region of your Azure speech resource.
         * Subscription Key - the subscription key of your Azure speech resource.
+        * Enable Private Endpoint - If you check this, you need to fill EndPoint section below.
+        * EndPoint - the endpoint of your Azure speech resource, please follow [here](https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link) to get endpoint.
     * Azure OpenAI Resource
         * Endpoint - the endpoint of your Azure OpenAI resource, e.g. https://your-openai-resource-name.openai.azure.com/, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
         * API Key - the API key of your Azure OpenAI resource, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
@@ -59,6 +64,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * STT Locale(s) - the locale(s) of the STT. Here is the [available STT languages list](https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=stt#supported-languages). If multiple locales are specified, the STT will enable multi-language recognition, which means the STT will recognize the speech in any of the specified locales.
         * TTS Voice - the voice of the TTS. Here is the [available TTS voices list](https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts#supported-languages)
         * Custom Voice Deployment ID (Endpoint ID) - the deployment ID (also called endpoint ID) of your custom voice. If you are not using a custom voice, please leave it empty.
+        * Personal Voice Speaker Profile ID - the Personal Voice Speaker Profile ID of you personal voice. Please follow [here](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/personal-voice-overview) to view and create personal voice.
         * Continuous Conversation - check this if you want to enable continuous conversation. If this is checked, the STT will keep listening to your speech, with microphone always on until you click `Stop Microphone` button. If this is not checked, the microphone will automatically stop once an utterance is recognized, and you need click `Start Microphone` every time before you give a speech. The `Continuous Conversation` mode is suitable for quiet environment, while the `Non-Continuous Conversation` mode is suitable for noisy environment, which can avoid the noise being recorded while you are not speaking.
     * Avatar Configuration
         * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.

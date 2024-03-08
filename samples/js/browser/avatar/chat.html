@@ -19,7 +19,14 @@
     <option value="southeastasia">Southeast Asia</option>
   </select>
   <label style="font-size: medium;" for="subscriptionKey">Subscription Key:</label>
-  <input id="subscriptionKey" type="password" size="32" style="font-size: medium;" /><br />
+  <input id="subscriptionKey" type="password" size="32" style="font-size: medium;" />
+  <div style="background-color: white; width: 300px;">
+    <input type="checkbox" id="enablePrivateEndpoint" onchange = "window.updatePrivateEndpoint()">Enable Private Endpoint</input><br />
+  </div>
+  <div id = "showPrivateEndpointCheckBox" hidden="hidden">
+    <label style="font-size: medium;" for="azureOpenAIEndpoint">Endpoint:</label>
+    <input id="privateEndpoint" type="text" size="64" style="font-size: medium;"></input><br />
+  </div><br />
 
   <h2 style="background-color: white; width: 300px;">Azure OpenAI Resource</h2>
   <label style="font-size: medium;" for="azureOpenAIEndpoint">Endpoint:</label>
@@ -62,6 +69,8 @@
   <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyMultilingualV2Neural"></input><br />
   <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
   <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <label style="font-size: medium;" for="personalVoiceSpeakerProfileID">Personal Voice Speaker Profile ID:</label>
+  <input id="personalVoiceSpeakerProfileID" type="text" size="32" style="font-size: medium;" value=""></input><br />
   <div style="background-color: white; width: 300px;">
     <input type="checkbox" id="continuousConversation">Continuous Conversation</input><br />
   </div>
