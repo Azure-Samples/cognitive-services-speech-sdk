@@ -73,7 +73,7 @@ def clean_up(project_id: str, consent_id: str, personal_voice_id: str):
 
 
 region = 'eastus' # eastus, westeurope, southeastasia
-key = 'your_subscription_key'
+key = 'your sub key here'
 
 
 logging.basicConfig(filename="customvoice.log",
@@ -111,7 +111,7 @@ try:
 
     # step 2: synthesis wave
     text = 'This is zero shot voice. Test 2.'
-    output_wave_file_path = 'voice\\output_1.wav'
+    output_wave_file_path = 'output_1.wav'
     speech_synthesis_to_wave_file(text, output_wave_file_path, speaker_profile_id)
 except Exception as e:
     print(e)
