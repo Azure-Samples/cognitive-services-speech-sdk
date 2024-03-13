@@ -25,16 +25,16 @@ function connectAvatar() {
         alert('Please fill in the subscription key of your speech resource.')
         return
     }
-    
+
     const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
     const privateEndpoint = document.getElementById('privateEndpoint').value.slice(8)
-    if( privateEndpointEnabled && privateEndpoint === '') {
+    if (privateEndpointEnabled && privateEndpoint === '') {
         alert('Please fill in the Azure Speech endpoint.')
         return
     }
 
     let speechSynthesisConfig
-    if(privateEndpointEnabled) {
+    if (privateEndpointEnabled) {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey) 
     } else {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
@@ -709,7 +709,7 @@ window.updateLocalVideoForIdle = () => {
 }
 
 window.updatePrivateEndpoint = () => {
-    if(document.getElementById('enablePrivateEndpoint').checked) {
+    if (document.getElementById('enablePrivateEndpoint').checked) {
         document.getElementById('showPrivateEndpointCheckBox').hidden = false
     } else {
         document.getElementById('showPrivateEndpointCheckBox').hidden = true
