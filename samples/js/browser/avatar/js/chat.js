@@ -26,9 +26,20 @@ function connectAvatar() {
         return
     }
 
-    const speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
+    const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
+    const privateEndpoint = document.getElementById('privateEndpoint').value.slice(8)
+    if (privateEndpointEnabled && privateEndpoint === '') {
+        alert('Please fill in the Azure Speech endpoint.')
+        return
+    }
+
+    let speechSynthesisConfig
+    if (privateEndpointEnabled) {
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey) 
+    } else {
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
+    }
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
-    speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
 
     const talkingAvatarCharacter = document.getElementById('talkingAvatarCharacter').value
     const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
@@ -280,9 +291,10 @@ function speak(text, endingSilenceMs = 0) {
 
 function speakNext(text, endingSilenceMs = 0) {
     let ttsVoice = document.getElementById('ttsVoice').value
-    let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
+    let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
+    let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</mstts:ttsembedding></voice></speak>`
     if (endingSilenceMs > 0) {
-        ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></voice></speak>`
+        ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></mstts:ttsembedding></voice></speak>`
     }
 
     lastSpeakTime = new Date()
@@ -692,5 +704,13 @@ window.updateLocalVideoForIdle = () => {
         document.getElementById('showTypeMessageCheckbox').hidden = true
     } else {
         document.getElementById('showTypeMessageCheckbox').hidden = false
+    }
+}
+
+window.updatePrivateEndpoint = () => {
+    if (document.getElementById('enablePrivateEndpoint').checked) {
+        document.getElementById('showPrivateEndpointCheckBox').hidden = false
+    } else {
+        document.getElementById('showPrivateEndpointCheckBox').hidden = true
     }
 }
