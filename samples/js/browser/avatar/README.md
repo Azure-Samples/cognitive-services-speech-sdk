@@ -11,7 +11,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
         * Region - the region of your Azure speech resource.
         * Subscription Key - the subscription key of your Azure speech resource.
         * Enable Private Endpoint - check this if you want to apply private endpoint. If you check this, you need to fill Private Endpoint section below. Please refer to [speech-services-private-link](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-private-link?tabs=portal) to learn more about private endpoint.
-        * Private EndPoint - the private endpoint of your Azure speech resource. The format should be like: https://{your custom name}.cognitiveservices.azure.com.
+        * Private EndPoint - the private endpoint of your Azure speech resource. The format should be like: 'https://{your custom name}.cognitiveservices.azure.com'.
     * ICE Server
         * URL - the ICE server URL for WebRTC. e.g. `turn:relay.communication.microsoft.com:3478`. You can get the ICE server from ACS ([Azure Communication Services](https://learn.microsoft.com/azure/communication-services/overview)): you need follow [Create communication resource](https://learn.microsoft.com/azure/communication-services/quickstarts/create-communication-resource?tabs=windows&pivots=platform-azp) to create ACS resource, and then follow [Getting the relay configuration](https://learn.microsoft.com/azure/communication-services/quickstarts/relay-token?pivots=programming-language-python#getting-the-relay-configuration) to get ICE server URL, ICE server username, and ICE server credential. For ICE server URL, please make sure to use prefix `turn:`, instead of `stun:`.
         * IceServerUsername - the username of the ICE server, which is provided together with the ICE server URL (see above).
@@ -45,7 +45,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * Region - the region of your Azure speech resource.
         * Subscription Key - the subscription key of your Azure speech resource.
         *  Enable Private Endpoint - check this if you want to apply private endpoint. If you check this, you need to fill Private Endpoint section below. Please refer to [speech-services-private-link](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/speech-services-private-link?tabs=portal) to learn more about private endpoint.
-        * Private EndPoint - the private endpoint of your Azure speech resource. The format should be like: https://{your custom name}.cognitiveservices.azure.com.
+        * Private EndPoint - the private endpoint of your Azure speech resource. The format should be like: 'https://{your custom name}.cognitiveservices.azure.com'.
     * Azure OpenAI Resource
         * Endpoint - the endpoint of your Azure OpenAI resource, e.g. https://your-openai-resource-name.openai.azure.com/, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
         * API Key - the API key of your Azure OpenAI resource, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
