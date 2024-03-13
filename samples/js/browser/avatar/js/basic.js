@@ -194,7 +194,6 @@ window.startSession = () => {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
     }
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
-    speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
 
     const videoFormat = new SpeechSDK.AvatarVideoFormat()
     let videoCropTopLeftX = document.getElementById('videoCrop').checked ? 600 : 0

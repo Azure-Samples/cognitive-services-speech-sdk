@@ -40,7 +40,6 @@ function connectAvatar() {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
     }
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
-    speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
 
     const talkingAvatarCharacter = document.getElementById('talkingAvatarCharacter').value
     const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
