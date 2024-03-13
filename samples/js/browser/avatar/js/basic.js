@@ -186,7 +186,7 @@ window.startSession = () => {
         return
     }
     const speechSynthesisConfig = privateEndpointCheckBox ?
-    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`),cogSvcSubKey) 
+    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey) 
     :SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
     speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
