@@ -179,17 +179,18 @@ window.startSession = () => {
         alert('Please fill in the subscription key of your speech resource.')
         return
     }
-    const privateEndpointCheckBox = document.getElementById('enablePrivateEndpoint').checked
+    
+    const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
     const privateEndpoint = document.getElementById('privateEndpoint').value.slice(8)
-    if( privateEndpointCheckBox && privateEndpoint === ''){
+    if(privateEndpointEnabled && privateEndpoint === '') {
         alert('Please fill in the Azure Speech endpoint.')
         return
     }
 
     let speechSynthesisConfig
-    if(privateEndpointCheckBox){
+    if(privateEndpointEnabled) {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey) 
-    }else {
+    } else {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
     }
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
@@ -283,10 +284,10 @@ window.updataTransparentBackground = () => {
     }
 }
 
-window.updatePrivateEndpoint = () =>{
+window.updatePrivateEndpoint = () => {
     if(document.getElementById('enablePrivateEndpoint').checked) {
         document.getElementById('showPrivateEndpointCheckBox').hidden = false
-    }else{
+    } else {
         document.getElementById('showPrivateEndpointCheckBox').hidden = true
     }
 }
