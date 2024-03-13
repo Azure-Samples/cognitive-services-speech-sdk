@@ -3796,13 +3796,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ---------------------------------------------------------
 
-diff 5.2.0
+registry.npmjs.org/diff 5.2.0 - BSD 3-Clause
 
 
 
 BSD 3-Clause License
-
-Version 5.2.0
 
 Copyright (c) 2009-2015, Kevin Decker <kpdecker@gmail.com>
 All rights reserved.
