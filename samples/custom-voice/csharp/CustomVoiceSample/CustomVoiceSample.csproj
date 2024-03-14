@@ -1,5 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
@@ -13,7 +12,7 @@
     <PackageReference Include="Newtonsoft.Json" version="13.0.3" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
-	<Content Include="TestData\PersonalVoice\sample.wav">
+    <Content Include="TestData\PersonalVoice\sample.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="TestData\VoiceTalentVerbalStatement.wav">
