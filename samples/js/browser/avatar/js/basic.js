@@ -180,9 +180,20 @@ window.startSession = () => {
         return
     }
 
-    const speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
+    const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
+    const privateEndpoint = document.getElementById('privateEndpoint').value.slice(8)
+    if (privateEndpointEnabled && privateEndpoint === '') {
+        alert('Please fill in the Azure Speech endpoint.')
+        return
+    }
+
+    let speechSynthesisConfig
+    if (privateEndpointEnabled) {
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey) 
+    } else {
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
+    }
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
-    speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
 
     const videoFormat = new SpeechSDK.AvatarVideoFormat()
     let videoCropTopLeftX = document.getElementById('videoCrop').checked ? 600 : 0
@@ -222,7 +233,8 @@ window.speak = () => {
     document.getElementById('audio').muted = false
     let spokenText = document.getElementById('spokenText').value
     let ttsVoice = document.getElementById('ttsVoice').value
-    let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(spokenText)}</voice></speak>`
+    let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
+    let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(spokenText)}</mstts:ttsembedding></voice></speak>`
     console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
     avatarSynthesizer.speakSsmlAsync(spokenSsml).then(
         (result) => {
@@ -268,5 +280,13 @@ window.updataTransparentBackground = () => {
         document.body.background = ''
         document.getElementById('backgroundColor').value = '#FFFFFFFF'
         document.getElementById('backgroundColor').disabled = false
+    }
+}
+
+window.updatePrivateEndpoint = () => {
+    if (document.getElementById('enablePrivateEndpoint').checked) {
+        document.getElementById('showPrivateEndpointCheckBox').hidden = false
+    } else {
+        document.getElementById('showPrivateEndpointCheckBox').hidden = true
     }
 }
