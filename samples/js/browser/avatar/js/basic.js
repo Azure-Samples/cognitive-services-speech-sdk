@@ -218,7 +218,7 @@ window.startSession = () => {
     
     const xhr = new XMLHttpRequest()
     xhr.open("GET", "https://westus2.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1")
-    xhr.setRequestHeader("Ocp-Apim-Subscription-Key", "15cef86a18254a65aacc3daf91b1ea8c")
+    xhr.setRequestHeader("Ocp-Apim-Subscription-Key", cogSvcSubKey)
     xhr.addEventListener("readystatechange", function() {
         if (this.readyState === 4) {
             const responseData = JSON.parse(this.responseText)
