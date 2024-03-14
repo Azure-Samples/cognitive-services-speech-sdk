@@ -217,7 +217,7 @@ window.startSession = () => {
     document.getElementById('startSession').disabled = true
     
     const xhr = new XMLHttpRequest()
-    xhr.open("GET", "https://westus2.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1")
+    xhr.open("GET", `https://${cogSvcRegion}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`)
     xhr.setRequestHeader("Ocp-Apim-Subscription-Key", cogSvcSubKey)
     xhr.addEventListener("readystatechange", function() {
         if (this.readyState === 4) {
