@@ -70,7 +70,7 @@ function connectAvatar() {
     }
 
     dataSources = []
-    if (document.getElementById('enableByod').checked) {
+    if (document.getElementById('enableOyd').checked) {
         const azureCogSearchEndpoint = document.getElementById('azureCogSearchEndpoint').value
         const azureCogSearchApiKey = document.getElementById('azureCogSearchApiKey').value
         const azureCogSearchIndexName = document.getElementById('azureCogSearchIndexName').value
@@ -682,8 +682,8 @@ window.microphone = () => {
         })
 }
 
-window.updataEnableByod = () => {
-    if (document.getElementById('enableByod').checked) {
+window.updataEnableOyd = () => {
+    if (document.getElementById('enableOyd').checked) {
         document.getElementById('cogSearchConfig').hidden = false
     } else {
         document.getElementById('cogSearchConfig').hidden = true
