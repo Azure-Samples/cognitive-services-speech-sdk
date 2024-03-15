@@ -217,7 +217,11 @@ window.startSession = () => {
     document.getElementById('startSession').disabled = true
     
     const xhr = new XMLHttpRequest()
-    xhr.open("GET", `https://${cogSvcRegion}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`)
+    if (privateEndpointEnabled) {
+        xhr.open("GET", `https://${privateEndpoint}/tts/cognitiveservices/avatar/relay/token/v1`)
+    } else {
+        xhr.open("GET", `https://${cogSvcRegion}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`)
+    }
     xhr.setRequestHeader("Ocp-Apim-Subscription-Key", cogSvcSubKey)
     xhr.addEventListener("readystatechange", function() {
         if (this.readyState === 4) {
