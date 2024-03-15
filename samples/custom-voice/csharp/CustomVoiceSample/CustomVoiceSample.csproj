@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" version="6.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.36.0" />
+    <PackageReference Include="Newtonsoft.Json" version="13.0.3" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestData\PersonalVoice\sample.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\VoiceTalentVerbalStatement.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+   </Content>
+  </ItemGroup>
+</Project>
