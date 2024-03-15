@@ -24,7 +24,7 @@
     <input type="checkbox" id="enablePrivateEndpoint" onchange = "window.updatePrivateEndpoint()">Enable Private Endpoint</input><br />
   </div>
   <div id = "showPrivateEndpointCheckBox" hidden="hidden">
-    <label style="font-size: medium;" for="azureOpenAIEndpoint">Endpoint:</label>
+    <label style="font-size: medium;" for="privateEndpoint">Endpoint:</label>
     <input id="privateEndpoint" type="text" size="64" style="font-size: medium;" placeholder="https://{your custom name}.cognitiveservices.azure.com/"></input><br />
   </div><br />
 
@@ -52,15 +52,6 @@
     <input id="azureCogSearchIndexName" type="text" size="32" style="font-size: medium;" /><br />
     <br />
   </div>
-
-  <h2 style="background-color: white; width: 150px;">ICE Server</h2>
-  <label style="font-size: medium;" for="iceServerUrl">URL:</label>
-  <input id="iceServerUrl" type="text" size="64" style="font-size: medium;" value="turn:relay.communication.microsoft.com:3478"></input><br />
-  <label style="font-size: medium;" for="iceServerUsername">Username:</label>
-  <input id="iceServerUsername" type="text" size="64" style="font-size: medium;" /><br />
-  <label style="font-size: medium;" for="iceServerCredential">Credential:</label>
-  <input id="iceServerCredential" type="password" size="32" style="font-size: medium;" /><br />
-  <br />
 
   <h2 style="background-color: white; width: 300px;">STT / TTS Configuration</h2>
   <label style="font-size: medium;" for="sttLocale">STT Locale(s):</label>
