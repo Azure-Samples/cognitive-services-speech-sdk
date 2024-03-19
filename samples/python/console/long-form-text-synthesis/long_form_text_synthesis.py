@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class LongTextSynthesizer:
     def __init__(self, subscription: str, region: str, language: str = 'english',
-                 voice: str = 'en-US-AvaNeural', parallel_threads: int = 8) -> None:
+                 voice: str = 'en-US-AvaMultilingualNeural', parallel_threads: int = 8) -> None:
         self.is_ssml = None
         self.subscription = subscription
         self.region = region

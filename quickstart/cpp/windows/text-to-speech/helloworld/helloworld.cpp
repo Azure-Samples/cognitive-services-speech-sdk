@@ -18,7 +18,7 @@ void synthesizeSpeech()
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
-    config->SetSpeechSynthesisVoiceName("en-US-AvaNeural");
+    config->SetSpeechSynthesisVoiceName("en-US-AvaMultilingualNeural");
 
     // Creates a speech synthesizer using the default speaker as audio output. The default spoken language is "en-us".
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
