@@ -27,7 +27,7 @@ namespace helloworld
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
             // Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
-            config.SpeechSynthesisVoiceName = "en-US-AvaNeural";
+            config.SpeechSynthesisVoiceName = "en-US-AvaMultilingualNeural";
 
             // Creates a speech synthesizer using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
