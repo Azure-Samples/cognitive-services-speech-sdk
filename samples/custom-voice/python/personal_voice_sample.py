@@ -41,9 +41,12 @@ def create_personal_voice(project_id: str,
 def speech_synthesis_to_wave_file(text: str, output_file_path: str, speaker_profile_id: str):
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=config.key, region=config.region)
+    speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm)
     file_config = speechsdk.audio.AudioOutputConfig(filename=output_file_path)
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=file_config)
 
+
+    # use PhoenixLatestNeural if you want word boundary event.  We will support events on DragonLatestNeural in the future.
     ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' " \
            "xmlns:mstts='http://www.w3.org/2001/mstts'>" \
            "<voice name='DragonLatestNeural'>" \
@@ -52,6 +55,11 @@ def speech_synthesis_to_wave_file(text: str, output_file_path: str, speaker_prof
            "<lang xml:lang='en-US'> %s </lang>" \
            "</mstts:express-as>" \
            "</voice></speak> " % (speaker_profile_id, text)
+
+    def word_boundary(evt):
+        print(f"Word Boundary: Text='{evt.text}', Audio offset={evt.audio_offset / 10000}ms, Duration={evt.duration / 10000}ms, text={evt.text}")
+
+    speech_synthesizer.synthesis_word_boundary.connect(word_boundary)
     result = speech_synthesizer.speak_ssml_async(ssml).get()
 
     # Check result
@@ -73,7 +81,7 @@ def clean_up(project_id: str, consent_id: str, personal_voice_id: str):
 
 
 region = 'eastus' # eastus, westeurope, southeastasia
-key = 'your sub key here'
+key = 'your speech key here'
 
 
 logging.basicConfig(filename="customvoice.log",
@@ -111,7 +119,7 @@ try:
 
     # step 2: synthesis wave
     text = 'This is zero shot voice. Test 2.'
-    output_wave_file_path = 'output_1.wav'
+    output_wave_file_path = 'output_sdk.wav'
     speech_synthesis_to_wave_file(text, output_wave_file_path, speaker_profile_id)
 except Exception as e:
     print(e)
