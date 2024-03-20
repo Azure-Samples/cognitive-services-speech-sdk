@@ -70,7 +70,7 @@ function connectAvatar() {
     }
 
     dataSources = []
-    if (document.getElementById('enableByod').checked) {
+    if (document.getElementById('enableOyd').checked) {
         const azureCogSearchEndpoint = document.getElementById('azureCogSearchEndpoint').value
         const azureCogSearchApiKey = document.getElementById('azureCogSearchApiKey').value
         const azureCogSearchIndexName = document.getElementById('azureCogSearchIndexName').value
@@ -88,18 +88,26 @@ function connectAvatar() {
         messageInitiated = true
     }
 
-    const iceServerUrl = document.getElementById('iceServerUrl').value
-    const iceServerUsername = document.getElementById('iceServerUsername').value
-    const iceServerCredential = document.getElementById('iceServerCredential').value
-    if (iceServerUrl === '' || iceServerUsername === '' || iceServerCredential === '') {
-        alert('Please fill in the ICE server URL, username and credential.')
-        return
-    }
-
     document.getElementById('startSession').disabled = true
     document.getElementById('configuration').hidden = true
 
-    setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+    const xhr = new XMLHttpRequest()
+    if (privateEndpointEnabled) {
+        xhr.open("GET", `https://${privateEndpoint}/tts/cognitiveservices/avatar/relay/token/v1`)
+    } else {
+        xhr.open("GET", `https://${cogSvcRegion}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`)
+    }
+    xhr.setRequestHeader("Ocp-Apim-Subscription-Key", cogSvcSubKey)
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            const responseData = JSON.parse(this.responseText)
+            const iceServerUrl = responseData.Urls[0]
+            const iceServerUsername = responseData.Username
+            const iceServerCredential = responseData.Password
+            setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+        }
+    })
+    xhr.send()
 }
 
 // Disconnect from avatar service
@@ -674,8 +682,8 @@ window.microphone = () => {
         })
 }
 
-window.updataEnableByod = () => {
-    if (document.getElementById('enableByod').checked) {
+window.updataEnableOyd = () => {
+    if (document.getElementById('enableOyd').checked) {
         document.getElementById('cogSearchConfig').hidden = false
     } else {
         document.getElementById('cogSearchConfig').hidden = true
