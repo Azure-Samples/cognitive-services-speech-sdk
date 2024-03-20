@@ -42,13 +42,10 @@ export const main = (settings) => {
     const scoreNumber = {
         accuracyScore: 0,
         fluencyScore: 0,
-        compScore: 0,
-        prosodyScore: 0,
     };
     const allWords = [];
     var currentText = [];
     var startOffset = 0;
-    var recognizedWords = [];
     var fluencyScores = [];
     var prosodyScores = [];
     var durations = [];
@@ -91,10 +88,7 @@ export const main = (settings) => {
         const durationList = [];
         _.forEach(nBestWords, (word) => {
             if (word.PronunciationAssessment.AccuracyScore < 60) word.PronunciationAssessment.ErrorType = "Mispronunciation";
-            recognizedWords.push(word);
-            if (word.PronunciationAssessment.ErrorType == "None" && word.PronunciationAssessment.AccuracyScore >= 60) {
-                recognizedWordsNum++;
-            }
+            if (word.PronunciationAssessment.ErrorType == "None") recognizedWordsNum++;
             durationList.push(word.Duration);
         });
         durations.push(_.sum(durationList));
@@ -139,7 +133,7 @@ export const main = (settings) => {
 
         // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
         // We need to compare with the reference text after received all recognized words to get these error words.
-        const lastWords = [];
+        var lastWords = [];
         if (reference_text.length != 0) {
             const diff = diffArrays(wholelyricsArrayRes, currentText);
             let currentWholelyricsArrayResIndex = 0;
@@ -186,22 +180,17 @@ export const main = (settings) => {
             lastWords = allWords;
         }
 
-        let recognizedWordsRes = [];
-        _.forEach(recognizedWords, (word) => {
-            if (word.PronunciationAssessment.ErrorType == "None") {
-                recognizedWordsRes.push(word);
+        if (reference_text.trim() != "") {
+            let compScore =
+                reference_text.length != 0
+                    ? Number(((recognizedWordsNum / wholelyricsArrayRes.length) * 100).toFixed(0))
+                    : 0;
+
+            if (compScore > 100) {
+                compScore = 100;
             }
-        });
-
-        let compScore =
-            reference_text.length != 0
-                ? Number(((recognizedWordsNum / wholelyricsArrayRes.length) * 100).toFixed(0))
-                : 0;
-
-        if (compScore > 100) {
-            compScore = 100;
+            scoreNumber.compScore = compScore;
         }
-        scoreNumber.compScore = compScore;
 
         const accuracyScores = [];
         _.forEach(lastWords, (word) => {
@@ -219,15 +208,12 @@ export const main = (settings) => {
             scoreNumber.fluencyScore = _.sum(sumRes) / _.sum(durations);
         }
 
-        scoreNumber.prosodyScore = _.sum(prosodyScores) / prosodyScores.length;
+        enableProsodyAssessment && (scoreNumber.prosodyScore = _.sum(prosodyScores) / prosodyScores.length);
 
         const sortScore = Object.keys(scoreNumber).sort(function (a, b) {
             return scoreNumber[a] - scoreNumber[b];
         });
-        if (
-            jo.RecognitionStatus == "Success" ||
-            jo.RecognitionStatus == "Failed"
-        ) {
+        if (reference_text.trim() != "" && enableProsodyAssessment) {
             scoreNumber.pronScore = Number(
                 (
                     scoreNumber[sortScore["0"]] * 0.4 +
@@ -236,15 +222,19 @@ export const main = (settings) => {
                     scoreNumber[sortScore["3"]] * 0.2
                 ).toFixed(0)
             );
+        } else if (reference_text.trim() != "" || enableProsodyAssessment) {
+            scoreNumber.pronScore = Number(
+                (scoreNumber[sortScore["0"]] * 0.6 + scoreNumber[sortScore["1"]] * 0.2 + scoreNumber[sortScore["2"]] * 0.2).toFixed(0)
+            );
         } else {
             scoreNumber.pronScore = Number(
-                (scoreNumber.accuracyScore * 0.6 + scoreNumber.fluencyScore * 0.2 + scoreNumber.prosodyScore * 0.2).toFixed(0)
+                (scoreNumber[sortScore["0"]] * 0.6 + scoreNumber[sortScore["1"]] * 0.4).toFixed(0)
             );
         }
 
         console.log(`    Paragraph pronunciation score: ${scoreNumber.pronScore},` +
             ` accuracy score: ${scoreNumber.accuracyScore},` +
-            ` completeness score: ${scoreNumber.compScore},` +
+            `${reference_text.trim() != "" ? ` completeness score: ${scoreNumber.compScore},` : ""}` +
             ` fluency score: ${scoreNumber.fluencyScore}` +
             `${enableProsodyAssessment ? `, prosody score: ${scoreNumber.prosodyScore}` : ""}`);
 
