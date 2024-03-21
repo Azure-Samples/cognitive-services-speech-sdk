@@ -3,6 +3,8 @@
 This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for C#.
 It runs under .NET Core 3.1 or later on Windows or Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
 
+You can use latest .net 8.0. Follow link to install .net 8.0 SDK (https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu-2204)
+
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
@@ -60,6 +62,7 @@ It runs under .NET Core 3.1 or later on Windows or Linux (see the list of [suppo
     * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.
 * If you are using Microsoft Visual Studio 2017 on Windows, press <kbd>Ctrl+Shift+B</kbd>, or select **Build** \> **Build Solution**.
 * If you are using the .NET Core CLI, run the following command from the directory that contains this sample:
+* If you use .net framework other than 3.1,  modify the TargetFramework in the csproj file to your version like net8.0
 
   ```bash
   dotnet build samples/samples.csproj
