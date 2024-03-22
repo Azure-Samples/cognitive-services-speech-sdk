@@ -87,7 +87,9 @@ export const main = (settings) => {
         const nBestWords = jo.NBest[0].Words;
         const durationList = [];
         _.forEach(nBestWords, (word) => {
-            if (word.PronunciationAssessment.AccuracyScore < 60) word.PronunciationAssessment.ErrorType = "Mispronunciation";
+            if (word.PronunciationAssessment.AccuracyScore < 60 && word.PronunciationAssessment.ErrorType == "None") {
+                word.PronunciationAssessment.ErrorType = "Mispronunciation";
+            }
             if (word.PronunciationAssessment.ErrorType == "None") recognizedWordsNum++;
             durationList.push(word.Duration);
         });
@@ -240,7 +242,7 @@ export const main = (settings) => {
 
         _.forEach(lastWords, (word, ind) => {
             let wordLevelOutput = `     ${ind + 1}: word: ${word.Word}`;
-            if (word.PronunciationAssessment.ErrorType != "Omission") {
+            if (word.PronunciationAssessment.ErrorType != "Omission" && word.PronunciationAssessment.ErrorType != "Insertion") {
                 wordLevelOutput += `\taccuracy score: ${word.PronunciationAssessment.AccuracyScore}\terror type: ${word.PronunciationAssessment.ErrorType};`;
             } else {
                 wordLevelOutput += `\t\t\t\terror type: ${word.PronunciationAssessment.ErrorType};`;
