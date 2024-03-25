@@ -114,11 +114,11 @@ void SpeechSynthesisWithVoice()
     auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
     // Sets the voice name.
-    // e.g. "en-US-AndrewNeural".
+    // e.g. "en-US-AndrewMultilingualNeural".
     // The full list of supported voices can be found here:
     // https://aka.ms/csspeech/voicenames
     // And, you can try GetVoicesAsync method to get all available voices (see SpeechSynthesisGetAvailableVoices() sample below).
-    auto voice = "en-US-AndrewNeural";
+    auto voice = "en-US-AndrewMultilingualNeural";
     config->SetSpeechSynthesisVoiceName(voice);
 
     // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.
@@ -803,7 +803,7 @@ void SpeechSynthesisBookmarkEvent()
     };
 
     // Bookmark tag is needed in the SSML, e.g.
-    const auto ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='en-US-AvaNeural'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
+    const auto ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts'><voice name='en-US-AvaMultilingualNeural'><bookmark mark='bookmark_one'/> one. <bookmark mark='bookmark_two'/> two. three. four.</voice></speak>";
 
     cout << "Press Enter to start synthesizing." << std::endl;
     std::string text;
