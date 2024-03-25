@@ -15,6 +15,5 @@ public class PaginatedResults<T>
     /// <summary>
     /// The a link to the next set of paginated results if there are more entities available; otherwise <c>null</c>.
     /// </summary>
-    [JsonPropertyName("nextLink")]
     public Uri NextLink { get; set; }
 }

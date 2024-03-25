@@ -108,7 +108,7 @@ public class BatchSynthesisClient
         Console.WriteLine(content);
         if (response.Headers.TryGetValues("apim-request-id", out var traceRequestId))
         {
-            Console.WriteLine($"Trace request ID: {traceRequestId}.");
+            Console.WriteLine($"Trace request ID: {traceRequestId.FirstOrDefault()}.");
         }
     }
 }
