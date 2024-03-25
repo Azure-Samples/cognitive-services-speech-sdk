@@ -4,6 +4,7 @@
 //
 
 using Newtonsoft.Json;
+using System.Net.Http;
 using System.Net.Http.Formatting;
 
 public class BatchSynthesisClient
@@ -13,14 +14,16 @@ public class BatchSynthesisClient
     private readonly string hostName;
     private readonly string baseUri;
     private readonly string subscriptionKey;
+    private readonly string apiVersion;
 
     private readonly HttpClient client;
 
-    public BatchSynthesisClient(string hostName, string key)
+    public BatchSynthesisClient(string hostName, string key, string apiVersion)
     {
         this.hostName = hostName;
         this.subscriptionKey = key;
-        this.baseUri = $"{this.hostName}/api/texttospeech/3.1-preview1/batchsynthesis";
+        this.baseUri = $"{this.hostName}/texttospeech/batchsyntheses";
+        this.apiVersion = apiVersion;
 
         this.client = new HttpClient();
         client.DefaultRequestHeaders.Add(OcpApimSubscriptionKey, this.subscriptionKey);
@@ -29,7 +32,8 @@ public class BatchSynthesisClient
     public async Task<IEnumerable<BatchSynthesis>> GetAllSynthesesAsync()
     {
         var syntheses = new List<BatchSynthesis>();
-        var uri = new Uri(this.baseUri);
+        var uri = new Uri($"{this.baseUri}?api-version={this.apiVersion}");
+
         do
         {
             var response = await this.client.GetAsync(uri).ConfigureAwait(false);
@@ -41,7 +45,7 @@ public class BatchSynthesisClient
             }
 
             var pagedSyntheses = await response.Content.ReadAsAsync<PaginatedResults<BatchSynthesis>>().ConfigureAwait(false);
-            syntheses.AddRange(pagedSyntheses.Values);
+            syntheses.AddRange(pagedSyntheses.Value);
             uri = pagedSyntheses.NextLink;
         }
         while (uri != null);
@@ -49,9 +53,9 @@ public class BatchSynthesisClient
         return syntheses;
     }
 
-    public async Task<BatchSynthesis> GetSynthesisAsync(Guid id)
+    public async Task<BatchSynthesis> GetSynthesisAsync(string id)
     {
-        var uri = new Uri(this.baseUri + $"/{id}");
+        var uri = new Uri(this.baseUri + $"/{id}?api-version={this.apiVersion}");
         var response = await this.client.GetAsync(uri).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
@@ -62,9 +66,9 @@ public class BatchSynthesisClient
         return await response.Content.ReadAsAsync<BatchSynthesis>().ConfigureAwait(false);
     }
 
-    public async Task DeleteSynthesisAsync(Guid id)
+    public async Task DeleteSynthesisAsync(string id)
     {
-        var uri = new Uri(this.baseUri + $"/{id}");
+        var uri = new Uri(this.baseUri + $"/{id}?api-version={this.apiVersion}");
         var response = await this.client.DeleteAsync(uri).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
@@ -72,44 +76,39 @@ public class BatchSynthesisClient
         }
     }
 
-    public async Task<Uri> CreateSynthesisAsync(
+    public async Task CreateSynthesisAsync(
+        string id,
         string voiceName,
-        string displayName,
-        string description,
         string script,
         bool isSsml)
     {
-        var uri = new Uri(this.baseUri);
+        var uri = new Uri($"{this.baseUri}/{id}?api-version={this.apiVersion}");
 
         var batchSynthesis = new BatchSynthesis
         {
-            DisplayName = displayName,
-            Description = description,
-            TextType = isSsml ? "Ssml" : "PlainText",
-            SynthesisConfig = new BatchSynthesisConfig
+            InputKind = isSsml ? "Ssml" : "PlainText",
+            SynthesisConfig = new SynthesisConfig
             {
                 Voice = voiceName
             },
-            Inputs = new List<BatchSynthesisInputDefinition> { new BatchSynthesisInputDefinition { Text = script } }
+            Inputs = new List<BatchSynthesisInputDefinition> { new BatchSynthesisInputDefinition { Content = script } }
         };
 
-        StringContent content = new StringContent(JsonConvert.SerializeObject(batchSynthesis));
-        content.Headers.ContentType = JsonMediaTypeFormatter.DefaultMediaType;
-        var response = await this.client.PostAsync(uri, content).ConfigureAwait(false);
+        var formatter = new JsonMediaTypeFormatter() { SerializerSettings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } };
+        var response = await this.client.PutAsync(uri, batchSynthesis, formatter).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             await HandleErrorResponse(response);
-            return null;
         }
-
-        var location = response.Headers.GetValues("Location").FirstOrDefault();
-        return new Uri(location);
-
     }
 
     private static async Task HandleErrorResponse(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Console.WriteLine(content);
+        if (response.Headers.TryGetValues("apim-request-id", out var traceRequestId))
+        {
+            Console.WriteLine($"Trace request ID: {traceRequestId}.");
+        }
     }
 }
