@@ -3,9 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using Newtonsoft.Json;
-using System.Net.Http;
-using System.Net.Http.Formatting;
+using System.Text;
+using System.Text.Json;
 
 public class BatchSynthesisClient
 {
@@ -94,8 +93,9 @@ public class BatchSynthesisClient
             Inputs = new List<BatchSynthesisInputDefinition> { new BatchSynthesisInputDefinition { Content = script } }
         };
 
-        var formatter = new JsonMediaTypeFormatter() { SerializerSettings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore } };
-        var response = await this.client.PutAsync(uri, batchSynthesis, formatter).ConfigureAwait(false);
+        // Create JsonSerializer instance with configured options
+        string jsonString = JsonSerializer.Serialize(batchSynthesis, new JsonSerializerOptions { IgnoreNullValues = true });
+        var response = await this.client.PutAsync(uri, new StringContent(jsonString, Encoding.UTF8, "application/json")).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             await HandleErrorResponse(response);
