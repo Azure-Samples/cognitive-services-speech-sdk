@@ -19,7 +19,14 @@
     <option value="southeastasia">Southeast Asia</option>
   </select>
   <label style="font-size: medium;" for="subscriptionKey">Subscription Key:</label>
-  <input id="subscriptionKey" type="password" size="32" style="font-size: medium;" /><br />
+  <input id="subscriptionKey" type="password" size="32" style="font-size: medium;" />
+  <div style="background-color: white; width: 300px;">
+    <input type="checkbox" id="enablePrivateEndpoint" onchange = "window.updatePrivateEndpoint()">Enable Private Endpoint</input><br />
+  </div>
+  <div id = "showPrivateEndpointCheckBox" hidden="hidden">
+    <label style="font-size: medium;" for="privateEndpoint">Endpoint:</label>
+    <input id="privateEndpoint" type="text" size="64" style="font-size: medium;" placeholder="https://{your custom name}.cognitiveservices.azure.com/"></input><br />
+  </div><br />
 
   <h2 style="background-color: white; width: 300px;">Azure OpenAI Resource</h2>
   <label style="font-size: medium;" for="azureOpenAIEndpoint">Endpoint:</label>
@@ -31,7 +38,7 @@
   <label style="font-size: medium;"  for="prompt">System Prompt:</label><br/>
   <textarea id="prompt" style="width: 640px;">You are an AI assistant that helps people find information.</textarea>
   <div style="background-color: white; width: 300px;">
-    <input type="checkbox" id="enableByod" onchange="window.updataEnableByod()">Enable BYOD (Bring Your Own Data)</input><br />
+    <input type="checkbox" id="enableOyd" onchange="window.updataEnableOyd()">Enable On Your Data</input><br />
   </div>
   <br />
 
@@ -46,15 +53,6 @@
     <br />
   </div>
 
-  <h2 style="background-color: white; width: 150px;">ICE Server</h2>
-  <label style="font-size: medium;" for="iceServerUrl">URL:</label>
-  <input id="iceServerUrl" type="text" size="64" style="font-size: medium;" value="turn:relay.communication.microsoft.com:3478"></input><br />
-  <label style="font-size: medium;" for="iceServerUsername">Username:</label>
-  <input id="iceServerUsername" type="text" size="64" style="font-size: medium;" /><br />
-  <label style="font-size: medium;" for="iceServerCredential">Credential:</label>
-  <input id="iceServerCredential" type="password" size="32" style="font-size: medium;" /><br />
-  <br />
-
   <h2 style="background-color: white; width: 300px;">STT / TTS Configuration</h2>
   <label style="font-size: medium;" for="sttLocale">STT Locale(s):</label>
   <input id="sttLocales" type="text" size="64" style="font-size: medium;" value="en-US,de-DE,es-ES,fr-FR,it-IT,ja-JP,ko-KR,zh-CN"></input><br />
@@ -62,6 +60,8 @@
   <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyMultilingualV2Neural"></input><br />
   <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
   <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <label style="font-size: medium;" for="personalVoiceSpeakerProfileID">Personal Voice Speaker Profile ID:</label>
+  <input id="personalVoiceSpeakerProfileID" type="text" size="32" style="font-size: medium;" value=""></input><br />
   <div style="background-color: white; width: 300px;">
     <input type="checkbox" id="continuousConversation">Continuous Conversation</input><br />
   </div>
