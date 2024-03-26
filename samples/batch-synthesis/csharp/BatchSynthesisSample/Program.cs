@@ -59,14 +59,16 @@ while (!terminatedStates.Contains(synthesis.Status))
     synthesis = await synthesisClient.GetSynthesisAsync(newJobId).ConfigureAwait(false);
 }
 
+Console.WriteLine($"Synthesis {newJobId}. Status: {synthesis.Status}");
+
 // Get outputs of the synthesis
-if (!string.IsNullOrEmpty(synthesis.Outputs.Result))
+if (!string.IsNullOrEmpty(synthesis.Outputs?.Result))
 {
     Console.WriteLine("Please download result from this URL before you delete the synthesis.");
     Console.WriteLine(synthesis.Outputs.Result);
 }
 
-if (!string.IsNullOrEmpty(synthesis.Outputs.Summary))
+if (!string.IsNullOrEmpty(synthesis.Outputs?.Summary))
 {
     Console.WriteLine("Please download summary file from this URL before you delete the synthesis.");
     Console.WriteLine(synthesis.Outputs.Summary);
