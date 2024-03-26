@@ -22,6 +22,7 @@ export const main = (settings) => {
     var speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
 
     var reference_text = "What's the weather like?";
+    var enableProsodyAssessment = true;
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     const pronunciationAssessmentConfig = new sdk.PronunciationAssessmentConfig(
         reference_text,
@@ -29,7 +30,7 @@ export const main = (settings) => {
         sdk.PronunciationAssessmentGranularity.Phoneme,
         true
     );
-    pronunciationAssessmentConfig.enableProsodyAssessment = true;
+    pronunciationAssessmentConfig.enableProsodyAssessment = enableProsodyAssessment;
 
     // setting the recognition language to English.
     speechConfig.speechRecognitionLanguage = settings.language;
@@ -41,18 +42,16 @@ export const main = (settings) => {
     const scoreNumber = {
         accuracyScore: 0,
         fluencyScore: 0,
-        compScore: 0,
-        prosodyScore: 0,
     };
     const allWords = [];
     var currentText = [];
     var startOffset = 0;
-    var recognizedWords = [];
     var fluencyScores = [];
     var prosodyScores = [];
     var durations = [];
     var jo = {};
     var filePath = `${uuidv4()}.txt`;
+    var recognizedWordsNum = 0;
 
     // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
@@ -70,11 +69,11 @@ export const main = (settings) => {
     reco.recognized = function (s, e) {
         console.log("pronunciation assessment for: ", e.result.text);
         var pronunciation_result = sdk.PronunciationAssessmentResult.fromResult(e.result);
-        console.log(" Accuracy score: ", pronunciation_result.accuracyScore, '\n',
-            "pronunciation score: ", pronunciation_result.pronunciationScore, '\n',
-            "completeness score : ", pronunciation_result.completenessScore, '\n',
-            "fluency score: ", pronunciation_result.fluencyScore, '\n',
-            "prosody score: ", pronunciation_result.prosodyScore
+        console.log(` Accuracy score: ${pronunciation_result.accuracyScore},` +
+            `\n pronunciation score: ${pronunciation_result.pronunciationScore},` +
+            `\n completeness score : ${pronunciation_result.completenessScore},` +
+            `\n fluency score: ${pronunciation_result.fluencyScore},` +
+            `${enableProsodyAssessment ? `\n prosody score: ${pronunciation_result.prosodyScore}` : ""}`
         );
 
         jo = JSON.parse(e.result.properties.getProperty(sdk.PropertyId.SpeechServiceResponse_JsonResult));
@@ -88,7 +87,10 @@ export const main = (settings) => {
         const nBestWords = jo.NBest[0].Words;
         const durationList = [];
         _.forEach(nBestWords, (word) => {
-            recognizedWords.push(word);
+            if (word.PronunciationAssessment.AccuracyScore < 60 && word.PronunciationAssessment.ErrorType == "None") {
+                word.PronunciationAssessment.ErrorType = "Mispronunciation";
+            }
+            if (word.PronunciationAssessment.ErrorType == "None") recognizedWordsNum++;
             durationList.push(word.Duration);
         });
         durations.push(_.sum(durationList));
@@ -133,7 +135,7 @@ export const main = (settings) => {
 
         // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
         // We need to compare with the reference text after received all recognized words to get these error words.
-        const lastWords = [];
+        var lastWords = [];
         if (reference_text.length != 0) {
             const diff = diffArrays(wholelyricsArrayRes, currentText);
             let currentWholelyricsArrayResIndex = 0;
@@ -180,25 +182,17 @@ export const main = (settings) => {
             lastWords = allWords;
         }
 
-        let reference_words = [];
-        if (["zh-cn"].includes(settings.language.toLowerCase())) {
-            reference_words = allWords;
-        }else{
-            reference_words = wholelyricsArrayRes;
-        }
+        if (reference_text.trim() != "") {
+            let compScore =
+                reference_text.length != 0
+                    ? Number(((recognizedWordsNum / wholelyricsArrayRes.length) * 100).toFixed(0))
+                    : 0;
 
-        let recognizedWordsRes = [];
-        _.forEach(recognizedWords, (word) => {
-            if (word.PronunciationAssessment.ErrorType == "None") {
-                recognizedWordsRes.push(word);
+            if (compScore > 100) {
+                compScore = 100;
             }
-        });
-
-        let compScore = Number(((recognizedWordsRes.length / reference_words.length) * 100).toFixed(0));
-        if (compScore > 100) {
-            compScore = 100;
+            scoreNumber.compScore = compScore;
         }
-        scoreNumber.compScore = compScore;
 
         const accuracyScores = [];
         _.forEach(lastWords, (word) => {
@@ -216,15 +210,12 @@ export const main = (settings) => {
             scoreNumber.fluencyScore = _.sum(sumRes) / _.sum(durations);
         }
 
-        scoreNumber.prosodyScore = _.sum(prosodyScores) / prosodyScores.length;
+        enableProsodyAssessment && (scoreNumber.prosodyScore = _.sum(prosodyScores) / prosodyScores.length);
 
         const sortScore = Object.keys(scoreNumber).sort(function (a, b) {
             return scoreNumber[a] - scoreNumber[b];
         });
-        if (
-            jo.RecognitionStatus == "Success" ||
-            jo.RecognitionStatus == "Failed"
-        ) {
+        if (reference_text.trim() != "" && enableProsodyAssessment) {
             scoreNumber.pronScore = Number(
                 (
                     scoreNumber[sortScore["0"]] * 0.4 +
@@ -233,20 +224,30 @@ export const main = (settings) => {
                     scoreNumber[sortScore["3"]] * 0.2
                 ).toFixed(0)
             );
+        } else if (reference_text.trim() != "" || enableProsodyAssessment) {
+            scoreNumber.pronScore = Number(
+                (scoreNumber[sortScore["0"]] * 0.6 + scoreNumber[sortScore["1"]] * 0.2 + scoreNumber[sortScore["2"]] * 0.2).toFixed(0)
+            );
         } else {
             scoreNumber.pronScore = Number(
-                (scoreNumber.accuracyScore * 0.6 + scoreNumber.fluencyScore * 0.2 + scoreNumber.prosodyScore * 0.2).toFixed(0)
+                (scoreNumber[sortScore["0"]] * 0.6 + scoreNumber[sortScore["1"]] * 0.4).toFixed(0)
             );
         }
 
-        console.log("    Paragraph accuracy score: ", scoreNumber.accuracyScore, ", completeness score: ", scoreNumber.compScore, ", fluency score: ", scoreNumber.fluencyScore, ", prosody score: ", scoreNumber.prosodyScore);        
+        console.log(`    Paragraph pronunciation score: ${scoreNumber.pronScore},` +
+            ` accuracy score: ${scoreNumber.accuracyScore},` +
+            `${reference_text.trim() != "" ? ` completeness score: ${scoreNumber.compScore},` : ""}` +
+            ` fluency score: ${scoreNumber.fluencyScore}` +
+            `${enableProsodyAssessment ? `, prosody score: ${scoreNumber.prosodyScore}` : ""}`);
 
         _.forEach(lastWords, (word, ind) => {
-            if (word.PronunciationAssessment.ErrorType != "Omission") {
-                console.log("    ", ind + 1, ": word: ", word.Word, "\taccuracy score: ", word.PronunciationAssessment.AccuracyScore, "\terror type: ", word.PronunciationAssessment.ErrorType, ";");
+            let wordLevelOutput = `     ${ind + 1}: word: ${word.Word}`;
+            if (word.PronunciationAssessment.ErrorType != "Omission" && word.PronunciationAssessment.ErrorType != "Insertion") {
+                wordLevelOutput += `\taccuracy score: ${word.PronunciationAssessment.AccuracyScore}\terror type: ${word.PronunciationAssessment.ErrorType};`;
             } else {
-                console.log("    ", ind + 1, ": word: ", word.Word, "\t\t\t", "\terror type: ", word.PronunciationAssessment.ErrorType, ";");
+                wordLevelOutput += `\t\t\t\terror type: ${word.PronunciationAssessment.ErrorType};`;
             }
+            console.log(wordLevelOutput);
         });
 
     };
