@@ -79,7 +79,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
         if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
             document.getElementById('speak').disabled = true
-            document.getElementById('stopSpeaking').disabled = true
             document.getElementById('stopSession').disabled = true
             document.getElementById('startSession').disabled = false
             document.getElementById('configuration').hidden = false
@@ -119,10 +118,26 @@ function connectToAvatarService(peerConnection) {
     xhr.setRequestHeader("TransparentBackground", document.getElementById('transparentBackground').checked)
     xhr.setRequestHeader("VideoCrop", document.getElementById('videoCrop').checked)
 
+    let responseReceived = false
     xhr.addEventListener("readystatechange", function() {
-        if (this.readyState === 4) {
-            const remoteSdp = this.responseText
-            peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(remoteSdp))))
+        if (xhr.status == 200) {
+            if (xhr.responseText !== '') {
+                if (!responseReceived) {
+                    responseReceived = true
+                    const remoteSdp = this.responseText
+                    peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(remoteSdp))))
+                }
+            }
+        } else {
+            if (xhr.responseText !== '') {
+                if (!responseReceived) {
+                    responseReceived = true
+                    console.log("Failed to connect to the Avatar service. " + xhr.responseText)
+
+                    document.getElementById('startSession').disabled = false;
+                    document.getElementById('configuration').hidden = false;
+                }
+            }
         }
     })
     xhr.send()
@@ -170,6 +185,7 @@ function makeBackgroundTransparent(timestamp) {
 
     window.requestAnimationFrame(makeBackgroundTransparent)
 }
+
 // Do HTML encoding on given text
 function htmlEncode(text) {
     const entityMap = {
@@ -200,13 +216,26 @@ window.startSession = () => {
         xhr.setRequestHeader("PrivateEndpoint", privateEndpoint)
     }
 
+    let responseReceived = false
     xhr.addEventListener("readystatechange", function() {
-        if (this.readyState === 4) {
-            const responseData = JSON.parse(this.responseText)
-            const iceServerUrl = responseData.Urls[0]
-            const iceServerUsername = responseData.Username
-            const iceServerCredential = responseData.Password
-            setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+        if (xhr.status == 200) {
+            if (xhr.responseText !== '') {
+                if (!responseReceived) {
+                    responseReceived = true
+                    const responseData = JSON.parse(this.responseText)
+                    const iceServerUrl = responseData.Urls[0]
+                    const iceServerUsername = responseData.Username
+                    const iceServerCredential = responseData.Password
+                    setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+                }
+            }
+        } else {
+            if (xhr.responseText !== '') {
+                if (!responseReceived) {
+                    responseReceived = true
+                    console.log("[" + (new Date()).toISOString() + "] Failed fetching ICE token. " + xhr.responseText)
+                }
+            }
         }
     })
     xhr.send()
@@ -214,7 +243,6 @@ window.startSession = () => {
 
 window.speak = () => {
     document.getElementById('speak').disabled = true;
-    document.getElementById('stopSpeaking').disabled = false
     document.getElementById('audio').muted = false
     let spokenText = document.getElementById('spokenText').value
     let ttsVoice = document.getElementById('ttsVoice').value
@@ -224,34 +252,31 @@ window.speak = () => {
 
     const xhr = new XMLHttpRequest()
     xhr.open("POST", "/api/speak")
+    let responseReceived = false
     xhr.addEventListener("readystatechange", function() {
+        document.getElementById('speak').disabled = false
         if (xhr.status == 200) {
-            console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + spokenText + " ]. Result ID: " + xhr.responseText)
+            if (xhr.responseText !== '') {
+                if (!responseReceived) {
+                    responseReceived = true
+                    console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + spokenText + " ]. Result ID: " + xhr.responseText)
+                }
+            }
         } else {
-            console.log("[" + (new Date()).toISOString() + "] Unable to speak text. Result ID: " + xhr.responseText)
+            if (xhr.responseText !== '') {
+                if (!responseReceived) {
+                    responseReceived = true
+                    console.log("[" + (new Date()).toISOString() + "] Unable to speak text. " + xhr.responseText)
+                }
+            }
         }
     })
     xhr.send(spokenSsml)
 }
 
-
-window.stopSpeaking = () => {
-    document.getElementById('stopSpeaking').disabled = true
-
-    const xhr = new XMLHttpRequest()
-    xhr.open("POST", "/api/stopSpeaking")
-    xhr.addEventListener("readystatechange", function() {
-        if (xhr.status == 200) {
-            console.log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
-        }
-    })
-    xhr.send()
-}
-
 window.stopSession = () => {
     document.getElementById('speak').disabled = true
     document.getElementById('stopSession').disabled = true
-    document.getElementById('stopSpeaking').disabled = true
 
     const xhr = new XMLHttpRequest()
     xhr.open("POST", "/api/disconnectAvatar")

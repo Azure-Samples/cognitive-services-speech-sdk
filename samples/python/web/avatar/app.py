@@ -8,6 +8,7 @@ import requests
 import traceback
 from flask import Flask, Response, render_template, request
 
+# Create the Flask app
 app = Flask(__name__, template_folder='.')
 
 # Environment variables
@@ -18,21 +19,26 @@ speech_key = os.environ.get('SPEECH_KEY')
 speech_synthesizer = None
 ice_token = None
 
+# The default route, which shows the web page
 @app.route("/")
 def index():
     return render_template("basic.html", methods=["GET"])
 
+# The API route to get the ICE token
 @app.route("/api/getIceToken", methods=["GET"])
 def getIceToken() -> Response:
     global ice_token
     try:
         private_endpoint = request.headers.get('PrivateEndpoint')
         ice_token = getIceTokenInternal(private_endpoint)
-        return Response(ice_token, status=200)
-    
+        if ice_token.status_code == 200:
+            return Response(ice_token.text, status=200)
+        else:
+            raise Exception(ice_token.status_code)
     except:
         return Response(traceback.format_exc(), status=400)
 
+# The API route to connect the TTS avatar
 @app.route("/api/connectAvatar", methods=["POST"])
 def connectAvatar() -> Response:
     global ice_token
@@ -55,7 +61,7 @@ def connectAvatar() -> Response:
         if not ice_token:
             ice_token = getIceTokenInternal(private_endpoint)
         
-        ice_token_obj = json.loads(ice_token)
+        ice_token_obj = json.loads(ice_token.text)
         local_sdp = request.headers.get('LocalSdp')
         avatar_character = request.headers.get('AvatarCharacter')
         avatar_style = request.headers.get('AvatarStyle')
@@ -112,15 +118,16 @@ def connectAvatar() -> Response:
             print(f"Speech synthesis canceled: {cancellation_details.reason}")
             if cancellation_details.reason == speechsdk.CancellationReason.Error:
                 print(f"Error details: {cancellation_details.error_details}")
-
+                raise Exception(cancellation_details.error_details)
         turn_start_message = speech_synthesizer.properties.get_property_by_name('SpeechSDKInternal-ExtraTurnStartMessage')
         remoteSdp = json.loads(turn_start_message)['webrtc']['connectionString']
 
         return Response(remoteSdp, status=200)
 
-    except:
-        return Response(traceback.format_exc(), status=400)
-    
+    except Exception as e:
+        return Response(f"Result ID: {speech_sythesis_result.result_id}. Error message: {e}", status=400)
+
+# The API route to speak a given SSML
 @app.route("/api/speak", methods=["POST"])
 def speak() -> Response:
     global speech_synthesizer
@@ -132,19 +139,12 @@ def speak() -> Response:
             print(f"Speech synthesis canceled: {cancellation_details.reason}")
             if cancellation_details.reason == speechsdk.CancellationReason.Error:
                 print(f"Error details: {cancellation_details.error_details}")
+                raise Exception(cancellation_details.error_details)
         return Response(speech_sythesis_result.result_id, status=200)
-    except:
-        return Response(speech_sythesis_result.result_id, status=400)
+    except Exception as e:
+        return Response(f"Result ID: {speech_sythesis_result.result_id}. Error message: {e}", status=400)
 
-@app.route("/api/stopSpeaking", methods=["POST"])
-def stopSpeaking() -> Response:
-    global speech_synthesizer
-    try:
-        speech_synthesizer.stop_speaking_async().get()
-        return Response('Stopped speaking', status=200)
-    except:
-        return Response(traceback.format_exc(), status=400)
-
+# The API route to disconnect the TTS avatar
 @app.route("/api/disconnectAvatar", methods=["POST"])
 def disconnectAvatar() -> Response:
     global speech_synthesizer
@@ -155,7 +155,7 @@ def disconnectAvatar() -> Response:
     except:
         return Response(traceback.format_exc(), status=400)
 
-def getIceTokenInternal(private_endpoint: str) -> str:
+def getIceTokenInternal(private_endpoint: str) -> requests.Response:
     if private_endpoint:
         if not private_endpoint.startswith('https://'):
             private_endpoint = f'https://{private_endpoint}'
@@ -163,4 +163,4 @@ def getIceTokenInternal(private_endpoint: str) -> str:
     else:
         ice_token_response = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key})
 
-    return ice_token_response.text
+    return ice_token_response

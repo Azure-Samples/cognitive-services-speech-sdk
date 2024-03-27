@@ -12,23 +12,6 @@
 <h1>Talking Avatar Service Demo</h1>
 
 <div id="configuration">
-  <h2 style="background-color: white; width: 300px;">Azure Speech Resource</h2>
-  <label style="font-size: medium;" for="region">Region:</label>
-  <select id="region" style="font-size: medium;">
-    <option value="westus2">West US 2</option>
-    <option value="westeurope">West Europe</option>
-    <option value="southeastasia">Southeast Asia</option>
-  </select>
-  <label style="font-size: medium;" for="subscriptionKey">Subscription Key:</label>
-  <input id="subscriptionKey" type="password" size="32" style="font-size: medium;" /><br />
-  <div style="background-color: white; width: 300px;">
-    <input type="checkbox" id="enablePrivateEndpoint" onchange = "window.updatePrivateEndpoint()">Enable Private Endpoint</input><br />
-  </div>
-  <div id = "showPrivateEndpointCheckBox" hidden="hidden">
-    <label style="font-size: medium;" for="privateEndpoint">Endpoint:</label>
-    <input id="privateEndpoint" type="text" size="64" style="font-size: medium;" placeholder="https://{your custom name}.cognitiveservices.azure.com/"></input><br />
-  </div><br />
-
   <h2 style="background-color: white; width: 300px;">TTS Configuration</h2>
   <label style="font-size: medium;" for="ttsVoice">TTS Voice:</label>
   <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyMultilingualV2Neural"></input><br />
@@ -36,6 +19,13 @@
   <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
   <label style="font-size: medium;" for="personalVoiceSpeakerProfileID">Personal Voice Speaker Profile ID:</label>
   <input id="personalVoiceSpeakerProfileID" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <div style="background-color: white; width: 300px;">
+    <input type="checkbox" id="enablePrivateEndpoint" onchange = "window.updatePrivateEndpoint()">Enable Private Endpoint</input><br />
+  </div>
+  <div id = "showPrivateEndpointCheckBox" hidden="hidden">
+    <label style="font-size: medium;" for="privateEndpoint">Endpoint:</label>
+    <input id="privateEndpoint" type="text" size="64" style="font-size: medium;" placeholder="https://{your custom name}.cognitiveservices.azure.com/"></input><br />
+  </div>
   <br />
 
   <h2 style="background-color: white; width: 300px;">Avatar Configuration</h2>
@@ -59,7 +49,6 @@
 <textarea id="spokenText" style="height:40px">Hello world!</textarea><br/>
 <button id="startSession" onclick="window.startSession()">Start Session</button>
 <button id="speak" onclick="window.speak()" disabled="disabled">Speak</button>
-<button id="stopSpeaking" onclick="window.stopSpeaking()" disabled="disabled">Stop Speaking</button>
 <button id="stopSession" onclick="window.stopSession()" disabled="disabled">Stop Session</button>
 <br/>
 
