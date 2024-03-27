@@ -3,12 +3,17 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-public class BatchSynthesisConfig
+public class SynthesisConfig
 {
     /// <summary>
     /// The voice name.
     /// </summary>
     public string Voice { get; set; }
+
+    /// <summary>
+    /// The speaker profile ID of target personal voice.
+    /// </summary>
+    public string SpeakerProfileId { get; init; }
 
     /// <summary>
     /// The role name.
@@ -39,4 +44,20 @@ public class BatchSynthesisConfig
     /// The volume value.
     /// </summary>
     string Volume { get; set; }
+
+    /// <summary>
+    /// The background audio configuration.
+    /// </summary>
+    public BackgroundAudioConfig BackgroundAudio { get; init; }
+}
+
+public class BackgroundAudioConfig
+{
+    public Uri Src { get; init; }
+
+    public long? Fadein { get; init; }
+
+    public long? Fadeout { get; init; }
+
+    public double? Volume { get; init; }
 }

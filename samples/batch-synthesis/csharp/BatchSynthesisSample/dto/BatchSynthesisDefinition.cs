@@ -7,9 +7,9 @@ public class BatchSynthesisDefinition
 {
 
     /// <summary>
-    /// The synthesis text type, SSMl or plain text.
+    /// The synthesis text type, `SSML` or `PlainText`.
     /// </summary>
-    public string TextType { get; set; }
+    public string InputKind { get; set; }
 
     /// <summary>
     /// The text inputs.
@@ -20,7 +20,7 @@ public class BatchSynthesisDefinition
     /// The synthesis config.
     /// Required and only effective when text type is plain text.
     /// </summary>
-    public BatchSynthesisConfig SynthesisConfig { get; set; }
+    public SynthesisConfig SynthesisConfig { get; set; }
 
     /// <summary>
     /// The custom voice map of voice name and deployment ID .
@@ -32,4 +32,12 @@ public class BatchSynthesisDefinition
     /// The additional configuration options when creating a new synthesis and additional metadata provided by the service.
     /// </summary>
     public BatchSynthesisPropertiesDefinition Properties { get; set; }
+}
+
+public class BatchSynthesisInputDefinition
+{
+    /// <summary>
+    /// The input text string, it could be SSML or plain text.
+    /// </summary>
+    public string Content { get; set; }
 }
