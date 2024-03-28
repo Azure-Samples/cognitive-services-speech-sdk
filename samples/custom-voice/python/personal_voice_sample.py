@@ -41,9 +41,12 @@ def create_personal_voice(project_id: str,
 def speech_synthesis_to_wave_file(text: str, output_file_path: str, speaker_profile_id: str):
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(subscription=config.key, region=config.region)
+    speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm)
     file_config = speechsdk.audio.AudioOutputConfig(filename=output_file_path)
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=file_config)
 
+
+    # use PhoenixLatestNeural if you want word boundary event.  We will support events on DragonLatestNeural in the future.
     ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' " \
            "xmlns:mstts='http://www.w3.org/2001/mstts'>" \
            "<voice name='DragonLatestNeural'>" \
@@ -52,6 +55,11 @@ def speech_synthesis_to_wave_file(text: str, output_file_path: str, speaker_prof
            "<lang xml:lang='en-US'> %s </lang>" \
            "</mstts:express-as>" \
            "</voice></speak> " % (speaker_profile_id, text)
+
+    def word_boundary(evt):
+        print(f"Word Boundary: Text='{evt.text}', Audio offset={evt.audio_offset / 10000}ms, Duration={evt.duration / 10000}ms, text={evt.text}")
+
+    speech_synthesizer.synthesis_word_boundary.connect(word_boundary)
     result = speech_synthesizer.speak_ssml_async(ssml).get()
 
     # Check result
@@ -73,7 +81,8 @@ def clean_up(project_id: str, consent_id: str, personal_voice_id: str):
 
 
 region = 'eastus' # eastus, westeurope, southeastasia
-key = '<put your speech accout key here>'
+key = 'your speech key here'
+
 
 logging.basicConfig(filename="customvoice.log",
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -88,28 +97,33 @@ project_id = 'personal-voice-project-1'
 consent_id = 'personal-voice-consent-1'
 personal_voice_id  = 'personal-voice-1'
 
-# step 1: create personal voice
-# Need consent file and audio file to create personal vocie.
-# This is consent file template.
-# I [voice talent name] am aware that recordings of my voice will be used by [company name] to create and use a synthetic version of my voice.
-# You can find sample consent file here
-# https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/VoiceTalentVerbalStatement.wav
-consent_file_path = r'D:\CNV_API\VoiceTalentVerbalStatement.wav'
-voice_talent_name = 'Sample Voice Actor'
-company_name = 'Contoso'
-# Need 50 - 90 seconds audio file.
-# You can find sample audio file here.
-# https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/SampleAudios.zip
-# Pleae unzip audio file, and put the first 14 files in folder below.
-audio_folder = r'D:\CNV_API\SampleAudios_14'
-speaker_profile_id = create_personal_voice(project_id, 
-                                           consent_id, consent_file_path, voice_talent_name, company_name,
-                                           personal_voice_id, audio_folder)
+try:
+    # step 1: create personal voice
+    # Need consent file and audio file to create personal vocie.
+    # This is consent file template.
+    # I [voice talent name] am aware that recordings of my voice will be used by [company name] to create and use a synthetic version of my voice.
+    # You can find sample consent file here
+    # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/VoiceTalentVerbalStatement.wav
+    consent_file_path = r'voice\\VoiceTalentVerbalStatement.wav'
+    voice_talent_name = 'Sample Voice Actor'
+    company_name = 'Contoso'
 
-# step 2: synthesis wave
-text = 'This is zero shot voice. Test 2.'
-output_wave_file_path = 'D:\CNV_API\output_1.wav'
-speech_synthesis_to_wave_file(text, output_wave_file_path, speaker_profile_id)
+    # Need 50 - 90 seconds audio file.
+    # You can find sample audio file here.
+    # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/SampleAudios.zip
+    # Pleae unzip audio file, and put the first 14 files in folder below.
+    audio_folder = r'voice\\'
+    speaker_profile_id = create_personal_voice(project_id, 
+                                            consent_id, consent_file_path, voice_talent_name, company_name,
+                                            personal_voice_id, audio_folder)
 
-# Optional step 3: clean up, if you don't need this voice to synthesis more content.
-clean_up(project_id, consent_id, personal_voice_id)
+    # step 2: synthesis wave
+    text = 'This is zero shot voice. Test 2.'
+    output_wave_file_path = 'output_sdk.wav'
+    speech_synthesis_to_wave_file(text, output_wave_file_path, speaker_profile_id)
+except Exception as e:
+    print(e)
+finally:
+    # Optional step 3: clean up, if you don't need this voice to synthesis more content.
+    clean_up(project_id, consent_id, personal_voice_id)
+
