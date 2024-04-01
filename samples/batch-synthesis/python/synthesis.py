@@ -90,7 +90,7 @@ def get_synthesis(job_id: str):
         logger.error(f'Failed to get batch synthesis job: {response.text}')
 
 
-def list_synthesis_jobs(skip: int = 0, top: int = 100):
+def list_synthesis_jobs(skip: int = 0, maxpagesize: int = 100):
     """List all batch synthesis jobs in the subscription"""
     url = f'{SPEECH_ENDPOINT}/texttospeech/batchsyntheses?api-version={API_VERSION}&skip={skip}&top={top}'
     header = {
