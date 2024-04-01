@@ -13,7 +13,7 @@ pip install requests
 The sample code itself is [synthesis.py](synthesis.py) and can be run using Python 3.7 or higher.
 You will need to adapt the following information to run the sample:
 
-1. Your Azure AI Speech Services.
+1. Your Azure AI Speech Service.
 
     Some notes:
 
