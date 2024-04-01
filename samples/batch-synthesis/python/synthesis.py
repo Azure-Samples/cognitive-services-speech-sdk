@@ -77,7 +77,7 @@ def submit_synthesis(job_id: str) -> bool:
 
 
 def get_synthesis(job_id: str):
-    url = f'{SPEECH_ENDPOINT}/texttospeech//batchsyntheses/{job_id}?api-version={API_VERSION}'
+    url = f'{SPEECH_ENDPOINT}/texttospeech/batchsyntheses/{job_id}?api-version={API_VERSION}'
     header = {
         'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY
     }
