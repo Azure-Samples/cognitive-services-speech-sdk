@@ -92,7 +92,7 @@ def get_synthesis(job_id: str):
 
 def list_synthesis_jobs(skip: int = 0, maxpagesize: int = 100):
     """List all batch synthesis jobs in the subscription"""
-    url = f'{SPEECH_ENDPOINT}/texttospeech/batchsyntheses?api-version={API_VERSION}&skip={skip}&top={top}'
+    url = f'{SPEECH_ENDPOINT}/texttospeech/batchsyntheses?api-version={API_VERSION}&skip={skip}&maxpagesize={maxpagesize}'
     header = {
         'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY
     }
