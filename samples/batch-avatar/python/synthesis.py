@@ -21,10 +21,11 @@ logger = logging.getLogger(__name__)
 
 # The endpoint (and key) could be gotten from the Keys and Endpoint page in the Speech service resource.
 # The endpoint would be like: https://<region>.api.cognitive.microsoft.com or https://<custom_domain>.cognitiveservices.azure.com
+# If you want to use passwordless authentication, custom domain is required.
 SPEECH_ENDPOINT = os.environ.get('SPEECH_ENDPOINT')
 # We recommend to use passwordless authentication with Azure Identity here; meanwhile, you can also use a subscription key instead
 PASSWORDLESS_AUTHENTICATION = False
-API_VERSION = "2024-04-01-preview"
+API_VERSION = "2024-04-15-preview"
 
 
 def _create_job_id():
@@ -41,7 +42,7 @@ def _authenticate():
         # Your app can then use a managed identity once it has been deployed to Azure. No code changes are required for this transition.
 
         # When developing locally, make sure that the user account that is accessing batch avatar synthesis has the right permission.
-        # You'll need Storage Blob Data Contributor to read and write blob data.
+        # You'll need Cognitive Services User or Cognitive Services Speech User role to submit batch avatar synthesis jobs.
         credential = DefaultAzureCredential()
         token = credential.get_token('https://cognitiveservices.azure.com/.default')
         return {'Authorization': f'Bearer {token.token}'}
@@ -91,7 +92,7 @@ def submit_synthesis(job_id: str):
         logger.info(f'Job ID: {response.json()["id"]}')
         return True
     else:
-        logger.error(f'Failed to submit batch avatar synthesis job: {response.text}')
+        logger.error(f'Failed to submit batch avatar synthesis job: [{response.status_code}], {response.text}')
 
 
 def get_synthesis(job_id):
