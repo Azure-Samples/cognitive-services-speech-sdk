@@ -1005,10 +1005,17 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Create a speech config with subscription key and service region and avatar enabled.
             var config = SpeechConfig.FromEndpoint(new Uri("wss://YourServiceRegion.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true"), "YourSubscriptionKey");
+            config.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw16Khz16BitMonoPcm);
 
             // Creates a speech synthesizer
             using (var synthesizer = new SpeechSynthesizer(config, null as AudioConfig))
             {
+                // Subscribes to synthesizing event to receive audio chunks
+                synthesizer.Synthesizing += (s, e) =>
+                {
+                    Console.WriteLine($"Synthesizing event received with audio chunk of {e.Result.AudioData.Length} bytes.");
+                };
+
                 using var connection = Connection.FromSpeechSynthesizer(synthesizer);
                 // Set the synthesis config payload to enable talking avatar.
                 string videoConfigPayload = @"{ ""synthesis"": {""video"": {
@@ -1020,7 +1027,8 @@ namespace MicrosoftSpeechSDKSamples
                                                     ""urls"": [""<ICE URL, e.g., turn:relay.communication.microsoft.com:3478>""],
                                                     ""username"": ""<ICE Username>"",
                                                     ""credential"": ""<ICE credential>""
-                                                }]
+                                                }],
+                                                ""auditAudio"": ""true""
                                             }
                                         },
                                         ""format"":{
