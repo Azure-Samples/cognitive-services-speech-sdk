@@ -8,6 +8,13 @@ The sample uses the `requests` library. You can install it with the command
 pip install requests
 ```
 
+We recommend using a passwordless authentication provided by the `azure-identity` library.
+You can install it with the command
+
+```sh
+pip install azure-identity
+```
+
 ## Run the sample code
 
 The sample code itself is [synthesis.py](synthesis.py) and can be run using Python 3.7 or higher.
@@ -17,7 +24,8 @@ You will need to adapt the following information to run the sample:
 
     Some notes:
 
-    - You can get the subscription key and endpoint from the "Keys and Endpoint" tab on your Cognitive Services or Speech resource in the Azure Portal.
+    - We recommend using a passwordless authentication provided by the `azure-identity` library. Your Microsoft Entra user account is need to be assigned with `Cognitive Services Speech User` or `Cognitive Services Speech User` role.
+      - Alternatively, you can get the subscription key from the "Keys and Endpoint" tab on your Azure AI Speech resource in the Azure Portal.
     - Batch synthesis is only available for paid subscriptions, free subscriptions are not supported.
     - Please refer to [this page](https://learn.microsoft.com/azure/ai-services/speech-service/regions#rest-apis) for a complete list of region identifiers in the expected format.
 
