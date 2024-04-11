@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # If you want to use passwordless authentication, custom domain is required.
 SPEECH_ENDPOINT = os.environ.get('SPEECH_ENDPOINT')
 # We recommend to use passwordless authentication with Azure Identity here; meanwhile, you can also use a subscription key instead
-PASSWORDLESS_AUTHENTICATION = False
+PASSWORDLESS_AUTHENTICATION = True
 API_VERSION = "2024-04-15-preview"
 
 
@@ -110,9 +110,9 @@ def get_synthesis(job_id):
         logger.error(f'Failed to get batch synthesis job: {response.text}')
 
 
-def list_synthesis_jobs(skip: int = 0, top: int = 100):
+def list_synthesis_jobs(skip: int = 0, max_page_size: int = 100):
     """List all batch synthesis jobs in the subscription"""
-    url = f'{SPEECH_ENDPOINT}/avatar/batchsyntheses?api-version={API_VERSION}&$skip={skip}&$top={top}'
+    url = f'{SPEECH_ENDPOINT}/avatar/batchsyntheses?api-version={API_VERSION}&skip={skip}&maxpagesize={max_page_size}'
     header = _authenticate()
 
     response = requests.get(url, headers=header)
