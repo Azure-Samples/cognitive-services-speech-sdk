@@ -57,11 +57,11 @@ Video dubbing client tool and API sample code
    | -region  | eastus | Supported regions |
    | -subscriptionKey | | Your speech resource key |
    | -VoiceKind | PlatformVoice/PersonalVoice | For trnaslated target video, synthesis TTS with either PlatformVoice or PersonalVoice. |
-   | -profileName | | Translation pipeline profile |
+   | -profileName | [Supported profiles](#Supported-profiles) | Translation pipeline profile |
    | -sourceLocale | en-US | Video file source locale, supported source locales can be queried by running tool with QueryMetadata mode. |
    | -targetLocales | en-US | translation target locale, supported source locales can be queried by running tool with QueryMetadata mode. |
 
-# Supported profiles:
+# Supported profiles
    | Profile name | Description | When to use? |
    | ------------ | ----------- | ------------ |
    | DynamicAlignmentProfile-Experiment-V1  | Optimized background audio extraction, translation content, length, alignment adjustment and personal voice TTS synthesis. | Full translatio. |
