@@ -100,12 +100,6 @@ function connectToAvatarService(peerConnection) {
     const xhr = new XMLHttpRequest()
     xhr.open("POST", "/api/connectAvatar")
 
-    const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
-    const privateEndpoint = document.getElementById('privateEndpoint').value
-    if (privateEndpointEnabled && privateEndpoint !== '') {
-        xhr.setRequestHeader("PrivateEndpoint", privateEndpoint)
-    }
-
     if (document.getElementById('customVoiceEndpointId').value !== '') {
         xhr.setRequestHeader("CustomVoiceEndpointId", document.getElementById('customVoiceEndpointId').value)
     }
@@ -201,20 +195,10 @@ function htmlEncode(text) {
 }
 
 window.startSession = () => {
-    const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
-    const privateEndpoint = document.getElementById('privateEndpoint').value
-    if (privateEndpointEnabled && privateEndpoint === '') {
-        alert('Please fill in the Azure Speech endpoint.')
-        return
-    }
-
     document.getElementById('startSession').disabled = true
     
     const xhr = new XMLHttpRequest()
     xhr.open("GET", "/api/getIceToken")
-    if (privateEndpointEnabled && privateEndpoint !== '') {
-        xhr.setRequestHeader("PrivateEndpoint", privateEndpoint)
-    }
 
     let responseReceived = false
     xhr.addEventListener("readystatechange", function() {
@@ -292,13 +276,5 @@ window.updataTransparentBackground = () => {
         document.body.background = ''
         document.getElementById('backgroundColor').value = '#FFFFFFFF'
         document.getElementById('backgroundColor').disabled = false
-    }
-}
-
-window.updatePrivateEndpoint = () => {
-    if (document.getElementById('enablePrivateEndpoint').checked) {
-        document.getElementById('showPrivateEndpointCheckBox').hidden = false
-    } else {
-        document.getElementById('showPrivateEndpointCheckBox').hidden = true
     }
 }
