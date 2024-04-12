@@ -6,6 +6,7 @@ import datetime
 import html
 import json
 import os
+import pytz
 import random
 import re
 import requests
@@ -31,24 +32,24 @@ cognitive_search_endpoint = os.environ.get('COGNITIVE_SEARCH_ENDPOINT') # e.g. h
 cognitive_search_api_key = os.environ.get('COGNITIVE_SEARCH_API_KEY')
 cognitive_search_index_name = os.environ.get('COGNITIVE_SEARCH_INDEX_NAME') # e.g. my-search-index
 
-# Configurations which can be overridden by the client
-tts_voice = 'en-US-JennyMultilingualV2Neural'
-personal_voice_speaker_profile_id = None
-
 # Global variables
-speech_synthesizer = None
-speech_token = None
-ice_token = None
-chat_initiated = False
-messages = []
-data_sources = []
-sentence_level_punctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ]
-enable_quick_reply = False
-quick_replies = [ 'Let me take a look.', 'Let me check.', 'One moment, please.' ]
-byod_doc_regex = re.compile(r'\[doc(\d+)\]')
-is_speaking = False
-spoken_text_queue = []
-last_speak_time = datetime.datetime.now()
+tts_voice = 'en-US-JennyMultilingualV2Neural' # Default TTS voice, can be overriden by client
+custom_voice_endpoint_id = None # Endpoint ID (deployment ID) for custom voice, can be overriden by client
+personal_voice_speaker_profile_id = None # Speaker profile ID for personal voice, can be overriden by client
+speech_synthesizer = None # Speech synthesizer for avatar
+speech_token = None # Speech token for client side authentication with speech service
+ice_token = None # ICE token for ICE/TURN/Relay server connection
+chat_initiated = False # Flag to indicate if the chat context is initiated
+messages = [] # Chat messages (history)
+data_sources = [] # Data sources for 'on your data' scenario
+sentence_level_punctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ] # Punctuations that indicate the end of a sentence
+enable_quick_reply = False # Enable quick reply for certain chat models which take longer time to respond
+quick_replies = [ 'Let me take a look.', 'Let me check.', 'One moment, please.' ] # Quick reply reponses
+oyd_doc_regex = re.compile(r'\[doc(\d+)\]') # Regex to match the OYD (on-your-data) document reference
+is_speaking = False # Flag to indicate if the avatar is speaking
+spoken_text_queue = [] # Queue to store the spoken text
+speaking_thread = None # The thread to speak the spoken text queue
+last_speak_time = None # The last time the avatar spoke
 
 # The default route, which shows the default web page (basic.html)
 @app.route("/")
@@ -60,10 +61,12 @@ def index():
 def basicView():
     return render_template("basic.html", methods=["GET"])
 
+# The chat route, which shows the chat web page
 @app.route("/chat")
 def chatView():
     return render_template("chat.html", methods=["GET"])
 
+# The API route to get the speech token
 @app.route("/api/getSpeechToken", methods=["GET"])
 def getSpeechToken() -> Response:
     global speech_token
@@ -81,7 +84,20 @@ def getIceToken() -> Response:
 def connectAvatar() -> Response:
     global ice_token
     global speech_synthesizer
+    global azure_openai_deployment_name
+    global cognitive_search_index_name
+    global tts_voice
+    global custom_voice_endpoint_id
+    global personal_voice_speaker_profile_id
     global last_speak_time
+
+    # Override default values with client provided values
+    azure_openai_deployment_name = request.headers.get('AoaiDeploymentName') if request.headers.get('AoaiDeploymentName') else azure_openai_deployment_name
+    cognitive_search_index_name = request.headers.get('CognitiveSearchIndexName') if request.headers.get('CognitiveSearchIndexName') else cognitive_search_index_name
+    tts_voice = request.headers.get('TtsVoice') if request.headers.get('TtsVoice') else tts_voice
+    custom_voice_endpoint_id = request.headers.get('CustomVoiceEndpointId')
+    personal_voice_speaker_profile_id = request.headers.get('PersonalVoiceSpeakerProfileId')
+
     try:
         if speech_private_endpoint:
             speech_private_endpoint_wss = speech_private_endpoint.replace('https://', 'wss://')
@@ -89,7 +105,6 @@ def connectAvatar() -> Response:
         else:
             speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=f'wss://{speech_region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
 
-        custom_voice_endpoint_id = request.headers.get('CustomVoiceEndpointId')
         if custom_voice_endpoint_id:
             speech_config.endpoint_id = custom_voice_endpoint_id
 
@@ -146,7 +161,7 @@ def connectAvatar() -> Response:
         connection.set_message_property('speech.config', 'context', json.dumps(avatar_config))
 
         speech_sythesis_result = speech_synthesizer.speak_text_async('').get()
-        print(f'Result ID: {speech_sythesis_result.result_id}')
+        print(f'Result id for avatar connection: {speech_sythesis_result.result_id}')
         if speech_sythesis_result.reason == speechsdk.ResultReason.Canceled:
             cancellation_details = speech_sythesis_result.cancellation_details
             print(f"Speech synthesis canceled: {cancellation_details.reason}")
@@ -155,7 +170,6 @@ def connectAvatar() -> Response:
                 raise Exception(cancellation_details.error_details)
         turn_start_message = speech_synthesizer.properties.get_property_by_name('SpeechSDKInternal-ExtraTurnStartMessage')
         remoteSdp = json.loads(turn_start_message)['webrtc']['connectionString']
-        last_speak_time = datetime.datetime.now()
 
         return Response(remoteSdp, status=200)
 
@@ -173,6 +187,26 @@ def speak() -> Response:
     except Exception as e:
         return Response(f"Result ID: {result_id}. Error message: {e}", status=400)
 
+# The API route to get the speaking status
+@app.route("/api/getSpeakingStatus", methods=["GET"])
+def getSpeakingStatus() -> Response:
+    global is_speaking
+    global last_speak_time
+    speaking_status = {
+        'isSpeaking': is_speaking,
+        'lastSpeakTime': last_speak_time.isoformat() if last_speak_time else None
+    }
+    return Response(json.dumps(speaking_status), status=200)
+
+# The API route to stop avatar from speaking
+@app.route("/api/stopSpeaking", methods=["POST"])
+def stopSpeaking() -> Response:
+    stopSpeakingInternal()
+    return Response('Speaking stopped.', status=200)
+
+# The API route for chat
+# It receives the user query and return the chat response.
+# It returns response in stream, which yields the chat response in chunks.
 @app.route("/api/chat", methods=["POST"])
 def chat() -> Response:
     global chat_initiated
@@ -181,6 +215,14 @@ def chat() -> Response:
         chat_initiated = True
     user_query = request.data.decode('utf-8')
     return Response(handleUserQuery(user_query), mimetype='text/plain', status=200)
+
+# The API route to clear the chat history
+@app.route("/api/chat/clearHistory", methods=["POST"])
+def clearChatHistory() -> Response:
+    global chat_initiated
+    initializeChatContext(request.headers.get('SystemPrompt'))
+    chat_initiated = True
+    return Response('Chat history cleared.', status=200)
 
 # The API route to disconnect the TTS avatar
 @app.route("/api/disconnectAvatar", methods=["POST"])
@@ -193,6 +235,7 @@ def disconnectAvatar() -> Response:
     except:
         return Response(traceback.format_exc(), status=400)
 
+# Refresh the ICE token which being called
 def refreshIceToken() -> None:
     global ice_token
     if speech_private_endpoint:
@@ -200,6 +243,7 @@ def refreshIceToken() -> None:
     else:
         ice_token = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
 
+# Refresh the speech token every 9 minutes
 def refreshSpeechToken() -> None:
     global speech_token
     while True:
@@ -207,14 +251,16 @@ def refreshSpeechToken() -> None:
         speech_token = requests.post(f'https://{speech_region}.api.cognitive.microsoft.com/sts/v1.0/issueToken', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
         time.sleep(60 * 9)
 
+# Initialize the chat context, e.g. chat history (messages), data sources, etc. For chat scenario.
 def initializeChatContext(system_prompt: str) -> None:
+    global cognitive_search_index_name
     global messages
     global data_sources
     global enable_quick_reply
     global is_speaking
-    global byod_doc_regex
+    global oyd_doc_regex
 
-    # Initialize data sources for 'bring your data' scenario
+    # Initialize data sources for 'on your data' scenario
     data_sources = []
     if cognitive_search_endpoint and cognitive_search_api_key and cognitive_search_index_name:
         # On-your-data scenario
@@ -251,6 +297,7 @@ def initializeChatContext(system_prompt: str) -> None:
 # Handle the user query and return the assistant reply. For chat scenario.
 # The function is a generator, which yields the assistant reply in chunks.
 def handleUserQuery(user_query: str):
+    global azure_openai_deployment_name
     global messages
     global data_sources
     global is_speaking
@@ -265,10 +312,9 @@ def handleUserQuery(user_query: str):
 
     # Stop previous speaking if there is any
     if is_speaking:
-        # To-do: also stop the current speaking after stop speaking is supported
-        spoken_text_queue = []
+        stopSpeakingInternal()
 
-    # For 'bring your data' scenario, chat API currently has long (4s+) latency
+    # For 'on your data' scenario, chat API currently has long (4s+) latency
     # We return some quick reply here before the chat API returns to mitigate.
     if len(data_sources) > 0 and enable_quick_reply:
         speak(random.choice(quick_replies), 2000)
@@ -290,7 +336,6 @@ def handleUserQuery(user_query: str):
     assistant_reply = ''
     tool_content = ''
     spoken_sentence = ''
-    display_sentence = ''
 
     response = requests.post(url, stream=True, headers={
         'api-key': azure_openai_api_key,
@@ -332,19 +377,17 @@ def handleUserQuery(user_query: str):
                             elif 'content' in delta:
                                 response_token = response_json['choices'][0]['messages'][0]['delta']['content']
                                 if response_token is not None:
-                                    if byod_doc_regex.search(response_token):
-                                        response_token = byod_doc_regex.sub('', response_token).strip()
+                                    if oyd_doc_regex.search(response_token):
+                                        response_token = oyd_doc_regex.sub('', response_token).strip()
                                     if response_token == '[DONE]':
                                         response_token = None
 
                     if response_token is not None:
-                        # print(f'Current token: {response_token}')
-                        yield response_token
+                        # Log response_token here if need debug
+                        yield response_token # yield response token to client as display text
                         assistant_reply += response_token  # build up the assistant message
-                        display_sentence += response_token  # build up the display sentence
                         if response_token == '\n' or response_token == '\n\n':
                             speakWithQueue(spoken_sentence.strip())
-                            # print(f"Spoken sentence: {spoken_sentence.strip()}")
                             spoken_sentence = ''
                         else:
                             response_token = response_token.replace('\n', '')
@@ -353,20 +396,14 @@ def handleUserQuery(user_query: str):
                                 for punctuation in sentence_level_punctuations:
                                     if response_token.startswith(punctuation):
                                         speakWithQueue(spoken_sentence.strip())
-                                        # print(f"Spoken sentence: {spoken_sentence.strip()}")
                                         spoken_sentence = ''
                                         break
             except Exception as e:
                 print(f"Error occurred while parsing the response: {e}")
                 print(line)
 
-        # print(f'Display sentence: {display_sentence}')
-        # yield display_sentence
-        display_sentence = ''
-
     if spoken_sentence != '':
         speakWithQueue(spoken_sentence.strip())
-        print(f"Spoken sentence: {spoken_sentence.strip()}")
         spoken_sentence = ''
 
     if len(data_sources) > 0:
@@ -384,22 +421,32 @@ def handleUserQuery(user_query: str):
 
 # Speak the given text. If there is already a speaking in progress, add the text to the queue. For chat scenario.
 def speakWithQueue(text: str, ending_silence_ms: int = 0) -> None:
-    global is_speaking
     global spoken_text_queue
-    if is_speaking:
-        spoken_text_queue.append(text)
-        return
-    speakNext(text, ending_silence_ms)
-
-# Speak the given text, after the speaking is done, speak the next text in the queue. For chat scenario.
-def speakNext(text: str, ending_silence_ms: int = 0) -> None:
-    global tts_voice
-    global personal_voice_speaker_profile_id
+    global speaking_thread
     global is_speaking
-    global last_speak_time
+    spoken_text_queue.append(text)
+    if not is_speaking:
+        def speakThread():
+            global spoken_text_queue
+            global is_speaking
+            global last_speak_time
+            global tts_voice
+            global personal_voice_speaker_profile_id
+            nonlocal ending_silence_ms
+            is_speaking = True
+            while len(spoken_text_queue) > 0:
+                text = spoken_text_queue.pop(0)
+                speakText(text, tts_voice, personal_voice_speaker_profile_id, ending_silence_ms)
+                last_speak_time = datetime.datetime.now(pytz.UTC)
+            is_speaking = False
+        speaking_thread = threading.Thread(target=speakThread)
+        speaking_thread.start()
+
+# Speak the given text.
+def speakText(text: str, voice: str, speaker_profile_id: str, ending_silence_ms: int = 0) -> str:
     ssml = f"""<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'>
-                 <voice name='{tts_voice}'>
-                     <mstts:ttsembedding speakerProfileId='{personal_voice_speaker_profile_id}'>
+                 <voice name='{voice}'>
+                     <mstts:ttsembedding speakerProfileId='{speaker_profile_id}'>
                          <mstts:leadingsilence-exact value='0'/>
                          {html.escape(text)}
                      </mstts:ttsembedding>
@@ -407,26 +454,15 @@ def speakNext(text: str, ending_silence_ms: int = 0) -> None:
                </speak>"""
     if ending_silence_ms > 0:
         ssml = f"""<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'>
-                     <voice name='{tts_voice}'>
-                         <mstts:ttsembedding speakerProfileId='{personal_voice_speaker_profile_id}'>
+                     <voice name='{voice}'>
+                         <mstts:ttsembedding speakerProfileId='{speaker_profile_id}'>
                              <mstts:leadingsilence-exact value='0'/>
                              {html.escape(text)}
                              <break time='{ending_silence_ms}ms' />
                          </mstts:ttsembedding>
                      </voice>
                    </speak>"""
-    last_speak_time = datetime.datetime.now()
-    is_speaking = True
-    try:
-        speakSsml(ssml)
-        if len(spoken_text_queue) > 0:
-            speakNext(spoken_text_queue.pop(0))
-        else:
-            is_speaking = False
-    except Exception as e:
-        is_speaking = False
-        print(f"Error occurred while speaking: {e}")
-    return
+    return speakSsml(ssml)
 
 # Speak the given ssml with speech sdk
 def speakSsml(ssml: str) -> str:
@@ -438,6 +474,12 @@ def speakSsml(ssml: str) -> str:
             print(f"Error details: {cancellation_details.error_details}")
             raise Exception(cancellation_details.error_details)
     return speech_sythesis_result.result_id
+
+# Stop speaking internal function
+def stopSpeakingInternal() -> None:
+    global spoken_text_queue
+    spoken_text_queue = []
+    # To-do: also stop the current speaking by synthesizer, after stop speaking is supported by SDK
 
 # Start the speech token refresh thread
 speechTokenRefereshThread = threading.Thread(target=refreshSpeechToken)

@@ -12,12 +12,8 @@
 <h1>Talking Avatar Chat Demo</h1>
 
 <div id="configuration">
-  <h2 style="background-color: white; width: 300px;">Azure OpenAI Resource</h2>
-  <label style="font-size: medium;" for="azureOpenAIEndpoint">Endpoint:</label>
-  <input id="azureOpenAIEndpoint" type="text" size="64" style="font-size: medium;"></input><br />
-  <label style="font-size: medium;" for="azureOpenAIApiKey">API Key:</label>
-  <input id="azureOpenAIApiKey" type="password" size="32" style="font-size: medium;" /><br />
-  <label style="font-size: medium;" for="azureOpenAIDeploymentName">Deployment Name:</label>
+  <h2 style="background-color: white; width: 300px;">Chat Configuration</h2>
+  <label style="font-size: medium;" for="azureOpenAIDeploymentName">Azure OpenAI Deployment Name:</label>
   <input id="azureOpenAIDeploymentName" type="text" size="32" style="font-size: medium;" /><br />
   <label style="font-size: medium;"  for="prompt">System Prompt:</label><br/>
   <textarea id="prompt" style="width: 640px;">You are an AI assistant that helps people find information.</textarea>
@@ -27,17 +23,12 @@
   <br />
 
   <div id="cogSearchConfig" hidden="hidden">
-    <h2 style="background-color: white; width: 400px;">Azure Cognitive Search Resource</h2>
-    <label style="font-size: medium;" for="azureCogSearchEndpoint">Endpoint:</label>
-    <input id="azureCogSearchEndpoint" type="text" size="64" style="font-size: medium;"></input><br />
-    <label style="font-size: medium;" for="azureCogSearchApiKey">API Key:</label>
-    <input id="azureCogSearchApiKey" type="password" size="32" style="font-size: medium;" /><br />
-    <label style="font-size: medium;" for="azureCogSearchIndexName">Index Name:</label>
+    <label style="font-size: medium;" for="azureCogSearchIndexName">Azure Cognitive Search Index Name:</label>
     <input id="azureCogSearchIndexName" type="text" size="32" style="font-size: medium;" /><br />
     <br />
   </div>
 
-  <h2 style="background-color: white; width: 300px;">STT / TTS Configuration</h2>
+  <h2 style="background-color: white; width: 300px;">Speech Configuration</h2>
   <label style="font-size: medium;" for="sttLocale">STT Locale(s):</label>
   <input id="sttLocales" type="text" size="64" style="font-size: medium;" value="en-US,de-DE,es-ES,fr-FR,it-IT,ja-JP,ko-KR,zh-CN"></input><br />
   <label style="font-size: medium;" for="ttsVoice">TTS Voice:</label>

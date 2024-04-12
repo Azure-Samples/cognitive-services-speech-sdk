@@ -12,78 +12,60 @@ var lastSpeakTime
 function connectAvatar() {
     document.getElementById('startSession').disabled = true
 
-    const xhr = new XMLHttpRequest()
-    xhr.open("GET", "/api/getIceToken")
-
-    let responseReceived = false
-    xhr.addEventListener("readystatechange", function() {
-        if (xhr.status == 200) {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    const responseData = JSON.parse(this.responseText)
-                    const iceServerUrl = responseData.Urls[0]
-                    const iceServerUsername = responseData.Username
-                    const iceServerCredential = responseData.Password
-                    setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
-                }
-            }
+    fetch('/api/getIceToken', {
+        method: 'GET',
+    })
+    .then(response => {
+        if (response.ok) {
+            response.json().then(data => {
+                const iceServerUrl = data.Urls[0]
+                const iceServerUsername = data.Username
+                const iceServerCredential = data.Password
+                setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+            })
         } else {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    console.log("[" + (new Date()).toISOString() + "] Failed fetching ICE token. " + xhr.responseText)
-                }
-            }
+            throw new Error(`Failed fetching ICE token: ${response.status} ${response.statusText}`)
         }
     })
-    xhr.send()
 
     document.getElementById('configuration').hidden = true
 }
 
 // Create speech recognizer
 function createSpeechRecognizer() {
-    const xhr = new XMLHttpRequest()
-    xhr.open("GET", "/api/getSpeechToken")
-
-    let responseReceived = false
-    xhr.addEventListener("readystatechange", function() {
-        if (xhr.status == 200) {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    const speechRegion = xhr.getResponseHeader('SpeechRegion')
-                    const speechToken = this.responseText
-                    const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
-                    speechRecognitionConfig.authorizationToken = speechToken
-                    speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
-                    var sttLocales = document.getElementById('sttLocales').value.split(',')
-                    var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
-                    speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
-                }
-            }
+    fetch('/api/getSpeechToken', {
+        method: 'GET',
+    })
+    .then(response => {
+        if (response.ok) {
+            const speechRegion = response.headers.get('SpeechRegion')
+            response.text().then(text => {
+                const speechToken = text
+                const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
+                speechRecognitionConfig.authorizationToken = speechToken
+                speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
+                var sttLocales = document.getElementById('sttLocales').value.split(',')
+                var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
+                speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
+            })
         } else {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    console.log("[" + (new Date()).toISOString() + "] Failed fetching speech token. " + xhr.responseText)
-                }
-            }
+            throw new Error(`Failed fetching speech token: ${response.status} ${response.statusText}`)
         }
     })
-    xhr.send()
 }
 
 // Disconnect from avatar service
-function disconnectAvatar() {
-    const xhr = new XMLHttpRequest()
-    xhr.open("POST", "/api/disconnectAvatar")
-    xhr.send()
+function disconnectAvatar(closeSpeechRecognizer = false) {
+    fetch('/api/disconnectAvatar', {
+        method: 'POST',
+        body: ''
+    })
 
     if (speechRecognizer !== undefined) {
         speechRecognizer.stopContinuousRecognitionAsync()
-        speechRecognizer.close()
+        if (closeSpeechRecognizer) {
+            speechRecognizer.close()
+        }
     }
 
     sessionActive = false
@@ -180,43 +162,53 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
 // Connect to TTS Avatar Service
 function connectToAvatarService(peerConnection) {
-    const xhr = new XMLHttpRequest()
-    xhr.open("POST", "/api/connectAvatar")
-
-    if (document.getElementById('customVoiceEndpointId').value !== '') {
-        xhr.setRequestHeader("CustomVoiceEndpointId", document.getElementById('customVoiceEndpointId').value)
+    let headers = {
+        'LocalSdp': btoa(JSON.stringify(peerConnection.localDescription)),
+        'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
+        'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
+        'IsCustomAvatar': document.getElementById('customizedAvatar').checked
     }
 
-    xhr.setRequestHeader("LocalSdp", btoa(JSON.stringify(peerConnection.localDescription)))
-    xhr.setRequestHeader("AvatarCharacter", document.getElementById('talkingAvatarCharacter').value)
-    xhr.setRequestHeader("AvatarStyle", document.getElementById('talkingAvatarStyle').value)
-    xhr.setRequestHeader("IsCustomAvatar", document.getElementById('customizedAvatar').checked)
+    if (document.getElementById('azureOpenAIDeploymentName').value !== '') {
+        headers['AoaiDeploymentName'] = document.getElementById('azureOpenAIDeploymentName').value
+    }
 
-    let responseReceived = false
-    xhr.addEventListener("readystatechange", function() {
-        if (xhr.status == 200) {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    const remoteSdp = this.responseText
-                    peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(remoteSdp))))
-                }
-            }
+    if (document.getElementById('enableOyd').checked && document.getElementById('azureCogSearchIndexName').value !== '') {
+        headers['CognitiveSearchIndexName'] = document.getElementById('azureCogSearchIndexName').value
+    }
+
+    if (document.getElementById('ttsVoice').value !== '') {
+        headers['TtsVoice'] = document.getElementById('ttsVoice').value
+    }
+
+    if (document.getElementById('customVoiceEndpointId').value !== '') {
+        headers['CustomVoiceEndpointId'] = document.getElementById('customVoiceEndpointId').value
+    }
+
+    if (document.getElementById('personalVoiceSpeakerProfileID').value !== '') {
+        headers['PersonalVoiceSpeakerProfileId'] = document.getElementById('personalVoiceSpeakerProfileID').value
+    }
+
+    fetch('/api/connectAvatar', {
+        method: 'POST',
+        headers: headers,
+        body: ''
+    })
+    .then(response => {
+        if (response.ok) {
+            response.text().then(text => {
+                const remoteSdp = text
+                peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(remoteSdp))))
+            })
         } else {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    console.log("Failed to connect to the Avatar service. " + xhr.responseText)
-
-                    document.getElementById('startSession').disabled = false;
-                    document.getElementById('configuration').hidden = false;
-                }
-            }
+            document.getElementById('startSession').disabled = false;
+            document.getElementById('configuration').hidden = false;
+            throw new Error(`Failed connecting to the Avatar service: ${response.status} ${response.statusText}`)
         }
     })
-    xhr.send()
 }
 
+// Handle user query. Send user query to the chat API and display the response.
 function handleUserQuery(userQuery) {
     fetch('/api/chat', {
         method: 'POST',
@@ -261,32 +253,8 @@ function handleUserQuery(userQuery) {
     })
 }
 
-function stopSpeaking() {
-    // To be implemented
-}
-
-function checkHung() {
-    // Check whether the avatar video stream is hung, by checking whether the video time is advancing
-    let videoElement = document.getElementById('videoPlayer')
-    if (videoElement !== null && videoElement !== undefined && sessionActive) {
-        let videoTime = videoElement.currentTime
-        setTimeout(() => {
-            // Check whether the video time is advancing
-            if (videoElement.currentTime === videoTime) {
-                // Check whether the session is active to avoid duplicatedly triggering reconnect
-                if (sessionActive) {
-                    sessionActive = false
-                    if (document.getElementById('autoReconnectAvatar').checked) {
-                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
-                        connectAvatar()
-                    }
-                }
-            }
-        }, 5000)
-    }
-}
-
-function checkLastSpeak() {
+// Handle local video. If the user is not speaking for 15 seconds, switch to local video.
+function handleLocalVideo() {
     if (lastSpeakTime === undefined) {
         return
     }
@@ -302,14 +270,65 @@ function checkLastSpeak() {
     }
 }
 
+// Check whether the avatar video stream is hung
+function checkHung() {
+    // Check whether the avatar video stream is hung, by checking whether the video time is advancing
+    let videoElement = document.getElementById('videoPlayer')
+    if (videoElement !== null && videoElement !== undefined && sessionActive) {
+        let videoTime = videoElement.currentTime
+        setTimeout(() => {
+            // Check whether the video time is advancing
+            if (videoElement.currentTime === videoTime) {
+                // Check whether the session is active to avoid duplicatedly triggering reconnect
+                if (sessionActive) {
+                    sessionActive = false
+                    if (document.getElementById('autoReconnectAvatar').checked) {
+                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                        connectAvatar()
+                        createSpeechRecognizer()
+                    }
+                }
+            }
+        }, 5000)
+    }
+}
+
+// Fetch speaking status from backend.
+function checkSpeakingStatus() {
+    fetch('/api/getSpeakingStatus', {
+        method: 'GET',
+    })
+    .then(response => {
+        if (response.ok) {
+            response.json().then(data => {
+                isSpeaking = data.isSpeaking
+                if (data.lastSpeakTime !== null) {
+                    lastSpeakTime = new Date(data.lastSpeakTime)
+                }
+
+                if (isSpeaking) {
+                    document.getElementById('stopSpeaking').disabled = false
+                } else {
+                    document.getElementById('stopSpeaking').disabled = true
+                }
+
+                handleLocalVideo()
+            })
+        } else {
+            throw new Error(`Failed to get speaking status: ${response.status} ${response.statusText}`)
+        }
+    })
+}
+
 window.onload = () => {
     setInterval(() => {
         checkHung()
-        checkLastSpeak()
+        checkSpeakingStatus()
     }, 5000) // Check session activity every 5 seconds
 }
 
 window.startSession = () => {
+    createSpeechRecognizer()
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('startSession').disabled = true
         document.getElementById('configuration').hidden = true
@@ -323,7 +342,22 @@ window.startSession = () => {
     }
 
     connectAvatar()
-    createSpeechRecognizer()
+}
+
+window.stopSpeaking = () => {
+    document.getElementById('stopSpeaking').disabled = true
+
+    fetch('/api/stopSpeaking', {
+        method: 'POST',
+        body: ''
+    })
+    .then(response => {
+        if (response.ok) {
+            checkSpeakingStatus()
+        } else {
+            throw new Error(`Failed to stop speaking: ${response.status} ${response.statusText}`)
+        }
+    })
 }
 
 window.stopSession = () => {
@@ -339,12 +373,24 @@ window.stopSession = () => {
         document.getElementById('localVideo').hidden = true
     }
 
-    disconnectAvatar()
+    disconnectAvatar(true)
 }
 
 window.clearChatHistory = () => {
-    document.getElementById('chatHistory').innerHTML = ''
-    // Call backend API to clear the chat history
+    fetch('/api/chat/clearHistory', {
+        method: 'POST',
+        headers: {
+            'SystemPrompt': document.getElementById('prompt').value,
+        },
+        body: ''
+    })
+    .then(response => {
+        if (response.ok) {
+            document.getElementById('chatHistory').innerHTML = ''
+        } else {
+            throw new Error(`Failed to clear chat history: ${response.status} ${response.statusText}`)
+        }
+    })
 }
 
 window.microphone = () => {
@@ -438,7 +484,7 @@ window.updateTypeMessageBox = () => {
                         chatHistoryTextArea.innerHTML += '\n\n'
                     }
 
-                    chatHistoryTextArea.innerHTML += "User: " + userQuery + '\n\n'
+                    chatHistoryTextArea.innerHTML += "User: " + userQuery.trim('\n') + '\n\n'
                     chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
                     handleUserQuery(userQuery.trim('\n'))
