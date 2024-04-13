@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 // Global objects
+var clientId
 var peerConnection
 var previousAnimationFrameTimestamp = 0;
 
@@ -98,6 +99,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 // Connect to TTS Avatar Service
 function connectToAvatarService(peerConnection) {
     let headers = {
+        'ClientId': clientId,
         'LocalSdp': btoa(JSON.stringify(peerConnection.localDescription)),
         'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
         'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
@@ -187,6 +189,10 @@ function htmlEncode(text) {
     return String(text).replace(/[&<>"'\/]/g, (match) => entityMap[match])
 }
 
+window.onload = () => {
+    clientId = document.getElementById('clientId').value
+}
+
 window.startSession = () => {
     document.getElementById('startSession').disabled = true
     
@@ -219,6 +225,7 @@ window.speak = () => {
     fetch('/api/speak', {
         method: 'POST',
         headers: {
+            'ClientId': clientId,
             'Content-Type': 'application/ssml+xml'
         },
         body: spokenSsml
@@ -241,6 +248,9 @@ window.stopSession = () => {
 
     fetch('/api/disconnectAvatar', {
         method: 'POST',
+        headers: {
+            'ClientId': clientId
+        },
         body: ''
     })
 }

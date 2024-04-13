@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 // Global objects
+var clientId
 var speechRecognizer
 var peerConnection
 var isSpeaking = false
@@ -58,6 +59,9 @@ function createSpeechRecognizer() {
 function disconnectAvatar(closeSpeechRecognizer = false) {
     fetch('/api/disconnectAvatar', {
         method: 'POST',
+        headers: {
+            'ClientId': clientId
+        },
         body: ''
     })
 
@@ -163,6 +167,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 // Connect to TTS Avatar Service
 function connectToAvatarService(peerConnection) {
     let headers = {
+        'ClientId': clientId,
         'LocalSdp': btoa(JSON.stringify(peerConnection.localDescription)),
         'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
         'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
@@ -213,6 +218,7 @@ function handleUserQuery(userQuery) {
     fetch('/api/chat', {
         method: 'POST',
         headers: {
+            'ClientId': clientId,
             'SystemPrompt': document.getElementById('prompt').value,
             'Content-Type': 'text/plain'
         },
@@ -297,6 +303,9 @@ function checkHung() {
 function checkSpeakingStatus() {
     fetch('/api/getSpeakingStatus', {
         method: 'GET',
+        headers: {
+            'ClientId': clientId
+        }
     })
     .then(response => {
         if (response.ok) {
@@ -321,6 +330,7 @@ function checkSpeakingStatus() {
 }
 
 window.onload = () => {
+    clientId = document.getElementById('clientId').value
     setInterval(() => {
         checkHung()
         checkSpeakingStatus()
@@ -349,6 +359,9 @@ window.stopSpeaking = () => {
 
     fetch('/api/stopSpeaking', {
         method: 'POST',
+        headers: {
+            'ClientId': clientId
+        },
         body: ''
     })
     .then(response => {
@@ -380,7 +393,8 @@ window.clearChatHistory = () => {
     fetch('/api/chat/clearHistory', {
         method: 'POST',
         headers: {
-            'SystemPrompt': document.getElementById('prompt').value,
+            'ClientId': clientId,
+            'SystemPrompt': document.getElementById('prompt').value
         },
         body: ''
     })

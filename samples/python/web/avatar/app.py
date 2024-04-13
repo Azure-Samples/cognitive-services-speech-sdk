@@ -13,6 +13,7 @@ import requests
 import threading
 import time
 import traceback
+import uuid
 from flask import Flask, Response, render_template, request
 
 # Create the Flask app
@@ -32,39 +33,32 @@ cognitive_search_endpoint = os.environ.get('COGNITIVE_SEARCH_ENDPOINT') # e.g. h
 cognitive_search_api_key = os.environ.get('COGNITIVE_SEARCH_API_KEY')
 cognitive_search_index_name = os.environ.get('COGNITIVE_SEARCH_INDEX_NAME') # e.g. my-search-index
 
-# Global variables
-tts_voice = 'en-US-JennyMultilingualV2Neural' # Default TTS voice, can be overriden by client
-custom_voice_endpoint_id = None # Endpoint ID (deployment ID) for custom voice, can be overriden by client
-personal_voice_speaker_profile_id = None # Speaker profile ID for personal voice, can be overriden by client
-speech_synthesizer = None # Speech synthesizer for avatar
-speech_token = None # Speech token for client side authentication with speech service
-ice_token = None # ICE token for ICE/TURN/Relay server connection
-chat_initiated = False # Flag to indicate if the chat context is initiated
-messages = [] # Chat messages (history)
-data_sources = [] # Data sources for 'on your data' scenario
+# Const variables
+default_tts_voice = 'en-US-JennyMultilingualV2Neural' # Default TTS voice
 sentence_level_punctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ] # Punctuations that indicate the end of a sentence
 enable_quick_reply = False # Enable quick reply for certain chat models which take longer time to respond
 quick_replies = [ 'Let me take a look.', 'Let me check.', 'One moment, please.' ] # Quick reply reponses
 oyd_doc_regex = re.compile(r'\[doc(\d+)\]') # Regex to match the OYD (on-your-data) document reference
-is_speaking = False # Flag to indicate if the avatar is speaking
-spoken_text_queue = [] # Queue to store the spoken text
-speaking_thread = None # The thread to speak the spoken text queue
-last_speak_time = None # The last time the avatar spoke
+
+# Global variables
+client_contexts = {} # Client contexts
+speech_token = None # Speech token
+ice_token = None # ICE token
 
 # The default route, which shows the default web page (basic.html)
 @app.route("/")
 def index():
-    return render_template("basic.html", methods=["GET"])
+    return render_template("basic.html", methods=["GET"], client_id=initializeClient())
 
 # The basic route, which shows the basic web page
 @app.route("/basic")
 def basicView():
-    return render_template("basic.html", methods=["GET"])
+    return render_template("basic.html", methods=["GET"], client_id=initializeClient())
 
 # The chat route, which shows the chat web page
 @app.route("/chat")
 def chatView():
-    return render_template("chat.html", methods=["GET"])
+    return render_template("chat.html", methods=["GET"], client_id=initializeClient())
 
 # The API route to get the speech token
 @app.route("/api/getSpeechToken", methods=["GET"])
@@ -82,21 +76,18 @@ def getIceToken() -> Response:
 # The API route to connect the TTS avatar
 @app.route("/api/connectAvatar", methods=["POST"])
 def connectAvatar() -> Response:
-    global ice_token
-    global speech_synthesizer
-    global azure_openai_deployment_name
-    global cognitive_search_index_name
-    global tts_voice
-    global custom_voice_endpoint_id
-    global personal_voice_speaker_profile_id
-    global last_speak_time
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    client_context = client_contexts[client_id]
 
     # Override default values with client provided values
-    azure_openai_deployment_name = request.headers.get('AoaiDeploymentName') if request.headers.get('AoaiDeploymentName') else azure_openai_deployment_name
-    cognitive_search_index_name = request.headers.get('CognitiveSearchIndexName') if request.headers.get('CognitiveSearchIndexName') else cognitive_search_index_name
-    tts_voice = request.headers.get('TtsVoice') if request.headers.get('TtsVoice') else tts_voice
-    custom_voice_endpoint_id = request.headers.get('CustomVoiceEndpointId')
-    personal_voice_speaker_profile_id = request.headers.get('PersonalVoiceSpeakerProfileId')
+    client_context['azure_openai_deployment_name'] = request.headers.get('AoaiDeploymentName') if request.headers.get('AoaiDeploymentName') else azure_openai_deployment_name
+    client_context['cognitive_search_index_name'] = request.headers.get('CognitiveSearchIndexName') if request.headers.get('CognitiveSearchIndexName') else cognitive_search_index_name
+    client_context['tts_voice'] = request.headers.get('TtsVoice') if request.headers.get('TtsVoice') else default_tts_voice
+    client_context['custom_voice_endpoint_id'] = request.headers.get('CustomVoiceEndpointId')
+    client_context['personal_voice_speaker_profile_id'] = request.headers.get('PersonalVoiceSpeakerProfileId')
+
+    custom_voice_endpoint_id = client_context['custom_voice_endpoint_id']
 
     try:
         if speech_private_endpoint:
@@ -108,7 +99,8 @@ def connectAvatar() -> Response:
         if custom_voice_endpoint_id:
             speech_config.endpoint_id = custom_voice_endpoint_id
 
-        speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
+        client_context['speech_synthesizer'] = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
+        speech_synthesizer = client_context['speech_synthesizer']
         
         ice_token_obj = json.loads(ice_token)
         local_sdp = request.headers.get('LocalSdp')
@@ -179,10 +171,10 @@ def connectAvatar() -> Response:
 # The API route to speak a given SSML
 @app.route("/api/speak", methods=["POST"])
 def speak() -> Response:
-    global speech_synthesizer
+    client_id = uuid.UUID(request.headers.get('ClientId'))
     try:
         ssml = request.data.decode('utf-8')
-        result_id = speakSsml(ssml)
+        result_id = speakSsml(ssml, client_id)
         return Response(result_id, status=200)
     except Exception as e:
         return Response(f"Result ID: {result_id}. Error message: {e}", status=400)
@@ -190,8 +182,10 @@ def speak() -> Response:
 # The API route to get the speaking status
 @app.route("/api/getSpeakingStatus", methods=["GET"])
 def getSpeakingStatus() -> Response:
-    global is_speaking
-    global last_speak_time
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    is_speaking = client_contexts[client_id]['is_speaking']
+    last_speak_time = client_contexts[client_id]['last_speak_time']
     speaking_status = {
         'isSpeaking': is_speaking,
         'lastSpeakTime': last_speak_time.isoformat() if last_speak_time else None
@@ -201,7 +195,7 @@ def getSpeakingStatus() -> Response:
 # The API route to stop avatar from speaking
 @app.route("/api/stopSpeaking", methods=["POST"])
 def stopSpeaking() -> Response:
-    stopSpeakingInternal()
+    stopSpeakingInternal(uuid.UUID(request.headers.get('ClientId')))
     return Response('Speaking stopped.', status=200)
 
 # The API route for chat
@@ -209,31 +203,61 @@ def stopSpeaking() -> Response:
 # It returns response in stream, which yields the chat response in chunks.
 @app.route("/api/chat", methods=["POST"])
 def chat() -> Response:
-    global chat_initiated
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    client_context = client_contexts[client_id]
+    chat_initiated = client_context['chat_initiated']
     if not chat_initiated:
-        initializeChatContext(request.headers.get('SystemPrompt'))
-        chat_initiated = True
+        initializeChatContext(request.headers.get('SystemPrompt'), client_id)
+        client_context['chat_initiated'] = True
     user_query = request.data.decode('utf-8')
-    return Response(handleUserQuery(user_query), mimetype='text/plain', status=200)
+    return Response(handleUserQuery(user_query, client_id), mimetype='text/plain', status=200)
 
 # The API route to clear the chat history
 @app.route("/api/chat/clearHistory", methods=["POST"])
 def clearChatHistory() -> Response:
-    global chat_initiated
-    initializeChatContext(request.headers.get('SystemPrompt'))
-    chat_initiated = True
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    client_context = client_contexts[client_id]
+    initializeChatContext(request.headers.get('SystemPrompt'), client_id)
+    client_context['chat_initiated'] = True
     return Response('Chat history cleared.', status=200)
 
 # The API route to disconnect the TTS avatar
 @app.route("/api/disconnectAvatar", methods=["POST"])
 def disconnectAvatar() -> Response:
-    global speech_synthesizer
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    client_context = client_contexts[client_id]
+    speech_synthesizer = client_context['speech_synthesizer']
     try:
         connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
         connection.close()
         return Response('Disconnected avatar', status=200)
     except:
         return Response(traceback.format_exc(), status=400)
+
+# Initialize the client by creating a client id and an initial context
+def initializeClient() -> uuid.UUID:
+    client_id = uuid.uuid4()
+    client_contexts[client_id] = {
+        'azure_openai_deployment_name': azure_openai_deployment_name, # Azure OpenAI deployment name
+        'cognitive_search_index_name': cognitive_search_index_name, # Cognitive search index name
+        'tts_voice': default_tts_voice, # TTS voice
+        'custom_voice_endpoint_id': None, # Endpoint ID (deployment ID) for custom voice
+        'personal_voice_speaker_profile_id': None, # Speaker profile ID for personal voice
+        'speech_synthesizer': None, # Speech synthesizer for avatar
+        'speech_token': None, # Speech token for client side authentication with speech service
+        'ice_token': None, # ICE token for ICE/TURN/Relay server connection
+        'chat_initiated': False, # Flag to indicate if the chat context is initiated
+        'messages': [], # Chat messages (history)
+        'data_sources': [], # Data sources for 'on your data' scenario
+        'is_speaking': False, # Flag to indicate if the avatar is speaking
+        'spoken_text_queue': [], # Queue to store the spoken text
+        'speaking_thread': None, # The thread to speak the spoken text queue
+        'last_speak_time': None # The last time the avatar spoke
+    }
+    return client_id
 
 # Refresh the ICE token which being called
 def refreshIceToken() -> None:
@@ -252,16 +276,15 @@ def refreshSpeechToken() -> None:
         time.sleep(60 * 9)
 
 # Initialize the chat context, e.g. chat history (messages), data sources, etc. For chat scenario.
-def initializeChatContext(system_prompt: str) -> None:
-    global cognitive_search_index_name
-    global messages
-    global data_sources
-    global enable_quick_reply
-    global is_speaking
-    global oyd_doc_regex
+def initializeChatContext(system_prompt: str, client_id: uuid.UUID) -> None:
+    global client_contexts
+    client_context = client_contexts[client_id]
+    cognitive_search_index_name = client_context['cognitive_search_index_name']
+    messages = client_context['messages']
+    data_sources = client_context['data_sources']
 
     # Initialize data sources for 'on your data' scenario
-    data_sources = []
+    data_sources.clear()
     if cognitive_search_endpoint and cognitive_search_api_key and cognitive_search_index_name:
         # On-your-data scenario
         data_source = {
@@ -286,7 +309,7 @@ def initializeChatContext(system_prompt: str) -> None:
         data_sources.append(data_source)
 
     # Initialize messages
-    messages = []
+    messages.clear()
     if len(data_sources) == 0:
         system_message = {
             'role': 'system',
@@ -296,12 +319,13 @@ def initializeChatContext(system_prompt: str) -> None:
 
 # Handle the user query and return the assistant reply. For chat scenario.
 # The function is a generator, which yields the assistant reply in chunks.
-def handleUserQuery(user_query: str):
-    global azure_openai_deployment_name
-    global messages
-    global data_sources
-    global is_speaking
-    global spoken_text_queue
+def handleUserQuery(user_query: str, client_id: uuid.UUID):
+    global client_contexts
+    client_context = client_contexts[client_id]
+    azure_openai_deployment_name = client_context['azure_openai_deployment_name']
+    messages = client_context['messages']
+    data_sources = client_context['data_sources']
+    is_speaking = client_context['is_speaking']
 
     chat_message = {
         'role': 'user',
@@ -387,7 +411,7 @@ def handleUserQuery(user_query: str):
                         yield response_token # yield response token to client as display text
                         assistant_reply += response_token  # build up the assistant message
                         if response_token == '\n' or response_token == '\n\n':
-                            speakWithQueue(spoken_sentence.strip())
+                            speakWithQueue(spoken_sentence.strip(), 0, client_id)
                             spoken_sentence = ''
                         else:
                             response_token = response_token.replace('\n', '')
@@ -395,7 +419,7 @@ def handleUserQuery(user_query: str):
                             if len(response_token) == 1 or len(response_token) == 2:
                                 for punctuation in sentence_level_punctuations:
                                     if response_token.startswith(punctuation):
-                                        speakWithQueue(spoken_sentence.strip())
+                                        speakWithQueue(spoken_sentence.strip(), 0, client_id)
                                         spoken_sentence = ''
                                         break
             except Exception as e:
@@ -403,7 +427,7 @@ def handleUserQuery(user_query: str):
                 print(line)
 
     if spoken_sentence != '':
-        speakWithQueue(spoken_sentence.strip())
+        speakWithQueue(spoken_sentence.strip(), 0, client_id)
         spoken_sentence = ''
 
     if len(data_sources) > 0:
@@ -420,30 +444,30 @@ def handleUserQuery(user_query: str):
     messages.append(assistant_message)
 
 # Speak the given text. If there is already a speaking in progress, add the text to the queue. For chat scenario.
-def speakWithQueue(text: str, ending_silence_ms: int = 0) -> None:
-    global spoken_text_queue
-    global speaking_thread
-    global is_speaking
+def speakWithQueue(text: str, ending_silence_ms: int, client_id: uuid.UUID) -> None:
+    global client_contexts
+    client_context = client_contexts[client_id]
+    spoken_text_queue = client_context['spoken_text_queue']
+    is_speaking = client_context['is_speaking']
     spoken_text_queue.append(text)
     if not is_speaking:
         def speakThread():
-            global spoken_text_queue
-            global is_speaking
-            global last_speak_time
-            global tts_voice
-            global personal_voice_speaker_profile_id
+            nonlocal client_context
+            nonlocal spoken_text_queue
             nonlocal ending_silence_ms
-            is_speaking = True
+            tts_voice = client_context['tts_voice']
+            personal_voice_speaker_profile_id = client_context['personal_voice_speaker_profile_id']
+            client_context['is_speaking'] = True
             while len(spoken_text_queue) > 0:
                 text = spoken_text_queue.pop(0)
-                speakText(text, tts_voice, personal_voice_speaker_profile_id, ending_silence_ms)
-                last_speak_time = datetime.datetime.now(pytz.UTC)
-            is_speaking = False
-        speaking_thread = threading.Thread(target=speakThread)
-        speaking_thread.start()
+                speakText(text, tts_voice, personal_voice_speaker_profile_id, ending_silence_ms, client_id)
+                client_context['last_speak_time'] = datetime.datetime.now(pytz.UTC)
+            client_context['is_speaking'] = False
+        client_context['speaking_thread'] = threading.Thread(target=speakThread)
+        client_context['speaking_thread'].start()
 
 # Speak the given text.
-def speakText(text: str, voice: str, speaker_profile_id: str, ending_silence_ms: int = 0) -> str:
+def speakText(text: str, voice: str, speaker_profile_id: str, ending_silence_ms: int, client_id: uuid.UUID) -> str:
     ssml = f"""<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'>
                  <voice name='{voice}'>
                      <mstts:ttsembedding speakerProfileId='{speaker_profile_id}'>
@@ -462,10 +486,12 @@ def speakText(text: str, voice: str, speaker_profile_id: str, ending_silence_ms:
                          </mstts:ttsembedding>
                      </voice>
                    </speak>"""
-    return speakSsml(ssml)
+    return speakSsml(ssml, client_id)
 
 # Speak the given ssml with speech sdk
-def speakSsml(ssml: str) -> str:
+def speakSsml(ssml: str, client_id: uuid.UUID) -> str:
+    global client_contexts
+    speech_synthesizer = client_contexts[client_id]['speech_synthesizer']
     speech_sythesis_result = speech_synthesizer.speak_ssml_async(ssml).get()
     if speech_sythesis_result.reason == speechsdk.ResultReason.Canceled:
         cancellation_details = speech_sythesis_result.cancellation_details
@@ -476,9 +502,10 @@ def speakSsml(ssml: str) -> str:
     return speech_sythesis_result.result_id
 
 # Stop speaking internal function
-def stopSpeakingInternal() -> None:
-    global spoken_text_queue
-    spoken_text_queue = []
+def stopSpeakingInternal(client_id: uuid.UUID) -> None:
+    global client_contexts
+    spoken_text_queue = client_contexts[client_id]['spoken_text_queue']
+    spoken_text_queue.clear()
     # To-do: also stop the current speaking by synthesizer, after stop speaking is supported by SDK
 
 # Start the speech token refresh thread
