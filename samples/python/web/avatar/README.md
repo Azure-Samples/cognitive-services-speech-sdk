@@ -13,7 +13,12 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
     * Set below environment virables:
         * `SPEECH_REGION` - the region of your Azure speech resource, e.g. westus2.
         * `SPEECH_KEY` - the subscription key of your Azure speech resource.
-        * `SPEECH_PRIVATE_ENDPOINT` - the private endpoint of your Azure speech resource. The format should be like: https://{your custom name}.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service.
+        * `SPEECH_PRIVATE_ENDPOINT` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint.
+    * Set below environment virables if you want to use customized ICE server:
+        * `ICE_SERVER_URL` - the URL of your customized ICE server.
+        * `ICE_SERVER_URL_REMOTE` - the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
+        * `ICE_SERVER_USERNAME` - the username of your customized ICE server.
+        * `ICE_SERVER_PASSWORD` - the password of your customized ICE server.
     * Run `python -m flask run -h 0.0.0.0 -p 5000` to start this sample.
 
 * Step 2: Open a browser and navigate to `http://localhost:5000/basic` to view the web UI of this sample.
@@ -46,7 +51,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
     * Set below environment virables:
         * `SPEECH_REGION` - the region of your Azure speech resource, e.g. westus2.
         * `SPEECH_KEY` - the subscription key of your Azure speech resource.
-        * `SPEECH_PRIVATE_ENDPOINT` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service.
+        * `SPEECH_PRIVATE_ENDPOINT` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint.
         * `AZURE_OPENAI_ENDPOINT` - the endpoint of your Azure OpenAI resource, e.g. https://my-aoai.openai.azure.com/, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
         * `AZURE_OPENAI_API_KEY` - the API key of your Azure OpenAI resource, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
         * `AZURE_OPENAI_DEPLOYMENT_NAME` - the name of your Azure OpenAI model deployment, which can be found in the `Model deployments` section of your Azure OpenAI resource in Azure portal.
@@ -54,6 +59,11 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * `COGNITIVE_SEARCH_ENDPOINT` - the endpoint of your Azure Cognitive Search resource, e.g. https://my-cognitive-search.search.windows.net/, which can be found in the `Overview` section of your Azure Cognitive Search resource in Azure portal, appearing at `Essentials -> Url` field.
         * `COGNITIVE_SEARCH_API_KEY` - the API key of your Azure Cognitive Search resource, which can be found in the `Keys` section of your Azure Cognitive Search resource in Azure portal. Please make sure to use the `Admin Key` instead of `Query Key`.
         * `COGNITIVE_SEARCH_INDEX_NAME` - the name of your Azure Cognitive Search index, which can be found in the `Indexes` section of your Azure Cognitive Search resource in Azure portal.
+    * Set below environment virables if you want to use customized ICE server:
+        * `ICE_SERVER_URL` - the URL of your customized ICE server.
+        * `ICE_SERVER_URL_REMOTE` - the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
+        * `ICE_SERVER_USERNAME` - the username of your customized ICE server.
+        * `ICE_SERVER_PASSWORD` - the password of your customized ICE server.
     * Run `python -m flask run -h 0.0.0.0 -p 5000` to start this sample.
 
 * Step 2: Open a browser and navigate to `http://localhost:5000/chat` to view the web UI of this sample.
