@@ -20,18 +20,23 @@ from flask import Flask, Response, render_template, request
 app = Flask(__name__, template_folder='.')
 
 # Environment variables
-# Speech resource
+# Speech resource (required)
 speech_region = os.environ.get('SPEECH_REGION') # e.g. westus2
 speech_key = os.environ.get('SPEECH_KEY')
-speech_private_endpoint = os.environ.get('SPEECH_PRIVATE_ENDPOINT') # e.g. https://my-speech-service.cognitiveservices.azure.com/
-# OpenAI resource
+speech_private_endpoint = os.environ.get('SPEECH_PRIVATE_ENDPOINT') # e.g. https://my-speech-service.cognitiveservices.azure.com/ (optional)
+# OpenAI resource (required for chat scenario)
 azure_openai_endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT') # e.g. https://my-aoai.openai.azure.com/
 azure_openai_api_key = os.environ.get('AZURE_OPENAI_API_KEY')
 azure_openai_deployment_name = os.environ.get('AZURE_OPENAI_DEPLOYMENT_NAME') # e.g. my-gpt-35-turbo-deployment
-# Cognitive search resource
+# Cognitive search resource (optional, only required for 'on your data' scenario)
 cognitive_search_endpoint = os.environ.get('COGNITIVE_SEARCH_ENDPOINT') # e.g. https://my-cognitive-search.search.windows.net/
 cognitive_search_api_key = os.environ.get('COGNITIVE_SEARCH_API_KEY')
 cognitive_search_index_name = os.environ.get('COGNITIVE_SEARCH_INDEX_NAME') # e.g. my-search-index
+# Customized ICE server (optional, only required for customized ICE server)
+ice_server_url = os.environ.get('ICE_SERVER_URL') # The ICE URL, e.g. turn:x.x.x.x:3478
+ice_server_url_remote = os.environ.get('ICE_SERVER_URL_REMOTE') # The ICE URL for remote side, e.g. turn:x.x.x.x:3478. This is only required when the ICE address for remote side is different from local side.
+ice_server_username = os.environ.get('ICE_SERVER_USERNAME') # The ICE username
+ice_server_password = os.environ.get('ICE_SERVER_PASSWORD') # The ICE password
 
 # Const variables
 default_tts_voice = 'en-US-JennyMultilingualV2Neural' # Default TTS voice
@@ -71,6 +76,14 @@ def getSpeechToken() -> Response:
 # The API route to get the ICE token
 @app.route("/api/getIceToken", methods=["GET"])
 def getIceToken() -> Response:
+    # Apply customized ICE server if provided
+    if ice_server_url and ice_server_username and ice_server_password:
+        custom_ice_token = json.dumps({
+            'Urls': [ ice_server_url ],
+            'Username': ice_server_username,
+            'Password': ice_server_password
+        })
+        return Response(custom_ice_token, status=200)
     return Response(ice_token, status=200)
 
 # The API route to connect the TTS avatar
@@ -103,6 +116,13 @@ def connectAvatar() -> Response:
         speech_synthesizer = client_context['speech_synthesizer']
         
         ice_token_obj = json.loads(ice_token)
+        # Apply customized ICE server if provided
+        if ice_server_url and ice_server_username and ice_server_password:
+            ice_token_obj = {
+                'Urls': [ ice_server_url_remote ] if ice_server_url_remote else [ ice_server_url ],
+                'Username': ice_server_username,
+                'Password': ice_server_password
+            }
         local_sdp = request.headers.get('LocalSdp')
         avatar_character = request.headers.get('AvatarCharacter')
         avatar_style = request.headers.get('AvatarStyle')
