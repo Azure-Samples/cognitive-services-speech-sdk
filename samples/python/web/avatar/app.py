@@ -197,7 +197,7 @@ def speak() -> Response:
         result_id = speakSsml(ssml, client_id)
         return Response(result_id, status=200)
     except Exception as e:
-        return Response(f"Result ID: {result_id}. Error message: {e}", status=400)
+        return Response(f"Speak failed. Error message: {e}", status=400)
 
 # The API route to get the speaking status
 @app.route("/api/getSpeakingStatus", methods=["GET"])
@@ -356,7 +356,7 @@ def handleUserQuery(user_query: str, client_id: uuid.UUID):
 
     # Stop previous speaking if there is any
     if is_speaking:
-        stopSpeakingInternal()
+        stopSpeakingInternal(client_id)
 
     # For 'on your data' scenario, chat API currently has long (4s+) latency
     # We return some quick reply here before the chat API returns to mitigate.
@@ -517,16 +517,19 @@ def speakSsml(ssml: str, client_id: uuid.UUID) -> str:
         cancellation_details = speech_sythesis_result.cancellation_details
         print(f"Speech synthesis canceled: {cancellation_details.reason}")
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
-            print(f"Error details: {cancellation_details.error_details}")
+            print(f"Result ID: {speech_sythesis_result.result_id}. Error details: {cancellation_details.error_details}")
             raise Exception(cancellation_details.error_details)
     return speech_sythesis_result.result_id
 
 # Stop speaking internal function
 def stopSpeakingInternal(client_id: uuid.UUID) -> None:
     global client_contexts
-    spoken_text_queue = client_contexts[client_id]['spoken_text_queue']
+    client_context = client_contexts[client_id]
+    speech_synthesizer = client_context['speech_synthesizer']
+    spoken_text_queue = client_context['spoken_text_queue']
     spoken_text_queue.clear()
-    # To-do: also stop the current speaking by synthesizer, after stop speaking is supported by SDK
+    connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
+    connection.send_message_async('synthesis.control', '{"action":"stop"}').get()
 
 # Start the speech token refresh thread
 speechTokenRefereshThread = threading.Thread(target=refreshSpeechToken)
