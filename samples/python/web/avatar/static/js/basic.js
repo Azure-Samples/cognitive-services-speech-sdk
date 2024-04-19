@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 // Global objects
+var clientId
 var peerConnection
 var previousAnimationFrameTimestamp = 0;
 
@@ -97,50 +98,38 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
 // Connect to TTS Avatar Service
 function connectToAvatarService(peerConnection) {
-    const xhr = new XMLHttpRequest()
-    xhr.open("POST", "/api/connectAvatar")
-
-    const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
-    const privateEndpoint = document.getElementById('privateEndpoint').value
-    if (privateEndpointEnabled && privateEndpoint !== '') {
-        xhr.setRequestHeader("PrivateEndpoint", privateEndpoint)
+    let headers = {
+        'ClientId': clientId,
+        'LocalSdp': btoa(JSON.stringify(peerConnection.localDescription)),
+        'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
+        'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
+        'BackgroundColor': document.getElementById('backgroundColor').value,
+        'IsCustomAvatar': document.getElementById('customizedAvatar').checked,
+        'TransparentBackground': document.getElementById('transparentBackground').checked,
+        'VideoCrop': document.getElementById('videoCrop').checked
     }
 
     if (document.getElementById('customVoiceEndpointId').value !== '') {
-        xhr.setRequestHeader("CustomVoiceEndpointId", document.getElementById('customVoiceEndpointId').value)
+        headers['CustomVoiceEndpointId'] = document.getElementById('customVoiceEndpointId').value
     }
 
-    xhr.setRequestHeader("LocalSdp", btoa(JSON.stringify(peerConnection.localDescription)))
-    xhr.setRequestHeader("AvatarCharacter", document.getElementById('talkingAvatarCharacter').value)
-    xhr.setRequestHeader("AvatarStyle", document.getElementById('talkingAvatarStyle').value)
-    xhr.setRequestHeader("BackgroundColor", document.getElementById('backgroundColor').value)
-    xhr.setRequestHeader("IsCustomAvatar", document.getElementById('customizedAvatar').checked)
-    xhr.setRequestHeader("TransparentBackground", document.getElementById('transparentBackground').checked)
-    xhr.setRequestHeader("VideoCrop", document.getElementById('videoCrop').checked)
-
-    let responseReceived = false
-    xhr.addEventListener("readystatechange", function() {
-        if (xhr.status == 200) {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    const remoteSdp = this.responseText
-                    peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(remoteSdp))))
-                }
-            }
+    fetch('/api/connectAvatar', {
+        method: 'POST',
+        headers: headers,
+        body: ''
+    })
+    .then(response => {
+        if (response.ok) {
+            response.text().then(text => {
+                const remoteSdp = text
+                peerConnection.setRemoteDescription(new RTCSessionDescription(JSON.parse(atob(remoteSdp))))
+            })
         } else {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    console.log("Failed to connect to the Avatar service. " + xhr.responseText)
-
-                    document.getElementById('startSession').disabled = false;
-                    document.getElementById('configuration').hidden = false;
-                }
-            }
+            document.getElementById('startSession').disabled = false;
+            document.getElementById('configuration').hidden = false;
+            throw new Error(`Failed connecting to the Avatar service: ${response.status} ${response.statusText}`)
         }
     })
-    xhr.send()
 }
 
 // Make video background transparent by matting
@@ -200,45 +189,28 @@ function htmlEncode(text) {
     return String(text).replace(/[&<>"'\/]/g, (match) => entityMap[match])
 }
 
-window.startSession = () => {
-    const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
-    const privateEndpoint = document.getElementById('privateEndpoint').value
-    if (privateEndpointEnabled && privateEndpoint === '') {
-        alert('Please fill in the Azure Speech endpoint.')
-        return
-    }
+window.onload = () => {
+    clientId = document.getElementById('clientId').value
+}
 
+window.startSession = () => {
     document.getElementById('startSession').disabled = true
     
-    const xhr = new XMLHttpRequest()
-    xhr.open("GET", "/api/getIceToken")
-    if (privateEndpointEnabled && privateEndpoint !== '') {
-        xhr.setRequestHeader("PrivateEndpoint", privateEndpoint)
-    }
-
-    let responseReceived = false
-    xhr.addEventListener("readystatechange", function() {
-        if (xhr.status == 200) {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    const responseData = JSON.parse(this.responseText)
-                    const iceServerUrl = responseData.Urls[0]
-                    const iceServerUsername = responseData.Username
-                    const iceServerCredential = responseData.Password
-                    setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
-                }
-            }
+    fetch('/api/getIceToken', {
+        method: 'GET',
+    })
+    .then(response => {
+        if (response.ok) {
+            response.json().then(data => {
+                const iceServerUrl = data.Urls[0]
+                const iceServerUsername = data.Username
+                const iceServerCredential = data.Password
+                setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+            })
         } else {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    console.log("[" + (new Date()).toISOString() + "] Failed fetching ICE token. " + xhr.responseText)
-                }
-            }
+            throw new Error(`Failed fetching ICE token: ${response.status} ${response.statusText}`)
         }
     })
-    xhr.send()
 }
 
 window.speak = () => {
@@ -250,37 +222,37 @@ window.speak = () => {
     let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(spokenText)}</mstts:ttsembedding></voice></speak>`
     console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
 
-    const xhr = new XMLHttpRequest()
-    xhr.open("POST", "/api/speak")
-    let responseReceived = false
-    xhr.addEventListener("readystatechange", function() {
+    fetch('/api/speak', {
+        method: 'POST',
+        headers: {
+            'ClientId': clientId,
+            'Content-Type': 'application/ssml+xml'
+        },
+        body: spokenSsml
+    })
+    .then(response => {
         document.getElementById('speak').disabled = false
-        if (xhr.status == 200) {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + spokenText + " ]. Result ID: " + xhr.responseText)
-                }
-            }
+        if (response.ok) {
+            response.text().then(text => {
+                console.log(`[${new Date().toISOString()}] Speech synthesized to speaker for text [ ${spokenText} ]. Result ID: ${text}`)
+            })
         } else {
-            if (xhr.responseText !== '') {
-                if (!responseReceived) {
-                    responseReceived = true
-                    console.log("[" + (new Date()).toISOString() + "] Unable to speak text. " + xhr.responseText)
-                }
-            }
+            throw new Error(`[${new Date().toISOString()}] Unable to speak text. ${response.status} ${response.statusText}`)
         }
     })
-    xhr.send(spokenSsml)
 }
 
 window.stopSession = () => {
     document.getElementById('speak').disabled = true
     document.getElementById('stopSession').disabled = true
 
-    const xhr = new XMLHttpRequest()
-    xhr.open("POST", "/api/disconnectAvatar")
-    xhr.send()
+    fetch('/api/disconnectAvatar', {
+        method: 'POST',
+        headers: {
+            'ClientId': clientId
+        },
+        body: ''
+    })
 }
 
 window.updataTransparentBackground = () => {
@@ -292,13 +264,5 @@ window.updataTransparentBackground = () => {
         document.body.background = ''
         document.getElementById('backgroundColor').value = '#FFFFFFFF'
         document.getElementById('backgroundColor').disabled = false
-    }
-}
-
-window.updatePrivateEndpoint = () => {
-    if (document.getElementById('enablePrivateEndpoint').checked) {
-        document.getElementById('showPrivateEndpointCheckBox').hidden = false
-    } else {
-        document.getElementById('showPrivateEndpointCheckBox').hidden = true
     }
 }
