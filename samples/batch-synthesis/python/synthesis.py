@@ -31,6 +31,9 @@ if not SPEECH_ENDPOINT:
         sys.exit(1)
     SERVICE_REGION = os.environ.get('SPEECH_REGION')
     SPEECH_ENDPOINT = f'https://{SERVICE_REGION}.api.cognitive.microsoft.com'
+if not PASSWORDLESS_AUTHENTICATION:
+    SUBSCRIPTION_KEY = os.environ.get('SPEECH_KEY')
+
 
 API_VERSION = "2024-04-01"
 
@@ -53,7 +56,6 @@ def _authenticate():
         token = credential.get_token('https://cognitiveservices.azure.com/.default')
         return {'Authorization': f'Bearer {token.token}'}
     else:
-        SUBSCRIPTION_KEY = os.environ.get('SPEECH_KEY')
         return {'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY}
 
 

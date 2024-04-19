@@ -17,14 +17,14 @@ pip install azure-identity
 
 ## Run the sample code
 
-The sample code itself is [synthesis.py](synthesis.py) and can be run using Python 3.7 or higher.
+The sample code itself is [synthesis.py](synthesis.py) and can be run using Python 3.8 or higher.
 You will need to adapt the following information to run the sample:
 
 1. Your Azure AI Speech Service.
 
     Some notes:
 
-    - We recommend using a passwordless authentication provided by the `azure-identity` library. Your Microsoft Entra user account is need to be assigned with `Cognitive Services Speech User` or `Cognitive Services Speech User` role.
+    - We recommend using a passwordless authentication provided by the `azure-identity` library. Your Microsoft Entra user account is need to be assigned with `Cognitive Services User` or `Cognitive Services Speech User` role.
       - Alternatively, you can get the subscription key from the "Keys and Endpoint" tab on your Azure AI Speech resource in the Azure Portal.
     - Batch synthesis is only available for paid subscriptions, free subscriptions are not supported.
     - Please refer to [this page](https://learn.microsoft.com/azure/ai-services/speech-service/regions#rest-apis) for a complete list of region identifiers in the expected format.
