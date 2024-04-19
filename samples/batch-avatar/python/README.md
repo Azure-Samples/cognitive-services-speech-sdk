@@ -24,7 +24,7 @@ You will need to adapt the following information to run the sample:
 
     Some notes:
 
-    - We recommend using a passwordless authentication provided by the `azure-identity` library. Your Microsoft Entra user account is need to be assigned with `Cognitive Services Speech User` or `Cognitive Services Speech User` role.
+    - We recommend using a passwordless authentication provided by the `azure-identity` library. Your Microsoft Entra user account is need to be assigned with `Cognitive Services User` or `Cognitive Services Speech User` role.
       - Alternatively, you can get the subscription key from the "Keys and Endpoint" tab on your Azure AI Speech resource in the Azure Portal.
     - Batch avatar synthesis is only available for paid subscriptions, free subscriptions are not supported.
     - Batch avatar synthesis is only available in these service regions: `West US 2`, `West Europe` and `South East Asia`
