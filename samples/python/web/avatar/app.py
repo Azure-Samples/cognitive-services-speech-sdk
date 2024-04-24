@@ -532,8 +532,11 @@ def stopSpeakingInternal(client_id: uuid.UUID) -> None:
     speech_synthesizer = client_context['speech_synthesizer']
     spoken_text_queue = client_context['spoken_text_queue']
     spoken_text_queue.clear()
-    connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
-    connection.send_message_async('synthesis.control', '{"action":"stop"}').get()
+    try:
+        connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
+        connection.send_message_async('synthesis.control', '{"action":"stop"}').get()
+    except:
+        print("Sending message through connection object is not yet supported by current Speech SDK.")
 
 # Start the speech token refresh thread
 speechTokenRefereshThread = threading.Thread(target=refreshSpeechToken)
