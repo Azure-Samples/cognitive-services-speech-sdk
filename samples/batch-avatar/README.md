@@ -10,6 +10,7 @@ Available samples:
 | Language | Directory | Description |
 | ---------- | -------- | ----------- |
 | Python | [python](python) | Python client calling batch avatar synthesis REST API |
+| C# | [csharp](csharp) | C# client calling batch avatar REST API. |
 
 ## Note
 

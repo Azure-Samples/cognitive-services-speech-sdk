@@ -1,4 +1,9 @@
-﻿using BatchAvatarSample.dto;
+﻿//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+
+using BatchAvatarSample.dto;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
