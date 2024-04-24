@@ -105,6 +105,7 @@ function connectToAvatarService(peerConnection) {
         'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
         'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
         'BackgroundColor': document.getElementById('backgroundColor').value,
+        'BackgroundImageUrl': document.getElementById('backgroundImageUrl').value,
         'IsCustomAvatar': document.getElementById('customizedAvatar').checked,
         'TransparentBackground': document.getElementById('transparentBackground').checked,
         'VideoCrop': document.getElementById('videoCrop').checked
@@ -285,9 +286,12 @@ window.updataTransparentBackground = () => {
         document.body.background = './static/image/background.png'
         document.getElementById('backgroundColor').value = '#00FF00FF'
         document.getElementById('backgroundColor').disabled = true
+        document.getElementById('backgroundImageUrl').value = ''
+        document.getElementById('backgroundImageUrl').disabled = true
     } else {
         document.body.background = ''
         document.getElementById('backgroundColor').value = '#FFFFFFFF'
         document.getElementById('backgroundColor').disabled = false
+        document.getElementById('backgroundImageUrl').disabled = false
     }
 }

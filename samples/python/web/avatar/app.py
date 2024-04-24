@@ -127,6 +127,7 @@ def connectAvatar() -> Response:
         avatar_character = request.headers.get('AvatarCharacter')
         avatar_style = request.headers.get('AvatarStyle')
         background_color = '#FFFFFFFF' if request.headers.get('BackgroundColor') is None else request.headers.get('BackgroundColor')
+        background_image_url = request.headers.get('BackgroundImageUrl')
         is_custom_avatar = request.headers.get('IsCustomAvatar')
         transparent_background = 'false' if request.headers.get('TransparentBackground') is None else request.headers.get('TransparentBackground')
         video_crop = 'false' if request.headers.get('VideoCrop') is None else request.headers.get('VideoCrop')
@@ -162,7 +163,10 @@ def connectAvatar() -> Response:
                         'character': avatar_character,
                         'style': avatar_style,
                         'background': {
-                            'color': '#00FF00FF' if transparent_background.lower() == 'true' else background_color
+                            'color': '#00FF00FF' if transparent_background.lower() == 'true' else background_color,
+                            'image': {
+                                'url': background_image_url
+                            }
                         }
                     }
                 }
