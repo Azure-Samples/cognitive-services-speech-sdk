@@ -1,5 +1,4 @@
-﻿using BatchAvatarSample;
-using BatchAvatarSample.dto;
+﻿using BatchAvatarSample.dto;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
