@@ -16,7 +16,7 @@ The input text stream API is designed to generate audio from text that is being 
 ## API overview
 ### Create text stream request
 To use the text stream API, you have to use the websocket V2 endpoint.  
-```wss://eastus.tts.speech.microsoft.com/cognitiveservices/websocket/v2```
+```wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v2```
 
 ### Set global properties
 Since the input of text stream API is parital text. SSML, which is based on XML, is not supported. And thus properties that set in SSML should be set in a new way.  
