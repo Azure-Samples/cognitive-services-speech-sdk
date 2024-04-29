@@ -32,6 +32,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
         * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
         * Background Color - The color of the avatar background.
+        * Background Image (URL) - The URL of the background image. If you want to have a background image for the avatar, please fill this field. You need first upload your image to a publicly accessbile place, with a public URL. e.g. https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg
         * Custom Avatar - Check this if you are using a custom avatar.
         * Transparent Background - Check this if you want to use transparent background for the avatar. When this is checked, the background color of the video stream from server side is automatically set to green(#00FF00FF), and the js code on client side (check the `makeBackgroundTransparent` function in main.js) will do the real-time matting by replacing the green color with transparent color.
         * Video Crop - By checking this, you can crop the video stream from server side to a smaller size. This is useful when you want to put the avatar video into a customized rectangle area.
