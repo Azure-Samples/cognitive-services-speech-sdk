@@ -80,6 +80,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
         if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
             document.getElementById('speak').disabled = true
+            document.getElementById('stopSpeaking').disabled = true
             document.getElementById('stopSession').disabled = true
             document.getElementById('startSession').disabled = false
             document.getElementById('configuration').hidden = false
@@ -98,12 +99,13 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
 // Connect to TTS Avatar Service
 function connectToAvatarService(peerConnection) {
+    let localSdp = btoa(JSON.stringify(peerConnection.localDescription))
     let headers = {
         'ClientId': clientId,
-        'LocalSdp': btoa(JSON.stringify(peerConnection.localDescription)),
         'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
         'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
         'BackgroundColor': document.getElementById('backgroundColor').value,
+        'BackgroundImageUrl': document.getElementById('backgroundImageUrl').value,
         'IsCustomAvatar': document.getElementById('customizedAvatar').checked,
         'TransparentBackground': document.getElementById('transparentBackground').checked,
         'VideoCrop': document.getElementById('videoCrop').checked
@@ -116,7 +118,7 @@ function connectToAvatarService(peerConnection) {
     fetch('/api/connectAvatar', {
         method: 'POST',
         headers: headers,
-        body: ''
+        body: localSdp
     })
     .then(response => {
         if (response.ok) {
@@ -215,6 +217,7 @@ window.startSession = () => {
 
 window.speak = () => {
     document.getElementById('speak').disabled = true;
+    document.getElementById('stopSpeaking').disabled = false
     document.getElementById('audio').muted = false
     let spokenText = document.getElementById('spokenText').value
     let ttsVoice = document.getElementById('ttsVoice').value
@@ -232,6 +235,7 @@ window.speak = () => {
     })
     .then(response => {
         document.getElementById('speak').disabled = false
+        document.getElementById('stopSpeaking').disabled = true
         if (response.ok) {
             response.text().then(text => {
                 console.log(`[${new Date().toISOString()}] Speech synthesized to speaker for text [ ${spokenText} ]. Result ID: ${text}`)
@@ -242,8 +246,30 @@ window.speak = () => {
     })
 }
 
+window.stopSpeaking = () => {
+    document.getElementById('stopSpeaking').disabled = true
+
+    fetch('/api/stopSpeaking', {
+        method: 'POST',
+        headers: {
+            'ClientId': clientId
+        },
+        body: ''
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log(`[${new Date().toISOString()}] Speaking stopped.`)
+            document.getElementById('speak').disabled = false
+            document.getElementById('stopSpeaking').disabled = false
+        } else {
+            throw new Error(`[${new Date().toISOString()}] Unable to stop speaking. ${response.status} ${response.statusText}`)
+        }
+    })
+}
+
 window.stopSession = () => {
     document.getElementById('speak').disabled = true
+    document.getElementById('stopSpeaking').disabled = true
     document.getElementById('stopSession').disabled = true
 
     fetch('/api/disconnectAvatar', {
@@ -260,9 +286,12 @@ window.updataTransparentBackground = () => {
         document.body.background = './static/image/background.png'
         document.getElementById('backgroundColor').value = '#00FF00FF'
         document.getElementById('backgroundColor').disabled = true
+        document.getElementById('backgroundImageUrl').value = ''
+        document.getElementById('backgroundImageUrl').disabled = true
     } else {
         document.body.background = ''
         document.getElementById('backgroundColor').value = '#FFFFFFFF'
         document.getElementById('backgroundColor').disabled = false
+        document.getElementById('backgroundImageUrl').disabled = false
     }
 }
