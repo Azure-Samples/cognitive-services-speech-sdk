@@ -70,7 +70,7 @@ def submit_synthesis(job_id: str) -> bool:
         text = f.read()
 
     payload = {
-        "inputKind": "PlainText",
+        "inputKind": "PlainText", # or SSML
         'synthesisConfig': {
             "voice": "en-US-AvaMultilingualNeural",
         },
