@@ -8,6 +8,9 @@ using System;
 
 public class BatchAvatarRequest
 {
+    /// <summary>
+    /// The synthesis text kind, `SSML` or `PlainText`.
+    /// </summary>
     public required string InputKind { get; set; }
 
     public required IList<BatchAvatarInput> Inputs { get; set; }
@@ -28,19 +31,19 @@ public class BatchAvatarJob
     public string? Description { get; set; }
 
     public required string Status { get; set; }
-    
+
     public DateTime CreatedDateTime { get; set; }
-    
+
     public DateTime LastActionDateTime { get; set; }
-        
+
     public IReadOnlyDictionary<string, Guid>? CustomVoices { get; set; }
-    
+
     public BatchSynthesisconfig? SynthesisConfig { get; set; }
-    
+
     public BatchSynthesisProperties? Properties { get; set; }
-    
+
     public required BatchAvatarconfig AvatarConfig { get; set; }
-    
+
     public BatchSynthesisOutputs? Outputs { get; set; }
 }
 
@@ -60,13 +63,13 @@ public class BatchSynthesisProperties
     public string? DestinationPath { get; set; }
 
     public int? sizeInBytes { get; set; }
-    
+
     public int? succeededCount { get; set; }
-    
+
     public int? failedCount { get; set; }
-    
+
     public int? durationInMilliseconds { get; set; }
-    
+
     public Billingdetails? billingDetails { get; set; }
 
     public Error? Error { get; set; }
@@ -98,13 +101,13 @@ public class BatchAvatarconfig
     public string? TalkingAvatarStyle { get; set; }
 
     public string? VideoFormat { get; set; }
-    
+
     public string? VideoCodec { get; set; }
-    
+
     public string? SubtitleType { get; set; }
-    
+
     public string? BackgroundColor { get; set; }
-    
+
     public Uri? BackgroundImage { get; set; }
 
     public Coordinate? AvatarPosition { get; set; }
@@ -112,7 +115,7 @@ public class BatchAvatarconfig
     public Coordinate? AvatarSize { get; set; }
 
     public Videocrop? VideoCrop { get; set; }
-    
+
     public int? BitrateKbps { get; set; }
 
     public bool? Customized { get; set; }
@@ -121,7 +124,7 @@ public class BatchAvatarconfig
 public class Videocrop
 {
     public required Coordinate TopLeft { get; set; }
-    
+
     public required Coordinate BottomRight { get; set; }
 }
 
@@ -134,7 +137,7 @@ public class BatchSynthesisOutputs
     public required string Summary { get; set; }
 }
 
-public class BillingDetails 
+public class BillingDetails
 {
     public long NeuralCharacters { get; set; }
 
