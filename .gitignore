@@ -332,3 +332,4 @@ samples/js/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*
 
 # iOS framwork
 samples/objective-c/ios/MicrosoftCognitiveServicesSpeech.framework/
+/samples/csharp/dotnetcore/mvc/samples/appsettings.Development.json
