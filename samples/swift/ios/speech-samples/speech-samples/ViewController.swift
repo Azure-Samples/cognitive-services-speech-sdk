@@ -115,7 +115,7 @@ class ViewController: UIViewController {
         if (path == nil) {
             print("Cannot find audio file!");
             self.updateLabel(text: "Cannot find audio file", color: UIColor.red)
-            return;
+            return
         }
         print("pronunciation assessment audio file path: ", path!)
 
@@ -233,7 +233,7 @@ class ViewController: UIViewController {
         if (path == nil) {
             print("Cannot find audio file!");
             self.updateLabel(text: "Cannot find audio file", color: UIColor.red)
-            return;
+            return
         }
         print("pronunciation assessment audio file path: ", path!)
         
@@ -305,7 +305,7 @@ class ViewController: UIViewController {
         if (path == nil) {
             print("Cannot find audio file!");
             self.updateLabel(text: "Cannot find audio file", color: UIColor.red)
-            return;
+            return
         }
         print("pronunciation assessment audio file path: ", path!)
         
@@ -422,7 +422,7 @@ class ViewController: UIViewController {
         if (path == nil) {
             print("Cannot find audio file!");
             self.updateLabel(text: "Cannot find audio file", color: UIColor.red)
-            return;
+            return
         }
         print("pronunciation assessment audio file path: ", path!)
         

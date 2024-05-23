@@ -32,10 +32,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="whatstheweatherlike.wav">
+    <None Include="whatstheweatherlike.wav">
       <Filter>Resource Files</Filter>
-    </Media>
+    </None>
   </ItemGroup>
 </Project>
