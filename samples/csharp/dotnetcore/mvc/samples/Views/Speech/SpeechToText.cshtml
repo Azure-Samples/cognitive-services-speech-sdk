@@ -1,0 +1,182 @@
+﻿@{
+    ViewData["Title"] = "Recording Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Speech to Text</h1>
+    <p>This sample demonstrate how you can use web app and stream recording using SignalR to convert voice recording to a text.</p>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="mb-3">
+            <h4>Recognize Type</h4>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="RecognizeType" id="RecognizeOnce" value="RecognizeOnce" checked>
+                <label class="form-check-label" for="RecognizeOnce">
+                    Recognize Once
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="RecognizeType" id="ContinuousRecognition" value="ContinuousRecognition">
+                <label class="form-check-label" for="ContinuousRecognition">
+                    Continuous Recognition
+                </label>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="recording">Start</button>
+
+        <div class="d-none mt-3" id="feedback-container">
+            <ul class="list-group list-group-flush d-none" id="feedback-list"></ul>
+            <p class="mb-0" id="feedback-message"></p>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/microsoft-signalr/signalr.js"></script>
+
+@section Scripts {
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+
+            if (!navigator.mediaDevices) {
+
+                alert('mediaDevices is not supported by your browser.');
+
+                return;
+            }
+
+            if (!MediaRecorder.isTypeSupported("audio/ogg")) {
+
+                alert('The MIMI type "audio/ogg" is not supported by your browser.');
+
+                return;
+            }
+
+            const startButton = document.getElementById('recording');
+            const container = document.getElementById('feedback-container');
+            const containerList = document.getElementById('feedback-list');
+            const containerMessage = document.getElementById('feedback-message');
+
+            const isContinuous = () => {
+                var recognizeType = document.querySelector('input[name="RecognizeType"]:checked').value;
+
+                return recognizeType == 'ContinuousRecognition';
+            }
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/speech-to-text")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.serverTimeoutInMilliseconds = 240000; // 240 seconds
+
+            navigator.mediaDevices.getUserMedia({
+                audio: {
+                    autoGainControl: false,
+                    channelCount: 1,
+                    echoCancellation: false,
+                    latency: 0,
+                    noiseSuppression: false,
+                    sampleSize: 16
+                }, video: false
+            }).then(stream => {
+
+                const mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: "audio/ogg"
+                });
+
+                const subject = new signalR.Subject();
+
+                mediaRecorder.addEventListener("dataavailable", async e => {
+                    // convert blob to base64 to send to the SignalR as string
+                    const uint8Array = new Uint8Array(await e.data.arrayBuffer());
+
+                    const binaryString = uint8Array.reduce((str, byte) => str + String.fromCharCode(byte), '');
+
+                    var base64 = btoa(binaryString);
+                    subject.next(base64);
+                });
+
+                mediaRecorder.addEventListener("stop", () => {
+
+                    startButton.innerText = 'Start';
+                    startButton.setAttribute('disabled', true);
+
+                    setTimeout(() => {
+                        subject.complete();
+                        startButton.removeAttribute('disabled');
+                    }, 800);
+                });
+
+                mediaRecorder.addEventListener("start", () => {
+                    if (isContinuous()) {
+                        connection.send('ContinuousRecognition', subject);
+                    } else {
+                        connection.send('RecognizeOnce', subject);
+                    }
+                    startButton.innerHTML = 'Stop';
+                });
+
+                // start recording when the start button is clicked
+                startButton.addEventListener("click", () => {
+                    if (mediaRecorder.state == "recording") {
+                        mediaRecorder.stop();
+                    } else {
+                        container.classList.add('d-none');
+                        containerList.innerHTML = '';
+                        containerList.classList.add('d-none');
+                        containerMessage.innerText = '';
+                        containerMessage.classList.add('d-none');
+
+                        // send every second
+                        mediaRecorder.start(1000);
+                    }
+                });
+
+            }).catch(err => {
+                // If the user denies permission to record audio, then display an error
+                console.log('Error: ' + err);
+                alert('You must allow Microphone access to use this feature.');
+            });
+
+            async function start() {
+                try {
+                    await connection.start();
+                } catch (err) {
+                    console.log(err);
+                    setTimeout(start, 3000);
+                }
+            };
+
+            connection.onclose(async () => {
+                await start();
+            });
+
+            connection.on('ReceiveMessage', (message, isError) => {
+                console.log(message, isError);
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerText = message;
+
+                if (isError) {
+                    li.classList.add('text-danger');
+                }
+                containerList.appendChild(li);
+                containerList.classList.remove('d-none');
+                container.classList.remove('d-none');
+            });
+
+            connection.on('ReceivePartialMessage', message => {
+                console.log(message);
+                containerMessage.innerText += message;
+                containerMessage.classList.remove('d-none');
+                container.classList.remove('d-none');
+            });
+
+            // Start the connection
+            start();
+        });
+    </script>
+}
