@@ -1,6 +1,6 @@
 # C# ASP.NET Core MVC
 
-This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for C#.
+This sample demonstrates various forms of speech recognition using the Speech SDK for C#.
 It runs under .NET 8 or later on Windows or Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
 
 ## Prerequisites
@@ -52,8 +52,7 @@ It runs under .NET 8 or later on Windows or Linux (see the list of [supported Li
 
 To debug the app and then run it, press <kbd>F5</kbd> or use **Debug** \> **Start Debugging**. To run the app without debugging, press <kbd>Ctrl+F5</kbd> or use **Debug** \> **Start Without Debugging**.
 
-The app displays a menu that you can navigate using your keyboard.
-Choose the scenarios that you're interested in.
+The app displays a menu that you can navigate. Choose the scenario that you're interested in.
 
 ### Using the .NET Core CLI
 

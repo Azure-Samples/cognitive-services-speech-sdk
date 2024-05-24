@@ -7,7 +7,7 @@ namespace samples;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +32,6 @@ public class Program
         builder.Services.AddSingleton<IConfigureOptions<HubOptions<TextToSpeechHub>>, HubOptionsSetup<TextToSpeechHub>>();
         builder.Services.Configure<HubOptions<TextToSpeechHub>>(hubOptions =>
         {
-            hubOptions.MaximumReceiveMessageSize = 50000000;
             hubOptions.EnableDetailedErrors = true;
             hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(240);
             hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(240);
@@ -55,6 +54,6 @@ public class Program
             name: "default",
             pattern: "{controller=Speech}/{action=SpeechToText}/{id?}");
 
-        app.Run();
+        await app.RunAsync();
     }
 }
