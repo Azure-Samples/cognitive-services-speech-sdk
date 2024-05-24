@@ -1,10 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Recording Page";
+    ViewData["Title"] = "Speech to Text";
 }
 
 <div class="text-center">
     <h1 class="display-4">Speech to Text</h1>
-    <p>This sample demonstrate how you can use web app and SignalR to convert voice recording to a text.</p>
+    <p>This sample demonstrates how you can use a web app and SignalR to convert voice recordings to text.</p>
 </div>
 
 <div class="card text-bg-light">
@@ -25,7 +25,7 @@
             </div>
         </div>
 
-        <button type="button" class="btn btn-primary" id="Recording">Start</button>
+        <button type="button" class="btn btn-primary" id="Recording"><i class="fa-solid fa-microphone"></i> Start</button>
 
         <div class="d-none mt-3" id="FeedbackContainer">
             <ul class="list-group list-group-flush d-none" id="FeedbackList"></ul>
@@ -36,9 +36,14 @@
 
 <script src="~/lib/microsoft-signalr/signalr.js"></script>
 
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+}
+
 @section Scripts {
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
+            const mimeType = "audio/ogg";
 
             if (!navigator.mediaDevices) {
 
@@ -47,9 +52,9 @@
                 return;
             }
 
-            if (!MediaRecorder.isTypeSupported("audio/ogg")) {
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
 
-                alert('The MIMI type "audio/ogg" is not supported by your browser.');
+                alert(`The MIMI type ${mimeType} is not supported by your browser.`);
 
                 return;
             }
@@ -84,7 +89,7 @@
             }).then(stream => {
 
                 const mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: "audio/ogg"
+                    mimeType: mimeType
                 });
 
                 const subject = new signalR.Subject();
@@ -101,7 +106,7 @@
 
                 mediaRecorder.addEventListener("stop", () => {
 
-                    startButton.innerText = 'Start';
+                    startButton.innerHTML = '<i class="fa-solid fa-microphone"></i> Start';
                     startButton.setAttribute('disabled', true);
 
                     setTimeout(() => {
@@ -116,7 +121,7 @@
                     } else {
                         connection.send('RecognizeOnce', subject);
                     }
-                    startButton.innerHTML = 'Stop';
+                    startButton.innerHTML = '<i class="fa-solid fa-stop"></i> Stop';
                 });
 
                 // start recording when the start button is clicked

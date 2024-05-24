@@ -1,10 +1,10 @@
 ﻿@{
-    ViewData["Title"] = "Recording Page";
+    ViewData["Title"] = "Text to Speech";
 }
 
 <div class="text-center">
     <h1 class="display-4">Text to Speech</h1>
-    <p>This sample demonstrate how you can use web app and SignalR to convert text to speech.</p>
+    <p>This sample demonstrates how you can use a web app and SignalR to convert text to speech.</p>
 </div>
 
 <div class="card text-bg-light">
@@ -47,7 +47,7 @@
             </select>
         </div>
 
-        <button type="button" class="btn btn-primary" id="Send" diabled>Send</button>
+        <button type="button" class="btn btn-primary disabled" id="Send" diabled><i class="fa-regular fa-paper-plane"></i> Send</button>
 
         <ul class="list-group list-group-flush d-none mt-3" id="FeedbackList"></ul>
 
@@ -80,7 +80,6 @@
                 })
             };
 
-
             const getByteArray = (base64String) => {
                 const byteCharacters = atob(base64String);
                 const byteArrays = [];
@@ -100,6 +99,16 @@
                 return byteArrays;
             }
 
+            const disableButton = (btn) => {
+                btn.setAttribute('disabled', true);
+                btn.classList.add('disabled');
+            };
+
+            const enableButton = (btn) => {
+                btn.removeAttribute('disabled');
+                btn.classList.remove('disabled');
+            };
+
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/text-to-speech")
                 .withAutomaticReconnect()
@@ -110,11 +119,11 @@
             inputMessage.addEventListener('keyup', (e) => {
                 if (isBlank(inputMessage.value)) {
 
-                    sendButton.setAttribute('disabled', true);
+                    disableButton(sendButton);
                     return;
                 }
 
-                sendButton.removeAttribute('disabled');
+                enableButton(sendButton);
 
                 if (e.key === 'Enter' || e.keyCode === 13) {
                     sendButton.dispatchEvent(new Event('click'));
@@ -130,7 +139,7 @@
 
                 connection.send('Send', inputMessage.value, voiceName.value);
                 inputMessage.value = '';
-                sendButton.setAttribute('disabled', true);
+                disableButton(sendButton);
             });
 
             async function start() {
@@ -158,7 +167,7 @@
                 containerList.classList.remove('d-none');
             });
 
-            let recordingCounter = 1;
+            let recordingCounter = 0;
 
             connection.on('ReceiveData', (data, text) => {
 
