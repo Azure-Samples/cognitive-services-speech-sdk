@@ -1,0 +1,236 @@
+﻿@{
+    ViewData["Title"] = "Recording Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Text to Speech</h1>
+    <p>This sample demonstrate how you can use web app and SignalR to convert text to speech.</p>
+</div>
+
+<div class="card text-bg-light">
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label" for="Message">Message</label>
+            <textarea class="form-control" name="Message" id="Message"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="VoiceName">Voice Name</label>
+            <select class="form-select" id="VoiceName" name="VoiceName">
+                <optgroup label="English (United States)">
+                    <option value="en-US-AvaNeural" selected>Ava (Female)</option>
+                    <option value="en-US-EmmaNeural">Emma (Female)</option>
+                    <option value="en-US-JennyNeural">Jenny (Female)</option>
+                    <option value="en-US-AriaNeural">Aria (Female)</option>
+                    <option value="en-US-JaneNeural">Jane (Female)</option>
+                    <option value="en-US-SaraNeural">Sara (Female)</option>
+                    <option value="en-US-NancyNeural">Nancy (Female)</option>
+                    <option value="en-US-AmberNeural">Amber (Female)</option>
+                    <option value="en-US-AnaNeural">Ana (Female, Child)</option>
+                    <option value="en-US-AshleyNeural">Ashley (Female)</option>
+                    <option value="en-US-CoraNeural">Cora (Female)</option>
+                    <option value="en-US-ElizabethNeural">Elizabeth (Female)</option>
+                    <option value="en-US-MichelleNeural">Michelle (Female)</option>
+                    <option value="en-US-MonicaNeural">Monica (Female)</option>
+                    <option value="en-US-AndrewNeural">Andrew (Male)</option>
+                    <option value="en-US-GuyNeural">Guy (Male)</option>
+                    <option value="en-US-DavisNeural">Davis (Male)</option>
+                    <option value="en-US-JasonNeural">Jason (Male)</option>
+                    <option value="en-US-TonyNeural">Tony (Male)</option>
+                    <option value="en-US-BrandonNeural">Brandon (Male)</option>
+                    <option value="en-US-ChristopherNeural">Christopher (Male)</option>
+                    <option value="en-US-EricNeural">Eric (Male)</option>
+                    <option value="en-US-JacobNeural">Jacob (Male)</option>
+                    <option value="en-US-RogerNeural">Roger (Male)</option>
+                    <option value="en-US-SteffanNeural">Steffan (Male)</option>
+                </optgroup>
+            </select>
+        </div>
+
+        <button type="button" class="btn btn-primary" id="Send" diabled>Send</button>
+
+        <ul class="list-group list-group-flush d-none mt-3" id="FeedbackList"></ul>
+
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+}
+
+<script src="~/lib/microsoft-signalr/signalr.js"></script>
+
+@section Scripts {
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const sendButton = document.getElementById('Send');
+            const containerList = document.getElementById('FeedbackList');
+            const inputMessage = document.getElementById('Message');
+            const voiceName = document.getElementById('VoiceName');
+
+            const isBlank = str => {
+                return (!str || /^\s*$/.test(str));
+            };
+
+            const playAudio = audio => {
+                return new Promise(res => {
+                    audio.play()
+                    audio.onended = res
+                })
+            };
+
+
+            const getByteArray = (base64String) => {
+                const byteCharacters = atob(base64String);
+                const byteArrays = [];
+
+                for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                    const slice = byteCharacters.slice(offset, offset + 512);
+
+                    const byteNumbers = new Array(slice.length);
+                    for (let i = 0; i < slice.length; i++) {
+                        byteNumbers[i] = slice.charCodeAt(i);
+                    }
+
+                    const byteArray = new Uint8Array(byteNumbers);
+                    byteArrays.push(byteArray);
+                }
+
+                return byteArrays;
+            }
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/text-to-speech")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.serverTimeoutInMilliseconds = 240000; // 240 seconds
+
+            inputMessage.addEventListener('keyup', (e) => {
+                if (isBlank(inputMessage.value)) {
+
+                    sendButton.setAttribute('disabled', true);
+                    return;
+                }
+
+                sendButton.removeAttribute('disabled');
+
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    sendButton.dispatchEvent(new Event('click'));
+                }
+            });
+
+            // send the message when the button is clicked
+            sendButton.addEventListener("click", () => {
+
+                if (!inputMessage.value) {
+                    return;
+                }
+
+                connection.send('Send', inputMessage.value, voiceName.value);
+                inputMessage.value = '';
+                sendButton.setAttribute('disabled', true);
+            });
+
+            async function start() {
+                try {
+                    await connection.start();
+                } catch (err) {
+                    console.log(err);
+                    setTimeout(start, 3000);
+                }
+            };
+
+            connection.onclose(async () => {
+                await start();
+            });
+
+            connection.on('ReceiveMessage', (message, isError) => {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerText = message;
+
+                if (isError) {
+                    li.classList.add('text-danger');
+                }
+                containerList.appendChild(li);
+                containerList.classList.remove('d-none');
+            });
+
+            let recordingCounter = 1;
+
+            connection.on('ReceiveData', (data, text) => {
+
+                console.log('ReceiveData', data, text)
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+
+                var playerButton = document.createElement('div');
+
+                let audioHtmlId = 'PlayerButton_' + (recordingCounter++);
+                playerButton.id = audioHtmlId;
+                playerButton.setAttribute('role', 'button');
+                playerButton.classList.add('btn');
+                playerButton.classList.add('rounded-circle');
+                playerButton.classList.add('btn-sm');
+                playerButton.classList.add('me-2');
+                playerButton.classList.add('btn-danger');
+                playerButton.classList.add('btn-audio-player');
+                playerButton.innerHTML = '<i class="fa-solid fa-pause"></i>';
+
+                var blob = new Blob(getByteArray(data), { type: 'audio/ogg' });
+
+                playerButton.setAttribute('data-audio-url', URL.createObjectURL(blob));
+
+                var liContent = document.createElement('div');
+                liContent.classList.add('d-flex');
+                liContent.classList.add('justify-content-start');
+                //liContent.classList.add('align-items-start');
+
+                var buttonWrapper = document.createElement('div');
+                buttonWrapper.classList.add('d-flex');
+                buttonWrapper.classList.add('align-self-center');
+                buttonWrapper.append(playerButton);
+                liContent.append(buttonWrapper);
+
+                var paragraph = document.createElement('p');
+                paragraph.classList.add('mb-0')
+                paragraph.innerText = text;
+                liContent.append(paragraph);
+                li.append(liContent);
+                containerList.appendChild(li);
+                containerList.classList.remove('d-none');
+
+                var playerButtonElement = document.getElementById(audioHtmlId);
+
+                playerButtonElement.audioPlayer = new Audio(playerButtonElement.getAttribute('data-audio-url'));
+                playerButtonElement.audioPlayer.play();
+                playerButtonElement.audioPlayer.addEventListener('ended', () => {
+                    playerButtonElement.innerHTML = '<i class="fa-solid fa-play"></i>';
+                });
+
+                playerButtonElement.addEventListener('click', (e) => {
+
+                    var button = e.target;
+
+                    if (button.getAttribute('role') != 'button') {
+                        button = button.closest('[role="button"]');
+                    }
+
+                    if (button.audioPlayer.paused || !button.audioPlayer.currentTime) {
+                        button.innerHTML = '<i class="fa-solid fa-pause"></i>';
+                        playAudio(button.audioPlayer);
+                    } else {
+                        button.innerHTML = '<i class="fa-solid fa-play"></i>';
+                        button.audioPlayer.pause();
+                    }
+                });
+            });
+
+            // Start the connection
+            start();
+        });
+
+    </script>
+}

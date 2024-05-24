@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
+
 </head>
 <body>
     <header>
@@ -18,7 +20,11 @@
                 <div class="navbar-collapse collapse d-lg-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="SpeechToText" asp-action="Index">Speech to Text</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Speech" asp-action="SpeechToText">Speech to Text</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Speech" asp-action="TextToSpeech">Text to Speech</a>
                         </li>
                     </ul>
                 </div>

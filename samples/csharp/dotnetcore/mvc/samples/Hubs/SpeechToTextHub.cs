@@ -163,8 +163,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
             return null;
         }
 
-        var speechConfig = SpeechConfig.FromSubscription(key, region);
-        return speechConfig;
+        return SpeechConfig.FromSubscription(key, region);
     }
 
     private void RecognizerStopped(object sender, SessionEventArgs e)

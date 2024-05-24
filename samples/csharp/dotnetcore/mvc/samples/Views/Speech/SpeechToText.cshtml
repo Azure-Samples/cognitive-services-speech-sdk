@@ -4,10 +4,10 @@
 
 <div class="text-center">
     <h1 class="display-4">Speech to Text</h1>
-    <p>This sample demonstrate how you can use web app and stream recording using SignalR to convert voice recording to a text.</p>
+    <p>This sample demonstrate how you can use web app and SignalR to convert voice recording to a text.</p>
 </div>
 
-<div class="card">
+<div class="card text-bg-light">
     <div class="card-body">
         <div class="mb-3">
             <h4>Recognize Type</h4>
@@ -25,11 +25,11 @@
             </div>
         </div>
 
-        <button type="button" class="btn btn-primary" id="recording">Start</button>
+        <button type="button" class="btn btn-primary" id="Recording">Start</button>
 
-        <div class="d-none mt-3" id="feedback-container">
-            <ul class="list-group list-group-flush d-none" id="feedback-list"></ul>
-            <p class="mb-0" id="feedback-message"></p>
+        <div class="d-none mt-3" id="FeedbackContainer">
+            <ul class="list-group list-group-flush d-none" id="FeedbackList"></ul>
+            <p class="mb-0" id="FeedbackMessage"></p>
         </div>
     </div>
 </div>
@@ -54,10 +54,10 @@
                 return;
             }
 
-            const startButton = document.getElementById('recording');
-            const container = document.getElementById('feedback-container');
-            const containerList = document.getElementById('feedback-list');
-            const containerMessage = document.getElementById('feedback-message');
+            const startButton = document.getElementById('Recording');
+            const container = document.getElementById('FeedbackContainer');
+            const containerList = document.getElementById('FeedbackList');
+            const containerMessage = document.getElementById('FeedbackMessage');
 
             const isContinuous = () => {
                 var recognizeType = document.querySelector('input[name="RecognizeType"]:checked').value;

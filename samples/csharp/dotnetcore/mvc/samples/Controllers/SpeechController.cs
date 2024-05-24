@@ -7,4 +7,9 @@ public class SpeechController : Controller
     {
         return View();
     }
+
+    public IActionResult TextToSpeech()
+    {
+        return View();
+    }
 }

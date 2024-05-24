@@ -29,6 +29,15 @@ public class Program
             hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(240);
         });
 
+        builder.Services.AddSingleton<IConfigureOptions<HubOptions<TextToSpeechHub>>, HubOptionsSetup<TextToSpeechHub>>();
+        builder.Services.Configure<HubOptions<TextToSpeechHub>>(hubOptions =>
+        {
+            hubOptions.MaximumReceiveMessageSize = 50000000;
+            hubOptions.EnableDetailedErrors = true;
+            hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(240);
+            hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(240);
+        });
+
         var app = builder.Build();
 
         app.UseHttpsRedirection();
@@ -39,6 +48,7 @@ public class Program
 
         app.UseAuthorization();
 
+        app.MapHub<TextToSpeechHub>("/text-to-speech");
         app.MapHub<SpeechToTextHub>("/speech-to-text");
 
         app.MapControllerRoute(
