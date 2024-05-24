@@ -7,6 +7,8 @@ namespace samples.Hubs;
 
 public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
 {
+    public const string InvalidConfigErrorMessage = "Please provide your service key and region in the configuration provider (e.g., in appsettings.json).";
+
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
 
@@ -20,11 +22,11 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
 
     public async Task ContinuousRecognition(IAsyncEnumerable<string> stream)
     {
-        var speechConfig = GetSpeechConfig();
+        var speechConfig = _configuration.GetSpeechConfig();
 
         if (speechConfig == null)
         {
-            await Clients.Caller.ReceiveMessage("Please provide your service key and region in the configuration provider. (Ex., appsettings.json).", true);
+            await Clients.Caller.ReceiveMessage(InvalidConfigErrorMessage, true);
 
             return;
         }
@@ -56,11 +58,11 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
 
     public async Task RecognizeOnce(IAsyncEnumerable<string> stream)
     {
-        var speechConfig = GetSpeechConfig();
+        var speechConfig = _configuration.GetSpeechConfig();
 
         if (speechConfig == null)
         {
-            await Clients.Caller.ReceiveMessage("Please provide your service key and region in the configuration provider. (Ex., appsettings.json).", true);
+            await Clients.Caller.ReceiveMessage(InvalidConfigErrorMessage, true);
 
             return;
         }
@@ -150,20 +152,6 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         }
 
         return audioInputStream;
-    }
-
-    private SpeechConfig GetSpeechConfig()
-    {
-        var section = _configuration.GetSection("SpeechService");
-        var key = section.GetValue<string>("Key");
-        var region = section.GetValue<string>("Region");
-
-        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(region))
-        {
-            return null;
-        }
-
-        return SpeechConfig.FromSubscription(key, region);
     }
 
     private void RecognizerStopped(object sender, SessionEventArgs e)

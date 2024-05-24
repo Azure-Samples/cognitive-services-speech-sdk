@@ -19,11 +19,11 @@ public sealed class TextToSpeechHub : Hub<ITextToSpeechHub>
             return;
         }
 
-        var speechConfig = GetSpeechConfig();
+        var speechConfig = _configuration.GetSpeechConfig();
 
         if (speechConfig == null)
         {
-            await Clients.Caller.ReceiveMessage("Please provide your service key and region in the configuration provider. (Ex., appsettings.json).", true);
+            await Clients.Caller.ReceiveMessage(SpeechToTextHub.InvalidConfigErrorMessage, true);
 
             return;
         }
@@ -58,20 +58,6 @@ public sealed class TextToSpeechHub : Hub<ITextToSpeechHub>
                 await Clients.Caller.ReceiveMessage($"Failed to speak an incoming text. Reason {cancellation.Reason}.", true);
             }
         }
-    }
-
-    private SpeechConfig GetSpeechConfig()
-    {
-        var section = _configuration.GetSection("SpeechService");
-        var key = section.GetValue<string>("Key");
-        var region = section.GetValue<string>("Region");
-
-        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(region))
-        {
-            return null;
-        }
-
-        return SpeechConfig.FromSubscription(key, region);
     }
 }
 
