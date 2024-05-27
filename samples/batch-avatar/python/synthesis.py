@@ -68,7 +68,7 @@ def submit_synthesis(job_id: str):
         'customVoices': {
             # "YOUR_CUSTOM_VOICE_NAME": "YOUR_CUSTOM_VOICE_ID"
         },
-        "inputKind": "plainText",
+        "inputKind": "PlainText",  # PlainText or SSML
         "inputs": [
             {
                 "content": "Hi, I'm a virtual assistant created by Microsoft.",
