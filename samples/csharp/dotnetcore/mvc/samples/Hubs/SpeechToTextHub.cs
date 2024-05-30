@@ -37,19 +37,18 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
 
         recognizer.Recognizing += RecognizerRecognizing;
+        recognizer.Recognized += RecognizerRecognized;
         recognizer.SessionStarted += RecognizerStarted;
         recognizer.SessionStopped += RecognizerStopped;
+
         await recognizer.StartContinuousRecognitionAsync();
 
-        await foreach (var base64Str in stream)
-        {
-            var chunk = Convert.FromBase64String(base64Str);
-            audioInputStream.Write(chunk);
-        }
+        await PushAudioAsync(audioInputStream, stream);
 
         await recognizer.StopContinuousRecognitionAsync();
 
         recognizer.Recognizing -= RecognizerRecognizing;
+        recognizer.Recognized -= RecognizerRecognized;
         recognizer.SessionStarted -= RecognizerStarted;
         recognizer.SessionStopped -= RecognizerStopped;
 
@@ -67,7 +66,11 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
             return;
         }
 
-        var audioInputStream = await GetAudioStreamDirectAsync(stream); // await GetAudioStreamChunksAsync(stream);
+        var format = AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.OGG_OPUS);
+        var audioInputStream = AudioInputStream.CreatePushStream(format);
+
+        await PushAudioAsync(audioInputStream, stream);
+
         try
         {
             using var audioConfig = AudioConfig.FromStreamInput(audioInputStream);
@@ -85,21 +88,21 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
             {
                 await Clients.Caller.ReceiveMessage("Speech could not be recognized. Please speak clearly into the microphone.");
                 await Clients.Caller.ReceiveMessage("Session Ended.");
-
-                return;
-            }
-
-            var cancellation = CancellationDetails.FromResult(result);
-
-            await Clients.Caller.ReceiveMessage("Speech service is not available. Please try again later.", true);
-
-            if (cancellation.Reason == CancellationReason.Error)
-            {
-                await Clients.Caller.ReceiveMessage($"Failed to recognize the incoming speech. Reason: {cancellation.Reason}. Error code: {cancellation.ErrorCode}. Error details: {cancellation.ErrorDetails}.", true);
             }
             else
             {
-                await Clients.Caller.ReceiveMessage($"Failed to recognize the incoming speech. Reason {cancellation.Reason}.", true);
+                var cancellation = CancellationDetails.FromResult(result);
+
+                await Clients.Caller.ReceiveMessage("Speech service is not available. Please try again later.", true);
+
+                if (cancellation.Reason == CancellationReason.Error)
+                {
+                    await Clients.Caller.ReceiveMessage($"Failed to recognize the incoming speech. Reason: {cancellation.Reason}. Error code: {cancellation.ErrorCode}. Error details: {cancellation.ErrorDetails}.", true);
+                }
+                else
+                {
+                    await Clients.Caller.ReceiveMessage($"Failed to recognize the incoming speech. Reason {cancellation.Reason}.", true);
+                }
             }
 
             await Clients.Caller.ReceiveMessage("Session Ended.");
@@ -110,58 +113,34 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         }
     }
 
-    private static async Task<PushAudioInputStream> GetAudioStreamDirectAsync(IAsyncEnumerable<string> stream)
+    private static async Task PushAudioAsync(PushAudioInputStream audioInputStream, IAsyncEnumerable<string> stream)
     {
-        var format = AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.OGG_OPUS);
-        var audioInputStream = AudioInputStream.CreatePushStream(format);
-
-        await foreach (var base64Str in stream)
+        await foreach (var base64String in stream)
         {
-            var chunk = Convert.FromBase64String(base64Str);
-            audioInputStream.Write(chunk);
-        }
+            using var memoryStream = new MemoryStream();
 
-        return audioInputStream;
-    }
+            var chunk = Convert.FromBase64String(base64String);
+            memoryStream.Write(chunk, 0, chunk.Length);
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
-    private static async Task<PushAudioInputStream> GetAudioStreamChunksAsync(IAsyncEnumerable<string> stream)
-    {
-        using var memoryStream = new MemoryStream();
-        await foreach (var base64Str in stream)
-        {
-            var chunk = Convert.FromBase64String(base64Str);
-            memoryStream.Write(chunk);
-        }
-
-        memoryStream.Seek(0, SeekOrigin.Begin);
-        var format = AudioStreamFormat.GetCompressedFormat(AudioStreamContainerFormat.OGG_OPUS);
-        var audioInputStream = AudioInputStream.CreatePushStream(format);
-        using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
-        {
+            using var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
             byte[] readBytes;
             do
             {
                 readBytes = binaryReader.ReadBytes(1024);
-
-                if (readBytes.Length == 0)
-                {
-                    break;
-                }
                 audioInputStream.Write(readBytes);
             } while (readBytes.Length > 0);
         }
-
-        return audioInputStream;
     }
 
     private void RecognizerStopped(object sender, SessionEventArgs e)
     {
-        Clients.Caller.ReceiveMessage("Session Started.").GetAwaiter().GetResult();
+        Clients.Caller.ReceiveMessage("Session Ended.").GetAwaiter().GetResult();
     }
 
     private void RecognizerStarted(object sender, SessionEventArgs e)
     {
-        Clients.Caller.ReceiveMessage("Session Ended.").GetAwaiter().GetResult();
+        Clients.Caller.ReceiveMessage("Session Started.").GetAwaiter().GetResult();
     }
 
     private void RecognizerRecognizing(object sender, SpeechRecognitionEventArgs e)
@@ -177,6 +156,31 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
             Clients.Caller.ReceiveMessage("NOMATCH: Speech could not be recognized.", true).GetAwaiter().GetResult();
         }
     }
+
+    private void RecognizerRecognized(object sender, SpeechRecognitionEventArgs e)
+    {
+        _logger.LogDebug("RecognizedRecognizing. Result: {Result}. Reason {Reason}", e.Result?.Text, e.Result?.Reason);
+
+        if (e.Result.Reason == ResultReason.RecognizedSpeech)
+        {
+            Clients.Caller.ReceiveMessage("Final Result: " + e.Result.Text).GetAwaiter().GetResult();
+        }
+        else if (e.Result.Reason == ResultReason.NoMatch)
+        {
+            Clients.Caller.ReceiveMessage("NOMATCH: Speech could not be recognized.", true).GetAwaiter().GetResult();
+        }
+    }
+}
+
+public class AudioInterpreterTextContext
+{
+    public uint SamplesPerSecond { get; set; }
+
+    public byte BitsPerSample { get; set; } = 16;
+
+    public byte Channel { get; set; } = 1;
+
+    public Dictionary<string, object> Data { get; } = [];
 }
 
 public interface ISpeechToTextHub

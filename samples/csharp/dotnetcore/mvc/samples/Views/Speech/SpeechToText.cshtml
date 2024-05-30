@@ -174,7 +174,7 @@
             });
 
             connection.on('ReceivePartialMessage', message => {
-                console.log(message);
+                console.log('partial message', message);
                 containerMessage.innerText += message;
                 containerMessage.classList.remove('d-none');
                 container.classList.remove('d-none');

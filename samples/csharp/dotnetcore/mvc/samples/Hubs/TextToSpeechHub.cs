@@ -39,7 +39,6 @@ public sealed class TextToSpeechHub : Hub<ITextToSpeechHub>
 
         if (result.Reason == ResultReason.SynthesizingAudioCompleted)
         {
-
             await Clients.Caller.ReceiveData(Convert.ToBase64String(result.AudioData), text);
 
             return;
