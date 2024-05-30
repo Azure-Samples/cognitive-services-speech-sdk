@@ -170,8 +170,6 @@
             let recordingCounter = 0;
 
             connection.on('ReceiveData', (data, text) => {
-
-                console.log('ReceiveData', data, text)
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
 

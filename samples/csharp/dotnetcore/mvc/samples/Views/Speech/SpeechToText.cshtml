@@ -25,11 +25,17 @@
             </div>
         </div>
 
-        <button type="button" class="btn btn-primary" id="Recording"><i class="fa-solid fa-microphone"></i> Start</button>
+        <div class="mb-3 d-flex justify-content-start">
+            <div class="d-flex align-self-center">
+                <button type="button" class="btn btn-primary" id="Recording"><i class="fa-solid fa-microphone"></i> Start</button>
+            </div>
+            <div class="d-flex align-self-center ps-2">
+                <mark class="d-none" id="FeedbackMessage"></mark>
+            </div>
+        </div>
 
         <div class="d-none mt-3" id="FeedbackContainer">
             <ul class="list-group list-group-flush d-none" id="FeedbackList"></ul>
-            <p class="mb-0" id="FeedbackMessage"></p>
         </div>
     </div>
 </div>
@@ -58,6 +64,9 @@
 
                 return;
             }
+            const audioContext = new AudioContext();
+            const channelsCount = 1;
+            const sampleSize = 16;
 
             const startButton = document.getElementById('Recording');
             const container = document.getElementById('FeedbackContainer');
@@ -80,11 +89,11 @@
             navigator.mediaDevices.getUserMedia({
                 audio: {
                     autoGainControl: false,
-                    channelCount: 1,
+                    channelCount: channelsCount,
                     echoCancellation: false,
                     latency: 0,
                     noiseSuppression: false,
-                    sampleSize: 16
+                    sampleSize: sampleSize
                 }, video: false
             }).then(stream => {
 
@@ -95,7 +104,7 @@
                 const subject = new signalR.Subject();
 
                 mediaRecorder.addEventListener("dataavailable", async e => {
-                    // convert blob to base64 to send to the SignalR as string
+                    // Convert blob to base64 to send to the SignalR as string
                     const uint8Array = new Uint8Array(await e.data.arrayBuffer());
 
                     const binaryString = uint8Array.reduce((str, byte) => str + String.fromCharCode(byte), '');
@@ -117,14 +126,14 @@
 
                 mediaRecorder.addEventListener("start", () => {
                     if (isContinuous()) {
-                        connection.send('ContinuousRecognition', subject);
+                        connection.send('ContinuousRecognition', subject, audioContext.sampleRate, channelsCount);
                     } else {
                         connection.send('RecognizeOnce', subject);
                     }
                     startButton.innerHTML = '<i class="fa-solid fa-stop"></i> Stop';
                 });
 
-                // start recording when the start button is clicked
+                // Start recording when the start button is clicked
                 startButton.addEventListener("click", () => {
                     if (mediaRecorder.state == "recording") {
                         mediaRecorder.stop();
@@ -135,7 +144,7 @@
                         containerMessage.innerText = '';
                         containerMessage.classList.add('d-none');
 
-                        // send every second
+                        // Send every second
                         mediaRecorder.start(1000);
                     }
                 });
@@ -159,7 +168,16 @@
                 await start();
             });
 
-            connection.on('ReceiveMessage', (message, isError) => {
+            connection.on('SessionStarted', () => logMessage("Session Started!", false));
+
+            connection.on('SessionStopped', () => {
+                logMessage("Session Stopped!", false);
+
+                containerMessage.innerText = '';
+                containerMessage.classList.add('d-none');
+            });
+
+            const logMessage = (message, isError) => {
                 console.log(message, isError);
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
@@ -171,13 +189,13 @@
                 containerList.appendChild(li);
                 containerList.classList.remove('d-none');
                 container.classList.remove('d-none');
-            });
+            }
+
+            connection.on('ReceiveMessage', logMessage);
 
             connection.on('ReceivePartialMessage', message => {
-                console.log('partial message', message);
-                containerMessage.innerText += message;
+                containerMessage.innerText = message;
                 containerMessage.classList.remove('d-none');
-                container.classList.remove('d-none');
             });
 
             // Start the connection
