@@ -9,7 +9,11 @@ import requests
 from time import sleep
 import os
 import logging
-import customvoice
+try:
+    import customvoice
+except ImportError:
+    print('Pleae copy folder https://github.com/ForrestGumb/cognitive-services-speech-sdk/tree/master/samples/custom-voice/python/customvoice and keep the same folder structure ask github.' )
+    quit()
 import azure.cognitiveservices.speech as speechsdk
 
 
