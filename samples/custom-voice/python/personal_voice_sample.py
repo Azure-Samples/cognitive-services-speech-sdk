@@ -9,7 +9,11 @@ import requests
 from time import sleep
 import os
 import logging
-import customvoice
+try:
+    import customvoice
+except ImportError:
+    print('Pleae copy folder https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/custom-voice/python/customvoice and keep the same folder structure as github.' )
+    quit()
 import azure.cognitiveservices.speech as speechsdk
 
 
@@ -104,15 +108,14 @@ try:
     # I [voice talent name] am aware that recordings of my voice will be used by [company name] to create and use a synthetic version of my voice.
     # You can find sample consent file here
     # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/VoiceTalentVerbalStatement.wav
-    consent_file_path = r'voice\\VoiceTalentVerbalStatement.wav'
+    consent_file_path = r'TestData\\VoiceTalentVerbalStatement.wav'
     voice_talent_name = 'Sample Voice Actor'
     company_name = 'Contoso'
 
-    # Need 50 - 90 seconds audio file.
+    # Need 5 - 90 seconds audio file.
     # You can find sample audio file here.
     # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/SampleAudios.zip
-    # Pleae unzip audio file, and put the first 14 files in folder below.
-    audio_folder = r'voice\\'
+    audio_folder = r'TestData\\voice\\'
     speaker_profile_id = create_personal_voice(project_id, 
                                             consent_id, consent_file_path, voice_talent_name, company_name,
                                             personal_voice_id, audio_folder)
