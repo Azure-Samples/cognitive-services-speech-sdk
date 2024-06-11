@@ -14,7 +14,7 @@ The following diagram shows the structure of this tool as defined by the ARM tem
 
 ![Architecture](./images/architecture.png)
 
-When a file lands in a storage container, the Grid event indicates the completed upload of a file. The file is filtered and pushed to a Service bus topic. Code in Azure Functions triggered by a timer picks up the event and creates a transmission request using the Azure Speech services batch pipeline. When the transmission request is complete, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status. When transcription completes, the Azure Function copies the transcript into the same container where the audio file was obtained.
+When a file lands in a storage container, the Grid event indicates the completed upload of a file. The file is filtered and pushed to a Service bus topic. Code in Azure Functions triggered by a timer picks up the event and creates a transcription request using the Azure Speech services batch pipeline. When the transcription request is complete, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status. When transcription completes, the Azure Function copies the transcript into the same container where the audio file was obtained.
 
 The rest of the features are applied on demand. By deploying additional resources through the ARM template, you can choose to apply analytics on the transcript, produce reports or redact. 
 
