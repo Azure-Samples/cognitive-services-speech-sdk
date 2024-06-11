@@ -11,6 +11,7 @@ Available samples:
 
 | Language | Directory | Description |
 | ---------- | -------- | ----------- |
+| C# | [csharp](csharp) | C# client calling custom voice REST API through System.Net.Http |
 | Python | [python](python) | Python client calling custom voice REST API |
 
 ## Note
