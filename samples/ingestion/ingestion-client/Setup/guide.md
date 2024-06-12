@@ -14,7 +14,7 @@ The following diagram shows the structure of this tool as defined by the ARM tem
 
 ![Architecture](./images/architecture.png)
 
-When a file lands in a storage container, the Grid event indicates the completed upload of a file. The file is filtered and pushed to a Service bus topic. Code in Azure Functions triggered by a timer picks up the event and creates a transcription request using the Azure Speech services batch pipeline. When the transcription request is complete, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status. When transcription completes, the Azure Function copies the transcript into the same container where the audio file was obtained.
+When a file lands in a storage container, the Grid event indicates the completed upload of a file. The file is filtered and pushed to a Service bus topic. Code in Azure Functions triggered by a timer (or the uploading of the file - you can configure this during deployment) picks up the event and creates a transcription request using the Azure Speech services batch pipeline. When the transcription request is complete, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status. When transcription completes, the Azure Function copies the transcript into the same container where the audio file was obtained.
 
 The rest of the features are applied on demand. By deploying additional resources through the ARM template, you can choose to apply analytics on the transcript, produce reports or redact. 
 
@@ -110,6 +110,8 @@ The following settings all relate to the resources and their attributes:
 
 * Give your storage account a name. You will be using a new storage
 account rather than an existing one.
+
+By default, audio will be picked up for transcription from storage on a timer. If you want to change this behavior so that transcription is triggered by an audio file upload, change the parameter "Timer Based Execution" to `false`.
 
 The following 2 steps are optional. If you omit them, the tool will use the base model to obtain
 transcripts. If you have created a Speech model, then enter a custom model.

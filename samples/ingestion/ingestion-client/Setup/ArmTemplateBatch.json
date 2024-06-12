@@ -115,6 +115,14 @@
                 "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
             }
         },
+        "TimerBasedExecution": {
+            "defaultValue": true,
+            "type": "bool",
+            "metadata":
+            {
+                "description": "If true, audio from the storage will be transcribed based on a timer. If false, audio will be transcribed based on a service bus trigger."
+            }
+        },
         "ProfanityFilterMode":
         {
             "defaultValue": "None",
@@ -248,7 +256,6 @@
         "ConsolidatedFilesOutputContainer": "consolidated-files",
         "CreateHtmlResultFile": false,
         "CreateConsolidatedOutputFiles": false,
-        "TimerBasedExecution": true,
         "CreateAudioProcessedContainer": true,
         "IsByosEnabledSubscription": false,
         "MessagesPerFunctionExecution": 1000,
@@ -932,7 +939,7 @@
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
                 "StartTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue','StartTranscription'), '2017-04-01').primaryConnectionString]",
-                "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('timerBasedExecution'), variables('StartTranscriptionByTimerBinary'), variables('StartTranscriptionByServiceBusBinary'))]"
+                "WEBSITE_RUN_FROM_PACKAGE": "[if(parameters('TimerBasedExecution'), variables('StartTranscriptionByTimerBinary'), variables('StartTranscriptionByServiceBusBinary'))]"
             }
         },
         {
