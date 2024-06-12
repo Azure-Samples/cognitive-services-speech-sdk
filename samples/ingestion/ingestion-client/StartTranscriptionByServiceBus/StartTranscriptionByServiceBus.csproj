@@ -15,6 +15,11 @@
         </None>
     </ItemGroup>
     <ItemGroup>
+        <None Update="local.settings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\Connector\Connector.csproj"/>
         <ProjectReference Include="..\StartTranscriptionByTimer\StartTranscriptionByTimer.csproj"/>
     </ItemGroup>
