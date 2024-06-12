@@ -83,27 +83,16 @@ In Real time mode, each Azure Speech resource is allocated with a default of 100
 
 The batch and real time ARM templates are nearly the same. The main differences are the lack of diarization and sentiment options in Real Time mode, as well as downstream post processing through SQL. With that in mind, follow the instructions below to deploy the resources from ARM template.
 
-1. In the [Azure portal](https://portal.azure.com), click **Create a Resource**. In the search box, type **template deployment**, and select the **Template deployment** resource.
+To deploy the required infrastructure, click the button below for Batch mode:
 
-2. On the screen that appears, click the**Create** button.
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcognitive-services-speech-sdk%2Fmaster%2Fsamples%2Fingestion%2Fingestion-client%2FSetup%2FArmTemplateBatch.json)
 
-![Create template](./images/image003.png)
+For Real Time mode, use the following button:
 
-3. You will be creating Azure resources from the ARM template we provide. Click on click the **Build your own template in the editor** link.
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcognitive-services-speech-sdk%2Fmaster%2Fsamples%2Fingestion%2Fingestion-client%2FSetup%2FArmTemplateRealtime.json)
 
-![Create template2](./images/image005.png)
 
-4. Load the template by clicking **Load file**. Alternatively,
-you could copy/paste the template in the editor.
-
-![Load template](./images/image007.png)
-
-5. Once the template text is loaded you will be able to read and edit the transcript. Do
-**NOT** attempt any edits at this stage. You need to save the template you loaded, so click the **Save** button.
-
-![Save template](./images/image009.png)
-
-Saving the template will result in the screen below. You will need to fill in the form provided. It is
+This will result in the screen below on your browser. You will need to fill in the form provided. It is
 important that all the information is correct. Let us look at the form and go through each field.
 
 ![form template](./images/image011.png)
