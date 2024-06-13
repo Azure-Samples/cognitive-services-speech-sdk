@@ -380,7 +380,7 @@ function handleUserQuery(userQuery,userQueryHTML,imgUrlPath) {
         chatHistoryTextArea.innerHTML += '\n\n'
     }
 
-    chatHistoryTextArea.innerHTML += "<br/>User: " + userQueryHTML;
+    chatHistoryTextArea.innerHTML += imgUrlPath.trim() ? "<br/>User: " + userQueryHTML : "<br/>User: "+userQuery+"<br/>";
         
     chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
