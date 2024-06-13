@@ -16,6 +16,7 @@ var isSpeaking = false
 var spokenTextQueue = []
 var sessionActive = false
 var lastSpeakTime
+var imgUrl=""
 
 // Connect to avatar service
 function connectAvatar() {
@@ -352,10 +353,25 @@ function stopSpeaking() {
     )
 }
 
-function handleUserQuery(userQuery) {
+function handleUserQuery(userQuery,userQueryHTML,imgUrlPath) {
+    let contentMessage=userQuery
+    if (imgUrlPath.trim()){
+        contentMessage=[  
+            { 
+                "type": "text", 
+                "text": userQuery 
+            },
+            { 
+                "type": "image_url",
+                "image_url": {
+                    "url":imgUrlPath
+                }
+            }
+        ]
+    }
     let chatMessage = {
         role: 'user',
-        content: userQuery
+        content: contentMessage
     }
 
     messages.push(chatMessage)
@@ -364,7 +380,8 @@ function handleUserQuery(userQuery) {
         chatHistoryTextArea.innerHTML += '\n\n'
     }
 
-    chatHistoryTextArea.innerHTML += "User: " + userQuery + '\n\n'
+    chatHistoryTextArea.innerHTML += "<br/>User: " + userQueryHTML;
+        
     chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
     // Stop previous speaking if there is any
@@ -607,6 +624,7 @@ window.stopSession = () => {
     document.getElementById('showTypeMessage').checked = false
     document.getElementById('showTypeMessage').disabled = true
     document.getElementById('userMessageBox').hidden = true
+    document.getElementById('myImageButton').hidden = true
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('localVideo').hidden = true
     }
@@ -668,7 +686,7 @@ window.microphone = () => {
                     })
             }
 
-            handleUserQuery(userQuery)
+            handleUserQuery(userQuery,"","")
         }
     }
 
@@ -693,17 +711,40 @@ window.updataEnableOyd = () => {
 window.updateTypeMessageBox = () => {
     if (document.getElementById('showTypeMessage').checked) {
         document.getElementById('userMessageBox').hidden = false
+        document.getElementById('myImageButton').hidden = false
         document.getElementById('userMessageBox').addEventListener('keyup', (e) => {
             if (e.key === 'Enter') {
-                const userQuery = document.getElementById('userMessageBox').value
+                const userQuery = document.getElementById('userMessageBox').innerText
+                const messageBox = document.getElementById('userMessageBox')
+                var childImg1=messageBox.querySelector("#picInput");
+                if(childImg1){
+                    childImg1.style.width="200px"
+                    childImg1.style.height="200px"
+                }
+                const userQueryHTML = messageBox.innerHTML.trim("\n")
                 if (userQuery !== '') {
-                    handleUserQuery(userQuery.trim('\n'))
-                    document.getElementById('userMessageBox').value = ''
+                    handleUserQuery(userQuery.trim('\n'),userQueryHTML,imgUrl)
+                    document.getElementById('userMessageBox').innerHTML = ''
+                    imgUrl=""
                 }
             }
         })
+        document.getElementById('myImageButton').addEventListener('click', function() {
+            imgUrl = "https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg"
+            var parent = document.getElementById("userMessageBox");
+            var childImg=parent.querySelector("#picInput");
+            if (childImg){
+                parent.removeChild(childImg)
+            }
+
+                parent.innerHTML+='<br/><img id="picInput" src="https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg" style="width:100px;height:100px"/><br/><br/>'
+
+            
+        });
     } else {
         document.getElementById('userMessageBox').hidden = true
+        document.getElementById('myImageButton').hidden = true
+        imgUrl=""
     }
 }
 
