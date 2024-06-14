@@ -551,7 +551,7 @@ function checkHung() {
                     }
                 }
             }
-        }, 5000)
+        }, 2000)
     }
 }
 
@@ -575,7 +575,7 @@ window.onload = () => {
     setInterval(() => {
         checkHung()
         checkLastSpeak()
-    }, 5000) // Check session activity every 5 seconds
+    }, 2000) // Check session activity every 2 seconds
 }
 
 window.startSession = () => {
