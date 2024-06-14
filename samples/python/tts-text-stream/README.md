@@ -1,0 +1,1 @@
+See [README.md](../../csharp/tts-text-stream/README.md) for details
