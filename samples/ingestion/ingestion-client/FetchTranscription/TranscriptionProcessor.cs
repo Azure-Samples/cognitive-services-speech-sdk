@@ -37,6 +37,10 @@ namespace FetchTranscription
 
         private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
 
+        private readonly ServiceBusClient completedServiceBusClient;
+
+        private readonly ServiceBusSender completedServiceBusSender;
+
         private readonly IServiceProvider serviceProvider;
 
         private readonly IngestionClientDbContext databaseContext;
@@ -48,6 +52,12 @@ namespace FetchTranscription
             if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
             {
                 this.databaseContext = this.serviceProvider.GetRequiredService<IngestionClientDbContext>();
+            }
+
+            if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+            {
+                this.completedServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString);
+                this.completedServiceBusSender = this.completedServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString).EntityPath);
             }
         }
 
@@ -429,7 +439,13 @@ namespace FetchTranscription
                 var jsonFileName = $"{fileName}.json";
                 var archiveFileLocation = System.IO.Path.GetFileNameWithoutExtension(fileName);
 
-                await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, FetchTranscriptionEnvironmentVariables.JsonResultOutputContainer, jsonFileName, log).ConfigureAwait(false);
+                var jsonFileUrl = await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, FetchTranscriptionEnvironmentVariables.JsonResultOutputContainer, jsonFileName, log).ConfigureAwait(false);
+
+                if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+                {
+                    var completedMessage = new CompletedMessage(audioFileInfo.FileUrl, jsonFileUrl);
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(this.completedServiceBusSender, completedMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+                }
 
                 var consolidatedContainer = FetchTranscriptionEnvironmentVariables.ConsolidatedFilesOutputContainer;
                 if (FetchTranscriptionEnvironmentVariables.CreateConsolidatedOutputFiles)

@@ -33,7 +33,7 @@ namespace Tests
         [TestCategory(TestCategories.UnitTest)]
         public void ConvertRealtimeResultToBatchFormat()
         {
-            var realtimeResultString = File.ReadAllText(@"testFiles/realtimeresult.json");
+            var realtimeResultString = File.ReadAllText(@"TestFiles/realtimeresult.json");
             var fileResult = JsonConvert.DeserializeObject<List<JsonResult>>(realtimeResultString);
 
             var speechTranscript = ResultConversionHelper.CreateBatchResultFromRealtimeResults("test", fileResult, Logger.Object);
@@ -59,7 +59,7 @@ namespace Tests
         [TestCategory(TestCategories.UnitTest)]
         public void GetSpeechObjectFromJson()
         {
-            var body = File.ReadAllText(@"testFiles/transcriptSample.json");
+            var body = File.ReadAllText(@"TestFiles/transcriptSample.json");
             var speechTranscript = JsonConvert.DeserializeObject<SpeechTranscript>(body);
             Assert.IsTrue(speechTranscript != null);
             Assert.IsTrue(speechTranscript.CombinedRecognizedPhrases.Count() == 1);
@@ -71,7 +71,7 @@ namespace Tests
         [TestCategory(TestCategories.UnitTest)]
         public void GetHTMLFromJson()
         {
-            var body = File.ReadAllText(@"testFiles/transcriptSample.json");
+            var body = File.ReadAllText(@"TestFiles/transcriptSample.json");
             var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
 
             var html = TranscriptionToHtml.ToHtml(transcription, "testfile");

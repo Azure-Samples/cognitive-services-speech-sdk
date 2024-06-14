@@ -136,7 +136,7 @@ namespace Connector
             return $"{blobContainerClient.GetBlobClient(fileName).Uri}?{sasToken}";
         }
 
-        public async Task WriteTextFileToBlobAsync(string content, string containerName, string fileName, ILogger log)
+        public async Task<string> WriteTextFileToBlobAsync(string content, string containerName, string fileName, ILogger log)
         {
             log.LogInformation($"Writing file {fileName} to container {containerName}.");
             var container = this.blobServiceClient.GetBlobContainerClient(containerName);
@@ -144,6 +144,7 @@ namespace Connector
 
             using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
             await blockBlobClient.UploadAsync(stream, overwrite: true).ConfigureAwait(false);
+            return blockBlobClient.Uri.AbsoluteUri;
         }
 
         public async Task MoveFileAsync(string inputContainerName,  string inputFileName, string outputContainerName, string outputFileName, bool keepSource, ILogger log)
