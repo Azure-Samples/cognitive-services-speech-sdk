@@ -166,9 +166,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
 // Connect to TTS Avatar Service
 function connectToAvatarService(peerConnection) {
+    let localSdp = btoa(JSON.stringify(peerConnection.localDescription))
     let headers = {
         'ClientId': clientId,
-        'LocalSdp': btoa(JSON.stringify(peerConnection.localDescription)),
         'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
         'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
         'IsCustomAvatar': document.getElementById('customizedAvatar').checked
@@ -197,7 +197,7 @@ function connectToAvatarService(peerConnection) {
     fetch('/api/connectAvatar', {
         method: 'POST',
         headers: headers,
-        body: ''
+        body: localSdp
     })
     .then(response => {
         if (response.ok) {

@@ -123,7 +123,7 @@ def connectAvatar() -> Response:
                 'Username': ice_server_username,
                 'Password': ice_server_password
             }
-        local_sdp = request.headers.get('LocalSdp')
+        local_sdp = request.data.decode('utf-8')
         avatar_character = request.headers.get('AvatarCharacter')
         avatar_style = request.headers.get('AvatarStyle')
         background_color = '#FFFFFFFF' if request.headers.get('BackgroundColor') is None else request.headers.get('BackgroundColor')
