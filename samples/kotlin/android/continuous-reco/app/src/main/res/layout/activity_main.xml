@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TextView
+        android:padding="16dp"
+        android:id="@+id/recognizedText"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:lines="5"
+        android:textSize="21sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/buttonStartContinuousReco"/>
+
+    <Button
+        android:id="@+id/buttonStartContinuousReco"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:maxLines="2"
+        android:text="@string/button_label_start_reco"
+        app:layout_constraintTop_toBottomOf="@id/recognizedText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/buttonStopContinuousReco"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+    <Button
+        android:id="@+id/buttonStopContinuousReco"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:text="@string/button_label_stop_reco"
+        app:layout_constraintTop_toBottomOf="@id/recognizedText"
+        app:layout_constraintStart_toEndOf="@id/buttonStartContinuousReco"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

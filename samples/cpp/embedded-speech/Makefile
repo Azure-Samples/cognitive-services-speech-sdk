@@ -29,7 +29,7 @@ ifneq ("$(CHECK_FOR_SPEECHSDK)","Success")
   $(error Please set SPEECHSDK_ROOT to point to your extracted Speech SDK, $$SPEECHSDK_ROOT/runtimes/$$TARGET_PLATFORM/native/libMicrosoft.CognitiveServices.Speech.core$$DYNLIB_SUFFIX should exist.)
 endif
 
-INCPATH:=$(SPEECHSDK_ROOT)/build/native/include/cxx_api $(SPEECHSDK_ROOT)/build/native/include/c_api
+INCPATH:=$(SPEECHSDK_ROOT)/build/native/include/cxx_api $(SPEECHSDK_ROOT)/build/native/include/c_api packages/nlohmann.json.3.11.2/build/native/include
 LIBPATH:=$(SPEECHSDK_ROOT)/runtimes/$(TARGET_PLATFORM)/native
 
 LIBS:=-lMicrosoft.CognitiveServices.Speech.core -lpthread
@@ -39,7 +39,7 @@ endif
 
 all: $(TARGET_BINARY)
 
-$(TARGET_BINARY): samples/main.cpp samples/settings.cpp samples/intent_recognition_samples.cpp samples/speech_recognition_samples.cpp samples/speech_synthesis_samples.cpp
+$(TARGET_BINARY): samples/main.cpp samples/settings.cpp samples/intent_recognition_samples.cpp samples/speech_recognition_samples.cpp samples/speech_synthesis_samples.cpp samples/speech_translation_samples.cpp
 	g++ $^ -o $@ \
 	    --std=c++14 \
 	    $(patsubst %,-I%, $(INCPATH)) \

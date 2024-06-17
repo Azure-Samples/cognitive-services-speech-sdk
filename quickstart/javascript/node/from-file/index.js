@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-(function() {
   // <code>
-  "use strict";
   
   // pull in the required packages.
-  var sdk = require("microsoft-cognitiveservices-speech-sdk");
-  var fs = require("fs");
+  import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+  import * as fs from "fs";
   
   // replace with your own subscription key,
   // service region (e.g., "westus"), and
@@ -57,5 +55,4 @@
     });
   // </code>
   
-}());
   

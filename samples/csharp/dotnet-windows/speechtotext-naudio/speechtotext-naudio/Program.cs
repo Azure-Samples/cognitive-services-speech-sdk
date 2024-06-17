@@ -4,38 +4,26 @@
 //
 
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
-using NAudio.CoreAudioApi;
+using NAudio.Wave;
 
 namespace speechtotext_naudio
 {
     class Program
     {
-        private static byte[] ConvertFloatArrayToInt16ByteArray(float[] data)
-        {
-            MemoryStream dataStream = new MemoryStream();
-            int x = sizeof(Int16);
-            Int16 maxValue = Int16.MaxValue;
-            int i = 0;
-            while (i < data.Length)
-            {
-                dataStream.Write(BitConverter.GetBytes(Convert.ToInt16(data[i] * maxValue)), 0, x);
-                ++i;
-            }
-            byte[] bytes = dataStream.ToArray();
-            dataStream.Dispose();
-            return bytes;
-        }
-
         public static async Task RecognitionWithPushAudioStreamAsync()
         {
-            var capture = new WasapiCapture();
+            // Create an instance of WaveInEvent
+            var waveIn = new WaveInEvent();
+
+            // Set the recording format to float
+            waveIn.WaveFormat = new WaveFormat(16000, 16, 1);
+
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").            
-            var config = SpeechConfig.FromSubscription("your key", "your region");
+            var config = SpeechConfig.FromSubscription("SubscriptionKey", "ServiceRegion");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -94,22 +82,18 @@ namespace speechtotext_naudio
                             stopRecognition.TrySetResult(0);
                         };
 
-                        capture.DataAvailable += (s, e) =>
+                        waveIn.DataAvailable += (s, e) =>
                         {
                             if (e.BytesRecorded != 0)
                             {
-                                var floatArray = new float[e.BytesRecorded / 4];
-                                Buffer.BlockCopy(e.Buffer, 0, floatArray, 0, e.BytesRecorded);
-
-                                byte[] ba = ConvertFloatArrayToInt16ByteArray(floatArray);
-                                pushStream.Write(ba); // try to push buffer here
+                                pushStream.Write(e.Buffer);
                             }
                         };
 
                         // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
                         await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                        capture.StartRecording();
+                        waveIn.StartRecording();
 
                         // Waits for completion.
                         // Use Task.WaitAny to keep the task rooted.
@@ -117,7 +101,7 @@ namespace speechtotext_naudio
 
                         // Stops recognition.
                         await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-                        capture.StopRecording();
+                        waveIn.StopRecording();
                     }
                 }
             }

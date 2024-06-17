@@ -18,6 +18,10 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of an embedded speech config.
             var speechConfig = Settings.CreateEmbeddedSpeechConfig();
+            if (speechConfig == null)
+            {
+                return;
+            }
 
             // Creates a speech synthesizer.
             using var synthesizer = new SpeechSynthesizer(speechConfig, null);

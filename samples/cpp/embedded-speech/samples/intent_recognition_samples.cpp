@@ -28,7 +28,7 @@ shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
 
     // Make the keyword optional (surround with [ and ] in the pattern string)
     // in case the pattern matching model is used without keyword recognition.
-    string patternKeywordOptional = "[" + GetKeywordPhrase() + "][,]";
+    string patternKeywordOptional = "[" + GetKeywordPhrase() + "]";
 
     // Specify some intents to add. Example inputs:
     // - "Turn on the radio."
@@ -181,7 +181,7 @@ void RecognizeIntent(bool useKeyword)
         {
             // NoMatch occurs when no speech was recognized.
             auto reason = NoMatchDetails::FromResult(e.Result)->Reason;
-            cout << "NOMATCH: Reason=";
+            cout << "NO MATCH: Reason=";
             switch (reason)
             {
             case NoMatchReason::NotRecognized:

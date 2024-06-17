@@ -225,6 +225,8 @@ void SpeechRecognitionUsingCustomizedModel()
     // Replace with your own CRIS endpoint ID.
     config->SetEndpointId("YourEndpointId");
 
+    config->SetSpeechRecognitionLanguage("en-US");
+
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = SpeechRecognizer::FromConfig(config);
 
@@ -556,13 +558,15 @@ void PronunciationAssessmentWithMicrophone()
     config->SetProperty(PropertyId::SpeechServiceConnection_EndSilenceTimeoutMs, "3000");
 
     std::string referenceText = "";
-    // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     auto pronunciationConfig = PronunciationAssessmentConfig::Create(referenceText,
         PronunciationAssessmentGradingSystem::HundredMark,
         PronunciationAssessmentGranularity::Phoneme, true);
 
+    pronunciationConfig->EnableProsodyAssessment();
+
     // Creates a speech recognizer using microphone as audio input.
-    auto recognizer = SpeechRecognizer::FromConfig(config);
+    auto recognizer = SpeechRecognizer::FromConfig(config, "en-US");
 
     while (true)
     {
@@ -592,8 +596,8 @@ void PronunciationAssessmentWithMicrophone()
 
             auto pronunciationResult = PronunciationAssessmentResult::FromResult(result);
 
-            cout << "    Accuracy score: " << pronunciationResult->AccuracyScore << ", Pronunciation score: "
-                 << pronunciationResult->PronunciationScore << ", Completeness score : " << pronunciationResult->CompletenessScore
+            cout << "    Accuracy score: " << pronunciationResult->AccuracyScore << ", Prosody Score: " << pronunciationResult->ProsodyScore << ", Pronunciation score: "
+                 << pronunciationResult->PronunciationScore << ", Completeness score: " << pronunciationResult->CompletenessScore
                  << ", FluencyScore: " << pronunciationResult->FluencyScore << endl;
         }
         else if (result->Reason == ResultReason::NoMatch)
@@ -623,8 +627,11 @@ void PronunciationAssessmentWithStreamInternalAsync(shared_ptr<SpeechConfig> spe
     // Specify the language used for Pronunciation Assessment
     auto speechRecognizer = SpeechRecognizer::FromConfig(speechConfig, "en-US", audioConfig);
 
-    // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     auto pronAssessmentConfig = PronunciationAssessmentConfig::Create(referenceText, PronunciationAssessmentGradingSystem::HundredMark, PronunciationAssessmentGranularity::Phoneme, false);
+
+    pronAssessmentConfig->EnableProsodyAssessment();
+
     pronAssessmentConfig->ApplyTo(speechRecognizer);
 
     audioInputStream->Write(audioData.data(), static_cast<uint32_t>(audioData.size()));
@@ -640,7 +647,7 @@ void PronunciationAssessmentWithStreamInternalAsync(shared_ptr<SpeechConfig> spe
     {
         auto responsePA = PronunciationAssessmentResult::FromResult(result);
         std::string responseResult = "PRONUNCIATION ASSESSMENT RESULTS : \n";
-        responseResult = responseResult + "  Accuracy score: " + std::to_string(responsePA->AccuracyScore) + ", Pronunciation score: " + std::to_string(responsePA->PronunciationScore) + ", Completeness score : " + std::to_string(responsePA->CompletenessScore) + ", FluencyScore: " + std::to_string(responsePA->FluencyScore);
+        responseResult = responseResult + "  Accuracy score: " + std::to_string(responsePA->AccuracyScore) + "  Prosody score: " + std::to_string(responsePA->ProsodyScore) + ", Pronunciation score: " + std::to_string(responsePA->PronunciationScore) + ", Completeness score : " + std::to_string(responsePA->CompletenessScore) + ", FluencyScore: " + std::to_string(responsePA->FluencyScore);
 
         resultContainer.push_back(responseResult);
     }
@@ -681,6 +688,150 @@ void PronunciationAssessmentWithStream()
 
     auto timeCost = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
     std::cout << "Time cost: " << timeCost << "ms" << std::endl;
+}
+
+// Pronunciation assessment configured with json
+void PronunciationAssessmentConfiguredWithJson()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Creates a speech recognizer from an audio file
+    auto audioConfig = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
+
+    std::string referenceText = "what's the weather like";
+
+    // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    std::string json_config = "{\"GradingSystem\":\"HundredMark\",\"Granularity\":\"Phoneme\",\"EnableMiscue\":true, \"ScenarioId\":\"[scenario ID will be assigned by product team]\"}";
+    auto pronunciationConfig = PronunciationAssessmentConfig::CreateFromJson(json_config);
+    pronunciationConfig->SetReferenceText(referenceText);
+
+    pronunciationConfig->EnableProsodyAssessment();
+
+    // Creates a speech recognizer.
+    auto recognizer = SpeechRecognizer::FromConfig(config, "en-US", audioConfig);
+
+    pronunciationConfig->ApplyTo(recognizer);
+
+    // Starts speech recognition, and returns after a single utterance is recognized.
+    // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+    auto result = recognizer->RecognizeOnceAsync().get();
+
+    // Checks result.
+    if (result->Reason == ResultReason::RecognizedSpeech)
+    {
+        cout << "RECOGNIZED: Text=" << result->Text << std::endl
+            << "  PRONUNCIATION ASSESSMENT RESULTS:";
+
+        auto pronunciationResult = PronunciationAssessmentResult::FromResult(result);
+
+        cout << "    Accuracy score: " << pronunciationResult->AccuracyScore << ", Prosody Score: " << pronunciationResult->ProsodyScore << ", Pronunciation score: "
+            << pronunciationResult->PronunciationScore << ", Completeness score : " << pronunciationResult->CompletenessScore
+            << ", FluencyScore: " << pronunciationResult->FluencyScore << endl;
+    }
+    else if (result->Reason == ResultReason::NoMatch)
+    {
+        cout << "NOMATCH: Speech could not be recognized." << std::endl;
+    }
+    else if (result->Reason == ResultReason::Canceled)
+    {
+        auto cancellation = CancellationDetails::FromResult(result);
+        cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
+
+        if (cancellation->Reason == CancellationReason::Error)
+        {
+            cout << "CANCELED: ErrorCode=" << (int)cancellation->ErrorCode << std::endl;
+            cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
+            cout << "CANCELED: Did you update the subscription info?" << std::endl;
+        }
+    }
+}
+
+// Pronunciation assessment with content assessment
+void PronunciationAssessmentWithContentAssessment()
+{
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
+    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
+    // Creates a speech recognizer from an audio file
+    auto audioConfig = AudioConfig::FromWavFileInput("pronunciation_assessment_fall.wav");
+
+    std::string theTopic = "the season of the fall";
+
+    // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    auto pronunciationConfig = PronunciationAssessmentConfig::Create("", PronunciationAssessmentGradingSystem::HundredMark, PronunciationAssessmentGranularity::Phoneme, false);
+
+    pronunciationConfig->EnableProsodyAssessment();
+    pronunciationConfig->EnableContentAssessmentWithTopic(theTopic);
+
+    // Creates a speech recognizer.
+    auto recognizer = SpeechRecognizer::FromConfig(config, "en-US", audioConfig);
+
+    pronunciationConfig->ApplyTo(recognizer);
+
+    vector<string> recognizedTexts;
+    std::shared_ptr<PronunciationContentAssessmentResult> contentResult;
+    promise<void> recognitionEnd;
+
+    recognizer->SessionStopped += [&recognitionEnd](const SessionEventArgs& e)
+    {
+        cout << "Session stopped." << endl;
+        recognitionEnd.set_value();
+    };
+
+    recognizer->Canceled += [&recognitionEnd](const SpeechRecognitionCanceledEventArgs& e)
+    {
+        switch (e.Reason)
+        {
+        case CancellationReason::EndOfStream:
+            cout << "CANCELED: Reach the end of the file." << std::endl;
+            break;
+
+        case CancellationReason::Error:
+            cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
+            cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
+            recognitionEnd.set_value();
+            break;
+
+        default:
+            cout << "CANCELED: received unknown reason." << std::endl;
+        }
+    };
+
+    recognizer->Recognized += [&recognizedTexts, &contentResult](const SpeechRecognitionEventArgs& e)
+    {
+        string text = e.Result->Text;
+        if (!text.empty() && text != ".")
+            recognizedTexts.push_back(text);
+
+        auto pronResult = PronunciationAssessmentResult::FromResult(e.Result);
+
+        contentResult = pronResult->ContentAssessmentResult;
+    };
+
+    recognizer->StartContinuousRecognitionAsync().wait();
+
+    recognitionEnd.get_future().get(); // Waits for recognition end.
+
+    recognizer->StopContinuousRecognitionAsync().get();
+
+    // Content assessment result is in the contentJsons
+    cout << "Content assessment for: " << endl;
+    for (const string& recognizedText : recognizedTexts) {
+        if (!recognizedText.empty()) {
+            cout << recognizedText << " ";
+        }
+    }
+    cout << endl;
+
+    if (contentResult != nullptr) {
+        cout << "Assessment Result: " << "GrammarScore: "  << contentResult->GrammarScore << ", VocabularyScore : " << contentResult->VocabularyScore << ", TopicScore : " << contentResult->TopicScore << endl;
+    }
+    else {
+        cout << "The contentResult is empty!" << endl;
+    }
 }
 
 #pragma region Language Detection related samples
@@ -899,6 +1050,7 @@ void SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled()
 
     // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
     // All default enhancements from Microsoft Audio Stack are enabled.
+    // Only works when input is from a microphone array.
     // On Windows, microphone array geometry is obtained from the driver. On other operating systems, a single channel (mono)
     // microphone is assumed.
     auto audioProcessingOptions = AudioProcessingOptions::Create(AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT);

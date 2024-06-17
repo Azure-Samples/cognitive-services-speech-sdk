@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Microsoft Cognitive Services Speech SDK JavaScript Quickstart</title>
+  <meta charset="utf-8" />
+</head>
+<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
+
+  <div id="warning">
+    <h1 style="font-weight:500;">Speech Recognition Speech SDK not found (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
+  </div>
+  
+  <div id="content" style="display:none">
+      <table width="100%">
+          <tr>
+              <td></td>
+              <td><h1 style="font-weight:500;">Microsoft Cognitive Services Speech SDK JavaScript Quickstart</h1></td>
+          </tr>
+          <tr>
+              <td></td>
+              <td><h2 style="font-weight:400;"><b>(INPUT FILE MUST BE 8-CHANNEL WAV FILE)</b></h2></td>
+          </tr>
+          <tr>
+              <td align="right"><a href="https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started" target="_blank">Subscription</a>:</td>
+              <td><input id="subscriptionKey" type="text" size="40" value="subscription"></td>
+          </tr>
+          <tr>
+              <td align="right">Region</td>
+              <td><input id="serviceRegion" type="text" size="40" value="YourServiceRegion"></td>
+          </tr>
+          <tr>
+              <td></td>
+              <td>
+                  <input id="filePicker" type="file" accept=".wav">
+              </td>
+          </tr>
+          <tr>
+              <td></td>
+              <td><button id="createTranscriberButton">Start transcribing meeting</button></td>
+          </tr>
+          <tr>
+              <td></td>
+              <td><button id="leaveMeetingButton">Leave </button></td>
+          </tr>
+          <tr>
+              <td align="right" valign="top">Input Text</td>
+              <td><textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea></td>
+          </tr>
+          <tr>
+              <td align="right" valign="top">Result</td>
+              <td><textarea id="resultDiv" style="display: inline-block;width:500px;height:100px"></textarea></td>
+          </tr>
+      </table>
+  </div>
+  <!-- Speech SDK reference sdk. -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+  <script>
+    // status fields and start button in UI
+    var phraseDiv;
+    var resultDiv;
+    var createTranscriberButton, leaveButton, filePicker;
+
+    // subscription key and region for speech services.
+    var subscriptionKey, serviceRegion;
+    var SpeechSDK;
+    var transcriber, meeting;
+    var audioFile;
+
+
+    document.addEventListener("DOMContentLoaded", 
+      () => {
+        createTranscriberButton = document.getElementById("createTranscriberButton");
+        leaveButton = document.getElementById("leaveMeetingButton");
+        subscriptionKey = document.getElementById("subscriptionKey");
+        serviceRegion = document.getElementById("serviceRegion");
+        phraseDiv = document.getElementById("phraseDiv");
+        resultDiv = document.getElementById("resultDiv");
+        filePicker = document.getElementById("filePicker");
+        var lastRecognized = ""
+
+        filePicker.addEventListener("change",
+          () => {
+            audioFile = filePicker.files[0];
+          });
+
+        createTranscriberButton.addEventListener("click", 
+          () => {
+            phraseDiv.innerHTML = "";
+            resultDiv.innerHTML = "";
+            lastRecognized = "";
+
+            if (!subscriptionKey.value || subscriptionKey.value === "subscription") {
+                alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+                createTranscriberButton.disabled = false;
+                return;
+            }
+            var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
+
+            var audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
+
+            var randomId = Math.floor((1 + Math.random()) * 0x10000)
+                .toString(16)
+                .substring(1);
+
+            meeting = SpeechSDK.Meeting.createMeetingAsync(speechConfig, randomId);
+            window.console.log("meeting created, id: " + randomId);
+            transcriber = new SpeechSDK.MeetingTranscriber(audioConfig);
+            transcriber.joinMeetingAsync(meeting, () => {
+                var voiceSignatureUser1 = `{ 
+                  Version: 0,
+                    Tag: "<<VOICE_TAG_HERE>>",
+                    Data: "<<VOICE_DATA_HERE>>"
+                 }`;
+                var voiceSignatureUser2 = `{ 
+                  Version: 0,
+                  Tag: "<<VOICE_TAG_HERE>>",
+                  Data: "<<VOICE_DATA_HERE>>"
+                 }`;
+                // creates a participant
+                var user1 = SpeechSDK.Participant.From("user1@example.com", "en-us", voiceSignatureUser1);
+
+                // creates another participant
+                var user2 = SpeechSDK.Participant.From("user2@example.com", "en-us", voiceSignatureUser2);
+
+                // Adds user1 as a participant to the meeting.
+                meeting.addParticipantAsync(user1);
+
+                // Adds user2 as a participant to the meeting.
+                meeting.addParticipantAsync(user2);
+
+                transcriber.sessionStarted = function (s, e) {
+                    window.console.log(e);
+                }
+                transcriber.sessionStopped = function (s, e) {
+                    window.console.log(e);
+                    createTranscriberButton.disabled = false;
+                }
+                transcriber.canceled = function (s, e) {
+                    window.console.log(e);
+                }
+                transcriber.transcribing = function (s, e) {
+                    // Uncomment line below to see intermediate results in console
+                    // window.console.log(e);
+                };
+
+                // The event recognized signals that a final recognition result is received.
+                // This is the final event that a phrase has been recognized.
+                // For transcription, you will get one recognized event for each phrase recognized.
+                transcriber.transcribed = function (s, e) {
+                    window.console.log(e);
+
+                    // Indicates that recognizable speech was not detected, and that recognition is done.
+                    if (e.result.reason === SpeechSDK.ResultReason.NoMatch) {
+                        var noMatchDetail = SpeechSDK.NoMatchDetails.fromResult(e.result);
+                        resultDiv.innerHTML += "(transcribed)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " NoMatchReason: " + SpeechSDK.NoMatchReason[noMatchDetail.reason] + "\r\n";
+                    } else {
+                        resultDiv.innerHTML += "(transcribed)  Reason: " + SpeechSDK.ResultReason[e.result.reason] + " Text: " + e.result.text + "\r\n";
+                        resultDiv.innerHTML += "(transcribed)  SpeakerId: " + e.result.speakerId + "\r\n";
+                    }
+
+                    lastRecognized += e.result.text + "\r\n";
+                    phraseDiv.innerHTML = lastRecognized;
+                };
+
+                transcriber.startTranscribingAsync(
+                    () => {
+                        window.console.log("startTranscribing complete");
+                    });
+                createTranscriberButton.disabled = true;
+                leaveButton.disabled = false;
+            });
+        });
+        leaveButton.addEventListener("click", function () {
+            transcriber.stopTranscribingAsync(
+              () => {
+                transcriber.leaveMeetingAsync(
+                  () => {
+                    meeting.endMeetingAsync(
+                      () => {
+                        transcriber.close();
+                        meeting = undefined;
+                        transcriber = undefined;
+                        createTranscriberButton.disabled = false;
+                        leaveButton.disabled = true;
+                      });
+                  });
+              });
+        });
+
+        if (!!window.SpeechSDK) {
+            SpeechSDK = window.SpeechSDK;
+            createTranscriberButton.disabled = false;
+            leaveButton.disabled = true;
+
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('warning').style.display = 'none';
+        }
+    });
+  </script>
+</body>
+</html>

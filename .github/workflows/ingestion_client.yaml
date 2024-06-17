@@ -7,6 +7,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,9 +23,9 @@ jobs:
           set -u -e -o pipefail
           version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq -r .variables.Version)
           versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq -r .variables.Version)
-          echo ::set-output name=version::$version
+          echo version=$version >> "$GITHUB_OUTPUT"
           echo "Batch template: ${version}"
-          echo ::set-output name=versionRealtime::$versionRealtime
+          echo versionRealtime=$versionRealtime >> "$GITHUB_OUTPUT"
           echo "Realtime template: ${versionRealtime}"
 
       - name: Verify Release Versions

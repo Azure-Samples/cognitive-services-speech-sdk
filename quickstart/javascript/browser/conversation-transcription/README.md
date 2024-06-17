@@ -7,8 +7,7 @@ This sample demonstrates how to transcribe a conversation from a file using the 
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC or Mac.
-* User voice samples [See User voice samples for Conversation Transcription](https://docs.microsoft.com/azure/cognitive-services/speech-service/conversation-transcription#expected-inputs)
-* An 8-channel wav file (while in preview, the feature only accepts 8-channel wav file input)
+* A wav file.
 * A text editor.
 * Optionally, a web server that supports hosting PHP scripts.
 
@@ -27,11 +26,10 @@ If you want to host the sample on a web server:
 ## Run the `index.html` sample
 
 * In case you are running the sample from your local computer, open `conversation-transcription.html` from the location where you have downloaded this quickstart with a JavaScript capable browser.
-* [To create a conversation and attach a Transcriber](https://docs.microsoft.com/azure/cognitive-services/speech-service/conversation-transcription):
-  * Use the input fields to set your `subscription key` and `service region`.
-  * Press the `create conversation` button to create a new conversation and begin transcription.
+* Use the input fields to set your `subscription key` and `service region`.
+* Press the `Start transcribing conversation` button to begin transcription.
 * Transcription results and speaker IDs will appear in the incoming messages box.
-* Press the `leave conversation` button to end transcription and leave the conversation. 
+* Press the `Stop transcribing conversation` button to end transcription. 
    
 ## Running .html samples
 * In case you are hosting the sample on a web server, open a web browser and navigate to the full URL where you host the sample.
@@ -40,4 +38,3 @@ If you want to host the sample on a web server:
 
 * [Speech SDK API reference for JavaScript](https://aka.ms/csspeech/javascriptref)
 * [Speech SDK Conversation Transcription (Preview)](https://docs.microsoft.com/azure/cognitive-services/speech-service/conversation-transcription)
-* [Asynchronous conversation transcription (Preview)](https://docs.microsoft.com/azure/cognitive-services/speech-service/conversation-transcription#asynchronous)
