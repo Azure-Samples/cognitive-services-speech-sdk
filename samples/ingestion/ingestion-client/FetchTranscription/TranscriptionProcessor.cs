@@ -37,13 +37,24 @@ namespace FetchTranscription
 
         private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
 
-        private readonly ServiceBusClient completedServiceBusClient;
+        private static readonly ServiceBusClient CompletedServiceBusClient;
 
-        private readonly ServiceBusSender completedServiceBusSender;
+        private static readonly ServiceBusSender CompletedServiceBusSender;
 
         private readonly IServiceProvider serviceProvider;
 
         private readonly IngestionClientDbContext databaseContext;
+
+        #pragma warning disable CA1810
+        static TranscriptionProcessor()
+        {
+            if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+            {
+                CompletedServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString);
+                CompletedServiceBusSender = CompletedServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString).EntityPath);
+            }
+        }
+        #pragma warning restore CA1810
 
         public TranscriptionProcessor(IServiceProvider serviceProvider)
         {
@@ -52,12 +63,6 @@ namespace FetchTranscription
             if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
             {
                 this.databaseContext = this.serviceProvider.GetRequiredService<IngestionClientDbContext>();
-            }
-
-            if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
-            {
-                this.completedServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString);
-                this.completedServiceBusSender = this.completedServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString).EntityPath);
             }
         }
 
@@ -444,7 +449,7 @@ namespace FetchTranscription
                 if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
                 {
                     var completedMessage = new CompletedMessage(audioFileInfo.FileUrl, jsonFileUrl);
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(this.completedServiceBusSender, completedMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(CompletedServiceBusSender, completedMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
                 }
 
                 var consolidatedContainer = FetchTranscriptionEnvironmentVariables.ConsolidatedFilesOutputContainer;
