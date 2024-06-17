@@ -19,7 +19,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             urls: [ iceServerUrl ],
             username: iceServerUsername,
             credential: iceServerCredential
-        }]
+        }],
+        iceTransportPolicy: 'relay'
     })
 
     // Fetch WebRTC video stream and mount it to an HTML video element
@@ -91,10 +92,24 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     peerConnection.addTransceiver('video', { direction: 'sendrecv' })
     peerConnection.addTransceiver('audio', { direction: 'sendrecv' })
 
-    // Set local description
+    // Connect to avatar service when ICE candidates gathering is done
+    iceGatheringDone = false
+
+    peerConnection.onicecandidate = e => {
+        if (!e.candidate && !iceGatheringDone) {
+            iceGatheringDone = true
+            connectToAvatarService(peerConnection)
+        }
+    }
+
     peerConnection.createOffer().then(sdp => {
-        peerConnection.setLocalDescription(sdp).then(() => { setTimeout(() => { connectToAvatarService(peerConnection) }, 1000) })
-    }).catch(log)
+        peerConnection.setLocalDescription(sdp).then(() => { setTimeout(() => {
+            if (!iceGatheringDone) {
+                iceGatheringDone = true
+                connectToAvatarService(peerConnection)
+            }
+        }, 2000) })
+    })
 }
 
 // Connect to TTS Avatar Service
