@@ -26,9 +26,20 @@ function connectAvatar() {
         return
     }
 
-    const speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
+    const privateEndpointEnabled = document.getElementById('enablePrivateEndpoint').checked
+    const privateEndpoint = document.getElementById('privateEndpoint').value.slice(8)
+    if (privateEndpointEnabled && privateEndpoint === '') {
+        alert('Please fill in the Azure Speech endpoint.')
+        return
+    }
+
+    let speechSynthesisConfig
+    if (privateEndpointEnabled) {
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey) 
+    } else {
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
+    }
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
-    speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
 
     const talkingAvatarCharacter = document.getElementById('talkingAvatarCharacter').value
     const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
@@ -59,7 +70,7 @@ function connectAvatar() {
     }
 
     dataSources = []
-    if (document.getElementById('enableByod').checked) {
+    if (document.getElementById('enableOyd').checked) {
         const azureCogSearchEndpoint = document.getElementById('azureCogSearchEndpoint').value
         const azureCogSearchApiKey = document.getElementById('azureCogSearchApiKey').value
         const azureCogSearchIndexName = document.getElementById('azureCogSearchIndexName').value
@@ -77,18 +88,26 @@ function connectAvatar() {
         messageInitiated = true
     }
 
-    const iceServerUrl = document.getElementById('iceServerUrl').value
-    const iceServerUsername = document.getElementById('iceServerUsername').value
-    const iceServerCredential = document.getElementById('iceServerCredential').value
-    if (iceServerUrl === '' || iceServerUsername === '' || iceServerCredential === '') {
-        alert('Please fill in the ICE server URL, username and credential.')
-        return
-    }
-
     document.getElementById('startSession').disabled = true
     document.getElementById('configuration').hidden = true
 
-    setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+    const xhr = new XMLHttpRequest()
+    if (privateEndpointEnabled) {
+        xhr.open("GET", `https://${privateEndpoint}/tts/cognitiveservices/avatar/relay/token/v1`)
+    } else {
+        xhr.open("GET", `https://${cogSvcRegion}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`)
+    }
+    xhr.setRequestHeader("Ocp-Apim-Subscription-Key", cogSvcSubKey)
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            const responseData = JSON.parse(this.responseText)
+            const iceServerUrl = responseData.Urls[0]
+            const iceServerUsername = responseData.Username
+            const iceServerCredential = responseData.Password
+            setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+        }
+    })
+    xhr.send()
 }
 
 // Disconnect from avatar service
@@ -118,14 +137,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
     // Fetch WebRTC video stream and mount it to an HTML video element
     peerConnection.ontrack = function (event) {
-        // Clean up existing video element if there is any
-        remoteVideoDiv = document.getElementById('remoteVideo')
-        for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
-            if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
-                remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
-            }
-        }
-
         if (event.track.kind === 'audio') {
             let audioElement = document.createElement('audio')
             audioElement.id = 'audioPlayer'
@@ -140,11 +151,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         }
 
         if (event.track.kind === 'video') {
-            document.getElementById('remoteVideo').style.width = '0.1px'
-            if (!document.getElementById('useLocalVideoForIdle').checked) {
-                document.getElementById('chatHistory').hidden = true
-            }
-
             let videoElement = document.createElement('video')
             videoElement.id = 'videoPlayer'
             videoElement.srcObject = event.streams[0]
@@ -152,6 +158,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.playsInline = true
 
             videoElement.onplaying = () => {
+                // Clean up existing video element if there is any
+                remoteVideoDiv = document.getElementById('remoteVideo')
+                for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
+                    if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
+                        remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
+                    }
+                }
+
+                // Append the new video element
+                document.getElementById('remoteVideo').appendChild(videoElement)
+
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
                 document.getElementById('microphone').disabled = false
                 document.getElementById('stopSession').disabled = false
@@ -168,8 +185,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
-
-            document.getElementById('remoteVideo').appendChild(videoElement)
         }
     }
 
@@ -280,9 +295,10 @@ function speak(text, endingSilenceMs = 0) {
 
 function speakNext(text, endingSilenceMs = 0) {
     let ttsVoice = document.getElementById('ttsVoice').value
-    let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
+    let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
+    let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</mstts:ttsembedding></voice></speak>`
     if (endingSilenceMs > 0) {
-        ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></voice></speak>`
+        ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></mstts:ttsembedding></voice></speak>`
     }
 
     lastSpeakTime = new Date()
@@ -362,7 +378,7 @@ function handleUserQuery(userQuery) {
     const azureOpenAIApiKey = document.getElementById('azureOpenAIApiKey').value
     const azureOpenAIDeploymentName = document.getElementById('azureOpenAIDeploymentName').value
 
-    let url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/chat/completions?api-version=2023-03-15-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
+    let url = "{AOAIEndpoint}/openai/deployments/{AOAIDeployment}/chat/completions?api-version=2023-06-01-preview".replace("{AOAIEndpoint}", azureOpenAIEndpoint).replace("{AOAIDeployment}", azureOpenAIDeploymentName)
     let body = JSON.stringify({
         messages: messages,
         stream: true
@@ -446,7 +462,7 @@ function handleUserQuery(userQuery) {
                                 }
                             }
 
-                            if (responseToken !== undefined) {
+                            if (responseToken !== undefined && responseToken !== null) {
                                 assistantReply += responseToken // build up the assistant message
                                 displaySentence += responseToken // build up the display sentence
 
@@ -535,7 +551,7 @@ function checkHung() {
                     }
                 }
             }
-        }, 5000)
+        }, 2000)
     }
 }
 
@@ -559,7 +575,7 @@ window.onload = () => {
     setInterval(() => {
         checkHung()
         checkLastSpeak()
-    }, 5000) // Check session activity every 5 seconds
+    }, 2000) // Check session activity every 2 seconds
 }
 
 window.startSession = () => {
@@ -662,8 +678,8 @@ window.microphone = () => {
         })
 }
 
-window.updataEnableByod = () => {
-    if (document.getElementById('enableByod').checked) {
+window.updataEnableOyd = () => {
+    if (document.getElementById('enableOyd').checked) {
         document.getElementById('cogSearchConfig').hidden = false
     } else {
         document.getElementById('cogSearchConfig').hidden = true
@@ -692,5 +708,13 @@ window.updateLocalVideoForIdle = () => {
         document.getElementById('showTypeMessageCheckbox').hidden = true
     } else {
         document.getElementById('showTypeMessageCheckbox').hidden = false
+    }
+}
+
+window.updatePrivateEndpoint = () => {
+    if (document.getElementById('enablePrivateEndpoint').checked) {
+        document.getElementById('showPrivateEndpointCheckBox').hidden = false
+    } else {
+        document.getElementById('showPrivateEndpointCheckBox').hidden = true
     }
 }
