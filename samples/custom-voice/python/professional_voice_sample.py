@@ -10,7 +10,11 @@ import uuid
 import os
 import datetime
 import logging
-import customvoice
+try:
+    import customvoice
+except ImportError:
+    print('Pleae copy folder https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/custom-voice/python/customvoice and keep the same folder structure as github.' )
+    quit()
 
 
 def create_project():

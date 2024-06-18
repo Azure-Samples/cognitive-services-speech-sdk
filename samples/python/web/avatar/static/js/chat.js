@@ -83,19 +83,12 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             urls: [ iceServerUrl ],
             username: iceServerUsername,
             credential: iceServerCredential
-        }]
+        }],
+        iceTransportPolicy: 'relay'
     })
 
     // Fetch WebRTC video stream and mount it to an HTML video element
     peerConnection.ontrack = function (event) {
-        // Clean up existing video element if there is any
-        remoteVideoDiv = document.getElementById('remoteVideo')
-        for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
-            if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
-                remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
-            }
-        }
-
         if (event.track.kind === 'audio') {
             let audioElement = document.createElement('audio')
             audioElement.id = 'audioPlayer'
@@ -110,11 +103,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         }
 
         if (event.track.kind === 'video') {
-            document.getElementById('remoteVideo').style.width = '0.1px'
-            if (!document.getElementById('useLocalVideoForIdle').checked) {
-                document.getElementById('chatHistory').hidden = true
-            }
-
             let videoElement = document.createElement('video')
             videoElement.id = 'videoPlayer'
             videoElement.srcObject = event.streams[0]
@@ -122,6 +110,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.playsInline = true
 
             videoElement.onplaying = () => {
+                // Clean up existing video element if there is any
+                remoteVideoDiv = document.getElementById('remoteVideo')
+                for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
+                    if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
+                        remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
+                    }
+                }
+
+                // Append the new video element
+                document.getElementById('remoteVideo').appendChild(videoElement)
+
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
                 document.getElementById('microphone').disabled = false
                 document.getElementById('stopSession').disabled = false
@@ -138,8 +137,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
-
-            document.getElementById('remoteVideo').appendChild(videoElement)
         }
     }
 
@@ -158,9 +155,23 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     peerConnection.addTransceiver('video', { direction: 'sendrecv' })
     peerConnection.addTransceiver('audio', { direction: 'sendrecv' })
 
-    // Set local description
+    // Connect to avatar service when ICE candidates gathering is done
+    iceGatheringDone = false
+
+    peerConnection.onicecandidate = e => {
+        if (!e.candidate && !iceGatheringDone) {
+            iceGatheringDone = true
+            connectToAvatarService(peerConnection)
+        }
+    }
+
     peerConnection.createOffer().then(sdp => {
-        peerConnection.setLocalDescription(sdp).then(() => { setTimeout(() => { connectToAvatarService(peerConnection) }, 1000) })
+        peerConnection.setLocalDescription(sdp).then(() => { setTimeout(() => {
+            if (!iceGatheringDone) {
+                iceGatheringDone = true
+                connectToAvatarService(peerConnection)
+            }
+        }, 2000) })
     })
 }
 
@@ -295,7 +306,7 @@ function checkHung() {
                     }
                 }
             }
-        }, 5000)
+        }, 2000)
     }
 }
 
@@ -334,7 +345,7 @@ window.onload = () => {
     setInterval(() => {
         checkHung()
         checkSpeakingStatus()
-    }, 5000) // Check session activity every 5 seconds
+    }, 2000) // Check session activity every 2 seconds
 }
 
 window.startSession = () => {

@@ -1,3 +1,0 @@
-# License
-
-This sample training set ("Dataset") owned by Microsoft includes a recording script, audios and a sample voice talent verbal statement. The Dataset can only be used as a reference for your training data collection and format checking when you start to use Microsoft Azure Cognitive Services Speech Studio and Custom Neural Voice ("Services"). To test the voice training process of the Services, you can upload this Dataset to your account at Microsoft Azure Cognitive Services Speech Studio and create a sample voice model. You may be charged for using the Services when you create the sample voice model using this Dataset. You are not permitted to use the Dataset in any other ways or for any other purposes that have not been stipulated hereby.
