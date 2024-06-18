@@ -28,7 +28,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Make the keyword optional (surround with [ and ] in the pattern string)
             // in case the pattern matching model is used without keyword recognition.
-            string patternKeywordOptional = "[" + Settings.GetKeywordPhrase() + "]";
+            string patternKeywordOptional = "[" + Settings.GetKeywordPhrase() + "][,]";
 
             // Specify some intents to add. Example inputs:
             // - "Turn on the radio."
