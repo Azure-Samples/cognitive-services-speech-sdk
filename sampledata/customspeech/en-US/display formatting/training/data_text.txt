@@ -29,7 +29,6 @@ Navigate to Arch O & P
 Navigate to Beltway Glass & Mirrors
 Navigate to Meraki Luxury Salon
 Navigate to Breig Inc
-Navigate to Gaylord Adams & Son Marine
 Navigate to Hall Propane
 Navigate to Cal Forestry & Fire
 Navigate to Wildens
@@ -266,7 +265,6 @@ Navigate to Big 5 Sporting Goods
 Navigate to JOANN Fabric and Crafts
 Navigate to Coastal Sewer & Drain Aberdeen Hoquiam
 Navigate to Charlton Deep Sea Charters
-Navigate to Fanny Tanners LLC
 Navigate to Atlantis Auto Glass
 Navigate to Taco Time
 Navigate to El Tapatio, Astoria
@@ -284,7 +282,6 @@ Navigate to TwinStar Credit Union Ocean Shores
 Navigate to Long Beach Tavern
 Navigate to LDComfort
 Navigate to Uptown Cafe
-Navigate to Pacific Capital Construction
 Navigate to Dr. John Eiland, DO, FACOOG OB/GYN
 Navigate to Ocosta Elementary School
 Navigate to Surfcrest Resort
@@ -322,7 +319,6 @@ Navigate to Sturgeon Paul's
 Navigate to Fort Stevens State Park Military Museum
 Navigate to UPS Customer Center
 Navigate to Classic Bodywerks, LTD.
-Navigate to Olympic Area Agency On Aging
 Navigate to The UPS Store
 Navigate to The Mission Christian Fellowship
 Navigate to Warrenton Police Department
@@ -361,7 +357,6 @@ Navigate to Pizza Hut
 Navigate to All Purpose Painting
 Navigate to Smooth Roots Astoria
 Navigate to Astoria Marine Construction Company
-Navigate to Kick Ass Koffee
 Navigate to Pig 'N Pancake
 Navigate to Warrenton Wauna Credit Union
 Navigate to Marlin Mini Storage
@@ -385,7 +380,6 @@ Navigate to Port of Astoria Marina Mooring
 Navigate to Ocean Shores Community Club
 Navigate to North Beach Vision Clinic
 Navigate to Blackbeard's Brewing Taphouse
-Navigate to Olympic Peninsula Guide Service
 Navigate to Dusty Trunk
 Navigate to The Grooming Garage LLC
 Navigate to Harbor Ceramics
@@ -472,7 +466,6 @@ Navigate to 3D Landscape Maintenance
 Navigate to Astoria Yacht Club
 Navigate to Terry's Plumbing
 Navigate to Pier 1 Astoria Oregon
-Navigate to North Olympic Library System
 Navigate to Roughbar Surf Shack
 Navigate to NAPA Auto Parts Harbor Auto & Truck Parts Inc
 Navigate to Artistic Floral Designs By Brenda
@@ -687,7 +680,6 @@ Navigate to Ocean City State Park
 Navigate to Family Practice Center
 Navigate to Aberdeen Hoquiam Dental Clinic
 Navigate to Wandell DDS
-Navigate to Olympic Chiropractic
 Navigate to Harbor Chiropractic Center Inc
 Navigate to Pacific Care Center
 Navigate to Harbors Home Health & Hospice
@@ -759,7 +751,6 @@ Navigate to Ocean Shores Library
 Navigate to Senior Center North Beach
 Navigate to Coastal Interpretive Center
 Navigate to Ocean Shores United Methodist Church
-Navigate to The Church of Jesus Christ of Latter-day Saints
 Navigate to Ocean Shores Baptist Church
 Navigate to SHORES FELLOWSHIP CHURCH
 Navigate to Galilean Lutheran Church
@@ -905,7 +896,6 @@ Navigate to Red Cedar Surf Co.
 Navigate to Visiting Angels
 Navigate to Veritas Classical Academy
 Navigate to Ruby Beach
-Navigate to Olympic Peninsula Fly Fishing
 Navigate to Neal J Garhofer O.D.
 Navigate to Freedom Sportfishing
 Navigate to Hoquiam Fire Department
@@ -1197,7 +1187,6 @@ Navigate to Westport by the Sea Condo
 Navigate to Westport Whale Watch
 Navigate to Windermere Real Estate
 Navigate to Alexandroff Dental
-Navigate to Cookies Country Chicken
 Navigate to Englund Marine & Industrial Supply
 Navigate to Oxford House Victory
 Navigate to Lonesome Creek Store & Resort
@@ -1270,7 +1259,6 @@ Navigate to Rusty Gate Nursery & Building Supply
 Navigate to Lay's Computer Repair
 Navigate to Crowell Brothers Inc
 Navigate to Clallam County Fire Department
-Navigate to Olympic Corrections Center
 Navigate to Radiant Care Adult Foster Homes
 Navigate to MyCovio's
 Navigate to Ocean Breeze
@@ -1310,7 +1298,6 @@ Navigate to Savage streams camp ground
 Navigate to Sara's Rusty Spur Bar & Grill
 Navigate to Blanchard Auto Sales
 Navigate to Hess Mart
-Navigate to Olympic Stadium
 Navigate to Body Essence Massage
 Navigate to Joe Creek Condos
 Navigate to Mike Z's Guide Service
@@ -1470,7 +1457,6 @@ Navigate to AAA Warrenton North Coast Service Center
 Navigate to A-Town Coffee
 Navigate to FedEx OnSite
 Navigate to Roger Saux Health Center
-Navigate to Our Lady of the Olympics Catholic Church
 Navigate to Kiss of Mist Espresso
 Navigate to Hoquiam Municipal Court
 Navigate to Sandy Toes and Mr. Ed's
@@ -1576,7 +1562,6 @@ Navigate to Clallam Bay School
 Navigate to Clallam Bay Corrections Center
 Navigate to Bogachiel State Park
 Navigate to Ferrellgas
-Navigate to University of Washington Olympic Natural Resources Center
 Navigate to WA State Dept. of Natural Resources
 Navigate to Forks Elks Lodge 2524
 Navigate to First Federal Forks Branch
@@ -1678,7 +1663,6 @@ Navigate to Chinook Marine Repair
 Navigate to Port of Chinook
 Navigate to Chinook Water District
 Navigate to Inspirations
-Navigate to Chinook Country Store
 Navigate to Chinook Lutheran Church
 Navigate to Beach Side Counseling, PLLC
 Navigate to Ilwaco Driver Licensing Office
@@ -1701,7 +1685,6 @@ Navigate to Ocean Spray Cranberries Inc
 Navigate to Don Parsons State Farm Insurance Agent
 Navigate to Cranguyma Farms
 Navigate to Wirkkala Construction
-Navigate to Woody's Septic Specialties
 Navigate to Ford Electric
 Navigate to Nichols Masonry & Concrete Inc
 Navigate to Sta-dri Continuous Gutters
@@ -1790,7 +1773,6 @@ Navigate to Streetside Pizza
 Navigate to North Beach Medical Equipment
 Navigate to TAPS Espresso Grub & Pub
 Navigate to Big Wheel Beach House at Seabrook
-Navigate to Massage at Olympic Chiropractic
 Navigate to Peninsula Landscape Service, LLC
 Navigate to Cakecakes
 Navigate to Do It Best
@@ -2143,7 +2125,6 @@ Navigate to Seaside Liquidation Outlet
 Navigate to Native Grounds Espresso
 Navigate to Peninsula Baptist Church
 Navigate to Panda Express
-Navigate to Olympic Waters Guide Service
 Navigate to Stitches Quilt & Craft Shop
 Navigate to Ocean Shores Laundromat
 Navigate to Paws & Claws Adventure Resort (diamond Dogs Daycare)
@@ -2162,7 +2143,6 @@ Navigate to Spawn Fly Fish
 Navigate to Ocean Shores Marina
 Navigate to Aramark
 Navigate to Quileute Indian Reservation
-Navigate to JACK'S COUNTRY STORE INC
 Navigate to World's Largest Frying Pan
 Navigate to Winkelman Law Firm, Inc
 Navigate to Astoria Ecowash
@@ -2229,7 +2209,6 @@ Navigate to Mobile West LLC
 Navigate to Magnolias Seabrook
 Navigate to Breezy Beach
 Navigate to Queets Campground
-Navigate to Hoh Rainforest Olympic National Park
 Navigate to L and K Appliance Repair
 Navigate to Dr. Craig J. Teveliet, MD
 Navigate to Forks Community Hospital
@@ -2249,12 +2228,10 @@ Navigate to Chrome Chasers Fly Fishing
 Navigate to Dependable Glass & Screens
 Navigate to Emerald Valley Inn
 Navigate to Joyce Depot Museum
-Navigate to Starlight Camp Olympic
 Navigate to Quinault Rain Forest Ranger Station
 Navigate to Blackberry Cafe
 Navigate to My RV Works
 Navigate to Salt Creek Recreation Area
-Navigate to Olympic Wilderness Apiary
 Navigate to Elkhorn Ranch In Lake Quinault
 Navigate to Evans Earthworks, Inc.
 Navigate to Fullness of Joy Floral
@@ -2267,7 +2244,6 @@ Navigate to Anthony's Services
 Navigate to Eden Excavating
 Navigate to Joyce General Store
 Navigate to Peninsula Drain & Septic
-Navigate to Olympic National Forest
 Navigate to Lyre River Campground
 Navigate to Graves Creek Campground
 Navigate to Tongue Point
@@ -2276,14 +2252,12 @@ Navigate to Family Kitchen
 Navigate to Crescent Beach and RV Park
 Navigate to Salt Creek RV Park & Golf
 Navigate to Joyce Bible Church
-Navigate to Olympic Ridge RV Community
 Navigate to Granny's Cafe
 Navigate to The Salmon House Restaurant
 Navigate to Storm King Ranger Station
 Navigate to Mount Storm King
 Navigate to Cliff Cairn Terriers by the Sea
 Navigate to Spruce Railroad Trail
-Navigate to ThunderingPaws Maine Coons Cattery Port Angeles, Wa
 Navigate to Crescent School
 Navigate to Freshwater Bay County Park
 Navigate to Geno's Pizza and Burgers
@@ -2367,7 +2341,6 @@ Navigate to Eugenia Behavioral Health And Substance Use Disorder Treatment Cente
 Navigate to HAVA Shelter
 Navigate to Eunice Chiweshe Goldstein Winery
 Navigate to Simpson St Carwash
-Navigate to Game Freaks
 Navigate to Five Star Detail
 Navigate to Astoria Food Hub
 Navigate to Willapa Harbor Chamber of Commerce
@@ -2398,7 +2371,6 @@ Navigate to Young Street Bridge
 Navigate to Oregon Film Museum
 Navigate to PNW Automotive
 Navigate to Robert Mclafferty
-Navigate to Metro by T-Mobile
 Navigate to D4 Custom Apparel And Sign Company
 Navigate to Grays Harbor Beauty College
 Navigate to Chiropractic Offices
@@ -2513,7 +2485,6 @@ Navigate to North Coast Home Care
 Navigate to Cmh Womens Center
 Navigate to T. Paul's Supper Club
 Navigate to His Way Works Business Service
-Navigate to Bloomin Crazy Floral
 Navigate to Tan Republic Aberdeen
 Navigate to Clatsop Community Bank
 Navigate to Polk Riley's Printing & Design
@@ -2568,7 +2539,6 @@ Navigate to K Manufacturing Inc
 Navigate to Bayshore Apartments
 Navigate to Columbia Memorial Rehab
 Navigate to Sunset Electrology
-Navigate to A Gypsy's Whimsy Herbal
 Navigate to Sunset Presort
 Navigate to Murk Mary Ann
 Navigate to Astoria First Assembly of God
@@ -2698,7 +2668,6 @@ Navigate to Hygge Hair
 Navigate to Shoppes at Riverside
 Navigate to Ingram Zelasko & Goodwin LLP Attorneys at Law
 Navigate to Sacrilicious
-Navigate to Sea Gypsy Gifts
 Navigate to Pacific County PUD #2
 Navigate to Pacific County Public Works
 Navigate to Gizmo's Arcade & Eatery
@@ -2800,7 +2769,6 @@ Navigate to Waugh's Men's and Women's Apparel
 Navigate to Charlene Larsen Center for the Performing Arts
 Navigate to Quilt Harbor
 Navigate to Breakwater Seafoods & Chowder
-Navigate to Canton Cafe
 Navigate to Lighthouse Drive-in
 Navigate to Mac's Tavern & Cardroom
 Navigate to Parkway Tavern
@@ -2812,7 +2780,6 @@ Navigate to Stullick Jewelry
 Navigate to Grays Harbor Monument
 Navigate to Great Northwest Federal Credit Union
 Navigate to Grays Harbor Title Company
-Navigate to Olympic Realty 2000
 Navigate to Aberdeen Realty, Inc.
 Navigate to Coast Title & Escrow Inc
 Navigate to Linkshire Mobile Home Park
@@ -2833,7 +2800,6 @@ Navigate to Industrial Hydraulics
 Navigate to Bishop Center for Performing Arts
 Navigate to Driftwood Players
 Navigate to Rainier Lanes Inc
-Navigate to Grays Harbor Country Club
 Navigate to Sons of Norway Hall
 Navigate to City of Aberdeen Parks & Recreation
 Navigate to Harbor Ophthalmology
@@ -2876,9 +2842,7 @@ Navigate to Aberdeen Municipal Court
 Navigate to Aberdeen Fire Department
 Navigate to Health Department
 Navigate to Maxi Mini Mart
-Navigate to Hong Kong Restaurant
 Navigate to Artic Rv Park
-Navigate to Country Estates Mobile Home Park
 Navigate to National Guard
 Navigate to Gondeau Enterprises Inc
 Navigate to Wynooche Wildwood Park
@@ -3031,7 +2995,6 @@ Navigate to DR. ANTHONY SURRATT
 Navigate to Javier's International Barber
 Navigate to Wauna Federal Credit Union
 Navigate to Infinity Gymnastics Academy
-Navigate to Olympic Family Dental
 Navigate to Naselle Timberland Library
 Navigate to D and Z Tow trucks
 Navigate to Five Star Ford
@@ -3268,7 +3231,6 @@ Navigate to Humphrey Construction Company Inc
 Navigate to Chiropractic Health Center
 Navigate to Aberdeen Boxing Club
 Navigate to Bella Vita Salon & Spa
-Navigate to Olympic Gateway Plaza
 Navigate to Harbour Taxi & Courier Inc.
 Navigate to Astoria Women's Health
 Navigate to Astoria Real Estate
@@ -3336,7 +3298,6 @@ Navigate to 105.7 The JET
 Navigate to Robbins Air
 Navigate to Erik M Kupka ATY
 Navigate to Oceana Massage Therapy
-Navigate to Oregon Gypsy-gallery
 Navigate to Rancho Alegre Meat And Produce
 Navigate to CMF Sawmill
 Navigate to Transit Center
@@ -3344,7 +3305,6 @@ Navigate to Edward Jones Financial Advisor: Osiel Rivera
 Navigate to The Salty Dog Salon
 Navigate to River Run RV Park
 Navigate to Mike Parker Honda of Grays Harbor
-Navigate to Olympic Self Storage
 Navigate to Mr Nice Guy Astoria
 Navigate to A bit of Everything
 Navigate to City of Raymond
@@ -3393,7 +3353,6 @@ Navigate to Aberdeen Goodwill
 Navigate to Game Day Sports Bar And Grill
 Navigate to Raymond Fire Department
 Navigate to Heather Meadows Apartments
-Navigate to Country Pet Veterinary Clinic
 Navigate to United Site Services
 Navigate to Loertscher Chiropractic Clinic
 Navigate to Liberty Tax
@@ -3524,7 +3483,6 @@ Navigate to H & K Auto Sales
 Navigate to Third Dimension Salon
 Navigate to Eleventh Street Barber
 Navigate to Pacific County Jail
-Navigate to Weird Sisters Freak Boutique
 Navigate to Yellow Deli South Bend
 Navigate to The Knot Bar
 Navigate to Bmf Washington LLC
@@ -3729,7 +3687,6 @@ Navigate to J M Weatherwax High School
 Navigate to Special Touch Janitorial Cleaning
 Navigate to Golden Lion Motel
 Navigate to Northwest Roofing & Construction LLC
-Navigate to Game Freaks Video Games
 Navigate to Luminari Arts
 Navigate to Lemon Family Dental Aberdeen
 Navigate to Electric Charging Station
@@ -4086,7 +4043,6 @@ Navigate to Hop & Vine Bottle Shop & Tap Room
 Navigate to Necanicum Estuary Natural History Park
 Navigate to The Natural Nook
 Navigate to Lighthouse Christian Church
-Navigate to Astoria Golf & Country Club
 Navigate to Seaside Muffler & Off Road
 Navigate to 335 4TH AVE
 Navigate to Rebecca C. Rueppel, MD
@@ -4211,7 +4167,6 @@ Navigate to PNW Cabinets
 Navigate to Bear Walk Cafe
 Navigate to The Drifthaven at Gearhart
 Navigate to Temple Of Metaphysical Science, NSAC
-Navigate to Saigon Deli
 Navigate to Seaside Beach Volleyball Tournament
 Navigate to Mason Autobody Inc
 Navigate to AMJ Insulation LLC
