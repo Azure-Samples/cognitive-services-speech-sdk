@@ -513,7 +513,10 @@ namespace FetchTranscription
                 }
             }
 
-            await ServiceBusUtilities.SendServiceBusMessageAsync(CompletedServiceBusSender, JsonConvert.SerializeObject(completedMessages), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+            {
+                await ServiceBusUtilities.SendServiceBusMessageAsync(CompletedServiceBusSender, JsonConvert.SerializeObject(completedMessages), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+            }
 
             var generalErrors = generalErrorsStringBuilder.ToString();
             if (!string.IsNullOrEmpty(generalErrors))
