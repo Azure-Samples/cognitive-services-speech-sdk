@@ -18,10 +18,5 @@ namespace Connector
         public string AudioFileName { get; set; }
 
         public string JsonReportLocation { get; set; }
-
-        public string CreateMessageString()
-        {
-            return JsonConvert.SerializeObject(this);
-        }
     }
 }

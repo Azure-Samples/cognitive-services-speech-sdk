@@ -426,6 +426,7 @@ namespace FetchTranscription
                 return;
             }
 
+            var completedMessages = new List<CompletedMessage>();
             foreach (var speechTranscriptMapping in speechTranscriptMappings)
             {
                 var speechTranscript = speechTranscriptMapping.Value;
@@ -449,7 +450,7 @@ namespace FetchTranscription
                 if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
                 {
                     var completedMessage = new CompletedMessage(audioFileInfo.FileUrl, jsonFileUrl);
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(CompletedServiceBusSender, completedMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+                    completedMessages.Add(completedMessage);
                 }
 
                 var consolidatedContainer = FetchTranscriptionEnvironmentVariables.ConsolidatedFilesOutputContainer;
@@ -511,6 +512,8 @@ namespace FetchTranscription
                     await StorageConnectorInstance.MoveFileAsync(FetchTranscriptionEnvironmentVariables.AudioInputContainer, fileName, FetchTranscriptionEnvironmentVariables.AudioProcessedContainer, fileName, false, log).ConfigureAwait(false);
                 }
             }
+
+            await ServiceBusUtilities.SendServiceBusMessageAsync(CompletedServiceBusSender, JsonConvert.SerializeObject(completedMessages), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
 
             var generalErrors = generalErrorsStringBuilder.ToString();
             if (!string.IsNullOrEmpty(generalErrors))
