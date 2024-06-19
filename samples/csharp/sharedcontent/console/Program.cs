@@ -349,6 +349,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 3. Translation with audio stream.");
                 Console.WriteLine(" 4. Translation with compressed input push audio stream.");
                 Console.WriteLine(" 5. Translation with language detection samples.");
+                Console.WriteLine(" 6. Multilingual Translation with language identification.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -377,6 +378,10 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D5:
                     case ConsoleKey.NumPad5:
                         TranslationWithLanguageDetectionEnabled();
+                        break;
+                    case ConsoleKey.D6:
+                    case ConsoleKey.NumPad6:
+                        TranslationSamples.MultilingualTranslationWithLanguageIdentificationAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
