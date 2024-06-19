@@ -10,19 +10,33 @@
 @interface AppDelegate ()
 
 @property (weak) IBOutlet NSWindow *window;
-@property (weak) NSButton *button;
+@property (strong) NSButton *button;
 @property (strong) NSTextField *textField;
 @end
 
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
+    CGFloat buttonWidth = 200.0;
+    CGFloat buttonHeight = 32.0;
+    CGFloat textWidth = 200.0;
+    CGFloat textHeight = 64.0;
+    CGFloat verticalSpacing = 20.0;
+
+    NSRect contentViewBounds = self.window.contentView.bounds;
+    CGFloat buttonX = (contentViewBounds.size.width - buttonWidth) / 2;
+    CGFloat buttonY = (contentViewBounds.size.height - buttonHeight) / 2 - verticalSpacing;
+    CGFloat textX = (contentViewBounds.size.width - textWidth) / 2;
+    CGFloat textY = (contentViewBounds.size.height - textHeight) / 2 + textHeight + verticalSpacing;
+
     self.button = [NSButton buttonWithTitle:@"Synthesize" target:nil action:nil];
+    [self.button setFrame:NSMakeRect(buttonX, buttonY, buttonWidth, buttonHeight) ];
+    [self.button setAutoresizingMask:NSViewMinXMargin | NSViewMaxXMargin | NSViewMinYMargin | NSViewMaxYMargin];
     [self.button setTarget:self];
     [self.button setAction:@selector(buttonPressed:)];
     [self.window.contentView addSubview:self.button];
-    
-    self.textField = [[NSTextField alloc] initWithFrame:NSMakeRect(100, 200, 200, 20)];
+
+    self.textField = [[NSTextField alloc] initWithFrame:NSMakeRect(textX, textY, textWidth, textHeight)];
     [self.textField setPlaceholderString:@"Text something to synthesize..."];
     [self.window.contentView addSubview:self.textField];
 }

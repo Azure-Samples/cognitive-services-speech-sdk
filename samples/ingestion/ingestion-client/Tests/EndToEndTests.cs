@@ -81,7 +81,7 @@ namespace Tests
             var region = testProperties["LanguageServiceRegion"].ToString();
             var subscriptionKey = testProperties["LanguageServiceSubscriptionKey"].ToString();
             var provider = new AnalyzeConversationsProvider("en-US", subscriptionKey, region, Logger.Object);
-            var body = File.ReadAllText(@"testFiles/summarizationInputSample.json");
+            var body = File.ReadAllText(@"TestFiles/summarizationInputSample.json");
             var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
 
             var speechTranscriptMapping = new Dictionary<AudioFileInfo, SpeechTranscript>
