@@ -717,7 +717,10 @@ window.updateTypeMessageBox = () => {
                     childImg1.style.width = "200px"
                     childImg1.style.height = "200px"
                 }
-                const userQueryHTML = messageBox.innerHTML.trim("")
+                let userQueryHTML = messageBox.innerHTML.trim("")
+                if(userQueryHTML.startsWith('<img')){
+                    userQueryHTML="<br/>"+userQueryHTML
+                }
                 if (userQuery !== '') {
                     handleUserQuery(userQuery.trim(''), userQueryHTML,imgUrl)
                     document.getElementById('userMessageBox').innerHTML = ''
