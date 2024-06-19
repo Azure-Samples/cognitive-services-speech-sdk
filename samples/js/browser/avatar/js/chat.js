@@ -376,7 +376,7 @@ function handleUserQuery(userQuery,userQueryHTML,imgUrlPath) {
         chatHistoryTextArea.innerHTML += '\n\n'
     }
 
-    chatHistoryTextArea.innerHTML += imgUrlPath.trim() ? "<br/>User: " + userQueryHTML : "<br/>User: " + userQuery + "<br/>";
+    chatHistoryTextArea.innerHTML += imgUrlPath.trim() ? "<br/><br/>User: " + userQueryHTML : "<br/><br/>User: " + userQuery + "<br/>";
         
     chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
@@ -429,7 +429,7 @@ function handleUserQuery(userQuery,userQueryHTML,imgUrlPath) {
         }
 
         let chatHistoryTextArea = document.getElementById('chatHistory')
-        chatHistoryTextArea.innerHTML += 'Assistant: '
+        chatHistoryTextArea.innerHTML += imgUrlPath.trim() ? 'Assistant: ':'<br/>Assistant: '
 
         const reader = response.body.getReader()
 
