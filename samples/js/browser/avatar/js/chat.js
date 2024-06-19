@@ -349,7 +349,7 @@ function stopSpeaking() {
     )
 }
 
-function handleUserQuery(userQuery,userQueryHTML,imgUrlPath) {
+function handleUserQuery(userQuery, userQueryHTML, imgUrlPath) {
     let contentMessage = userQuery
     if (imgUrlPath.trim()) {
         contentMessage = [  
@@ -712,17 +712,17 @@ window.updateTypeMessageBox = () => {
             if (e.key === 'Enter') {
                 const userQuery = document.getElementById('userMessageBox').innerText
                 const messageBox = document.getElementById('userMessageBox')
-                const childImg1 = messageBox.querySelector("#picInput")
-                if (childImg1) {
-                    childImg1.style.width = "200px"
-                    childImg1.style.height = "200px"
+                const childImg = messageBox.querySelector("#picInput")
+                if (childImg) {
+                    childImg.style.width = "200px"
+                    childImg.style.height = "200px"
                 }
                 let userQueryHTML = messageBox.innerHTML.trim("")
                 if(userQueryHTML.startsWith('<img')){
                     userQueryHTML="<br/>"+userQueryHTML
                 }
                 if (userQuery !== '') {
-                    handleUserQuery(userQuery.trim(''), userQueryHTML,imgUrl)
+                    handleUserQuery(userQuery.trim(''), userQueryHTML, imgUrl)
                     document.getElementById('userMessageBox').innerHTML = ''
                     imgUrl = ""
                 }
