@@ -234,11 +234,19 @@
             {
                 "description": "Id that will be suffixed to all created resources to identify resources of a certain deployment. Leave as is to use timestamp as deployment id."
             }
-        }
+        },
+        "CompletedServiceBusConnectionString":
+        {
+            "type": "SecureString",
+            "metadata":
+            {
+                "description": "The connection string for the Service Bus Queue where you want to receive the notification of completion of the transcription for each audio file. If left empty, no completion notification will be sent."
+            }
+        },
     },
     "variables":
     {
-        "Version": "v2.0.12",
+        "Version": "v2.0.13",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -1009,7 +1017,8 @@
                 "ConversationPiiCategories": "[variables('ConversationPiiCategories')]",
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
                 "ConversationPiiSetting": "[variables('ConversationPiiRedaction')]",
-                "ConversationSummarizationOptions": "[variables('ConversationSummarizationOptions')]"
+                "ConversationSummarizationOptions": "[variables('ConversationSummarizationOptions')]",
+                "CompletedServiceBusConnectionString": "[variables('CompletedServiceBusConnectionString')]"
             }
         }
     ],
