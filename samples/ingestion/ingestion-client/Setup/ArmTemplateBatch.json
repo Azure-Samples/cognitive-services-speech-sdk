@@ -242,7 +242,7 @@
             {
                 "description": "The connection string for the Service Bus Queue where you want to receive the notification of completion of the transcription for each audio file. If left empty, no completion notification will be sent."
             }
-        },
+        }
     },
     "variables":
     {
