@@ -1,6 +1,6 @@
 {
     "name": "C# (.NET)",
-    "image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
+    "image": "mcr.microsoft.com/devcontainers/dotnet:1-6.0",
     "features": {
         "ghcr.io/devcontainers/features/azure-cli:1": {},
         "ghcr.io/devcontainers/features/node:1": {},
