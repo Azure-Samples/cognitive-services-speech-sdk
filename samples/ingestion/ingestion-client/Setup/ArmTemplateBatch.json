@@ -1019,7 +1019,7 @@
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
                 "ConversationPiiSetting": "[variables('ConversationPiiRedaction')]",
                 "ConversationSummarizationOptions": "[variables('ConversationSummarizationOptions')]",
-                "CompletedServiceBusConnectionString": "[variables('CompletedServiceBusConnectionString')]"
+                "CompletedServiceBusConnectionString": "[parameters('CompletedServiceBusConnectionString')]"
             }
         }
     ],
