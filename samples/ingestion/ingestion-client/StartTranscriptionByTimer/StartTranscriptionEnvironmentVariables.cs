@@ -55,5 +55,7 @@ namespace StartTranscriptionByTimer
         public static readonly string PunctuationMode = Environment.GetEnvironmentVariable(nameof(PunctuationMode), EnvironmentVariableTarget.Process);
 
         public static readonly string StartTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(StartTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
+
+        public static readonly string StartTranscriptionFunctionTimeInterval = Environment.GetEnvironmentVariable(nameof(StartTranscriptionFunctionTimeInterval), EnvironmentVariableTarget.Process);
     }
 }

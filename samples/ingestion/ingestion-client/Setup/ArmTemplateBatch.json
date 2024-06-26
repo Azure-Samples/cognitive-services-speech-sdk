@@ -115,6 +115,15 @@
                 "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
             }
         },
+        "StartTranscriptionFunctionTimeInterval":
+        {
+            "defaultValue": "0 */2 * * * *",
+            "type": "String",
+            "metadata":
+            {
+                "description": "The time interval for the timer trigger in the StartTranscription function. The default value is every 2 minutes."
+            }
+        },
         "ProfanityFilterMode":
         {
             "defaultValue": "None",
@@ -937,6 +946,7 @@
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "Locale": "[parameters('Locale')]",
                 "MessagesPerFunctionExecution": "[variables('MessagesPerFunctionExecution')]",
+                "StartTranscriptionFunctionTimeInterval": "[parameters('StartTranscriptionFunctionTimeInterval')]",
                 "ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
