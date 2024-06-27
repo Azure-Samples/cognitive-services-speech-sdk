@@ -37,9 +37,24 @@ namespace FetchTranscription
 
         private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
 
+        private static readonly ServiceBusClient CompletedServiceBusClient;
+
+        private static readonly ServiceBusSender CompletedServiceBusSender;
+
         private readonly IServiceProvider serviceProvider;
 
         private readonly IngestionClientDbContext databaseContext;
+
+        #pragma warning disable CA1810
+        static TranscriptionProcessor()
+        {
+            if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+            {
+                CompletedServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString);
+                CompletedServiceBusSender = CompletedServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString).EntityPath);
+            }
+        }
+        #pragma warning restore CA1810
 
         public TranscriptionProcessor(IServiceProvider serviceProvider)
         {
@@ -411,6 +426,7 @@ namespace FetchTranscription
                 return;
             }
 
+            var completedMessages = new List<CompletedMessage>();
             foreach (var speechTranscriptMapping in speechTranscriptMappings)
             {
                 var speechTranscript = speechTranscriptMapping.Value;
@@ -429,7 +445,13 @@ namespace FetchTranscription
                 var jsonFileName = $"{fileName}.json";
                 var archiveFileLocation = System.IO.Path.GetFileNameWithoutExtension(fileName);
 
-                await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, FetchTranscriptionEnvironmentVariables.JsonResultOutputContainer, jsonFileName, log).ConfigureAwait(false);
+                var jsonFileUrl = await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, FetchTranscriptionEnvironmentVariables.JsonResultOutputContainer, jsonFileName, log).ConfigureAwait(false);
+
+                if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+                {
+                    var completedMessage = new CompletedMessage(audioFileInfo.FileUrl, jsonFileUrl);
+                    completedMessages.Add(completedMessage);
+                }
 
                 var consolidatedContainer = FetchTranscriptionEnvironmentVariables.ConsolidatedFilesOutputContainer;
                 if (FetchTranscriptionEnvironmentVariables.CreateConsolidatedOutputFiles)
@@ -489,6 +511,11 @@ namespace FetchTranscription
                 {
                     await StorageConnectorInstance.MoveFileAsync(FetchTranscriptionEnvironmentVariables.AudioInputContainer, fileName, FetchTranscriptionEnvironmentVariables.AudioProcessedContainer, fileName, false, log).ConfigureAwait(false);
                 }
+            }
+
+            if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+            {
+                await ServiceBusUtilities.SendServiceBusMessageAsync(CompletedServiceBusSender, JsonConvert.SerializeObject(completedMessages), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
             }
 
             var generalErrors = generalErrorsStringBuilder.ToString();

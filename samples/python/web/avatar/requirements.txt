@@ -1,2 +1,4 @@
-Flask
 azure-cognitiveservices-speech
+flask
+pytz
+requests

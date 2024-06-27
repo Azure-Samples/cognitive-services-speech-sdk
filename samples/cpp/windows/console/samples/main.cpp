@@ -74,6 +74,7 @@ extern void SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile();
 
 extern void TranslationAndLanguageIdWithMicrophone();
 extern void ContinuousTranslationAndLanguageIdWithMultiLingualFile();
+extern void ContinuousMultilingualTranslationWithLanguageIdentification();
 
 extern void StandaloneLanguageDetectionWithMicrophone();
 extern void StandaloneLanguageDetectionWithFileInput();
@@ -262,6 +263,7 @@ void TranslationSamples()
         cout << "2.) Continuous translation with microphone input.\n";
         cout << "3.) Single utterance translation with language detection using microphone input.\n";
         cout << "4.) Continuous translation with language detection using multi-lingual input file.\n";
+        cout << "5.) Continuous multilingual translation with language identification.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -281,6 +283,9 @@ void TranslationSamples()
             break;
         case '4':
             ContinuousTranslationAndLanguageIdWithMultiLingualFile();
+            break;
+        case '5':
+            ContinuousMultilingualTranslationWithLanguageIdentification();
             break;
         case '0':
             break;

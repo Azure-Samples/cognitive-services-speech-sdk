@@ -1,7 +1,7 @@
 # C# Console app for .NET Core (Windows or Linux)
 
 This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for C#.
-It runs under .NET Core 3.1 or later on Windows or Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
+It runs under .NET 6.0 or later on Windows or Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ It runs under .NET Core 3.1 or later on Windows or Linux (see the list of [suppo
     * The **.NET Core cross-platform development** workload in Visual Studio.
       You can enable it in **Tools** \> **Get Tools and Features**.
   * On Windows or Linux:
-    * [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1)
+    * [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
     * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 * On Ubuntu or Debian, run the following commands for the installation of required packages:
 
@@ -22,13 +22,11 @@ It runs under .NET Core 3.1 or later on Windows or Linux (see the list of [suppo
   sudo apt-get install libssl-dev libasound2
   ```
 
-  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
-
 * On RHEL or CentOS, run the following commands for the installation of required packages:
 
   ```sh
   sudo yum update
-  sudo yum install alsa-lib dotnet-sdk-3.1 openssl
+  sudo yum install alsa-lib dotnet-sdk-6.0 openssl
   ```
 
   * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
@@ -80,7 +78,7 @@ Run the following command below from the directory that contains this sample.
 (We assume you performed a Debug build earlier)
 
 ```bash
-cd samples/bin/Debug/netcoreapp3.1
+cd samples/bin/Debug/net6.0
 dotnet samples.dll
 ```
 
