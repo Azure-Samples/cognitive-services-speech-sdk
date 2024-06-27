@@ -47,9 +47,20 @@
 }
 
 @section Scripts {
+    <!-- load OpusMediaRecorder.umd.js. OpusMediaRecorder will be loaded. -->
+    <script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OpusMediaRecorder.umd.js"></script>
+    <!-- load encoderWorker.umd.js. This should be after OpusMediaRecorder. -->
+    <!-- This script tag will create OpusMediaRecorder.encoderWorker. -->
+    <script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/encoderWorker.umd.js"></script>
+
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-            const mimeType = "audio/ogg";
+            const workerOptions = {
+                OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OggOpusEncoder.wasm',
+                WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/WebMOpusEncoder.wasm'
+            };
+
+            const isUsingOpusMediaRecorder = !window.MediaRecorder || !window.MediaRecorder.isTypeSupported('audio/ogg;codecs=opus');
 
             if (!navigator.mediaDevices) {
 
@@ -58,15 +69,8 @@
                 return;
             }
 
-            if (!MediaRecorder.isTypeSupported(mimeType)) {
-
-                alert(`The MIMI type ${mimeType} is not supported by your browser.`);
-
-                return;
-            }
             const audioContext = new AudioContext();
-            const channelsCount = 1;
-            const sampleSize = 16;
+            const channelsCount = 2;
 
             const startButton = document.getElementById('Recording');
             const container = document.getElementById('FeedbackContainer');
@@ -88,18 +92,22 @@
 
             navigator.mediaDevices.getUserMedia({
                 audio: {
-                    autoGainControl: false,
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
                     channelCount: channelsCount,
-                    echoCancellation: false,
-                    latency: 0,
-                    noiseSuppression: false,
-                    sampleSize: sampleSize
+                    sampleSize: 16,
+                    sampleRate: 16000
                 }, video: false
             }).then(stream => {
 
-                const mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: mimeType
-                });
+                const mediaRecorder = isUsingOpusMediaRecorder
+                    ? new MediaRecorder(stream, {
+                        mimeType: "audio/ogg;codecs=opus"
+                    }, workerOptions)
+                    : new MediaRecorder(stream, {
+                        mimeType: "audio/ogg;codecs=opus"
+                    });
 
                 const subject = new signalR.Subject();
 

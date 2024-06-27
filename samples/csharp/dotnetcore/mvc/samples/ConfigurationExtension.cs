@@ -15,6 +15,31 @@ public static class ConfigurationExtension
             return null;
         }
 
-        return SpeechConfig.FromSubscription(key, region);
+        var config = SpeechConfig.FromSubscription(key, region);
+
+        var enableLogging = configuration.GetValue<bool>("EnableSDKLogging");
+
+        if (enableLogging)
+        {
+            var contentRoot = configuration.GetValue<string>(WebHostDefaults.ContentRootKey);
+
+            var directory = Path.Combine(contentRoot, "logs");
+            var fileFullname = Path.Combine(directory, $"log-{DateTime.Now:yyyy-MM-dd}.log");
+
+            if (!Path.Exists(fileFullname))
+            {
+                if (!Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                using var logFile = new FileStream(fileFullname, FileMode.Create);
+            }
+
+            config.EnableAudioLogging();
+            config.SetProperty(PropertyId.Speech_LogFilename, fileFullname);
+        }
+
+        return config;
     }
 }

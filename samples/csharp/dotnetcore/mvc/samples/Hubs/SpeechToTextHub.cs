@@ -37,7 +37,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
 
         using var audioInputStream = AudioInputStream.CreatePushStream(format);
         using var audioConfig = AudioConfig.FromStreamInput(audioInputStream);
-        var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+        using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
 
         recognizer.Recognizing += RecognizerRecognizing;
         recognizer.Recognized += RecognizerRecognized;
@@ -54,8 +54,6 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         recognizer.Recognized -= RecognizerRecognized;
         recognizer.SessionStarted -= RecognizerStarted;
         recognizer.SessionStopped -= RecognizerStopped;
-
-        recognizer.Dispose();
     }
 
     public async Task RecognizeOnce(IAsyncEnumerable<string> stream)
@@ -116,7 +114,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
 
     private static async Task PushAudioAsync(PushAudioInputStream audioInputStream, IAsyncEnumerable<string> stream, int sampleRate, int channels)
     {
-        var decoder = OpusCodecFactory.CreateDecoder(sampleRate, channels);
+        using var decoder = OpusCodecFactory.CreateDecoder(sampleRate, channels);
 
         await foreach (var base64String in stream)
         {
@@ -157,6 +155,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
             var chunk = Convert.FromBase64String(base64String);
             memoryStream.Write(chunk, 0, chunk.Length);
         }
+
         memoryStream.Seek(0, SeekOrigin.Begin);
 
         using var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
