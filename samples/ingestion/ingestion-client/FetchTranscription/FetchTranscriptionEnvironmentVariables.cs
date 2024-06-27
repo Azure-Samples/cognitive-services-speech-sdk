@@ -51,6 +51,8 @@ namespace FetchTranscription
 
         public static readonly string FetchTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(FetchTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
 
+        public static readonly string CompletedServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(CompletedServiceBusConnectionString), EnvironmentVariableTarget.Process);
+
         public static readonly string HtmlResultOutputContainer = Environment.GetEnvironmentVariable(nameof(HtmlResultOutputContainer), EnvironmentVariableTarget.Process);
 
         public static readonly string JsonResultOutputContainer = Environment.GetEnvironmentVariable(nameof(JsonResultOutputContainer), EnvironmentVariableTarget.Process);
