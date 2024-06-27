@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace samples;
 
-public class Program
+public sealed class Program
 {
     public static async Task Main(string[] args)
     {
