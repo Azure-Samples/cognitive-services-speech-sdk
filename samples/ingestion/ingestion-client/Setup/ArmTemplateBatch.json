@@ -256,7 +256,7 @@
     },
     "variables":
     {
-        "Version": "v2.0.13",
+        "Version": "v2.0.14",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -1029,7 +1029,7 @@
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
                 "ConversationPiiSetting": "[variables('ConversationPiiRedaction')]",
                 "ConversationSummarizationOptions": "[variables('ConversationSummarizationOptions')]",
-                "CompletedServiceBusConnectionString": "[variables('CompletedServiceBusConnectionString')]"
+                "CompletedServiceBusConnectionString": "[parameters('CompletedServiceBusConnectionString')]"
             }
         }
     ],
