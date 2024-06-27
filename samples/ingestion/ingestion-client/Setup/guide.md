@@ -85,7 +85,7 @@ The batch and real time ARM templates are nearly the same. The main differences 
 
 To deploy the required infrastructure, click the button below for Batch mode:
 
-[![Deploy to Azure](ArmTemplateBatch.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcognitive-services-speech-sdk%2Fmaster%2Fsamples%2Fingestion%2Fingestion-client%2FSetup%2FArmTemplateBatch.json)
 
 For Real Time mode, use the following button:
 
