@@ -1,4 +1,5 @@
-﻿@{
+﻿@using samples.Hubs
+@{
     ViewData["Title"] = "Speech to Text";
 }
 
@@ -41,18 +42,17 @@
 </div>
 
 <script src="~/lib/microsoft-signalr/signalr.js"></script>
+<!-- load OpusMediaRecorder.umd.js. OpusMediaRecorder will be loaded. -->
+<script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OpusMediaRecorder.umd.js"></script>
+<!-- load encoderWorker.umd.js. This should be after OpusMediaRecorder. -->
+<!-- This script tag will create OpusMediaRecorder.encoderWorker. -->
+<script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/encoderWorker.umd.js"></script>
 
 @section Styles {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 }
 
 @section Scripts {
-    <!-- load OpusMediaRecorder.umd.js. OpusMediaRecorder will be loaded. -->
-    <script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OpusMediaRecorder.umd.js"></script>
-    <!-- load encoderWorker.umd.js. This should be after OpusMediaRecorder. -->
-    <!-- This script tag will create OpusMediaRecorder.encoderWorker. -->
-    <script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/encoderWorker.umd.js"></script>
-
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -100,7 +100,7 @@
                     autoGainControl: true,
                     channelCount: 2,
                     sampleSize: 16,
-                    sampleRate: 44100
+                    sampleRate: 16000
                 }, video: false
             }).then(stream => {
 
@@ -137,9 +137,9 @@
 
                 mediaRecorder.addEventListener("start", () => {
                     if (isContinuous()) {
-                        connection.send('ContinuousRecognition', subject, audioContext.sampleRate);
+                        connection.send('@nameof(SpeechToTextHub.ContinuousRecognition)', subject);
                     } else {
-                        connection.send('RecognizeOnce', subject);
+                        connection.send('@nameof(SpeechToTextHub.RecognizeOnce)', subject);
                     }
                     startButton.innerHTML = '<i class="fa-solid fa-stop"></i> Stop';
                 });
@@ -179,9 +179,9 @@
                 await start();
             });
 
-            connection.on('SessionStarted', () => logMessage("Session Started!", false));
+            connection.on('@nameof(ISpeechToTextHub.SessionStarted)', () => logMessage("Session Started!", false));
 
-            connection.on('SessionStopped', () => {
+            connection.on('@nameof(ISpeechToTextHub.SessionStopped)', () => {
                 logMessage("Session Stopped!", false);
 
                 containerMessage.innerText = '';
@@ -202,9 +202,9 @@
                 container.classList.remove('d-none');
             }
 
-            connection.on('ReceiveMessage', logMessage);
+            connection.on('@nameof(ISpeechToTextHub.ReceiveMessage)', logMessage);
 
-            connection.on('ReceivePartialMessage', message => {
+            connection.on('@nameof(ISpeechToTextHub.ReceivePartialMessage)', message => {
                 containerMessage.innerText = message;
                 containerMessage.classList.remove('d-none');
             });

@@ -25,7 +25,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         _configuration = configuration;
     }
 
-    public async Task ContinuousRecognition(IAsyncEnumerable<string> stream, uint samplePerSecond)
+    public async Task ContinuousRecognition(IAsyncEnumerable<string> stream)
     {
         var speechConfig = _configuration.GetSpeechConfig();
 

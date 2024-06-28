@@ -1,4 +1,5 @@
-﻿@{
+﻿@using samples.Hubs
+@{
     ViewData["Title"] = "Text to Speech";
 }
 
@@ -137,7 +138,7 @@
                     return;
                 }
 
-                connection.send('Send', inputMessage.value, voiceName.value);
+                connection.send('@nameof(TextToSpeechHub.Send)', inputMessage.value, voiceName.value);
                 inputMessage.value = '';
                 disableButton(sendButton);
             });
@@ -155,7 +156,7 @@
                 await start();
             });
 
-            connection.on('ReceiveMessage', (message, isError) => {
+            connection.on('@nameof(ITextToSpeechHub.ReceiveMessage)', (message, isError) => {
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
                 li.innerText = message;
@@ -169,7 +170,7 @@
 
             let recordingCounter = 0;
 
-            connection.on('ReceiveData', (data, text) => {
+            connection.on('@nameof(ITextToSpeechHub.ReceiveData)', (data, text) => {
                 const li = document.createElement('li');
                 li.classList.add('list-group-item');
 
