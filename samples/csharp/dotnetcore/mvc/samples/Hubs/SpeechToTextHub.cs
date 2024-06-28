@@ -11,6 +11,9 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
 {
     public const string InvalidConfigErrorMessage = "Please provide your service key and region in the configuration provider (e.g., in appsettings.json).";
 
+    private const uint _samplesPerSecond = 16000;
+    private const byte _channels = 1;
+
     private readonly ILogger _logger;
     private readonly IConfiguration _configuration;
 
@@ -22,7 +25,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         _configuration = configuration;
     }
 
-    public async Task ContinuousRecognition(IAsyncEnumerable<string> stream, uint samplePerSecond, byte channels)
+    public async Task ContinuousRecognition(IAsyncEnumerable<string> stream, uint samplePerSecond)
     {
         var speechConfig = _configuration.GetSpeechConfig();
 
@@ -33,8 +36,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
             return;
         }
 
-        using var format = AudioStreamFormat.GetWaveFormatPCM(samplePerSecond, 16, channels);
-
+        using var format = AudioStreamFormat.GetWaveFormatPCM(_samplesPerSecond, 16, _channels);
         using var audioInputStream = AudioInputStream.CreatePushStream(format);
         using var audioConfig = AudioConfig.FromStreamInput(audioInputStream);
         using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
@@ -43,10 +45,11 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         recognizer.Recognized += RecognizerRecognized;
         recognizer.SessionStarted += RecognizerStarted;
         recognizer.SessionStopped += RecognizerStopped;
+        recognizer.Canceled += RecognizerCanceled;
 
         await recognizer.StartContinuousRecognitionAsync();
 
-        await PushAudioAsync(audioInputStream, stream, (int)samplePerSecond, channels);
+        await PushPCMAudioAsync(audioInputStream, stream);
 
         await recognizer.StopContinuousRecognitionAsync();
 
@@ -54,6 +57,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         recognizer.Recognized -= RecognizerRecognized;
         recognizer.SessionStarted -= RecognizerStarted;
         recognizer.SessionStopped -= RecognizerStopped;
+        recognizer.Canceled -= RecognizerCanceled;
     }
 
     public async Task RecognizeOnce(IAsyncEnumerable<string> stream)
@@ -98,11 +102,11 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
                 if (cancellation.Reason == CancellationReason.Error)
                 {
                     await Clients.Caller.ReceiveMessage($"Failed to recognize the incoming speech. Reason: {cancellation.Reason}. Error code: {cancellation.ErrorCode}. Error details: {cancellation.ErrorDetails}.", true);
+
+                    return;
                 }
-                else
-                {
-                    await Clients.Caller.ReceiveMessage($"Failed to recognize the incoming speech. Reason {cancellation.Reason}.", true);
-                }
+
+                await Clients.Caller.ReceiveMessage($"Failed to recognize the incoming speech. Reason {cancellation.Reason}.", true);
             }
         }
         finally
@@ -112,9 +116,9 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
         }
     }
 
-    private static async Task PushAudioAsync(PushAudioInputStream audioInputStream, IAsyncEnumerable<string> stream, int sampleRate, int channels)
+    private static async Task PushPCMAudioAsync(PushAudioInputStream audioInputStream, IAsyncEnumerable<string> stream)
     {
-        using var decoder = OpusCodecFactory.CreateDecoder(sampleRate, channels);
+        using var decoder = OpusCodecFactory.CreateDecoder((int)_samplesPerSecond, _channels);
 
         await foreach (var base64String in stream)
         {
@@ -131,7 +135,7 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
             while (oggStream.HasNextPacket)
             {
                 // Decode the next packet.
-                short[] packet = oggStream.DecodeNextPacket();
+                var packet = oggStream.DecodeNextPacket();
                 if (packet == null)
                 {
                     continue;
@@ -175,6 +179,20 @@ public sealed class SpeechToTextHub : Hub<ISpeechToTextHub>
     private void RecognizerStarted(object sender, SessionEventArgs e)
     {
         Clients.Caller.SessionStarted();
+    }
+
+    private void RecognizerCanceled(object sender, SpeechRecognitionCanceledEventArgs e)
+    {
+        var cancellation = CancellationDetails.FromResult(e.Result);
+
+        if (cancellation.Reason == CancellationReason.Error)
+        {
+            Clients.Caller.ReceiveMessage($"The request to recognize the incoming speech was canceled. Reason: {cancellation.Reason}. Error code: {cancellation.ErrorCode}. Error details: {cancellation.ErrorDetails}.", true).GetAwaiter().GetResult(); ;
+
+            return;
+        }
+
+        Clients.Caller.ReceiveMessage($"The request to recognize the incoming speech was canceled. Reason {cancellation.Reason}.", true).GetAwaiter().GetResult(); ;
     }
 
     private void RecognizerRecognizing(object sender, SpeechRecognitionEventArgs e)

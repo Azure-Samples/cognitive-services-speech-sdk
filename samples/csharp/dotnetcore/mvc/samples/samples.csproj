@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Concentus.Oggfile" Version="1.0.6" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.37.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.38.0" />
     <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
   </ItemGroup>
 

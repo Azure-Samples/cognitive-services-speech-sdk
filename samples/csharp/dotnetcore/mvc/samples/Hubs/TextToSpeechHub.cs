@@ -51,11 +51,11 @@ public sealed class TextToSpeechHub : Hub<ITextToSpeechHub>
             if (cancellation.Reason == CancellationReason.Error)
             {
                 await Clients.Caller.ReceiveMessage($"Failed to speak an incoming text. Reason: {cancellation.Reason}. Error code: {cancellation.ErrorCode}. Error details: {cancellation.ErrorDetails}.", true);
+
+                return;
             }
-            else
-            {
-                await Clients.Caller.ReceiveMessage($"Failed to speak an incoming text. Reason {cancellation.Reason}.", true);
-            }
+
+            await Clients.Caller.ReceiveMessage($"Failed to speak an incoming text. Reason {cancellation.Reason}.", true);
         }
     }
 }

@@ -55,12 +55,6 @@
 
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function () {
-            const workerOptions = {
-                OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OggOpusEncoder.wasm',
-                WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/WebMOpusEncoder.wasm'
-            };
-
-            const isUsingOpusMediaRecorder = !window.MediaRecorder || !window.MediaRecorder.isTypeSupported('audio/ogg;codecs=opus');
 
             if (!navigator.mediaDevices) {
 
@@ -68,9 +62,6 @@
 
                 return;
             }
-
-            const audioContext = new AudioContext();
-            const channelsCount = 2;
 
             const startButton = document.getElementById('Recording');
             const container = document.getElementById('FeedbackContainer');
@@ -90,14 +81,26 @@
 
             connection.serverTimeoutInMilliseconds = 240000; // 240 seconds
 
+            const isUsingOpusMediaRecorder = !window.MediaRecorder || !window.MediaRecorder.isTypeSupported('audio/ogg;codecs=opus');
+            const workerOptions = {
+                OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OggOpusEncoder.wasm',
+                WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/WebMOpusEncoder.wasm'
+            };
+
+            // For browsers that do not support audio/ogg;codecs=opus or do not support MediaRecorder, load OpusMediaRecorder.
+            if (isUsingOpusMediaRecorder) {
+                window.MediaRecorder = OpusMediaRecorder;
+            }
+
+            const audioContext = new AudioContext();
             navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: true,
                     noiseSuppression: true,
                     autoGainControl: true,
-                    channelCount: channelsCount,
+                    channelCount: 2,
                     sampleSize: 16,
-                    sampleRate: 16000
+                    sampleRate: 44100
                 }, video: false
             }).then(stream => {
 
@@ -134,7 +137,7 @@
 
                 mediaRecorder.addEventListener("start", () => {
                     if (isContinuous()) {
-                        connection.send('ContinuousRecognition', subject, audioContext.sampleRate, channelsCount);
+                        connection.send('ContinuousRecognition', subject, audioContext.sampleRate);
                     } else {
                         connection.send('RecognizeOnce', subject);
                     }
