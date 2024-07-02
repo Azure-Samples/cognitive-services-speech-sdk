@@ -51,46 +51,11 @@ If the above link does not work try the following steps:
 
 To test, we recommend you use [Microsoft Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/).
 
-### Operating Mode
-
-Audio files can be processed either by the [Speech to Text API v3.0](https://centralus.dev.cognitive.microsoft.com/docs/services/speech-to-text-api-v3-0) for batch processing, or our [Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk) for real-time processing. This section lists differences to help you choose an operating mode.
-
-#### Batch Mode
-
-In batch mode, audio files are processed in batches. The Azure Function creates a transcription request periodically with all the files that have been requested up to that point. If the number of files is large then many requests will be raised. Consider the following about batch mode:
-
-* **Low Azure Function costs.** Two Azure Functions coordinate the process and run for milliseconds.
-* **Diarization and Sentiment.** Offered in Batch Mode only.
-* **Higher Latency.** Transcripts are scheduled and executed based on capacity of cluster. Real time mode takes priority.
-* **Multiple Audio Formats are supported.**
-* **You will need to deploy the [Batch ARM Template](ArmTemplateBatch.json) from the repository for this operating mode.**
-
-#### Real Time Mode
-
-In real time mode, audio files are downloaded and streamed from the Azure Function to the real time Azure Speech endpoint. Consider the following about real time mode:
-
-* **Higher Azure Function costs.** A single type Azure Functions will handle the process for each file and run at least for half the audio length.
-* **2x processing of audio files.** For example, a 10-min file is transcribed in 5mins.
-* **Only .wav PCM is supported.**
-* **You will need to use the [Real Time ARM Template](ArmTemplateRealtime.json) from the repository for this operating mode.**
-
-#### Scale up
-Batch mode will process transcription requests following best effort policies using the compute you request when the transcription is scheduled. Available compute is directly allocated. 
-
-In Real time mode, each Azure Speech resource is allocated with a default of 100 concurrent connections, which indicates the maximum number of parallel audio transcription streams. Customers can request a higher limit. To avoid throttling, the cadence of new audio file uploads to Azure storage should be controlled, because each upload triggers  a real-time transcription. Throttling occurs when the concurrency limit is reached.
-
 ## Ingestion Client Setup Instructions
 
-The batch and real time ARM templates are nearly the same. The main differences are the lack of diarization and sentiment options in Real Time mode, as well as downstream post processing through SQL. With that in mind, follow the instructions below to deploy the resources from ARM template.
-
-To deploy the required infrastructure, click the button below for Batch mode:
+To deploy the required infrastructure, click the button below:
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcognitive-services-speech-sdk%2Fmaster%2Fsamples%2Fingestion%2Fingestion-client%2FSetup%2FArmTemplateBatch.json)
-
-For Real Time mode, use the following button:
-
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcognitive-services-speech-sdk%2Fmaster%2Fsamples%2Fingestion%2Fingestion-client%2FSetup%2FArmTemplateRealtime.json)
-
 
 This will result in the screen below on your browser. You will need to fill in the form provided. It is
 important that all the information is correct. Let us look at the form and go through each field.
