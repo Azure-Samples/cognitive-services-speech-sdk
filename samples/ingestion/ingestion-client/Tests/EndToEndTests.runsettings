@@ -2,8 +2,6 @@
 <RunSettings>
   <!-- Parameters used by tests at runtime -->
   <TestRunParameters>
-    <Parameter name="SpeechServicesRegion" value=""/>
-    <Parameter name="SpeechServicesSubscriptionKey" value=""/>
     <Parameter name="LanguageServiceRegion" value=""/>
     <Parameter name="LanguageServiceSubscriptionKey" value=""/>
   </TestRunParameters>
