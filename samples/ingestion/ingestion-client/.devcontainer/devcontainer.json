@@ -1,9 +1,18 @@
 {
-    "name": "C# (.NET)",
-    "image": "mcr.microsoft.com/devcontainers/dotnet:1-6.0",
+    "name": "Ingestion Client",
+    "image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0",
     "features": {
         "ghcr.io/devcontainers/features/azure-cli:1": {},
         "ghcr.io/devcontainers/features/node:1": {},
         "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-azuretools.vscode-azurefunctions",
+                "ms-dotnettools.csharp",
+                "ms-dotnettools.csdevkit"
+            ]
+        }
     }
 }
