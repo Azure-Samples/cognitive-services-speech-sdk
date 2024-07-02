@@ -22,18 +22,15 @@ jobs:
         run: |
           set -u -e -o pipefail
           version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq -r .variables.Version)
-          versionRealtime=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateRealtime.json | jq -r .variables.Version)
           echo version=$version >> "$GITHUB_OUTPUT"
           echo "Batch template: ${version}"
-          echo versionRealtime=$versionRealtime >> "$GITHUB_OUTPUT"
-          echo "Realtime template: ${versionRealtime}"
 
       - name: Verify Release Versions
-        if: steps.get_release_versions.outputs.version == '' || steps.get_release_versions.outputs.version != steps.get_release_versions.outputs.versionRealtime
+        if: steps.get_release_versions.outputs.version == ''
         uses: actions/github-script@v3
         with:
           script: |
-            core.setFailed('Invalid version specified or mismatching versions in batch and realtime.')
+            core.setFailed('Invalid version specified.')
 
       - name: Clean Solution
         run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
@@ -55,11 +52,6 @@ jobs:
         run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./FetchTranscription samples/ingestion/ingestion-client/FetchTranscription/FetchTranscription.csproj
       - name: Zip FetchTranscription
         run: cd FetchTranscription && zip -r ../FetchTranscription.zip *
-
-      - name: Publish RealtimeTranscription function
-        run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./RealtimeTranscription samples/ingestion/ingestion-client/RealtimeTranscription/RealtimeTranscription.csproj
-      - name: Zip RealtimeTranscription
-        run: cd RealtimeTranscription && zip -r ../RealtimeTranscription.zip *
 
       - name: Create Release
         id: create_release
@@ -103,15 +95,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./FetchTranscription.zip
           asset_name: FetchTranscription.zip
-          asset_content_type: application/zip
-
-      - name: Upload RealtimeTranscription
-        id: upload-release-asset-3
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./RealtimeTranscription.zip
-          asset_name: RealtimeTranscription.zip
           asset_content_type: application/zip

@@ -17,15 +17,12 @@ namespace Tests
 
     using FetchTranscription;
 
-    using Microsoft.CognitiveServices.Speech;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Moq;
 
     using Newtonsoft.Json;
-
-    using RealtimeTranscription;
 
     [TestClass]
     public class EndToEndTests
@@ -40,28 +37,6 @@ namespace Tests
             context = context ?? throw new ArgumentNullException(nameof(context));
             testProperties = context.Properties;
             Logger = new Mock<ILogger>();
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.EndToEndTest)]
-        public async Task TestMultiChannelFromSasTestAsync()
-        {
-            var region = testProperties["SpeechServicesRegion"].ToString();
-            var subscriptionKey = testProperties["SpeechServicesSubscriptionKey"].ToString();
-            var conf = SpeechConfig.FromEndpoint(
-                new Uri($"wss://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2&initialSilenceTimeoutMs=600000&endSilenceTimeoutMs=600000"),
-                subscriptionKey);
-            conf.OutputFormat = OutputFormat.Detailed;
-
-            var stereoFile = File.ReadAllBytes(@"testFiles/test_audio_stereo.wav");
-            var jsonResults = await RealtimeTranscriptionHelper.TranscribeAsync(stereoFile, conf, Logger.Object).ConfigureAwait(false);
-
-            Assert.IsTrue(jsonResults.Any());
-            Assert.IsTrue(!string.IsNullOrEmpty(jsonResults.First().SpeakerId));
-            Assert.IsTrue(jsonResults.First().NBest.Any());
-
-            var firstNBest = jsonResults.First().NBest.First();
-            Assert.AreEqual(firstNBest.Lexical, "hello");
         }
 
         [TestMethod]

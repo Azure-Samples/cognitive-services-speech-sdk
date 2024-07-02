@@ -12,7 +12,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Connector\Connector.csproj" />
         <ProjectReference Include="..\FetchTranscription\FetchTranscription.csproj" />
-        <ProjectReference Include="..\RealtimeTranscription\RealtimeTranscription.csproj" />
     </ItemGroup>
     <ItemGroup>
         <None Update="TestFiles\*.*">
