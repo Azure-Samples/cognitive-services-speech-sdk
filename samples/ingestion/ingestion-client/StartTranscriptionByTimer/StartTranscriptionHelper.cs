@@ -113,7 +113,6 @@ namespace StartTranscriptionByTimer
 
             var busMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(message.Body.ToString());
             var audioFileName = this.storageConnector.GetFileNameFromUri(busMessage.Data.Url);
-            Console.WriteLine($"Starting transcription jhbdfnkjecrkjd,f for {audioFileName}");
 
             await this.StartBatchTranscriptionJobAsync(new[] { message }, audioFileName).ConfigureAwait(false);
         }
@@ -208,7 +207,6 @@ namespace StartTranscriptionByTimer
                         audioUrls.Add(this.storageConnector.CreateSas(serviceBusMessage.Data.Url));
                     }
 
-                    Console.WriteLine($"Adding audio file {absoluteAudioUrl} to transcription job {jobName}");
                     var fileName = this.storageConnector.GetFileNameFromUri(new Uri(absoluteAudioUrl));
 
                     audioFileInfos.Add(new AudioFileInfo(absoluteAudioUrl, serviceBusMessage.RetryCount, textAnalyticsRequests: null, fileName));
