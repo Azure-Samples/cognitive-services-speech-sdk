@@ -9,13 +9,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 
 namespace MicrosoftSpeechSDKSamples
 {
     public class SpeechRecognitionSamples
     {
-        // List available embeddded speech recognition models.
+        // List available embedded speech recognition models.
         public static void ListEmbeddedModels()
         {
             // Creates an instance of an embedded speech config.
@@ -141,7 +143,7 @@ namespace MicrosoftSpeechSDKSamples
                 {
                     // NoMatch occurs when no speech was recognized.
                     var reason = NoMatchDetails.FromResult(e.Result).Reason;
-                    Console.WriteLine($"NOMATCH: Reason={reason}");
+                    Console.WriteLine($"NO MATCH: Reason={reason}");
                 }
             };
 
@@ -408,6 +410,70 @@ namespace MicrosoftSpeechSDKSamples
 
             using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
             RecognizeSpeechAsync(recognizer, useKeyword, waitForUser).Wait();
+        }
+
+
+        // Measures the device performance when running embedded speech recognition.
+        public static async Task EmbeddedSpeechRecognitionPerformanceTest()
+        {
+            var speechConfig = Settings.CreateEmbeddedSpeechConfig();
+            using var audioConfig = AudioConfig.FromWavFileInput(Settings.GetPerfTestAudioFileName());
+
+            // Enables performance metrics to be included with recognition results.
+            speechConfig.SetProperty(PropertyId.EmbeddedSpeech_EnablePerformanceMetrics, "true");
+
+            using var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+            var recognitionEnd = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+            int resultCount = 0;
+
+            // Subscribes to events.
+            recognizer.SpeechStartDetected += (s, e) =>
+            {
+                Console.WriteLine("Processing, please wait...");
+            };
+
+            recognizer.Recognized += (s, e) =>
+            {
+                if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                {
+                    resultCount++;
+                    Console.WriteLine($"[{resultCount}] RECOGNIZED: Text={e.Result.Text}");
+
+                    // Recognition results in JSON format.
+                    string jsonResult = e.Result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                    JObject json = JObject.Parse(jsonResult);
+
+                    if (json.ContainsKey("PerformanceCounters"))
+                    {
+                        var perfCounters = json["PerformanceCounters"];
+                        Console.WriteLine($"[{resultCount}] PerformanceCounters: {perfCounters.ToString(Formatting.Indented)}");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("ERROR: No performance counters data found.");
+                    }
+                }
+            };
+
+            recognizer.Canceled += (s, e) =>
+            {
+                if (e.Reason == CancellationReason.Error)
+                {
+                    Console.Error.WriteLine($"CANCELED: ErrorCode={e.ErrorCode} ErrorDetails={e.ErrorDetails}");
+                }
+            };
+
+            recognizer.SessionStopped += (s, e) =>
+            {
+                Console.WriteLine("All done! Please go to https://aka.ms/embedded-speech for information on how to evaluate the results.");
+                recognitionEnd.TrySetResult(0);
+            };
+
+            // Runs continuous recognition.
+            await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+            Task.WaitAny(new[] { recognitionEnd.Task });
+            await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
         }
     }
 }

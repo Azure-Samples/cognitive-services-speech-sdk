@@ -14,7 +14,6 @@ namespace Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using Newtonsoft.Json;
-    using RealtimeTranscription;
 
     [TestClass]
     public class UnitTests
@@ -27,20 +26,6 @@ namespace Tests
         public virtual void TestInitialize()
         {
             Logger = new Mock<ILogger>();
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.UnitTest)]
-        public void ConvertRealtimeResultToBatchFormat()
-        {
-            var realtimeResultString = File.ReadAllText(@"testFiles/realtimeresult.json");
-            var fileResult = JsonConvert.DeserializeObject<List<JsonResult>>(realtimeResultString);
-
-            var speechTranscript = ResultConversionHelper.CreateBatchResultFromRealtimeResults("test", fileResult, Logger.Object);
-
-            Assert.AreEqual(speechTranscript.Duration, "PT1.7S");
-            Assert.IsTrue(speechTranscript.CombinedRecognizedPhrases.Any());
-            Assert.IsTrue(speechTranscript.RecognizedPhrases.Any());
         }
 
         [TestMethod]
@@ -59,7 +44,7 @@ namespace Tests
         [TestCategory(TestCategories.UnitTest)]
         public void GetSpeechObjectFromJson()
         {
-            var body = File.ReadAllText(@"testFiles/transcriptSample.json");
+            var body = File.ReadAllText(@"TestFiles/transcriptSample.json");
             var speechTranscript = JsonConvert.DeserializeObject<SpeechTranscript>(body);
             Assert.IsTrue(speechTranscript != null);
             Assert.IsTrue(speechTranscript.CombinedRecognizedPhrases.Count() == 1);
@@ -71,7 +56,7 @@ namespace Tests
         [TestCategory(TestCategories.UnitTest)]
         public void GetHTMLFromJson()
         {
-            var body = File.ReadAllText(@"testFiles/transcriptSample.json");
+            var body = File.ReadAllText(@"TestFiles/transcriptSample.json");
             var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
 
             var html = TranscriptionToHtml.ToHtml(transcription, "testfile");

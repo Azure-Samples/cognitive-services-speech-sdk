@@ -25,7 +25,7 @@ public class Main
             {
                 System.out.println("\nEMBEDDED SPEECH SAMPLES");
                 System.out.println("\nSpeech recognition");
-                System.out.println(" 1. List embeddded speech recognition models.");
+                System.out.println(" 1. List embedded speech recognition models.");
                 System.out.println(" 2. Embedded speech recognition with microphone input.");
                 System.out.println(" 3. Embedded speech recognition with microphone input, keyword-triggered.");
                 System.out.println(" 4. Embedded speech recognition with WAV file input.");
@@ -36,12 +36,14 @@ public class Main
                 System.out.println(" 8. Embedded intent recognition with microphone input.");
                 System.out.println(" 9. Embedded intent recognition with microphone input, keyword-triggered.");
                 System.out.println("\nSpeech synthesis");
-                System.out.println("10. List embeddded speech synthesis voices.");
+                System.out.println("10. List embedded speech synthesis voices.");
                 System.out.println("11. Embedded speech synthesis with speaker output.");
                 System.out.println("12. Hybrid (cloud & embedded) speech synthesis with speaker output.");
                 System.out.println("\nSpeech translation");
-                System.out.println("13. List embeddded speech translation models.");
+                System.out.println("13. List embedded speech translation models.");
                 System.out.println("14. Embedded speech translation with microphone input.");
+                System.out.println("\nDevice performance measurement");
+                System.out.println("15. Embedded speech recognition.");
                 System.out.print("\nChoose a number (or none for exit) and press Enter: ");
     
                 input = new Scanner(System.in).nextLine();
@@ -92,6 +94,9 @@ public class Main
                     break;
                 case 14:
                     if (Settings.hasSpeechTranslationModel()) SpeechTranslationSamples.embeddedTranslationFromMicrophone();
+                    break;
+                case 15:
+                    if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.embeddedRecognitionPerformanceTest();
                     break;
                 default:
                     break;

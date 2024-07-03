@@ -16,10 +16,8 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
   ```sh
   sudo apt-get update
-  sudo apt-get install libssl1.0.0 libasound2
+  sudo apt-get install libssl-dev libasound2
   ```
-
-  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
 
 * On RHEL or CentOS, run the following commands for the installation of required packages:
 
@@ -36,7 +34,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 > Note: more detailed step-by-step instructions are available [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre).
 
-* **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://docs.microsoft.com/azure/cognitive-services/speech-service/license).**
+* **By downloading the Microsoft Cognitive Services Speech SDK when building this sample, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * Edit the `Main` source:

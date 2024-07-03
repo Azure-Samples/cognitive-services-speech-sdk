@@ -14,7 +14,7 @@ extern shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig();
 extern shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig();
 
 
-// Lists available embeddded speech synthesis voices.
+// Lists available embedded speech synthesis voices.
 void ListEmbeddedSpeechSynthesisVoices()
 {
     // Creates an instance of an embedded speech config.

@@ -4,9 +4,9 @@ These samples demonstrate embedded and hybrid speech using the Speech SDK for C#
 
 Embedded speech enables offline (on-device) speech recognition, synthesis, and translation.
 Hybrid speech uses cloud speech services by default and embedded speech as a fallback in case cloud connectivity is limited.
+See https://aka.ms/embedded-speech for the latest information on supported features and platforms.
 
 > **Note:**
-> * Embedded speech is in [preview](https://aka.ms/embedded-speech) and details in this document and samples are subject to change.
 > * Embedded speech recognition and translation only support audio in the following format:
 >   * single channel
 >   * 8000 or 16000 Hz sample rate
@@ -44,6 +44,7 @@ https://csspeechstorage.blob.core.windows.net/drop/SamplesData/embedded_speech_s
 Unzip the package under this sample folder. The result should be a `data` subfolder with the following files:
 ```
 data\keyword_computer.table
+data\performance_test.wav
 data\speech_test.raw
 data\speech_test.wav
 ```

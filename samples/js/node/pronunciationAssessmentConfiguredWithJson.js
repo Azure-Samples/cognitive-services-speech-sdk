@@ -3,8 +3,8 @@
 
 // pull in the required packages.
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
-import * as _ from "lodash";
 import * as fs from "fs";
+import _ from "lodash";
 
 // pronunciation assessment with audio file
 export const main = (settings) => {
@@ -13,13 +13,14 @@ export const main = (settings) => {
 
     var reference_text = "What's the weather like?";
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
-    const pronunciationAssessmentConfig = new sdk.PronunciationAssessmentConfig.fromJSON(
+    const pronunciationAssessmentConfig = sdk.PronunciationAssessmentConfig.fromJSON(
         "{\"GradingSystem\": \"HundredMark\", \
         \"Granularity\": \"Phoneme\", \
         \"EnableMiscue\": \"True\", \
         \"ScenarioId\": \"[scenario ID will be assigned by product team]\"}"
     );
-    pronunciationAssessmentConfig.referenceText = reference_text
+    pronunciationAssessmentConfig.referenceText = reference_text;
+    pronunciationAssessmentConfig.enableProsodyAssessment = true;
 
     // setting the recognition language to English.
     speechConfig.speechRecognitionLanguage = settings.language;
@@ -34,7 +35,8 @@ export const main = (settings) => {
         console.log(" Accuracy score: ", pronunciation_result.accuracyScore, '\n',
             "pronunciation score: ", pronunciation_result.pronunciationScore, '\n',
             "completeness score : ", pronunciation_result.completenessScore, '\n',
-            "fluency score: ", pronunciation_result.fluencyScore
+            "fluency score: ", pronunciation_result.fluencyScore, '\n',
+            "prosody score: ", pronunciation_result.prosodyScore
         );
         console.log("  Word-level details:");
         _.forEach(pronunciation_result.detailResult.Words, (word, idx) => {

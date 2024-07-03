@@ -1,0 +1,50 @@
+﻿// structured custom dpp rule definition file
+
+# itn
+cat-\d
+\d\d{to>-}\d\d {K>cadence}
+
+# rewrite
+end to end	E2E
+bergerson construction incorporated	Bergerson Construction, Inc
+bridge & tunnel bottleshop & taproom	Bridge & Tunnel Bottleshop & Taproom
+department human svc-child	Department Human Svc-child
+sweet relief	Sweet Relief
+1 star motors	1 Star Motors
+neighborworks of grays harbor	NeighborWorks of Grays Harbor
+fedex onsite	Fedex Onsite
+timothy troeh	TIMOTHY TROEH
+cesar's plumbing	Cesar's Plumbing
+surf 2 soul	Surf 2 Soul
+fern hill cemetery	Fern Hill Cemetery
+murdock michael A dpm	Murdock, Michael A., Dpm
+mossytech	MossyTech
+harbor architects llc	HARBOR ARCHITECTS LLC
+a bit of everything	A bit of Everything
+
+# profanity
+fake word
+masked word
+
+
+# test
+do you like cat nine	Do you like cat-9
+do you like dog nine	Do you like dog 9
+twenty to thirty K	20-30 cadence
+thirty to forty K	30-40 cadence
+how about the performance of end to end speech recognition system	How about the performance of E2E speech recognition system
+profanity word fake word and masked word should be masked	Profanity word **** **** and ****** **** should be masked
+navigate to bergerson construction incorporated	Navigate to Bergerson Construction, Inc
+navigate to bridge & tunnel bottleshop & taproom	Navigate to Bridge & Tunnel Bottleshop & Taproom
+navigate to department human svc-child	Navigate to Department Human Svc-child
+navigate to sweet relief	Navigate to Sweet Relief
+navigate to 1 star motors	Navigate to 1 Star Motors
+navigate to neighborworks of grays harbor	Navigate to NeighborWorks of Grays Harbor
+navigate to fedex onsite	Navigate to Fedex Onsite
+navigate to cesar's plumbing	Navigate to Cesar's Plumbing
+navigate to surf 2 soul	Navigate to Surf 2 Soul
+navigate to fern hill cemetery	Navigate to Fern Hill Cemetery
+navigate to murdock michael A dpm	Navigate to Murdock, Michael A., Dpm
+navigate to mossytech	Navigate to MossyTech
+navigate to harbor architects llc	Navigate to HARBOR ARCHITECTS LLC
+navigate to a bit of everything	Navigate to A bit of Everything

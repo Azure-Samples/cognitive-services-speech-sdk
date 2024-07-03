@@ -3,8 +3,8 @@
 
 // pull in the required packages.
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
-import * as _ from "lodash";
 import * as fs from "fs";
+import _ from "lodash";
 
 // pronunciation assessment with audio file
 export const main = (settings) => {
@@ -19,6 +19,7 @@ export const main = (settings) => {
         sdk.PronunciationAssessmentGranularity.Phoneme,
         true
     );
+    pronunciationAssessmentConfig.enableProsodyAssessment = true;
 
     // setting the recognition language to English.
     speechConfig.speechRecognitionLanguage = settings.language;
@@ -33,7 +34,8 @@ export const main = (settings) => {
         console.log(" Accuracy score: ", pronunciation_result.accuracyScore, '\n',
             "pronunciation score: ", pronunciation_result.pronunciationScore, '\n',
             "completeness score : ", pronunciation_result.completenessScore, '\n',
-            "fluency score: ", pronunciation_result.fluencyScore
+            "fluency score: ", pronunciation_result.fluencyScore, '\n',
+            "prosody score: ", pronunciation_result.prosodyScore
         );
         console.log("  Word-level details:");
         _.forEach(pronunciation_result.detailResult.Words, (word, idx) => {

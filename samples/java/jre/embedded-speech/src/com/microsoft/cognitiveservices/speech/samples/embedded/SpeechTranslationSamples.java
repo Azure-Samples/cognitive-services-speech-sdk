@@ -15,10 +15,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
 
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.audio.*;
@@ -78,36 +74,46 @@ public class SpeechTranslationSamples
             // Note that embedded "many-to-1" translation models support only one
             // target language (the model native output language). For example, a
             // "Many-to-English" model generates only output in English.
-            // At the moment embedded translation cannot provide transcription or
-            // language ID of the source language.
+            // At the moment embedded translation cannot provide transcription of
+            // the source language.
             if (e.getResult().getReason() == ResultReason.TranslatingSpeech)
             {
+                // Source (input) language identification is enabled when TranslationRecognizer
+                // is created with an AutoDetectSourceLanguageConfig argument.
+                // In case the model does not support this functionality or the language cannot
+                // be identified, the result Language is "Unknown".
+                AutoDetectSourceLanguageResult sourceLangResult = AutoDetectSourceLanguageResult.fromResult(e.getResult());
+                String sourceLang = sourceLangResult.getLanguage();
+
                 for (Map.Entry<String, String> translation : e.getResult().getTranslations().entrySet())
                 {
                     String targetLang = translation.getKey();
                     String outputText = translation.getValue();
-                    System.out.println("Translating [" + targetLang + "]: " + outputText);
+                    System.out.println("Translating [" + sourceLang + " -> " + targetLang + "]: " + outputText);
                 }
             }
         });
 
         recognizer.recognized.addEventListener((s, e) ->
         {
+            // Final result. May differ from the last intermediate result.
             if (e.getResult().getReason() == ResultReason.TranslatedSpeech)
             {
-                // Final result. May differ from the last intermediate result.
+                AutoDetectSourceLanguageResult sourceLangResult = AutoDetectSourceLanguageResult.fromResult(e.getResult());
+                String sourceLang = sourceLangResult.getLanguage();
+
                 for (Map.Entry<String, String> translation : e.getResult().getTranslations().entrySet())
                 {
                     String targetLang = translation.getKey();
                     String outputText = translation.getValue();
-                    System.out.println("TRANSLATED [" + targetLang + "]: " + outputText);
+                    System.out.println("TRANSLATED [" + sourceLang + " -> " + targetLang + "]: " + outputText);
                 }
             }
             else if (e.getResult().getReason() == ResultReason.NoMatch)
             {
                 // NoMatch occurs when no speech was recognized.
                 NoMatchReason reason = NoMatchDetails.fromResult(e.getResult()).getReason();
-                System.out.println("NOMATCH: Reason=" + reason);
+                System.out.println("NO MATCH: Reason=" + reason);
             }
         });
 
@@ -158,9 +164,10 @@ public class SpeechTranslationSamples
     public static void embeddedTranslationFromMicrophone() throws InterruptedException, ExecutionException
     {
         EmbeddedSpeechConfig speechConfig = Settings.createEmbeddedSpeechConfig();
+        AutoDetectSourceLanguageConfig sourceLangConfig = AutoDetectSourceLanguageConfig.fromOpenRange(); // optional, for input language identification
         AudioConfig audioConfig = AudioConfig.fromDefaultMicrophoneInput();
 
-        TranslationRecognizer recognizer = new TranslationRecognizer(speechConfig, audioConfig);
+        TranslationRecognizer recognizer = new TranslationRecognizer(speechConfig, sourceLangConfig, audioConfig);
         translateSpeechAsync(recognizer);
 
         recognizer.close();
