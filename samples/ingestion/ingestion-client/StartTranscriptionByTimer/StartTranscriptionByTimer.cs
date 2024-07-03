@@ -10,10 +10,11 @@ namespace StartTranscriptionByTimer
     using System.Linq;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+    using Connector;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Extensions.Logging;
 
-    public static class StartTranscriptionByTimer
+    public class StartTranscriptionByTimer
     {
         private const double MessageReceiveTimeoutInSeconds = 60;
 
@@ -23,8 +24,15 @@ namespace StartTranscriptionByTimer
 
         private static readonly ServiceBusReceiver ServiceBusReceiver = ServiceBusClient.CreateReceiver(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath, ServiceBusReceiverOptions);
 
+        private readonly IStorageConnector storageConnector;
+
+        public StartTranscriptionByTimer(IStorageConnector storageConnector)
+        {
+            this.storageConnector = storageConnector;
+        }
+
         [FunctionName("StartTranscriptionByTimer")]
-        public static async Task Run([TimerTrigger("%StartTranscriptionFunctionTimeInterval%")] TimerInfo timerInfo, ILogger log)
+        public async Task Run([TimerTrigger("%StartTranscriptionFunctionTimeInterval%")] TimerInfo timerInfo, ILogger log)
         {
             if (log == null)
             {
@@ -40,7 +48,7 @@ namespace StartTranscriptionByTimer
             log.LogInformation($"C# Timer trigger function v3 executed at: {startDateTime}. Next occurrence on {timerInfo.Schedule.GetNextOccurrence(startDateTime)}.");
 
             var validServiceBusMessages = new List<ServiceBusReceivedMessage>();
-            var transcriptionHelper = new StartTranscriptionHelper(log);
+            var transcriptionHelper = new StartTranscriptionHelper(log, this.storageConnector);
 
             log.LogInformation("Pulling messages from queue...");
             var messages = await ServiceBusReceiver.ReceiveMessagesAsync(StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);

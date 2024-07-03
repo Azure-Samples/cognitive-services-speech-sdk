@@ -5,9 +5,9 @@
 
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 
-[assembly: FunctionsStartup(typeof(FetchTranscription.Startup))]
+[assembly: FunctionsStartup(typeof(StartTranscriptionByTimer.Startup))]
 
-namespace FetchTranscription
+namespace StartTranscriptionByTimer
 {
     using System;
 
@@ -15,10 +15,8 @@ namespace FetchTranscription
     using Azure.Storage.Blobs;
 
     using Connector;
-    using Connector.Database;
 
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Startup : FunctionsStartup
@@ -27,13 +25,7 @@ namespace FetchTranscription
         {
             _ = builder ?? throw new ArgumentNullException(nameof(builder));
 
-            if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
-            {
-                builder.Services.AddDbContext<IngestionClientDbContext>(
-                  options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, FetchTranscriptionEnvironmentVariables.DatabaseConnectionString));
-            }
-
-            var storageConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+            var storageConnectionString = StartTranscriptionEnvironmentVariables.AzureWebJobsStorage;
             var blobServiceClient = new BlobServiceClient(storageConnectionString);
             var storageCredential = new StorageSharedKeyCredential(
                 GetValueFromConnectionString("AccountName", storageConnectionString),

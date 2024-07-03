@@ -27,8 +27,6 @@ namespace FetchTranscription
 
     public class TranscriptionProcessor
     {
-        private static readonly StorageConnector StorageConnectorInstance = new StorageConnector(FetchTranscriptionEnvironmentVariables.AzureWebJobsStorage);
-
         private static readonly ServiceBusClient StartServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
 
         private static readonly ServiceBusSender StartServiceBusSender = StartServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath);
@@ -45,6 +43,8 @@ namespace FetchTranscription
 
         private readonly IngestionClientDbContext databaseContext;
 
+        private readonly IStorageConnector storageConnector;
+
         #pragma warning disable CA1810
         static TranscriptionProcessor()
         {
@@ -56,9 +56,10 @@ namespace FetchTranscription
         }
         #pragma warning restore CA1810
 
-        public TranscriptionProcessor(IServiceProvider serviceProvider)
+        public TranscriptionProcessor(IServiceProvider serviceProvider, IStorageConnector storageConnector)
         {
             this.serviceProvider = serviceProvider;
+            this.storageConnector = storageConnector;
 
             if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
             {
@@ -89,10 +90,10 @@ namespace FetchTranscription
                 switch (transcription.Status)
                 {
                     case "Failed":
-                        await ProcessFailedTranscriptionAsync(transcriptionLocation, subscriptionKey, serviceBusMessage, transcription, jobName, log).ConfigureAwait(false);
+                        await ProcessFailedTranscriptionAsync(transcriptionLocation, subscriptionKey, serviceBusMessage, transcription, jobName, log, this.storageConnector).ConfigureAwait(false);
                         break;
                     case "Succeeded":
-                        await this.ProcessSucceededTranscriptionAsync(transcriptionLocation, subscriptionKey, serviceBusMessage, jobName, log).ConfigureAwait(false);
+                        await this.ProcessSucceededTranscriptionAsync(transcriptionLocation, subscriptionKey, serviceBusMessage, jobName, log, this.storageConnector).ConfigureAwait(false);
                         break;
                     case "Running":
                         log.LogInformation($"Transcription running, polling again after {messageDelayTime.TotalMinutes} minutes.");
@@ -113,7 +114,8 @@ namespace FetchTranscription
                     transcriptionLocation,
                     subscriptionKey,
                     log,
-                    isThrottled: false).ConfigureAwait(false);
+                    isThrottled: false,
+                    this.storageConnector).ConfigureAwait(false);
             }
             catch (TimeoutException e)
             {
@@ -124,7 +126,8 @@ namespace FetchTranscription
                     transcriptionLocation,
                     subscriptionKey,
                     log,
-                    isThrottled: false).ConfigureAwait(false);
+                    isThrottled: false,
+                    this.storageConnector).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -144,11 +147,11 @@ namespace FetchTranscription
 
                 if (httpStatusCode.HasValue && httpStatusCode.Value.IsRetryableStatus())
                 {
-                    await RetryOrFailJobAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, transcriptionLocation, subscriptionKey, log, isThrottled: httpStatusCode.Value == HttpStatusCode.TooManyRequests).ConfigureAwait(false);
+                    await RetryOrFailJobAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, transcriptionLocation, subscriptionKey, log, isThrottled: httpStatusCode.Value == HttpStatusCode.TooManyRequests, this.storageConnector).ConfigureAwait(false);
                 }
                 else
                 {
-                    await WriteFailedJobLogToStorageAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, log).ConfigureAwait(false);
+                    await WriteFailedJobLogToStorageAsync(serviceBusMessage, $"Exception {e} in job {jobName} at {transcriptionLocation}: {e.Message}", jobName, log, this.storageConnector).ConfigureAwait(false);
                 }
             }
         }
@@ -170,7 +173,7 @@ namespace FetchTranscription
             return TimeSpan.FromMinutes(updatedDelay);
         }
 
-        private static async Task ProcessFailedTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage transcriptionStartedMessage, Transcription transcription, string jobName, ILogger log)
+        private static async Task ProcessFailedTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage transcriptionStartedMessage, Transcription transcription, string jobName, ILogger log, IStorageConnector storageConnector)
         {
             var safeErrorCode = transcription?.Properties?.Error?.Code ?? "unknown";
             var safeErrorMessage = transcription?.Properties?.Error?.Message ?? "unknown";
@@ -189,13 +192,13 @@ namespace FetchTranscription
             }
 
             var errorOutputContainer = FetchTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
-            await StorageConnectorInstance.WriteTextFileToBlobAsync(errorReportOutput, errorOutputContainer, $"jobs/{jobName}.txt", log).ConfigureAwait(false);
+            await storageConnector.WriteTextFileToBlobAsync(errorReportOutput, errorOutputContainer, $"jobs/{jobName}.txt").ConfigureAwait(false);
 
             var retryAudioFile = IsRetryableError(safeErrorCode);
 
             foreach (var audio in transcriptionStartedMessage.AudioFileInfos)
             {
-                var fileName = StorageConnector.GetFileNameFromUri(new Uri(audio.FileUrl));
+                var fileName = storageConnector.GetFileNameFromUri(new Uri(audio.FileUrl));
 
                 if (retryAudioFile && audio.RetryCount < FetchTranscriptionEnvironmentVariables.RetryLimit)
                 {
@@ -216,14 +219,13 @@ namespace FetchTranscription
                 else
                 {
                     var message = $"Failed transcription with name {fileName} in job {jobName} after {audio.RetryCount} retries with error: {safeErrorMessage} (Error: {safeErrorCode}).";
-                    await StorageConnectorInstance.WriteTextFileToBlobAsync(message, errorOutputContainer, $"{fileName}.txt", log).ConfigureAwait(false);
-                    await StorageConnectorInstance.MoveFileAsync(
+                    await storageConnector.WriteTextFileToBlobAsync(message, errorOutputContainer, $"{fileName}.txt").ConfigureAwait(false);
+                    await storageConnector.MoveFileAsync(
                         FetchTranscriptionEnvironmentVariables.AudioInputContainer,
                         fileName,
                         FetchTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                         fileName,
-                        false,
-                        log).ConfigureAwait(false);
+                        false).ConfigureAwait(false);
                 }
             }
 
@@ -239,7 +241,7 @@ namespace FetchTranscription
             };
         }
 
-        private static async Task ProcessReportFileAsync(TranscriptionReportFile transcriptionReportFile, ILogger log)
+        private static async Task ProcessReportFileAsync(TranscriptionReportFile transcriptionReportFile, ILogger log, IStorageConnector storageConnector)
         {
             var failedTranscriptions = transcriptionReportFile.Details.
                 Where(detail => !string.IsNullOrEmpty(detail.Status) &&
@@ -256,28 +258,26 @@ namespace FetchTranscription
                 var safeErrorCode = failedTranscription.ErrorKind ?? "unknown";
                 var safeErrorMessage = failedTranscription.ErrorMessage ?? "unknown";
 
-                var fileName = StorageConnector.GetFileNameFromUri(new Uri(failedTranscription.Source));
+                var fileName = storageConnector.GetFileNameFromUri(new Uri(failedTranscription.Source));
 
                 var message = $"Transcription \"{fileName}\" failed with error \"{safeErrorCode}\" and message \"{safeErrorMessage}\"";
                 log.LogError(message);
 
                 var errorTxtname = fileName + ".txt";
-                await StorageConnectorInstance.WriteTextFileToBlobAsync(
+                await storageConnector.WriteTextFileToBlobAsync(
                     message,
                     FetchTranscriptionEnvironmentVariables.ErrorReportOutputContainer,
-                    errorTxtname,
-                    log).ConfigureAwait(false);
-                await StorageConnectorInstance.MoveFileAsync(
+                    errorTxtname).ConfigureAwait(false);
+                await storageConnector.MoveFileAsync(
                     FetchTranscriptionEnvironmentVariables.AudioInputContainer,
                     fileName,
                     FetchTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                     fileName,
-                    false,
-                    log).ConfigureAwait(false);
+                    false).ConfigureAwait(false);
             }
         }
 
-        private static async Task RetryOrFailJobAsync(TranscriptionStartedMessage message, string errorMessage, string jobName, string transcriptionLocation, string subscriptionKey, ILogger log, bool isThrottled)
+        private static async Task RetryOrFailJobAsync(TranscriptionStartedMessage message, string errorMessage, string jobName, string transcriptionLocation, string subscriptionKey, ILogger log, bool isThrottled, IStorageConnector storageConnector)
         {
             log.LogError(errorMessage);
             message.FailedExecutionCounter += 1;
@@ -290,33 +290,32 @@ namespace FetchTranscription
             }
             else
             {
-                await WriteFailedJobLogToStorageAsync(message, errorMessage, jobName, log).ConfigureAwait(false);
+                await WriteFailedJobLogToStorageAsync(message, errorMessage, jobName, log, storageConnector).ConfigureAwait(false);
                 await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
             }
         }
 
-        private static async Task WriteFailedJobLogToStorageAsync(TranscriptionStartedMessage transcriptionStartedMessage, string errorMessage, string jobName, ILogger log)
+        private static async Task WriteFailedJobLogToStorageAsync(TranscriptionStartedMessage transcriptionStartedMessage, string errorMessage, string jobName, ILogger log, IStorageConnector storageConnector)
         {
             log.LogError(errorMessage);
             var errorOutputContainer = FetchTranscriptionEnvironmentVariables.ErrorReportOutputContainer;
 
             var jobErrorFileName = $"jobs/{jobName}.txt";
-            await StorageConnectorInstance.WriteTextFileToBlobAsync(errorMessage, errorOutputContainer, jobErrorFileName, log).ConfigureAwait(false);
+            await storageConnector.WriteTextFileToBlobAsync(errorMessage, errorOutputContainer, jobErrorFileName).ConfigureAwait(false);
 
             foreach (var audioFileInfo in transcriptionStartedMessage.AudioFileInfos)
             {
-                var fileName = StorageConnector.GetFileNameFromUri(new Uri(audioFileInfo.FileUrl));
+                var fileName = storageConnector.GetFileNameFromUri(new Uri(audioFileInfo.FileUrl));
                 var errorFileName = fileName + ".txt";
                 try
                 {
-                    await StorageConnectorInstance.WriteTextFileToBlobAsync(errorMessage, errorOutputContainer, errorFileName, log).ConfigureAwait(false);
-                    await StorageConnectorInstance.MoveFileAsync(
+                    await storageConnector.WriteTextFileToBlobAsync(errorMessage, errorOutputContainer, errorFileName).ConfigureAwait(false);
+                    await storageConnector.MoveFileAsync(
                         FetchTranscriptionEnvironmentVariables.AudioInputContainer,
                         fileName,
                         FetchTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                         fileName,
-                        false,
-                        log).ConfigureAwait(false);
+                        false).ConfigureAwait(false);
                 }
                 catch (RequestFailedException e)
                 {
@@ -325,18 +324,17 @@ namespace FetchTranscription
             }
         }
 
-        private static async Task WriteErrorReportAsync(string errorString, string jobName, ILogger logger)
+        private static async Task WriteErrorReportAsync(string errorString, string jobName, IStorageConnector storageConnector)
         {
             var errorTxtname = $"jobs/{jobName}.txt";
 
-            await StorageConnectorInstance.WriteTextFileToBlobAsync(
+            await storageConnector.WriteTextFileToBlobAsync(
                 errorString,
                 FetchTranscriptionEnvironmentVariables.ErrorReportOutputContainer,
-                errorTxtname,
-                logger).ConfigureAwait(false);
+                errorTxtname).ConfigureAwait(false);
         }
 
-        private async Task ProcessSucceededTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage serviceBusMessage, string jobName, ILogger log)
+        private async Task ProcessSucceededTranscriptionAsync(string transcriptionLocation, string subscriptionKey, TranscriptionStartedMessage serviceBusMessage, string jobName, ILogger log, IStorageConnector storageConnector)
         {
             log.LogInformation($"Got succeeded transcription for job {jobName}");
 
@@ -374,7 +372,7 @@ namespace FetchTranscription
                         continue;
                     }
 
-                    var audioFileName = StorageConnector.GetFileNameFromUri(new Uri(transcriptionResult.Source));
+                    var audioFileName = storageConnector.GetFileNameFromUri(new Uri(transcriptionResult.Source));
                     var audioFileInfo = serviceBusMessage.AudioFileInfos.Where(a => a.FileName == audioFileName).First();
 
                     if (speechTranscriptMappings.ContainsKey(audioFileInfo))
@@ -416,7 +414,7 @@ namespace FetchTranscription
                 var textAnalyticsSubmitErrors = generalErrorsStringBuilder.ToString();
                 if (!string.IsNullOrEmpty(textAnalyticsSubmitErrors))
                 {
-                    await WriteErrorReportAsync(textAnalyticsSubmitErrors, jobName, log).ConfigureAwait(false);
+                    await WriteErrorReportAsync(textAnalyticsSubmitErrors, jobName, storageConnector).ConfigureAwait(false);
                 }
 
                 log.LogInformation($"Added text analytics requests to service bus message - re-queueing message.");
@@ -445,7 +443,7 @@ namespace FetchTranscription
                 var jsonFileName = $"{fileName}.json";
                 var archiveFileLocation = System.IO.Path.GetFileNameWithoutExtension(fileName);
 
-                var jsonFileUrl = await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, FetchTranscriptionEnvironmentVariables.JsonResultOutputContainer, jsonFileName, log).ConfigureAwait(false);
+                var jsonFileUrl = await storageConnector.WriteTextFileToBlobAsync(editedTranscriptionResultJson, FetchTranscriptionEnvironmentVariables.JsonResultOutputContainer, jsonFileName).ConfigureAwait(false);
 
                 if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
                 {
@@ -459,8 +457,8 @@ namespace FetchTranscription
                     var audioArchiveFileName = $"{archiveFileLocation}/{fileName}";
                     var jsonArchiveFileName = $"{archiveFileLocation}/{jsonFileName}";
 
-                    await StorageConnectorInstance.MoveFileAsync(FetchTranscriptionEnvironmentVariables.AudioInputContainer, fileName, consolidatedContainer, audioArchiveFileName, true, log).ConfigureAwait(false);
-                    await StorageConnectorInstance.WriteTextFileToBlobAsync(editedTranscriptionResultJson, consolidatedContainer, jsonArchiveFileName, log).ConfigureAwait(false);
+                    await storageConnector.MoveFileAsync(FetchTranscriptionEnvironmentVariables.AudioInputContainer, fileName, consolidatedContainer, audioArchiveFileName, true).ConfigureAwait(false);
+                    await storageConnector.WriteTextFileToBlobAsync(editedTranscriptionResultJson, consolidatedContainer, jsonArchiveFileName).ConfigureAwait(false);
                 }
 
                 if (FetchTranscriptionEnvironmentVariables.CreateHtmlResultFile)
@@ -468,12 +466,12 @@ namespace FetchTranscription
                     var htmlContainer = FetchTranscriptionEnvironmentVariables.HtmlResultOutputContainer;
                     var htmlFileName = $"{fileName}.html";
                     var displayResults = TranscriptionToHtml.ToHtml(speechTranscript, jobName);
-                    await StorageConnectorInstance.WriteTextFileToBlobAsync(displayResults, htmlContainer, htmlFileName, log).ConfigureAwait(false);
+                    await storageConnector.WriteTextFileToBlobAsync(displayResults, htmlContainer, htmlFileName).ConfigureAwait(false);
 
                     if (FetchTranscriptionEnvironmentVariables.CreateConsolidatedOutputFiles)
                     {
                         var htmlArchiveFileName = $"{archiveFileLocation}/{htmlFileName}";
-                        await StorageConnectorInstance.WriteTextFileToBlobAsync(displayResults, consolidatedContainer, htmlArchiveFileName, log).ConfigureAwait(false);
+                        await storageConnector.WriteTextFileToBlobAsync(displayResults, consolidatedContainer, htmlArchiveFileName).ConfigureAwait(false);
                     }
                 }
 
@@ -509,7 +507,7 @@ namespace FetchTranscription
 
                 if (FetchTranscriptionEnvironmentVariables.CreateAudioProcessedContainer)
                 {
-                    await StorageConnectorInstance.MoveFileAsync(FetchTranscriptionEnvironmentVariables.AudioInputContainer, fileName, FetchTranscriptionEnvironmentVariables.AudioProcessedContainer, fileName, false, log).ConfigureAwait(false);
+                    await storageConnector.MoveFileAsync(FetchTranscriptionEnvironmentVariables.AudioInputContainer, fileName, FetchTranscriptionEnvironmentVariables.AudioProcessedContainer, fileName, false).ConfigureAwait(false);
                 }
             }
 
@@ -521,12 +519,12 @@ namespace FetchTranscription
             var generalErrors = generalErrorsStringBuilder.ToString();
             if (!string.IsNullOrEmpty(generalErrors))
             {
-                await WriteErrorReportAsync(generalErrors, jobName, log).ConfigureAwait(false);
+                await WriteErrorReportAsync(generalErrors, jobName, storageConnector).ConfigureAwait(false);
             }
 
             var reportFile = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.TranscriptionReport).FirstOrDefault();
             var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
-            await ProcessReportFileAsync(reportFileContent, log).ConfigureAwait(false);
+            await ProcessReportFileAsync(reportFileContent, log, storageConnector).ConfigureAwait(false);
 
             BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false).GetAwaiter().GetResult();
         }

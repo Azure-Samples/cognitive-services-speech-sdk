@@ -15,10 +15,12 @@ namespace FetchTranscription
     public class FetchTranscription
     {
         private readonly IServiceProvider serviceProvider;
+        private readonly IStorageConnector storageConnector;
 
-        public FetchTranscription(IServiceProvider serviceProvider)
+        public FetchTranscription(IServiceProvider serviceProvider, IStorageConnector storageConnector)
         {
             this.serviceProvider = serviceProvider;
+            this.storageConnector = storageConnector;
         }
 
         [FunctionName("FetchTranscription")]
@@ -39,7 +41,7 @@ namespace FetchTranscription
 
             var serviceBusMessage = TranscriptionStartedMessage.DeserializeMessage(message);
 
-            var transcriptionProcessor = new TranscriptionProcessor(this.serviceProvider);
+            var transcriptionProcessor = new TranscriptionProcessor(this.serviceProvider, this.storageConnector);
 
             await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  log).ConfigureAwait(false);
         }
