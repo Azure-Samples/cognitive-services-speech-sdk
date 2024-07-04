@@ -18,6 +18,6 @@ REST API doc: Personal voice REST API is a part of [custom voice REST API](https
 
 > Personal voice access is [limited](https://learn.microsoft.com/en-us/legal/cognitive-services/speech-service/custom-neural-voice/limited-access-custom-neural-voice?context=%2fazure%2fcognitive-services%2fspeech-service%2fcontext%2fcontext) based on eligibility and usage criteria. [Request access](https://aka.ms/customneural) before using the sample code here.
 
-> Personal voice is available in these regions: West Europe, East US, and South East Asia.
+> Personal voice is available in these regions: West Europe, East US, and Southeast Asia.
 
 > For supported locales, see [personal voice language support](https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts#personal-voice).
