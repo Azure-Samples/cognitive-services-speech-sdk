@@ -192,6 +192,10 @@ def transcribe():
             completed = True
 
         if transcription.status == "Succeeded":
+            if properties.destination_container_url is not None:
+                logging.info("Transcription succeeded. Results are located in your Azure Blob Storage.")
+                break
+
             pag_files = api.transcriptions_list_files(transcription_id)
             for file_data in _paginate(api, pag_files):
                 if file_data.kind != "Transcription":

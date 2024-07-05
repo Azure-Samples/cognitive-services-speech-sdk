@@ -115,6 +115,15 @@
                 "description": "Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint"
             }
         },
+        "StartTranscriptionFunctionTimeInterval":
+        {
+            "defaultValue": "0 */2 * * * *",
+            "type": "String",
+            "metadata":
+            {
+                "description": "The time interval for the timer trigger in the StartTranscription function (https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-timer?tabs=python-v2%2Cisolated-process%2Cnodejs-v4&pivots=programming-language-csharp#ncrontab-expressions). The default value is every 2 minutes."
+            }
+        },
         "ProfanityFilterMode":
         {
             "defaultValue": "None",
@@ -238,15 +247,16 @@
         "CompletedServiceBusConnectionString":
         {
             "type": "SecureString",
+            "defaultValue": "",
             "metadata":
             {
                 "description": "The connection string for the Service Bus Queue where you want to receive the notification of completion of the transcription for each audio file. If left empty, no completion notification will be sent."
             }
-        },
+        }
     },
     "variables":
     {
-        "Version": "v2.0.13",
+        "Version": "v2.0.16",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -936,6 +946,7 @@
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",
                 "Locale": "[parameters('Locale')]",
                 "MessagesPerFunctionExecution": "[variables('MessagesPerFunctionExecution')]",
+                "StartTranscriptionFunctionTimeInterval": "[parameters('StartTranscriptionFunctionTimeInterval')]",
                 "ProfanityFilterMode": "[parameters('ProfanityFilterMode')]",
                 "PunctuationMode": "[parameters('PunctuationMode')]",
                 "RetryLimit": "[variables('RetryLimit')]",
@@ -1018,7 +1029,7 @@
                 "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
                 "ConversationPiiSetting": "[variables('ConversationPiiRedaction')]",
                 "ConversationSummarizationOptions": "[variables('ConversationSummarizationOptions')]",
-                "CompletedServiceBusConnectionString": "[variables('CompletedServiceBusConnectionString')]"
+                "CompletedServiceBusConnectionString": "[parameters('CompletedServiceBusConnectionString')]"
             }
         }
     ],

@@ -24,7 +24,7 @@ namespace StartTranscriptionByTimer
         private static readonly ServiceBusReceiver ServiceBusReceiver = ServiceBusClient.CreateReceiver(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath, ServiceBusReceiverOptions);
 
         [FunctionName("StartTranscriptionByTimer")]
-        public static async Task Run([TimerTrigger("0 */2 * * * *")] TimerInfo timerInfo, ILogger log)
+        public static async Task Run([TimerTrigger("%StartTranscriptionFunctionTimeInterval%")] TimerInfo timerInfo, ILogger log)
         {
             if (log == null)
             {
