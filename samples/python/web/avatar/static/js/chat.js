@@ -40,9 +40,12 @@ function createSpeechRecognizer() {
     .then(response => {
         if (response.ok) {
             const speechRegion = response.headers.get('SpeechRegion')
+            const speechPrivateEndpoint = response.headers.get('SpeechPrivateEndpoint')
             response.text().then(text => {
                 const speechToken = text
-                const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
+                const speechRecognitionConfig = speechPrivateEndpoint ?
+                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechPrivateEndpoint.replace('https://', '')}/stt/speech/universal/v2`), '') :
+                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
                 speechRecognitionConfig.authorizationToken = speechToken
                 speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
                 var sttLocales = document.getElementById('sttLocales').value.split(',')

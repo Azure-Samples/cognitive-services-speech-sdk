@@ -15,6 +15,7 @@ import time
 import traceback
 import uuid
 from flask import Flask, Response, render_template, request
+from azure.identity import DefaultAzureCredential
 
 # Create the Flask app
 app = Flask(__name__, template_folder='.')
@@ -24,6 +25,8 @@ app = Flask(__name__, template_folder='.')
 speech_region = os.environ.get('SPEECH_REGION') # e.g. westus2
 speech_key = os.environ.get('SPEECH_KEY')
 speech_private_endpoint = os.environ.get('SPEECH_PRIVATE_ENDPOINT') # e.g. https://my-speech-service.cognitiveservices.azure.com/ (optional)
+speech_resource_url = os.environ.get('SPEECH_RESOURCE_URL') # e.g. /subscriptions/6e83d8b7-00dd-4b0a-9e98-dab9f060418b/resourceGroups/my-rg/providers/Microsoft.CognitiveServices/accounts/my-speech (optional, only used for private endpoint)
+user_assigned_managed_identity_client_id = os.environ.get('USER_ASSIGNED_MANAGED_IDENTITY_CLIENT_ID') # e.g. the client id of user assigned managed identity accociated to your app service (optional, only used for private endpoint and user assigned managed identity)
 # OpenAI resource (required for chat scenario)
 azure_openai_endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT') # e.g. https://my-aoai.openai.azure.com/
 azure_openai_api_key = os.environ.get('AZURE_OPENAI_API_KEY')
@@ -71,6 +74,8 @@ def getSpeechToken() -> Response:
     global speech_token
     response = Response(speech_token, status=200)
     response.headers['SpeechRegion'] = speech_region
+    if speech_private_endpoint:
+        response.headers['SpeechPrivateEndpoint'] = speech_private_endpoint
     return response
 
 # The API route to get the ICE token
@@ -296,7 +301,12 @@ def refreshSpeechToken() -> None:
     global speech_token
     while True:
         # Refresh the speech token every 9 minutes
-        speech_token = requests.post(f'https://{speech_region}.api.cognitive.microsoft.com/sts/v1.0/issueToken', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
+        if speech_private_endpoint:
+            credential = DefaultAzureCredential(managed_identity_client_id=user_assigned_managed_identity_client_id)
+            token = credential.get_token('https://cognitiveservices.azure.com/.default')
+            speech_token = f'aad#{speech_resource_url}#{token.token}'
+        else:
+            speech_token = requests.post(f'https://{speech_region}.api.cognitive.microsoft.com/sts/v1.0/issueToken', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
         time.sleep(60 * 9)
 
 # Initialize the chat context, e.g. chat history (messages), data sources, etc. For chat scenario.
