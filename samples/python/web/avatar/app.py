@@ -156,7 +156,7 @@ def connectAvatar() -> Response:
                                 'y': 1080
                             }
                         },
-                        'bitrate': 2000000
+                        'bitrate': 1000000
                     },
                     'talkingAvatar': {
                         'customized': is_custom_avatar.lower() == 'true',
@@ -365,7 +365,7 @@ def handleUserQuery(user_query: str, client_id: uuid.UUID):
     # For 'on your data' scenario, chat API currently has long (4s+) latency
     # We return some quick reply here before the chat API returns to mitigate.
     if len(data_sources) > 0 and enable_quick_reply:
-        speak(random.choice(quick_replies), 2000)
+        speakWithQueue(random.choice(quick_replies), 2000)
 
     url = f"{azure_openai_endpoint}/openai/deployments/{azure_openai_deployment_name}/chat/completions?api-version=2023-06-01-preview"
     body = json.dumps({
