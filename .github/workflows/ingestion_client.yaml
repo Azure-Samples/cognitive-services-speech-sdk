@@ -15,7 +15,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '8.0.x'
 
       - name: Get Release Versions
         id: get_release_versions
@@ -39,17 +39,17 @@ jobs:
         run: dotnet build samples/ingestion/ingestion-client --configuration Release
 
       - name: Publish StartTranscriptionByTimer function
-        run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./StartTranscriptionByTimer samples/ingestion/ingestion-client/StartTranscriptionByTimer/StartTranscriptionByTimer.csproj
+        run: dotnet publish -c Release -f net8.0 --no-self-contained --output ./StartTranscriptionByTimer samples/ingestion/ingestion-client/StartTranscriptionByTimer/StartTranscriptionByTimer.csproj
       - name: Zip StartTranscriptionByTimer
         run: cd StartTranscriptionByTimer && zip -r ../StartTranscriptionByTimer.zip *
 
       - name: Publish StartTranscriptionByServiceBus function
-        run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./StartTranscriptionByServiceBus samples/ingestion/ingestion-client/StartTranscriptionByServiceBus/StartTranscriptionByServiceBus.csproj
+        run: dotnet publish -c Release -f net8.0 --no-self-contained --output ./StartTranscriptionByServiceBus samples/ingestion/ingestion-client/StartTranscriptionByServiceBus/StartTranscriptionByServiceBus.csproj
       - name: Zip StartTranscriptionByServiceBus
         run: cd StartTranscriptionByServiceBus && zip -r ../StartTranscriptionByServiceBus.zip *
 
       - name: Publish FetchTranscription function
-        run: dotnet publish -c Release -f net6.0 --no-self-contained --output ./FetchTranscription samples/ingestion/ingestion-client/FetchTranscription/FetchTranscription.csproj
+        run: dotnet publish -c Release -f net8.0 --no-self-contained --output ./FetchTranscription samples/ingestion/ingestion-client/FetchTranscription/FetchTranscription.csproj
       - name: Zip FetchTranscription
         run: cd FetchTranscription && zip -r ../FetchTranscription.zip *
 
