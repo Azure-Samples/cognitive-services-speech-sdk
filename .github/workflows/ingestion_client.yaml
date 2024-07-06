@@ -2,13 +2,11 @@ name: Build Ingestion Client Binaries
 
 on:
   push:
-    branches: ['main', 'master']
+    branches: ['main', 'master', '*']
     paths: ['samples/ingestion/ingestion-client/**', '.github/workflows/ingestion_client.yaml']
 
 jobs:
   build:
-    permissions:
-      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -38,8 +36,15 @@ jobs:
       - name: Build BatchIngestionClient
         run: dotnet build samples/ingestion/ingestion-client --configuration Release
 
+  publish:
+    permissions:
+      contents: write
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
       - name: Publish StartTranscriptionByTimer function
         run: dotnet publish -c Release -f net8.0 --no-self-contained --output ./StartTranscriptionByTimer samples/ingestion/ingestion-client/StartTranscriptionByTimer/StartTranscriptionByTimer.csproj
+
       - name: Zip StartTranscriptionByTimer
         run: cd StartTranscriptionByTimer && zip -r ../StartTranscriptionByTimer.zip *
 
