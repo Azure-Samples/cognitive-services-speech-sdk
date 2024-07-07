@@ -24,13 +24,11 @@ namespace StartTranscriptionByTimer
     {
         private static readonly StorageConnector StorageConnectorInstance = new (StartTranscriptionEnvironmentVariables.AzureWebJobsStorage);
 
-        private static readonly ServiceBusClient StartServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
+        private readonly ServiceBusSender startTranscriptionSender;
 
-        private static readonly ServiceBusSender StartSender = StartServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath);
+        private readonly ServiceBusReceiver startTranscriptionReceiver;
 
-        private static readonly ServiceBusClient FetchServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString);
-
-        private static readonly ServiceBusSender FetchSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
+        private readonly ServiceBusSender fetchTranscriptionSender;
 
         private readonly string subscriptionKey = StartTranscriptionEnvironmentVariables.AzureSpeechServicesKey;
 
@@ -44,23 +42,22 @@ namespace StartTranscriptionByTimer
 
         private readonly string locale;
 
-        public StartTranscriptionHelper(ILogger logger)
+        public StartTranscriptionHelper(ILogger logger, ServiceBusSender startTranscriptionSender, ServiceBusReceiver startTranscriptionReceiver, ServiceBusSender fetchTranscriptionSender)
         {
             this.logger = logger;
             this.locale = StartTranscriptionEnvironmentVariables.Locale.Split('|')[0].Trim();
+
+            this.startTranscriptionSender = startTranscriptionSender;
+            this.startTranscriptionReceiver = startTranscriptionReceiver;
+            this.fetchTranscriptionSender = fetchTranscriptionSender;
         }
 
-        public async Task StartTranscriptionsAsync(IEnumerable<ServiceBusReceivedMessage> messages, ServiceBusReceiver messageReceiver, DateTime startDateTime)
+        public async Task StartTranscriptionsAsync(IEnumerable<ServiceBusReceivedMessage> messages, DateTime startDateTime)
         {
-            if (messageReceiver == null)
-            {
-                throw new ArgumentNullException(nameof(messageReceiver));
-            }
-
             var chunkedMessages = new List<List<ServiceBusReceivedMessage>>();
             var messageCount = messages.Count();
 
-            for (int i = 0; i < messageCount; i += this.filesPerTranscriptionJob)
+            for (var i = 0; i < messageCount; i += this.filesPerTranscriptionJob)
             {
                 var chunk = messages.Skip(i).Take(Math.Min(this.filesPerTranscriptionJob, messageCount - i)).ToList();
                 chunkedMessages.Add(chunk);
@@ -80,7 +77,7 @@ namespace StartTranscriptionByTimer
                 for (var j = 0; j < messagesInChunk; j += 10)
                 {
                     var completionBatch = chunk.Skip(j).Take(Math.Min(10, messagesInChunk - j));
-                    var completionTasks = completionBatch.Select(sb => messageReceiver.CompleteMessageAsync(sb));
+                    var completionTasks = completionBatch.Select(sb => this.startTranscriptionReceiver.CompleteMessageAsync(sb));
                     await Task.WhenAll(completionTasks).ConfigureAwait(false);
                 }
 
@@ -91,7 +88,7 @@ namespace StartTranscriptionByTimer
                     {
                         foreach (var message in remainingChunk)
                         {
-                            await messageReceiver.RenewMessageLockAsync(message).ConfigureAwait(false);
+                            await this.startTranscriptionReceiver.RenewMessageLockAsync(message).ConfigureAwait(false);
                         }
                     }
 
@@ -235,7 +232,7 @@ namespace StartTranscriptionByTimer
                     0);
 
                 var fetchingDelay = TimeSpan.FromMinutes(StartTranscriptionEnvironmentVariables.InitialPollingDelayInMinutes);
-                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchSender, transcriptionMessage.CreateMessageString(), this.logger, fetchingDelay).ConfigureAwait(false);
+                await ServiceBusUtilities.SendServiceBusMessageAsync(this.fetchTranscriptionSender, transcriptionMessage.CreateMessageString(), this.logger, fetchingDelay).ConfigureAwait(false);
             }
             catch (TransientFailureException e)
             {
@@ -282,7 +279,7 @@ namespace StartTranscriptionByTimer
                     serviceBusMessage.RetryCount += 1;
                     var messageDelay = GetMessageDelayTime(serviceBusMessage.RetryCount);
                     var newMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(JsonConvert.SerializeObject(serviceBusMessage));
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(StartSender, newMessage, this.logger, messageDelay).ConfigureAwait(false);
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(this.startTranscriptionSender, newMessage, this.logger, messageDelay).ConfigureAwait(false);
                 }
                 else
                 {

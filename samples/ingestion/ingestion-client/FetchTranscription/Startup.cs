@@ -12,9 +12,11 @@ namespace FetchTranscription
     using System;
 
     using Connector.Database;
+    using Connector.Enums;
 
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Startup : FunctionsStartup
@@ -28,6 +30,20 @@ namespace FetchTranscription
                 builder.Services.AddDbContext<IngestionClientDbContext>(
                   options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, FetchTranscriptionEnvironmentVariables.DatabaseConnectionString));
             }
+
+            builder.Services.AddAzureClients(clientBuilder =>
+            {
+                clientBuilder.AddServiceBusClient(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString)
+                    .WithName(ServiceBusClientName.StartTranscriptionServiceBusClient.ToString());
+                clientBuilder.AddServiceBusClient(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString)
+                    .WithName(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
+
+                if (!string.IsNullOrWhiteSpace(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+                {
+                    clientBuilder.AddServiceBusClient(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString)
+                        .WithName(ServiceBusClientName.CompletedTranscriptionServiceBusClient.ToString());
+                }
+            });
         }
     }
 }

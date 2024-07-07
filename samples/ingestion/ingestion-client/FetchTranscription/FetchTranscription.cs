@@ -7,9 +7,14 @@ namespace FetchTranscription
 {
     using System;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
+
     using Connector;
+    using Connector.Enums;
 
     using Microsoft.Azure.WebJobs;
+    using Microsoft.Extensions.Azure;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
     public class FetchTranscription
