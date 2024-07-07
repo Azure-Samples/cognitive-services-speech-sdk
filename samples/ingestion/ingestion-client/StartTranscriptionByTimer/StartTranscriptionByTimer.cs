@@ -45,7 +45,7 @@ namespace StartTranscriptionByTimer
 
             var fetchTranscriptionServiceBusClient = serviceBusClientFactory.CreateClient(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
             var fetchTranscriptionQueueName = ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath;
-            this.fetchTranscriptionServiceBusSender = startTranscriptionServiceBusClient.CreateSender(fetchTranscriptionQueueName);
+            this.fetchTranscriptionServiceBusSender = fetchTranscriptionServiceBusClient.CreateSender(fetchTranscriptionQueueName);
         }
 
         [FunctionName("StartTranscriptionByTimer")]

@@ -55,8 +55,8 @@ namespace FetchTranscription
             this.startTranscriptionServiceBusSender = startTranscriptionServiceBusClient.CreateSender(startTranscriptionQueueName);
 
             var fetchTranscriptionServiceBusClient = serviceBusClientFactory.CreateClient(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
-            var fetchTranscriptionQueueName = ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath;
-            this.fetchTranscriptionServiceBusSender = startTranscriptionServiceBusClient.CreateSender(fetchTranscriptionQueueName);
+            var fetchTranscriptionQueueName = ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath;
+            this.fetchTranscriptionServiceBusSender = fetchTranscriptionServiceBusClient.CreateSender(fetchTranscriptionQueueName);
 
             if (!string.IsNullOrWhiteSpace(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
             {
