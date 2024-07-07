@@ -5,8 +5,6 @@
 
 namespace Connector
 {
-    using Newtonsoft.Json;
-
     public class CompletedMessage
     {
         public CompletedMessage(string audioFileName, string jsonResportLocation)
