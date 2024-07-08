@@ -8,7 +8,8 @@
     <MSTestTestFrameworkPackageVersion>[3.4.3]</MSTestTestFrameworkPackageVersion>
 
     <MicrosoftAzureFunctionsExtensionsPackageVersion>[1.1.0]</MicrosoftAzureFunctionsExtensionsPackageVersion>
-    <MicrosoftAzureWebJobsExtensionsServiceBusPackageVersion>[5.16.1]</MicrosoftAzureWebJobsExtensionsServiceBusPackageVersion>
+
+    <MicrosoftAzureFunctionsWorkerExtensionsServiceBusPackageVersion>[5.20.0]</MicrosoftAzureFunctionsWorkerExtensionsServiceBusPackageVersion>
 
     <MicrosoftEntityFrameworkCorePackageVersion>[8.0.6]</MicrosoftEntityFrameworkCorePackageVersion>
     <MicrosoftEntityFrameworkCoreDesignPackageVersion>[8.0.6]</MicrosoftEntityFrameworkCoreDesignPackageVersion>
@@ -20,11 +21,8 @@
 
   <PropertyGroup Label="Third-party components">
     <JsonSubTypesPackageVersion>[2.0.1]</JsonSubTypesPackageVersion>
-    
     <MoqPackageVersion>[4.20.70]</MoqPackageVersion>
-    
     <NewtonsoftJsonPackageVersion>[13.0.3]</NewtonsoftJsonPackageVersion>
-    
     <PollyPackageVersion>[8.4.1]</PollyPackageVersion>
   </PropertyGroup>
 </Project>
