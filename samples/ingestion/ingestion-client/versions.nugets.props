@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup Label="Microsoft components">
+    <AzureAILanguageConversationsPackageVersion>[1.1.0-beta.2]</AzureAILanguageConversationsPackageVersion>
+    <AzureAITextAnalyticsPackageVersion>[5.1.1]</AzureAITextAnalyticsPackageVersion>
+    <AzureStorageBlobsPackageVersion>[12.14.0]</AzureStorageBlobsPackageVersion>
+
+    <MSTestTestAdapterPackageVersion>[1.3.2]</MSTestTestAdapterPackageVersion>
+    <MSTestTestFrameworkPackageVersion>[1.3.2]</MSTestTestFrameworkPackageVersion>
+
+    <MicrosoftAzureFunctionsExtensionsPackageVersion>[1.1.0]</MicrosoftAzureFunctionsExtensionsPackageVersion>
+    <MicrosoftAzureWebJobsExtensionsServiceBusPackageVersion>[5.16.0]</MicrosoftAzureWebJobsExtensionsServiceBusPackageVersion>
+
+    <MicrosoftEntityFrameworkCorePackageVersion>[6.0.31]</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>[6.0.31]</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>[6.0.31]</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+
+    <MicrosoftNETSdkFunctionsPackageVersion>[4.1.3]</MicrosoftNETSdkFunctionsPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>[15.9.0]</MicrosoftNETTestSdkPackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Third-party components">
+    <JsonSubTypesPackageVersion>[1.9.0]</JsonSubTypesPackageVersion>
+    
+    <MoqPackageVersion>[4.13.1]</MoqPackageVersion>
+    
+    <NewtonsoftJsonPackageVersion>[13.0.1]</NewtonsoftJsonPackageVersion>
+    
+    <PollyPackageVersion>[7.2.3]</PollyPackageVersion>
+  </PropertyGroup>
+</Project>
