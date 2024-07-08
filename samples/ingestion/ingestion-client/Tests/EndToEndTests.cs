@@ -27,15 +27,14 @@ namespace Tests
     [TestClass]
     public class EndToEndTests
     {
-        private static IDictionary<string, object> testProperties;
+        private static TestContext testContext;
 
         private static Mock<ILogger> Logger { get; set; }
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
-            context = context ?? throw new ArgumentNullException(nameof(context));
-            testProperties = context.Properties;
+            testContext = context ?? throw new ArgumentNullException(nameof(context));
             Logger = new Mock<ILogger>();
         }
 
@@ -53,8 +52,8 @@ namespace Tests
                     FallbackRole = Role.None,
                 }
             }));
-            var region = testProperties["LanguageServiceRegion"].ToString();
-            var subscriptionKey = testProperties["LanguageServiceSubscriptionKey"].ToString();
+            var region = testContext.Properties["LanguageServiceRegion"].ToString();
+            var subscriptionKey = testContext.Properties["LanguageServiceSubscriptionKey"].ToString();
             var provider = new AnalyzeConversationsProvider("en-US", subscriptionKey, region, Logger.Object);
             var body = File.ReadAllText(@"TestFiles/summarizationInputSample.json");
             var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
