@@ -1,31 +1,31 @@
 {
-	"folders": [
-		{
-			"path": "StartTranscriptionByServiceBus"
-		},
-		{
-			"path": "StartTranscriptionByTimer"
-		},
+    "folders": [
+        {
+            "path": "StartTranscriptionByServiceBus"
+        },
+        {
+            "path": "StartTranscriptionByTimer"
+        },
         {
             "path": "FetchTranscription"
         },
-		{
-			"path": "."
-		}
-	],
-	"settings": {
-		"debug.internalConsoleOptions": "neverOpen"
-	},
+        {
+            "path": "."
+        }
+    ],
+    "settings": {
+        "debug.internalConsoleOptions": "neverOpen"
+    },
     "launch": {
-		"configurations": [],
-		"compounds": [
-			{
-				"name": "Attach to both apps",
-				"configurations": [
-					"Attach to Start Transcription by Timer",
-					"Attach to Fetch Transcription from Queue"
-				]
-			}
-		]
-	}
+        "configurations": [],
+        "compounds": [
+            {
+                "name": "Attach to both apps",
+                "configurations": [
+                    "Attach to Start Transcription by Timer",
+                    "Attach to Fetch Transcription from Queue"
+                ]
+            }
+        ]
+    }
 }
