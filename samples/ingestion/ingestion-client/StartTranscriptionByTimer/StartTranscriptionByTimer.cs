@@ -31,10 +31,10 @@ namespace StartTranscriptionByTimer
         /// <summary>
         /// Initializes a new instance of the <see cref="StartTranscriptionByTimer"/> class.
         /// </summary>
-        /// <param name="factory">The logger factory</param>
-        public StartTranscriptionByTimer(ILoggerFactory factory)
+        /// <param name="logger">The StartTranscriptionByTimer logger</param>
+        public StartTranscriptionByTimer(ILogger<StartTranscriptionByTimer> logger)
         {
-            this.logger = factory.CreateLogger<StartTranscriptionByTimer>();
+            this.logger = logger;
         }
 
         /// <summary>

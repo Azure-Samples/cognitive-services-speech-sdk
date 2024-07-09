@@ -7,8 +7,11 @@ namespace FetchTranscription
 {
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.ApplicationInsights.WorkerService;
+
+    using Connector.Database;
+
     using Microsoft.Azure.Functions.Worker;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -35,6 +38,12 @@ namespace FetchTranscription
                             options.Rules.Remove(toRemove);
                         }
                     });
+
+                    if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
+                    {
+                        s.AddDbContext<IngestionClientDbContext>(
+                        options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, FetchTranscriptionEnvironmentVariables.DatabaseConnectionString));
+                    }
                 })
                 .Build();
 

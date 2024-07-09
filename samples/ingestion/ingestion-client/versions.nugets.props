@@ -19,8 +19,6 @@
     <MicrosoftEntityFrameworkCorePackageVersion>[8.0.6]</MicrosoftEntityFrameworkCorePackageVersion>
     <MicrosoftEntityFrameworkCoreDesignPackageVersion>[8.0.6]</MicrosoftEntityFrameworkCoreDesignPackageVersion>
     <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>[8.0.6]</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
-
-    <MicrosoftNETTestSdkPackageVersion>[17.10.0]</MicrosoftNETTestSdkPackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Third-party components">

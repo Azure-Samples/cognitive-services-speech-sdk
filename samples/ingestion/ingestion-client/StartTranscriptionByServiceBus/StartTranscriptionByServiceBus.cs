@@ -22,10 +22,10 @@ namespace StartTranscription
         /// <summary>
         /// Initializes a new instance of the <see cref="StartTranscriptionByServiceBus"/> class.
         /// </summary>
-        /// <param name="factory">The Logger Factory</param>
-        public StartTranscriptionByServiceBus(ILoggerFactory factory)
+        /// <param name="logger">The StartTranscriptionByServiceBus Logger</param>
+        public StartTranscriptionByServiceBus(ILogger<StartTranscriptionByServiceBus> logger)
         {
-            this.logger = factory.CreateLogger<StartTranscriptionByServiceBus>();
+            this.logger = logger;
         }
 
         /// <summary>

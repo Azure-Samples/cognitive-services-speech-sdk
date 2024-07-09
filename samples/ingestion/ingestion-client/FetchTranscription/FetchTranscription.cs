@@ -25,11 +25,11 @@ namespace FetchTranscription
         /// Initializes a new instance of the <see cref="FetchTranscription"/> class.
         /// </summary>
         /// <param name="serviceProvider">The service provider.</param>
-        /// <param name="factory">The logger factory.</param>
-        public FetchTranscription(IServiceProvider serviceProvider, ILoggerFactory factory)
+        /// <param name="logger">The FetchTranscription logger.</param>
+        public FetchTranscription(IServiceProvider serviceProvider, ILogger<FetchTranscription> logger)
         {
             this.serviceProvider = serviceProvider;
-            this.logger = factory.CreateLogger<FetchTranscription>();
+            this.logger = logger;
         }
 
         /// <summary>
