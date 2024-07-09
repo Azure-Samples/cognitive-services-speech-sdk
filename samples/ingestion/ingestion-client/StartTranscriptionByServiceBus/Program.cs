@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace StartTranscriptionByTimer
+namespace StartTranscription
 {
     using System.Linq;
     using System.Threading.Tasks;
@@ -12,8 +12,16 @@ namespace StartTranscriptionByTimer
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Represents the entry point of the application.
+    /// </summary>
     public static class Program
     {
+        /// <summary>
+        /// Main entry point of the function app.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         public static async Task Main(string[] args)
         {
             var host = new HostBuilder()

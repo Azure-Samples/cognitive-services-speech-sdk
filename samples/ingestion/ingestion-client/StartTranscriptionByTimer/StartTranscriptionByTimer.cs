@@ -13,6 +13,9 @@ namespace StartTranscriptionByTimer
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Start Transcription By Timer class.
+    /// </summary>
     public class StartTranscriptionByTimer
     {
         private const double MessageReceiveTimeoutInSeconds = 60;
@@ -23,15 +26,22 @@ namespace StartTranscriptionByTimer
 
         private static readonly ServiceBusReceiver ServiceBusReceiver = ServiceBusClient.CreateReceiver(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath, ServiceBusReceiverOptions);
 
-        private readonly ILoggerFactory factory;
         private readonly ILogger<StartTranscriptionByTimer> logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StartTranscriptionByTimer"/> class.
+        /// </summary>
+        /// <param name="factory">The logger factory</param>
         public StartTranscriptionByTimer(ILoggerFactory factory)
         {
-            this.factory = factory;
             this.logger = factory.CreateLogger<StartTranscriptionByTimer>();
         }
 
+        /// <summary>
+        /// Run method to start transcription by timer.
+        /// </summary>
+        /// <param name="timerInfo"></param>
+        /// <returns></returns>
         [Function("StartTranscriptionByTimer")]
         public async Task Run([TimerTrigger("%StartTranscriptionFunctionTimeInterval%")] TimerInfo timerInfo)
         {
