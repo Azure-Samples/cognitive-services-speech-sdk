@@ -7,6 +7,7 @@ namespace Connector
 {
     using System.Linq;
 
+    using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
@@ -16,12 +17,15 @@ namespace Connector
     public static class AppInsightsServiceCollectionExtensions
     {
         /// <summary>
-        /// Configures the logger filter to remove the default logging filter added by the Application Insights SDK.
+        /// Configures the logger for the Ingestion Client and removes the default logging filter added by the Application Insights SDK.
         /// </summary>
         /// <param name="services">The Service Collection</param>
         /// <returns>The Service Collection</returns>
-        public static IServiceCollection ConfigureLoggingFilter(this IServiceCollection services)
+        public static IServiceCollection ConfigureIngestionClientLogging(this IServiceCollection services)
         {
+            services.AddApplicationInsightsTelemetryWorkerService();
+            services.ConfigureFunctionsApplicationInsights();
+
             services.Configure<LoggerFilterOptions>(options =>
             {
                 // The Application Insights SDK adds a default logging filter that instructs ILogger to capture only Warning and more severe logs. Application Insights requires an explicit override.

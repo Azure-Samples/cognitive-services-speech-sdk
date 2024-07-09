@@ -7,8 +7,6 @@ namespace StartTranscriptionByTimer
 {
     using System.Threading.Tasks;
     using Connector;
-    using Microsoft.Azure.Functions.Worker;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
 
     public static class Program
@@ -19,11 +17,8 @@ namespace StartTranscriptionByTimer
                 .ConfigureFunctionsWorkerDefaults()
                 .ConfigureServices(s =>
                 {
-                    s.AddApplicationInsightsTelemetryWorkerService();
-                    s.ConfigureFunctionsApplicationInsights();
-
                     // This is a unified way to configure logging filter for all functions.
-                    s.ConfigureLoggingFilter();
+                    s.ConfigureIngestionClientLogging();
                 })
                 .Build();
 

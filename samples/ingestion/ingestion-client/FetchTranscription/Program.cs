@@ -10,7 +10,6 @@ namespace FetchTranscription
     using Connector;
     using Connector.Database;
 
-    using Microsoft.Azure.Functions.Worker;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -23,11 +22,8 @@ namespace FetchTranscription
                 .ConfigureFunctionsWorkerDefaults()
                 .ConfigureServices(s =>
                 {
-                    s.AddApplicationInsightsTelemetryWorkerService();
-                    s.ConfigureFunctionsApplicationInsights();
-
                     // This is a unified way to configure logging filter for all functions.
-                    s.ConfigureLoggingFilter();
+                    s.ConfigureIngestionClientLogging();
 
                     if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
                     {

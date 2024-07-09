@@ -6,10 +6,8 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="$(MicrosoftApplicationInsightsWorkerServicePackageVersion)" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="$(MicrosoftAzureFunctionsWorkerPackageVersion)" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="$(MicrosoftAzureFunctionsWorkerExtensionsServiceBusPackageVersion)" />
-    <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="$(MicrosoftAzureFunctionsWorkerApplicationInsightsPackageVersion)" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="$(MicrosoftAzureFunctionsWorkerSdkPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)"/>
   </ItemGroup>

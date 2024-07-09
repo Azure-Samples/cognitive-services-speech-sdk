@@ -7,9 +7,7 @@
     <ItemGroup>
         <PackageReference Include="Azure.AI.Language.Conversations" Version="$(AzureAILanguageConversationsPackageVersion)" />
         <PackageReference Include="Azure.AI.TextAnalytics" Version="$(AzureAITextAnalyticsPackageVersion)" />
-        <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="$(MicrosoftApplicationInsightsWorkerServicePackageVersion)" />
         <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="$(MicrosoftAzureFunctionsWorkerPackageVersion)" />
-        <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="$(MicrosoftAzureFunctionsWorkerApplicationInsightsPackageVersion)" />
         <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="$(MicrosoftAzureFunctionsExtensionsPackageVersion)" />
     		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="$(MicrosoftAzureFunctionsWorkerSdkPackageVersion)" />
     </ItemGroup>
