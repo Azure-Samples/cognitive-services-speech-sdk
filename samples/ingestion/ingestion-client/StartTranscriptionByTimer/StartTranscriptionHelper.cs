@@ -13,11 +13,11 @@ namespace StartTranscriptionByTimer
     using System.Net;
     using System.Text;
     using System.Threading.Tasks;
+    using Azure;
     using Azure.Messaging.ServiceBus;
     using Connector;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
     using Microsoft.Extensions.Logging;
-    using Microsoft.WindowsAzure.Storage;
     using Newtonsoft.Json;
 
     public class StartTranscriptionHelper
@@ -346,7 +346,7 @@ namespace StartTranscriptionByTimer
                     false,
                     this.logger).ConfigureAwait(false);
             }
-            catch (StorageException e)
+            catch (RequestFailedException e)
             {
                 this.logger.LogError($"Storage Exception {e} while writing error log to file and moving result");
             }

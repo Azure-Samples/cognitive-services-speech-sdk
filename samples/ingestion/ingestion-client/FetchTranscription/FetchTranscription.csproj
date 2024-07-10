@@ -2,13 +2,14 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <AzureFunctionsVersion>v4</AzureFunctionsVersion>
+        <OutputType>Exe</OutputType>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="Azure.AI.Language.Conversations" Version="$(AzureAILanguageConversationsPackageVersion)" />
         <PackageReference Include="Azure.AI.TextAnalytics" Version="$(AzureAITextAnalyticsPackageVersion)" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="$(MicrosoftAzureFunctionsWorkerPackageVersion)" />
         <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="$(MicrosoftAzureFunctionsExtensionsPackageVersion)" />
-        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="$(MicrosoftAzureWebJobsExtensionsServiceBusPackageVersion)" />
-        <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="$(MicrosoftNETSdkFunctionsPackageVersion)" />
+    		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="$(MicrosoftAzureFunctionsWorkerSdkPackageVersion)" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Connector\Connector.csproj" />
@@ -21,6 +22,7 @@
     <ItemGroup>
         <None Update="local.settings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </None>
     </ItemGroup>
 </Project>
