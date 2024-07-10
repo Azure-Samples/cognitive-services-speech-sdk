@@ -256,7 +256,7 @@
     },
     "variables":
     {
-        "Version": "v2.0.16",
+        "Version": "v2.1.1",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -938,7 +938,7 @@
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription'), '2017-04-01').primaryConnectionString]",
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
                 "FUNCTIONS_EXTENSION_VERSION": "~4",
-                "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+                "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
                 "AzureSpeechServicesEndpointUri": "[variables('AzureSpeechServicesEndpointUri')]",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
                 "IsAzureGovDeployment": "[variables('IsAzureGovDeployment')]",
@@ -1009,7 +1009,7 @@
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription'), '2017-04-01').primaryConnectionString]",
                 "FUNCTIONS_EXTENSION_VERSION": "~4",
-                "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+                "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
                 "HtmlResultOutputContainer": "[variables('HtmlResultOutputContainer')]",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",

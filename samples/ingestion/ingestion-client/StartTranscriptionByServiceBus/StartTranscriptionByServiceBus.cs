@@ -6,36 +6,47 @@
 namespace StartTranscription
 {
     using System;
-    using System.Text;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
-    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Logging;
     using StartTranscriptionByTimer;
 
-    public static class StartTranscriptionByServiceBus
+    /// <summary>
+    /// Start Transcription by Service Bus class.
+    /// </summary>
+    public class StartTranscriptionByServiceBus
     {
-        [FunctionName("StartTranscriptionByServiceBus")]
-        public static async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]ServiceBusReceivedMessage message, ILogger log)
+        private readonly ILogger<StartTranscriptionByServiceBus> logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StartTranscriptionByServiceBus"/> class.
+        /// </summary>
+        /// <param name="logger">The StartTranscriptionByServiceBus Logger</param>
+        public StartTranscriptionByServiceBus(ILogger<StartTranscriptionByServiceBus> logger)
         {
-            if (log == null)
-            {
-                throw new ArgumentNullException(nameof(log));
-            }
+            this.logger = logger;
+        }
 
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+        /// <summary>
+        /// Starts the transcription process by processing a message from a Service Bus queue.
+        /// </summary>
+        /// <param name="message">The message to read from the queue</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Function("StartTranscriptionByServiceBus")]
+        public async Task Run([ServiceBusTrigger("start_transcription_queue", Connection = "AzureServiceBus")]ServiceBusReceivedMessage message)
+        {
+            ArgumentNullException.ThrowIfNull(this.logger, nameof(this.logger));
+            ArgumentNullException.ThrowIfNull(message, nameof(message));
 
-            log.LogInformation($"C# ServiceBus queue trigger function processed message: {message.Subject}");
-            log.LogInformation($"Received message: SequenceNumber:{message.SequenceNumber} Body:{message.Body}");
+            this.logger.LogInformation($"C# Isolated ServiceBus queue trigger function processed message: {message.Subject}");
+            this.logger.LogInformation($"Received message: SequenceNumber:{message.SequenceNumber} Body:{message.Body}");
 
-            var transcriptionHelper = new StartTranscriptionHelper(log);
+            var transcriptionHelper = new StartTranscriptionHelper(this.logger);
 
             if (message == null || !transcriptionHelper.IsValidServiceBusMessage(message))
             {
-                log.LogInformation($"Service bus message is invalid.");
+                this.logger.LogInformation($"Service bus message is invalid.");
                 return;
             }
 
