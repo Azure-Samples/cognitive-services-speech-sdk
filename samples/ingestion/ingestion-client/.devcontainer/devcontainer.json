@@ -10,6 +10,7 @@
         "vscode": {
             "extensions": [
                 "ms-dotnettools.csdevkit",
+                "ms-vscode.azure-account",
                 "ms-azuretools.vscode-azurefunctions",
                 "editorconfig.editorconfig"
             ],
