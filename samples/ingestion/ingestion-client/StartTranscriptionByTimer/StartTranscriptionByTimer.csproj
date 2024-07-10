@@ -5,6 +5,7 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="$(MicrosoftApplicationInsightsWorkerServicePackageVersion)" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="$(MicrosoftAzureFunctionsWorkerPackageVersion)" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="$(MicrosoftAzureFunctionsWorkerExtensionsServiceBusPackageVersion)" />
@@ -25,5 +26,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
   </ItemGroup>
 </Project>

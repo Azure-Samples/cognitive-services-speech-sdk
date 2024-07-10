@@ -4,11 +4,12 @@
         <AzureFunctionsVersion>v4</AzureFunctionsVersion>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
-    <ItemGroup>
+  <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
         <PackageReference Include="Azure.AI.Language.Conversations" Version="$(AzureAILanguageConversationsPackageVersion)" />
         <PackageReference Include="Azure.AI.TextAnalytics" Version="$(AzureAITextAnalyticsPackageVersion)" />
         <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="$(MicrosoftAzureFunctionsWorkerPackageVersion)" />
-        <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="$(MicrosoftAzureFunctionsExtensionsPackageVersion)" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="$(MicrosoftAzureFunctionsWorkerExtensionsServiceBusPackageVersion)" />
     		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="$(MicrosoftAzureFunctionsWorkerSdkPackageVersion)" />
     </ItemGroup>
     <ItemGroup>
@@ -25,4 +26,7 @@
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </None>
     </ItemGroup>
+  <ItemGroup>
+    <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
+  </ItemGroup>
 </Project>
