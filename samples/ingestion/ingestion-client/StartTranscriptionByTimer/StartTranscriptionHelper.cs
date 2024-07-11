@@ -22,8 +22,6 @@ namespace StartTranscriptionByTimer
 
     public class StartTranscriptionHelper
     {
-        private static readonly StorageConnector StorageConnectorInstance = new (StartTranscriptionEnvironmentVariables.AzureWebJobsStorage);
-
         private static readonly ServiceBusClient StartServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
 
         private static readonly ServiceBusSender StartSender = StartServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath);
@@ -44,9 +42,12 @@ namespace StartTranscriptionByTimer
 
         private readonly string locale;
 
-        public StartTranscriptionHelper(ILogger logger)
+        private readonly IStorageConnector storageConnector;
+
+        public StartTranscriptionHelper(ILogger logger, IStorageConnector storageConnector)
         {
             this.logger = logger;
+            this.storageConnector = storageConnector;
             this.locale = StartTranscriptionEnvironmentVariables.Locale.Split('|')[0].Trim();
         }
 
@@ -111,7 +112,7 @@ namespace StartTranscriptionByTimer
             }
 
             var busMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(message.Body.ToString());
-            var audioFileName = StorageConnector.GetFileNameFromUri(busMessage.Data.Url);
+            var audioFileName = this.storageConnector.GetFileNameFromUri(busMessage.Data.Url);
 
             await this.StartBatchTranscriptionJobAsync(new[] { message }, audioFileName).ConfigureAwait(false);
         }
@@ -132,7 +133,7 @@ namespace StartTranscriptionByTimer
                 var serviceBusMessage = JsonConvert.DeserializeObject<Connector.ServiceBusMessage>(messageBody);
 
                 if (serviceBusMessage.EventType.Contains("BlobCreate", StringComparison.OrdinalIgnoreCase) &&
-                    StorageConnector.GetContainerNameFromUri(serviceBusMessage.Data.Url).Equals(this.audioInputContainerName, StringComparison.Ordinal))
+                    this.storageConnector.GetContainerNameFromUri(serviceBusMessage.Data.Url).Equals(this.audioInputContainerName, StringComparison.Ordinal))
                 {
                     return true;
                 }
@@ -203,10 +204,12 @@ namespace StartTranscriptionByTimer
                     }
                     else
                     {
-                        audioUrls.Add(StorageConnectorInstance.CreateSas(serviceBusMessage.Data.Url));
+                        audioUrls.Add(this.storageConnector.CreateSas(serviceBusMessage.Data.Url));
                     }
 
-                    audioFileInfos.Add(new AudioFileInfo(absoluteAudioUrl, serviceBusMessage.RetryCount, textAnalyticsRequests: null));
+                    var fileName = this.storageConnector.GetFileNameFromUri(new Uri(absoluteAudioUrl));
+
+                    audioFileInfos.Add(new AudioFileInfo(absoluteAudioUrl, serviceBusMessage.RetryCount, textAnalyticsRequests: null, fileName));
                 }
 
                 ModelIdentity modelIdentity = null;
@@ -286,7 +289,7 @@ namespace StartTranscriptionByTimer
                 }
                 else
                 {
-                    var fileName = StorageConnector.GetFileNameFromUri(serviceBusMessage.Data.Url);
+                    var fileName = this.storageConnector.GetFileNameFromUri(serviceBusMessage.Data.Url);
                     var errorFileName = fileName + ".txt";
                     var retryExceededErrorMessage = $"Exceeded retry count for transcription {fileName} with error message {errorMessage}.";
                     this.logger.LogError(retryExceededErrorMessage);
@@ -299,11 +302,11 @@ namespace StartTranscriptionByTimer
         {
             this.logger.LogError(errorMessage);
             var jobErrorFileName = $"jobs/{jobName}.txt";
-            await StorageConnectorInstance.WriteTextFileToBlobAsync(errorMessage, this.errorReportContaineName, jobErrorFileName, this.logger).ConfigureAwait(false);
+            await this.storageConnector.WriteTextFileToBlobAsync(errorMessage, this.errorReportContaineName, jobErrorFileName).ConfigureAwait(false);
 
             foreach (var message in serviceBusMessages)
             {
-                var fileName = StorageConnector.GetFileNameFromUri(message.Data.Url);
+                var fileName = this.storageConnector.GetFileNameFromUri(message.Data.Url);
                 var errorFileName = fileName + ".txt";
                 await this.ProcessFailedFileAsync(fileName, errorMessage, errorFileName).ConfigureAwait(false);
             }
@@ -337,14 +340,13 @@ namespace StartTranscriptionByTimer
         {
             try
             {
-                await StorageConnectorInstance.WriteTextFileToBlobAsync(errorMessage, this.errorReportContaineName, logFileName, this.logger).ConfigureAwait(false);
-                await StorageConnectorInstance.MoveFileAsync(
+                await this.storageConnector.WriteTextFileToBlobAsync(errorMessage, this.errorReportContaineName, logFileName).ConfigureAwait(false);
+                await this.storageConnector.MoveFileAsync(
                     this.audioInputContainerName,
                     fileName,
                     StartTranscriptionEnvironmentVariables.ErrorFilesOutputContainer,
                     fileName,
-                    false,
-                    this.logger).ConfigureAwait(false);
+                    false).ConfigureAwait(false);
             }
             catch (RequestFailedException e)
             {

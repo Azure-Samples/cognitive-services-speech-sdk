@@ -9,16 +9,17 @@ namespace Connector.Serializable.TranscriptionStartedServiceBusMessage
 
     public class AudioFileInfo
     {
-        public AudioFileInfo(string fileUrl, int retryCount, TextAnalyticsRequests textAnalyticsRequests)
+        public AudioFileInfo(string fileUrl, int retryCount, TextAnalyticsRequests textAnalyticsRequests, string fileName)
         {
             this.FileUrl = fileUrl;
             this.RetryCount = retryCount;
             this.TextAnalyticsRequests = textAnalyticsRequests;
+            this.FileName = fileName;
         }
 
         public string FileUrl { get; set; }
 
-        public string FileName => StorageConnector.GetFileNameFromUri(new Uri(this.FileUrl));
+        public string FileName { get; set; }
 
         public int RetryCount { get; set; }
 

@@ -10,6 +10,9 @@ namespace StartTranscriptionByTimer
     using System.Linq;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+
+    using Connector;
+
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Logging;
 
@@ -28,13 +31,17 @@ namespace StartTranscriptionByTimer
 
         private readonly ILogger<StartTranscriptionByTimer> logger;
 
+        private readonly IStorageConnector storageConnector;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="StartTranscriptionByTimer"/> class.
         /// </summary>
         /// <param name="logger">The StartTranscriptionByTimer logger</param>
-        public StartTranscriptionByTimer(ILogger<StartTranscriptionByTimer> logger)
+        /// <param name="storageConnector">Storage connector dependency</param>
+        public StartTranscriptionByTimer(ILogger<StartTranscriptionByTimer> logger, IStorageConnector storageConnector)
         {
             this.logger = logger;
+            this.storageConnector = storageConnector;
         }
 
         /// <summary>
@@ -52,7 +59,7 @@ namespace StartTranscriptionByTimer
             this.logger.LogInformation($"C# Isolated Timer trigger function v4 executed at: {startDateTime}. Next occurrence on {timerInfo.ScheduleStatus.Next}.");
 
             var validServiceBusMessages = new List<ServiceBusReceivedMessage>();
-            var transcriptionHelper = new StartTranscriptionHelper(this.logger);
+            var transcriptionHelper = new StartTranscriptionHelper(this.logger, this.storageConnector);
 
             this.logger.LogInformation("Pulling messages from queue...");
             var messages = await ServiceBusReceiver.ReceiveMessagesAsync(StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);

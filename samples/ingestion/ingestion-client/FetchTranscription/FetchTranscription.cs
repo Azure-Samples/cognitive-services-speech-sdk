@@ -18,7 +18,7 @@ namespace FetchTranscription
     public class FetchTranscription
     {
         private readonly IServiceProvider serviceProvider;
-
+        private readonly IStorageConnector storageConnector;
         private readonly ILogger<FetchTranscription> logger;
 
         /// <summary>
@@ -26,10 +26,12 @@ namespace FetchTranscription
         /// </summary>
         /// <param name="serviceProvider">The service provider.</param>
         /// <param name="logger">The FetchTranscription logger.</param>
-        public FetchTranscription(IServiceProvider serviceProvider, ILogger<FetchTranscription> logger)
+        /// <param name="storageConnector">Storage Connector dependency</param>
+        public FetchTranscription(IServiceProvider serviceProvider, ILogger<FetchTranscription> logger, IStorageConnector storageConnector)
         {
             this.serviceProvider = serviceProvider;
             this.logger = logger;
+            this.storageConnector = storageConnector;
         }
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace FetchTranscription
 
             var serviceBusMessage = TranscriptionStartedMessage.DeserializeMessage(message);
 
-            var transcriptionProcessor = new TranscriptionProcessor(this.serviceProvider);
+            var transcriptionProcessor = new TranscriptionProcessor(this.serviceProvider, this.storageConnector);
 
             await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  this.logger).ConfigureAwait(false);
         }

@@ -8,6 +8,9 @@ namespace StartTranscription
     using System;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+
+    using Connector;
+
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Logging;
     using StartTranscriptionByTimer;
@@ -18,14 +21,17 @@ namespace StartTranscription
     public class StartTranscriptionByServiceBus
     {
         private readonly ILogger<StartTranscriptionByServiceBus> logger;
+        private readonly IStorageConnector storageConnector;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StartTranscriptionByServiceBus"/> class.
         /// </summary>
         /// <param name="logger">The StartTranscriptionByServiceBus Logger</param>
-        public StartTranscriptionByServiceBus(ILogger<StartTranscriptionByServiceBus> logger)
+        /// <param name="storageConnector">Storage connector dependency</param>
+        public StartTranscriptionByServiceBus(ILogger<StartTranscriptionByServiceBus> logger, IStorageConnector storageConnector)
         {
             this.logger = logger;
+            this.storageConnector = storageConnector;
         }
 
         /// <summary>
@@ -42,7 +48,7 @@ namespace StartTranscription
             this.logger.LogInformation($"C# Isolated ServiceBus queue trigger function processed message: {message.Subject}");
             this.logger.LogInformation($"Received message: SequenceNumber:{message.SequenceNumber} Body:{message.Body}");
 
-            var transcriptionHelper = new StartTranscriptionHelper(this.logger);
+            var transcriptionHelper = new StartTranscriptionHelper(this.logger, this.storageConnector);
 
             if (message == null || !transcriptionHelper.IsValidServiceBusMessage(message))
             {

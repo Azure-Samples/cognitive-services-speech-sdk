@@ -5,19 +5,34 @@
 
 namespace StartTranscriptionByTimer
 {
+    using Azure.Storage;
+    using Azure.Storage.Blobs;
+
     using Connector;
+
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
 
     public static class Program
     {
         public static void Main(string[] args)
         {
+            var storageConnectionString = StartTranscriptionEnvironmentVariables.AzureWebJobsStorage;
+            var blobServiceClient = new BlobServiceClient(storageConnectionString);
+
+            var storageCredential = new StorageSharedKeyCredential(
+                AzureStorageConnectionExtensions.GetValueFromConnectionString("AccountName", storageConnectionString),
+                AzureStorageConnectionExtensions.GetValueFromConnectionString("AccountKey", storageConnectionString));
+
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
                 .ConfigureServices(s =>
                 {
                     // This is a unified way to configure logging filter for all functions.
                     s.ConfigureIngestionClientLogging();
+                    s.AddSingleton(blobServiceClient);
+                    s.AddSingleton(storageCredential);
+                    s.AddTransient<IStorageConnector, StorageConnector>();
                 })
                 .Build();
 

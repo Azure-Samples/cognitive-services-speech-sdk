@@ -5,6 +5,11 @@
 
 namespace FetchTranscription
 {
+    using System;
+
+    using Azure.Storage;
+    using Azure.Storage.Blobs;
+
     using Connector;
     using Connector.Database;
 
@@ -17,6 +22,11 @@ namespace FetchTranscription
         public static void Main(string[] args)
         {
             var useSqlDatabase = FetchTranscriptionEnvironmentVariables.UseSqlDatabase;
+            var storageConnectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+            var blobServiceClient = new BlobServiceClient(storageConnectionString);
+            var storageCredential = new StorageSharedKeyCredential(
+                AzureStorageConnectionExtensions.GetValueFromConnectionString("AccountName", storageConnectionString),
+                AzureStorageConnectionExtensions.GetValueFromConnectionString("AccountKey", storageConnectionString));
 
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
@@ -30,6 +40,10 @@ namespace FetchTranscription
                         s.AddDbContext<IngestionClientDbContext>(
                         options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, FetchTranscriptionEnvironmentVariables.DatabaseConnectionString));
                     }
+
+                    s.AddSingleton(blobServiceClient);
+                    s.AddSingleton(storageCredential);
+                    s.AddTransient<IStorageConnector, StorageConnector>();
                 })
                 .Build();
 
