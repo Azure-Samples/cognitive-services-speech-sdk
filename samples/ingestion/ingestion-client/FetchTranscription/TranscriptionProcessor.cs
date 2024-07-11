@@ -22,7 +22,6 @@ namespace FetchTranscription
 
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Azure;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
@@ -34,23 +33,19 @@ namespace FetchTranscription
 
         private readonly ServiceBusSender completedTranscriptionServiceBusSender;
 
-        private readonly IServiceProvider serviceProvider;
-
         private readonly IngestionClientDbContext databaseContext;
 
         private readonly IStorageConnector storageConnector;
 
-        public TranscriptionProcessor(IServiceProvider serviceProvider, IStorageConnector storageConnector)
+        public TranscriptionProcessor(
+            IStorageConnector storageConnector,
+            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
+            IngestionClientDbContext databaseContext)
         {
-            this.serviceProvider = serviceProvider;
             this.storageConnector = storageConnector;
+            this.databaseContext = databaseContext;
 
-            if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
-            {
-                this.databaseContext = this.serviceProvider.GetRequiredService<IngestionClientDbContext>();
-            }
-
-            var serviceBusClientFactory = serviceProvider.GetRequiredService<IAzureClientFactory<ServiceBusClient>>();
+            ArgumentNullException.ThrowIfNull(serviceBusClientFactory, nameof(serviceBusClientFactory));
             var startTranscriptionServiceBusClient = serviceBusClientFactory.CreateClient(ServiceBusClientName.StartTranscriptionServiceBusClient.ToString());
             var startTranscriptionQueueName = ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath;
             this.startTranscriptionServiceBusSender = startTranscriptionServiceBusClient.CreateSender(startTranscriptionQueueName);
