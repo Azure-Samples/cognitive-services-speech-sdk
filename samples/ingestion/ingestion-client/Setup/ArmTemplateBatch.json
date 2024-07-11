@@ -256,7 +256,7 @@
     },
     "variables":
     {
-        "Version": "v2.0.17",
+        "Version": "v2.1.2",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -895,7 +895,10 @@
             "properties":
             {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]",
-                "httpsOnly": "true"
+                "httpsOnly": "true",
+                "siteConfig": {
+                    "netFrameworkVersion": "v8.0"
+                }
             },
             "identity":
             {
@@ -938,8 +941,7 @@
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription'), '2017-04-01').primaryConnectionString]",
                 "FilesPerTranscriptionJob": "[variables('FilesPerTranscriptionJob')]",
                 "FUNCTIONS_EXTENSION_VERSION": "~4",
-                "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-                "FUNCTIONS_INPROC_NET8_ENABLED": 1,
+                "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
                 "AzureSpeechServicesEndpointUri": "[variables('AzureSpeechServicesEndpointUri')]",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
                 "IsAzureGovDeployment": "[variables('IsAzureGovDeployment')]",
@@ -967,7 +969,10 @@
             "properties":
             {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]",
-                "httpsOnly": "true"
+                "httpsOnly": "true",
+                "siteConfig": {
+                    "netFrameworkVersion": "v8.0"
+                }
             },
             "identity":
             {
@@ -1010,8 +1015,7 @@
                 "ErrorReportOutputContainer": "[variables('ErrorReportOutputContainer')]",
                 "FetchTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue','FetchTranscription'), '2017-04-01').primaryConnectionString]",
                 "FUNCTIONS_EXTENSION_VERSION": "~4",
-                "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-                "FUNCTIONS_INPROC_NET8_ENABLED": 1,
+                "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
                 "HtmlResultOutputContainer": "[variables('HtmlResultOutputContainer')]",
                 "InitialPollingDelayInMinutes": "[variables('InitialPollingDelayInMinutes')]",
                 "MaxPollingDelayInMinutes": "[variables('MaxPollingDelayInMinutes')]",

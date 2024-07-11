@@ -9,33 +9,45 @@ namespace FetchTranscription
     using System.Threading.Tasks;
     using Connector;
 
-    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Logging;
 
+    /// <summary>
+    /// Fetch Transcription class.
+    /// </summary>
     public class FetchTranscription
     {
         private readonly IServiceProvider serviceProvider;
         private readonly IStorageConnector storageConnector;
+        private readonly ILogger<FetchTranscription> logger;
 
-        public FetchTranscription(IServiceProvider serviceProvider, IStorageConnector storageConnector)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FetchTranscription"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="logger">The FetchTranscription logger.</param>
+        /// <param name="storageConnector">Storage Connector dependency</param>
+        public FetchTranscription(IServiceProvider serviceProvider, ILogger<FetchTranscription> logger, IStorageConnector storageConnector)
         {
             this.serviceProvider = serviceProvider;
+            this.logger = logger;
             this.storageConnector = storageConnector;
         }
 
-        [FunctionName("FetchTranscription")]
-        public async Task Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string message, ILogger log)
+        /// <summary>
+        /// Triggered by a Service Bus message to fetch the transcription.
+        /// </summary>
+        /// <param name="message">The message on the queue</param>
+        [Function("FetchTranscription")]
+        public async Task Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string message)
         {
-            if (log == null)
-            {
-                throw new ArgumentNullException(nameof(log));
-            }
+            ArgumentNullException.ThrowIfNull(this.logger, nameof(this.logger));
 
-            log.LogInformation($"C# Service bus triggered function executed at: {DateTime.Now}");
+            this.logger.LogInformation($"C# Isolated Service bus triggered function executed at: {DateTime.Now}");
 
             if (string.IsNullOrEmpty(message))
             {
-                log.LogInformation($"Found invalid service bus message: {message}. Stopping execution.");
+                this.logger.LogInformation($"Found invalid service bus message: {message}. Stopping execution.");
                 return;
             }
 
@@ -43,7 +55,7 @@ namespace FetchTranscription
 
             var transcriptionProcessor = new TranscriptionProcessor(this.serviceProvider, this.storageConnector);
 
-            await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  log).ConfigureAwait(false);
+            await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  this.logger).ConfigureAwait(false);
         }
     }
 }

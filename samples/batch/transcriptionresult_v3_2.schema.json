@@ -1,0 +1,7 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://speech.microsoft.com/transcriptionresult_v3_2.schema.json",
+    "title": "Transcription result",
+    "allOf": [{ "$ref": "https://speech.microsoft.com/transcriptionresult_v3_1.schema.json" }]
+}
