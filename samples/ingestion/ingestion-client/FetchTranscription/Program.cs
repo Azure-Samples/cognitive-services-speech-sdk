@@ -12,8 +12,10 @@ namespace FetchTranscription
 
     using Connector;
     using Connector.Database;
+    using Connector.Enums;
 
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
 
@@ -44,6 +46,20 @@ namespace FetchTranscription
                     s.AddSingleton(blobServiceClient);
                     s.AddSingleton(storageCredential);
                     s.AddTransient<IStorageConnector, StorageConnector>();
+
+                    s.AddAzureClients(clientBuilder =>
+                    {
+                        clientBuilder.AddServiceBusClient(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString)
+                            .WithName(ServiceBusClientName.StartTranscriptionServiceBusClient.ToString());
+                        clientBuilder.AddServiceBusClient(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString)
+                            .WithName(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
+
+                        if (!string.IsNullOrWhiteSpace(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+                        {
+                            clientBuilder.AddServiceBusClient(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString)
+                                .WithName(ServiceBusClientName.CompletedTranscriptionServiceBusClient.ToString());
+                        }
+                    });
                 })
                 .Build();
 
