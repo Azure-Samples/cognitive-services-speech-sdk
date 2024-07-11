@@ -256,7 +256,7 @@
     },
     "variables":
     {
-        "Version": "v2.1.1",
+        "Version": "v2.1.2",
         "AudioInputContainer": "audio-input",
         "AudioProcessedContainer": "audio-processed",
         "ErrorFilesOutputContainer": "audio-failed",
@@ -895,7 +895,10 @@
             "properties":
             {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]",
-                "httpsOnly": "true"
+                "httpsOnly": "true",
+                "siteConfig": {
+                    "netFrameworkVersion": "v8.0"
+                }
             },
             "identity":
             {
@@ -966,7 +969,10 @@
             "properties":
             {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]",
-                "httpsOnly": "true"
+                "httpsOnly": "true",
+                "siteConfig": {
+                    "netFrameworkVersion": "v8.0"
+                }
             },
             "identity":
             {

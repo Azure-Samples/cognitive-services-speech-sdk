@@ -5,8 +5,6 @@
 
 namespace FetchTranscription
 {
-    using System.Threading.Tasks;
-
     using Connector;
     using Connector.Database;
 
@@ -16,8 +14,10 @@ namespace FetchTranscription
 
     public static class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
+            var useSqlDatabase = FetchTranscriptionEnvironmentVariables.UseSqlDatabase;
+
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
                 .ConfigureServices(s =>
@@ -25,7 +25,7 @@ namespace FetchTranscription
                     // This is a unified way to configure logging filter for all functions.
                     s.ConfigureIngestionClientLogging();
 
-                    if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
+                    if (useSqlDatabase)
                     {
                         s.AddDbContext<IngestionClientDbContext>(
                         options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, FetchTranscriptionEnvironmentVariables.DatabaseConnectionString));
@@ -33,7 +33,15 @@ namespace FetchTranscription
                 })
                 .Build();
 
-            await host.RunAsync();
+            // apply database migrations once during startup (not with every function execution):
+            if (useSqlDatabase)
+            {
+                using var scope = host.Services.CreateScope();
+                var ingestionClientDbContext = scope.ServiceProvider.GetRequiredService<IngestionClientDbContext>();
+                ingestionClientDbContext.Database.Migrate();
+            }
+
+            host.Run();
         }
     }
 }

@@ -5,13 +5,12 @@
 
 namespace StartTranscriptionByTimer
 {
-    using System.Threading.Tasks;
     using Connector;
     using Microsoft.Extensions.Hosting;
 
     public static class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
@@ -22,7 +21,7 @@ namespace StartTranscriptionByTimer
                 })
                 .Build();
 
-            await host.RunAsync();
+            host.Run();
         }
     }
 }

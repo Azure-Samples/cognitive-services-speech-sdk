@@ -5,7 +5,6 @@
 
 namespace StartTranscription
 {
-    using System.Threading.Tasks;
     using Connector;
     using Microsoft.Extensions.Hosting;
 
@@ -18,8 +17,7 @@ namespace StartTranscription
         /// Main entry point of the function app.
         /// </summary>
         /// <param name="args"></param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
@@ -30,7 +28,7 @@ namespace StartTranscription
                 })
                 .Build();
 
-            await host.RunAsync();
+            host.Run();
         }
     }
 }
