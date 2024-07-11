@@ -1,13 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Azure.Storage.Blobs" Version="12.14.0" />
-        <PackageReference Include="JsonSubTypes" Version="1.9.0" />
-        <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.16.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.31" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.31" />
-        <PackageReference Include="Polly" Version="7.2.3" />
+        <PackageReference Include="Azure.Storage.Blobs" Version="$(AzureStorageBlobsPackageVersion)" />
+        <PackageReference Include="JsonSubTypes" Version="$(JsonSubTypesPackageVersion)" />
+        <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="$(MicrosoftApplicationInsightsWorkerServicePackageVersion)" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="$(MicrosoftAzureFunctionsWorkerPackageVersion)" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="$(MicrosoftAzureFunctionsWorkerApplicationInsightsPackageVersion)" />
+        <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.ServiceBus" Version="$(MicrosoftAzureFunctionsWorkerExtensionsServiceBusPackageVersion)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="$(MicrosoftEntityFrameworkCorePackageVersion)" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(MicrosoftEntityFrameworkCoreSqlServerPackageVersion)" />
+        <PackageReference Include="Polly" Version="$(PollyPackageVersion)" />
     </ItemGroup>
 </Project>
