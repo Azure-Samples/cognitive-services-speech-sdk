@@ -10,6 +10,7 @@ namespace Connector
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Web;
     using Azure.Storage;
     using Azure.Storage.Blobs;
     using Azure.Storage.Sas;
@@ -35,7 +36,7 @@ namespace Connector
                 throw new ArgumentNullException(nameof(fileUri));
             }
 
-            var pathParts = System.Web.HttpUtility.UrlDecode(fileUri.AbsolutePath).Split('/').ToList();
+            var pathParts = HttpUtility.UrlDecode(fileUri.AbsolutePath).Split('/').ToList();
             var cleanedPathParts = pathParts.SkipWhile(part => string.IsNullOrEmpty(part) || part.Equals("/", StringComparison.OrdinalIgnoreCase));
             return string.Join('/', cleanedPathParts.Skip(1));
         }
@@ -47,7 +48,7 @@ namespace Connector
                 throw new ArgumentNullException(nameof(fileUri));
             }
 
-            var pathParts = System.Web.HttpUtility.UrlDecode(fileUri.AbsolutePath).Split('/').ToList();
+            var pathParts = HttpUtility.UrlDecode(fileUri.AbsolutePath).Split('/').ToList();
             var cleanedPathParts = pathParts.SkipWhile(part => string.IsNullOrEmpty(part) || part.Equals("/", StringComparison.OrdinalIgnoreCase));
             return cleanedPathParts.FirstOrDefault();
         }
