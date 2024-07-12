@@ -16,7 +16,7 @@ The following diagram shows the structure of this tool as defined by the ARM tem
 
 When a file lands in a storage container, the Grid event indicates the completed upload of a file. The file is filtered and pushed to a Service bus topic. Code in Azure Functions triggered by a timer picks up the event and creates a transcription request using the Azure Speech services batch pipeline. When the transcription request is complete, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status. When transcription completes, the Azure Function copies the transcript into the same container where the audio file was obtained.
 
-The rest of the features are applied on demand. By deploying additional resources through the ARM template, you can choose to apply analytics on the transcript, produce reports or redact. 
+The rest of the features are applied on demand. By deploying additional resources through the ARM template, you can choose to apply analytics on the transcript, produce reports or redact.
 
 This solution can transcribe audio files automatically and at scale.
 
@@ -55,7 +55,7 @@ To test, we recommend you use [Microsoft Azure Storage Explorer](https://azure.m
 
 To deploy the required infrastructure, click the button below:
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcognitive-services-speech-sdk%2Fmaster%2Fsamples%2Fingestion%2Fingestion-client%2FSetup%2FArmTemplateBatch.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcognitive-services-speech-sdk%2Fmaster%2Fsamples%2Fingestion%2Fingestion-client%2Finfra%2Fmain.json)
 
 This will result in the screen below on your browser. You will need to fill in the form provided. It is
 important that all the information is correct. Let us look at the form and go through each field.
@@ -175,7 +175,7 @@ cd cognitive-services-speech-sdk/samples/ingestion/ingestion-client
 The created resources their pricing and corresponding plans (where applicable) are:
 
 * [Storage Pricing](https://azure.microsoft.com/pricing/details/storage/), Simple Storage
-* [Service Bus Pricing](https://azure.microsoft.com/pricing/details/service-bus/), Standard 
+* [Service Bus Pricing](https://azure.microsoft.com/pricing/details/service-bus/), Standard
 * [Azure Functions Pricing](https://azure.microsoft.com/pricing/details/functions/), Premium / Consumption
 * [Key Vault Pricing](https://azure.microsoft.com/pricing/details/key-vault/)
 
@@ -189,7 +189,7 @@ The following example is indicative of the cost distributions to inform and set 
 Assume a scenario where we are trying to transcribe 1000 mp3 files of an average length of 10mins and size of 10MB. Each of them individually landing on the storage container over the course of a business day.
 
 * [Speech Transcription](https://azure.microsoft.com/services/cognitive-services/speech-to-text/) Costs are: 10k mins = **$166.60**
-* [Service Bus](https://azure.microsoft.com/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = **$0.324/daily** (standing charge) for up to 13m messages/month 
+* [Service Bus](https://azure.microsoft.com/services/service-bus) Costs are: 1k events landing in 'CreateTranscriptionQueue' and another 1k in 'FetchTranscriptionQueue' = **$0.324/daily** (standing charge) for up to 13m messages/month
 * [Storage](https://azure.microsoft.com/services/storage/) Costs are: Write operations are $0.0175 (per 10,000), and Read operations $0.0014 (again per 10k read operations) = ($0.0175 + $0.0014)/10 (for 1000 files) = **$0.00189**
 * [Azure Functions](https://azure.microsoft.com/services/functions/) For Consumption, the costs are: The first 400,000 GB/s of execution and 1,000,000 executions are free = $0.00. For Premium functions, the base cost is: 2 instances in EP1 x 1 hour: $0.43
 * [Key Vault](https://azure.microsoft.com/services/key-vault/) Costs are: 0.03/10,000 transactions (For the above scenario 1 transactions would be required per file) = **$0.003**

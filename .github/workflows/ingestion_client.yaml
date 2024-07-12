@@ -20,7 +20,7 @@ jobs:
         id: get_release_versions
         run: |
           set -u -e -o pipefail
-          version=$(cat ./samples/ingestion/ingestion-client/Setup/ArmTemplateBatch.json | jq -r .variables.Version)
+          version=$(cat ./samples/ingestion/ingestion-client/infra/main.json | jq -r .variables.Version)
           echo version=$version >> "$GITHUB_OUTPUT"
           echo "Batch template: ${version}"
 
