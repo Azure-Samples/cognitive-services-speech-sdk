@@ -5,13 +5,13 @@
 
 namespace StartTranscription
 {
-    using System;
-
     using Azure.Storage;
     using Azure.Storage.Blobs;
 
     using Connector;
+    using Connector.Enums;
 
+    using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
 
@@ -44,6 +44,14 @@ namespace StartTranscription
                     s.AddSingleton(blobServiceClient);
                     s.AddSingleton(storageCredential);
                     s.AddTransient<IStorageConnector, StorageConnector>();
+
+                    s.AddAzureClients(clientBuilder =>
+                    {
+                        clientBuilder.AddServiceBusClient(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString)
+                            .WithName(ServiceBusClientName.StartTranscriptionServiceBusClient.ToString());
+                        clientBuilder.AddServiceBusClient(StartTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString)
+                            .WithName(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
+                    });
                 })
                 .Build();
 

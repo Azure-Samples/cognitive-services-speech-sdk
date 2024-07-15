@@ -8,10 +8,14 @@ namespace Tests
     using System;
     using System.IO;
     using System.Linq;
+
     using Connector;
+
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     using Moq;
+
     using Newtonsoft.Json;
 
     [TestClass]
