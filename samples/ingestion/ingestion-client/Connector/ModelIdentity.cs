@@ -5,8 +5,6 @@
 
 namespace Connector
 {
-    using System;
-
     public sealed class ModelIdentity
     {
         public ModelIdentity(string self)

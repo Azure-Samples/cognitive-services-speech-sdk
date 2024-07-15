@@ -21,49 +21,44 @@ namespace FetchTranscription
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
     public class TranscriptionProcessor
     {
-        private static readonly ServiceBusClient StartServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
+        private readonly ServiceBusSender startTranscriptionServiceBusSender;
 
-        private static readonly ServiceBusSender StartServiceBusSender = StartServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath);
+        private readonly ServiceBusSender fetchTranscriptionServiceBusSender;
 
-        private static readonly ServiceBusClient FetchServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString);
-
-        private static readonly ServiceBusSender FetchServiceBusSender = FetchServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath);
-
-        private static readonly ServiceBusClient CompletedServiceBusClient;
-
-        private static readonly ServiceBusSender CompletedServiceBusSender;
-
-        private readonly IServiceProvider serviceProvider;
+        private readonly ServiceBusSender completedTranscriptionServiceBusSender;
 
         private readonly IngestionClientDbContext databaseContext;
 
         private readonly IStorageConnector storageConnector;
 
-        #pragma warning disable CA1810
-        static TranscriptionProcessor()
+        public TranscriptionProcessor(
+            IStorageConnector storageConnector,
+            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
+            IngestionClientDbContext databaseContext)
         {
-            if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
-            {
-                CompletedServiceBusClient = new ServiceBusClient(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString);
-                CompletedServiceBusSender = CompletedServiceBusClient.CreateSender(ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString).EntityPath);
-            }
-        }
-        #pragma warning restore CA1810
-
-        public TranscriptionProcessor(IServiceProvider serviceProvider, IStorageConnector storageConnector)
-        {
-            this.serviceProvider = serviceProvider;
             this.storageConnector = storageConnector;
+            this.databaseContext = databaseContext;
 
-            if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
+            ArgumentNullException.ThrowIfNull(serviceBusClientFactory, nameof(serviceBusClientFactory));
+            var startTranscriptionServiceBusClient = serviceBusClientFactory.CreateClient(ServiceBusClientName.StartTranscriptionServiceBusClient.ToString());
+            var startTranscriptionQueueName = ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath;
+            this.startTranscriptionServiceBusSender = startTranscriptionServiceBusClient.CreateSender(startTranscriptionQueueName);
+
+            var fetchTranscriptionServiceBusClient = serviceBusClientFactory.CreateClient(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
+            var fetchTranscriptionQueueName = ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.FetchTranscriptionServiceBusConnectionString).EntityPath;
+            this.fetchTranscriptionServiceBusSender = fetchTranscriptionServiceBusClient.CreateSender(fetchTranscriptionQueueName);
+
+            if (!string.IsNullOrWhiteSpace(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
             {
-                this.databaseContext = this.serviceProvider.GetRequiredService<IngestionClientDbContext>();
+                var completedTranscriptionServiceBusClient = serviceBusClientFactory.CreateClient(ServiceBusClientName.CompletedTranscriptionServiceBusClient.ToString());
+                var completedTranscriptionQueueName = ServiceBusConnectionStringProperties.Parse(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString).EntityPath;
+                this.completedTranscriptionServiceBusSender = completedTranscriptionServiceBusClient.CreateSender(completedTranscriptionQueueName);
             }
         }
 
@@ -97,11 +92,11 @@ namespace FetchTranscription
                         break;
                     case "Running":
                         log.LogInformation($"Transcription running, polling again after {messageDelayTime.TotalMinutes} minutes.");
-                        await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+                        await ServiceBusUtilities.SendServiceBusMessageAsync(this.fetchTranscriptionServiceBusSender, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
                         break;
                     case "NotStarted":
                         log.LogInformation($"Transcription not started, polling again after {messageDelayTime.TotalMinutes} minutes.");
-                        await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+                        await ServiceBusUtilities.SendServiceBusMessageAsync(this.fetchTranscriptionServiceBusSender, serviceBusMessage.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
                         break;
                 }
             }
@@ -221,7 +216,7 @@ namespace FetchTranscription
                     };
 
                     var audioFileMessage = new Azure.Messaging.ServiceBus.ServiceBusMessage(JsonConvert.SerializeObject(serviceBusMessage));
-                    await ServiceBusUtilities.SendServiceBusMessageAsync(StartServiceBusSender, audioFileMessage, log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                    await ServiceBusUtilities.SendServiceBusMessageAsync(this.startTranscriptionServiceBusSender, audioFileMessage, log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 }
                 else
                 {
@@ -284,7 +279,7 @@ namespace FetchTranscription
             if (message.FailedExecutionCounter <= FetchTranscriptionEnvironmentVariables.RetryLimit || isThrottled)
             {
                 log.LogInformation("Retrying..");
-                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, message.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
+                await ServiceBusUtilities.SendServiceBusMessageAsync(this.fetchTranscriptionServiceBusSender, message.CreateMessageString(), log, messageDelayTime).ConfigureAwait(false);
             }
             else
             {
@@ -342,7 +337,7 @@ namespace FetchTranscription
             {
                 // If transcription analytics request is still running, re-queue message and get status again after X minutes:
                 log.LogInformation($"Transcription analytics requests still running for job {jobName} - re-queueing message.");
-                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+                await ServiceBusUtilities.SendServiceBusMessageAsync(this.fetchTranscriptionServiceBusSender, serviceBusMessage.CreateMessageString(), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
                 return;
             }
 
@@ -418,7 +413,7 @@ namespace FetchTranscription
                 log.LogInformation($"Added text analytics requests to service bus message - re-queueing message.");
 
                 // Poll for first time with TA request after 1 minute
-                await ServiceBusUtilities.SendServiceBusMessageAsync(FetchServiceBusSender, serviceBusMessage.CreateMessageString(), log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                await ServiceBusUtilities.SendServiceBusMessageAsync(this.fetchTranscriptionServiceBusSender, serviceBusMessage.CreateMessageString(), log, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 return;
             }
 
@@ -509,9 +504,9 @@ namespace FetchTranscription
                 }
             }
 
-            if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.CompletedServiceBusConnectionString))
+            if (this.completedTranscriptionServiceBusSender != null)
             {
-                await ServiceBusUtilities.SendServiceBusMessageAsync(CompletedServiceBusSender, JsonConvert.SerializeObject(completedMessages), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
+                await ServiceBusUtilities.SendServiceBusMessageAsync(this.completedTranscriptionServiceBusSender, JsonConvert.SerializeObject(completedMessages), log, GetMessageDelayTime(serviceBusMessage.PollingCounter)).ConfigureAwait(false);
             }
 
             var generalErrors = generalErrorsStringBuilder.ToString();
