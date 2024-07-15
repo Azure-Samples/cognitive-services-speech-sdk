@@ -159,6 +159,9 @@ There are several containers to distinguish between the various outputs. We sugg
 
 By default, the ARM template uses the newest version of the Ingestion Client which can be found in this repository. To use a custom version, edit the paths to the binaries inside the deployment template to point to a custom published version. You can find our published binaries [here](https://github.com/Azure-Samples/cognitive-services-speech-sdk/releases?q=ingestion+client&expanded=true).
 
+When using Windows for development, for any changes to the resources, you need to update the `main.bicep` and generate the corresponding `main.json`. If `main.json` is not in sync with the `main.bicep`, your build will fail.
+When using Linux, any changes to `main.bicep`, on every commit will generate the corresponding `main.json`.
+
 To publish a new version, you can use Visual Studio, right-click on the project, click **Publish** and follow the instructions.
 
 ## The Project

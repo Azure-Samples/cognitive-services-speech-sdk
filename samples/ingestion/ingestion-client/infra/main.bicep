@@ -143,7 +143,8 @@ param DeploymentId string = utcNow()
 @secure()
 param CompletedServiceBusConnectionString string = ''
 
-var Version = 'v2.1.3'
+// Don't change the format for Version variable
+var Version = 'v2.1.5'
 var AudioInputContainer = 'audio-input'
 var AudioProcessedContainer = 'audio-processed'
 var ErrorFilesOutputContainer = 'audio-failed'
