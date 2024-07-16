@@ -12,6 +12,7 @@
     "customizations": {
         "vscode": {
             "extensions": [
+                "github.vscode-pull-request-github",
                 "ms-dotnettools.csdevkit",
                 "ms-vscode.azure-account",
                 "ms-azuretools.vscode-azurefunctions",
