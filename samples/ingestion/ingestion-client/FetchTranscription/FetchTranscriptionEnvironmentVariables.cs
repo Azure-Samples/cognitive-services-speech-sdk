@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace FetchTranscriptionFunction
+namespace FetchTranscription
 {
     using System;
     using Connector;
@@ -51,6 +51,8 @@ namespace FetchTranscriptionFunction
 
         public static readonly string FetchTranscriptionServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(FetchTranscriptionServiceBusConnectionString), EnvironmentVariableTarget.Process);
 
+        public static readonly string CompletedServiceBusConnectionString = Environment.GetEnvironmentVariable(nameof(CompletedServiceBusConnectionString), EnvironmentVariableTarget.Process);
+
         public static readonly string HtmlResultOutputContainer = Environment.GetEnvironmentVariable(nameof(HtmlResultOutputContainer), EnvironmentVariableTarget.Process);
 
         public static readonly string JsonResultOutputContainer = Environment.GetEnvironmentVariable(nameof(JsonResultOutputContainer), EnvironmentVariableTarget.Process);
@@ -59,7 +61,7 @@ namespace FetchTranscriptionFunction
 
         public static readonly string TextAnalyticsKey = Environment.GetEnvironmentVariable(nameof(TextAnalyticsKey), EnvironmentVariableTarget.Process);
 
-        public static readonly string TextAnalyticsRegion = Environment.GetEnvironmentVariable(nameof(TextAnalyticsRegion), EnvironmentVariableTarget.Process);
+        public static readonly string TextAnalyticsEndpoint = Environment.GetEnvironmentVariable(nameof(TextAnalyticsEndpoint), EnvironmentVariableTarget.Process);
 
         public static readonly string PiiCategories = Environment.GetEnvironmentVariable(nameof(PiiCategories), EnvironmentVariableTarget.Process);
 

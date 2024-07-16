@@ -1,0 +1,23 @@
+{
+    "name": "Ingestion Client",
+    "image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0",
+    "features": {
+        "ghcr.io/devcontainers/features/azure-cli:1": {},
+        "ghcr.io/devcontainers/features/node:1": {},
+        "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csdevkit",
+                "ms-vscode.azure-account",
+                "ms-azuretools.vscode-azurefunctions",
+                "editorconfig.editorconfig"
+            ],
+            "settings": {
+                "omnisharp.enableRoslynAnalyzers": true,
+                "omnisharp.enableEditorConfigSupport": true
+            }
+        }
+    }
+}
