@@ -6,6 +6,8 @@
 
     <MSTestTestAdapterPackageVersion>[3.4.3]</MSTestTestAdapterPackageVersion>
     <MSTestTestFrameworkPackageVersion>[3.4.3]</MSTestTestFrameworkPackageVersion>
+    <MSTestSdk>[17.10.0]</MSTestSdk>
+    <coverletCollector>[6.0.2]</coverletCollector>
 
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>[2.22.0]</MicrosoftApplicationInsightsWorkerServicePackageVersion>
     <MicrosoftAzureFunctionsWorkerPackageVersion>[1.22.0]</MicrosoftAzureFunctionsWorkerPackageVersion>

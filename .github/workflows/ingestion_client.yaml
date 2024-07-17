@@ -4,6 +4,9 @@ on:
   push:
     branches: ['main', 'master', '*']
     paths: ['samples/ingestion/ingestion-client/**', '.github/workflows/ingestion_client.yaml']
+  pull_request:
+    branches: ['main', 'master','*']
+    paths: ['samples/ingestion/ingestion-client/**', '.github/workflows/ingestion_client.yaml']
 
 jobs:
   convert_bicep:
@@ -31,8 +34,55 @@ jobs:
             echo "Generated ARM template does not match the existing main.json. Please update main.json accordingly." >&2
             exit 1
           fi
-  build:
+
+  test:
+    runs-on: ubuntu-latest
     needs: convert_bicep
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install coverlet
+        run: dotnet tool install --global coverlet.console
+
+      - name: Install reportgenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Run Unit Tests and Collect Coverage
+        run: |
+          dotnet test ./samples/ingestion/ingestion-client/Tests --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
+          reportgenerator -reports:./samples/ingestion/ingestion-client/Tests/**/coverage.cobertura.xml -targetdir:coveragereport -reporttypes:MarkdownSummaryGithub
+        env:
+          PATH: $PATH:/home/runner/.dotnet/tools
+
+      - name: Code Coverage Summary Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: ./samples/ingestion/ingestion-client/Tests/**/coverage.cobertura.xml
+          badge: true
+          format: 'markdown'
+          output: 'both'
+
+      - name: Add Coverage PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: code-coverage-results.md
+
+      - name: Write to Job Summary
+        run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coveragereport
+
+  build:
+    needs: [convert_bicep, test]
     runs-on: ubuntu-latest
     outputs:
       releaseversionoutput: ${{ steps.get_release_versions.outputs.version }}

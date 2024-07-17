@@ -4,6 +4,11 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="$(coverletCollector)">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MSTestSdk)" />
         <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
         <PackageReference Include="MSTest.TestAdapter" Version="$(MSTestTestAdapterPackageVersion)" />
         <PackageReference Include="MSTest.TestFramework" Version="$(MSTestTestFrameworkPackageVersion)" />
