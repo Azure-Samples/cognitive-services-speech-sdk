@@ -1,6 +1,6 @@
 # Power BI Reports
 
-<!-- 
+<!--
 Guidelines on README format: https://review.docs.microsoft.com/help/onboard/admin/samples/concepts/readme-template?branch=master
 
 Guidance on onboarding samples to docs.microsoft.com/samples: https://review.docs.microsoft.com/help/onboard/admin/samples/process/onboarding?branch=master
@@ -27,7 +27,7 @@ These are template reports provided for two use cases that help realize value of
 * An existing [Azure Account](https://azure.microsoft.com/free/)
 * An existing [Speech Services Subscription](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices)
 * An existing [Text Analytics Subscription](https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics) (required for SentimentInsights.pbit only)
-* Successfully deployed [Ingestion Client](https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/ingestion/ingestion-client/Setup/guide.md)
+* Successfully deployed [Ingestion Client](https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/ingestion/ingestion-client/infra/guide.md)
 
 ## Getting started
 
