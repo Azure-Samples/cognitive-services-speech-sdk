@@ -52,9 +52,10 @@ namespace Tests
                     FallbackRole = Role.None,
                 }
             }));
-            var region = testContext.Properties["LanguageServiceRegion"].ToString();
-            var subscriptionKey = testContext.Properties["LanguageServiceSubscriptionKey"].ToString();
-            var provider = new AnalyzeConversationsProvider("en-US", subscriptionKey, region, Logger.Object);
+
+            // var region = testContext.Properties["LanguageServiceRegion"].ToString();
+            // var subscriptionKey = testContext.Properties["LanguageServiceSubscriptionKey"].ToString();
+            var provider = new AnalyzeConversationsProvider("en-US",  "sometestkey", "https://sometestendpoint", Logger.Object);
             var body = File.ReadAllText(@"TestFiles/summarizationInputSample.json");
             var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
 
