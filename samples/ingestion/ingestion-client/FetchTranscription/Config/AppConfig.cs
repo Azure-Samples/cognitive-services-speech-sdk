@@ -62,11 +62,7 @@ namespace FetchTranscription
             set => this.initialPollingDelayInMinutes = Math.Clamp(value, 2, Constants.MaxInitialPollingDelayInMinutes);
         }
 
-        public int MaxPollingDelayInMinutes
-        {
-            get => this.maxPollingDelayInMinutes;
-            set => this.maxPollingDelayInMinutes = Math.Clamp(value, 2, Constants.DefaultMaxPollingDelayInMinutes);
-        }
+        public int MaxPollingDelayInMinutes { get; set; } = Constants.DefaultMaxPollingDelayInMinutes;
 
         public int RetryLimit
         {
