@@ -16,6 +16,7 @@ namespace FetchTranscription
     using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Fetch Transcription class.
@@ -26,6 +27,7 @@ namespace FetchTranscription
         private readonly IStorageConnector storageConnector;
         private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
         private readonly ILogger<FetchTranscription> logger;
+        private readonly AppConfig appConfig;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FetchTranscription"/> class.
@@ -34,16 +36,19 @@ namespace FetchTranscription
         /// <param name="logger">The FetchTranscription logger.</param>
         /// <param name="storageConnector">Storage Connector dependency</param>
         /// <param name="serviceBusClientFactory">Azure client factory for service bus clients</param>
+        /// <param name="appConfig">Environment configuration</param>
         public FetchTranscription(
             IServiceProvider serviceProvider,
             ILogger<FetchTranscription> logger,
             IStorageConnector storageConnector,
-            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory)
+            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
+            IOptions<AppConfig> appConfig)
         {
             this.serviceProvider = serviceProvider;
             this.logger = logger;
             this.storageConnector = storageConnector;
             this.serviceBusClientFactory = serviceBusClientFactory;
+            this.appConfig = appConfig?.Value;
         }
 
         /// <summary>
@@ -65,9 +70,9 @@ namespace FetchTranscription
 
             var serviceBusMessage = TranscriptionStartedMessage.DeserializeMessage(message);
 
-            var databaseContext = FetchTranscriptionEnvironmentVariables.UseSqlDatabase ? this.serviceProvider.GetRequiredService<IngestionClientDbContext>() : null;
+            var databaseContext = this.appConfig.UseSqlDatabase ? this.serviceProvider.GetRequiredService<IngestionClientDbContext>() : null;
 
-            var transcriptionProcessor = new TranscriptionProcessor(this.storageConnector, this.serviceBusClientFactory, databaseContext);
+            var transcriptionProcessor = new TranscriptionProcessor(this.storageConnector, this.serviceBusClientFactory, databaseContext, Options.Create(this.appConfig));
 
             await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  this.logger).ConfigureAwait(false);
         }
