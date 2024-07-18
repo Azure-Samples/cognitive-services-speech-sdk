@@ -4,7 +4,7 @@ repos:
       - id: bicep
         name: bicep
         description: Lint and build Bicep files
-        entry: ./samples/ingestion/ingestion-client/scripts/generate_arm_templates.sh
+        entry: ./samples/ingestion/ingestion-client/infra/generate_arm_templates.sh
         language: script
         files: \.bicep$
         require_serial: true
