@@ -17,7 +17,6 @@ namespace FetchTranscription
         private int initialPollingDelayInMinutes = Constants.DefaultInitialPollingDelayInMinutes;
 
         private int retryLimit = Constants.DefaultRetryLimit;
-        private int maxPollingDelayInMinutes = Constants.DefaultMaxPollingDelayInMinutes;
 
         public SentimentAnalysisSetting SentimentAnalysisSetting { get; set; } = SentimentAnalysisSetting.None;
 
