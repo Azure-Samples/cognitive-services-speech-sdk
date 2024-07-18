@@ -10,6 +10,8 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Connector\Connector.csproj" />
+        <ProjectReference Include="..\StartTranscriptionByTimer\StartTranscriptionByTimer.csproj" />
+        <ProjectReference Include="..\StartTranscriptionByServiceBus\StartTranscriptionByServiceBus.csproj" />
         <ProjectReference Include="..\FetchTranscription\FetchTranscription.csproj" />
     </ItemGroup>
     <ItemGroup>
