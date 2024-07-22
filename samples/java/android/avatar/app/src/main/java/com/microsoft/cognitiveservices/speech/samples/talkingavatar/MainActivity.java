@@ -4,7 +4,6 @@
 //
 package com.microsoft.cognitiveservices.speech.samples.talkingavatar;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
@@ -76,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String speechSubscriptionKey = "YourSubscriptionKey";
     // Replace below with your own service region (e.g., "westus2").
     private static final String serviceRegion = "YourServiceRegion";
+
     private static final String avatarCharacter = "lisa";
     private static final String avatarStyle = "casual-sitting";
     private static final String ttsVoice = "en-US-AvaMultilingualNeural";
@@ -434,6 +434,7 @@ public class MainActivity extends AppCompatActivity {
         speechConfig = SpeechConfig.fromEndpoint(uri, speechSubscriptionKey);
         speechConfig.setSpeechSynthesisVoiceName(ttsVoice);
         synthesizer = new SpeechSynthesizer(speechConfig, null);
+        connection = Connection.fromSpeechSynthesizer(synthesizer);
         synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
             String cancellationDetails =
                     SpeechSynthesisCancellationDetails.fromResult(e.getResult()).toString();
@@ -441,16 +442,8 @@ public class MainActivity extends AppCompatActivity {
             Log.e("[Synthesizer]", cancellationDetails);
             e.close();
         });
-        connection = Connection.fromSpeechSynthesizer(synthesizer);
 
-        String avatarConfig = buildAvatarConfig(
-                localSDP,
-                iceUrl,
-                iceUsername,
-                icePassword,
-                avatarCharacter,
-                avatarStyle,
-                "");
+        String avatarConfig = buildAvatarConfig(localSDP, avatarCharacter, avatarStyle,"");
         try {
             JSONObject avatarConfigJsonObj = new JSONObject(avatarConfig);
         } catch (org.json.JSONException e) {
@@ -523,13 +516,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String buildAvatarConfig(
-            String localSDP,
-            String iceUrl,
-            String iceUsername,
-            String icePassword,
-            String avatarCharacter,
-            String avatarStyle,
-            String backgroundImageUrl) {
+            String localSDP, String avatarCharacter, String avatarStyle, String backgroundImageUrl) {
         return "{\n" +
                 "    \"synthesis\": {\n" +
                 "        \"video\": {\n" +
@@ -619,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
         return -1;
     }
 
-    private @Nullable String movePayloadTypesToFront(
+    private String movePayloadTypesToFront(
             List<String> preferredPayloadTypes, String mLine) {
         // The format of the media description line should be: m=<media> <port> <proto> <fmt> ...
         final List<String> origLineParts = Arrays.asList(mLine.split(" "));
