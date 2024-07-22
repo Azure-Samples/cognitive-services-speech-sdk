@@ -7,8 +7,7 @@
     <MSTestTestAdapterPackageVersion>[3.4.3]</MSTestTestAdapterPackageVersion>
     <MSTestTestFrameworkPackageVersion>[3.4.3]</MSTestTestFrameworkPackageVersion>
     <MSTestSdk>[17.10.0]</MSTestSdk>
-    <coverletCollector>[6.0.2]</coverletCollector>
-    <coverletMsBuild>[6.0.2]</coverletMsBuild>
+
 
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>[2.22.0]</MicrosoftApplicationInsightsWorkerServicePackageVersion>
     <MicrosoftAzureFunctionsWorkerPackageVersion>[1.22.0]</MicrosoftAzureFunctionsWorkerPackageVersion>
@@ -27,5 +26,7 @@
     <MoqPackageVersion>[4.20.70]</MoqPackageVersion>
     <NewtonsoftJsonPackageVersion>[13.0.3]</NewtonsoftJsonPackageVersion>
     <PollyPackageVersion>[8.4.1]</PollyPackageVersion>
+    <CoverletCollector>[6.0.2]</CoverletCollector>
+    <CoverletMsBuild>[6.0.2]</CoverletMsBuild>
   </PropertyGroup>
 </Project>
