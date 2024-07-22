@@ -10,29 +10,36 @@ import androidx.core.app.ActivityCompat;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import com.microsoft.cognitiveservices.speech.Connection;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails;
-import com.microsoft.cognitiveservices.speech.SpeechSynthesisResult;
 import com.microsoft.cognitiveservices.speech.SpeechSynthesizer;
 
-import java.io.UnsupportedEncodingException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,30 +68,43 @@ import org.webrtc.VideoTrack;
 import org.webrtc.audio.AudioDeviceModule;
 import org.webrtc.audio.JavaAudioDeviceModule;
 
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
 
 public class MainActivity extends AppCompatActivity {
+    // Replace below with your own subscription key
+    private static final String speechSubscriptionKey = "YourSubscriptionKey";
+    // Replace below with your own service region (e.g., "westus2").
+    private static final String serviceRegion = "YourServiceRegion";
+    private static final String avatarCharacter = "lisa";
+    private static final String avatarStyle = "casual-sitting";
+    private static final String ttsVoice = "en-US-AvaMultilingualNeural";
+
+    private static final String VIDEO_TRACK_ID = "ARDAMSv0";
+    private static final String AUDIO_TRACK_ID = "ARDAMSa0";
+    private static final String MEDIA_STREAM_LABEL = "ARDAMS";
     private static final String AUDIO_CODEC_ISAC = "ISAC";
     private static final String VIDEO_CODEC_H264 = "H264";
 
-    // Replace below with your own subscription key
-    private static String speechSubscriptionKey = "YourSubscriptionKey";
-    // Replace below with your own service region (e.g., "westus2").
-    private static String serviceRegion = "YourServiceRegion";
+    private String iceUrl;
+    private String iceUsername;
+    private String icePassword;
 
     private SpeechConfig speechConfig;
     private SpeechSynthesizer synthesizer;
     private Connection connection;
 
+    private PeerConnectionFactory peerConnectionFactory;
+    private MediaStream mediaStream;
     private PeerConnection peerConnection;
-    private PeerConnection.Observer peerConnectionObserver;
     private SdpObserver sdpObserver;
+
+    private Button startSessionButton;
+    private Button stopSessionButton;
+    private Button speakButton;
+    private Button stopSpeakingButton;
     private SurfaceViewRenderer videoRenderer;
-
     private TextView outputMessage;
-
-//    private SpeakingRunnable speakingRunnable;
-    private ExecutorService singleThreadExecutor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,10 +113,20 @@ public class MainActivity extends AppCompatActivity {
 
         // Note: we need to request the permissions
         int requestCode = 5; // Unique code for the permission request
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{INTERNET}, requestCode);
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{ACCESS_NETWORK_STATE, INTERNET}, requestCode);
+
+        startSessionButton = this.findViewById(R.id.startSessionButton);
+        stopSessionButton = this.findViewById(R.id.stopSessionButton);
+        speakButton = this.findViewById(R.id.speakButton);
+        stopSpeakingButton = this.findViewById(R.id.stopSpeakingButton);
+        setButtonAvailability(stopSessionButton, false);
+        setButtonAvailability(speakButton, false);
+        setButtonAvailability(stopSpeakingButton, false);
 
         outputMessage = this.findViewById(R.id.outputMessage);
         outputMessage.setMovementMethod(new ScrollingMovementMethod());
+
+        initializePeerConnectionFactory();
     }
 
     @Override
@@ -108,12 +138,54 @@ public class MainActivity extends AppCompatActivity {
             synthesizer.close();
             connection.close();
         }
+
         if (speechConfig != null) {
             speechConfig.close();
         }
     }
 
-    public void setupWebRTC() {
+    public void onStartSessionButtonClicked(View v) throws URISyntaxException {
+        setButtonAvailability(startSessionButton, false);
+
+        if (synthesizer != null) {
+            speechConfig.close();
+            synthesizer.close();
+            connection.close();
+        }
+
+        if (peerConnection != null) {
+            peerConnection.close();
+        }
+
+        fetchIceToken();
+    }
+
+    public void onSpeakButtonClicked(View v) throws ExecutionException, InterruptedException {
+        if (synthesizer == null) {
+            updateOutputMessage("Please start the avatar session first", true, true);
+            return;
+        }
+
+        EditText inputText = this.findViewById(R.id.inputText);
+        String spokenText = inputText.getText().toString();
+        synthesizer.SpeakTextAsync(spokenText);
+    }
+
+    public void onStopSpeakingButtonClicked(View v) {
+        setButtonAvailability(stopSpeakingButton, false);
+        connection.sendMessageAsync("synthesis.control", "{\"action\":\"stop\"}");
+    }
+
+    public void onStopSessionButtonClicked(View v) {
+        if (synthesizer == null) {
+            updateOutputMessage("Please start the avatar session first", true, true);
+            return;
+        }
+
+        synthesizer.close();
+    }
+
+    private void initializePeerConnectionFactory() {
         // Prepare peer connection factory
         PeerConnectionFactory.InitializationOptions initializationOptions =
                 PeerConnectionFactory.InitializationOptions
@@ -130,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                 new DefaultVideoEncoderFactory(eglBase.getEglBaseContext(), true, true);
         AudioDeviceModule audioDeviceModule =
                 JavaAudioDeviceModule.builder(this).createAudioDeviceModule();
-        PeerConnectionFactory peerConnectionFactory = PeerConnectionFactory.builder()
+        peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(options)
                 .setVideoDecoderFactory(videoDecoderFactory)
                 .setVideoEncoderFactory(videoEncoderFactory)
@@ -149,23 +221,69 @@ public class MainActivity extends AppCompatActivity {
         audioConstraints.mandatory.add(new MediaConstraints.KeyValuePair("googHighpassFilter", "true"));
         audioConstraints.mandatory.add(new MediaConstraints.KeyValuePair("googNoiseSuppression", "true"));
         AudioSource audioSource = peerConnectionFactory.createAudioSource(audioConstraints);
-        AudioTrack localAudioTrack = peerConnectionFactory.createAudioTrack("102", audioSource);
+        AudioTrack audioTrack = peerConnectionFactory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
 
         // Create video track
         VideoSource videoSource = peerConnectionFactory.createVideoSource(false);
-        VideoTrack videoTrack = peerConnectionFactory.createVideoTrack("103", videoSource);
+        VideoTrack videoTrack = peerConnectionFactory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
 
         // Create media stream
-        MediaStream mediaStream = peerConnectionFactory.createLocalMediaStream("110");
-        mediaStream.addTrack(localAudioTrack);
+        mediaStream = peerConnectionFactory.createLocalMediaStream(MEDIA_STREAM_LABEL);
+        mediaStream.addTrack(audioTrack);
         mediaStream.addTrack(videoTrack);
+    }
 
+    private void fetchIceToken() {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if  (iceUrl == null) {
+                    updateOutputMessage("Fetching ICE token ...", false, true);
+                    try {
+                        String endpoint = "https://" + serviceRegion + ".tts.speech.microsoft.com";
+                        URL url = new URL(endpoint + "/cognitiveservices/avatar/relay/token/v1");
+                        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                        urlConnection.setRequestMethod("GET");
+                        urlConnection.setRequestProperty("Ocp-Apim-Subscription-Key", speechSubscriptionKey);
+                        urlConnection.connect();
+                        InputStream responseStream = urlConnection.getInputStream();
+                        InputStreamReader streamReader = new InputStreamReader(responseStream);
+                        BufferedReader bufferedReader = new BufferedReader(streamReader);
+                        StringBuilder responseStringBuilder = new StringBuilder();
+                        String responseLine;
+                        while ((responseLine = bufferedReader.readLine()) != null) {
+                            responseStringBuilder.append(responseLine);
+                        }
+
+                        String responseString = responseStringBuilder.toString();
+                        JSONObject iceTokenJsonObj = new JSONObject(responseString);
+                        iceUrl = iceTokenJsonObj.getJSONArray("Urls").getString(0);
+                        iceUsername = iceTokenJsonObj.getString("Username");
+                        icePassword = iceTokenJsonObj.getString("Password");
+                        updateOutputMessage("ICE token successfully fetched", false, true);
+                        setupWebRTC();
+                    } catch (IOException e) {
+                        Log.e("[ICE Token]", e.toString());
+                    } catch (JSONException e) {
+                        Log.e("[ICE Token]", e.toString());
+                    }
+                } else {
+                    setupWebRTC();
+                }
+            }
+        };
+
+        Thread thread = new Thread(runnable);
+        thread.start();
+    }
+
+    private void setupWebRTC() {
         // Create peer connection
         List<PeerConnection.IceServer> iceServers = new ArrayList<>();
         PeerConnection.IceServer iceServer = PeerConnection.IceServer
-                .builder("turn:relay.communication.microsoft.com:443?transport=tcp")
-                .setUsername("BQAANki+a4AB2qWVggesaxY+ZyGDLtboAAYlDGNZyI4AAAAQAxC6Y2laD2dOgrYx1Zk1SkZ91+GFWMuiNiwT/VRr+QAMdRBu660=")
-                .setPassword("mM7SJk873o9FNgMPt+JARSxBxAs=")
+                .builder(iceUrl)
+                .setUsername(iceUsername)
+                .setPassword(icePassword)
                 .createIceServer();
         iceServers.add(iceServer);
 
@@ -174,27 +292,53 @@ public class MainActivity extends AppCompatActivity {
         rtcConfig.iceTransportsType = PeerConnection.IceTransportsType.RELAY;
         rtcConfig.audioJitterBufferMaxPackets = 0;
 
-        peerConnectionObserver = new PeerConnection.Observer() {
+        // Encode SDP and send to service
+        PeerConnection.Observer peerConnectionObserver = new PeerConnection.Observer() {
             private int iceCandidateCount = 0;
 
             @Override
             public void onSignalingChange(PeerConnection.SignalingState signalingState) {
-
             }
 
             @Override
             public void onIceConnectionChange(PeerConnection.IceConnectionState iceConnectionState) {
                 Log.i("[WebRTC][PeerConnectionObserver]", "WebRTC connection state: " + iceConnectionState.name());
+                updateOutputMessage("WebRTC connection state: " + iceConnectionState.name(), false, true);
+                if (iceConnectionState.equals(PeerConnection.IceConnectionState.CONNECTED)) {
+                    setVideoRendererVisibility(true);
+                    setButtonAvailability(stopSessionButton, true);
+                    setButtonAvailability(speakButton, true);
+                    synthesizer.SynthesisStarted.addEventListener((o, e) -> {
+                        setButtonAvailability(stopSessionButton, false);
+                        setButtonAvailability(speakButton, false);
+                        setButtonAvailability(stopSpeakingButton, true);
+                        e.close();
+                    });
+                    synthesizer.SynthesisCompleted.addEventListener((o, e) -> {
+                        setButtonAvailability(stopSessionButton, true);
+                        setButtonAvailability(speakButton, true);
+                        setButtonAvailability(stopSpeakingButton, false);
+                        e.close();
+                    });
+                }
+
+                if (iceConnectionState.equals(PeerConnection.IceConnectionState.DISCONNECTED)) {
+                    setVideoRendererVisibility(false);
+                    setButtonAvailability(startSessionButton, true);
+                    setButtonAvailability(stopSessionButton, false);
+                    setButtonAvailability(speakButton, false);
+                    setButtonAvailability(stopSpeakingButton, false);
+                }
             }
 
             @Override
             public void onIceConnectionReceivingChange(boolean b) {
-
             }
 
             @Override
             public void onIceGatheringChange(PeerConnection.IceGatheringState iceGatheringState) {
                 Log.i("[WebRTC][PeerConnectionObserver]", "ICE gathering state: " + iceGatheringState.name());
+                updateOutputMessage("ICE gathering state: " + iceGatheringState.name(), false, true);
             }
 
             @Override
@@ -219,38 +363,33 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onIceCandidatesRemoved(IceCandidate[] iceCandidates) {
-
             }
 
             @Override
             public void onAddStream(MediaStream mediaStream) {
-                if (mediaStream.videoTracks.size() > 0) {
+                if (!mediaStream.videoTracks.isEmpty()) {
                     mediaStream.videoTracks.get(0).addSink(videoRenderer);
                 }
 
-                if (mediaStream.audioTracks.size() > 0) {
+                if (!mediaStream.audioTracks.isEmpty()) {
                     mediaStream.audioTracks.get(0).setEnabled(true);
                 }
             }
 
             @Override
             public void onRemoveStream(MediaStream mediaStream) {
-
             }
 
             @Override
             public void onDataChannel(DataChannel dataChannel) {
-
             }
 
             @Override
             public void onRenegotiationNeeded() {
-
             }
 
             @Override
             public void onAddTrack(RtpReceiver rtpReceiver, MediaStream[] mediaStreams) {
-
             }
         };
 
@@ -270,12 +409,11 @@ public class MainActivity extends AppCompatActivity {
                 sdp = preferCodec(sdp, AUDIO_CODEC_ISAC, true);
                 sdp = preferCodec(sdp, VIDEO_CODEC_H264, false);
                 peerConnection.setLocalDescription(sdpObserver, new SessionDescription(sessionDescription.type, sdp));
-//                Log.i("[WebRTC][SdpObserver]", "Offer creation succeeded: " + sessionDescription.description);
+                Log.i("[WebRTC][SdpObserver]", "Offer creation succeeded: " + sessionDescription.description);
             }
 
             @Override
             public void onSetSuccess() {
-//                Log.i("[WebRTC][SdpObserver]", "Offer set succeeded: " + peerConnection.getLocalDescription().description);
             }
 
             @Override
@@ -290,13 +428,159 @@ public class MainActivity extends AppCompatActivity {
         peerConnection.createOffer(sdpObserver, constraints);
     }
 
+    private void connectAvatar(String localSDP) {
+        String endpoint = "wss://" + serviceRegion + ".tts.speech.microsoft.com";
+        URI uri = URI.create(endpoint + "/cognitiveservices/websocket/v1?enableTalkingAvatar=true");
+        speechConfig = SpeechConfig.fromEndpoint(uri, speechSubscriptionKey);
+        speechConfig.setSpeechSynthesisVoiceName(ttsVoice);
+        synthesizer = new SpeechSynthesizer(speechConfig, null);
+        synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
+            String cancellationDetails =
+                    SpeechSynthesisCancellationDetails.fromResult(e.getResult()).toString();
+            updateOutputMessage(cancellationDetails, true, true);
+            Log.e("[Synthesizer]", cancellationDetails);
+            e.close();
+        });
+        connection = Connection.fromSpeechSynthesizer(synthesizer);
+
+        String avatarConfig = buildAvatarConfig(
+                localSDP,
+                iceUrl,
+                iceUsername,
+                icePassword,
+                avatarCharacter,
+                avatarStyle,
+                "");
+        try {
+            JSONObject avatarConfigJsonObj = new JSONObject(avatarConfig);
+        } catch (org.json.JSONException e) {
+            Log.e("[WebRTC]", e.toString());
+        }
+
+        connection.setMessageProperty("speech.config", "context", avatarConfig);
+        synthesizer.SpeakText("");
+        String turnStartMessage = synthesizer.getProperties().getProperty("SpeechSDKInternal-ExtraTurnStartMessage");
+        try {
+            JSONObject turnStartMessageJsonObj = new JSONObject(turnStartMessage);
+            String remoteSdpBase64 = turnStartMessageJsonObj.getJSONObject("webrtc").getString("connectionString");
+            String remoteSdpJsonStr = new String(Base64.decode(remoteSdpBase64, Base64.DEFAULT), StandardCharsets.UTF_8);
+            JSONObject remoteSdpJsonObj = new JSONObject(remoteSdpJsonStr);
+            String remoteSdp = remoteSdpJsonObj.getString("sdp");
+            Log.i("[WebRTC][Remote SDP]", "Remote SDP: " + remoteSdp);
+            peerConnection.setRemoteDescription(sdpObserver, new SessionDescription(SessionDescription.Type.ANSWER, remoteSdp));
+        } catch (JSONException e) {
+            Log.e("[WebRTC][Remote SDP]", e.toString());
+        }
+    }
+
+    private synchronized void setVideoRendererVisibility(boolean visible) {
+        this.runOnUiThread(() -> {
+            if (visible) {
+                videoRenderer.setVisibility(View.VISIBLE);
+            } else {
+                videoRenderer.setVisibility(View.GONE);
+            }
+        });
+    }
+
+    private synchronized void setButtonAvailability(Button button, boolean enabled) {
+        this.runOnUiThread(() -> {
+            button.setEnabled(enabled);
+        });
+    }
+
+    private synchronized void updateOutputMessage(String text, boolean error, boolean append) {
+        this.runOnUiThread(() -> {
+            if (append) {
+                if (outputMessage.length() > 0) {
+                    outputMessage.append("\n");
+                }
+
+                outputMessage.append(text);
+            } else {
+                outputMessage.setText(text);
+            }
+
+            if (error) {
+                Spannable spannableText = (Spannable) outputMessage.getText();
+                spannableText.setSpan(new ForegroundColorSpan(Color.RED),
+                    spannableText.length() - text.length(),
+                    spannableText.length(),
+                    0);
+            }
+
+            // Scroll to bottom in order to show latest message
+            final Layout layout = outputMessage.getLayout();
+            if (layout != null) {
+                int scrollAmount = layout.getLineTop(outputMessage.getLineCount()) - outputMessage.getHeight();
+                if (scrollAmount > 0) {
+                    outputMessage.scrollTo(0, scrollAmount);
+                } else {
+                    outputMessage.scrollTo(0, 0);
+                }
+            }
+        });
+    }
+
+    private String buildAvatarConfig(
+            String localSDP,
+            String iceUrl,
+            String iceUsername,
+            String icePassword,
+            String avatarCharacter,
+            String avatarStyle,
+            String backgroundImageUrl) {
+        return "{\n" +
+                "    \"synthesis\": {\n" +
+                "        \"video\": {\n" +
+                "            \"protocol\": {\n" +
+                "                \"name\": \"WebRTC\",\n" +
+                "                \"webrtcConfig\": {\n" +
+                "                    \"clientDescription\": \"" + localSDP + "\",\n" +
+                "                    \"iceServers\": [{\n" +
+                "                        \"urls\": [ \"" + iceUrl + "\" ],\n" +
+                "                        \"username\": \"" + iceUsername + "\",\n" +
+                "                        \"credential\": \"" + icePassword + "\"\n" +
+                "                    }]\n" +
+                "                }\n" +
+                "            },\n" +
+                "            \"format\":{\n" +
+                "                \"crop\":{\n" +
+                "                    \"topLeft\":{\n" +
+                "                        \"x\": 640,\n" +
+                "                        \"y\": 0\n" +
+                "                    },\n" +
+                "                    \"bottomRight\":{\n" +
+                "                        \"x\": 1280,\n" +
+                "                        \"y\": 1080\n" +
+                "                    }\n" +
+                "                },\n" +
+                "                \"bitrate\": 1000000\n" +
+                "            },\n" +
+                "            \"talkingAvatar\": {\n" +
+                "                \"customized\": false,\n" +
+                "                \"character\": \"" + avatarCharacter + "\",\n" +
+                "                \"style\": \"" + avatarStyle + "\",\n" +
+                "                \"background\": {\n" +
+                "                    \"color\": \"#FFFFFFFF\",\n" +
+                "                    \"image\": {\n" +
+                "                        \"url\": \"" + backgroundImageUrl + "\"\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
+    }
+
     private String preferCodec(String sdp, String codec, boolean isAudio) {
         final String[] lines = sdp.split("\r\n");
         final int mLineIndex = findMediaDescriptionLine(isAudio, lines);
         if (mLineIndex == -1) {
-            Log.w("[WebRTC]", "No mediaDescription line, so can't prefer " + codec);
+            Log.w("[WebRTC][Local SDP]", "No mediaDescription line, so can't prefer " + codec);
             return sdp;
         }
+
         // A list with all the payload types with name `codec`. The payload types are integers in the
         // range 96-127, but they are stored as strings here.
         final List<String> codecPayloadTypes = new ArrayList<>();
@@ -308,20 +592,23 @@ public class MainActivity extends AppCompatActivity {
                 codecPayloadTypes.add(codecMatcher.group(1));
             }
         }
+
         if (codecPayloadTypes.isEmpty()) {
-            Log.w("[WebRTC]", "No payload types with name " + codec);
+            Log.w("[WebRTC][Local SDP]", "No payload types with name " + codec);
             return sdp;
         }
+
         final String newMLine = movePayloadTypesToFront(codecPayloadTypes, lines[mLineIndex]);
         if (newMLine == null) {
             return sdp;
         }
-        Log.d("[WebRTC]", "Change media description from: " + lines[mLineIndex] + " to " + newMLine);
+
+        Log.d("[WebRTC][Local SDP]", "Change media description from: " + lines[mLineIndex] + " to " + newMLine);
         lines[mLineIndex] = newMLine;
         return joinString(Arrays.asList(lines), "\r\n", true /* delimiterAtEnd */);
     }
 
-    /** Returns the line number containing "m=audio|video", or -1 if no such line exists. */
+    // Returns the line number containing "m=audio|video", or -1 if no such line exists.
     private int findMediaDescriptionLine(boolean isAudio, String[] sdpLines) {
         final String mediaDescription = isAudio ? "m=audio " : "m=video ";
         for (int i = 0; i < sdpLines.length; ++i) {
@@ -337,7 +624,7 @@ public class MainActivity extends AppCompatActivity {
         // The format of the media description line should be: m=<media> <port> <proto> <fmt> ...
         final List<String> origLineParts = Arrays.asList(mLine.split(" "));
         if (origLineParts.size() <= 3) {
-            Log.e("[WebRTC]", "Wrong SDP media description format: " + mLine);
+            Log.e("[WebRTC][Local SDP]", "Wrong SDP media description format: " + mLine);
             return null;
         }
         final List<String> header = origLineParts.subList(0, 3);
@@ -359,168 +646,16 @@ public class MainActivity extends AppCompatActivity {
         if (!iter.hasNext()) {
             return "";
         }
+
         StringBuilder buffer = new StringBuilder(iter.next());
         while (iter.hasNext()) {
             buffer.append(delimiter).append(iter.next());
         }
+
         if (delimiterAtEnd) {
             buffer.append(delimiter);
         }
+
         return buffer.toString();
-    }
-
-    private void connectAvatar(String localSDP) {
-        speechConfig = SpeechConfig.fromEndpoint(URI.create("wss://" + serviceRegion + ".tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true"), speechSubscriptionKey);
-        synthesizer = new SpeechSynthesizer(speechConfig, null);
-        connection = Connection.fromSpeechSynthesizer(synthesizer);
-
-        String avatarCharacter = "lisa";
-        String avatarStyle = "casual-sitting";
-        String backgroundImageUrl = "";
-
-        String avatarConfig = "{\n" +
-                "    \"synthesis\": {\n" +
-                "        \"video\": {\n" +
-                "            \"protocol\": {\n" +
-                "                \"name\": \"WebRTC\",\n" +
-                "                \"webrtcConfig\": {\n" +
-                "                    \"clientDescription\": \"" + localSDP + "\",\n" +
-                "                    \"iceServers\": [{\n" +
-                "                        \"urls\": [ \"turn:relay.communication.microsoft.com:3478\" ],\n" +
-                "                        \"username\": \"BQAANki+a4AB2qWVggesaxY+ZyGDLtboAAYlDGNZyI4AAAAQAxC6Y2laD2dOgrYx1Zk1SkZ91+GFWMuiNiwT/VRr+QAMdRBu660=\",\n" +
-                "                        \"credential\": \"mM7SJk873o9FNgMPt+JARSxBxAs=\"\n" +
-                "                    }]\n" +
-                "                }\n" +
-                "            },\n" +
-                "            \"format\":{\n" +
-                "                \"crop\":{\n" +
-                "                    \"topLeft\":{\n" +
-                "                        \"x\": 0,\n" +
-                "                        \"y\": 0\n" +
-                "                    },\n" +
-                "                    \"bottomRight\":{\n" +
-                "                        \"x\": 1920,\n" +
-                "                        \"y\": 1080\n" +
-                "                    }\n" +
-                "                },\n" +
-                "                \"bitrate\": 1000000\n" +
-                "            },\n" +
-                "            \"talkingAvatar\": {\n" +
-                "                \"customized\": false,\n" +
-                "                \"character\": \"" + avatarCharacter + "\",\n" +
-                "                \"style\": \"" + avatarStyle + "\",\n" +
-                "                \"background\": {\n" +
-                "                    \"color\": \"#FFFFFFFF\",\n" +
-                "                    \"image\": {\n" +
-                "                        \"url\": \"" + backgroundImageUrl + "\"\n" +
-                "                    }\n" +
-                "                }\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "}";
-        try {
-            JSONObject avatarConfigJsonObj = new JSONObject(avatarConfig);
-        } catch (org.json.JSONException e) {
-            Log.e("[WebRTC]", e.toString());
-        }
-
-        connection.setMessageProperty("speech.config", "context", avatarConfig);
-        synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
-            String cancellationDetails =
-                    SpeechSynthesisCancellationDetails.fromResult(e.getResult()).toString();
-            Log.e("[WebRTC]", cancellationDetails);
-            e.close();
-        });
-
-        synthesizer.SpeakText("");
-        String turnStartMessage = synthesizer.getProperties().getProperty("SpeechSDKInternal-ExtraTurnStartMessage");
-        try {
-            JSONObject turnStartMessageJsonObj = new JSONObject(turnStartMessage);
-            String remoteSdpBase64 = turnStartMessageJsonObj.getJSONObject("webrtc").getString("connectionString");
-            String remoteSdpJsonStr = new String(Base64.decode(remoteSdpBase64, Base64.DEFAULT), "UTF-8");
-            JSONObject remoteSdpJsonObj = new JSONObject(remoteSdpJsonStr);
-            String remoteSdp = remoteSdpJsonObj.getString("sdp");
-//            Log.i("[WebRTC][Remote SDP]", "Remote SDP: " + remoteSdp);
-
-            peerConnection.setRemoteDescription(sdpObserver, new SessionDescription(SessionDescription.Type.ANSWER, remoteSdp));
-        } catch (JSONException e) {
-            Log.e("[WebRTC][Remote SDP]", e.toString());
-        } catch (UnsupportedEncodingException e) {
-            Log.e("[WebRTC][Remote SDP]", e.toString());
-        }
-    }
-
-    public void onStartSessionButtonClicked(View v) throws URISyntaxException {
-        if (synthesizer != null) {
-            speechConfig.close();
-            synthesizer.close();
-            connection.close();
-        }
-
-        // Reuse the synthesizer to lower the latency.
-        // I.e. create one synthesizer and speak many times using it.
-        clearOutputMessage();
-        updateOutputMessage("Initializing synthesizer...\n");
-
-        // Setup WebRTC
-        setupWebRTC();
-    }
-
-    public void onSpeechButtonClicked(View v) {
-        clearOutputMessage();
-
-        if (synthesizer == null) {
-            updateOutputMessage("Please initialize the speech synthesizer first\n", true, true);
-            return;
-        }
-
-        EditText speakText = this.findViewById(R.id.speakText);
-        String spokenText = speakText.getText().toString();
-        try {
-            SpeechSynthesisResult result = synthesizer.StartSpeakingText(spokenText);
-        } catch (Exception e)
-        {
-        }
-    }
-
-    public void onStopButtonClicked(View v) {
-        if (synthesizer == null) {
-            updateOutputMessage("Please initialize the speech synthesizer first\n", true, true);
-            return;
-        }
-
-        stopSynthesizing();
-    }
-
-    private void stopSynthesizing() {
-        if (synthesizer != null) {
-            synthesizer.StopSpeakingAsync();
-        }
-    }
-
-    private void updateOutputMessage(String text) {
-        updateOutputMessage(text, false, true);
-    }
-
-    private synchronized void updateOutputMessage(String text, boolean error, boolean append) {
-        this.runOnUiThread(() -> {
-            if (append) {
-                outputMessage.append(text);
-            } else {
-                outputMessage.setText(text);
-            }
-            if (error) {
-                Spannable spannableText = (Spannable) outputMessage.getText();
-                spannableText.setSpan(new ForegroundColorSpan(Color.RED),
-                    spannableText.length() - text.length(),
-                    spannableText.length(),
-                    0);
-            }
-        });
-    }
-
-    private void clearOutputMessage() {
-        updateOutputMessage("", false, false);
     }
 }

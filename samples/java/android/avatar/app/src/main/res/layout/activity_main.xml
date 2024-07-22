@@ -7,12 +7,14 @@
     android:scrollbars="vertical"
     tools:context=".MainActivity">
 
-    <org.webrtc.SurfaceViewRenderer
-        android:id="@+id/webrtcVideoRenderer"
-        android:layout_width="320dp"
-        android:layout_height="540dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="240dp"
+    <EditText
+        android:id="@+id/inputText"
+        android:layout_width="360dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:ems="10"
+        android:inputType="text"
+        android:text="Hello world!"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -21,56 +23,58 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:onClick="onStartSessionButtonClicked"
         android:text="Start Session"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/speakText" />
+        app:layout_constraintTop_toBottomOf="@+id/inputText" />
 
-    <EditText
-        android:id="@+id/speakText"
-        android:layout_width="330dp"
+    <Button
+        android:id="@+id/stopSessionButton"
+        android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:inputType="text"
-        android:text="Hi there!"
+        android:onClick="onStopSessionButtonClicked"
+        android:text="Stop Session"
+        app:layout_constraintLeft_toRightOf="@+id/startSessionButton"
+        app:layout_constraintTop_toBottomOf="@+id/inputText" />
+
+    <Button
+        android:id="@+id/speakButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:onClick="onSpeakButtonClicked"
+        android:text="Speak"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/startSessionButton" />
+
+    <Button
+        android:id="@+id/stopSpeakingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:onClick="onStopSpeakingButtonClicked"
+        android:text="Stop Speaking"
+        app:layout_constraintLeft_toRightOf="@+id/speakButton"
+        app:layout_constraintTop_toBottomOf="@+id/startSessionButton" />
+
+    <org.webrtc.SurfaceViewRenderer
+        android:id="@+id/webrtcVideoRenderer"
+        android:layout_width="320dp"
+        android:layout_height="540dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="54dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/speakButton" />
 
     <TextView
         android:id="@+id/outputMessage"
         android:layout_width="360dp"
-        android:layout_height="240dp"
+        android:layout_height="56dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.473"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.967" />
+        app:layout_constraintTop_toBottomOf="@+id/speakButton" />
 
-    <Button
-        android:id="@+id/button_speak"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:onClick="onSpeechButtonClicked"
-        android:text="Speak"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_connect" />
-
-    <Button
-        android:id="@+id/button_stop"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginStart="160dp"
-        android:onClick="onStopButtonClicked"
-        android:text="Stop"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_connect" />
 </androidx.constraintlayout.widget.ConstraintLayout>
