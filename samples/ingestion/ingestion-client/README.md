@@ -33,7 +33,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Getting started
 
-Follow the instructions for setting up Ingestion Client [here](Setup/guide.md).
+Follow the instructions for setting up Ingestion Client [here](infra/guide.md).
 
 To set up Power BI for further insights of the transcription, follow the guide [here](PowerBI/README.md).
 

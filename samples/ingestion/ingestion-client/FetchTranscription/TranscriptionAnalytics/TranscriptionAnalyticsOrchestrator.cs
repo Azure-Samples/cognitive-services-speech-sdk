@@ -14,25 +14,26 @@ namespace FetchTranscription
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     public sealed class TranscriptionAnalyticsOrchestrator
     {
         private readonly List<ITranscriptionAnalyticsProvider> providers;
 
+        private readonly AppConfig appConfig;
+
         public TranscriptionAnalyticsOrchestrator(
             string locale,
-            ILogger logger)
+            ILogger logger,
+            IOptions<AppConfig> appConfig)
         {
-            var textAnalyticsKey = FetchTranscriptionEnvironmentVariables.TextAnalyticsKey;
-            var textAnalyticsEndpoint = FetchTranscriptionEnvironmentVariables.TextAnalyticsEndpoint;
-            var textAnalyticsInfoProvided = !string.IsNullOrEmpty(textAnalyticsKey) && !string.IsNullOrEmpty(textAnalyticsEndpoint);
-
+            this.appConfig = appConfig?.Value;
             this.providers = new List<ITranscriptionAnalyticsProvider>();
 
-            if (textAnalyticsInfoProvided)
+            if (!string.IsNullOrEmpty(this.appConfig.TextAnalyticsKey) && !string.IsNullOrEmpty(this.appConfig.TextAnalyticsEndpoint))
             {
-                this.providers.Add(new TextAnalyticsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger));
-                this.providers.Add(new AnalyzeConversationsProvider(locale, textAnalyticsKey, textAnalyticsEndpoint, logger));
+                this.providers.Add(new TextAnalyticsProvider(locale, this.appConfig.TextAnalyticsKey, this.appConfig.TextAnalyticsEndpoint, logger, Options.Create(this.appConfig)));
+                this.providers.Add(new AnalyzeConversationsProvider(locale, this.appConfig.TextAnalyticsKey, this.appConfig.TextAnalyticsEndpoint, logger, Options.Create(this.appConfig)));
             }
         }
 
