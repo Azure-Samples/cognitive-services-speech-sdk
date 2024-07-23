@@ -8,6 +8,7 @@ namespace StartTranscription
     using System;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Extensions.Logging;
     using StartTranscriptionByTimer;
@@ -18,14 +19,19 @@ namespace StartTranscription
     public class StartTranscriptionByServiceBus
     {
         private readonly ILogger<StartTranscriptionByServiceBus> logger;
+        private readonly IStartTranscriptionHelper transcriptionHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StartTranscriptionByServiceBus"/> class.
         /// </summary>
         /// <param name="logger">The StartTranscriptionByServiceBus Logger</param>
-        public StartTranscriptionByServiceBus(ILogger<StartTranscriptionByServiceBus> logger)
+        /// <param name="transcriptionHelper"></param>
+        public StartTranscriptionByServiceBus(
+            ILogger<StartTranscriptionByServiceBus> logger,
+            IStartTranscriptionHelper transcriptionHelper)
         {
             this.logger = logger;
+            this.transcriptionHelper = transcriptionHelper;
         }
 
         /// <summary>
@@ -42,15 +48,13 @@ namespace StartTranscription
             this.logger.LogInformation($"C# Isolated ServiceBus queue trigger function processed message: {message.Subject}");
             this.logger.LogInformation($"Received message: SequenceNumber:{message.SequenceNumber} Body:{message.Body}");
 
-            var transcriptionHelper = new StartTranscriptionHelper(this.logger);
-
-            if (message == null || !transcriptionHelper.IsValidServiceBusMessage(message))
+            if (message == null || !this.transcriptionHelper.IsValidServiceBusMessage(message))
             {
                 this.logger.LogInformation($"Service bus message is invalid.");
                 return;
             }
 
-            await transcriptionHelper.StartTranscriptionAsync(message).ConfigureAwait(false);
+            await this.transcriptionHelper.StartTranscriptionAsync(message).ConfigureAwait(false);
         }
     }
 }

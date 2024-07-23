@@ -10,8 +10,14 @@ namespace StartTranscriptionByTimer
     using System.Linq;
     using System.Threading.Tasks;
     using Azure.Messaging.ServiceBus;
+
+    using Connector;
+    using Connector.Enums;
+
     using Microsoft.Azure.Functions.Worker;
+    using Microsoft.Extensions.Azure;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Start Transcription By Timer class.
@@ -20,21 +26,36 @@ namespace StartTranscriptionByTimer
     {
         private const double MessageReceiveTimeoutInSeconds = 60;
 
-        private static readonly ServiceBusClient ServiceBusClient = new ServiceBusClient(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString);
-
-        private static readonly ServiceBusReceiverOptions ServiceBusReceiverOptions = new ServiceBusReceiverOptions() { PrefetchCount = StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution };
-
-        private static readonly ServiceBusReceiver ServiceBusReceiver = ServiceBusClient.CreateReceiver(ServiceBusConnectionStringProperties.Parse(StartTranscriptionEnvironmentVariables.StartTranscriptionServiceBusConnectionString).EntityPath, ServiceBusReceiverOptions);
-
         private readonly ILogger<StartTranscriptionByTimer> logger;
+
+        private readonly ServiceBusReceiver startTranscriptionServiceBusReceiver;
+
+        private readonly AppConfig appConfig;
+
+        private readonly IStartTranscriptionHelper transcriptionHelper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StartTranscriptionByTimer"/> class.
         /// </summary>
         /// <param name="logger">The StartTranscriptionByTimer logger</param>
-        public StartTranscriptionByTimer(ILogger<StartTranscriptionByTimer> logger)
+        /// <param name="appConfig">environment configuration</param>
+        /// <param name="serviceBusClientFactory"></param>
+        /// <param name="transcriptionHelper"></param>
+        public StartTranscriptionByTimer(
+            ILogger<StartTranscriptionByTimer> logger,
+            IOptions<AppConfig> appConfig,
+            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
+            IStartTranscriptionHelper transcriptionHelper)
         {
             this.logger = logger;
+            this.appConfig = appConfig?.Value;
+            this.transcriptionHelper = transcriptionHelper;
+
+            serviceBusClientFactory = serviceBusClientFactory ?? throw new ArgumentNullException(nameof(serviceBusClientFactory));
+            var startTranscriptionServiceBusClient = serviceBusClientFactory.CreateClient(ServiceBusClientName.StartTranscriptionServiceBusClient.ToString());
+
+            var startTranscriptionQueueName = ServiceBusConnectionStringProperties.Parse(this.appConfig.StartTranscriptionServiceBusConnectionString).EntityPath;
+            this.startTranscriptionServiceBusReceiver = startTranscriptionServiceBusClient.CreateReceiver(startTranscriptionQueueName);
         }
 
         /// <summary>
@@ -52,10 +73,9 @@ namespace StartTranscriptionByTimer
             this.logger.LogInformation($"C# Isolated Timer trigger function v4 executed at: {startDateTime}. Next occurrence on {timerInfo.ScheduleStatus.Next}.");
 
             var validServiceBusMessages = new List<ServiceBusReceivedMessage>();
-            var transcriptionHelper = new StartTranscriptionHelper(this.logger);
 
             this.logger.LogInformation("Pulling messages from queue...");
-            var messages = await ServiceBusReceiver.ReceiveMessagesAsync(StartTranscriptionEnvironmentVariables.MessagesPerFunctionExecution, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);
+            var messages = await this.startTranscriptionServiceBusReceiver.ReceiveMessagesAsync(this.appConfig.MessagesPerFunctionExecution, TimeSpan.FromSeconds(MessageReceiveTimeoutInSeconds)).ConfigureAwait(false);
 
             if (messages == null || !messages.Any())
             {
@@ -70,14 +90,14 @@ namespace StartTranscriptionByTimer
                 {
                     try
                     {
-                        if (transcriptionHelper.IsValidServiceBusMessage(message))
+                        if (this.transcriptionHelper.IsValidServiceBusMessage(message))
                         {
-                            await ServiceBusReceiver.RenewMessageLockAsync(message).ConfigureAwait(false);
+                            await this.startTranscriptionServiceBusReceiver.RenewMessageLockAsync(message).ConfigureAwait(false);
                             validServiceBusMessages.Add(message);
                         }
                         else
                         {
-                            await ServiceBusReceiver.CompleteMessageAsync(message).ConfigureAwait(false);
+                            await this.startTranscriptionServiceBusReceiver.CompleteMessageAsync(message).ConfigureAwait(false);
                         }
                     }
                     catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessageLockLost)
@@ -95,7 +115,7 @@ namespace StartTranscriptionByTimer
 
             this.logger.LogInformation($"Pulled {validServiceBusMessages.Count} valid messages from queue.");
 
-            await transcriptionHelper.StartTranscriptionsAsync(validServiceBusMessages, ServiceBusReceiver, startDateTime).ConfigureAwait(false);
+            await this.transcriptionHelper.StartTranscriptionsAsync(validServiceBusMessages, startDateTime).ConfigureAwait(false);
         }
     }
 }

@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 SPEECH_ENDPOINT = os.environ.get('SPEECH_ENDPOINT')
 # We recommend to use passwordless authentication with Azure Identity here; meanwhile, you can also use a subscription key instead
 PASSWORDLESS_AUTHENTICATION = True
-API_VERSION = "2024-04-15-preview"
+API_VERSION = "2024-08-01"
 
 
 def _create_job_id():

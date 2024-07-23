@@ -5,35 +5,86 @@
 
 namespace FetchTranscription
 {
-    using System.Threading.Tasks;
+    using System.IO;
+
+    using Azure.Storage;
+    using Azure.Storage.Blobs;
 
     using Connector;
     using Connector.Database;
+    using Connector.Enums;
 
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Azure;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Options;
 
     public static class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
-                .ConfigureServices(s =>
+                .ConfigureAppConfiguration((context, config) =>
                 {
-                    // This is a unified way to configure logging filter for all functions.
-                    s.ConfigureIngestionClientLogging();
+                    config.SetBasePath(Directory.GetCurrentDirectory())
+                     .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+                     .AddEnvironmentVariables();
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    var configuration = context.Configuration;
+                    var config = new AppConfig();
+                    configuration.GetSection("Values").Bind(config);
 
-                    if (FetchTranscriptionEnvironmentVariables.UseSqlDatabase)
+                    var blobServiceClient = new BlobServiceClient(config.AzureWebJobsStorage);
+                    var storageCredential = new StorageSharedKeyCredential(
+                    AzureStorageConnectionExtensions.GetValueFromConnectionString("AccountName", config.AzureWebJobsStorage),
+                    AzureStorageConnectionExtensions.GetValueFromConnectionString("AccountKey", config.AzureWebJobsStorage));
+
+                    // This is a unified way to configure logging filter for all functions.
+                    services.ConfigureIngestionClientLogging();
+
+                    if (config.UseSqlDatabase)
                     {
-                        s.AddDbContext<IngestionClientDbContext>(
-                        options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, FetchTranscriptionEnvironmentVariables.DatabaseConnectionString));
+                        services.AddDbContext<IngestionClientDbContext>(
+                        options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, config.DatabaseConnectionString));
                     }
+
+                    services.AddSingleton(blobServiceClient);
+                    services.AddSingleton(storageCredential);
+                    services.AddTransient<IStorageConnector, StorageConnector>();
+
+                    services.AddAzureClients(clientBuilder =>
+                    {
+                        clientBuilder.AddServiceBusClient(config.StartTranscriptionServiceBusConnectionString)
+                            .WithName(ServiceBusClientName.StartTranscriptionServiceBusClient.ToString());
+                        clientBuilder.AddServiceBusClient(config.FetchTranscriptionServiceBusConnectionString)
+                            .WithName(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
+
+                        if (!string.IsNullOrWhiteSpace(config.CompletedServiceBusConnectionString))
+                        {
+                            clientBuilder.AddServiceBusClient(config.CompletedServiceBusConnectionString)
+                                .WithName(ServiceBusClientName.CompletedTranscriptionServiceBusClient.ToString());
+                        }
+                    });
+                    services.Configure<AppConfig>(configuration.GetSection("Values"));
                 })
                 .Build();
 
-            await host.RunAsync();
+            var config = host.Services.GetService<IOptions<AppConfig>>().Value;
+
+            // apply database migrations once during startup (not with every function execution):
+            if (config.UseSqlDatabase)
+            {
+                using var scope = host.Services.CreateScope();
+                var ingestionClientDbContext = scope.ServiceProvider.GetRequiredService<IngestionClientDbContext>();
+                ingestionClientDbContext.Database.Migrate();
+            }
+
+            host.Run();
         }
     }
 }

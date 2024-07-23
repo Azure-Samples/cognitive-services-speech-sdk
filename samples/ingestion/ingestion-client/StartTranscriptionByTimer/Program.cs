@@ -5,24 +5,62 @@
 
 namespace StartTranscriptionByTimer
 {
-    using System.Threading.Tasks;
+    using System.IO;
+
+    using Azure.Storage;
+    using Azure.Storage.Blobs;
+
     using Connector;
+    using Connector.Enums;
+
+    using Microsoft.Extensions.Azure;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
 
     public static class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             var host = new HostBuilder()
                 .ConfigureFunctionsWorkerDefaults()
-                .ConfigureServices(s =>
+
+                .ConfigureAppConfiguration((context, config) =>
                 {
+                    config.SetBasePath(Directory.GetCurrentDirectory())
+                     .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+                     .AddEnvironmentVariables();
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    var configuration = context.Configuration;
+                    var config = new AppConfig();
+                    configuration.GetSection("Values").Bind(config);
+
+                    var blobServiceClient = new BlobServiceClient(config.AzureWebJobsStorage);
+                    var storageCredential = new StorageSharedKeyCredential(
+                    AzureStorageConnectionExtensions.GetValueFromConnectionString("AccountName", config.AzureWebJobsStorage),
+                    AzureStorageConnectionExtensions.GetValueFromConnectionString("AccountKey", config.AzureWebJobsStorage));
+
                     // This is a unified way to configure logging filter for all functions.
-                    s.ConfigureIngestionClientLogging();
+                    services.ConfigureIngestionClientLogging();
+                    services.AddSingleton(blobServiceClient);
+                    services.AddSingleton(storageCredential);
+                    services.AddTransient<IStorageConnector, StorageConnector>();
+                    services.AddTransient<IStartTranscriptionHelper, StartTranscriptionHelper>();
+
+                    services.AddAzureClients(clientBuilder =>
+                    {
+                        clientBuilder.AddServiceBusClient(config.StartTranscriptionServiceBusConnectionString)
+                            .WithName(ServiceBusClientName.StartTranscriptionServiceBusClient.ToString());
+                        clientBuilder.AddServiceBusClient(config.FetchTranscriptionServiceBusConnectionString)
+                            .WithName(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
+                    });
+                    services.Configure<AppConfig>(configuration.GetSection("Values"));
                 })
                 .Build();
 
-            await host.RunAsync();
+            host.Run();
         }
     }
 }
