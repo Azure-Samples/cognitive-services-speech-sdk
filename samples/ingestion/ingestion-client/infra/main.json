@@ -306,9 +306,9 @@
       "name": "[variables('KeyVaultName')]",
       "location": "[resourceGroup().location]",
       "properties": {
-        "enabledForDeployment": "true",
-        "enabledForDiskEncryption": "false",
-        "enabledForTemplateDeployment": "false",
+        "enabledForDeployment": true,
+        "enabledForDiskEncryption": false,
+        "enabledForTemplateDeployment": false,
         "tenantId": "[subscription().tenantId]",
         "accessPolicies": [
           {
@@ -349,8 +349,7 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2019-09-01",
-      "name": "[format('{0}/{1}', variables('KeyVaultName'), format('{0}', variables('AzureSpeechServicesKeySecretName')))]",
-      "location": "[resourceGroup().location]",
+      "name": "[format('{0}/{1}', variables('KeyVaultName'), variables('AzureSpeechServicesKeySecretName'))]",
       "properties": {
         "value": "[parameters('AzureSpeechServicesKey')]"
       },
@@ -361,8 +360,7 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2019-09-01",
-      "name": "[format('{0}/{1}', variables('KeyVaultName'), format('{0}', variables('TextAnalyticsKeySecretName')))]",
-      "location": "[resourceGroup().location]",
+      "name": "[format('{0}/{1}', variables('KeyVaultName'), variables('TextAnalyticsKeySecretName'))]",
       "properties": {
         "value": "[if(empty(parameters('TextAnalyticsKey')), 'NULL', parameters('TextAnalyticsKey'))]"
       },
@@ -373,8 +371,7 @@
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "apiVersion": "2019-09-01",
-      "name": "[format('{0}/{1}', variables('KeyVaultName'), format('{0}', variables('DatabaseConnectionStringSecretName')))]",
-      "location": "[resourceGroup().location]",
+      "name": "[format('{0}/{1}', variables('KeyVaultName'), variables('DatabaseConnectionStringSecretName'))]",
       "properties": {
         "value": "[if(variables('UseSqlDatabase'), format('Server=tcp:{0},1433;Initial Catalog={1};Persist Security Info=False;User ID={2};Password={3};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;', reference(variables('SqlServerName'), '2014-04-01-preview').fullyQualifiedDomainName, variables('DatabaseName'), parameters('SqlAdministratorLogin'), parameters('SqlAdministratorLoginPassword')), 'NULL')]"
       },
@@ -402,7 +399,7 @@
       "condition": "[variables('UseSqlDatabase')]",
       "type": "Microsoft.Sql/servers/databases",
       "apiVersion": "2015-01-01",
-      "name": "[format('{0}/{1}', variables('SqlServerName'), format('{0}', variables('DatabaseName')))]",
+      "name": "[format('{0}/{1}', variables('SqlServerName'), variables('DatabaseName'))]",
       "location": "[resourceGroup().location]",
       "tags": {
         "displayName": "Database"
@@ -420,13 +417,13 @@
       "condition": "[variables('UseSqlDatabase')]",
       "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
       "apiVersion": "2014-04-01-preview",
-      "name": "[format('{0}/{1}/{2}', variables('SqlServerName'), format('{0}', variables('DatabaseName')), 'current')]",
+      "name": "[format('{0}/{1}/{2}', variables('SqlServerName'), variables('DatabaseName'), 'current')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "status": "Enabled"
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Sql/servers/databases', variables('SqlServerName'), format('{0}', variables('DatabaseName')))]"
+        "[resourceId('Microsoft.Sql/servers/databases', variables('SqlServerName'), variables('DatabaseName'))]"
       ]
     },
     {
@@ -452,7 +449,6 @@
       "type": "Microsoft.Sql/servers/firewallRules",
       "apiVersion": "2014-04-01",
       "name": "[format('{0}/{1}', variables('SqlServerName'), 'AllowAllMicrosoftAzureIps')]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "endIpAddress": "0.0.0.0",
         "startIpAddress": "0.0.0.0"
@@ -467,8 +463,7 @@
       "name": "[variables('StorageAccountName')]",
       "location": "[resourceGroup().location]",
       "sku": {
-        "name": "Standard_GRS",
-        "tier": "Standard"
+        "name": "Standard_GRS"
       },
       "kind": "StorageV2",
       "properties": {
@@ -499,7 +494,6 @@
       "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
       "apiVersion": "2017-04-01",
       "name": "[format('{0}/{1}', variables('ServiceBusName'), 'RootManageSharedAccessKey')]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "rights": [
           "Listen",
@@ -515,7 +509,6 @@
       "type": "Microsoft.ServiceBus/namespaces/queues",
       "apiVersion": "2017-04-01",
       "name": "[format('{0}/{1}', variables('ServiceBusName'), 'start_transcription_queue')]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "lockDuration": "PT4M",
         "maxSizeInMegabytes": 5120,
@@ -539,7 +532,6 @@
       "type": "Microsoft.ServiceBus/namespaces/queues",
       "apiVersion": "2017-04-01",
       "name": "[format('{0}/{1}', variables('ServiceBusName'), 'fetch_transcription_queue')]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "lockDuration": "PT5M",
         "maxSizeInMegabytes": 5120,
@@ -563,10 +555,6 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}', variables('StorageAccountName'), 'default')]",
-      "location": "[resourceGroup().location]",
-      "sku": {
-        "name": "Standard_GRS"
-      },
       "properties": {
         "cors": {
           "corsRules": []
@@ -583,10 +571,6 @@
       "type": "Microsoft.Storage/storageAccounts/fileServices",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}', variables('StorageAccountName'), 'default')]",
-      "location": "[resourceGroup().location]",
-      "sku": {
-        "name": "Standard_GRS"
-      },
       "properties": {
         "cors": {
           "corsRules": []
@@ -600,7 +584,6 @@
       "type": "Microsoft.ServiceBus/namespaces/queues/authorizationRules",
       "apiVersion": "2017-04-01",
       "name": "[format('{0}/{1}/{2}', variables('ServiceBusName'), 'fetch_transcription_queue', 'FetchTranscription')]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "rights": [
           "Listen",
@@ -616,7 +599,6 @@
       "type": "Microsoft.ServiceBus/namespaces/queues/authorizationRules",
       "apiVersion": "2017-04-01",
       "name": "[format('{0}/{1}/{2}', variables('ServiceBusName'), 'start_transcription_queue', 'StartTranscription')]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "rights": [
           "Listen",
@@ -632,7 +614,6 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}/{2}', variables('StorageAccountName'), 'default', variables('AudioInputContainer'))]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "publicAccess": "None"
       },
@@ -644,7 +625,6 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}/{2}', variables('StorageAccountName'), 'default', variables('JsonResultOutputContainer'))]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "publicAccess": "None"
       },
@@ -657,7 +637,6 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}/{2}', variables('StorageAccountName'), 'default', variables('ConsolidatedFilesOutputContainer'))]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "publicAccess": "None"
       },
@@ -670,7 +649,6 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}/{2}', variables('StorageAccountName'), 'default', variables('AudioProcessedContainer'))]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "publicAccess": "None"
       },
@@ -683,7 +661,6 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}/{2}', variables('StorageAccountName'), 'default', variables('HtmlResultOutputContainer'))]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "publicAccess": "None"
       },
@@ -695,7 +672,6 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}/{2}', variables('StorageAccountName'), 'default', variables('ErrorReportOutputContainer'))]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "publicAccess": "None"
       },
@@ -707,7 +683,6 @@
       "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
       "apiVersion": "2019-06-01",
       "name": "[format('{0}/{1}/{2}', variables('StorageAccountName'), 'default', variables('ErrorFilesOutputContainer'))]",
-      "location": "[resourceGroup().location]",
       "properties": {
         "publicAccess": "None"
       },
@@ -793,7 +768,7 @@
       "kind": "functionapp",
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]",
-        "httpsOnly": "true",
+        "httpsOnly": true,
         "siteConfig": {
           "netFrameworkVersion": "v8.0"
         }
@@ -847,7 +822,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Insights/components', variables('AppInsightsName'))]",
         "[resourceId('Microsoft.KeyVault/vaults', variables('KeyVaultName'))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), format('{0}', variables('AzureSpeechServicesKeySecretName')))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), variables('AzureSpeechServicesKeySecretName'))]",
         "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue', 'FetchTranscription')]",
         "[resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey')]",
         "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue', 'StartTranscription')]",
@@ -863,7 +838,7 @@
       "kind": "functionapp",
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('AppServicePlanName'))]",
-        "httpsOnly": "true",
+        "httpsOnly": true,
         "siteConfig": {
           "netFrameworkVersion": "v8.0"
         }
@@ -924,8 +899,8 @@
         "[resourceId('Microsoft.Insights/components', variables('AppInsightsName'))]",
         "[resourceId('Microsoft.Web/sites', variables('FetchTranscriptionFunctionName'))]",
         "[resourceId('Microsoft.KeyVault/vaults', variables('KeyVaultName'))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), format('{0}', variables('AzureSpeechServicesKeySecretName')))]",
-        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), format('{0}', variables('TextAnalyticsKeySecretName')))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), variables('AzureSpeechServicesKeySecretName'))]",
+        "[resourceId('Microsoft.KeyVault/vaults/secrets', variables('KeyVaultName'), variables('TextAnalyticsKeySecretName'))]",
         "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'fetch_transcription_queue', 'FetchTranscription')]",
         "[resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', variables('ServiceBusName'), 'RootManageSharedAccessKey')]",
         "[resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue', 'StartTranscription')]",
