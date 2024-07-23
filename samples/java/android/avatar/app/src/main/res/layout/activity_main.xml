@@ -64,7 +64,6 @@
         android:layout_height="540dp"
         android:layout_marginStart="36dp"
         android:layout_marginTop="54dp"
-        android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/speakButton" />
 

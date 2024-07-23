@@ -50,6 +50,7 @@ import org.webrtc.DataChannel;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
+import org.webrtc.EglRenderer;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
@@ -104,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
     private Button speakButton;
     private Button stopSpeakingButton;
     private SurfaceViewRenderer videoRenderer;
+    private EglRenderer.FrameListener frameListener;
     private TextView outputMessage;
 
     @Override
@@ -142,6 +144,10 @@ public class MainActivity extends AppCompatActivity {
         if (speechConfig != null) {
             speechConfig.close();
         }
+
+        if (peerConnection != null) {
+            peerConnection.close();
+        }
     }
 
     public void onStartSessionButtonClicked(View v) throws URISyntaxException {
@@ -157,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
             peerConnection.close();
         }
 
+        videoRenderer.addFrameListener(frameListener, 1.0f);
         fetchIceToken();
     }
 
@@ -213,6 +220,24 @@ public class MainActivity extends AppCompatActivity {
         videoRenderer = this.findViewById(R.id.webrtcVideoRenderer);
         videoRenderer.init(eglBase.getEglBaseContext(), null);
         videoRenderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+        setVideoRendererVisibility(false);
+        frameListener = bitmap -> {
+            setVideoRendererVisibility(true);
+            setButtonAvailability(stopSessionButton, true);
+            setButtonAvailability(speakButton, true);
+            synthesizer.SynthesisStarted.addEventListener((o, e) -> {
+                setButtonAvailability(stopSessionButton, false);
+                setButtonAvailability(speakButton, false);
+                setButtonAvailability(stopSpeakingButton, true);
+                e.close();
+            });
+            synthesizer.SynthesisCompleted.addEventListener((o, e) -> {
+                setButtonAvailability(stopSessionButton, true);
+                setButtonAvailability(speakButton, true);
+                setButtonAvailability(stopSpeakingButton, false);
+                e.close();
+            });
+        };
 
         // Create audio track
         MediaConstraints audioConstraints = new MediaConstraints();
@@ -304,24 +329,6 @@ public class MainActivity extends AppCompatActivity {
             public void onIceConnectionChange(PeerConnection.IceConnectionState iceConnectionState) {
                 Log.i("[WebRTC][PeerConnectionObserver]", "WebRTC connection state: " + iceConnectionState.name());
                 updateOutputMessage("WebRTC connection state: " + iceConnectionState.name(), false, true);
-                if (iceConnectionState.equals(PeerConnection.IceConnectionState.CONNECTED)) {
-                    setVideoRendererVisibility(true);
-                    setButtonAvailability(stopSessionButton, true);
-                    setButtonAvailability(speakButton, true);
-                    synthesizer.SynthesisStarted.addEventListener((o, e) -> {
-                        setButtonAvailability(stopSessionButton, false);
-                        setButtonAvailability(speakButton, false);
-                        setButtonAvailability(stopSpeakingButton, true);
-                        e.close();
-                    });
-                    synthesizer.SynthesisCompleted.addEventListener((o, e) -> {
-                        setButtonAvailability(stopSessionButton, true);
-                        setButtonAvailability(speakButton, true);
-                        setButtonAvailability(stopSpeakingButton, false);
-                        e.close();
-                    });
-                }
-
                 if (iceConnectionState.equals(PeerConnection.IceConnectionState.DISCONNECTED)) {
                     setVideoRendererVisibility(false);
                     setButtonAvailability(startSessionButton, true);
@@ -469,9 +476,9 @@ public class MainActivity extends AppCompatActivity {
     private synchronized void setVideoRendererVisibility(boolean visible) {
         this.runOnUiThread(() -> {
             if (visible) {
-                videoRenderer.setVisibility(View.VISIBLE);
+                videoRenderer.setBackgroundColor(0x00000000);
             } else {
-                videoRenderer.setVisibility(View.GONE);
+                videoRenderer.setBackgroundColor(0xFFFFFFFF);
             }
         });
     }
