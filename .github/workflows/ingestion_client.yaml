@@ -22,7 +22,6 @@ jobs:
       - name: Install Bicep CLI
         run: |
           az bicep install
-          az bicep upgrade
 
       - name: Convert Bicep to ARM Template
         run: |
