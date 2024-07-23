@@ -77,9 +77,16 @@ public class MainActivity extends AppCompatActivity {
     // Replace below with your own service region (e.g., "westus2").
     private static final String serviceRegion = "YourServiceRegion";
 
+    // Update below values if you want to use a different avatar
     private static final String avatarCharacter = "lisa";
     private static final String avatarStyle = "casual-sitting";
+    // Set below parameter to true if you want to use custom avatar
+    private static final boolean customAvatar = false;
+
+    // Update below value if you want to use a different TTS voice
     private static final String ttsVoice = "en-US-AvaMultilingualNeural";
+    // Fill below value if you want to use custom TTS voice
+    private static final String ttsEndpointID = "";
 
     private static final String VIDEO_TRACK_ID = "ARDAMSv0";
     private static final String AUDIO_TRACK_ID = "ARDAMSa0";
@@ -440,6 +447,10 @@ public class MainActivity extends AppCompatActivity {
         URI uri = URI.create(endpoint + "/cognitiveservices/websocket/v1?enableTalkingAvatar=true");
         speechConfig = SpeechConfig.fromEndpoint(uri, speechSubscriptionKey);
         speechConfig.setSpeechSynthesisVoiceName(ttsVoice);
+        if (ttsEndpointID != null && !ttsEndpointID.isEmpty()) {
+            speechConfig.setEndpointId(ttsEndpointID);
+        }
+
         synthesizer = new SpeechSynthesizer(speechConfig, null);
         connection = Connection.fromSpeechSynthesizer(synthesizer);
         synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
@@ -450,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
             e.close();
         });
 
-        String avatarConfig = buildAvatarConfig(localSDP, avatarCharacter, avatarStyle,"");
+        String avatarConfig = buildAvatarConfig(localSDP);
         try {
             JSONObject avatarConfigJsonObj = new JSONObject(avatarConfig);
         } catch (org.json.JSONException e) {
@@ -522,8 +533,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private String buildAvatarConfig(
-            String localSDP, String avatarCharacter, String avatarStyle, String backgroundImageUrl) {
+    private String buildAvatarConfig(String localSDP) {
         return "{\n" +
                 "    \"synthesis\": {\n" +
                 "        \"video\": {\n" +
@@ -552,13 +562,13 @@ public class MainActivity extends AppCompatActivity {
                 "                \"bitrate\": 1000000\n" +
                 "            },\n" +
                 "            \"talkingAvatar\": {\n" +
-                "                \"customized\": false,\n" +
+                "                \"customized\": " + customAvatar + ",\n" +
                 "                \"character\": \"" + avatarCharacter + "\",\n" +
                 "                \"style\": \"" + avatarStyle + "\",\n" +
                 "                \"background\": {\n" +
                 "                    \"color\": \"#FFFFFFFF\",\n" +
                 "                    \"image\": {\n" +
-                "                        \"url\": \"" + backgroundImageUrl + "\"\n" +
+                "                        \"url\": \"\"\n" +
                 "                    }\n" +
                 "                }\n" +
                 "            }\n" +
