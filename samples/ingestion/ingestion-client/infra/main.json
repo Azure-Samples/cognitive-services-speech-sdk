@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.29.45.22436",
-      "templateHash": "14835083518951802266"
+      "version": "0.29.47.4906",
+      "templateHash": "128019599086429636"
     }
   },
   "parameters": {
@@ -224,7 +224,7 @@
     }
   },
   "variables": {
-    "Version": "v2.1.7",
+    "Version": "v2.1.8",
     "AudioInputContainer": "audio-input",
     "AudioProcessedContainer": "audio-processed",
     "ErrorFilesOutputContainer": "audio-failed",
