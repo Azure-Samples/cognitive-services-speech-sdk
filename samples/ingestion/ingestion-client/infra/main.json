@@ -5,10 +5,25 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "128019599086429636"
+      "templateHash": "10746629345153305500"
     }
   },
   "parameters": {
+    "EnvironmentName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "metadata": {
+        "description": "Name of the the environment which is used to generate a short unique hash used in all resources."
+      }
+    },
+    "ResourceToken": {
+      "type": "string",
+      "defaultValue": "[toLower(uniqueString(subscription().id, parameters('EnvironmentName'), parameters('AzureSpeechServicesRegion')))]",
+      "metadata": {
+        "description": "A generated idempotent unique token that can be used across the subscription."
+      }
+    },
     "StorageAccount": {
       "type": "string",
       "metadata": {
@@ -208,13 +223,6 @@
         "description": "The administrator password of the SQL Server. If it is left empty, no SQL server/database will be created."
       }
     },
-    "DeploymentId": {
-      "type": "string",
-      "defaultValue": "[utcNow()]",
-      "metadata": {
-        "description": "Id that will be suffixed to all created resources to identify resources of a certain deployment. Leave as is to use timestamp as deployment id."
-      }
-    },
     "CompletedServiceBusConnectionString": {
       "type": "securestring",
       "defaultValue": "",
@@ -242,20 +250,19 @@
     "RetryLimit": 4,
     "InitialPollingDelayInMinutes": 2,
     "MaxPollingDelayInMinutes": 180,
-    "InstanceId": "[parameters('DeploymentId')]",
     "StorageAccountName": "[parameters('StorageAccount')]",
     "UseSqlDatabase": "[and(not(equals(parameters('SqlAdministratorLogin'), '')), not(equals(parameters('SqlAdministratorLoginPassword'), '')))]",
-    "SqlServerName": "[format('sqlserver{0}', toLower(variables('InstanceId')))]",
-    "DatabaseName": "[format('Database-{0}', toLower(variables('InstanceId')))]",
-    "ServiceBusName": "[format('ServiceBus-{0}', variables('InstanceId'))]",
-    "AppInsightsName": "[format('AppInsights-{0}', variables('InstanceId'))]",
-    "KeyVaultName": "[format('KV-{0}', variables('InstanceId'))]",
-    "EventGridSystemTopicName": "[format('{0}-{1}', variables('StorageAccountName'), variables('InstanceId'))]",
-    "StartTranscriptionFunctionName": "[take(format('StartTranscriptionFunction-{0}', variables('InstanceId')), 60)]",
+    "SqlServerName": "[format('sqlserver{0}', parameters('ResourceToken'))]",
+    "DatabaseName": "[format('Database-{0}', parameters('ResourceToken'))]",
+    "ServiceBusName": "[format('ServiceBus-{0}', parameters('ResourceToken'))]",
+    "AppInsightsName": "[format('AppInsights-{0}', parameters('ResourceToken'))]",
+    "KeyVaultName": "[format('KV-{0}', parameters('ResourceToken'))]",
+    "EventGridSystemTopicName": "[format('{0}-{1}', variables('StorageAccountName'), parameters('ResourceToken'))]",
+    "StartTranscriptionFunctionName": "[take(format('StartTranscription-{0}', parameters('ResourceToken')), 60)]",
     "StartTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('StartTranscriptionFunctionName'))]",
-    "FetchTranscriptionFunctionName": "[take(format('FetchTranscriptionFunction-{0}', variables('InstanceId')), 60)]",
+    "FetchTranscriptionFunctionName": "[take(format('FetchTranscription-{0}', parameters('ResourceToken')), 60)]",
     "FetchTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('FetchTranscriptionFunctionName'))]",
-    "AppServicePlanName": "[format('AppServicePlan-{0}', variables('InstanceId'))]",
+    "AppServicePlanName": "[format('AppServicePlan-{0}', parameters('ResourceToken'))]",
     "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey",
     "TextAnalyticsKeySecretName": "TextAnalyticsKey",
     "DatabaseConnectionStringSecretName": "DatabaseConnectionString",

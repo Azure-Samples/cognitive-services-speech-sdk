@@ -1,3 +1,11 @@
+@minLength(1)
+@maxLength(20)
+@description('Name of the the environment which is used to generate a short unique hash used in all resources.')
+param EnvironmentName string
+
+@description('A generated idempotent unique token that can be used across the subscription.')
+param ResourceToken string = toLower(uniqueString(subscription().id, EnvironmentName, AzureSpeechServicesRegion))
+
 @description('The name of the storage account. It must be unique across all existing storage account names in Azure, between 3 and 24 characters long, and can contain only lowercase letters and numbers.')
 param StorageAccount string
 
@@ -136,9 +144,6 @@ param SqlAdministratorLogin string = ''
 @secure()
 param SqlAdministratorLoginPassword string = ''
 
-@description('Id that will be suffixed to all created resources to identify resources of a certain deployment. Leave as is to use timestamp as deployment id.')
-param DeploymentId string = utcNow()
-
 @description('The connection string for the Service Bus Queue where you want to receive the notification of completion of the transcription for each audio file. If left empty, no completion notification will be sent.')
 @secure()
 param CompletedServiceBusConnectionString string = ''
@@ -162,20 +167,19 @@ var FilesPerTranscriptionJob = 100
 var RetryLimit = 4
 var InitialPollingDelayInMinutes = 2
 var MaxPollingDelayInMinutes = 180
-var InstanceId = DeploymentId
 var StorageAccountName = StorageAccount
 var UseSqlDatabase = ((SqlAdministratorLogin != '') && (SqlAdministratorLoginPassword != ''))
-var SqlServerName = 'sqlserver${toLower(InstanceId)}'
-var DatabaseName = 'Database-${toLower(InstanceId)}'
-var ServiceBusName = 'ServiceBus-${InstanceId}'
-var AppInsightsName = 'AppInsights-${InstanceId}'
-var KeyVaultName = 'KV-${InstanceId}'
-var EventGridSystemTopicName = '${StorageAccountName}-${InstanceId}'
-var StartTranscriptionFunctionName = take('StartTranscriptionFunction-${InstanceId}', 60)
+var SqlServerName = 'sqlserver${ResourceToken}'
+var DatabaseName = 'Database-${ResourceToken}'
+var ServiceBusName = 'ServiceBus-${ResourceToken}'
+var AppInsightsName = 'AppInsights-${ResourceToken}'
+var KeyVaultName = 'KV-${ResourceToken}'
+var EventGridSystemTopicName = '${StorageAccountName}-${ResourceToken}'
+var StartTranscriptionFunctionName = take('StartTranscription-${ResourceToken}', 60)
 var StartTranscriptionFunctionId = StartTranscriptionFunction.id
-var FetchTranscriptionFunctionName = take('FetchTranscriptionFunction-${InstanceId}', 60)
+var FetchTranscriptionFunctionName = take('FetchTranscription-${ResourceToken}', 60)
 var FetchTranscriptionFunctionId = FetchTranscriptionFunction.id
-var AppServicePlanName = 'AppServicePlan-${InstanceId}'
+var AppServicePlanName = 'AppServicePlan-${ResourceToken}'
 var AzureSpeechServicesKeySecretName = 'AzureSpeechServicesKey'
 var TextAnalyticsKeySecretName = 'TextAnalyticsKey'
 var DatabaseConnectionStringSecretName = 'DatabaseConnectionString'
