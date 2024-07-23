@@ -144,7 +144,7 @@ param DeploymentId string = utcNow()
 param CompletedServiceBusConnectionString string = ''
 
 // Don't change the format for Version variable
-var Version = 'v2.1.6'
+var Version = 'v2.1.7'
 var AudioInputContainer = 'audio-input'
 var AudioProcessedContainer = 'audio-processed'
 var ErrorFilesOutputContainer = 'audio-failed'
@@ -225,9 +225,9 @@ resource KeyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: KeyVaultName
   location: resourceGroup().location
   properties: {
-    enabledForDeployment: 'true'
-    enabledForDiskEncryption: 'false'
-    enabledForTemplateDeployment: 'false'
+    enabledForDeployment: true
+    enabledForDiskEncryption: false
+    enabledForTemplateDeployment: false
     tenantId: subscription().tenantId
     accessPolicies: [
       {
@@ -264,8 +264,7 @@ resource KeyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
 
 resource KeyVaultName_AzureSpeechServicesKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
   parent: KeyVault
-  name: '${AzureSpeechServicesKeySecretName}'
-  location: resourceGroup().location
+  name: AzureSpeechServicesKeySecretName
   properties: {
     value: AzureSpeechServicesKey
   }
@@ -273,8 +272,7 @@ resource KeyVaultName_AzureSpeechServicesKeySecret 'Microsoft.KeyVault/vaults/se
 
 resource KeyVaultName_TextAnalyticsKeySecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
   parent: KeyVault
-  name: '${TextAnalyticsKeySecretName}'
-  location: resourceGroup().location
+  name: TextAnalyticsKeySecretName
   properties: {
     value: (empty(TextAnalyticsKey) ? 'NULL' : TextAnalyticsKey)
   }
@@ -282,8 +280,7 @@ resource KeyVaultName_TextAnalyticsKeySecret 'Microsoft.KeyVault/vaults/secrets@
 
 resource KeyVaultName_DatabaseConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2019-09-01' = {
   parent: KeyVault
-  name: '${DatabaseConnectionStringSecretName}'
-  location: resourceGroup().location
+  name: DatabaseConnectionStringSecretName
   properties: {
     value: (UseSqlDatabase
       ? 'Server=tcp:${reference(SqlServerName,'2014-04-01-preview').fullyQualifiedDomainName},1433;Initial Catalog=${DatabaseName};Persist Security Info=False;User ID=${SqlAdministratorLogin};Password=${SqlAdministratorLoginPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
@@ -309,7 +306,7 @@ resource SqlServer 'Microsoft.Sql/servers@2021-02-01-preview' = if (UseSqlDataba
 
 resource SqlServerName_Database 'Microsoft.Sql/servers/databases@2015-01-01' = if (UseSqlDatabase) {
   parent: SqlServer
-  name: '${DatabaseName}'
+  name: DatabaseName
   location: resourceGroup().location
   tags: {
     displayName: 'Database'
@@ -346,7 +343,6 @@ resource SqlServerName_DefaultAuditingSettings 'Microsoft.Sql/servers/auditingSe
 resource SqlServerName_AllowAllMicrosoftAzureIps 'Microsoft.Sql/servers/firewallrules@2014-04-01' = if (UseSqlDatabase) {
   parent: SqlServer
   name: 'AllowAllMicrosoftAzureIps'
-  location: resourceGroup().location
   properties: {
     endIpAddress: '0.0.0.0'
     startIpAddress: '0.0.0.0'
@@ -358,7 +354,6 @@ resource StorageAccount_resource 'Microsoft.Storage/storageAccounts@2019-06-01' 
   location: resourceGroup().location
   sku: {
     name: 'Standard_GRS'
-    tier: 'Standard'
   }
   kind: 'StorageV2'
   properties: {
@@ -389,7 +384,6 @@ resource StorageAccount_resource 'Microsoft.Storage/storageAccounts@2019-06-01' 
 resource ServiceBusName_RootManageSharedAccessKey 'Microsoft.ServiceBus/namespaces/authorizationRules@2017-04-01' = {
   parent: ServiceBus
   name: 'RootManageSharedAccessKey'
-  location: resourceGroup().location
   properties: {
     rights: [
       'Listen'
@@ -402,7 +396,6 @@ resource ServiceBusName_RootManageSharedAccessKey 'Microsoft.ServiceBus/namespac
 resource ServiceBusName_start_transcription_queue 'Microsoft.ServiceBus/namespaces/queues@2017-04-01' = {
   parent: ServiceBus
   name: 'start_transcription_queue'
-  location: resourceGroup().location
   properties: {
     lockDuration: 'PT4M'
     maxSizeInMegabytes: 5120
@@ -423,7 +416,6 @@ resource ServiceBusName_start_transcription_queue 'Microsoft.ServiceBus/namespac
 resource ServiceBusName_fetch_transcription_queue 'Microsoft.ServiceBus/namespaces/queues@2017-04-01' = {
   parent: ServiceBus
   name: 'fetch_transcription_queue'
-  location: resourceGroup().location
   properties: {
     lockDuration: 'PT5M'
     maxSizeInMegabytes: 5120
@@ -443,11 +435,7 @@ resource ServiceBusName_fetch_transcription_queue 'Microsoft.ServiceBus/namespac
 
 resource StorageAccountName_default 'Microsoft.Storage/storageAccounts/blobServices@2019-06-01' = {
   parent: StorageAccount_resource
-  location: resourceGroup().location
   name: 'default'
-  sku: {
-    name: 'Standard_GRS'
-  }
   properties: {
     cors: {
       corsRules: []
@@ -460,11 +448,7 @@ resource StorageAccountName_default 'Microsoft.Storage/storageAccounts/blobServi
 
 resource Microsoft_Storage_storageAccounts_fileServices_StorageAccountName_default 'Microsoft.Storage/storageAccounts/fileServices@2019-06-01' = {
   parent: StorageAccount_resource
-  location: resourceGroup().location
   name: 'default'
-  sku: {
-    name: 'Standard_GRS'
-  }
   properties: {
     cors: {
       corsRules: []
@@ -475,7 +459,6 @@ resource Microsoft_Storage_storageAccounts_fileServices_StorageAccountName_defau
 resource ServiceBusName_fetch_transcription_queue_FetchTranscription 'Microsoft.ServiceBus/namespaces/queues/authorizationRules@2017-04-01' = {
   parent: ServiceBusName_fetch_transcription_queue
   name: 'FetchTranscription'
-  location: resourceGroup().location
   properties: {
     rights: [
       'Listen'
@@ -483,7 +466,6 @@ resource ServiceBusName_fetch_transcription_queue_FetchTranscription 'Microsoft.
     ]
   }
   dependsOn: [
-    ServiceBus
     ServiceBusName_RootManageSharedAccessKey
   ]
 }
@@ -491,7 +473,6 @@ resource ServiceBusName_fetch_transcription_queue_FetchTranscription 'Microsoft.
 resource ServiceBusName_start_transcription_queue_StartTranscription 'Microsoft.ServiceBus/namespaces/queues/authorizationRules@2017-04-01' = {
   parent: ServiceBusName_start_transcription_queue
   name: 'StartTranscription'
-  location: resourceGroup().location
   properties: {
     rights: [
       'Listen'
@@ -499,7 +480,6 @@ resource ServiceBusName_start_transcription_queue_StartTranscription 'Microsoft.
     ]
   }
   dependsOn: [
-    ServiceBus
     ServiceBusName_RootManageSharedAccessKey
   ]
 }
@@ -507,85 +487,57 @@ resource ServiceBusName_start_transcription_queue_StartTranscription 'Microsoft.
 resource StorageAccountName_default_AudioInputContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = {
   parent: StorageAccountName_default
   name: AudioInputContainer
-  location: resourceGroup().location
   properties: {
     publicAccess: 'None'
   }
-  dependsOn: [
-    StorageAccount_resource
-  ]
 }
 
 resource StorageAccountName_default_JsonResultOutputContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = {
   parent: StorageAccountName_default
   name: JsonResultOutputContainer
-  location: resourceGroup().location
   properties: {
     publicAccess: 'None'
   }
-  dependsOn: [
-    StorageAccount_resource
-  ]
 }
 
 resource StorageAccountName_default_ConsolidatedFilesOutputContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = if (CreateConsolidatedOutputFiles) {
   parent: StorageAccountName_default
   name: ConsolidatedFilesOutputContainer
-  location: resourceGroup().location
   properties: {
     publicAccess: 'None'
   }
-  dependsOn: [
-    StorageAccount_resource
-  ]
 }
 
 resource StorageAccountName_default_AudioProcessedContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = if (CreateAudioProcessedContainer) {
   parent: StorageAccountName_default
   name: AudioProcessedContainer
-  location: resourceGroup().location
   properties: {
     publicAccess: 'None'
   }
-  dependsOn: [
-    StorageAccount_resource
-  ]
 }
 
 resource StorageAccountName_default_HtmlResultOutputContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = if (CreateHtmlResultFile) {
   parent: StorageAccountName_default
   name: HtmlResultOutputContainer
-  location: resourceGroup().location
   properties: {
     publicAccess: 'None'
   }
-  dependsOn: [
-    StorageAccount_resource
-  ]
 }
 
 resource StorageAccountName_default_ErrorReportOutputContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = {
   parent: StorageAccountName_default
   name: ErrorReportOutputContainer
-  location: resourceGroup().location
   properties: {
     publicAccess: 'None'
   }
-  dependsOn: [
-    StorageAccount_resource
-  ]
 }
 
 resource StorageAccountName_default_ErrorFilesOutputContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2019-06-01' = {
   parent: StorageAccountName_default
   name: ErrorFilesOutputContainer
-  location: resourceGroup().location
   properties: {
     publicAccess: 'None'
   }
-  dependsOn: [
-    StorageAccount_resource
-  ]
 }
 
 resource EventGridSystemTopic 'Microsoft.EventGrid/systemTopics@2020-04-01-preview' = {
@@ -661,7 +613,7 @@ resource StartTranscriptionFunction 'Microsoft.Web/sites@2020-09-01' = {
   kind: 'functionapp'
   properties: {
     serverFarmId: AppServicePlan.id
-    httpsOnly: 'true'
+    httpsOnly: true
     siteConfig: {
       netFrameworkVersion: 'v8.0'
     }
@@ -729,7 +681,7 @@ resource FetchTranscriptionFunction 'Microsoft.Web/sites@2020-09-01' = {
   kind: 'functionapp'
   properties: {
     serverFarmId: AppServicePlan.id
-    httpsOnly: 'true'
+    httpsOnly: true
     siteConfig: {
       netFrameworkVersion: 'v8.0'
     }
