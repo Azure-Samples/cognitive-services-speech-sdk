@@ -12,7 +12,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
     * Run `pip install -r requirements.txt` to install the required packages.
     * Set below environment virables:
         * `SPEECH_REGION` - the region of your Azure speech resource, e.g. westus2.
-        * `SPEECH_KEY` - the subscription key of your Azure speech resource.
+        * `SPEECH_KEY` - the API key of your Azure speech resource.
         * `SPEECH_PRIVATE_ENDPOINT` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint.
     * Set below environment virables if you want to use customized ICE server:
         * `ICE_SERVER_URL` - the URL of your customized ICE server.
@@ -51,7 +51,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
     * Run `pip install -r requirements.txt` to install the required packages.
     * Set below environment virables:
         * `SPEECH_REGION` - the region of your Azure speech resource, e.g. westus2.
-        * `SPEECH_KEY` - the subscription key of your Azure speech resource.
+        * `SPEECH_KEY` - the API key of your Azure speech resource.
         * `SPEECH_PRIVATE_ENDPOINT` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint.
         * `AZURE_OPENAI_ENDPOINT` - the endpoint of your Azure OpenAI resource, e.g. https://my-aoai.openai.azure.com/, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
         * `AZURE_OPENAI_API_KEY` - the API key of your Azure OpenAI resource, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
