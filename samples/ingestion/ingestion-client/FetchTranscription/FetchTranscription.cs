@@ -3,45 +3,78 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace FetchTranscriptionFunction
+namespace FetchTranscription
 {
     using System;
     using System.Threading.Tasks;
+    using Azure.Messaging.ServiceBus;
+
     using Connector;
+    using Connector.Database;
 
-    using Microsoft.Azure.WebJobs;
+    using Microsoft.Azure.Functions.Worker;
+    using Microsoft.Extensions.Azure;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
+    /// <summary>
+    /// Fetch Transcription class.
+    /// </summary>
     public class FetchTranscription
     {
         private readonly IServiceProvider serviceProvider;
+        private readonly IStorageConnector storageConnector;
+        private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
+        private readonly ILogger<FetchTranscription> logger;
+        private readonly AppConfig appConfig;
 
-        public FetchTranscription(IServiceProvider serviceProvider)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FetchTranscription"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="logger">The FetchTranscription logger.</param>
+        /// <param name="storageConnector">Storage Connector dependency</param>
+        /// <param name="serviceBusClientFactory">Azure client factory for service bus clients</param>
+        /// <param name="appConfig">Environment configuration</param>
+        public FetchTranscription(
+            IServiceProvider serviceProvider,
+            ILogger<FetchTranscription> logger,
+            IStorageConnector storageConnector,
+            IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
+            IOptions<AppConfig> appConfig)
         {
             this.serviceProvider = serviceProvider;
+            this.logger = logger;
+            this.storageConnector = storageConnector;
+            this.serviceBusClientFactory = serviceBusClientFactory;
+            this.appConfig = appConfig?.Value;
         }
 
-        [FunctionName("FetchTranscription")]
-        public async Task Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string message, ILogger log)
+        /// <summary>
+        /// Triggered by a Service Bus message to fetch the transcription.
+        /// </summary>
+        /// <param name="message">The message on the queue</param>
+        [Function("FetchTranscription")]
+        public async Task Run([ServiceBusTrigger("fetch_transcription_queue", Connection = "AzureServiceBus")]string message)
         {
-            if (log == null)
-            {
-                throw new ArgumentNullException(nameof(log));
-            }
+            ArgumentNullException.ThrowIfNull(this.logger, nameof(this.logger));
 
-            log.LogInformation($"C# Service bus triggered function executed at: {DateTime.Now}");
+            this.logger.LogInformation($"C# Isolated Service bus triggered function executed at: {DateTime.Now}");
 
             if (string.IsNullOrEmpty(message))
             {
-                log.LogInformation($"Found invalid service bus message: {message}. Stopping execution.");
+                this.logger.LogInformation($"Found invalid service bus message: {message}. Stopping execution.");
                 return;
             }
 
             var serviceBusMessage = TranscriptionStartedMessage.DeserializeMessage(message);
 
-            var transcriptionProcessor = new TranscriptionProcessor(this.serviceProvider);
+            var databaseContext = this.appConfig.UseSqlDatabase ? this.serviceProvider.GetRequiredService<IngestionClientDbContext>() : null;
 
-            await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  log).ConfigureAwait(false);
+            var transcriptionProcessor = new TranscriptionProcessor(this.storageConnector, this.serviceBusClientFactory, databaseContext, Options.Create(this.appConfig));
+
+            await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  this.logger).ConfigureAwait(false);
         }
     }
 }

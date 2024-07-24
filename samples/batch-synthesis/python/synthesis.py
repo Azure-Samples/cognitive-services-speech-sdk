@@ -9,44 +9,70 @@ import logging
 import os
 import sys
 import time
+import uuid
 from pathlib import Path
 
+from azure.identity import DefaultAzureCredential
 import requests
 
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,  # set to logging.DEBUG for verbose output
         format="[%(asctime)s] %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
 logger = logging.getLogger(__name__)
 
-# Your Speech resource key and region
-# This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
+# The endpoint (and key) could be gotten from the Keys and Endpoint page in the Speech service resource.
+# The endpoint would be like: https://<region>.api.cognitive.microsoft.com or https://<custom_domain>.cognitiveservices.azure.com
+# If you want to use passwordless authentication, custom domain is required.
+SPEECH_ENDPOINT = os.environ.get('SPEECH_ENDPOINT')
+# We recommend to use passwordless authentication with Azure Identity here; meanwhile, you can also use a subscription key instead
+PASSWORDLESS_AUTHENTICATION = True
+if not SPEECH_ENDPOINT:
+    if PASSWORDLESS_AUTHENTICATION:
+        logger.error('SPEECH_ENDPOINT is required for passwordless authentication')
+        sys.exit(1)
+    SERVICE_REGION = os.environ.get('SPEECH_REGION')
+    SPEECH_ENDPOINT = f'https://{SERVICE_REGION}.api.cognitive.microsoft.com'
+if not PASSWORDLESS_AUTHENTICATION:
+    SUBSCRIPTION_KEY = os.environ.get('SPEECH_KEY')
 
-SUBSCRIPTION_KEY = os.environ.get('SPEECH_KEY')
-SERVICE_REGION = os.environ.get('SPEECH_REGION')
 
-NAME = "Simple synthesis"
-DESCRIPTION = "Simple synthesis description"
+API_VERSION = "2024-04-01"
 
-# The service host suffix.
-# For azure.cn the host suffix is "customvoice.api.speech.azure.cn"
-SERVICE_HOST = "customvoice.api.speech.microsoft.com"
+def _create_job_id():
+    # the job ID must be unique in current speech resource
+    # you can use a GUID or a self-increasing number
+    return uuid.uuid4()
 
 
-def submit_synthesis():
-    url = f'https://{SERVICE_REGION}.{SERVICE_HOST}/api/texttospeech/3.1-preview1/batchsynthesis'
+def _authenticate():
+    if PASSWORDLESS_AUTHENTICATION:
+        # Refer to https://learn.microsoft.com/python/api/overview/azure/identity-readme?view=azure-python#defaultazurecredential
+        # for more information about Azure Identity
+        # For example, your app can authenticate using your Azure CLI sign-in credentials with when developing locally.
+        # Your app can then use a managed identity once it has been deployed to Azure. No code changes are required for this transition.
+
+        # When developing locally, make sure that the user account that is accessing batch avatar synthesis has the right permission.
+        # You'll need Cognitive Services User or Cognitive Services Speech User role to submit batch avatar synthesis jobs.
+        credential = DefaultAzureCredential()
+        token = credential.get_token('https://cognitiveservices.azure.com/.default')
+        return {'Authorization': f'Bearer {token.token}'}
+    else:
+        return {'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY}
+
+
+def submit_synthesis(job_id: str) -> bool:
+    url = f'{SPEECH_ENDPOINT}/texttospeech/batchsyntheses/{job_id}?api-version={API_VERSION}'
     header = {
-        'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY,
         'Content-Type': 'application/json'
     }
+    header.update(_authenticate())
 
     with open(Path(__file__).absolute().parent.parent / 'Gatsby-chapter1.txt', 'r') as f:
         text = f.read()
 
     payload = {
-        'displayName': NAME,
-        'description': DESCRIPTION,
-        "textType": "PlainText",
+        "inputKind": "PlainText", # or SSML
         'synthesisConfig': {
-            "voice": "en-US-AndrewNeural",
+            "voice": "en-US-AvaMultilingualNeural",
         },
         # Replace with your custom voice name and deployment ID if you want to use custom voice.
         # Multiple voices are supported, the mixture of custom voices and platform voices is allowed.
@@ -56,7 +82,7 @@ def submit_synthesis():
         },
         "inputs": [
             {
-                "text": text
+                "content": text
             },
         ],
         "properties": {
@@ -65,20 +91,19 @@ def submit_synthesis():
         },
     }
 
-    response = requests.post(url, json.dumps(payload), headers=header)
+    response = requests.put(url, json.dumps(payload), headers=header)
     if response.status_code < 400:
         logger.info('Batch synthesis job submitted successfully')
         logger.info(f'Job ID: {response.json()["id"]}')
-        return response.json()["id"]
+        return True
     else:
-        logger.error(f'Failed to submit batch synthesis job: {response.text}')
+        logger.error(f'Failed to submit batch synthesis job: [{response.status_code}], {response.text}')
+        return False
 
 
-def get_synthesis(job_id):
-    url = f'https://{SERVICE_REGION}.{SERVICE_HOST}/api/texttospeech/3.1-preview1/batchsynthesis/{job_id}'
-    header = {
-        'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY
-    }
+def get_synthesis(job_id: str):
+    url = f'{SPEECH_ENDPOINT}/texttospeech/batchsyntheses/{job_id}?api-version={API_VERSION}'
+    header = _authenticate()
     response = requests.get(url, headers=header)
     if response.status_code < 400:
         logger.info('Get batch synthesis job successfully')
@@ -88,12 +113,10 @@ def get_synthesis(job_id):
         logger.error(f'Failed to get batch synthesis job: {response.text}')
 
 
-def list_synthesis_jobs(skip: int = 0, top: int = 100):
+def list_synthesis_jobs(skip: int = 0, max_page_size: int = 100):
     """List all batch synthesis jobs in the subscription"""
-    url = f'https://{SERVICE_REGION}.{SERVICE_HOST}/api/texttospeech/3.1-preview1/batchsynthesis?skip={skip}&top={top}'
-    header = {
-        'Ocp-Apim-Subscription-Key': SUBSCRIPTION_KEY
-    }
+    url = f'{SPEECH_ENDPOINT}/texttospeech/batchsyntheses?api-version={API_VERSION}&skip={skip}&maxpagesize={max_page_size}'
+    header = _authenticate()
     response = requests.get(url, headers=header)
     if response.status_code < 400:
         logger.info(f'List batch synthesis jobs successfully, got {len(response.json()["values"])} jobs')
@@ -103,8 +126,8 @@ def list_synthesis_jobs(skip: int = 0, top: int = 100):
 
 
 if __name__ == '__main__':
-    job_id = submit_synthesis()
-    if job_id is not None:
+    job_id = _create_job_id()
+    if submit_synthesis(job_id):
         while True:
             status = get_synthesis(job_id)
             if status == 'Succeeded':

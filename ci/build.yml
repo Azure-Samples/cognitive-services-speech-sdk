@@ -38,7 +38,7 @@ jobs:
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: Component Detection
     condition: >
-      and(eq(variables['System.CollectionId'], '19422243-19b9-4d85-9ca6-bc961861d287'),
+      and(eq(variables['System.CollectionId'], '26f8e8b1-373f-4f65-96fc-d17a59b38306'),
         eq(variables['System.DefinitionId'], '5400'),
         eq(variables['Build.SourceBranch'], 'refs/heads/master'),
         or(eq(variables['Build.Reason'], 'Schedule'), eq(variables['Build.Reason'], 'Manual')))
@@ -72,7 +72,7 @@ jobs:
   dependsOn: Pre
   timeoutInMinutes: 60
   pool:
-    name: SkymanWS2022Compliant
+    name: CarbonWS2022Compliant
   steps:
   - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
     displayName: Patch samples

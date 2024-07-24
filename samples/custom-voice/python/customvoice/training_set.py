@@ -41,8 +41,8 @@ class TrainingSet(StatusObject):
         self.project_id = json_dict['projectId']
         if 'properties' in json_dict:
             properties = json_dict['properties']
-            if 'size' in properties:
-                self.utteranceCount = int(properties['size'])
+            if 'utteranceCount' in properties:
+                self.utteranceCount = int(properties['utteranceCount'])
 
 
     # get all training sets in project

@@ -17,8 +17,6 @@ Before you get started, here's a list of prerequisites:
   sudo apt-get install libssl-dev libasound2
   ```
 
-  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
-
 * On RHEL or CentOS, run the following commands for the installation of required packages:
   ```sh
   sudo yum update
