@@ -20,7 +20,7 @@ resources:
   clean: true
 
 variables:
-  SPEECHSDK_NUGET_VERSION: 6.2.1
+  SPEECHSDK_NUGET_VERSION: 8.x
   CG_RAN: true # we do Component Governance explicitly only in the Pre job
 
 jobs:
