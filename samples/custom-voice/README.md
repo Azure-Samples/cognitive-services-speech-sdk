@@ -4,8 +4,7 @@ The Custom Voice API (Preview) is designed to create professional voice and pers
 
 For a detailed explanation see the [custom neural voice documentation](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/custom-neural-voice) and the `README.md` in the language specific subdirectories.
 
-You can copy paste [custom voice REST API swagger doc](https://github.com/Azure/azure-rest-api-specs/blob/main/specification/cognitiveservices/data-plane/Speech/TextToSpeech/preview/2023-12-01-preview/texttospeech.json) to [Swagger Editor](https://editor.swagger.io/), then you can go through API in swagger UI.
-You can find sample request/response pair for each API [here](https://github.com/Azure/azure-rest-api-specs/tree/main/specification/cognitiveservices/data-plane/Speech/TextToSpeech/preview/2023-12-01-preview/examples).
+REST API doc: [custom voice REST API](https://learn.microsoft.com/rest/api/aiservices/speechapi/operation-groups?view=rest-aiservices-speechapi-2024-02-01-preview).
 
 Available samples:
 
