@@ -20,7 +20,7 @@ resources:
   clean: true
 
 variables:
-  SPEECHSDK_NUGET_VERSION: 8.x
+  SPEECHSDK_NUGET_VERSION: 6.2.1
   CG_RAN: true # we do Component Governance explicitly only in the Pre job
 
 jobs:
@@ -82,6 +82,11 @@ jobs:
     displayName: Use NuGet $(SPEECHSDK_NUGET_VERSION)
     inputs:
       versionSpec: $(SPEECHSDK_NUGET_VERSION)
+  - task: UseDotNet@2
+    displayName: 'Install .NET SDK 8.x'
+    inputs:
+      version: 8.x
+      performMultiLevelLookup: true
   - task: NuGetCommand@2
     inputs:
       command: restore
