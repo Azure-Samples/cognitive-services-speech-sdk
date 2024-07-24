@@ -6,7 +6,7 @@
 
     <MSTestTestAdapterPackageVersion>[3.4.3]</MSTestTestAdapterPackageVersion>
     <MSTestTestFrameworkPackageVersion>[3.4.3]</MSTestTestFrameworkPackageVersion>
-    <MSTestSdk>[17.10.0]</MSTestSdk>
+    <MSTestSdkPackageVersion>[17.10.0]</MSTestSdkPackageVersion>
 
 
     <MicrosoftApplicationInsightsWorkerServicePackageVersion>[2.22.0]</MicrosoftApplicationInsightsWorkerServicePackageVersion>
