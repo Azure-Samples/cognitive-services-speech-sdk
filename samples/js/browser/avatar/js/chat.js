@@ -20,9 +20,9 @@ var lastSpeakTime
 // Connect to avatar service
 function connectAvatar() {
     const cogSvcRegion = document.getElementById('region').value
-    const cogSvcSubKey = document.getElementById('subscriptionKey').value
+    const cogSvcSubKey = document.getElementById('APIKey').value
     if (cogSvcSubKey === '') {
-        alert('Please fill in the subscription key of your speech resource.')
+        alert('Please fill in the API key of your speech resource.')
         return
     }
 
