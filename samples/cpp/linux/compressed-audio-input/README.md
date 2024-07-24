@@ -20,8 +20,6 @@ The compressed audio input stream should be either in MP3 or Opus format.
   sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
   ```
 
-  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
-
 * On RHEL or CentOS, install these packages to build and run this sample:
 
   ```sh

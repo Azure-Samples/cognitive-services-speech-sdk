@@ -111,10 +111,11 @@ namespace BatchClient
                     //     }
                     // },
 
-                    // uncomment the following block to enable and configure language identification prior to transcription
+                    // // uncomment the following block to enable and configure language identification prior to transcription. Available modes are "Single" and "Continuous".
                     // LanguageIdentification = new LanguageIdentificationProperties
                     // {
                     //     CandidateLocales = new CultureInfo[] { new CultureInfo("en-US"), new CultureInfo("ja-JP") },
+                    //     LanguageIdentificationMode = "Single",
                     // }
                 }
             };

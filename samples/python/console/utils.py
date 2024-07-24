@@ -6,6 +6,7 @@
 
 import struct
 
+
 # Utility function to get the header size of a WAV file
 def get_wav_header_size(wav_file):
     with open(wav_file, 'rb') as f:
