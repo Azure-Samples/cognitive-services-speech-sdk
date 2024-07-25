@@ -72,9 +72,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // Listen to data channel, to get the event from the server
     peerConnection.addEventListener("datachannel", event => {
         const dataChannel = event.channel
-        console.log("connecting to data channel" + dataChannel.label)
         dataChannel.onmessage = e => {
-            console.log("[" + (new Date()).toISOString() + "] Event received: " + e.data)
+            console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
         }
     })
 
