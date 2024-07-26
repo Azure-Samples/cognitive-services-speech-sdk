@@ -40,7 +40,7 @@ Requirements specific to embedded speech samples are as follows.
 [Download the sample code to your development PC.](/README.md#get-the-samples)
 
 Download example data (a keyword recognition model, speech recognition input files) used in this sample project from
-https://csspeechstorage.blob.core.windows.net/drop/SamplesData/embedded_speech_samples_data.zip.
+https://aka.ms/embedded-speech-samples-data (zip file).
 Unzip the package under this sample folder. The result should be a `data` subfolder with the following files:
 ```
 data\keyword_computer.table
