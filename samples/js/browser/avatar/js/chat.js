@@ -21,9 +21,9 @@ var imgUrl = ""
 // Connect to avatar service
 function connectAvatar() {
     const cogSvcRegion = document.getElementById('region').value
-    const cogSvcSubKey = document.getElementById('subscriptionKey').value
+    const cogSvcSubKey = document.getElementById('APIKey').value
     if (cogSvcSubKey === '') {
-        alert('Please fill in the subscription key of your speech resource.')
+        alert('Please fill in the API key of your speech resource.')
         return
     }
 
@@ -188,6 +188,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             }
         }
     }
+    
+     // Listen to data channel, to get the event from the server
+    peerConnection.addEventListener("datachannel", event => {
+        const dataChannel = event.channel
+        dataChannel.onmessage = e => {
+            console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+        }
+    })
+
+    // This is a workaround to make sure the data channel listening is working by creating a data channel from the client side
+    c = peerConnection.createDataChannel("eventChannel")
 
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {

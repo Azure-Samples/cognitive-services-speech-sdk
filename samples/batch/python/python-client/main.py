@@ -132,7 +132,7 @@ def transcribe():
     # configure API key authorization: subscription_key
     configuration = swagger_client.Configuration()
     configuration.api_key["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY
-    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.1"
+    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.2"
 
     # create the client object and authenticate
     client = swagger_client.ApiClient(configuration)
@@ -156,7 +156,8 @@ def transcribe():
     # properties.diarization = swagger_client.DiarizationProperties(
     #     swagger_client.DiarizationSpeakersProperties(min_count=1, max_count=5))
 
-    # properties.language_identification = swagger_client.LanguageIdentificationProperties(["en-US", "ja-JP"])
+    # uncomment the following block to enable and configure language identification prior to transcription. Available modes are "single" and "continuous".
+    # properties.language_identification = swagger_client.LanguageIdentificationProperties(mode="single", candidate_locales=["en-US", "ja-JP"])
 
     # Use base models for transcription. Comment this block if you are using a custom model.
     transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URI, properties)

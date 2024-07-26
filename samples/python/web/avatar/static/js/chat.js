@@ -40,9 +40,12 @@ function createSpeechRecognizer() {
     .then(response => {
         if (response.ok) {
             const speechRegion = response.headers.get('SpeechRegion')
+            const speechPrivateEndpoint = response.headers.get('SpeechPrivateEndpoint')
             response.text().then(text => {
                 const speechToken = text
-                const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
+                const speechRecognitionConfig = speechPrivateEndpoint ?
+                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechPrivateEndpoint.replace('https://', '')}/stt/speech/universal/v2`), '') :
+                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
                 speechRecognitionConfig.authorizationToken = speechToken
                 speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
                 var sttLocales = document.getElementById('sttLocales').value.split(',')
@@ -139,6 +142,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             }
         }
     }
+
+    // Listen to data channel, to get the event from the server
+    peerConnection.addEventListener("datachannel", event => {
+        const dataChannel = event.channel
+        dataChannel.onmessage = e => {
+            console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+        }
+    })
+
+    // This is a workaround to make sure the data channel listening is working by creating a data channel from the client side
+    c = peerConnection.createDataChannel("eventChannel")
 
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {

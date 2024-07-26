@@ -1,7 +1,7 @@
 # Local development instructions
 
 Pre-requisites:
-1. Please follow the instructions on [the main guide](./../Setup/guide.md#ingestion-client-setup-instructions) to deploy the Ingestion Client and associated ecosystem to Azure. 
+1. Please follow the instructions on [the main guide](./../infra/guide.md#ingestion-client-setup-instructions) to deploy the Ingestion Client and associated ecosystem to Azure.
 2. Reopen the project within a [devcontainer](https://containers.dev/overview). (The devcontainer settings at the root of the project have the tools needed to develop and run this function locally)
 
 To run the StartTranscriptionByTimer function locally, do the following:

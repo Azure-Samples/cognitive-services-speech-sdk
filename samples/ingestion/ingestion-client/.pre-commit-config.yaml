@@ -1,0 +1,12 @@
+repos:
+  - repo: local
+    hooks:
+      - id: bicep
+        name: bicep
+        description: Lint and build Bicep files
+        entry: ./samples/ingestion/ingestion-client/infra/generate_arm_templates.sh
+        language: script
+        files: \.bicep$
+        require_serial: true
+        args: # Bicep files that we want to generate ARM templates from
+          - -f=./samples/ingestion/ingestion-client/infra/main.bicep

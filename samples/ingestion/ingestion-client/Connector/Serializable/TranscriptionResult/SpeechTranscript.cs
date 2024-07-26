@@ -7,8 +7,6 @@ namespace Connector
 {
     using System.Collections.Generic;
 
-    using Connector.Serializable.Language.Conversations;
-
     using Newtonsoft.Json;
 
     public class SpeechTranscript

@@ -6,53 +6,27 @@
 namespace Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+
     using Connector;
+
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+
     using Moq;
+
     using Newtonsoft.Json;
-    using RealtimeTranscription;
 
     [TestClass]
     public class UnitTests
     {
-        private const string TestSasUri = "https://contoso.blob.core.windows.net/testContainer/testfolder/test.wav";
-
         private static Mock<ILogger> Logger { get; set; }
 
         [TestInitialize]
         public virtual void TestInitialize()
         {
             Logger = new Mock<ILogger>();
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.UnitTest)]
-        public void ConvertRealtimeResultToBatchFormat()
-        {
-            var realtimeResultString = File.ReadAllText(@"TestFiles/realtimeresult.json");
-            var fileResult = JsonConvert.DeserializeObject<List<JsonResult>>(realtimeResultString);
-
-            var speechTranscript = ResultConversionHelper.CreateBatchResultFromRealtimeResults("test", fileResult, Logger.Object);
-
-            Assert.AreEqual(speechTranscript.Duration, "PT1.7S");
-            Assert.IsTrue(speechTranscript.CombinedRecognizedPhrases.Any());
-            Assert.IsTrue(speechTranscript.RecognizedPhrases.Any());
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.UnitTest)]
-        public void GetContainerFromSasTest()
-        {
-            var containerName = StorageConnector.GetContainerNameFromUri(new Uri(TestSasUri));
-            var fileName = StorageConnector.GetFileNameFromUri(new Uri(TestSasUri));
-            var fileNameWithoutExtension = StorageConnector.GetFileNameWithoutExtension(fileName);
-            Assert.AreEqual("testContainer", containerName);
-            Assert.AreEqual("testfolder/test.wav", fileName);
-            Assert.AreEqual("testfolder/test", fileNameWithoutExtension);
         }
 
         [TestMethod]
