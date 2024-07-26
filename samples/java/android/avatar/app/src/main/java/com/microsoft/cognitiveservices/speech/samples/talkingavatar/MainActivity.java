@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String VIDEO_TRACK_ID = "ARDAMSv0";
     private static final String AUDIO_TRACK_ID = "ARDAMSa0";
-    private static final String MEDIA_STREAM_LABEL = "ARDAMS";
     private static final String AUDIO_CODEC_ISAC = "ISAC";
     private static final String VIDEO_CODEC_H264 = "H264";
 
@@ -103,8 +102,9 @@ public class MainActivity extends AppCompatActivity {
     private Connection connection;
 
     private PeerConnectionFactory peerConnectionFactory;
-    private MediaStream mediaStream;
     private PeerConnection peerConnection;
+    private AudioTrack audioTrack;
+    private VideoTrack videoTrack;
     private SdpObserver sdpObserver;
 
     private Button startSessionButton;
@@ -253,16 +253,11 @@ public class MainActivity extends AppCompatActivity {
         audioConstraints.mandatory.add(new MediaConstraints.KeyValuePair("googHighpassFilter", "true"));
         audioConstraints.mandatory.add(new MediaConstraints.KeyValuePair("googNoiseSuppression", "true"));
         AudioSource audioSource = peerConnectionFactory.createAudioSource(audioConstraints);
-        AudioTrack audioTrack = peerConnectionFactory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
+        audioTrack = peerConnectionFactory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
 
         // Create video track
         VideoSource videoSource = peerConnectionFactory.createVideoSource(false);
-        VideoTrack videoTrack = peerConnectionFactory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
-
-        // Create media stream
-        mediaStream = peerConnectionFactory.createLocalMediaStream(MEDIA_STREAM_LABEL);
-        mediaStream.addTrack(audioTrack);
-        mediaStream.addTrack(videoTrack);
+        videoTrack = peerConnectionFactory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
     }
 
     private void fetchIceToken() {
@@ -381,13 +376,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAddStream(MediaStream mediaStream) {
-                if (!mediaStream.videoTracks.isEmpty()) {
-                    mediaStream.videoTracks.get(0).addSink(videoRenderer);
-                }
-
-                if (!mediaStream.audioTracks.isEmpty()) {
-                    mediaStream.audioTracks.get(0).setEnabled(true);
-                }
             }
 
             @Override
@@ -404,11 +392,22 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onAddTrack(RtpReceiver rtpReceiver, MediaStream[] mediaStreams) {
+                if (mediaStreams.length > 0) {
+                    if (!mediaStreams[0].videoTracks.isEmpty()) {
+                        mediaStreams[0].videoTracks.get(0).addSink(videoRenderer);
+                    }
+
+                    if (!mediaStreams[0].audioTracks.isEmpty()) {
+                        mediaStreams[0].audioTracks.get(0).setEnabled(true);
+                    }
+                }
             }
         };
 
+        // Create peer connection
         peerConnection = peerConnectionFactory.createPeerConnection(rtcConfig, peerConnectionObserver);
-        peerConnection.addStream(mediaStream);
+        peerConnection.addTrack(audioTrack);
+        peerConnection.addTrack(videoTrack);
 
         // Add offer constrains
         MediaConstraints constraints = new MediaConstraints();
@@ -438,7 +437,6 @@ public class MainActivity extends AppCompatActivity {
             public void onSetFailure(String s) {
             }
         };
-
         peerConnection.createOffer(sdpObserver, constraints);
     }
 
