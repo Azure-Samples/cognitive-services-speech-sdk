@@ -37,7 +37,7 @@ namespace FetchTranscription
                 {
                     var configuration = context.Configuration;
                     var config = new AppConfig();
-                    configuration.GetSection("Values").Bind(config);
+                    configuration.Bind(config);
 
                     var blobServiceClient = new BlobServiceClient(config.AzureWebJobsStorage);
                     var storageCredential = new StorageSharedKeyCredential(
