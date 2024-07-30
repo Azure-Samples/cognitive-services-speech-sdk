@@ -56,7 +56,7 @@ namespace StartTranscriptionByTimer
                         clientBuilder.AddServiceBusClient(config.FetchTranscriptionServiceBusConnectionString)
                             .WithName(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
                     });
-                    services.Configure<AppConfig>(configuration.GetSection("Values"));
+                    services.Configure<AppConfig>(configuration);
                 })
                 .Build();
 

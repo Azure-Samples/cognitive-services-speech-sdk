@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.29.47.4906",
-      "templateHash": "10199282088246899223"
+      "templateHash": "10256299698599007648"
     }
   },
   "parameters": {
@@ -224,7 +224,7 @@
     }
   },
   "variables": {
-    "Version": "v2.1.9",
+    "Version": "v2.1.10",
     "AudioInputContainer": "audio-input",
     "AudioProcessedContainer": "audio-processed",
     "ErrorFilesOutputContainer": "audio-failed",
