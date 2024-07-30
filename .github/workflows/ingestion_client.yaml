@@ -122,7 +122,7 @@ jobs:
     permissions:
       contents: write
     needs: build
-#    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
