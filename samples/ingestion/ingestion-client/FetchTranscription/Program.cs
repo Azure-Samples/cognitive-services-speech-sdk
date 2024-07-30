@@ -70,7 +70,7 @@ namespace FetchTranscription
                                 .WithName(ServiceBusClientName.CompletedTranscriptionServiceBusClient.ToString());
                         }
                     });
-                    services.Configure<AppConfig>(configuration.GetSection("Values"));
+                    services.Configure<AppConfig>(configuration);
                 })
                 .Build();
 
