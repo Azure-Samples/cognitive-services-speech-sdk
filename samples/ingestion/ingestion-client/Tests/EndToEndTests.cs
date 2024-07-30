@@ -22,7 +22,6 @@ namespace Tests
     using Moq;
     using Newtonsoft.Json;
 
-    // using StartTranscriptionByTimer;
     [TestClass]
     public class EndToEndTests
     {
