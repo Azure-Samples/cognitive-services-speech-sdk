@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.28.1.47646",
-      "templateHash": "7855477000736253469"
+      "version": "0.29.47.4906",
+      "templateHash": "10256299698599007648"
     }
   },
   "parameters": {
@@ -224,7 +224,7 @@
     }
   },
   "variables": {
-    "Version": "v2.1.7",
+    "Version": "v2.1.10",
     "AudioInputContainer": "audio-input",
     "AudioProcessedContainer": "audio-processed",
     "ErrorFilesOutputContainer": "audio-failed",
@@ -251,9 +251,9 @@
     "AppInsightsName": "[format('AppInsights-{0}', variables('InstanceId'))]",
     "KeyVaultName": "[format('KV-{0}', variables('InstanceId'))]",
     "EventGridSystemTopicName": "[format('{0}-{1}', variables('StorageAccountName'), variables('InstanceId'))]",
-    "StartTranscriptionFunctionName": "[take(format('StartTranscriptionFunction-{0}', variables('InstanceId')), 60)]",
+    "StartTranscriptionFunctionName": "[take(format('StartTranscription-{0}', variables('InstanceId')), 60)]",
     "StartTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('StartTranscriptionFunctionName'))]",
-    "FetchTranscriptionFunctionName": "[take(format('FetchTranscriptionFunction-{0}', variables('InstanceId')), 60)]",
+    "FetchTranscriptionFunctionName": "[take(format('FetchTranscription-{0}', variables('InstanceId')), 60)]",
     "FetchTranscriptionFunctionId": "[resourceId('Microsoft.Web/sites', variables('FetchTranscriptionFunctionName'))]",
     "AppServicePlanName": "[format('AppServicePlan-{0}', variables('InstanceId'))]",
     "AzureSpeechServicesKeySecretName": "AzureSpeechServicesKey",
