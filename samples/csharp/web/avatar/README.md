@@ -2,7 +2,7 @@
 
 ## Pre-requisites
 
-* Follow [Text to speech quickstart](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/get-started-text-to-speech?pivots=programming-language-csharp#set-up-the-environment) to set up the environment for running Speech SDK in csharp.
+* Follow [Text to speech quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/get-started-text-to-speech?pivots=programming-language-csharp#set-up-the-environment) to set up the environment for running Speech SDK in csharp.
 
 ## Basic Sample
 
