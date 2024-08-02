@@ -1,4 +1,9 @@
-﻿using Avatar.Models;
+﻿//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+
+using Avatar.Models;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.Extensions.Options;
@@ -41,7 +46,7 @@ namespace Avatar.Services
                     response.EnsureSuccessStatusCode();
 
                     GlobalVariables.SpeechToken = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("Token refreshed using subscription key.");
+                    Console.WriteLine("Token refreshed using API key.");
                 }
 
                 Console.WriteLine($"Token generated: {GlobalVariables.SpeechToken}");

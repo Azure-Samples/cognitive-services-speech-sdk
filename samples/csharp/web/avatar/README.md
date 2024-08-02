@@ -2,7 +2,7 @@
 
 ## Pre-requisites
 
-* Follow [Text to speech quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/get-started-text-to-speech?pivots=programming-language-python#set-up-the-environment) to set up the environment for running Speech SDK in python.
+* Follow [Text to speech quickstart](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/get-started-text-to-speech?pivots=programming-language-csharp#set-up-the-environment) to set up the environment for running Speech SDK in csharp.
 
 ## Basic Sample
 
@@ -11,7 +11,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
 * Step 1: Open a console and navigate to the folder containing this README.md document.
     * Set below varibles in appsettings.json:
         * `SpeechRegion` - the region of your Azure speech resource, e.g. westus2.
-        * `SpeechKey` - the subscription key of your Azure speech resource.
+        * `SpeechKey` - the API key of your Azure speech resource.
         * `SpeechPrivateEndpoint` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint.
     * Set below varibles if you want to use customized ICE server:
         * `IceServerUrl` - the URL of your customized ICE server.
@@ -50,7 +50,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
 * Step 1: Open a console and navigate to the folder containing this README.md document.
     * Set below varibles in appsettings.json:
         * `SpeechRegion` - the region of your Azure speech resource, e.g. westus2.
-        * `SpeechKey` - the subscription key of your Azure speech resource.
+        * `SpeechKey` - the API key of your Azure speech resource.
         * `SpeechPrivateEndpoint` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint. For more information about private endpoint, please refer to [Enable private endpoint](https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link).
         * `SpeechResourceUrl` - the URL of your Azure speech resource, e.g. /subscriptions/6e83d8b7-00dd-4b0a-9e98-dab9f060418b/resourceGroups/my-resource-group/providers/Microsoft.CognitiveServices/accounts/my-speech-resource. To fetch the speech resource URL, go to your speech resource overview page on Azure portal, click `JSON View` link, and then copy the `Resource ID` value on the popped up page. This is optional, which is only needed when you want to use private endpoint to access Azure speech service.
         * `UserAssignedManagedIdentityClientId` - the client ID of your user-assigned managed identity. This is optional, which is only needed when you want to use private endpoint with user-assigned managed identity to access Azure speech service. For more information about user-assigned managed identity, please refer to [Use a user-assigned managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token?tabs=azure-cli).

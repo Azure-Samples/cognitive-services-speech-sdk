@@ -1,4 +1,9 @@
-﻿using System.Web;
+﻿//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.CognitiveServices.Speech;
@@ -16,9 +21,6 @@ namespace Avatar.Controllers
 {
     public class HomeController(IOptions<ClientSettings> clientSettings, IClientService clientService, ClientContext clientContext) : Controller
     {
-        //private static Timer _speechTokenTimer;
-        //private static readonly object _lock = new object();
-
         private readonly ClientSettings _clientSettings = clientSettings.Value;
         private readonly IClientService _clientService = clientService;
         private readonly ClientContext _clientContext = clientContext;
