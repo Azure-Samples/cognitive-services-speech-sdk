@@ -239,7 +239,7 @@ namespace Avatar.Controllers
                 connection.SetMessageProperty("speech.config", "context", JsonConvert.SerializeObject(avatarConfig));
 
                 var speechSynthesisResult = speechSynthesizer.SpeakTextAsync("").Result;
-                Console.WriteLine(speechSynthesisResult.ResultId);
+                    Console.WriteLine($"Result ID: {speechSynthesisResult.ResultId}");
                 if (speechSynthesisResult.Reason == ResultReason.Canceled)
                 {
                     var cancellationDetails = SpeechSynthesisCancellationDetails.FromResult(speechSynthesisResult);
