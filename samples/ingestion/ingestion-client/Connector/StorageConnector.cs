@@ -121,7 +121,7 @@ namespace Connector
 
                 if (!keepSource)
                 {
-                    await inputBlockBlobClient.DeleteIfExistsAsync().ConfigureAwait(false);
+                    await inputBlockBlobClient.DeleteAsync().ConfigureAwait(false);
                 }
 
                 return;
@@ -131,7 +131,7 @@ namespace Connector
 
             if (!keepSource)
             {
-                await inputBlockBlobClient.DeleteIfExistsAsync().ConfigureAwait(false);
+                await inputBlockBlobClient.DeleteAsync().ConfigureAwait(false);
             }
         }
     }
