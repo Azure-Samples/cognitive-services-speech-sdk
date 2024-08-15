@@ -611,7 +611,7 @@ def speech_recognition_with_push_stream_mulaw():
     # Setup the audio stream
     audio_format = speechsdk.audio.AudioStreamFormat(samples_per_second=16000,
                                                      bits_per_sample=8,
-                                                     channels=1, 
+                                                     channels=1,
                                                      wave_stream_format=speechsdk.AudioStreamWaveFormat.MULAW)
     stream = speechsdk.audio.PushAudioInputStream(stream_format=audio_format)
     audio_config = speechsdk.audio.AudioConfig(stream=stream)
@@ -634,13 +634,13 @@ def speech_recognition_with_push_stream_mulaw():
 
     # Start continuous speech recognition
     speech_recognizer.start_continuous_recognition()
-    
+
     # Open the wav file and push it to the push stream.
     # NOTE the wav header must be skipped before pushing the data to the stream.
     with open(weatherfilenamemulaw, 'rb') as audio_file:
         wav_header_size = utils.get_wav_header_size(weatherfilenamemulaw)
         # Read the wave header
-        header = audio_file.read(wav_header_size)
+        header = audio_file.read(wav_header_size)  # noqa: F841 # pylint: disable=unused-variable
         # Read the audio data
         audio_data = audio_file.read()
         stream.write(audio_data)
@@ -1128,8 +1128,7 @@ def pronunciation_assessment_with_content_assessment():
 
     def recognized(evt):
         nonlocal pron_results, recognized_text
-        if (evt.result.reason == speechsdk.ResultReason.RecognizedSpeech or
-                evt.result.reason == speechsdk.ResultReason.NoMatch):
+        if (evt.result.reason == speechsdk.ResultReason.RecognizedSpeech or evt.result.reason == speechsdk.ResultReason.NoMatch):
             pron_results.append(speechsdk.PronunciationAssessmentResult(evt.result))
             if evt.result.text.strip().rstrip(".") != "":
                 print(f"Recognizing: {evt.result.text}")
