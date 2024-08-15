@@ -13,5 +13,7 @@ namespace BatchClient
         public IEnumerable<CultureInfo> CandidateLocales { get; set; }
 
         public IReadOnlyDictionary<CultureInfo, EntityReference> SpeechModelMapping { get; set; }
+
+        public string LanguageIdentificationMode { get; set; }
     }
 }

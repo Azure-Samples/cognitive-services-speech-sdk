@@ -148,7 +148,7 @@ void TranslationContinuousRecognition()
 
     cout << "Say something...\n";
 
-    // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
     recognizer->StartContinuousRecognitionAsync().get();
 
     cout << "Press any key to stop\n";
@@ -320,7 +320,102 @@ void ContinuousTranslationAndLanguageIdWithMultiLingualFile()
             recognitionEnd.set_value(); // Notify to stop recognition.
         });
 
-    // Starts continuos recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+    recognizer->StartContinuousRecognitionAsync().get();
+
+    // Waits for recognition end.
+    recognitionEnd.get_future().get();
+
+    // Stops recognition.
+    recognizer->StopContinuousRecognitionAsync().get();
+}
+
+#pragma endregion
+
+#pragma region Multilingual Translation with language identification
+void ContinuousMultilingualTranslationWithLanguageIdentification()
+{
+    // When you use Multilingual Translation with language identification, 
+    // you don't need to define any candidate languages to detect, but you must set a v2 endpoint and use
+    // SpeechTranslationConfig::FromEndpoint() to create the SpeechTranslationConfig object.
+    // This will be fixed in a future version of Speech SDK.
+
+    // Replace "YourServiceRegion" with your service region (e.g. "westus"):
+    string speechv2Endpoint = "wss://YourServiceRegion.stt.speech.microsoft.com/speech/universal/v2";
+
+    // Replace "YourSubscriptionKey" with your speech subscription key:
+    auto config = SpeechTranslationConfig::FromEndpoint(speechv2Endpoint, "YourSubscriptionKey");
+
+    // You don't need to define any candidate languages to detect.
+    auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromOpenRange();
+
+    // Define the set of target (translation) languages
+    config->AddTargetLanguage("de");
+    config->AddTargetLanguage("fr");
+
+    // Creates a translation recognizer using audio file as audio input.
+    auto audioInput = AudioConfig::FromWavFileInput("en-us_zh-cn.wav");
+    auto recognizer = TranslationRecognizer::FromConfig(config, autoDetectSourceLanguageConfig, audioInput);
+
+    // Promise for synchronization of recognition end.
+    promise<void> recognitionEnd;
+
+    // Subscribes to events.
+    recognizer->Recognizing.Connect([](const TranslationRecognitionEventArgs& e)
+        {
+            std::string lidResult = e.Result->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult);
+
+            cout << "Recognizing in Language = "<< lidResult << ": Text=" << e.Result->Text << std::endl;
+            if (e.Result->Reason == ResultReason::TranslatingSpeech) {
+                for (const auto& it : e.Result->Translations)
+                {
+                    cout << "  Translated into '" << it.first.c_str() << "': " << it.second.c_str() << std::endl;
+                }
+            }
+        });
+
+    recognizer->Recognized.Connect([](const TranslationRecognitionEventArgs& e)
+        {
+            if (e.Result->Reason == ResultReason::TranslatedSpeech)
+            {
+                std::string lidResult = e.Result->Properties.GetProperty(PropertyId::SpeechServiceConnection_AutoDetectSourceLanguageResult);
+                cout << "RECOGNIZED in Language = " << lidResult << ": Text=" << e.Result->Text << std::endl;
+                
+                for (const auto& it : e.Result->Translations)
+                {
+                    cout << "  Translated into '" << it.first.c_str() << "': " << it.second.c_str() << std::endl;
+                }
+            }
+            else if (e.Result->Reason == ResultReason::RecognizedSpeech)
+            {
+                cout << "RECOGNIZED: Text=" << e.Result->Text << " (text could not be translated)" << std::endl;
+            }
+            else if (e.Result->Reason == ResultReason::NoMatch)
+            {
+                cout << "NOMATCH: Speech could not be recognized." << std::endl;
+            }
+        });
+
+    recognizer->Canceled.Connect([&recognitionEnd](const TranslationRecognitionCanceledEventArgs& e)
+        {
+            cout << "CANCELED: Reason=" << (int)e.Reason << std::endl;
+            if (e.Reason == CancellationReason::Error)
+            {
+                cout << "CANCELED: ErrorCode=" << (int)e.ErrorCode << std::endl;
+                cout << "CANCELED: ErrorDetails=" << e.ErrorDetails << std::endl;
+                cout << "CANCELED: Did you update the subscription info?" << std::endl;
+
+                recognitionEnd.set_value(); // Notify to stop recognition.
+            }
+        });
+
+    recognizer->SessionStopped.Connect([&recognitionEnd](const SessionEventArgs& e)
+        {
+            cout << "Session stopped.";
+            recognitionEnd.set_value(); // Notify to stop recognition.
+        });
+
+    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
     recognizer->StartContinuousRecognitionAsync().get();
 
     // Waits for recognition end.

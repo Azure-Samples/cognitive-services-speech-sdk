@@ -1,6 +1,6 @@
 # Ingestion Client
 
-<!-- 
+<!--
 Guidelines on README format: https://review.docs.microsoft.com/help/onboard/admin/samples/concepts/readme-template?branch=master
 
 Guidance on onboarding samples to docs.microsoft.com/samples: https://review.docs.microsoft.com/help/onboard/admin/samples/process/onboarding?branch=master
@@ -22,9 +22,8 @@ Outline the file contents of the repository. It helps users navigate the codebas
 | `FetchTranscription`    | Function to check the state of the transcription job and write results to storage.             |
 | `StartTranscriptionByServiceBus`      | Function to add a new transcription job to the speech service as one-job-per-file.      |
 | `StartTranscriptionByTimer`      | Function to add a new transcription job to the speech service for all files added in a certain period of time.      |
-| `RealTimeTranscription`      | Function to stream an audio file to the speech service and compose the transcript results in a single json file.      |
 | `PowerBI`    | Template files and deployment guide for visualizing insights from the accelerator.             |
-| `Setup` | ARM template to setup the project on Azure. |
+| `infra` | Bicep template to setup the project on Azure. |
 | `Tests`       | Unit tests for both functions.                          |
 
 ## Prerequisites
@@ -34,7 +33,7 @@ Outline the file contents of the repository. It helps users navigate the codebas
 
 ## Getting started
 
-Follow the instructions for setting up Ingestion Client [here](Setup/guide.md).
+Follow the instructions for setting up Ingestion Client [here](infra/guide.md).
 
 To set up Power BI for further insights of the transcription, follow the guide [here](PowerBI/README.md).
 

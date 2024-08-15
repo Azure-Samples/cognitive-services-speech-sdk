@@ -19,6 +19,7 @@ namespace FetchTranscription
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
@@ -34,23 +35,26 @@ namespace FetchTranscription
 
         private readonly ILogger log;
 
-        public TextAnalyticsProvider(string locale, string subscriptionKey, string endpoint, ILogger log)
+        private readonly AppConfig appConfig;
+
+        public TextAnalyticsProvider(string locale, string subscriptionKey, string endpoint, ILogger log, IOptions<AppConfig> appConfig)
         {
             this.textAnalyticsClient = new TextAnalyticsClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
             this.locale = locale;
             this.log = log;
+            this.appConfig = appConfig?.Value;
         }
 
-        public static bool IsTextAnalyticsRequested()
+        public bool IsTextAnalyticsRequested()
         {
-            return FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting != SentimentAnalysisSetting.None ||
-                FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None;
+            return this.appConfig.SentimentAnalysisSetting != SentimentAnalysisSetting.None ||
+                this.appConfig.PiiRedactionSetting != PiiRedactionSetting.None;
         }
 
         /// <inheritdoc />
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!IsTextAnalyticsRequested())
+            if (!this.IsTextAnalyticsRequested())
             {
                 return TranscriptionAnalyticsJobStatus.Completed;
             }
@@ -116,15 +120,15 @@ namespace FetchTranscription
 
                     (var utteranceLevelJobIds, var utteranceLevelErrors) = await this.SubmitUtteranceLevelRequests(
                         speechTranscript,
-                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting).ConfigureAwait(false);
+                        this.appConfig.SentimentAnalysisSetting).ConfigureAwait(false);
 
                     var utteranceLevelRequests = utteranceLevelJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
                     textAnalyticsErrors.AddRange(utteranceLevelErrors);
 
                     (var audioLevelJobIds, var audioLevelErrors) = await this.SubmitAudioLevelRequests(
                         speechTranscript,
-                        FetchTranscriptionEnvironmentVariables.SentimentAnalysisSetting,
-                        FetchTranscriptionEnvironmentVariables.PiiRedactionSetting).ConfigureAwait(false);
+                        this.appConfig.SentimentAnalysisSetting,
+                        this.appConfig.PiiRedactionSetting).ConfigureAwait(false);
 
                     var audioLevelRequests = audioLevelJobIds?.Select(jobId => new TextAnalyticsRequest(jobId, TextAnalyticsRequestStatus.Running));
                     textAnalyticsErrors.AddRange(audioLevelErrors);
@@ -162,7 +166,7 @@ namespace FetchTranscription
                 var speechTranscript = speechTranscriptMapping.Value;
                 var audioFileInfo = speechTranscriptMapping.Key;
                 var fileName = audioFileInfo.FileName;
-                if (FetchTranscriptionEnvironmentVariables.PiiRedactionSetting != PiiRedactionSetting.None)
+                if (this.appConfig.PiiRedactionSetting != PiiRedactionSetting.None)
                 {
                     speechTranscript.RecognizedPhrases.ToList().ForEach(phrase =>
                     {
@@ -264,9 +268,9 @@ namespace FetchTranscription
             {
                 var action = new RecognizePiiEntitiesAction();
 
-                if (!string.IsNullOrEmpty(FetchTranscriptionEnvironmentVariables.PiiCategories))
+                if (!string.IsNullOrEmpty(this.appConfig.PiiCategories))
                 {
-                    var piiEntityCategories = FetchTranscriptionEnvironmentVariables.PiiCategories.Split(",").Select(c => new PiiEntityCategory(c));
+                    var piiEntityCategories = this.appConfig.PiiCategories.Split(",").Select(c => new PiiEntityCategory(c));
 
                     foreach (var category in piiEntityCategories)
                     {
@@ -362,7 +366,7 @@ namespace FetchTranscription
                     };
                 }
 
-                if (!AnalyzeConversationsProvider.IsConversationalPiiEnabled())
+                if (!(this.appConfig.ConversationPiiSetting != ConversationPiiSetting.None))
                 {
                     var piiResult = piiResults.Where(document => document.Id.Equals($"{channel}", StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
                     if (piiResult != null)
