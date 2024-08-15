@@ -32,7 +32,7 @@ namespace Demo
 
             // setup speech synthesizer
             // IMPORTANT: MUST use the websocket v2 endpoint
-            var ttsEndpoint = $"wss://{Environment.GetEnvironmentVariable("AZURE_TTS_REGION")}.tts.speech.microsoft.com/cognitiveservices/websocket/v2&traffictype=12345zhn";
+            var ttsEndpoint = $"wss://{Environment.GetEnvironmentVariable("AZURE_TTS_REGION")}.tts.speech.microsoft.com/cognitiveservices/websocket/v2";
             var speechConfig = SpeechConfig.FromEndpoint(
                 new Uri(ttsEndpoint),
                 Environment.GetEnvironmentVariable("AZURE_TTS_API_KEY"));
