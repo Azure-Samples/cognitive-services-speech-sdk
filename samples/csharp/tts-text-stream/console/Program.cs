@@ -55,10 +55,20 @@ namespace Demo
             // request.Pitch = "50%";
             // request.Volume = "25";
 
+            var audioData = new MemoryStream();
             var ttsTask = await speechSynthesizer.StartSpeakingAsync(request);
-            using var audioDataStream = AudioDataStream.FromResult(ttsTask);
             var gptTask = GenerateGPTResponse(aoaiClient, request);
-            audioData = new MemoryStream();
+            var audioTask = Task.Run(() => ReadAudioStream(ttsTask, audioData));
+
+            await gptTask;
+            await audioTask;
+            File.WriteAllBytes("streaming.wav", audioData.ToArray());
+            audioData.Close();
+        }
+
+        private static void ReadAudioStream(SpeechSynthesisResult ttsTask, MemoryStream audioData)
+        {
+            using var audioDataStream = AudioDataStream.FromResult(ttsTask);
             byte[] buffer = new byte[32000];
             uint totalSize = 0;
             uint totalRead = 0;
@@ -81,10 +91,6 @@ namespace Demo
                 totalSize += readSize;
                 audioData.Write(buffer, 0, (int)readSize);
             }
-
-            await gptTask;
-            File.WriteAllBytes("streaming.wav", audioData.ToArray());
-            audioData.Close();
         }
 
         private static async Task GenerateGPTResponse(OpenAIClient aoaiClient, SpeechSynthesisRequest request)
