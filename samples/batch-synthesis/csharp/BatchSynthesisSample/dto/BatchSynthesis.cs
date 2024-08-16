@@ -8,22 +8,22 @@ public class BatchSynthesis : BatchSynthesisDefinition
     /// <summary>
     /// The identifier of this batch synthesis.
     /// </summary>
-    public string Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// The display name of the batch synthesis.
     /// </summary>
-    public string DisplayName { get; set; }
+    public string? DisplayName { get; set; }
 
     /// <summary>
     /// The description of the batch synthesis.
     /// </summary>
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
     /// <summary>
     /// The status of the batch synthesis.
     /// </summary>
-    public string Status { get; set; }
+    public string? Status { get; set; }
 
     /// <summary>
     /// The time-stamp when the object was created.
@@ -48,19 +48,4 @@ public class BatchSynthesis : BatchSynthesisDefinition
     /// The synthesis task outputs.
     /// </summary>
     public BatchSynthesisOutputs Outputs { get; set; }
-}
-
-public class BatchSynthesisOutputs
-{
-    /// <summary>
-    /// The sas url of the result file.
-    /// It would be relative path when "destinationContainerUrl" is specified.
-    /// </summary>
-    public string Result { get; set; }
-
-    /// <summary>
-    /// The sas url of the summary file.
-    /// It would be relative path when "destinationContainerUrl" is specified.
-    /// </summary>
-    public string Summary { get; set; }
 }

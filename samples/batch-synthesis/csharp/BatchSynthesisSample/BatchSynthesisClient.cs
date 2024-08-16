@@ -3,8 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using System.Text;
-using System.Text.Json;
+using Newtonsoft.Json;
+using System.Net.Http.Formatting;
 
 public class BatchSynthesisClient
 {
@@ -13,16 +13,14 @@ public class BatchSynthesisClient
     private readonly string hostName;
     private readonly string baseUri;
     private readonly string subscriptionKey;
-    private readonly string apiVersion;
 
     private readonly HttpClient client;
 
-    public BatchSynthesisClient(string hostName, string key, string apiVersion)
+    public BatchSynthesisClient(string hostName, string key)
     {
         this.hostName = hostName;
         this.subscriptionKey = key;
-        this.baseUri = $"{this.hostName}/texttospeech/batchsyntheses";
-        this.apiVersion = apiVersion;
+        this.baseUri = $"{this.hostName}/api/texttospeech/3.1-preview1/batchsynthesis";
 
         this.client = new HttpClient();
         client.DefaultRequestHeaders.Add(OcpApimSubscriptionKey, this.subscriptionKey);
@@ -31,8 +29,7 @@ public class BatchSynthesisClient
     public async Task<IEnumerable<BatchSynthesis>> GetAllSynthesesAsync()
     {
         var syntheses = new List<BatchSynthesis>();
-        var uri = new Uri($"{this.baseUri}?api-version={this.apiVersion}");
-
+        var uri = new Uri(this.baseUri);
         do
         {
             var response = await this.client.GetAsync(uri).ConfigureAwait(false);
@@ -44,7 +41,7 @@ public class BatchSynthesisClient
             }
 
             var pagedSyntheses = await response.Content.ReadAsAsync<PaginatedResults<BatchSynthesis>>().ConfigureAwait(false);
-            syntheses.AddRange(pagedSyntheses.Value);
+            syntheses.AddRange(pagedSyntheses.Values);
             uri = pagedSyntheses.NextLink;
         }
         while (uri != null);
@@ -52,9 +49,9 @@ public class BatchSynthesisClient
         return syntheses;
     }
 
-    public async Task<BatchSynthesis> GetSynthesisAsync(string id)
+    public async Task<BatchSynthesis> GetSynthesisAsync(Guid id)
     {
-        var uri = new Uri(this.baseUri + $"/{id}?api-version={this.apiVersion}");
+        var uri = new Uri(this.baseUri + $"/{id}");
         var response = await this.client.GetAsync(uri).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
@@ -65,9 +62,9 @@ public class BatchSynthesisClient
         return await response.Content.ReadAsAsync<BatchSynthesis>().ConfigureAwait(false);
     }
 
-    public async Task DeleteSynthesisAsync(string id)
+    public async Task DeleteSynthesisAsync(Guid id)
     {
-        var uri = new Uri(this.baseUri + $"/{id}?api-version={this.apiVersion}");
+        var uri = new Uri(this.baseUri + $"/{id}");
         var response = await this.client.DeleteAsync(uri).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
@@ -75,40 +72,44 @@ public class BatchSynthesisClient
         }
     }
 
-    public async Task CreateSynthesisAsync(
-        string id,
+    public async Task<Uri> CreateSynthesisAsync(
         string voiceName,
+        string displayName,
+        string description,
         string script,
         bool isSsml)
     {
-        var uri = new Uri($"{this.baseUri}/{id}?api-version={this.apiVersion}");
+        var uri = new Uri(this.baseUri);
 
         var batchSynthesis = new BatchSynthesis
         {
-            InputKind = isSsml ? "Ssml" : "PlainText",
-            SynthesisConfig = new SynthesisConfig
+            DisplayName = displayName,
+            Description = description,
+            TextType = isSsml ? "Ssml" : "PlainText",
+            SynthesisConfig = new BatchSynthesisConfig
             {
                 Voice = voiceName
             },
-            Inputs = new List<BatchSynthesisInputDefinition> { new BatchSynthesisInputDefinition { Content = script } }
+            Inputs = new List<BatchSynthesisInputDefinition> { new BatchSynthesisInputDefinition { Text = script } }
         };
 
-        // Create JsonSerializer instance with configured options
-        string jsonString = JsonSerializer.Serialize(batchSynthesis, new JsonSerializerOptions { IgnoreNullValues = true });
-        var response = await this.client.PutAsync(uri, new StringContent(jsonString, Encoding.UTF8, "application/json")).ConfigureAwait(false);
+        StringContent content = new StringContent(JsonConvert.SerializeObject(batchSynthesis));
+        content.Headers.ContentType = JsonMediaTypeFormatter.DefaultMediaType;
+        var response = await this.client.PostAsync(uri, content).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
             await HandleErrorResponse(response);
+            return null;
         }
+
+        var location = response.Headers.GetValues("Location").FirstOrDefault();
+        return new Uri(location);
+
     }
 
     private static async Task HandleErrorResponse(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         Console.WriteLine(content);
-        if (response.Headers.TryGetValues("apim-request-id", out var traceRequestId))
-        {
-            Console.WriteLine($"Trace request ID: {traceRequestId.FirstOrDefault()}.");
-        }
     }
 }
