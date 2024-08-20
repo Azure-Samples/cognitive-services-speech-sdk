@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace TextAnalytics
+namespace FetchTranscription
 {
     using System;
     using System.Collections.Generic;
@@ -18,35 +18,12 @@ namespace TextAnalytics
     using Connector.Enums;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
-    using FetchTranscriptionFunction;
-
-    using Language;
-
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     using static Connector.Serializable.TranscriptionStartedServiceBusMessage.TextAnalyticsRequest;
 
-    /// <summary>
-    /// The text analytics provide.
-    ///
-    /// General overview of text analytics request processing:
-    ///
-    /// For a succeded transcription, check if transcription has text analytics job info.
-    ///     if true:
-    ///         Check if text analytics job terminated.
-    ///         if true:
-    ///             Add text analytics results to transcript, write transcript to storage.
-    ///         if false:
-    ///             Re-enqueue job, check again after X minutes.
-    ///     if false:
-    ///         Check if text analytics is requested
-    ///         if true:
-    ///             Add text analytics job info to transcription. Re-enqueue job, check again after X minutes.
-    ///         if false:
-    ///             Write transcript to storage.
-    /// </summary>
-    public class TextAnalyticsProvider
+    public class TextAnalyticsProvider : ITranscriptionAnalyticsProvider
     {
         private const int MaxRecordsPerRequest = 25;
 
@@ -62,7 +39,7 @@ namespace TextAnalytics
 
         public TextAnalyticsProvider(string locale, string subscriptionKey, string endpoint, ILogger log, IOptions<AppConfig> appConfig)
         {
-            this.textAnalyticsClient = new TextAnalyticsClient(new Uri($"https://{region}.api.cognitive.microsoft.com"), new AzureKeyCredential(subscriptionKey));
+            this.textAnalyticsClient = new TextAnalyticsClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
             this.locale = locale;
             this.log = log;
             this.appConfig = appConfig?.Value;
@@ -79,7 +56,12 @@ namespace TextAnalytics
         {
             if (!this.IsTextAnalyticsRequested())
             {
-                return true;
+                return TranscriptionAnalyticsJobStatus.Completed;
+            }
+
+            if (!audioFileInfos.Where(audioFileInfo => audioFileInfo.TextAnalyticsRequests != null).Any())
+            {
+                return TranscriptionAnalyticsJobStatus.NotSubmitted;
             }
 
             var runningTextAnalyticsRequests = new List<TextAnalyticsRequest>();
@@ -96,8 +78,7 @@ namespace TextAnalytics
                     .SelectMany(audioFileInfo => audioFileInfo.TextAnalyticsRequests.UtteranceLevelRequests)
                     .Where(text => text.Status == TextAnalyticsRequestStatus.Running));
 
-            var textAnalyticsRequestCompleted = true;
-
+            var status = TranscriptionAnalyticsJobStatus.Completed;
             foreach (var textAnalyticsJob in runningTextAnalyticsRequests)
             {
                 var operation = new AnalyzeActionsOperation(textAnalyticsJob.Id, this.textAnalyticsClient);
@@ -112,7 +93,8 @@ namespace TextAnalytics
                 }
                 else
                 {
-                    textAnalyticsRequestCompleted = false;
+                    // if one or more jobs are still running, report status as running:
+                    status = TranscriptionAnalyticsJobStatus.Running;
                 }
             }
 
@@ -228,7 +210,7 @@ namespace TextAnalytics
         /// <param name="speechTranscript">The speech transcript object.</param>
         /// <param name="sentimentAnalysisSetting">The sentiment analysis setting.</param>
         /// <returns>The job ids and errors, if any were found.</returns>
-        public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitUtteranceLevelRequests(
+        private async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitUtteranceLevelRequests(
             SpeechTranscript speechTranscript,
             SentimentAnalysisSetting sentimentAnalysisSetting)
         {
@@ -258,7 +240,7 @@ namespace TextAnalytics
         /// <param name="sentimentAnalysisSetting">The sentiment analysis setting.</param>
         /// <param name="piiRedactionSetting">The PII redaction setting.</param>
         /// <returns>The job ids and errors, if any were found.</returns>
-        public async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitAudioLevelRequests(
+        private async Task<(IEnumerable<string> jobIds, IEnumerable<string> errors)> SubmitAudioLevelRequests(
             SpeechTranscript speechTranscript,
             SentimentAnalysisSetting sentimentAnalysisSetting,
             PiiRedactionSetting piiRedactionSetting)
@@ -308,7 +290,7 @@ namespace TextAnalytics
         /// <param name="jobIds">The text analytics job ids.</param>
         /// <param name="speechTranscript">The speech transcript object.</param>
         /// <returns>The errors, if any.</returns>
-        public async Task<IEnumerable<string>> AddUtteranceLevelEntitiesAsync(
+        private async Task<IEnumerable<string>> AddUtteranceLevelEntitiesAsync(
             IEnumerable<string> jobIds,
             SpeechTranscript speechTranscript)
         {
@@ -354,7 +336,7 @@ namespace TextAnalytics
         /// <param name="jobIds">The text analytics job ids.</param>
         /// <param name="speechTranscript">The speech transcript object.</param>
         /// <returns>The errors, if any.</returns>
-        public async Task<IEnumerable<string>> AddAudioLevelEntitiesAsync(
+        private async Task<IEnumerable<string>> AddAudioLevelEntitiesAsync(
             IEnumerable<string> jobIds,
             SpeechTranscript speechTranscript)
         {

@@ -14,7 +14,7 @@ namespace Tests
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
-    using Language;
+    using FetchTranscription;
 
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -69,11 +69,9 @@ namespace Tests
 
             var errors = await provider.SubmitTranscriptionAnalyticsJobsAsync(speechTranscriptMapping).ConfigureAwait(false);
             Console.WriteLine("Submit");
-            Console.WriteLine(JsonConvert.SerializeObject(jobIds));
-            Assert.AreEqual(0, jobIds.errors.Count());
-            var req = jobIds.jobIds.Select(jobId => new AudioFileInfo(default, default, new TextAnalyticsRequests(default, default, new[] { new TextAnalyticsRequest(jobId, TextAnalyticsRequest.TextAnalyticsRequestStatus.Running) })));
+            Assert.AreEqual(0, errors.Count());
 
-            while (!await provider.ConversationalRequestsCompleted(req).ConfigureAwait(false))
+            while ((await provider.GetTranscriptionAnalyticsJobStatusAsync(speechTranscriptMapping.Keys).ConfigureAwait(false)) == Connector.Enums.TranscriptionAnalyticsJobStatus.Running)
             {
                 await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
                 Console.WriteLine($"[{DateTime.Now}]jobs are running...");
@@ -81,7 +79,7 @@ namespace Tests
 
             Console.WriteLine($"[{DateTime.Now}]jobs done.");
 
-            var err = await provider.AddConversationalEntitiesAsync(jobIds.jobIds, transcription);
+            var err = await provider.AddTranscriptionAnalyticsResultsToTranscriptsAsync(speechTranscriptMapping);
             Console.WriteLine($"annotation result: {JsonConvert.SerializeObject(transcription)}");
             Assert.AreEqual(0, err.Count());
             Assert.AreEqual(4, transcription.ConversationAnalyticsResults.AnalyzeConversationSummarizationResults.Conversations.First().Summaries.Count());
