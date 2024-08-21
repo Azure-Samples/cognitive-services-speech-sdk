@@ -73,6 +73,7 @@ proguard-rules.pro text
 *.bacpac binary
 *.class binary
 *.bmp binary
+*.ico binary
 *.jar binary
 *.jpg binary
 *.mp3 binary
