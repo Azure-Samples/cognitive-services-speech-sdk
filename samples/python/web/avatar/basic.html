@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Talking Avatar Service Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='image/favicon.ico') }}">
+    <script src="{{ url_for('static', filename='js/basic.js') }}"></script>
+    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+</head>
+<body>
+<h1>Talking Avatar Service Demo</h1>
+
+<input type="hidden" id="clientId" value="{{ client_id }}"></input>
+
+<div id="configuration">
+  <h2 style="background-color: white; width: 300px;">TTS Configuration</h2>
+  <label style="font-size: medium;" for="ttsVoice">TTS Voice:</label>
+  <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyMultilingualV2Neural"></input><br />
+  <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
+  <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <label style="font-size: medium;" for="personalVoiceSpeakerProfileID">Personal Voice Speaker Profile ID:</label>
+  <input id="personalVoiceSpeakerProfileID" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <br />
+
+  <h2 style="background-color: white; width: 300px;">Avatar Configuration</h2>
+  <label style="font-size: medium;" for="talkingAvatarCharacter">Avatar Character:</label>
+  <input id="talkingAvatarCharacter" type="text" size="16" style="font-size: medium;" value="lisa"></input><br />
+  <label style="font-size: medium;" for="talkingAvatarStyle">Avatar Style:</label>
+  <input id="talkingAvatarStyle" type="text" size="16" style="font-size: medium;" value="casual-sitting"></input><br />
+  <label style="font-size: medium;" for="backgroundColor">Background Color:</label>
+  <input id="backgroundColor" type="text" size="16" style="font-size: medium;" value="#FFFFFFFF"></input><br />
+  <label style="font-size: medium;" for="backgroundImageUrl">Background Image (URL):</label>
+  <input id="backgroundImageUrl" type="text" size="64" style="font-size: medium;" placeholder="https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg" value=""></input><br />
+  <div style="background-color: white; width: 200px;">
+    <input type="checkbox" id="customizedAvatar">Custom Avatar</input><br />
+    <input type="checkbox" id="transparentBackground" onchange="window.updataTransparentBackground()">Transparent
+    Background</input><br />
+    <input type="checkbox" id="videoCrop">Video Crop</input><br />
+  </div>
+  <br />
+</div>
+
+<h2 style="background-color: white; width: 300px;">Avatar Control Panel</h2>
+<label style="font-size: medium;" for="spokenText">Spoken Text:</label><br/>
+<textarea id="spokenText" style="height:40px">Hello world!</textarea><br/>
+<button id="startSession" onclick="window.startSession()">Start Session</button>
+<button id="speak" onclick="window.speak()" disabled="disabled">Speak</button>
+<button id="stopSpeaking" onclick="window.stopSpeaking()" disabled="disabled">Stop Speaking</button>
+<button id="stopSession" onclick="window.stopSession()" disabled="disabled">Stop Session</button>
+<br/>
+
+<h2 id="videoLabel" style="background-color: white; width: 300px;">Avatar Video</h2>
+<div id="videoContainer" style="position: relative; width: 960px;">
+  <div id="overlayArea" style="position: absolute;" hidden="hidden">
+    <!-- Add your text or image controls here -->
+    <p id="overlayText" style="font-size: large;">Live Video</p>
+    <!-- <img id="overlayImage" src="your-image-source.png" alt="Overlay Image"> -->
+  </div>
+  <div id="remoteVideo"></div>
+  <canvas id="canvas" width="1920" height="1080" style="background-color: transparent;" hidden="hidden"></canvas>
+  <canvas id="tmpCanvas" width="1920" height="1080" hidden="hidden"></canvas>
+</div>
+<br/>
+
+<h2 style="background-color: white; width: 300px;">Logs</h2>
+<div id="logging" style="background-color: white;"></div>
+</body>
+</html>

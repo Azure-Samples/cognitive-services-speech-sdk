@@ -1,0 +1,5 @@
+azure-cognitiveservices-speech
+azure-identity
+flask
+pytz
+requests

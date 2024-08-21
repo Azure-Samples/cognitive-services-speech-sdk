@@ -6,6 +6,7 @@ var speechRecognizer
 var avatarSynthesizer
 var peerConnection
 var messages = []
+var messageInitiated = false
 var dataSources = []
 var sentenceLevelPunctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ]
 var enableQuickReply = false
@@ -137,14 +138,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
     // Fetch WebRTC video stream and mount it to an HTML video element
     peerConnection.ontrack = function (event) {
-        // Clean up existing video element if there is any
-        remoteVideoDiv = document.getElementById('remoteVideo')
-        for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
-            if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
-                remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
-            }
-        }
-
         if (event.track.kind === 'audio') {
             let audioElement = document.createElement('audio')
             audioElement.id = 'audioPlayer'
@@ -152,7 +145,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             audioElement.autoplay = true
 
             audioElement.onplaying = () => {
-                log(`WebRTC ${event.track.kind} channel connected.`)
+                console.log(`WebRTC ${event.track.kind} channel connected.`)
             }
 
             document.getElementById('remoteVideo').appendChild(audioElement)
@@ -166,12 +159,33 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.playsInline = true
 
             videoElement.onplaying = () => {
-                log(`WebRTC ${event.track.kind} channel connected.`)
-                document.getElementById('startMicrophone').disabled = false
-                document.getElementById('stopSession').disabled = false
-            }
+                // Clean up existing video element if there is any
+                remoteVideoDiv = document.getElementById('remoteVideo')
+                for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
+                    if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
+                        remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
+                    }
+                }
 
-            document.getElementById('remoteVideo').appendChild(videoElement)
+                // Append the new video element
+                document.getElementById('remoteVideo').appendChild(videoElement)
+
+                console.log(`WebRTC ${event.track.kind} channel connected.`)
+                document.getElementById('microphone').disabled = false
+                document.getElementById('stopSession').disabled = false
+                document.getElementById('remoteVideo').style.width = '960px'
+                document.getElementById('chatHistory').hidden = false
+                document.getElementById('showTypeMessage').disabled = false
+
+                if (document.getElementById('useLocalVideoForIdle').checked) {
+                    document.getElementById('localVideo').hidden = true
+                    if (lastSpeakTime === undefined) {
+                        lastSpeakTime = new Date()
+                    }
+                }
+
+                setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
+            }
         }
     }
     
@@ -189,13 +203,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {
         console.log("WebRTC status: " + peerConnection.iceConnectionState)
-
-        if (peerConnection.iceConnectionState === 'connected') {
-            document.getElementById('configuration').hidden = true
-        }
-
-        if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
-            document.getElementById('configuration').hidden = false
+        if (peerConnection.iceConnectionState === 'disconnected') {
+            if (document.getElementById('useLocalVideoForIdle').checked) {
+                document.getElementById('localVideo').hidden = false
+                document.getElementById('remoteVideo').style.width = '0.1px'
+            }
         }
     }
 
@@ -206,15 +218,16 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // start avatar, establish WebRTC connection
     avatarSynthesizer.startAvatarAsync(peerConnection).then((r) => {
         if (r.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-            console.log("[" + (new Date()).toISOString() + "] Avatar started.")
+            console.log("[" + (new Date()).toISOString() + "] Avatar started. Result ID: " + r.resultId)
         } else {
-            console.log("[" + (new Date()).toISOString() + "] Unable to start avatar.")
+            console.log("[" + (new Date()).toISOString() + "] Unable to start avatar. Result ID: " + r.resultId)
             if (r.reason === SpeechSDK.ResultReason.Canceled) {
                 let cancellationDetails = SpeechSDK.CancellationDetails.fromResult(r)
                 if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
                     console.log(cancellationDetails.errorDetails)
                 };
-                log("Unable to start avatar: " + cancellationDetails.errorDetails);
+
+                console.log("Unable to start avatar: " + cancellationDetails.errorDetails);
             }
             document.getElementById('startSession').disabled = false;
             document.getElementById('configuration').hidden = false;
@@ -294,28 +307,40 @@ function speak(text, endingSilenceMs = 0) {
 
 function speakNext(text, endingSilenceMs = 0) {
     let ttsVoice = document.getElementById('ttsVoice').value
-    let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
+    let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
+    let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</mstts:ttsembedding></voice></speak>`
     if (endingSilenceMs > 0) {
-        ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></voice></speak>`
+        ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></mstts:ttsembedding></voice></speak>`
     }
 
+    lastSpeakTime = new Date()
     isSpeaking = true
+    document.getElementById('stopSpeaking').disabled = false
     avatarSynthesizer.speakSsmlAsync(ssml).then(
         (result) => {
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-                console.log(`Speech synthesized to speaker for text [ ${text} ]`)
+                console.log(`Speech synthesized to speaker for text [ ${text} ]. Result ID: ${result.resultId}`)
+                lastSpeakTime = new Date()
             } else {
-                console.log(`Error occurred while speaking the SSML.`)
+                console.log(`Error occurred while speaking the SSML. Result ID: ${result.resultId}`)
             }
 
             if (spokenTextQueue.length > 0) {
                 speakNext(spokenTextQueue.shift())
             } else {
                 isSpeaking = false
+                document.getElementById('stopSpeaking').disabled = true
             }
         }).catch(
             (error) => {
                 console.log(`Error occurred while speaking the SSML: [ ${error} ]`)
+
+                if (spokenTextQueue.length > 0) {
+                    speakNext(spokenTextQueue.shift())
+                } else {
+                    isSpeaking = false
+                    document.getElementById('stopSpeaking').disabled = true
+                }
             }
         )
 }
@@ -323,7 +348,11 @@ function speakNext(text, endingSilenceMs = 0) {
 function stopSpeaking() {
     spokenTextQueue = []
     avatarSynthesizer.stopSpeakingAsync().then(
-        log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
+        () => {
+            isSpeaking = false
+            document.getElementById('stopSpeaking').disabled = true
+            console.log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
+        }
     ).catch(
         (error) => {
             console.log("Error occurred while stopping speaking: " + error)
@@ -533,77 +562,69 @@ function getQuickReply() {
     return quickReplies[Math.floor(Math.random() * quickReplies.length)]
 }
 
+function checkHung() {
+    // Check whether the avatar video stream is hung, by checking whether the video time is advancing
+    let videoElement = document.getElementById('videoPlayer')
+    if (videoElement !== null && videoElement !== undefined && sessionActive) {
+        let videoTime = videoElement.currentTime
+        setTimeout(() => {
+            // Check whether the video time is advancing
+            if (videoElement.currentTime === videoTime) {
+                // Check whether the session is active to avoid duplicatedly triggering reconnect
+                if (sessionActive) {
+                    sessionActive = false
+                    if (document.getElementById('autoReconnectAvatar').checked) {
+                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                        connectAvatar()
+                    }
+                }
+            }
+        }, 2000)
+    }
+}
+
+function checkLastSpeak() {
+    if (lastSpeakTime === undefined) {
+        return
+    }
+
+    let currentTime = new Date()
+    if (currentTime - lastSpeakTime > 15000) {
+        if (document.getElementById('useLocalVideoForIdle').checked && sessionActive && !isSpeaking) {
+            disconnectAvatar()
+            document.getElementById('localVideo').hidden = false
+            document.getElementById('remoteVideo').style.width = '0.1px'
+            sessionActive = false
+        }
+    }
+}
+
+window.onload = () => {
+    setInterval(() => {
+        checkHung()
+        checkLastSpeak()
+    }, 2000) // Check session activity every 2 seconds
+}
+
 window.startSession = () => {
-    const cogSvcRegion = document.getElementById('region').value
-    const cogSvcSubKey = document.getElementById('subscriptionKey').value
-    if (cogSvcSubKey === '') {
-        alert('Please fill in the subscription key of your speech resource.')
+    if (document.getElementById('useLocalVideoForIdle').checked) {
+        document.getElementById('startSession').disabled = true
+        document.getElementById('configuration').hidden = true
+        document.getElementById('microphone').disabled = false
+        document.getElementById('stopSession').disabled = false
+        document.getElementById('localVideo').hidden = false
+        document.getElementById('remoteVideo').style.width = '0.1px'
+        document.getElementById('chatHistory').hidden = false
+        document.getElementById('showTypeMessage').disabled = false
         return
     }
 
-    const speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
-    speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
-    speechSynthesisConfig.speechSynthesisVoiceName = document.getElementById('ttsVoice').value
-
-    const talkingAvatarCharacter = document.getElementById('talkingAvatarCharacter').value
-    const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
-    const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle)
-    avatarConfig.customized = document.getElementById('customizedAvatar').checked
-    avatarSynthesizer = new SpeechSDK.AvatarSynthesizer(speechSynthesisConfig, avatarConfig)
-    avatarSynthesizer.avatarEventReceived = function (s, e) {
-        var offsetMessage = ", offset from session start: " + e.offset / 10000 + "ms."
-        if (e.offset === 0) {
-            offsetMessage = ""
-        }
-
-        console.log("Event received: " + e.description + offsetMessage)
-    }
-
-    const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${cogSvcRegion}.stt.speech.microsoft.com/speech/universal/v2`), cogSvcSubKey)
-    speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
-    var sttLocales = document.getElementById('sttLocales').value.split(',')
-    var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
-    speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
-
-    const azureOpenAIEndpoint = document.getElementById('azureOpenAIEndpoint').value
-    const azureOpenAIApiKey = document.getElementById('azureOpenAIApiKey').value
-    const azureOpenAIDeploymentName = document.getElementById('azureOpenAIDeploymentName').value
-    if (azureOpenAIEndpoint === '' || azureOpenAIApiKey === '' || azureOpenAIDeploymentName === '') {
-        alert('Please fill in the Azure OpenAI endpoint, API key and deployment name.')
-        return
-    }
-
-    dataSources = []
-    if (document.getElementById('enableByod').checked) {
-        const azureCogSearchEndpoint = document.getElementById('azureCogSearchEndpoint').value
-        const azureCogSearchApiKey = document.getElementById('azureCogSearchApiKey').value
-        const azureCogSearchIndexName = document.getElementById('azureCogSearchIndexName').value
-        if (azureCogSearchEndpoint === "" || azureCogSearchApiKey === "" || azureCogSearchIndexName === "") {
-            alert('Please fill in the Azure Cognitive Search endpoint, API key and index name.')
-            return
-        } else {
-            setDataSources(azureCogSearchEndpoint, azureCogSearchApiKey, azureCogSearchIndexName)
-        }
-    }
-
-    initMessages()
-
-    const iceServerUrl = document.getElementById('iceServerUrl').value
-    const iceServerUsername = document.getElementById('iceServerUsername').value
-    const iceServerCredential = document.getElementById('iceServerCredential').value
-    if (iceServerUrl === '' || iceServerUsername === '' || iceServerCredential === '') {
-        alert('Please fill in the ICE server URL, username and credential.')
-        return
-    }
-
-    document.getElementById('startSession').disabled = true
-
-    setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
+    connectAvatar()
 }
 
 window.stopSession = () => {
     document.getElementById('startSession').disabled = false
-    document.getElementById('startMicrophone').disabled = true
+    document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
     document.getElementById('configuration').hidden = false
     document.getElementById('chatHistory').hidden = true
@@ -623,9 +644,35 @@ window.clearChatHistory = () => {
     initMessages()
 }
 
-window.startMicrophone = () => {
-    document.getElementById('startMicrophone').disabled = true
-    document.getElementById('audioPlayer').play()
+window.microphone = () => {
+    if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
+        // Stop microphone
+        document.getElementById('microphone').disabled = true
+        speechRecognizer.stopContinuousRecognitionAsync(
+            () => {
+                document.getElementById('microphone').innerHTML = 'Start Microphone'
+                document.getElementById('microphone').disabled = false
+            }, (err) => {
+                console.log("Failed to stop continuous recognition:", err)
+                document.getElementById('microphone').disabled = false
+            })
+
+        return
+    }
+
+    if (document.getElementById('useLocalVideoForIdle').checked) {
+        if (!sessionActive) {
+            connectAvatar()
+        }
+
+        setTimeout(() => {
+            document.getElementById('audioPlayer').play()
+        }, 5000)
+    } else {
+        document.getElementById('audioPlayer').play()
+    }
+
+    document.getElementById('microphone').disabled = true
     speechRecognizer.recognized = async (s, e) => {
         if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
             let userQuery = e.result.text.trim()
@@ -633,20 +680,35 @@ window.startMicrophone = () => {
                 return
             }
 
-            let chatMessage = {
-                role: 'user',
-                content: userQuery
+            // Auto stop microphone when a phrase is recognized, when it's not continuous conversation mode
+            if (!document.getElementById('continuousConversation').checked) {
+                document.getElementById('microphone').disabled = true
+                speechRecognizer.stopContinuousRecognitionAsync(
+                    () => {
+                        document.getElementById('microphone').innerHTML = 'Start Microphone'
+                        document.getElementById('microphone').disabled = false
+                    }, (err) => {
+                        console.log("Failed to stop continuous recognition:", err)
+                        document.getElementById('microphone').disabled = false
+                    })
             }
 
             handleUserQuery(userQuery,"","")
         }
     }
 
-    speechRecognizer.startContinuousRecognitionAsync()
+    speechRecognizer.startContinuousRecognitionAsync(
+        () => {
+            document.getElementById('microphone').innerHTML = 'Stop Microphone'
+            document.getElementById('microphone').disabled = false
+        }, (err) => {
+            console.log("Failed to start continuous recognition:", err)
+            document.getElementById('microphone').disabled = false
+        })
 }
 
-window.updataEnableByod = () => {
-    if (document.getElementById('enableByod').checked) {
+window.updataEnableOyd = () => {
+    if (document.getElementById('enableOyd').checked) {
         document.getElementById('cogSearchConfig').hidden = false
     } else {
         document.getElementById('cogSearchConfig').hidden = true
