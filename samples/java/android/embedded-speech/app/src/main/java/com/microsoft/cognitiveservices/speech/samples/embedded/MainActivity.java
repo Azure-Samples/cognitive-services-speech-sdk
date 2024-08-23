@@ -28,12 +28,11 @@ public class MainActivity extends AppCompatActivity
      * START OF CONFIGURABLE SETTINGS *
      **********************************/
 
-    // Enter the names and keys of your embedded speech recognition model and synthesis voice.
-    // If either recognition or synthesis is not needed, leave the corresponding default values unchanged.
+    // Enter the names of your embedded speech recognition model and synthesis voice, and the license (text).
+    // If either recognition or synthesis is not needed, leave the corresponding name string empty.
+    private static final String EmbeddedSpeechModelLicense         = ""; // license text (presumed to be the same for all the customer's models)
     private static final String EmbeddedSpeechRecognitionModelName = ""; // e.g. "en-US" or "Microsoft Speech Recognizer en-US FP Model V8.1"
-    private static final String EmbeddedSpeechRecognitionModelKey  = ""; // model decryption key
     private static final String EmbeddedSpeechSynthesisVoiceName   = ""; // e.g. "en-US-AriaNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
-    private static final String EmbeddedSpeechSynthesisVoiceKey    = ""; // voice decryption key
 
     // Embedded speech recognition models and synthesis voices must reside
     // as normal individual files in model/voice specific folders on the
@@ -100,10 +99,10 @@ public class MainActivity extends AppCompatActivity
 
             StringBuilder sb = new StringBuilder("Initialized");
 
-            if (!EmbeddedSpeechRecognitionModelName.isEmpty() && !EmbeddedSpeechRecognitionModelKey.isEmpty())
+            if (!EmbeddedSpeechRecognitionModelName.isEmpty() && !EmbeddedSpeechModelLicense.isEmpty())
             {
                 // Selects the embedded speech recognition model to use.
-                speechConfig.setSpeechRecognitionModel(EmbeddedSpeechRecognitionModelName, EmbeddedSpeechRecognitionModelKey);
+                speechConfig.setSpeechRecognitionModel(EmbeddedSpeechRecognitionModelName, EmbeddedSpeechModelLicense);
 
                 // Creates a speech recognizer instance using the device default
                 // microphone for audio input.
@@ -114,10 +113,10 @@ public class MainActivity extends AppCompatActivity
                 sb.append(" recognizer");
             }
 
-            if (!EmbeddedSpeechSynthesisVoiceName.isEmpty() && !EmbeddedSpeechSynthesisVoiceKey.isEmpty())
+            if (!EmbeddedSpeechSynthesisVoiceName.isEmpty() && !EmbeddedSpeechModelLicense.isEmpty())
             {
                 // Selects the embedded speech synthesis voice to use.
-                speechConfig.setSpeechSynthesisVoice(EmbeddedSpeechSynthesisVoiceName, EmbeddedSpeechSynthesisVoiceKey);
+                speechConfig.setSpeechSynthesisVoice(EmbeddedSpeechSynthesisVoiceName, EmbeddedSpeechModelLicense);
 
                 if (EmbeddedSpeechSynthesisVoiceName.contains("Neural"))
                 {
