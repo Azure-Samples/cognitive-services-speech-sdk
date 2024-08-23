@@ -106,4 +106,3 @@ jobs:
     continueOnError: false
   - bash: ./ci/run-gradle.sh
     displayName: 'Build samples (gradle)'
-    continueOnError: true
