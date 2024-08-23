@@ -10,12 +10,11 @@ gpt_client = AzureOpenAI(azure_endpoint=os.getenv("AZURE_OPENAI_API_ENDPOINT"), 
 speech_config = speechsdk.SpeechConfig(endpoint=f"wss://{os.getenv('AZURE_TTS_REGION')}.tts.speech.microsoft.com/cognitiveservices/websocket/v2",
                                        subscription=os.getenv("AZURE_TTS_API_KEY"))
 
+# set a voice name
+speech_config.speech_synthesis_voice_name = "en-US-BrianMultilingualNeural"
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 
 speech_synthesizer.synthesizing.connect(lambda evt: print("[audio]", end=""))
-
-# set a voice name
-speech_config.speech_synthesis_voice_name = "en-US-AvaMultilingualNeural"
 
 # set timeout value to bigger ones to avoid sdk cancel the request when GPT latency too high
 properties = dict()
