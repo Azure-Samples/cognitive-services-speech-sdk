@@ -22,7 +22,6 @@ SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK
 # - Linux x86 (32-bit), replace "x64" below with "x86".
 # - Linux ARM64 (64-bit), replace "x64" below with "arm64".
 # - Linux ARM32 (32-bit), replace "x64" below with "arm32".
-# - CentOS 7 x64 (64-bit), replace "x64" below with "centos7-x64".
 TARGET_PLATFORM:=x64
 
 CHECK_FOR_SPEECHSDK := $(shell test -f $(SPEECHSDK_ROOT)/lib/$(TARGET_PLATFORM)/libMicrosoft.CognitiveServices.Speech.core.so && echo Success)

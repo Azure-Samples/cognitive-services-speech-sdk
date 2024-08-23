@@ -22,9 +22,8 @@ let EmbeddedSpeechRecognitionModelFolderName = "STT"
 /// For example: "en-US" or "Microsoft Speech Recognizer en-US FP Model V8"
 let EmbeddedSpeechRecognitionModelName = "YourEmbeddedSpeechRecognitionModelName"
 
-/// Decryption key of the (encrypted) embedded speech recognition model.
-/// WARNING: The key may be visible in the program binary if hard-coded as a plain string.
-let EmbeddedSpeechRecognitionModelKey = "YourEmbeddedSpeechRecognitionModelKey"
+/// Embedded speech model license (text).
+let EmbeddedSpeechModelLicense = "YourEmbeddedSpeechModelLicense"
 
 
 class ViewController: UIViewController {
@@ -42,7 +41,7 @@ class ViewController: UIViewController {
             do {
                 embeddedSpeechConfig = try SPXEmbeddedSpeechConfiguration(fromPath: absoluteModelPath)
                 embeddedSpeechConfig?.setSpeechRecognitionModel(EmbeddedSpeechRecognitionModelName,
-                                                                key: EmbeddedSpeechRecognitionModelKey)
+                                                                license: EmbeddedSpeechModelLicense)
             }
             catch {
                 print("Error: \(error) in initializing embedded speech configuration.")
