@@ -14,7 +14,7 @@ The following diagram shows the structure of this tool as defined by the ARM tem
 
 ![Architecture](./images/architecture.png)
 
-When a file lands in a storage container, the Grid event indicates the completed upload of a file. The file is filtered and pushed to a Service bus topic. Code in Azure Functions triggered by a timer picks up the event and creates a transmission request using the Azure Speech services batch pipeline. When the transmission request is complete, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status. When transcription completes, the Azure Function copies the transcript into the same container where the audio file was obtained.
+When a file lands in a storage container, the Grid event indicates the completed upload of a file. The file is filtered and pushed to a Service bus topic. Code in Azure Functions triggered by a timer picks up the event and creates a transcription request using the Azure Speech services batch pipeline. When the transcription request is complete, an event is placed in another queue in the same service bus resource. A different Azure Function triggered by the completion event starts monitoring transcription completion status. When transcription completes, the Azure Function copies the transcript into the same container where the audio file was obtained.
 
 The rest of the features are applied on demand. By deploying additional resources through the ARM template, you can choose to apply analytics on the transcript, produce reports or redact.
 
@@ -57,17 +57,7 @@ To deploy the required infrastructure, click the button below:
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fcognitive-services-speech-sdk%2Fmaster%2Fsamples%2Fingestion%2Fingestion-client%2Finfra%2Fmain.json)
 
-4. Load the template by clicking **Load file**. Alternatively,
-you could copy/paste the template in the editor.
-
-![Load template](./images/image007.png)
-
-5. Once the template text is loaded you will be able to read and edit the transcript. Do
-**NOT** attempt any edits at this stage. You need to save the template you loaded, so click the **Save** button.
-
-![Save template](./images/image009.png)
-
-Saving the template will result in the screen below. You will need to fill in the form provided. It is
+This will result in the screen below on your browser. You will need to fill in the form provided. It is
 important that all the information is correct. Let us look at the form and go through each field.
 
 ![form template](./images/image011.png)
