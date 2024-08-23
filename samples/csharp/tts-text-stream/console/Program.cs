@@ -32,7 +32,7 @@ namespace Demo
 
             // setup speech synthesizer
             // IMPORTANT: MUST use the websocket v2 endpoint
-            var ttsEndpoint = $"wss://{Environment.GetEnvironmentVariable("AZURE_TTS_REGION")}.tts.speech.microsoft.com/cognitiveservices/websocket/v2";
+            var ttsEndpoint = $"wss://{Environment.GetEnvironmentVariable("AZURE_TTS_REGION")}.tts.speech.microsoft.com/cognitiveservices/websocket/v2?debug=3";
             var speechConfig = SpeechConfig.FromEndpoint(
                 new Uri(ttsEndpoint),
                 Environment.GetEnvironmentVariable("AZURE_TTS_API_KEY"));
@@ -41,13 +41,13 @@ namespace Demo
             speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm);
 
             // set a voice name
-            speechConfig.SetProperty(PropertyId.SpeechServiceConnection_SynthVoice, "en-US-AvaMultilingualNeural");
+            speechConfig.SetProperty(PropertyId.SpeechServiceConnection_SynthVoice, "en-US-BrianMultilingualNeural");
 
             // set timeout value to bigger ones to avoid sdk cancel the request when GPT latency too high
             speechConfig.SetProperty("SpeechSynthesis_FrameTimeoutInterval", "10000");
             speechConfig.SetProperty("SpeechSynthesis_RtfTimeoutThreshold", "10");
 
-            speechSynthesizer = new SpeechSynthesizer(speechConfig, null as AudioConfig);
+            speechSynthesizer = new SpeechSynthesizer(speechConfig);
             using var request = new SpeechSynthesisRequest(SpeechSynthesisRequestInputType.TextStream);
 
             // Adjust global pitch, rate, and volume if you need
@@ -57,8 +57,8 @@ namespace Demo
 
             var audioData = new MemoryStream();
             var ttsTask = await speechSynthesizer.StartSpeakingAsync(request);
-            var gptTask = GenerateGPTResponse(aoaiClient, request);
             var audioTask = Task.Run(() => ReadAudioStream(ttsTask, audioData));
+            var gptTask = GenerateGPTResponse(aoaiClient, request);
 
             await gptTask;
             await audioTask;
