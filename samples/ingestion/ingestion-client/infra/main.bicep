@@ -144,7 +144,7 @@ param DeploymentId string = utcNow()
 param CompletedServiceBusConnectionString string = ''
 
 // Don't change the format for Version variable
-var Version = 'v2.1.7'
+var Version = 'v2.1.10'
 var AudioInputContainer = 'audio-input'
 var AudioProcessedContainer = 'audio-processed'
 var ErrorFilesOutputContainer = 'audio-failed'
@@ -171,9 +171,9 @@ var ServiceBusName = 'ServiceBus-${InstanceId}'
 var AppInsightsName = 'AppInsights-${InstanceId}'
 var KeyVaultName = 'KV-${InstanceId}'
 var EventGridSystemTopicName = '${StorageAccountName}-${InstanceId}'
-var StartTranscriptionFunctionName = take('StartTranscriptionFunction-${InstanceId}', 60)
+var StartTranscriptionFunctionName = take('StartTranscription-${InstanceId}', 60)
 var StartTranscriptionFunctionId = StartTranscriptionFunction.id
-var FetchTranscriptionFunctionName = take('FetchTranscriptionFunction-${InstanceId}', 60)
+var FetchTranscriptionFunctionName = take('FetchTranscription-${InstanceId}', 60)
 var FetchTranscriptionFunctionId = FetchTranscriptionFunction.id
 var AppServicePlanName = 'AppServicePlan-${InstanceId}'
 var AzureSpeechServicesKeySecretName = 'AzureSpeechServicesKey'

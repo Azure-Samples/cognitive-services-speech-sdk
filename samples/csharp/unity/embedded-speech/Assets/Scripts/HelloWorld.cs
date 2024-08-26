@@ -21,10 +21,9 @@ public class HelloWorld : MonoBehaviour
     /**********************************
      * START OF CONFIGURABLE SETTINGS *
      **********************************/
-    private static readonly string recognitionModelName = ""; // e.g. "en-US" or "Microsoft Speech Recognizer en-US FP Model V8.1"
-    private static readonly string recognitionModelKey  = ""; // model decryption key
-    private static readonly string synthesisVoiceName   = ""; // e.g. "en-US-AriaNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
-    private static readonly string synthesisVoiceKey    = ""; // voice decryption key
+    private static readonly string embeddedSpeechLicense = ""; // embedded speech model license (text)
+    private static readonly string recognitionModelName  = ""; // e.g. "en-US" or "Microsoft Speech Recognizer en-US FP Model V8.1"
+    private static readonly string synthesisVoiceName    = ""; // e.g. "en-US-AriaNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)"
 
 #if PLATFORM_ANDROID
     // Embedded speech recognition models and synthesis voices must reside
@@ -180,8 +179,8 @@ public class HelloWorld : MonoBehaviour
             var config = EmbeddedSpeechConfig.FromPath(modelRootPath);
 
             // Selects embedded speech models to use.
-            config.SetSpeechRecognitionModel(recognitionModelName, recognitionModelKey);
-            config.SetSpeechSynthesisVoice(synthesisVoiceName, synthesisVoiceKey);
+            config.SetSpeechRecognitionModel(recognitionModelName, embeddedSpeechLicense);
+            config.SetSpeechSynthesisVoice(synthesisVoiceName, embeddedSpeechLicense);
 
             if (synthesisVoiceName.Contains("Neural"))
             {
@@ -197,7 +196,7 @@ public class HelloWorld : MonoBehaviour
             // With embedded speech, this can take a moment due to loading
             // of the model. To avoid unnecessary delays when recognition is
             // started, create the recognizer well in advance.
-            if (!string.IsNullOrEmpty(recognitionModelName) && !string.IsNullOrEmpty(recognitionModelKey))
+            if (!string.IsNullOrEmpty(recognitionModelName) && !string.IsNullOrEmpty(embeddedSpeechLicense))
             {
                 recognizer = new SpeechRecognizer(config);
                 sb.Append(" recognizer");
@@ -205,7 +204,7 @@ public class HelloWorld : MonoBehaviour
 
             // Creates a speech synthesizer instance using the device default
             // speaker for audio output.
-            if (!string.IsNullOrEmpty(synthesisVoiceName) && !string.IsNullOrEmpty(synthesisVoiceKey))
+            if (!string.IsNullOrEmpty(synthesisVoiceName) && !string.IsNullOrEmpty(embeddedSpeechLicense))
             {
                 synthesizer = new SpeechSynthesizer(config);
                 if (recognizer != null)

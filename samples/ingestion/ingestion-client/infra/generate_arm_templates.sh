@@ -2,7 +2,12 @@
 
 set -e
 
-az bicep version 2>/dev/null || az bicep install
+# if az bicep is not installed, install it else upgrade it
+if ! command -v az bicep &> /dev/null; then
+    az bicep install
+else
+    az bicep upgrade
+fi
 
 TEMPLATES=()
 FILES=()

@@ -8,6 +8,7 @@ namespace Demo
     using Azure;
     using Azure.AI.OpenAI;
     using Microsoft.CognitiveServices.Speech;
+    using Microsoft.CognitiveServices.Speech.Audio;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -40,22 +41,60 @@ namespace Demo
             speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm);
 
             // set a voice name
-            speechConfig.SetProperty(PropertyId.SpeechServiceConnection_SynthVoice, "en-US-AvaMultilingualNeural");
+            speechConfig.SetProperty(PropertyId.SpeechServiceConnection_SynthVoice, "en-US-BrianMultilingualNeural");
 
             // set timeout value to bigger ones to avoid sdk cancel the request when GPT latency too high
             speechConfig.SetProperty("SpeechSynthesis_FrameTimeoutInterval", "10000");
             speechConfig.SetProperty("SpeechSynthesis_RtfTimeoutThreshold", "10");
 
             speechSynthesizer = new SpeechSynthesizer(speechConfig);
-            speechSynthesizer.Synthesizing += SpeechSynthesizer_Synthesizing;
-
-            // create request with TextStream input type
             using var request = new SpeechSynthesisRequest(SpeechSynthesisRequestInputType.TextStream);
 
-            var ttsTask = speechSynthesizer.SpeakAsync(request);
+            // Adjust global pitch, rate, and volume if you need
+            // request.SpeakingRate = "50%";
+            // request.Pitch = "50%";
+            // request.Volume = "25";
 
-            audioData = new MemoryStream();
+            var audioData = new MemoryStream();
+            var ttsTask = await speechSynthesizer.StartSpeakingAsync(request);
+            var audioTask = Task.Run(() => ReadAudioStream(ttsTask, audioData));
+            var gptTask = GenerateGPTResponse(aoaiClient, request);
 
+            await gptTask;
+            await audioTask;
+            File.WriteAllBytes("streaming.wav", audioData.ToArray());
+            audioData.Close();
+        }
+
+        private static void ReadAudioStream(SpeechSynthesisResult ttsTask, MemoryStream audioData)
+        {
+            using var audioDataStream = AudioDataStream.FromResult(ttsTask);
+            byte[] buffer = new byte[32000];
+            uint totalSize = 0;
+            uint totalRead = 0;
+            while (true)
+            {
+                uint readSize = audioDataStream.ReadData(buffer);
+                if (readSize == 0)
+                {
+                    break;
+                }
+
+                lock (consoleLock)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write($"[audio]");
+                    Console.ResetColor();
+                }
+
+                totalRead += readSize;
+                totalSize += readSize;
+                audioData.Write(buffer, 0, (int)readSize);
+            }
+        }
+
+        private static async Task GenerateGPTResponse(OpenAIClient aoaiClient, SpeechSynthesisRequest request)
+        {
             string query = "tell me a joke in 100 words";
 
             // Get GPT output stream
@@ -104,79 +143,6 @@ namespace Demo
                 Console.Write($"[GPT END]");
                 Console.ResetColor();
             }
-
-            // wait all tts audio bytes return
-            var result = await ttsTask;
-            lock (consoleLock)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write($"[TTS END]");
-                Console.ResetColor();
-            }
-
-            var totalSampleCount = audioData.Length * 8 / 16;
-            WriteWavHeader(audioData, false, 1, 16, 24000, (int)totalSampleCount, 0);
-            File.WriteAllBytes("streaming.wav", audioData.ToArray());
-            audioData.Close();
-        }
-
-        private static void SpeechSynthesizer_Synthesizing(object? sender, SpeechSynthesisEventArgs e)
-        {
-            lock (consoleLock)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write($"[audio]");
-                Console.ResetColor();
-            }
-
-            audioData.Write(e.Result.AudioData, 0, e.Result.AudioData.Length);
-        }
-
-        public static void WriteWavHeader(MemoryStream stream, bool isFloatingPoint, ushort channelCount, ushort bitDepth, int sampleRate, int totalSampleCount, int extraChunkSize)
-        {
-            stream.Position = 0;
-
-            // RIFF header.
-            // Chunk ID.
-            stream.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"), 0, 4);
-
-            // Chunk size.
-            stream.Write(BitConverter.GetBytes(((bitDepth / 8) * totalSampleCount) + 36 + extraChunkSize), 0, 4);
-
-            // Format.
-            stream.Write(System.Text.Encoding.ASCII.GetBytes("WAVE"), 0, 4);
-
-            // Sub-chunk 1.
-            // Sub-chunk 1 ID.
-            stream.Write(System.Text.Encoding.ASCII.GetBytes("fmt "), 0, 4);
-
-            // Sub-chunk 1 size.
-            stream.Write(BitConverter.GetBytes(16), 0, 4);
-
-            // Audio format (floating point (3) or PCM (1)). Any other format indicates compression.
-            stream.Write(BitConverter.GetBytes((ushort)(isFloatingPoint ? 3 : 1)), 0, 2);
-
-            // Channels.
-            stream.Write(BitConverter.GetBytes(channelCount), 0, 2);
-
-            // Sample rate.
-            stream.Write(BitConverter.GetBytes(sampleRate), 0, 4);
-
-            // Bytes rate.
-            stream.Write(BitConverter.GetBytes(sampleRate * channelCount * (bitDepth / 8)), 0, 4);
-
-            // Block align.
-            stream.Write(BitConverter.GetBytes((ushort)channelCount * (bitDepth / 8)), 0, 2);
-
-            // Bits per sample.
-            stream.Write(BitConverter.GetBytes(bitDepth), 0, 2);
-
-            // Sub-chunk 2.
-            // Sub-chunk 2 ID.
-            stream.Write(System.Text.Encoding.ASCII.GetBytes("data"), 0, 4);
-
-            // Sub-chunk 2 size.
-            stream.Write(BitConverter.GetBytes((bitDepth / 8) * totalSampleCount), 0, 4);
         }
     }
 }

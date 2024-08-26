@@ -19,9 +19,8 @@ let EmbeddedSpeechSynthesisVoicesFolderName = "TTS"
 /// For example: "en-US-JennyNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
 let EmbeddedSpeechSynthesisVoiceName = "YourEmbeddedSpeechSynthesisVoiceName"
 
-/// Decryption key of the (encrypted) embedded speech synthesis voice.
-/// WARNING: The key may be visible in the program binary if hard-coded as a plain string.
-let EmbeddedSpeechSynthesisVoiceKey = "YourEmbeddedSpeechSynthesisVoiceKey"
+/// Embedded speech model license (text).
+let EmbeddedSpeechModelLicense = "YourEmbeddedSpeechModelLicense"
 
 
 class ViewController: UIViewController, UITextFieldDelegate{
@@ -39,7 +38,7 @@ class ViewController: UIViewController, UITextFieldDelegate{
             do {
                 embeddedSpeechConfig = try SPXEmbeddedSpeechConfiguration(fromPath: absoluteModelPath)
                 embeddedSpeechConfig?.setSpeechSynthesisVoice(EmbeddedSpeechSynthesisVoiceName,
-                                                                key: EmbeddedSpeechSynthesisVoiceKey)
+                                                                license: EmbeddedSpeechModelLicense)
             }
             catch {
                 print("Error: \(error) in initializing embedded speech configuration.")

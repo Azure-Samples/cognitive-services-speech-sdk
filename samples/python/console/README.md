@@ -12,14 +12,6 @@ This sample demonstrates various forms of speech recognition, intent recognition
   sudo apt-get install libssl-dev libasound2
   ```
 
-* On RHEL or CentOS, run the following commands for the installation of required packages:
-  ```sh
-  sudo yum update
-  sudo yum install alsa-lib openssl python3
-  ```
-
-  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
-
 * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2017](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 
 
