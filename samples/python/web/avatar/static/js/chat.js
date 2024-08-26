@@ -148,6 +148,15 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         const dataChannel = event.channel
         dataChannel.onmessage = e => {
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+
+            if (e.data.includes("EVENT_TYPE_SWITCH_TO_SPEAKING")) {
+                isSpeaking = true
+                document.getElementById('stopSpeaking').disabled = false
+            } else if (e.data.includes("EVENT_TYPE_SWITCH_TO_IDLE")) {
+                isSpeaking = false
+                lastSpeakTime = new Date()
+                document.getElementById('stopSpeaking').disabled = true
+            }
         }
     })
 
@@ -324,41 +333,10 @@ function checkHung() {
     }
 }
 
-// Fetch speaking status from backend.
-function checkSpeakingStatus() {
-    fetch('/api/getSpeakingStatus', {
-        method: 'GET',
-        headers: {
-            'ClientId': clientId
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            response.json().then(data => {
-                isSpeaking = data.isSpeaking
-                if (data.lastSpeakTime !== null) {
-                    lastSpeakTime = new Date(data.lastSpeakTime)
-                }
-
-                if (isSpeaking) {
-                    document.getElementById('stopSpeaking').disabled = false
-                } else {
-                    document.getElementById('stopSpeaking').disabled = true
-                }
-
-                handleLocalVideo()
-            })
-        } else {
-            throw new Error(`Failed to get speaking status: ${response.status} ${response.statusText}`)
-        }
-    })
-}
-
 window.onload = () => {
     clientId = document.getElementById('clientId').value
     setInterval(() => {
         checkHung()
-        checkSpeakingStatus()
     }, 2000) // Check session activity every 2 seconds
 }
 
@@ -391,7 +369,7 @@ window.stopSpeaking = () => {
     })
     .then(response => {
         if (response.ok) {
-            checkSpeakingStatus()
+            console.log('Successfully stopped speaking.')
         } else {
             throw new Error(`Failed to stop speaking: ${response.status} ${response.statusText}`)
         }

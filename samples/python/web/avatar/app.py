@@ -203,23 +203,10 @@ def speak() -> Response:
     client_id = uuid.UUID(request.headers.get('ClientId'))
     try:
         ssml = request.data.decode('utf-8')
-        result_id = speakSsml(ssml, client_id)
+        result_id = speakSsml(ssml, client_id, True)
         return Response(result_id, status=200)
     except Exception as e:
         return Response(f"Speak failed. Error message: {e}", status=400)
-
-# The API route to get the speaking status
-@app.route("/api/getSpeakingStatus", methods=["GET"])
-def getSpeakingStatus() -> Response:
-    global client_contexts
-    client_id = uuid.UUID(request.headers.get('ClientId'))
-    is_speaking = client_contexts[client_id]['is_speaking']
-    last_speak_time = client_contexts[client_id]['last_speak_time']
-    speaking_status = {
-        'isSpeaking': is_speaking,
-        'lastSpeakTime': last_speak_time.isoformat() if last_speak_time else None
-    }
-    return Response(json.dumps(speaking_status), status=200)
 
 # The API route to stop avatar from speaking
 @app.route("/api/stopSpeaking", methods=["POST"])
@@ -520,13 +507,13 @@ def speakText(text: str, voice: str, speaker_profile_id: str, ending_silence_ms:
                          </mstts:ttsembedding>
                      </voice>
                    </speak>"""
-    return speakSsml(ssml, client_id)
+    return speakSsml(ssml, client_id, False)
 
 # Speak the given ssml with speech sdk
-def speakSsml(ssml: str, client_id: uuid.UUID) -> str:
+def speakSsml(ssml: str, client_id: uuid.UUID, asynchronized: bool) -> str:
     global client_contexts
     speech_synthesizer = client_contexts[client_id]['speech_synthesizer']
-    speech_sythesis_result = speech_synthesizer.speak_ssml_async(ssml).get()
+    speech_sythesis_result = speech_synthesizer.start_speaking_ssml_async(ssml).get() if asynchronized else speech_synthesizer.speak_ssml_async(ssml).get()
     if speech_sythesis_result.reason == speechsdk.ResultReason.Canceled:
         cancellation_details = speech_sythesis_result.cancellation_details
         print(f"Speech synthesis canceled: {cancellation_details.reason}")
