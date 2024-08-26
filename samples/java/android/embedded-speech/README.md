@@ -38,20 +38,16 @@ To build:
      * Files belonging to a specific model must be present as normal individual files in a model folder,
        not in a package, and they must be readable by the application process.
        The model internal subfolder structure must be intact i.e. as originally delivered.
+   * `EmbeddedSpeechModelLicense`
+     * License text. It is presumed that all the customer's embedded speech models use the same license.
    * `EmbeddedSpeechRecognitionModelName`
      * Name of the embedded speech recognition model to be used for recognition.
        If recognition is not needed, leave the default value unchanged.
      * The model name can be short (see https://aka.ms/speech/sr-languages, e.g. `en-US`) or full (e.g. `Microsoft Speech Recognizer en-US FP Model V8.1`).
-   * `EmbeddedSpeechRecognitionModelKey`
-     * Decryption key of the (encrypted) embedded speech recognition model.
-       If recognition is not needed, leave the default value unchanged.
    * `EmbeddedSpeechSynthesisVoiceName`
      * Name of the embedded speech synthesis voice to be used for synthesis.
        If synthesis is not needed, leave the default value unchanged.
      * The voice name can be short (see https://aka.ms/speech/tts-languages, e.g. `en-US-AriaNeural`) or full (e.g. `Microsoft Server Speech Text to Speech Voice (en-US, AriaNeural)`).
-   * `EmbeddedSpeechSynthesisVoiceKey`
-     * Decryption key of the (encrypted) embedded speech synthesis voice.
-       If synthesis is not needed, leave the default value unchanged.
 1. Press **Ctrl+F9** or select **Build** \> **Make Project**.
 
 Note: If the build is successful but Android Studio shows references to Speech SDK symbols in red and displays "*Cannot resolve symbol ...*", delete `.gradle` and `.idea` folders, then rebuild.
@@ -67,7 +63,7 @@ Note: If the build is successful but Android Studio shows references to Speech S
      This access method will not work if the application specifies a target API level 30 (Android 11) or higher.
      See https://developer.android.com/about/versions/11/privacy/storage for information on alternatives.
 1. Use the buttons in the app as follows.
-   * *Initialize objects* : Initializes the recognizer and/or synthesizer based on model/voice configuration (name, key) in `MainActivity`.
+   * *Initialize objects* : Initializes the recognizer and/or synthesizer based on model/voice configuration (name, license) in `MainActivity`.
      * This can take a moment due to loading of model data, so it is best done as a separate stage in advance before starting recognition or synthesis.
    * *Recognize speech* : Listens to the device default microphone for input and transcribes recognized speech to text in the app window. This returns one result - run it again to recognize more.
    * *Synthesize speech* : Reads input from the text entry above this button, and synthesizes speech to the device default speaker.
@@ -81,7 +77,7 @@ Do **not** add [client-sdk](https://mvnrepository.com/artifact/com.microsoft.cog
 **Note:** Make sure that `@aar` suffix is used when the dependency is specified in `build.gradle`. For example,
 ```
 dependencies {
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.35.0@aar'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk-embedded:1.40.0@aar'
     ...
 ```
 

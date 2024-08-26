@@ -10,8 +10,8 @@ REST API doc: Personal voice REST API is a part of [custom voice REST API](https
 
 | Language | Sample code | Description |
 |----------|-----------|-------------|
-| C#       | [csharp](custom-voice/csharp/CustomVoiceSample/ProfessionalVoiceSample.cs) | C# client calling personal voice REST API through System.Net.Http |
-| Python   | [python](custom-voice/python/professional_voice_sample.py) | Python client calling personal voice REST API |
+| C#       | [csharp](custom-voice/csharp/CustomVoiceSample/PersonalVoiceSample.cs) | C# client calling personal voice REST API through System.Net.Http |
+| Python   | [python](custom-voice/python/personal_voice_sample.py) | Python client calling personal voice REST API |
 
 > [!NOTE]
 > You need an Azure AI services [subscription key](https://learn.microsoft.com/azure/ai-services/speech-service/get-started-text-to-speech?tabs=windows%2Cterminal&pivots=programming-language-rest#prerequisites) resource to run the sample code provided here. Personal voice is only available for paid resources (S0); free resources (F0) aren't supported.

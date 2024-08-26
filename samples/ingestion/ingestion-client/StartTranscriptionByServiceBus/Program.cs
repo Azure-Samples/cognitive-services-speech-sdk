@@ -43,7 +43,7 @@ namespace StartTranscription
                 {
                     var configuration = context.Configuration;
                     var config = new AppConfig();
-                    configuration.GetSection("Values").Bind(config);
+                    configuration.Bind(config);
 
                     var blobServiceClient = new BlobServiceClient(config.AzureWebJobsStorage);
                     var storageCredential = new StorageSharedKeyCredential(
@@ -64,7 +64,7 @@ namespace StartTranscription
                         clientBuilder.AddServiceBusClient(config.FetchTranscriptionServiceBusConnectionString)
                             .WithName(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
                     });
-                    services.Configure<AppConfig>(configuration.GetSection("Values"));
+                    services.Configure<AppConfig>(configuration);
                 })
                 .Build();
 

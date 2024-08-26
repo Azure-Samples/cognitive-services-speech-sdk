@@ -10,7 +10,6 @@
 #
 # Update SPEECHSDK_ROOT below, and check and adjust TARGET_PLATFORM if necessary
 # (see $SPEECHSDK_ROOT/runtimes).
-# Note that RHEL/CentOS 7 is not supported with embedded speech.
 #
 SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK
 TARGET_PLATFORM:=linux-x64
