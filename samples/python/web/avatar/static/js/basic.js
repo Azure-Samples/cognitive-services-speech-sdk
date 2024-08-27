@@ -74,6 +74,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         const dataChannel = event.channel
         dataChannel.onmessage = e => {
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+
+            if (e.data.includes("EVENT_TYPE_SWITCH_TO_IDLE")) {
+                document.getElementById('speak').disabled = false
+                document.getElementById('stopSpeaking').disabled = true
+            }
         }
     })
 
@@ -260,8 +265,6 @@ window.speak = () => {
         body: spokenSsml
     })
     .then(response => {
-        document.getElementById('speak').disabled = false
-        document.getElementById('stopSpeaking').disabled = true
         if (response.ok) {
             response.text().then(text => {
                 console.log(`[${new Date().toISOString()}] Speech synthesized to speaker for text [ ${spokenText} ]. Result ID: ${text}`)
@@ -285,8 +288,6 @@ window.stopSpeaking = () => {
     .then(response => {
         if (response.ok) {
             console.log(`[${new Date().toISOString()}] Speaking stopped.`)
-            document.getElementById('speak').disabled = false
-            document.getElementById('stopSpeaking').disabled = false
         } else {
             throw new Error(`[${new Date().toISOString()}] Unable to stop speaking. ${response.status} ${response.statusText}`)
         }
