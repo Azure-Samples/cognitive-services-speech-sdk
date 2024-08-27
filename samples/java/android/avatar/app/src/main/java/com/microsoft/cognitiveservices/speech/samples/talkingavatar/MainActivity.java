@@ -7,7 +7,9 @@ package com.microsoft.cognitiveservices.speech.samples.talkingavatar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.text.Layout;
 import android.text.Spannable;
@@ -134,6 +136,10 @@ public class MainActivity extends AppCompatActivity {
 
         outputMessage = this.findViewById(R.id.outputMessage);
         outputMessage.setMovementMethod(new ScrollingMovementMethod());
+
+        // Switch audio output device from earphone to speaker, for louder volume.
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setSpeakerphoneOn(true);
 
         initializePeerConnectionFactory();
     }
@@ -399,6 +405,9 @@ public class MainActivity extends AppCompatActivity {
 
                     if (!mediaStreams[0].audioTracks.isEmpty()) {
                         mediaStreams[0].audioTracks.get(0).setEnabled(true);
+
+                        // To boost the audio volume, set below value to be greater than 1.0
+                        mediaStreams[0].audioTracks.get(0).setVolume(1.0);
                     }
                 }
             }
