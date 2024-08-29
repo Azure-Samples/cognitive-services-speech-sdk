@@ -39,15 +39,14 @@ Video dubbing client tool and API sample code
 # Command line sample
    | Description | Command Sample |
    | ------------ | -------------- |
-   | Query video dubbing metadata | -mode QueryMetadata -region eastus -subscriptionKey ... |
-   | Upload new video file, and translate the file to new locale | -mode UploadVideoOrAudioFileAndCreateTranslation -region eastus -subscriptionKey ... -sourceLocale zh-CN -targetLocales en-US -VoiceKind PersonalVoice -sourceVideoOrAudioFilePath YourVideoFileLocalPath |
-   | Query single translation by ID. | -mode QueryTranslation -region eastus -subscriptionKey ... -id TranslationId |
-   | Query all translations of the speech resource. | -mode QueryTranslations -region eastus -subscriptionKey ... |
-   | Delete single translation by ID. | -mode DeleteTranslation -region eastus -subscriptionKey ... -id TranslationId |
-   | Upload video file | -mode UploadVideoOrAudioFile -region eastus -subscriptionKey -sourceLocale zh-CN -sourceVideoOrAudioFilePath YourVideoFileLocalPath. |
-   | Delete single video file by ID. |-mode DeleteVideoOrAudioFile -region eastus -subscriptionKey ... -id TranslationId -deleteAssociations |
-   | query all uploaded video files. | -mode QueryVideoOrAudioFiles -region eastus -subscriptionKey ... |
-   | query single video file by ID | -mode QueryVideoOrAudioFile -environment eastus -subscriptionKey ... -id VideoFileId |
+   | Upload new video file for translation, and run first iteration of the translation | -mode CreateTranslationAndIterationAndWaitUntilTerminated -region eastus -subscriptionKey subscriptionKey -apiVersion 2024-05-20-preview -sourceLocale zh-CN -targetLocales en-US -VoiceKind PersonalVoice -videoFileAzureBlobUrl VideoFileAzureBlobUrl |
+   | Create translation for a video file. | -mode CreateTranslation -region eastus -subscriptionKey subscriptionKey -apiVersion 2024-05-20-preview -sourceLocale zh-CN -targetLocale en-US -voiceKind PlatformVoice -translationId translationId -videoFileAzureBlobUrl VideoFileAzureBlobUrl |
+   | Query translations. | -mode QueryTranslations -region eastus -subscriptionKey subscriptionKey -apiVersion 2024-05-20-preview |
+   | Query translation by ID. | -mode QueryTranslation -region eastus -subscriptionKey subscriptionKey -apiVersion 2024-05-20-preview -translationId translationId |
+   | Delete translation by ID. | -mode DeleteTranslation -region eastus -subscriptionKey subscriptionKey -apiVersion 2024-05-20-preview -translationId translationId |
+   | Create iteration for a translation. | -mode CreateIteration -region eastus -subscriptionKey subscriptionKey -apiVersion 2024-05-20-preview -translationId translationId -iterationId iterationId  |
+   | Query iterations. | -mode QueryIterations -region eastus -subscriptionKey subscriptionKey -apiVersion 2024-05-20-preview -translationId translationId |
+   | Query iteration by ID. | -mode QueryIteration -region eastus -subscriptionKey subscriptionKey -apiVersion 2024-05-20-preview -translationId translationId -iterationId iterationId |
 
 # Command line tool arguments
    | Argument | Supported Values Sample | Description |
@@ -61,3 +60,9 @@ Video dubbing client tool and API sample code
    | -translationId | MyTranslateVideo1FromZhCNToEnUS2024050601 | Translation ID. |
    | -iterationId | MyFirstIteration2024050601 | Iteration ID. |
    | -videoFileAzureBlobUrl |  | Video file URL with SAS(or not) which is hosted in Azure storage blob. |
+   | -webvttFileAzureBlobUrl |  | Webvtt file URL with SAS(or not) which is hosted in Azure storage blob. |
+   | -webvttFileKind | TargetLocaleSubtitle/SourceLocaleSubtitle/MetadataJson | Webvtt file kind. |
+   | -subtitleMaxCharCountPerSegment | 100 | Subtitle max char count per segment. |
+   | -speakerCount | 1 | Speaker count of the video. |
+   | -enableLipSync | false | Enable lip sync. |
+   | -exportSubtitleInVideo | false | Export subtitle in video. |
