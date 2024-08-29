@@ -20,4 +20,4 @@ Refer to [this](../js/browser/avatar/README.md) for real time avatar synthesis.
 ## Resources
 
 1. [Batch avatar synthesis request properties](https://learn.microsoft.com/azure/ai-services/speech-service/text-to-speech-avatar/batch-synthesis-avatar-properties)
-2. [The OPENAPI specification for the Batch avatar synthesis API](https://github.com/Azure/azure-rest-api-specs/blob/main/specification/cognitiveservices/data-plane/Speech/BatchAvatar/preview/2024-04-15-preview/batchavatar.json)
+2. [The OPENAPI specification for the Batch avatar synthesis API](https://github.com/Azure/azure-rest-api-specs/blob/main/specification/cognitiveservices/data-plane/Speech/BatchAvatar/stable/2024-08-01/batchavatar.json)

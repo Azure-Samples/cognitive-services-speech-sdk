@@ -23,6 +23,7 @@ namespace FetchTranscription
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     using Newtonsoft.Json;
 
@@ -39,25 +40,28 @@ namespace FetchTranscription
         private readonly string locale;
         private readonly ILogger log;
 
-        public AnalyzeConversationsProvider(string locale, string subscriptionKey, string endpoint, ILogger log)
+        private readonly AppConfig appConfig;
+
+        public AnalyzeConversationsProvider(string locale, string subscriptionKey, string endpoint, ILogger log, IOptions<AppConfig> appConfig)
         {
             this.conversationAnalysisClient = new ConversationAnalysisClient(new Uri(endpoint), new AzureKeyCredential(subscriptionKey));
             this.locale = locale;
             this.log = log;
+            this.appConfig = appConfig?.Value;
         }
 
-        public static bool IsConversationalPiiEnabled()
+        public bool IsConversationalPiiEnabled()
         {
-            return FetchTranscriptionEnvironmentVariables.ConversationPiiSetting != ConversationPiiSetting.None;
+            return this.appConfig.ConversationPiiSetting != ConversationPiiSetting.None;
         }
 
-        public static bool IsConversationalSummarizationEnabled()
-            => FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Enabled;
+        public bool IsConversationalSummarizationEnabled()
+            => this.appConfig.ConversationSummarizationOptions.Enabled;
 
         /// <inheritdoc />
         public async Task<TranscriptionAnalyticsJobStatus> GetTranscriptionAnalyticsJobStatusAsync(IEnumerable<AudioFileInfo> audioFileInfos)
         {
-            if (!IsConversationalPiiEnabled() && !IsConversationalSummarizationEnabled())
+            if (!this.IsConversationalPiiEnabled() && !this.IsConversationalSummarizationEnabled())
             {
                 return TranscriptionAnalyticsJobStatus.Completed;
             }
@@ -299,7 +303,7 @@ namespace FetchTranscription
             speechTranscript = speechTranscript ?? throw new ArgumentNullException(nameof(speechTranscript));
             var errors = new List<string>();
 
-            if (!(IsConversationalPiiEnabled() || IsConversationalSummarizationEnabled()))
+            if (!(this.IsConversationalPiiEnabled() || this.IsConversationalSummarizationEnabled()))
             {
                 return new List<string>();
             }
@@ -327,7 +331,7 @@ namespace FetchTranscription
 
         private void PrepareSummarizationRequest(SpeechTranscript speechTranscript, List<AnalyzeConversationsRequest> data)
         {
-            if (!IsConversationalSummarizationEnabled())
+            if (!this.IsConversationalSummarizationEnabled())
             {
                 this.log.LogInformation("Skip prepare summarization request because disabled");
                 return;
@@ -360,7 +364,7 @@ namespace FetchTranscription
                 Tasks = new List<AnalyzeConversationsTask>(),
             };
 
-            foreach (var aspect in FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Aspects)
+            foreach (var aspect in this.appConfig.ConversationSummarizationOptions.Aspects)
             {
                 summarizationData.Tasks.Add(new AnalyzeConversationsTask
                 {
@@ -402,7 +406,7 @@ namespace FetchTranscription
                         })
                 };
 
-                var stratergy = FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.Stratergy;
+                var stratergy = this.appConfig.ConversationSummarizationOptions.Stratergy;
                 var roleKey = stratergy.Key switch
                 {
                     RoleAssignmentMappingKey.Channel => recognizedPhrase.Channel,
@@ -414,7 +418,7 @@ namespace FetchTranscription
                     role = stratergy.FallbackRole;
                 }
 
-                if (role != Role.None && count + utterance.Text.Length < FetchTranscriptionEnvironmentVariables.ConversationSummarizationOptions.InputLengthLimit)
+                if (role != Role.None && count + utterance.Text.Length < this.appConfig.ConversationSummarizationOptions.InputLengthLimit)
                 {
                     utterance.Role = utterance.ParticipantId = role.ToString();
                     summarizationData.AnalysisInput.Conversations[0].ConversationItems.Add(utterance);
@@ -430,7 +434,7 @@ namespace FetchTranscription
 
         private void PreparePiiRequest(SpeechTranscript speechTranscript, List<AnalyzeConversationsRequest> data)
         {
-            if (!IsConversationalPiiEnabled())
+            if (!this.IsConversationalPiiEnabled())
             {
                 this.log.LogInformation("Skip prepare pii request");
                 return;
@@ -447,7 +451,7 @@ namespace FetchTranscription
                 var topResult = recognizedPhrase.NBest.First();
                 var textCount = topResult.Lexical.Length;
 
-                if (count == -1 || (count + textCount) > FetchTranscriptionEnvironmentVariables.ConversationPiiMaxChunkSize)
+                if (count == -1 || (count + textCount) > this.appConfig.ConversationPiiMaxChunkSize)
                 {
                     count = 0;
                     jobCount++;
@@ -473,13 +477,13 @@ namespace FetchTranscription
                                 Parameters = new Dictionary<string, object>
                                 {
                                     {
-                                        "piiCategories", FetchTranscriptionEnvironmentVariables.ConversationPiiCategories.ToList()
+                                        "piiCategories", this.appConfig.ConversationPiiCategories.ToList()
                                     },
                                     {
-                                        "redactionSource", FetchTranscriptionEnvironmentVariables.ConversationPiiInferenceSource ?? DefaultInferenceSource
+                                        "redactionSource", this.appConfig.ConversationPiiInferenceSource ?? DefaultInferenceSource
                                     },
                                     {
-                                        "includeAudioRedaction", FetchTranscriptionEnvironmentVariables.ConversationPiiSetting == ConversationPiiSetting.IncludeAudioRedaction
+                                        "includeAudioRedaction", this.appConfig.ConversationPiiSetting == ConversationPiiSetting.IncludeAudioRedaction
                                     }
                                 }
                             }

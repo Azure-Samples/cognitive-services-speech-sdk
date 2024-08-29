@@ -1,0 +1,35 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    defaultConfig {
+        applicationId "com.microsoft.cognitiveservices.speech.samples.talkingavatar"
+        minSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    namespace 'com.microsoft.cognitiveservices.speech.samples.talkingavatar'
+    compileSdk 34
+}
+
+dependencies {
+    // Speech SDK
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.40.0'
+
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.dafruits:webrtc:123.0.0'
+}

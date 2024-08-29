@@ -21,9 +21,8 @@ let EmbeddedSpeechTranslationModelFolderName = "ST"
 /// For example: "Microsoft Speech Translator Many-to-English Model V3"
 let EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"
 
-/// Decryption key of the (encrypted) embedded speech translation model.
-/// WARNING: The key may be visible in the program binary if hard-coded as a plain string.
-let EmbeddedSpeechTranslationModelKey = "YourEmbeddedSpeechTranslationModelKey"
+/// Embedded speech model license (text).
+let EmbeddedSpeechModelLicense = "YourEmbeddedSpeechModelLicense"
 
 
 class ViewController: UIViewController {
@@ -41,7 +40,7 @@ class ViewController: UIViewController {
             do {
                 embeddedSpeechConfig = try SPXEmbeddedSpeechConfiguration(fromPath: absoluteModelPath)
                 embeddedSpeechConfig?.setSpeechTranslationModel(EmbeddedSpeechTranslationModelName,
-                                                                key: EmbeddedSpeechTranslationModelKey)
+                                                                license: EmbeddedSpeechModelLicense)
             }
             catch {
                 print("Error: \(error) in initializing embedded speech configuration.")
