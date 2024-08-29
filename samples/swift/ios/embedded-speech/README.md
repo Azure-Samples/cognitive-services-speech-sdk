@@ -14,7 +14,7 @@ For an introduction to the embedded Speech SDK, please refer to the [article for
 
 ## Get the Speech SDK for iOS
 
-The Cognitive Services Speech SDK for iOS can be downloaded as a zip file from [https://aka.ms/csspeech/iosbinary](https://aka.ms/csspeech/iosbinary). Download and unpack the files to the directory of this `README.md`, i.e., parallel to the samples directories.
+The Cognitive Services Speech SDK with embedded speech support for iOS can be downloaded as a zip file from [https://aka.ms/csspeech/iosbinaryembedded](https://aka.ms/csspeech/iosbinaryembedded). Download and unpack the files to the directory of this `README.md`, i.e., parallel to the samples directories.
 
 ## Build and Run the Sample
 
