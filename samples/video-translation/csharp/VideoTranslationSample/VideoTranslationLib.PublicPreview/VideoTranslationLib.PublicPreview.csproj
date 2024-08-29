@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net7.0</TargetFramework>
+	  <AssemblyName>Microsoft.SpeechServices.VideoTranslationLib.PublicPreview</AssemblyName>
+	  <RootNamespace>Microsoft.SpeechServices.VideoTranslationLib.PublicPreview</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\CommonLib\CommonLib.csproj" />
+    <ProjectReference Include="..\..\Common\VideoTranslationLib.PublicPreview.Base\VideoTranslationLib.PublicPreview.Base.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Enum\" />
+  </ItemGroup>
+
+</Project>
