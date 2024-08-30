@@ -5,7 +5,6 @@
 
 namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VoiceGeneralTask;
 
-using Microsoft.SpeechServices.DataContracts;
 using System;
 
 public class VoiceGeneralTaskInputFileBase : StatefulResourceBase

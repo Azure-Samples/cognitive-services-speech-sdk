@@ -1,0 +1,18 @@
+﻿//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
+
+namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+
+public class Translation<TIteration> : StatefulResourceBase
+    where TIteration : Iteration
+{
+    public TranslationInput Input { get; set; }
+
+    public Iteration LatestIteration { get; set; }
+
+    public Iteration LatestSucceededIteration { get; set; }
+
+    public string FailureReason { get; set; }
+}
