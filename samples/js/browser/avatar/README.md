@@ -9,7 +9,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
 * Step 2: Fill or select below information:
     * Azure Speech Resource
         * Region - the region of your Azure speech resource.
-        * Subscription Key - the subscription key of your Azure speech resource.
+        * API Key - the API key of your Azure speech resource.
         * Enable Private Endpoint - check this if you want to apply private endpoint. If you check this, you need to fill Private Endpoint section below. Please refer to [speech-services-private-link](https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link) to learn more about private endpoint.
         * Private EndPoint - the private endpoint of your Azure speech resource. The format should be like: `https://{your custom name}.cognitiveservices.azure.com`.
     * TTS Configuration
@@ -39,7 +39,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
 * Step 2: Fill or select below information:
     * Azure Speech Resource
         * Region - the region of your Azure speech resource.
-        * Subscription Key - the subscription key of your Azure speech resource.
+        * API Key - the API key of your Azure speech resource.
         *  Enable Private Endpoint - check this if you want to apply private endpoint. If you check this, you need to fill Private Endpoint section below. Please refer to [speech-services-private-link](https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link) to learn more about private endpoint.
         * Private EndPoint - the private endpoint of your Azure speech resource. The format should be like: `https://{your custom name}.cognitiveservices.azure.com`.
     * Azure OpenAI Resource

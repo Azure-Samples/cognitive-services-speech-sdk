@@ -40,9 +40,12 @@ function createSpeechRecognizer() {
     .then(response => {
         if (response.ok) {
             const speechRegion = response.headers.get('SpeechRegion')
+            const speechPrivateEndpoint = response.headers.get('SpeechPrivateEndpoint')
             response.text().then(text => {
                 const speechToken = text
-                const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
+                const speechRecognitionConfig = speechPrivateEndpoint ?
+                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechPrivateEndpoint.replace('https://', '')}/stt/speech/universal/v2`), '') :
+                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
                 speechRecognitionConfig.authorizationToken = speechToken
                 speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
                 var sttLocales = document.getElementById('sttLocales').value.split(',')
@@ -83,19 +86,12 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             urls: [ iceServerUrl ],
             username: iceServerUsername,
             credential: iceServerCredential
-        }]
+        }],
+        iceTransportPolicy: 'relay'
     })
 
     // Fetch WebRTC video stream and mount it to an HTML video element
     peerConnection.ontrack = function (event) {
-        // Clean up existing video element if there is any
-        remoteVideoDiv = document.getElementById('remoteVideo')
-        for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
-            if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
-                remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
-            }
-        }
-
         if (event.track.kind === 'audio') {
             let audioElement = document.createElement('audio')
             audioElement.id = 'audioPlayer'
@@ -110,11 +106,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         }
 
         if (event.track.kind === 'video') {
-            document.getElementById('remoteVideo').style.width = '0.1px'
-            if (!document.getElementById('useLocalVideoForIdle').checked) {
-                document.getElementById('chatHistory').hidden = true
-            }
-
             let videoElement = document.createElement('video')
             videoElement.id = 'videoPlayer'
             videoElement.srcObject = event.streams[0]
@@ -122,6 +113,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.playsInline = true
 
             videoElement.onplaying = () => {
+                // Clean up existing video element if there is any
+                remoteVideoDiv = document.getElementById('remoteVideo')
+                for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
+                    if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
+                        remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
+                    }
+                }
+
+                // Append the new video element
+                document.getElementById('remoteVideo').appendChild(videoElement)
+
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
                 document.getElementById('microphone').disabled = false
                 document.getElementById('stopSession').disabled = false
@@ -138,10 +140,28 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
-
-            document.getElementById('remoteVideo').appendChild(videoElement)
         }
     }
+
+    // Listen to data channel, to get the event from the server
+    peerConnection.addEventListener("datachannel", event => {
+        const dataChannel = event.channel
+        dataChannel.onmessage = e => {
+            console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+
+            if (e.data.includes("EVENT_TYPE_SWITCH_TO_SPEAKING")) {
+                isSpeaking = true
+                document.getElementById('stopSpeaking').disabled = false
+            } else if (e.data.includes("EVENT_TYPE_SWITCH_TO_IDLE")) {
+                isSpeaking = false
+                lastSpeakTime = new Date()
+                document.getElementById('stopSpeaking').disabled = true
+            }
+        }
+    })
+
+    // This is a workaround to make sure the data channel listening is working by creating a data channel from the client side
+    c = peerConnection.createDataChannel("eventChannel")
 
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {
@@ -158,9 +178,23 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     peerConnection.addTransceiver('video', { direction: 'sendrecv' })
     peerConnection.addTransceiver('audio', { direction: 'sendrecv' })
 
-    // Set local description
+    // Connect to avatar service when ICE candidates gathering is done
+    iceGatheringDone = false
+
+    peerConnection.onicecandidate = e => {
+        if (!e.candidate && !iceGatheringDone) {
+            iceGatheringDone = true
+            connectToAvatarService(peerConnection)
+        }
+    }
+
     peerConnection.createOffer().then(sdp => {
-        peerConnection.setLocalDescription(sdp).then(() => { setTimeout(() => { connectToAvatarService(peerConnection) }, 1000) })
+        peerConnection.setLocalDescription(sdp).then(() => { setTimeout(() => {
+            if (!iceGatheringDone) {
+                iceGatheringDone = true
+                connectToAvatarService(peerConnection)
+            }
+        }, 2000) })
     })
 }
 
@@ -295,46 +329,15 @@ function checkHung() {
                     }
                 }
             }
-        }, 5000)
+        }, 2000)
     }
-}
-
-// Fetch speaking status from backend.
-function checkSpeakingStatus() {
-    fetch('/api/getSpeakingStatus', {
-        method: 'GET',
-        headers: {
-            'ClientId': clientId
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            response.json().then(data => {
-                isSpeaking = data.isSpeaking
-                if (data.lastSpeakTime !== null) {
-                    lastSpeakTime = new Date(data.lastSpeakTime)
-                }
-
-                if (isSpeaking) {
-                    document.getElementById('stopSpeaking').disabled = false
-                } else {
-                    document.getElementById('stopSpeaking').disabled = true
-                }
-
-                handleLocalVideo()
-            })
-        } else {
-            throw new Error(`Failed to get speaking status: ${response.status} ${response.statusText}`)
-        }
-    })
 }
 
 window.onload = () => {
     clientId = document.getElementById('clientId').value
     setInterval(() => {
         checkHung()
-        checkSpeakingStatus()
-    }, 5000) // Check session activity every 5 seconds
+    }, 2000) // Check session activity every 2 seconds
 }
 
 window.startSession = () => {
@@ -366,7 +369,7 @@ window.stopSpeaking = () => {
     })
     .then(response => {
         if (response.ok) {
-            checkSpeakingStatus()
+            console.log('Successfully stopped speaking.')
         } else {
             throw new Error(`Failed to stop speaking: ${response.status} ${response.statusText}`)
         }

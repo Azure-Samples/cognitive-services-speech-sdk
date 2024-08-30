@@ -1,4 +1,6 @@
 <Project>
+    <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), 'BatchIngestionClient.sln'))/versions.nugets.props" />
+
     <PropertyGroup>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
     </PropertyGroup>

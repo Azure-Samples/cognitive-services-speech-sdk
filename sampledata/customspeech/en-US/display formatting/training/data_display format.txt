@@ -8,7 +8,6 @@ cat-\d
 end to end	E2E
 bergerson construction incorporated	Bergerson Construction, Inc
 bridge & tunnel bottleshop & taproom	Bridge & Tunnel Bottleshop & Taproom
-oregon gypsy-gallery	Oregon Gypsy-gallery
 department human svc-child	Department Human Svc-child
 sweet relief	Sweet Relief
 1 star motors	1 Star Motors
@@ -37,7 +36,6 @@ how about the performance of end to end speech recognition system	How about the 
 profanity word fake word and masked word should be masked	Profanity word **** **** and ****** **** should be masked
 navigate to bergerson construction incorporated	Navigate to Bergerson Construction, Inc
 navigate to bridge & tunnel bottleshop & taproom	Navigate to Bridge & Tunnel Bottleshop & Taproom
-navigate to oregon gypsy-gallery	Navigate to Oregon Gypsy-gallery
 navigate to department human svc-child	Navigate to Department Human Svc-child
 navigate to sweet relief	Navigate to Sweet Relief
 navigate to 1 star motors	Navigate to 1 Star Motors

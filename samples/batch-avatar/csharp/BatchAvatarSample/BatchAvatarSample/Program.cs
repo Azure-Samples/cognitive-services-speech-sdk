@@ -10,12 +10,12 @@ using System.Text.Json.Serialization;
 
 internal class Program
 {
-    private const string ApiVersion = "2024-04-15-preview";
+    private const string ApiVersion = "2024-08-01";
 
     // The endpoint (and key) could be gotten from the Keys and Endpoint page in the Speech service resource.
     // The endpoint would be like: https://<region>.api.cognitive.microsoft.com or https://<custom_domain>.cognitiveservices.azure.com
     private static readonly string subscriptionKey = "SPEECH_KEY";
-    private static readonly string speechEndpoint = "SPEECH_ENDPOINT"; 
+    private static readonly string speechEndpoint = "SPEECH_ENDPOINT";
 
     private static readonly JsonSerializerOptions defaultJsonSerializerOptions = new(JsonSerializerDefaults.Web)
     {
@@ -119,7 +119,7 @@ internal class Program
                 TalkingAvatarStyle = "graceful-sitting",    // Avatar style, required for prebuilt avatar, optional for custom avatar
                 VideoFormat = "mp4",                        // mp4 or webm, webm is required for transparent background
                 VideoCodec = "h264",                        // hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
-                SubtitleType = "soft_embedded",             
+                SubtitleType = "soft_embedded",
                 BackgroundColor = "#FFFFFFFF",              // background color in RGBA format, default is white; can be set to 'transparent' for transparent background
                 Customized = false,                         // Set to true if you want to use custom avatar
             },
@@ -162,7 +162,7 @@ internal class Program
             response = await httpClient.GetAsync(pagedJobs.NextLink);
             await PrintResponseOnError(response);
             response.EnsureSuccessStatusCode();
-            
+
             pagedJobs = await response.Content.ReadFromJsonAsync<PaginatedResults<BatchAvatarJob>>(defaultJsonSerializerOptions);
             allJobs.AddRange(pagedJobs!.Value);
         }

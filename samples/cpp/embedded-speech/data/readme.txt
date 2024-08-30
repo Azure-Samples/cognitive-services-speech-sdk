@@ -1,5 +1,5 @@
 Download example data used in the sample project from
-https://csspeechstorage.blob.core.windows.net/drop/SamplesData/embedded_speech_samples_data.zip
+https://aka.ms/embedded-speech-samples-data (zip file)
 
 Extract the following files from the package and place them in the same folder
 where this readme.txt is located:

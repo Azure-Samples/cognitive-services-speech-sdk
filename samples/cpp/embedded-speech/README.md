@@ -18,7 +18,7 @@ See the [platform requirements for installing the Speech SDK](https://learn.micr
 Requirements specific to embedded speech samples are as follows.
 * Supported operating systems and architectures:
   * Windows - `x64`, `ARM64`.
-  * Linux - `x64`, `ARM64`. Note that embedded speech is not supported on RHEL/CentOS 7.
+  * Linux - `x64`, `ARM64`.
   * macOS - `x64`, `ARM64`.
 * If using Visual Studio (Windows):
   * [Microsoft Visual Studio 2022 or newer](https://www.visualstudio.com/).
@@ -40,7 +40,7 @@ Requirements specific to embedded speech samples are as follows.
 [Download the sample code to your development PC.](/README.md#get-the-samples)
 
 Download example data (a keyword recognition model, speech recognition input files) used in this sample project from
-https://csspeechstorage.blob.core.windows.net/drop/SamplesData/embedded_speech_samples_data.zip.
+https://aka.ms/embedded-speech-samples-data (zip file).
 Unzip the package under this sample folder. The result should be a `data` subfolder with the following files:
 ```
 data\keyword_computer.table
@@ -54,12 +54,10 @@ To tailor the sample to your configuration, there are two options:
 * Alternatively set corresponding environment variables (shown in parentheses in the list) before running the sample application. See details in [how to run the sample](#run-the-sample).
 
 Sample settings:
-1. `SpeechRecognitionLocale` (`SPEECH_RECOGNITION_LOCALE`)
-   * Speech recognition locale in BCP-47 format, case-sensitive. If not set, en-US will be assumed.
-   * Setting `EmbeddedSpeechRecognitionModelName` overrides this for embedded speech.
-1. `SpeechSynthesisLocale` (`SPEECH_SYNTHESIS_LOCALE`)
-   * Speech synthesis locale in BCP-47 format, case-sensitive. If not set, en-US will be assumed.
-   * Setting `EmbeddedSpeechSynthesisVoiceName` overrides this for embedded speech.
+1. `EmbeddedSpeechModelLicense` (`EMBEDDED_SPEECH_MODEL_LICENSE`)
+   * Embedded speech model license (text).
+   * This applies to embedded speech recognition, synthesis and translation.
+   * It is presumed that all the customer's embedded speech models use the same license.
 1. `EmbeddedSpeechRecognitionModelPath` (`EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH`)
    * Path to the local embedded speech recognition model(s) on the device file system.
      This may be a single model folder or a top-level folder for several models.
@@ -69,10 +67,8 @@ Sample settings:
      not inside an archive, and they must be readable by the application process.
      The model internal subfolder structure must be intact i.e. as originally delivered.
 1. `EmbeddedSpeechRecognitionModelName` (`EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME`)
-   * Name of the embedded speech recognition model to be used for recognition. If set, this overrides `SpeechRecognitionLocale` for embedded.
+   * Name of the embedded speech recognition model to be used for recognition.
    * The model name can be short (see https://aka.ms/speech/sr-languages, e.g. `en-US`) or full (e.g. `Microsoft Speech Recognizer en-US FP Model V8`).
-1. `EmbeddedSpeechRecognitionModelKey` (`EMBEDDED_SPEECH_RECOGNITION_MODEL_KEY`)
-   * Decryption key of the (encrypted) embedded speech recognition model.
 1. `EmbeddedSpeechSynthesisVoicePath` (`EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH`)
    * Path to the local embedded speech synthesis voice(s) on the device file system.
      This may be a single voice folder or a top-level folder for several voices.
@@ -82,10 +78,8 @@ Sample settings:
      not inside an archive, and they must be readable by the application process.
      The voice internal subfolder structure must be intact i.e. as originally delivered.
 1. `EmbeddedSpeechSynthesisVoiceName` (`EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME`)
-   * Name of the embedded speech synthesis voice to be used for synthesis. If set, this overrides `SpeechSynthesisLocale` for embedded.
+   * Name of the embedded speech synthesis voice to be used for synthesis.
    * The voice name can be short (see https://aka.ms/speech/tts-languages, e.g. `en-US-JennyNeural`) or full (e.g. `Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)`).
-1. `EmbeddedSpeechSynthesisVoiceKey` (`EMBEDDED_SPEECH_SYNTHESIS_VOICE_KEY`)
-   * Decryption key of the (encrypted) embedded speech synthesis voice.
 1. `EmbeddedSpeechTranslationModelPath` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH`)
    * Path to the local embedded speech translation model(s) on the device file system.
      This may be a single model folder or a top-level folder for several models.
@@ -97,12 +91,14 @@ Sample settings:
 1. `EmbeddedSpeechTranslationModelName` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME`)
    * Name of the embedded speech translation model to be used for translation.
    * The full model name must be given (e.g. `Microsoft Speech Translator Many-to-English Model V2`).
-1. `EmbeddedSpeechTranslationModelKey` (`EMBEDDED_SPEECH_TRANSLATION_MODEL_KEY`)
-   * Decryption key of the (encrypted) embedded speech translation model.
 1. `CloudSpeechSubscriptionKey` (`CLOUD_SPEECH_SUBSCRIPTION_KEY`)
    * Cloud speech service subscription key. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
 1. `CloudSpeechServiceRegion` (`CLOUD_SPEECH_SERVICE_REGION`)
    * Cloud speech service region. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
+1. `CloudSpeechRecognitionLanguage` (`CLOUD_SPEECH_RECOGNITION_LANGUAGE`)
+   * Cloud speech recognition language in BCP-47 format, case-sensitive. This is needed with hybrid speech configuration. If not set, en-US will be assumed.
+1. `CloudSpeechSynthesisLanguage` (`CLOUD_SPEECH_SYNTHESIS_LANGUAGE`)
+   * Cloud speech synthesis language in BCP-47 format, case-sensitive. This is needed with hybrid speech configuration. If not set, en-US will be assumed.
 
 ### Visual Studio (Windows)
 
