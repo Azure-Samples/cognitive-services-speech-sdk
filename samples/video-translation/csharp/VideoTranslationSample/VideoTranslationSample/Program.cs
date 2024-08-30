@@ -123,6 +123,19 @@ internal class Program
                         var iteration = new Iteration()
                         {
                             Id = args.IterationId,
+                            DisplayName = args.IterationId,
+                            Input = new IterationInput()
+                            {
+                                SpeakerCount = args.SpeakerCount,
+                                EnableLipSync = args.EnableLipSync,
+                                SubtitleMaxCharCountPerSegment = args.SubtitleMaxCharCountPerSegment,
+                                ExportSubtitleInVideo = args.ExportSubtitleInVideo,
+                                WebvttFile = args.TypedWebvttFileAzureBlobUrl == null ? null : new WebvttFile()
+                                {
+                                    Kind = args.TypedWebvttFileKind ?? WebvttFileKind.TargetLocaleSubtitle,
+                                    Url = args.TypedWebvttFileAzureBlobUrl,
+                                }
+                            }
                         };
 
                         var iterationResponse = await iterationClient.CreateIterationAndWaitUntilTerminatedAsync(

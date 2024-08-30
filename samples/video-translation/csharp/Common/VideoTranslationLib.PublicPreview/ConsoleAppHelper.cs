@@ -54,11 +54,6 @@ public static class ConsoleAppHelper
         (translation, var headers) = await translationClient.CreateTranslationAsync(
             translation: translation,
             operationId: operationId).ConfigureAwait(false);
-        Console.WriteLine("Created translation headers:");
-        Console.WriteLine(JsonConvert.SerializeObject(
-            headers,
-            Formatting.Indented,
-            CustomContractResolver.WriterSettings));
 
         Console.WriteLine();
         Console.WriteLine("Created translation:");
