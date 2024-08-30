@@ -14,10 +14,7 @@ public static class CommonConst
     {
         public static class ApiVersions
         {
-            public const string PublicPreviewApiVersion20240730Preview = "2024-07-30-preview";
             public const string PublicPreviewApiVersion20240520Preview = "2024-05-20-preview";
-            public const string PrivatePreviewApiVersion20230401Preview = "2023-04-01-preview";
-            public const string PortalApiVersion20230701Preview = "2023-07-01-preview";
         }
     }
 
