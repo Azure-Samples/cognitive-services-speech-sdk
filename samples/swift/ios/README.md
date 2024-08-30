@@ -23,7 +23,8 @@ This [speech sample app](./speech-samples) shows various other techniques, curre
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 The Cognitive Services Speech SDK for iOS is distributed as a xcframework bundle.
-It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or downloaded directly [here](https://aka.ms/csspeech/iosbinary) and linked manually. This guide uses a CocoaPod.
+It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or downloaded directly from [https://aka.ms/csspeech/iosbinary](https://aka.ms/csspeech/iosbinary) and linked manually.
+If you are going to use keyword recognition in your application, note that new keyword models created on Speech Studio will require using the SDK package from [https://aka.ms/csspeech/iosbinaryembedded](https://aka.ms/csspeech/iosbinaryembedded).
 
 ## Install the SDK as a CocoaPod
 

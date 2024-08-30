@@ -10,58 +10,37 @@ namespace Tests
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-
     using Connector;
     using Connector.Serializable.Language.Conversations;
     using Connector.Serializable.TranscriptionStartedServiceBusMessage;
 
     using FetchTranscription;
 
-    using Microsoft.CognitiveServices.Speech;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     using Moq;
-
     using Newtonsoft.Json;
-
-    using RealtimeTranscription;
 
     [TestClass]
     public class EndToEndTests
     {
-        private static IDictionary<string, object> testProperties;
+        private readonly Mock<ILogger> logger;
 
-        private static Mock<ILogger> Logger { get; set; }
+        private readonly IOptions<AppConfig> appConfigOptions;
 
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext context)
+        public EndToEndTests()
         {
-            context = context ?? throw new ArgumentNullException(nameof(context));
-            testProperties = context.Properties;
-            Logger = new Mock<ILogger>();
-        }
-
-        [TestMethod]
-        [TestCategory(TestCategories.EndToEndTest)]
-        public async Task TestMultiChannelFromSasTestAsync()
-        {
-            var region = testProperties["SpeechServicesRegion"].ToString();
-            var subscriptionKey = testProperties["SpeechServicesSubscriptionKey"].ToString();
-            var conf = SpeechConfig.FromEndpoint(
-                new Uri($"wss://{region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?setfeature=multichannel2&initialSilenceTimeoutMs=600000&endSilenceTimeoutMs=600000"),
-                subscriptionKey);
-            conf.OutputFormat = OutputFormat.Detailed;
-
-            var stereoFile = File.ReadAllBytes(@"testFiles/test_audio_stereo.wav");
-            var jsonResults = await RealtimeTranscriptionHelper.TranscribeAsync(stereoFile, conf, Logger.Object).ConfigureAwait(false);
-
-            Assert.IsTrue(jsonResults.Any());
-            Assert.IsTrue(!string.IsNullOrEmpty(jsonResults.First().SpeakerId));
-            Assert.IsTrue(jsonResults.First().NBest.Any());
-
-            var firstNBest = jsonResults.First().NBest.First();
-            Assert.AreEqual(firstNBest.Lexical, "hello");
+            this.logger = new Mock<ILogger>();
+            var appConfig = new AppConfig
+            {
+                AzureWebJobsStorage = "UseDevelopmentStorage=true",
+                StartTranscriptionServiceBusConnectionString = "Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=testkey=",
+                FetchTranscriptionServiceBusConnectionString = "Endpoint=sb://test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=testkey=",
+                TextAnalyticsKey = "sometestkey",
+                TextAnalyticsEndpoint = "https://sometestendpoint",
+            };
+            this.appConfigOptions = Options.Create(appConfig);
         }
 
         [TestMethod]
@@ -78,15 +57,14 @@ namespace Tests
                     FallbackRole = Role.None,
                 }
             }));
-            var region = testProperties["LanguageServiceRegion"].ToString();
-            var subscriptionKey = testProperties["LanguageServiceSubscriptionKey"].ToString();
-            var provider = new AnalyzeConversationsProvider("en-US", subscriptionKey, region, Logger.Object);
-            var body = File.ReadAllText(@"testFiles/summarizationInputSample.json");
+
+            var provider = new AnalyzeConversationsProvider("en-US", this.appConfigOptions.Value.TextAnalyticsKey, this.appConfigOptions.Value.TextAnalyticsEndpoint, this.logger.Object, this.appConfigOptions);
+            var body = File.ReadAllText(@"TestFiles/summarizationInputSample.json");
             var transcription = JsonConvert.DeserializeObject<SpeechTranscript>(body);
 
             var speechTranscriptMapping = new Dictionary<AudioFileInfo, SpeechTranscript>
             {
-                { new AudioFileInfo("someUrl", 0, null), transcription }
+                { new AudioFileInfo("someUrl", 0, null, "someFile"), transcription }
             };
 
             var errors = await provider.SubmitTranscriptionAnalyticsJobsAsync(speechTranscriptMapping).ConfigureAwait(false);

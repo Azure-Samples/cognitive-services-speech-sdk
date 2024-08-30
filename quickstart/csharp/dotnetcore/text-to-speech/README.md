@@ -1,6 +1,6 @@
 # Quickstart: Synthesize speech in C# under .NET Core (Windows or Linux)
 
-This sample demonstrates how to synthesize speech with C# under .NET Core 3.1 (Windows or Linux) using the Speech SDK.
+This sample demonstrates how to synthesize speech with C# under .NET 6.0 (Windows or Linux) using the Speech SDK.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/text-to-speech-audio-file?tabs=ubuntu%2Cwindowsinstall&pivots=programming-language-csharp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
 
 > **Note:**
@@ -16,7 +16,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
     * The **.NET Core cross-platform development** workload in Visual Studio.
       You can enable it in **Tools** \> **Get Tools and Features**.
   * On Windows or Linux:
-    * [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1)
+    * [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
     * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
 * On Ubuntu or Debian, run the following commands for the installation of required packages:
 
@@ -24,17 +24,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   sudo apt-get update
   sudo apt-get install libssl-dev libasound2
   ```
-
-  * On **Ubuntu 22.04 LTS** it is also required to download and install the latest **libssl1.1** package e.g. from http://security.ubuntu.com/ubuntu/pool/main/o/openssl/.
-
-* On RHEL or CentOS, run the following commands for the installation of required packages:
-
-  ```sh
-  sudo yum update
-  sudo yum install alsa-lib dotnet-sdk-3.1 openssl
-  ```
-
-  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
 
 ## Build the sample
 
@@ -66,7 +55,7 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 Run the following command from the directory that contains this sample:
 
 ```bash
-dotnet helloworld/bin/Debug/netcoreapp3.1/helloworld.dll
+dotnet helloworld/bin/Debug/net6.0/helloworld.dll
 ```
 
 ## References

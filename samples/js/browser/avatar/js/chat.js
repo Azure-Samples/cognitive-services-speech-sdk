@@ -16,13 +16,14 @@ var isSpeaking = false
 var spokenTextQueue = []
 var sessionActive = false
 var lastSpeakTime
+var imgUrl = ""
 
 // Connect to avatar service
 function connectAvatar() {
     const cogSvcRegion = document.getElementById('region').value
-    const cogSvcSubKey = document.getElementById('subscriptionKey').value
+    const cogSvcSubKey = document.getElementById('APIKey').value
     if (cogSvcSubKey === '') {
-        alert('Please fill in the subscription key of your speech resource.')
+        alert('Please fill in the API key of your speech resource.')
         return
     }
 
@@ -137,14 +138,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
     // Fetch WebRTC video stream and mount it to an HTML video element
     peerConnection.ontrack = function (event) {
-        // Clean up existing video element if there is any
-        remoteVideoDiv = document.getElementById('remoteVideo')
-        for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
-            if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
-                remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
-            }
-        }
-
         if (event.track.kind === 'audio') {
             let audioElement = document.createElement('audio')
             audioElement.id = 'audioPlayer'
@@ -159,11 +152,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         }
 
         if (event.track.kind === 'video') {
-            document.getElementById('remoteVideo').style.width = '0.1px'
-            if (!document.getElementById('useLocalVideoForIdle').checked) {
-                document.getElementById('chatHistory').hidden = true
-            }
-
             let videoElement = document.createElement('video')
             videoElement.id = 'videoPlayer'
             videoElement.srcObject = event.streams[0]
@@ -171,6 +159,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.playsInline = true
 
             videoElement.onplaying = () => {
+                // Clean up existing video element if there is any
+                remoteVideoDiv = document.getElementById('remoteVideo')
+                for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
+                    if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
+                        remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
+                    }
+                }
+
+                // Append the new video element
+                document.getElementById('remoteVideo').appendChild(videoElement)
+
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
                 document.getElementById('microphone').disabled = false
                 document.getElementById('stopSession').disabled = false
@@ -187,10 +186,19 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
-
-            document.getElementById('remoteVideo').appendChild(videoElement)
         }
     }
+    
+     // Listen to data channel, to get the event from the server
+    peerConnection.addEventListener("datachannel", event => {
+        const dataChannel = event.channel
+        dataChannel.onmessage = e => {
+            console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+        }
+    })
+
+    // This is a workaround to make sure the data channel listening is working by creating a data channel from the client side
+    c = peerConnection.createDataChannel("eventChannel")
 
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {
@@ -352,10 +360,25 @@ function stopSpeaking() {
     )
 }
 
-function handleUserQuery(userQuery) {
+function handleUserQuery(userQuery, userQueryHTML, imgUrlPath) {
+    let contentMessage = userQuery
+    if (imgUrlPath.trim()) {
+        contentMessage = [  
+            { 
+                "type": "text", 
+                "text": userQuery 
+            },
+            { 
+                "type": "image_url",
+                "image_url": {
+                    "url": imgUrlPath
+                }
+            }
+        ]
+    }
     let chatMessage = {
         role: 'user',
-        content: userQuery
+        content: contentMessage
     }
 
     messages.push(chatMessage)
@@ -364,7 +387,8 @@ function handleUserQuery(userQuery) {
         chatHistoryTextArea.innerHTML += '\n\n'
     }
 
-    chatHistoryTextArea.innerHTML += "User: " + userQuery + '\n\n'
+    chatHistoryTextArea.innerHTML += imgUrlPath.trim() ? "<br/><br/>User: " + userQueryHTML : "<br/><br/>User: " + userQuery + "<br/>";
+        
     chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
     // Stop previous speaking if there is any
@@ -416,7 +440,7 @@ function handleUserQuery(userQuery) {
         }
 
         let chatHistoryTextArea = document.getElementById('chatHistory')
-        chatHistoryTextArea.innerHTML += 'Assistant: '
+        chatHistoryTextArea.innerHTML += imgUrlPath.trim() ? 'Assistant: ':'<br/>Assistant: '
 
         const reader = response.body.getReader()
 
@@ -555,7 +579,7 @@ function checkHung() {
                     }
                 }
             }
-        }, 5000)
+        }, 2000)
     }
 }
 
@@ -579,7 +603,7 @@ window.onload = () => {
     setInterval(() => {
         checkHung()
         checkLastSpeak()
-    }, 5000) // Check session activity every 5 seconds
+    }, 2000) // Check session activity every 2 seconds
 }
 
 window.startSession = () => {
@@ -607,6 +631,7 @@ window.stopSession = () => {
     document.getElementById('showTypeMessage').checked = false
     document.getElementById('showTypeMessage').disabled = true
     document.getElementById('userMessageBox').hidden = true
+    document.getElementById('uploadImgIcon').hidden = true
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('localVideo').hidden = true
     }
@@ -668,7 +693,7 @@ window.microphone = () => {
                     })
             }
 
-            handleUserQuery(userQuery)
+            handleUserQuery(userQuery,"","")
         }
     }
 
@@ -693,17 +718,40 @@ window.updataEnableOyd = () => {
 window.updateTypeMessageBox = () => {
     if (document.getElementById('showTypeMessage').checked) {
         document.getElementById('userMessageBox').hidden = false
+        document.getElementById('uploadImgIcon').hidden = false
         document.getElementById('userMessageBox').addEventListener('keyup', (e) => {
             if (e.key === 'Enter') {
-                const userQuery = document.getElementById('userMessageBox').value
+                const userQuery = document.getElementById('userMessageBox').innerText
+                const messageBox = document.getElementById('userMessageBox')
+                const childImg = messageBox.querySelector("#picInput")
+                if (childImg) {
+                    childImg.style.width = "200px"
+                    childImg.style.height = "200px"
+                }
+                let userQueryHTML = messageBox.innerHTML.trim("")
+                if(userQueryHTML.startsWith('<img')){
+                    userQueryHTML="<br/>"+userQueryHTML
+                }
                 if (userQuery !== '') {
-                    handleUserQuery(userQuery.trim('\n'))
-                    document.getElementById('userMessageBox').value = ''
+                    handleUserQuery(userQuery.trim(''), userQueryHTML, imgUrl)
+                    document.getElementById('userMessageBox').innerHTML = ''
+                    imgUrl = ""
                 }
             }
         })
+        document.getElementById('uploadImgIcon').addEventListener('click', function() {
+            imgUrl = "https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg"
+            const userMessage = document.getElementById("userMessageBox");
+            const childImg = userMessage.querySelector("#picInput");
+            if (childImg) {
+                userMessage.removeChild(childImg)
+            }
+            userMessage.innerHTML+='<br/><img id="picInput" src="https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg" style="width:100px;height:100px"/><br/><br/>'   
+        });
     } else {
         document.getElementById('userMessageBox').hidden = true
+        document.getElementById('uploadImgIcon').hidden = true
+        imgUrl = ""
     }
 }
 

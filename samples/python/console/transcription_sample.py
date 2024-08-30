@@ -8,7 +8,6 @@ Conversation transcription samples for the Microsoft Cognitive Services Speech S
 """
 
 import time
-import uuid
 
 from scipy.io import wavfile
 

@@ -15,6 +15,7 @@ import time
 import traceback
 import uuid
 from flask import Flask, Response, render_template, request
+from azure.identity import DefaultAzureCredential
 
 # Create the Flask app
 app = Flask(__name__, template_folder='.')
@@ -24,6 +25,8 @@ app = Flask(__name__, template_folder='.')
 speech_region = os.environ.get('SPEECH_REGION') # e.g. westus2
 speech_key = os.environ.get('SPEECH_KEY')
 speech_private_endpoint = os.environ.get('SPEECH_PRIVATE_ENDPOINT') # e.g. https://my-speech-service.cognitiveservices.azure.com/ (optional)
+speech_resource_url = os.environ.get('SPEECH_RESOURCE_URL') # e.g. /subscriptions/6e83d8b7-00dd-4b0a-9e98-dab9f060418b/resourceGroups/my-rg/providers/Microsoft.CognitiveServices/accounts/my-speech (optional, only used for private endpoint)
+user_assigned_managed_identity_client_id = os.environ.get('USER_ASSIGNED_MANAGED_IDENTITY_CLIENT_ID') # e.g. the client id of user assigned managed identity accociated to your app service (optional, only used for private endpoint and user assigned managed identity)
 # OpenAI resource (required for chat scenario)
 azure_openai_endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT') # e.g. https://my-aoai.openai.azure.com/
 azure_openai_api_key = os.environ.get('AZURE_OPENAI_API_KEY')
@@ -71,6 +74,8 @@ def getSpeechToken() -> Response:
     global speech_token
     response = Response(speech_token, status=200)
     response.headers['SpeechRegion'] = speech_region
+    if speech_private_endpoint:
+        response.headers['SpeechPrivateEndpoint'] = speech_private_endpoint
     return response
 
 # The API route to get the ICE token
@@ -156,7 +161,7 @@ def connectAvatar() -> Response:
                                 'y': 1080
                             }
                         },
-                        'bitrate': 2000000
+                        'bitrate': 1000000
                     },
                     'talkingAvatar': {
                         'customized': is_custom_avatar.lower() == 'true',
@@ -198,23 +203,10 @@ def speak() -> Response:
     client_id = uuid.UUID(request.headers.get('ClientId'))
     try:
         ssml = request.data.decode('utf-8')
-        result_id = speakSsml(ssml, client_id)
+        result_id = speakSsml(ssml, client_id, True)
         return Response(result_id, status=200)
     except Exception as e:
         return Response(f"Speak failed. Error message: {e}", status=400)
-
-# The API route to get the speaking status
-@app.route("/api/getSpeakingStatus", methods=["GET"])
-def getSpeakingStatus() -> Response:
-    global client_contexts
-    client_id = uuid.UUID(request.headers.get('ClientId'))
-    is_speaking = client_contexts[client_id]['is_speaking']
-    last_speak_time = client_contexts[client_id]['last_speak_time']
-    speaking_status = {
-        'isSpeaking': is_speaking,
-        'lastSpeakTime': last_speak_time.isoformat() if last_speak_time else None
-    }
-    return Response(json.dumps(speaking_status), status=200)
 
 # The API route to stop avatar from speaking
 @app.route("/api/stopSpeaking", methods=["POST"])
@@ -296,7 +288,12 @@ def refreshSpeechToken() -> None:
     global speech_token
     while True:
         # Refresh the speech token every 9 minutes
-        speech_token = requests.post(f'https://{speech_region}.api.cognitive.microsoft.com/sts/v1.0/issueToken', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
+        if speech_private_endpoint:
+            credential = DefaultAzureCredential(managed_identity_client_id=user_assigned_managed_identity_client_id)
+            token = credential.get_token('https://cognitiveservices.azure.com/.default')
+            speech_token = f'aad#{speech_resource_url}#{token.token}'
+        else:
+            speech_token = requests.post(f'https://{speech_region}.api.cognitive.microsoft.com/sts/v1.0/issueToken', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
         time.sleep(60 * 9)
 
 # Initialize the chat context, e.g. chat history (messages), data sources, etc. For chat scenario.
@@ -365,7 +362,7 @@ def handleUserQuery(user_query: str, client_id: uuid.UUID):
     # For 'on your data' scenario, chat API currently has long (4s+) latency
     # We return some quick reply here before the chat API returns to mitigate.
     if len(data_sources) > 0 and enable_quick_reply:
-        speak(random.choice(quick_replies), 2000)
+        speakWithQueue(random.choice(quick_replies), 2000)
 
     url = f"{azure_openai_endpoint}/openai/deployments/{azure_openai_deployment_name}/chat/completions?api-version=2023-06-01-preview"
     body = json.dumps({
@@ -510,13 +507,13 @@ def speakText(text: str, voice: str, speaker_profile_id: str, ending_silence_ms:
                          </mstts:ttsembedding>
                      </voice>
                    </speak>"""
-    return speakSsml(ssml, client_id)
+    return speakSsml(ssml, client_id, False)
 
 # Speak the given ssml with speech sdk
-def speakSsml(ssml: str, client_id: uuid.UUID) -> str:
+def speakSsml(ssml: str, client_id: uuid.UUID, asynchronized: bool) -> str:
     global client_contexts
     speech_synthesizer = client_contexts[client_id]['speech_synthesizer']
-    speech_sythesis_result = speech_synthesizer.speak_ssml_async(ssml).get()
+    speech_sythesis_result = speech_synthesizer.start_speaking_ssml_async(ssml).get() if asynchronized else speech_synthesizer.speak_ssml_async(ssml).get()
     if speech_sythesis_result.reason == speechsdk.ResultReason.Canceled:
         cancellation_details = speech_sythesis_result.cancellation_details
         print(f"Speech synthesis canceled: {cancellation_details.reason}")
