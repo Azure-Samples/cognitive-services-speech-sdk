@@ -1,5 +1,6 @@
 azure-cognitiveservices-speech
 azure-identity
 flask
+openai
 pytz
 requests
