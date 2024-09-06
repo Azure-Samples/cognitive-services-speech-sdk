@@ -16,6 +16,7 @@ import traceback
 import uuid
 from flask import Flask, Response, render_template, request
 from azure.identity import DefaultAzureCredential
+from openai import AzureOpenAI
 
 # Create the Flask app
 app = Flask(__name__, template_folder='.')
@@ -52,6 +53,10 @@ oyd_doc_regex = re.compile(r'\[doc(\d+)\]') # Regex to match the OYD (on-your-da
 client_contexts = {} # Client contexts
 speech_token = None # Speech token
 ice_token = None # ICE token
+azure_openai = AzureOpenAI(
+    azure_endpoint=azure_openai_endpoint,
+    api_version='2024-06-01',
+    api_key=azure_openai_api_key)
 
 # The default route, which shows the default web page (basic.html)
 @app.route("/")
@@ -309,22 +314,25 @@ def initializeChatContext(system_prompt: str, client_id: uuid.UUID) -> None:
     if cognitive_search_endpoint and cognitive_search_api_key and cognitive_search_index_name:
         # On-your-data scenario
         data_source = {
-            'type': 'AzureCognitiveSearch',
+            'type': 'azure_search',
             'parameters': {
                 'endpoint': cognitive_search_endpoint,
-                'key': cognitive_search_api_key,
-                'indexName': cognitive_search_index_name,
-                'semanticConfiguration': '',
-                'queryType': 'simple',
-                'fieldsMapping': {
-                    'contentFieldsSeparator': '\n',
-                    'contentFields': ['content'],
-                    'filepathField': None,
-                    'titleField': 'title',
-                    'urlField': None
+                'index_name': cognitive_search_index_name,
+                'authentication': {
+                    'type': 'api_key',
+                    'key': cognitive_search_api_key
                 },
-                'inScope': True,
-                'roleInformation': system_prompt
+                'semantic_configuration': '',
+                'query_type': 'simple',
+                'fields_mapping': {
+                    'content_fields_separator': '\n',
+                    'content_fields': ['content'],
+                    'filepath_field': None,
+                    'title_field': 'title',
+                    'url_field': None
+                },
+                'in_scope': True,
+                'role_information': system_prompt
             }
         }
         data_sources.append(data_source)
@@ -364,88 +372,40 @@ def handleUserQuery(user_query: str, client_id: uuid.UUID):
     if len(data_sources) > 0 and enable_quick_reply:
         speakWithQueue(random.choice(quick_replies), 2000)
 
-    url = f"{azure_openai_endpoint}/openai/deployments/{azure_openai_deployment_name}/chat/completions?api-version=2023-06-01-preview"
-    body = json.dumps({
-        'messages': messages,
-        'stream': True
-    })
-
-    if len(data_sources) > 0:
-        url = f"{azure_openai_endpoint}/openai/deployments/{azure_openai_deployment_name}/extensions/chat/completions?api-version=2023-06-01-preview"
-        body = json.dumps({
-            'dataSources': data_sources,
-            'messages': messages,
-            'stream': True
-        })
-
     assistant_reply = ''
     tool_content = ''
     spoken_sentence = ''
 
-    response = requests.post(url, stream=True, headers={
-        'api-key': azure_openai_api_key,
-        'Content-Type': 'application/json'
-    }, data=body)
+    aoai_start_time = datetime.datetime.now(pytz.UTC)
+    response = azure_openai.chat.completions.create(
+        model=azure_openai_deployment_name,
+        messages=messages,
+        extra_body={ 'data_sources' : data_sources } if len(data_sources) > 0 else None,
+        stream=True)
+    aoai_reponse_time = datetime.datetime.now(pytz.UTC)
+    print(f"AOAI latency: {(aoai_reponse_time - aoai_start_time).total_seconds() * 1000}ms")
 
-    if not response.ok:
-        raise Exception(f"Chat API response status: {response.status_code} {response.reason}")
-
-    # Iterate chunks from the response stream
-    iterator = response.iter_content(chunk_size=None)
-    for chunk in iterator:
-        if not chunk:
-            # End of stream
-            return
-
-        # Process the chunk of data (value)
-        chunk_string = chunk.decode()
-
-        if not chunk_string.endswith('}\n\n') and not chunk_string.endswith('[DONE]\n\n'):
-            # This is an incomplete chunk, read the next chunk
-            while not chunk_string.endswith('}\n\n') and not chunk_string.endswith('[DONE]\n\n'):
-                chunk_string += next(iterator).decode()
-
-        for line in chunk_string.split('\n\n'):
-            try:
-                if line.startswith('data:') and not line.endswith('[DONE]'):
-                    response_json = json.loads(line[5:].strip())
-                    response_token = None
-                    if len(response_json['choices']) > 0:
-                        choice = response_json['choices'][0]
-                        if len(data_sources) == 0:
-                            if len(choice['delta']) > 0 and 'content' in choice['delta']:
-                                response_token = choice['delta']['content']
-                        elif len(choice['messages']) > 0 and 'delta' in choice['messages'][0]:
-                            delta = choice['messages'][0]['delta']
-                            if 'role' in delta and delta['role'] == 'tool' and 'content' in delta:
-                                tool_content = response_json['choices'][0]['messages'][0]['delta']['content']
-                            elif 'content' in delta:
-                                response_token = response_json['choices'][0]['messages'][0]['delta']['content']
-                                if response_token is not None:
-                                    if oyd_doc_regex.search(response_token):
-                                        response_token = oyd_doc_regex.sub('', response_token).strip()
-                                    if response_token == '[DONE]':
-                                        response_token = None
-
-                    if response_token is not None:
-                        # Log response_token here if need debug
-                        yield response_token # yield response token to client as display text
-                        assistant_reply += response_token  # build up the assistant message
-                        if response_token == '\n' or response_token == '\n\n':
-                            speakWithQueue(spoken_sentence.strip(), 0, client_id)
-                            spoken_sentence = ''
-                        else:
-                            response_token = response_token.replace('\n', '')
-                            spoken_sentence += response_token  # build up the spoken sentence
-                            if len(response_token) == 1 or len(response_token) == 2:
-                                for punctuation in sentence_level_punctuations:
-                                    if response_token.startswith(punctuation):
-                                        speakWithQueue(spoken_sentence.strip(), 0, client_id)
-                                        spoken_sentence = ''
-                                        break
-            except Exception as e:
-                print(f"Error occurred while parsing the response: {e}")
-                print(line)
+    for chunk in response:
+        if len(chunk.choices) > 0:
+            response_token = chunk.choices[0].delta.content
+            if response_token is not None:
+                # Log response_token here if need debug
+                if oyd_doc_regex.search(response_token):
+                    response_token = oyd_doc_regex.sub('', response_token).strip()
+                yield response_token # yield response token to client as display text
+                assistant_reply += response_token  # build up the assistant message
+                if response_token == '\n' or response_token == '\n\n':
+                    speakWithQueue(spoken_sentence.strip(), 0, client_id)
+                    spoken_sentence = ''
+                else:
+                    response_token = response_token.replace('\n', '')
+                    spoken_sentence += response_token  # build up the spoken sentence
+                    if len(response_token) == 1 or len(response_token) == 2:
+                        for punctuation in sentence_level_punctuations:
+                            if response_token.startswith(punctuation):
+                                speakWithQueue(spoken_sentence.strip(), 0, client_id)
+                                spoken_sentence = ''
+                                break
 
     if spoken_sentence != '':
         speakWithQueue(spoken_sentence.strip(), 0, client_id)
