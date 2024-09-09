@@ -216,7 +216,11 @@ def speak() -> Response:
 # The API route to stop avatar from speaking
 @app.route("/api/stopSpeaking", methods=["POST"])
 def stopSpeaking() -> Response:
-    stopSpeakingInternal(uuid.UUID(request.headers.get('ClientId')))
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    is_speaking = client_contexts[client_id]['is_speaking']
+    if is_speaking:
+        stopSpeakingInternal(client_id)
     return Response('Speaking stopped.', status=200)
 
 # The API route for chat
@@ -354,7 +358,6 @@ def handleUserQuery(user_query: str, client_id: uuid.UUID):
     azure_openai_deployment_name = client_context['azure_openai_deployment_name']
     messages = client_context['messages']
     data_sources = client_context['data_sources']
-    is_speaking = client_context['is_speaking']
 
     chat_message = {
         'role': 'user',
@@ -362,10 +365,6 @@ def handleUserQuery(user_query: str, client_id: uuid.UUID):
     }
 
     messages.append(chat_message)
-
-    # Stop previous speaking if there is any
-    if is_speaking:
-        stopSpeakingInternal(client_id)
 
     # For 'on your data' scenario, chat API currently has long (4s+) latency
     # We return some quick reply here before the chat API returns to mitigate.

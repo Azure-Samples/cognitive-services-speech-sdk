@@ -8,6 +8,7 @@ var peerConnection
 var isSpeaking = false
 var sessionActive = false
 var lastSpeakTime
+var isFirstRecognizingEvent = true
 
 // Connect to avatar service
 function connectAvatar() {
@@ -439,6 +440,13 @@ window.microphone = () => {
     }
 
     document.getElementById('microphone').disabled = true
+    speechRecognizer.recognizing = async (s, e) => {
+        if (isFirstRecognizingEvent && isSpeaking) {
+            window.stopSpeaking()
+            isFirstRecognizingEvent = false
+        }
+    }
+
     speechRecognizer.recognized = async (s, e) => {
         if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
             let userQuery = e.result.text.trim()
@@ -468,6 +476,8 @@ window.microphone = () => {
             chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
             handleUserQuery(userQuery)
+
+            isFirstRecognizingEvent = true
         }
     }
 
