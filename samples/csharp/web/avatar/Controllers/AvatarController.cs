@@ -173,7 +173,7 @@ namespace Avatar.Controllers
                 var videoCrop = Request.Headers["VideoCrop"].FirstOrDefault() ?? "false";
 
                 // Configure avatar settings
-                var urlsArray = iceTokenObj?.TryGetValue("Urls", out var value) == true ? value as JArray : null;
+                var urlsArray = iceTokenObj?.TryGetValue("Urls", out var value) == true ? value as string[] : null;
 
                 var firstUrl = urlsArray?.FirstOrDefault()?.ToString();
 
