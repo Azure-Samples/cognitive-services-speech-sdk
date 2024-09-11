@@ -27,7 +27,6 @@ public class VideoTranslationPublicPreviewHttpClientConfig<TDeploymentEnvironmen
         get
         {
             return this.BaseUrl
-                .AppendPathSegment("api")
                 .AppendPathSegment(RouteBase)
                 .ToUri();
         }
@@ -37,8 +36,7 @@ public class VideoTranslationPublicPreviewHttpClientConfig<TDeploymentEnvironmen
     {
         get
         {
-            // TODO: change to APIM.
-            return this.Environment.GetAttributeOfType<DeploymentEnvironmentAttribute>()?.GetBackendApiBaseUrl();
+            return this.Environment.GetAttributeOfType<DeploymentEnvironmentAttribute>()?.GetApimApiBaseUrl();
         }
     }
 }
