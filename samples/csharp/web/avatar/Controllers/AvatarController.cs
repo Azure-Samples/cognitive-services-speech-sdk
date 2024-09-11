@@ -476,7 +476,6 @@ namespace Avatar.Controllers
             var azureOpenaiDeploymentName = clientContext.AzureOpenAIDeploymentName;
             var messages = clientContext.Messages;
             var isSpeaking = clientContext.IsSpeaking;
-            var httpClient = new HttpClient();
 
             var chatMessage = new UserChatMessage(userQuery);
             messages.Add(chatMessage);
@@ -505,9 +504,9 @@ namespace Avatar.Controllers
             }
 
             var chatOptions = new ChatCompletionOptions();
-            if (_clientSettings.CognitiveSearchEndpoint != null &&
-                _clientSettings.CognitiveSearchIndexName != null &&
-                _clientSettings.CognitiveSearchAPIKey != null)
+            if (!string.IsNullOrEmpty(_clientSettings.CognitiveSearchEndpoint) &&
+                !string.IsNullOrEmpty(_clientSettings.CognitiveSearchIndexName) &&
+                !string.IsNullOrEmpty(_clientSettings.CognitiveSearchAPIKey))
             {
 #pragma warning disable AOAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                 chatOptions.AddDataSource(new AzureSearchChatDataSource()
