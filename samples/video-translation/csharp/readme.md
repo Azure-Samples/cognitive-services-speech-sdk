@@ -8,12 +8,15 @@ Video dubbing client tool and API sample code
 
 # API sample:
 
-## RESTful API library:
-   Translation API: [TranslationClient.cs](Common/VideoTranslationLib.PublicPreview.Base/HttpClient/TranslationClient.cs)
+## Usage:
+   For RESTful API usage reference below API core library class.
 
-   Iteration API: [TranslationClient.cs](Common/VideoTranslationLib.PublicPreview.Base/HttpClient/IterationClient.cs)
+## RESTful API core library:
+   Translation API core library: [TranslationClient.cs](Common/VideoTranslationLib.PublicPreview.Base/HttpClient/TranslationClient.cs)
 
-   Operation API: [TranslationClient.cs](Common/VideoTranslationLib.PublicPreview.Base/HttpClient/OperationClient.cs)
+   Iteration API core library: [TranslationClient.cs](Common/VideoTranslationLib.PublicPreview.Base/HttpClient/IterationClient.cs)
+
+   Operation API core library: [TranslationClient.cs](Common/VideoTranslationLib.PublicPreview.Base/HttpClient/OperationClient.cs)
 
 # For project CommonLib
    Not upgrade Flurl to 4.0 due to 4.0 doesn't support NewtonJson for ReceiveJson.
@@ -21,17 +24,6 @@ Video dubbing client tool and API sample code
 # Supported OS
    ## Windows
       Microsoft.VideoTranslationClient.exe
-   ## Linux:
-      $HOME/.dotnet/dotnet ./Microsoft.VideoTranslationClient.dll
-
-# Runn tool on Linux prerequisite
-   Install dotnet 7.0 on Linux:
-      wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
-      chmod +x ./dotnet-install.sh
-      ./dotnet-install.sh --channel 7.0
-      export DOTNET_ROOT=$HOME/.dotnet
-   [Install .NET on Linux without using a package manager - .NET | Microsoft Learn](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#scripted-install)
-
 
 # Runn tool on Windows prerequisite:
    [Install dotnet 7.0](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)

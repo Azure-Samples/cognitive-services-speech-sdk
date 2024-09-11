@@ -19,8 +19,6 @@ public class TranslationInput
 
     public int? SpeakerCount { get; set; }
 
-    public bool? EnableLipSync { get; set; }
-
     public int? SubtitleMaxCharCountPerSegment { get; set; }
 
     public bool? ExportSubtitleInVideo { get; set; }

@@ -9,8 +9,10 @@ using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.CommandParser;
 using Microsoft.SpeechServices.CommonLib.Util;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+using Microsoft.SpeechServices.CustomVoice.TtsLib.Util;
 using Microsoft.SpeechServices.VideoTranslationLib.Enums;
 using Microsoft.SpeechServices.VideoTranslationLib.PublicPreview.Base;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Threading.Tasks;
@@ -39,7 +41,7 @@ internal class Program
                 ApiVersion = args.ApiVersion,
             };
 
-            var translationClient = new TranslationClient<TDeploymentEnvironment, Iteration>(httpConfig);
+            var translationClient = new TranslationClient<TDeploymentEnvironment, Iteration<IterationInput>, IterationInput>(httpConfig);
 
             var iterationClient = new IterationClient<TDeploymentEnvironment>(httpConfig);
 
@@ -49,14 +51,13 @@ internal class Program
             {
                 case Mode.CreateTranslationAndIterationAndWaitUntilTerminated:
                     {
-                        var iteration = new Iteration()
+                        var iteration = new Iteration<IterationInput>()
                         {
                             Id = args.IterationId,
                             DisplayName = args.IterationId,
                             Input = new IterationInput()
                             {
                                 SpeakerCount = args.SpeakerCount,
-                                EnableLipSync = args.EnableLipSync,
                                 SubtitleMaxCharCountPerSegment = args.SubtitleMaxCharCountPerSegment,
                                 ExportSubtitleInVideo = args.ExportSubtitleInVideo,
                                 WebvttFile = args.TypedWebvttFileAzureBlobUrl == null ? null : new WebvttFile()
@@ -67,14 +68,28 @@ internal class Program
                             }
                         };
 
-                        await ConsoleAppHelper.CreateTranslationAndIterationAndWaitUntilTerminatedAsync<TDeploymentEnvironment, Iteration>(
-                            translationClient: translationClient,
-                            translationId: args.TranslationId,
-                            sourceLocale: args.TypedSourceLocale,
-                            targetLocale: args.TypedTargetLocale,
-                            voiceKind: args.TypedVoiceKind ?? VoiceKind.PlatformVoice,
-                            iteration: iteration,
-                            videoFileUrl: args.TypedVideoFileAzureBlobUrl).ConfigureAwait(false);
+                        var voiceKind = args.TypedVoiceKind ?? VoiceKind.PlatformVoice;
+                        var fileName = UriHelper.GetFileName(args.TypedVideoFileAzureBlobUrl);
+                        var translation = new Translation<Iteration<IterationInput>, IterationInput>()
+                        {
+                            Id = args.TranslationId,
+                            DisplayName = fileName,
+                            Description = $"Translation {fileName} from {args.TypedSourceLocale} to {args.TypedTargetLocale} with {voiceKind.AsString()}",
+                            Input = new TranslationInput()
+                            {
+                                SpeakerCount = iteration.Input?.SpeakerCount,
+                                SubtitleMaxCharCountPerSegment = iteration.Input?.SubtitleMaxCharCountPerSegment,
+                                ExportSubtitleInVideo = iteration.Input?.ExportSubtitleInVideo,
+                                SourceLocale = args.TypedSourceLocale,
+                                TargetLocale = args.TypedTargetLocale,
+                                VoiceKind = voiceKind,
+                                VideoFileUrl = args.TypedVideoFileAzureBlobUrl,
+                            }
+                        };
+
+                        (translation, iteration) = await translationClient.CreateTranslationAndIterationAndWaitUntilTerminatedAsync(
+                            translation: translation,
+                            iteration: iteration).ConfigureAwait(false);
                         break;
                     }
 
@@ -103,7 +118,8 @@ internal class Program
 
                 case Mode.QueryTranslation:
                     {
-                        var translation = await translationClient.GetTranslationAsync<Iteration>(args.TranslationId).ConfigureAwait(false);
+                        var translation = await translationClient.GetTranslationAsync(
+                            args.TranslationId).ConfigureAwait(false);
                         Console.WriteLine(JsonConvert.SerializeObject(
                             translation,
                             Formatting.Indented,
@@ -120,14 +136,13 @@ internal class Program
 
                 case Mode.CreateIteration:
                     {
-                        var iteration = new Iteration()
+                        var iteration = new Iteration<IterationInput>()
                         {
                             Id = args.IterationId,
                             DisplayName = args.IterationId,
                             Input = new IterationInput()
                             {
                                 SpeakerCount = args.SpeakerCount,
-                                EnableLipSync = args.EnableLipSync,
                                 SubtitleMaxCharCountPerSegment = args.SubtitleMaxCharCountPerSegment,
                                 ExportSubtitleInVideo = args.ExportSubtitleInVideo,
                                 WebvttFile = args.TypedWebvttFileAzureBlobUrl == null ? null : new WebvttFile()

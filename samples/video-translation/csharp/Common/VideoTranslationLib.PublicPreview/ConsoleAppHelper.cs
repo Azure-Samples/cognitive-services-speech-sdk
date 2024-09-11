@@ -9,6 +9,7 @@ using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Util;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
 using Microsoft.SpeechServices.CustomVoice.TtsLib.Util;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Globalization;
@@ -17,8 +18,8 @@ using VideoTranslationPublicPreviewLib.HttpClient;
 
 public static class ConsoleAppHelper
 {
-    public static async Task CreateTranslationAsync<TDeploymentEnvironment, TIteration>(
-        TranslationClient<TDeploymentEnvironment, TIteration> translationClient,
+    public static async Task CreateTranslationAsync<TDeploymentEnvironment, TIteration, TIterationInput>(
+        TranslationClient<TDeploymentEnvironment, TIteration, TIterationInput> translationClient,
         string translationId,
         CultureInfo sourceLocale,
         CultureInfo targetLocale,
@@ -26,7 +27,8 @@ public static class ConsoleAppHelper
         Uri videoFileUrl,
         int? speakerCount)
         where TDeploymentEnvironment : Enum
-        where TIteration : Iteration
+        where TIteration : Iteration<TIterationInput>
+        where TIterationInput : IterationInput
     {
         ArgumentNullException.ThrowIfNull(translationClient);
         if (string.IsNullOrWhiteSpace(videoFileUrl?.OriginalString))
@@ -35,7 +37,7 @@ public static class ConsoleAppHelper
         }
 
         var fileName = UriHelper.GetFileName(videoFileUrl);
-        var translation = new Translation<Iteration>()
+        var translation = new Translation<TIteration, TIterationInput>()
         {
             Id = translationId,
             DisplayName = fileName,
@@ -61,47 +63,5 @@ public static class ConsoleAppHelper
             translation,
             Formatting.Indented,
             CustomContractResolver.WriterSettings));
-    }
-
-    public static async Task CreateTranslationAndIterationAndWaitUntilTerminatedAsync<TDeploymentEnvironment, TIteration>(
-        TranslationClient<TDeploymentEnvironment, TIteration> translationClient,
-        string translationId,
-        CultureInfo sourceLocale,
-        CultureInfo targetLocale,
-        VoiceKind voiceKind,
-        TIteration iteration,
-        Uri videoFileUrl)
-        where TDeploymentEnvironment : Enum
-        where TIteration : Iteration
-    {
-        ArgumentNullException.ThrowIfNull(translationClient);
-        if (string.IsNullOrWhiteSpace(videoFileUrl?.OriginalString))
-        {
-            throw new ArgumentNullException(nameof(videoFileUrl));
-        }
-
-        var fileName = UriHelper.GetFileName(videoFileUrl);
-        var translation = new Translation<TIteration>()
-        {
-            Id = translationId,
-            DisplayName = fileName,
-            Description = $"Translation {fileName} from {sourceLocale} to {targetLocale} with {voiceKind.AsString()}",
-            Input = new TranslationInput()
-            {
-                SpeakerCount = iteration.Input?.SpeakerCount,
-                EnableLipSync = iteration.Input?.EnableLipSync,
-                SubtitleMaxCharCountPerSegment = iteration.Input?.SubtitleMaxCharCountPerSegment,
-                ExportSubtitleInVideo = iteration.Input?.ExportSubtitleInVideo,
-                SourceLocale = sourceLocale,
-                TargetLocale = targetLocale,
-                VoiceKind = voiceKind,
-                VideoFileUrl = videoFileUrl,
-            }
-        };
-
-        (translation, iteration) = await translationClient.CreateTranslationAndIterationAndWaitUntilTerminatedAsync(
-            translation: translation,
-            iteration: iteration).ConfigureAwait(false);
-
     }
 }

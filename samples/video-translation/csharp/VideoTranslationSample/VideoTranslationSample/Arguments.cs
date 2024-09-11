@@ -126,14 +126,6 @@ public class Arguments<TDeploymentEnvironment>
     private int speakerCount = 0;
 
     [Argument(
-        "enableLipSync",
-        Description = "Whether enable lip sync.",
-        Optional = true,
-        UsagePlaceholder = "enableLipSync",
-        OptionalModes = "CreateIteration,CreateTranslationAndIterationAndWaitUntilTerminated")]
-    private bool enableLipSync = false;
-
-    [Argument(
         "exportSubtitleInVideo",
         Description = "Whether export subtitle in video.",
         Optional = true,
@@ -233,8 +225,6 @@ public class Arguments<TDeploymentEnvironment>
     public int? SubtitleMaxCharCountPerSegment => this.subtitleMaxCharCountPerSegment == 0 ? null : this.subtitleMaxCharCountPerSegment;
 
     public int? SpeakerCount => this.speakerCount == 0 ? null : this.speakerCount;
-
-    public bool? EnableLipSync => this.enableLipSync ? true : null;
 
     public bool? ExportSubtitleInVideo => this.exportSubtitleInVideo ? true : null;
 }

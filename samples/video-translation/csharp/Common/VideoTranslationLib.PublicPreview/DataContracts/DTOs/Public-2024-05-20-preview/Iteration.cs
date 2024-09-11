@@ -7,9 +7,10 @@ namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public
 
 using Newtonsoft.Json;
 
-public class Iteration : StatefulResourceBase
+public class Iteration<TIterationInput> : StatefulResourceBase
+    where TIterationInput : IterationInput
 {
-    public IterationInput Input { get; set; }
+    public TIterationInput Input { get; set; }
 
     public IterationResult Result { get; set; }
 

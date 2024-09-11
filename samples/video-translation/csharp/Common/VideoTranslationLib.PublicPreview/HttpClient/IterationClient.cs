@@ -10,15 +10,12 @@ using Flurl.Http;
 using Flurl.Util;
 using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Util;
-using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
-using Microsoft.SpeechServices.CustomVoice;
+using Microsoft.SpeechServices.Cris.Http.DTOs.Public;
 using Microsoft.SpeechServices.DataContracts;
-using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -36,7 +33,6 @@ public class IterationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
         string translationId,
         string iterationId,
         IReadOnlyDictionary<string, string> additionalHeaders)
-        where TIteration : Iteration
     {
         var responseTask = GetIterationWithResponseAsync(
             translationId: translationId,
@@ -95,7 +91,7 @@ public class IterationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
         }).ConfigureAwait(false);
     }
 
-    public async Task<PaginatedResources<Iteration>> QueryIterationsAsync(string translationId)
+    public async Task<PaginatedResources<TIteration>> QueryIterationsAsync<TIteration>(string translationId)
     {
         var url = BuildRequestBase()
             .AppendPathSegment(translationId);
@@ -104,7 +100,7 @@ public class IterationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
         {
             // var responseJson = await url.GetStringAsync().ConfigureAwait(false);
             return await url.GetAsync()
-                .ReceiveJson<PaginatedResources<Iteration>>()
+                .ReceiveJson<PaginatedResources<TIteration>>()
                 .ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
@@ -113,17 +109,17 @@ public class IterationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
         string translationId,
         TIteration iteration,
         IReadOnlyDictionary<string, string> additionalHeaders = null)
-        where TIteration : Iteration
+        where TIteration : StatefulResourceBase
     {
         var operationId = Guid.NewGuid().ToString();
 
         Console.WriteLine($"Creating iteration {iteration.Id} for translation {translationId} :");
-        var (responseIteration, headers) = await CreateIterationAsync(
+        var (iterationResponse, headers) = await CreateIterationAsync(
             translationId: translationId,
             iteration: iteration,
             operationId: operationId,
             additionalHeaders: additionalHeaders).ConfigureAwait(false);
-        ArgumentNullException.ThrowIfNull(responseIteration);
+        ArgumentNullException.ThrowIfNull(iterationResponse);
 
         if (!headers.TryGetFirst(CommonConst.Http.Headers.OperationLocation, out var operationLocation) ||
             string.IsNullOrEmpty(operationLocation))
@@ -135,11 +131,18 @@ public class IterationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
 
         await operationClient.QueryOperationUntilTerminateAsync(new Uri(operationLocation)).ConfigureAwait(false);
 
-        (responseIteration, headers) = await GetIterationAsync<TIteration>(
+        (iterationResponse, headers) = await GetIterationAsync<TIteration>(
             translationId: translationId,
-            iterationId: responseIteration.Id,
+            iterationId: iterationResponse.Id,
             additionalHeaders: additionalHeaders).ConfigureAwait(false);
-        return responseIteration;
+
+        Console.WriteLine("Created iteration:");
+        Console.WriteLine(JsonConvert.SerializeObject(
+            iterationResponse,
+            Formatting.Indented,
+            CustomContractResolver.WriterSettings));
+
+        return iterationResponse;
     }
 
     public async Task<(TIteration iteration, IReadOnlyNameValueList<string> headers)> CreateIterationAsync<TIteration>(
@@ -147,7 +150,7 @@ public class IterationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
         TIteration iteration,
         string operationId,
         IReadOnlyDictionary<string, string> additionalHeaders = null)
-        where TIteration : Iteration
+        where TIteration : StatefulResourceBase
     {
         ArgumentNullException.ThrowIfNull(iteration);
 
@@ -162,11 +165,12 @@ public class IterationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
         return (iterationResponse, response.Headers);
     }
 
-    public async Task<(string iterationResponseString, IReadOnlyNameValueList<string> headers)> CreateIterationWithStringResponseAsync(
+    public async Task<(string iterationResponseString, IReadOnlyNameValueList<string> headers)> CreateIterationWithStringResponseAsync<TIteration>(
         string translationId,
-        Iteration iteration,
+        TIteration iteration,
         string operationId,
         IReadOnlyDictionary<string, string> additionalHeaders = null)
+        where TIteration : StatefulResourceBase
     {
         var responseTask = CreateIterationWithResponseAsync(
             translationId: translationId,
@@ -179,11 +183,12 @@ public class IterationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
         return (responseString, response.Headers);
     }
 
-    private async Task<IFlurlResponse> CreateIterationWithResponseAsync(
+    private async Task<IFlurlResponse> CreateIterationWithResponseAsync<TIteration>(
         string translationId,
-        Iteration iteration,
+        TIteration iteration,
         string operationId,
         IReadOnlyDictionary<string, string> additionalHeaders = null)
+        where TIteration : StatefulResourceBase
     {
         ArgumentNullException.ThrowIfNull(iteration);
         ArgumentException.ThrowIfNullOrEmpty(translationId);

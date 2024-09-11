@@ -5,14 +5,15 @@
 
 namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
 
-public class Translation<TIteration> : StatefulResourceBase
-    where TIteration : Iteration
+public class Translation<TIteration, TIterationInput> : StatefulResourceBase
+    where TIteration : Iteration<TIterationInput>
+    where TIterationInput : IterationInput
 {
     public TranslationInput Input { get; set; }
 
-    public Iteration LatestIteration { get; set; }
+    public Iteration<TIterationInput> LatestIteration { get; set; }
 
-    public Iteration LatestSucceededIteration { get; set; }
+    public Iteration<TIterationInput> LatestSucceededIteration { get; set; }
 
     public string FailureReason { get; set; }
 }

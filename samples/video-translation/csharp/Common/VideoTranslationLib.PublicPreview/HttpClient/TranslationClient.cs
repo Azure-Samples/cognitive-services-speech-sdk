@@ -19,9 +19,10 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientBase<TDeploymentEnvironment>
+public class TranslationClient<TDeploymentEnvironment, TIteration, TIterationInput> : HttpClientBase<TDeploymentEnvironment>
     where TDeploymentEnvironment : Enum
-    where TIteration : Iteration
+    where TIteration : Iteration<TIterationInput>
+    where TIterationInput : IterationInput
 {
     public TranslationClient(HttpClientConfigBase<TDeploymentEnvironment> config)
         : base(config)
@@ -52,8 +53,7 @@ public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientB
         return await response.GetStringAsync().ConfigureAwait(false);
     }
 
-    public async Task<Translation<TIteration>> GetTranslationAsync<TIteration>(string translationId)
-        where TIteration : Iteration
+    public async Task<Translation<TIteration, TIterationInput>> GetTranslationAsync(string translationId)
     {
         var response = await GetTranslationResponseAsync(translationId).ConfigureAwait(false);
 
@@ -63,7 +63,7 @@ public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientB
             return null;
         }
 
-        return await response.GetJsonAsync<Translation<TIteration>>().ConfigureAwait(false);
+        return await response.GetJsonAsync<Translation<TIteration, TIterationInput>>().ConfigureAwait(false);
     }
 
     public async Task<IFlurlResponse> GetTranslationResponseAsync(string translationId)
@@ -93,7 +93,7 @@ public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientB
         }).ConfigureAwait(false);
     }
 
-    public async Task<PaginatedResources<Translation<TIteration>>> GetTranslationsAsync()
+    public async Task<PaginatedResources<Translation<TIteration, TIterationInput>>> GetTranslationsAsync()
     {
         var url = BuildRequestBase();
 
@@ -101,7 +101,7 @@ public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientB
         {
             // var responseJson = await url.GetStringAsync().ConfigureAwait(false);
             return await url.GetAsync()
-                .ReceiveJson<PaginatedResources<Translation<TIteration>>>()
+                .ReceiveJson<PaginatedResources<Translation<TIteration, TIterationInput>>>()
                 .ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
@@ -139,12 +139,11 @@ public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientB
         }).ConfigureAwait(false);
     }
 
-    public async Task<(Translation<TIteration> translation, TIteration iteration)> CreateTranslationAndIterationAndWaitUntilTerminatedAsync<TIteration>(
-        Translation<TIteration> translation,
+    public async Task<(Translation<TIteration, TIterationInput> translation, TIteration iteration)> CreateTranslationAndIterationAndWaitUntilTerminatedAsync(
+        Translation<TIteration, TIterationInput> translation,
         TIteration iteration)
-        where TIteration : Iteration
     {
-        var transaltionResponse = await CreateTranslationAndWaitUntilTerminatedAsync<TIteration>(
+        var transaltionResponse = await CreateTranslationAndWaitUntilTerminatedAsync(
             translation: translation).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(transaltionResponse);
 
@@ -160,23 +159,16 @@ public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientB
             iteration: iteration,
             additionalHeaders: null).ConfigureAwait(false);
 
-        Console.WriteLine("Created iteration:");
-        Console.WriteLine(JsonConvert.SerializeObject(
-            iterationResponse,
-            Formatting.Indented,
-            CustomContractResolver.WriterSettings));
-
         return (transaltionResponse, iterationResponse);
     }
 
-    public async Task<Translation<TIteration>> CreateTranslationAndWaitUntilTerminatedAsync<TIteration>(
-        Translation<TIteration> translation)
-        where TIteration : Iteration
+    public async Task<Translation<TIteration, TIterationInput>> CreateTranslationAndWaitUntilTerminatedAsync(
+        Translation<TIteration, TIterationInput> translation)
     {
         Console.WriteLine($"Creating translation {translation.Id} :");
 
         var operationId = Guid.NewGuid().ToString();
-        var (responseTranslation, createTranslationResponseHeaders) = await CreateTranslationAsync<TIteration>(
+        var (responseTranslation, createTranslationResponseHeaders) = await CreateTranslationAsync(
             translation: translation,
             operationId: operationId).ConfigureAwait(false);
         ArgumentNullException.ThrowIfNull(responseTranslation);
@@ -191,29 +183,27 @@ public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientB
 
         await operationClient.QueryOperationUntilTerminateAsync(new Uri(operationLocation)).ConfigureAwait(false);
 
-        return await GetTranslationAsync<TIteration>(
+        return await GetTranslationAsync(
             translationId: responseTranslation.Id).ConfigureAwait(false);
     }
 
-    public async Task<(Translation<TIteration> translation, IReadOnlyNameValueList<string> headers)> CreateTranslationAsync<TIteration>(
-        Translation<TIteration> translation,
+    public async Task<(Translation<TIteration, TIterationInput> translation, IReadOnlyNameValueList<string> headers)> CreateTranslationAsync(
+        Translation<TIteration, TIterationInput> translation,
         string operationId)
-        where TIteration : Iteration
     {
         ArgumentNullException.ThrowIfNull(translation);
-        var responseTask = CreateTranslationWithResponseAsync<TIteration>(
+        var responseTask = CreateTranslationWithResponseAsync(
             translation: translation,
             operationId: operationId);
         var response = await responseTask.ConfigureAwait(false);
-        var translationResponse = await response.GetJsonAsync<Translation<TIteration>>()
+        var translationResponse = await response.GetJsonAsync<Translation<TIteration, TIterationInput>>()
             .ConfigureAwait(false);
         return (translationResponse, response.Headers);
     }
 
-    public async Task<(string responseString, IReadOnlyNameValueList<string> headers)> CreateTranslationWithStringResponseAsync<TIteration>(
-        Translation<TIteration> translation,
+    public async Task<(string responseString, IReadOnlyNameValueList<string> headers)> CreateTranslationWithStringResponseAsync(
+        Translation<TIteration, TIterationInput> translation,
         string operationId)
-        where TIteration : Iteration
     {
         ArgumentNullException.ThrowIfNull(translation);
         var responseTask = CreateTranslationWithResponseAsync(
@@ -225,10 +215,9 @@ public class TranslationClient<TDeploymentEnvironment, TIteration> : HttpClientB
         return (translationResponse, response.Headers);
     }
 
-    private async Task<IFlurlResponse> CreateTranslationWithResponseAsync<TIteration>(
-        Translation<TIteration> translation,
+    private async Task<IFlurlResponse> CreateTranslationWithResponseAsync(
+        Translation<TIteration, TIterationInput> translation,
         string operationId)
-        where TIteration : Iteration
     {
         ArgumentNullException.ThrowIfNull(translation);
         ArgumentException.ThrowIfNullOrEmpty(translation.Id);

@@ -16,8 +16,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\CommonLib\CommonLib.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="HttpClient\" />
-  </ItemGroup>
 </Project>
