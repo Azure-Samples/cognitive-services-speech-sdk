@@ -8,6 +8,7 @@ namespace Avatar.Services
     public class TokenRefreshBackgroundService : BackgroundService
     {
         private readonly IceTokenService _iceTokenService;
+
         private readonly SpeechTokenService _speechTokenService;
 
         public TokenRefreshBackgroundService(IceTokenService iceTokenService, SpeechTokenService speechTokenService)
@@ -26,5 +27,4 @@ namespace Avatar.Services
             await Task.WhenAny(refreshSpeechTokenTask, Task.Delay(-1, stoppingToken));
         }
     }
-
 }

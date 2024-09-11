@@ -13,6 +13,7 @@ namespace Avatar.Services
     public class SpeechTokenService
     {
         private readonly HttpClient _httpClient;
+
         private readonly ClientSettings _clientSettings;
 
         public SpeechTokenService(HttpClient httpClient, IOptions<ClientSettings> clientSettings)

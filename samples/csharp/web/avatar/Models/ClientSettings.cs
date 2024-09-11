@@ -10,26 +10,43 @@ namespace Avatar.Models
     public class ClientSettings
     {
         public static readonly List<string> SentenceLevelPunctuations = new List<string> { ".", "?", "!", ":", ";", "。", "？", "！", "：", "；" };
+
         public static readonly List<string> QuickReplies = new List<string> { "Let me take a look.", "Let me check.", "One moment, please." };
+
         public static readonly Regex OydDocRegex = new Regex(@"\[doc(\d+)\]");
 
-        public string? SpeechRegion { get; set; }
-        public string? SpeechKey { get; set; }
-        public string? SpeechPrivateEndpoint { get; set; }
-        public string? SpeechResourceUrl { get; set; }
-        public string? UserAssignedManagedIdentityClientId { get; set; }
-        public string? AzureOpenAIEndpoint { get; set; }
-        public string? AzureOpenAIAPIKey { get; set; }
-        public string? AzureOpenAIDeploymentName { get; set; }
-        public string? CognitiveSearchEndpoint { get; set; }
-        public string? CognitiveSearchAPIKey { get; set; }
-        public string? CognitiveSearchIndexName { get; set; }
-        public string? IceServerUrl { get; set; }
-        public string? IceServerUrlRemote { get; set; }
-        public string? IceServerUsername { get; set; }
-        public string? IceServerPassword { get; set; }
-        public string? DefaultTtsVoice { get; set; }
-        public bool EnableQuickReply { get; set; }
-    }
+        public static readonly string DefaultTtsVoice = "en-US-JennyNeural";
 
+        public static readonly bool EnableQuickReply = false;
+
+        public string? SpeechRegion { get; set; }
+
+        public string? SpeechKey { get; set; }
+
+        public string? SpeechPrivateEndpoint { get; set; }
+
+        public string? SpeechResourceUrl { get; set; }
+
+        public string? UserAssignedManagedIdentityClientId { get; set; }
+
+        public string? AzureOpenAIEndpoint { get; set; }
+
+        public string? AzureOpenAIAPIKey { get; set; }
+
+        public string? AzureOpenAIDeploymentName { get; set; }
+
+        public string? CognitiveSearchEndpoint { get; set; }
+
+        public string? CognitiveSearchAPIKey { get; set; }
+
+        public string? CognitiveSearchIndexName { get; set; }
+
+        public string? IceServerUrl { get; set; }
+
+        public string? IceServerUrlRemote { get; set; }
+
+        public string? IceServerUsername { get; set; }
+
+        public string? IceServerPassword { get; set; }
+    }
 }

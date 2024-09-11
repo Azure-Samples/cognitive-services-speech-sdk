@@ -11,6 +11,7 @@ namespace Avatar.Services
     public class IceTokenService
     {
         private readonly HttpClient _httpClient;
+
         private readonly ClientSettings _clientSettings;
 
         public IceTokenService(HttpClient httpClient, IOptions<ClientSettings> clientSettings)
@@ -34,5 +35,4 @@ namespace Avatar.Services
             GlobalVariables.IceToken = await response.Content.ReadAsStringAsync();
         }
     }
-
 }

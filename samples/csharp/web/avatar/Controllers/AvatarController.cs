@@ -22,9 +22,11 @@ namespace Avatar.Controllers
     public class HomeController(IOptions<ClientSettings> clientSettings, IClientService clientService, ClientContext clientContext) : Controller
     {
         private readonly ClientSettings _clientSettings = clientSettings.Value;
+
         private readonly IClientService _clientService = clientService;
+
         private readonly ClientContext _clientContext = clientContext;
-        private static readonly string[] separator = ["\n\n"];
+
         private static ChatClient? chatClient;
 
         [HttpGet("")]
@@ -128,7 +130,7 @@ namespace Avatar.Controllers
                 // Override default values with client provided values
                 clientContext.AzureOpenAIDeploymentName = Request.Headers["AoaiDeploymentName"].FirstOrDefault() ?? _clientSettings.AzureOpenAIDeploymentName;
                 clientContext.CognitiveSearchIndexName = Request.Headers["CognitiveSearchIndexName"].FirstOrDefault() ?? _clientSettings.CognitiveSearchIndexName;
-                clientContext.TtsVoice = Request.Headers["TtsVoice"].FirstOrDefault() ?? _clientSettings.DefaultTtsVoice;
+                clientContext.TtsVoice = Request.Headers["TtsVoice"].FirstOrDefault() ?? ClientSettings.DefaultTtsVoice;
                 clientContext.CustomVoiceEndpointId = Request.Headers["CustomVoiceEndpointId"].FirstOrDefault();
                 clientContext.PersonalVoiceSpeakerProfileId = Request.Headers["PersonalVoiceSpeakerProfileId"].FirstOrDefault();
 
@@ -473,7 +475,6 @@ namespace Avatar.Controllers
             var clientContext = _clientService.GetClientContext(clientId);
             var azureOpenaiDeploymentName = clientContext.AzureOpenAIDeploymentName;
             var messages = clientContext.Messages;
-            var dataSources = clientContext.DataSources;
             var isSpeaking = clientContext.IsSpeaking;
             var httpClient = new HttpClient();
 
@@ -488,7 +489,7 @@ namespace Avatar.Controllers
 
             // For 'on your data' scenario, chat API currently has long (4s+) latency
             // We return some quick reply here before the chat API returns to mitigate.
-            if (dataSources.Count > 0 && _clientSettings.EnableQuickReply)
+            if (ClientSettings.EnableQuickReply)
             {
                 await SpeakWithQueue(ClientSettings.QuickReplies[new Random().Next(ClientSettings.QuickReplies.Count)], 2000, clientId);
             }
@@ -504,8 +505,7 @@ namespace Avatar.Controllers
             }
 
             var chatOptions = new ChatCompletionOptions();
-            if (dataSources.Count > 0 &&
-                _clientSettings.CognitiveSearchEndpoint != null &&
+            if (_clientSettings.CognitiveSearchEndpoint != null &&
                 _clientSettings.CognitiveSearchIndexName != null &&
                 _clientSettings.CognitiveSearchAPIKey != null)
             {
@@ -571,48 +571,12 @@ namespace Avatar.Controllers
         public void InitializeChatContext(string systemPrompt, Guid clientId)
         {
             var clientContext = _clientService.GetClientContext(clientId);
-
-            var cognitiveSearchIndexName = clientContext.CognitiveSearchIndexName;
             var messages = clientContext.Messages;
-            var dataSources = clientContext.DataSources;
-
-            dataSources.Clear();
-            if (!string.IsNullOrEmpty(_clientSettings.CognitiveSearchEndpoint) &&
-                !string.IsNullOrEmpty(_clientSettings.CognitiveSearchAPIKey) &&
-                !string.IsNullOrEmpty(cognitiveSearchIndexName))
-            {
-                var dataSource = new
-                {
-                    type = "AzureCognitiveSearch",
-                    parameters = new
-                    {
-                        endpoint = _clientSettings.CognitiveSearchEndpoint,
-                        key = _clientSettings.CognitiveSearchAPIKey,
-                        indexName = cognitiveSearchIndexName,
-                        semanticConfiguration = "",
-                        queryType = "simple",
-                        fieldsMapping = new
-                        {
-                            contentFieldsSeparator = "\n",
-                            contentFields = new[] { "content" },
-                            filepathField = null as string,
-                            titleField = "title",
-                            urlField = null as string
-                        },
-                        inScope = true,
-                        roleInformation = systemPrompt
-                    }
-                };
-                dataSources.Add(dataSource);
-            }
 
             // Initialize messages
             messages.Clear();
-            if (dataSources.Count == 0)
-            {
-                var systemMessage = new SystemChatMessage(systemPrompt);
-                messages.Add(systemMessage);
-            }
+            var systemMessage = new SystemChatMessage(systemPrompt);
+            messages.Add(systemMessage);
         }
 
         // Speak the given text. If there is already a speaking in progress, add the text to the queue. For chat scenario.

@@ -13,21 +13,35 @@ namespace Avatar.Models
     public class ClientContext
     {
         private readonly DefaultAzureCredential _credential;
+
         private readonly ClientSettings _clientSettings;
+
         public string? AzureOpenAIDeploymentName { get; set; }
+
         public string? CognitiveSearchIndexName { get; set; }
+
         public string? TtsVoice { get; set; }
+
         public string? CustomVoiceEndpointId { get; set; }
+
         public string? PersonalVoiceSpeakerProfileId { get; set; }
+
         public object? SpeechSynthesizer { get; set; }
+
         public string? SpeechToken { get; set; }
+
         public string? IceToken { get; set; }
+
         public bool ChatInitiated { get; set; }
+
         public List<ChatMessage> Messages { get; set; } = [];
-        public List<dynamic> DataSources { get; set; } = [];
+
         public bool IsSpeaking { get; set; }
+
         public Queue<string> SpokenTextQueue { get; set; } = new Queue<string>();
+
         public Thread? SpeakingThread { get; set; }
+
         public DateTime? LastSpeakTime { get; set; }
 
         public ClientContext(IOptions<ClientSettings> clientSettings)
