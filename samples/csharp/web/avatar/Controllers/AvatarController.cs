@@ -316,8 +316,12 @@ namespace Avatar.Controllers
                     return BadRequest("Invalid ClientId");
                 }
 
-                // Call the internal method to stop speaking
-                await StopSpeakingInternal(clientId);
+                var clientContext = _clientService.GetClientContext(clientId);
+                if (clientContext.IsSpeaking)
+                {
+                    // Call the internal method to stop speaking
+                    await StopSpeakingInternal(clientId);
+                }
 
                 // Return a success message
                 return Ok("Speaking stopped.");
@@ -444,16 +448,9 @@ namespace Avatar.Controllers
             var clientContext = _clientService.GetClientContext(clientId);
             var azureOpenaiDeploymentName = clientContext.AzureOpenAIDeploymentName;
             var messages = clientContext.Messages;
-            var isSpeaking = clientContext.IsSpeaking;
 
             var chatMessage = new UserChatMessage(userQuery);
             messages.Add(chatMessage);
-
-            // Stop previous speaking if there is any
-            if (isSpeaking)
-            {
-                await StopSpeakingInternal(clientId);
-            }
 
             // For 'on your data' scenario, chat API currently has long (4s+) latency
             // We return some quick reply here before the chat API returns to mitigate.
