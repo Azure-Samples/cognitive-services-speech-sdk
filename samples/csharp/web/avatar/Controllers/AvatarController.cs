@@ -392,7 +392,7 @@ namespace Avatar.Controllers
 
             await HandleUserQuery(userQuery, clientGuid, Response);
 
-            return new OkResult();
+            return new EmptyResult();
         }
 
         [HttpPost("api/chat/clearHistory")]
