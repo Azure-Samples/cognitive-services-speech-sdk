@@ -295,43 +295,12 @@ namespace Avatar.Controllers
                 }
 
                 // Call your method to process the SSML
-                string resultId = await SpeakSsml(ssml, clientId);
+                string resultId = await SpeakSsml(ssml, clientId).ConfigureAwait(false);
                 return Content(resultId, "text/plain");
             }
             catch (Exception ex)
             {
                 return BadRequest($"Speak failed. Error message: {ex.Message}");
-            }
-        }
-
-        [HttpGet]
-        [Route("api/getSpeakingStatus")]
-        public ActionResult GetSpeakingStatus()
-        {
-            try
-            {
-                // Extract the client ID from the request headers
-                var clientIdHeader = Request.Headers["ClientId"];
-                if (!Guid.TryParse(clientIdHeader, out Guid clientId))
-                {
-                    return BadRequest("Invalid ClientId");
-                }
-
-                var clientContext = _clientService.GetClientContext(clientId);
-
-                // Get speaking status
-                var speakingStatus = new
-                {
-                    isSpeaking = clientContext.IsSpeaking,
-                    lastSpeakTime = clientContext.LastSpeakTime?.ToString("o") // ISO 8601 format
-                };
-
-                // Return the status as JSON
-                return Ok(speakingStatus);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error: {ex.Message}");
             }
         }
 
@@ -657,7 +626,8 @@ namespace Avatar.Controllers
             {
                 throw new InvalidOperationException("SpeechSynthesizer is not of type SpeechSynthesizer.");
             }
-            var speechSynthesisResult = await Task.Run(() => speechSynthesizer.SpeakSsmlAsync(ssml));
+
+            var speechSynthesisResult = await speechSynthesizer.SpeakSsmlAsync(ssml).ConfigureAwait(false);
 
             if (speechSynthesisResult.Reason == ResultReason.Canceled)
             {
