@@ -3,19 +3,19 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-using System.Web;
-using Microsoft.AspNetCore.Mvc;
-
-using Microsoft.CognitiveServices.Speech;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-
 using Avatar.Models;
 using Avatar.Services;
-using System.Text;
-
+using Azure;
+using Azure.AI.OpenAI;
+using Azure.AI.OpenAI.Chat;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.CognitiveServices.Speech;
 using Microsoft.Extensions.Options;
-
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OpenAI.Chat;
+using System.Text;
+using System.Web;
 
 namespace Avatar.Controllers
 {
@@ -25,6 +25,7 @@ namespace Avatar.Controllers
         private readonly IClientService _clientService = clientService;
         private readonly ClientContext _clientContext = clientContext;
         private static readonly string[] separator = ["\n\n"];
+        private static ChatClient? chatClient;
 
         [HttpGet("")]
         public IActionResult Index()
@@ -44,6 +45,19 @@ namespace Avatar.Controllers
         public ActionResult ChatView()
         {
             var clientId = _clientService.InitializeClient();
+            if (chatClient == null)
+            {
+                if (_clientSettings.AzureOpenAIEndpoint != null &&
+                    _clientSettings.AzureOpenAIAPIKey != null &&
+                    _clientSettings.AzureOpenAIDeploymentName != null)
+                {
+                    AzureOpenAIClient aoaiClient = new AzureOpenAIClient(
+                        new Uri(_clientSettings.AzureOpenAIEndpoint),
+                        new AzureKeyCredential(_clientSettings.AzureOpenAIAPIKey));
+                    chatClient = aoaiClient.GetChatClient(_clientSettings.AzureOpenAIDeploymentName);
+                }
+            }
+
             return View("Chat", clientId);
         }
 
@@ -374,13 +388,9 @@ namespace Avatar.Controllers
                 clientContext.ChatInitiated = true;
             }
 
-            var responseMessage = await HandleUserQuery(userQuery, clientGuid);
-            return new ContentResult
-            {
-                Content = responseMessage,
-                //ContentEncoding = Encoding.UTF8,
-                ContentType = "text/plain"
-            };
+            await HandleUserQuery(userQuery, clientGuid, Response);
+
+            return new OkResult();
         }
 
         [HttpPost("api/chat/clearHistory")]
@@ -458,7 +468,7 @@ namespace Avatar.Controllers
             }
         }
 
-        public async Task<string> HandleUserQuery(string userQuery, Guid clientId)
+        public async Task HandleUserQuery(string userQuery, Guid clientId, HttpResponse httpResponse)
         {
             var clientContext = _clientService.GetClientContext(clientId);
             var azureOpenaiDeploymentName = clientContext.AzureOpenAIDeploymentName;
@@ -467,12 +477,7 @@ namespace Avatar.Controllers
             var isSpeaking = clientContext.IsSpeaking;
             var httpClient = new HttpClient();
 
-            var chatMessage = new Dictionary<string, string>
-        {
-            { "role", "user" },
-            { "content", userQuery }
-        };
-
+            var chatMessage = new UserChatMessage(userQuery);
             messages.Add(chatMessage);
 
             // Stop previous speaking if there is any
@@ -488,79 +493,68 @@ namespace Avatar.Controllers
                 await SpeakWithQueue(ClientSettings.QuickReplies[new Random().Next(ClientSettings.QuickReplies.Count)], 2000, clientId);
             }
 
-            var url = $"{_clientSettings.AzureOpenAIEndpoint}/openai/deployments/{azureOpenaiDeploymentName}/chat/completions?api-version=2023-06-01-preview";
-            var body = JsonConvert.SerializeObject(new
-            {
-                messages,
-                stream = true
-            });
-
-            if (dataSources.Count > 0)
-            {
-                url = $"{_clientSettings.AzureOpenAIEndpoint}/openai/deployments/{azureOpenaiDeploymentName}/extensions/chat/completions?api-version=2023-06-01-preview";
-                body = JsonConvert.SerializeObject(new
-                {
-                    dataSources,
-                    messages,
-                    stream = true
-                });
-            }
-
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
-            requestMessage.Headers.Add("api-key", _clientSettings.AzureOpenAIAPIKey);
-            requestMessage.Content = new StringContent(body, Encoding.UTF8, "application/json");
-
-            var response = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Chat API response status: {response.StatusCode} {response.ReasonPhrase}");
-            }
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-
             // Process the responseContent as needed
             var assistantReply = new StringBuilder();
-            var toolContent = new StringBuilder();
             var spokenSentence = new StringBuilder();
 
-            var lines = responseContent.Split(separator, StringSplitOptions.None);
-
-            foreach (var line in lines)
+            if (chatClient == null)
             {
-                if (line.StartsWith("data:") && !line.Contains("[DONE]"))
+                // Skip if the chat client is not ready
+                return;
+            }
+
+            var chatOptions = new ChatCompletionOptions();
+            if (dataSources.Count > 0 &&
+                _clientSettings.CognitiveSearchEndpoint != null &&
+                _clientSettings.CognitiveSearchIndexName != null &&
+                _clientSettings.CognitiveSearchAPIKey != null)
+            {
+#pragma warning disable AOAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                chatOptions.AddDataSource(new AzureSearchChatDataSource()
                 {
-                    try
+                    Endpoint = new Uri(_clientSettings.CognitiveSearchEndpoint),
+                    IndexName = _clientSettings.CognitiveSearchIndexName,
+                    Authentication = DataSourceAuthentication.FromApiKey(_clientSettings.CognitiveSearchAPIKey)
+                });
+#pragma warning restore AOAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            }
+
+            var chatUpdates = chatClient.CompleteChatStreaming(messages, chatOptions);
+
+            foreach (var chatUpdate in chatUpdates)
+            {
+                foreach (var contentPart in chatUpdate.ContentUpdate)
+                {
+                    var responseToken = contentPart.Text;
+                    if (ClientSettings.OydDocRegex.IsMatch(responseToken))
                     {
-                        var responseJson = JsonConvert.DeserializeObject<dynamic>(line[5..].Trim());
-                        var choices = responseJson!.choices;
+                        responseToken = ClientSettings.OydDocRegex.Replace(responseToken, string.Empty);
+                    }
 
-                        foreach (var choice in choices)
+                    await httpResponse.WriteAsync(responseToken).ConfigureAwait(false);
+
+                    assistantReply.Append(responseToken);
+                    if (responseToken == "\n" || responseToken == "\n\n")
+                    {
+                        await SpeakWithQueue(spokenSentence.ToString().Trim(), 0, clientId);
+                        spokenSentence.Clear();
+                    }
+                    else
+                    {
+                        responseToken = responseToken.Replace("\n", string.Empty);
+                        spokenSentence.Append(responseToken); // build up the spoken sentence
+                        if (responseToken.Length == 1 || responseToken.Length == 2)
                         {
-                            var delta = choice.delta;
-
-                            if (delta.content != null)
+                            foreach (var punctuation in ClientSettings.SentenceLevelPunctuations)
                             {
-                                var responseToken = (string)delta.content;
-                                assistantReply.Append(responseToken);
-
-                                spokenSentence.Append(responseToken);
-                                if (responseToken.Contains('\n'))
+                                if (responseToken.StartsWith(punctuation))
                                 {
                                     await SpeakWithQueue(spokenSentence.ToString().Trim(), 0, clientId);
                                     spokenSentence.Clear();
+                                    break;
                                 }
                             }
-
-                            if (delta.role != null && delta.role == "tool")
-                            {
-                                toolContent.Append(delta.content);
-                            }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"Error occurred while parsing the response: {e}");
                     }
                 }
             }
@@ -570,25 +564,10 @@ namespace Avatar.Controllers
                 await SpeakWithQueue(spokenSentence.ToString().Trim(), 0, clientId);
             }
 
-            if (toolContent.Length > 0)
-            {
-                var toolMessage = new
-                {
-                    role = "tool",
-                    content = toolContent.ToString()
-                };
-                messages.Add(toolMessage);
-            }
-
-            var assistantMessage = new
-            {
-                role = "assistant",
-                content = assistantReply.ToString()
-            };
+            var assistantMessage = new AssistantChatMessage(assistantReply.ToString());
             messages.Add(assistantMessage);
-
-            return assistantReply.ToString();
         }
+
         public void InitializeChatContext(string systemPrompt, Guid clientId)
         {
             var clientContext = _clientService.GetClientContext(clientId);
@@ -631,11 +610,7 @@ namespace Avatar.Controllers
             messages.Clear();
             if (dataSources.Count == 0)
             {
-                var systemMessage = new
-                {
-                    role = "system",
-                    content = systemPrompt
-                };
+                var systemMessage = new SystemChatMessage(systemPrompt);
                 messages.Add(systemMessage);
             }
         }

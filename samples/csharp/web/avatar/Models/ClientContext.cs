@@ -5,6 +5,7 @@
 
 using Azure.Core;
 using Azure.Identity;
+using OpenAI.Chat;
 using Microsoft.Extensions.Options;
 
 namespace Avatar.Models
@@ -22,7 +23,7 @@ namespace Avatar.Models
         public string? SpeechToken { get; set; }
         public string? IceToken { get; set; }
         public bool ChatInitiated { get; set; }
-        public List<dynamic> Messages { get; set; } = [];
+        public List<ChatMessage> Messages { get; set; } = [];
         public List<dynamic> DataSources { get; set; } = [];
         public bool IsSpeaking { get; set; }
         public Queue<string> SpokenTextQueue { get; set; } = new Queue<string>();
