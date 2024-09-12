@@ -32,8 +32,8 @@ It is recommended to try them out before this MAUI specific sample.
   * The model internal subfolder structure must be intact i.e. as originally delivered.
 * Start Microsoft Visual Studio 2022 and select **File** \> **Open** \> **Project/Solution**.
 * Find and select the solution file in this sample folder.
-* Edit the `MainPage.xaml.cs` source file under the main project and update the settings marked as configurable (model name, key, and list of files).
-  If either recognition or synthesis is not needed, leave the corresponding default values unchanged.
+* Edit the `MainPage.xaml.cs` source file under the main project and update the settings marked as configurable (model name, license, and list of files).
+  If either recognition or synthesis is not needed, leave the corresponding name string empty.
 
 ## Build and run the sample for Windows
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.

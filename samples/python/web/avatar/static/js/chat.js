@@ -8,6 +8,7 @@ var peerConnection
 var isSpeaking = false
 var sessionActive = false
 var lastSpeakTime
+var isFirstRecognizingEvent = true
 
 // Connect to avatar service
 function connectAvatar() {
@@ -48,6 +49,10 @@ function createSpeechRecognizer() {
                     SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
                 speechRecognitionConfig.authorizationToken = speechToken
                 speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
+                speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.TrailingSilenceTimeout", "3000")
+                speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.InitialSilenceTimeout", "10000")
+                speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.Dictation.Segmentation.Mode", "Custom")
+                speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.Dictation.Segmentation.SegmentationSilenceTimeoutMs", "200")
                 var sttLocales = document.getElementById('sttLocales').value.split(',')
                 var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
                 speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
@@ -148,6 +153,15 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         const dataChannel = event.channel
         dataChannel.onmessage = e => {
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+
+            if (e.data.includes("EVENT_TYPE_SWITCH_TO_SPEAKING")) {
+                isSpeaking = true
+                document.getElementById('stopSpeaking').disabled = false
+            } else if (e.data.includes("EVENT_TYPE_SWITCH_TO_IDLE")) {
+                isSpeaking = false
+                lastSpeakTime = new Date()
+                document.getElementById('stopSpeaking').disabled = true
+            }
         }
     })
 
@@ -324,41 +338,10 @@ function checkHung() {
     }
 }
 
-// Fetch speaking status from backend.
-function checkSpeakingStatus() {
-    fetch('/api/getSpeakingStatus', {
-        method: 'GET',
-        headers: {
-            'ClientId': clientId
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            response.json().then(data => {
-                isSpeaking = data.isSpeaking
-                if (data.lastSpeakTime !== null) {
-                    lastSpeakTime = new Date(data.lastSpeakTime)
-                }
-
-                if (isSpeaking) {
-                    document.getElementById('stopSpeaking').disabled = false
-                } else {
-                    document.getElementById('stopSpeaking').disabled = true
-                }
-
-                handleLocalVideo()
-            })
-        } else {
-            throw new Error(`Failed to get speaking status: ${response.status} ${response.statusText}`)
-        }
-    })
-}
-
 window.onload = () => {
     clientId = document.getElementById('clientId').value
     setInterval(() => {
         checkHung()
-        checkSpeakingStatus()
     }, 2000) // Check session activity every 2 seconds
 }
 
@@ -391,7 +374,7 @@ window.stopSpeaking = () => {
     })
     .then(response => {
         if (response.ok) {
-            checkSpeakingStatus()
+            console.log('Successfully stopped speaking.')
         } else {
             throw new Error(`Failed to stop speaking: ${response.status} ${response.statusText}`)
         }
@@ -461,6 +444,13 @@ window.microphone = () => {
     }
 
     document.getElementById('microphone').disabled = true
+    speechRecognizer.recognizing = async (s, e) => {
+        if (isFirstRecognizingEvent && isSpeaking) {
+            window.stopSpeaking()
+            isFirstRecognizingEvent = false
+        }
+    }
+
     speechRecognizer.recognized = async (s, e) => {
         if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
             let userQuery = e.result.text.trim()
@@ -490,6 +480,8 @@ window.microphone = () => {
             chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
             handleUserQuery(userQuery)
+
+            isFirstRecognizingEvent = true
         }
     }
 

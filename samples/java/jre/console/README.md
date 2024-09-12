@@ -18,15 +18,6 @@ This sample demonstrates various forms of speech recognition, intent recognition
   sudo apt-get install libssl-dev libasound2
   ```
 
-* On RHEL or CentOS, run the following commands for the installation of required packages:
-
-  ```sh
-  sudo yum update
-  sudo yum install alsa-lib java-1.8.0-openjdk-devel openssl
-  ```
-
-  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
-
 <small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM platforms.</small>
 
 ## Build the sample

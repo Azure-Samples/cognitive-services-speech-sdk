@@ -57,8 +57,8 @@ Requirements specific to this embedded speech sample are as follows.
 1. Review and update the sample code.
    * In the Project window, navigate to **Assets** > **Scripts** and double-click the `HelloWorld` C# script to edit it.
      (This script is used as a component of the canvas object in the HelloWorld scene.)
-   * Update the settings marked as configurable (model/voice name and key, also the list of files if Android is the target).
-     If either recognition or synthesis is not needed, leave the corresponding default values unchanged.
+   * Update the settings marked as configurable (model/voice name and license, also the list of files if Android is the target).
+     If either recognition or synthesis is not needed, leave the corresponding name string empty.
 1. Build and run the sample.
    * In the Unity Editor, use the **Play** button in the toolbar.
      * For a stand-alone application, use **File** > **Build Settings**.

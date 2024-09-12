@@ -22,15 +22,6 @@ It runs under .NET 6.0 or later on Windows or Linux (see the list of [supported 
   sudo apt-get install libssl-dev libasound2
   ```
 
-* On RHEL or CentOS, run the following commands for the installation of required packages:
-
-  ```sh
-  sudo yum update
-  sudo yum install alsa-lib dotnet-sdk-6.0 openssl
-  ```
-
-  * See also [how to configure RHEL/CentOS 7 for Speech SDK](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-configure-rhel-centos-7).
-
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
