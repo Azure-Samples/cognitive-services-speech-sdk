@@ -18,7 +18,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
         * `IceServerUrlRemote` - the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
         * `IceServerUsername` - the username of your customized ICE server.
         * `IceServerPassword` - the password of your customized ICE server.
-	* Run `dotnet restore` to restore the dependencies and tools specified in the project file.
+    * Run `dotnet restore` to restore the dependencies and tools specified in the project file.
     * Run `dotnet run --urls http://localhost:5000` to start this sample.
 
 * Step 2: Open a browser and navigate to `http://localhost:5000/basic` to view the web UI of this sample.
@@ -66,7 +66,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * `IceServerUrlRemote` - the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
         * `IceServerUsername` - the username of your customized ICE server.
         * `IceServerPassword` - the password of your customized ICE server.
-	* Run `dotnet restore` to restore the dependencies and tools specified in the project file.
+    * Run `dotnet restore` to restore the dependencies and tools specified in the project file.
     * Run `dotnet run --urls http://localhost:5000` to start this sample.
 
 * Step 2: Open a browser and navigate to `http://localhost:5000/chat` to view the web UI of this sample.
