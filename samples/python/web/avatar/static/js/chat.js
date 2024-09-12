@@ -8,6 +8,7 @@ var peerConnection
 var isSpeaking = false
 var sessionActive = false
 var lastSpeakTime
+var isFirstRecognizingEvent = true
 
 // Connect to avatar service
 function connectAvatar() {
@@ -48,6 +49,10 @@ function createSpeechRecognizer() {
                     SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
                 speechRecognitionConfig.authorizationToken = speechToken
                 speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
+                speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.TrailingSilenceTimeout", "3000")
+                speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.InitialSilenceTimeout", "10000")
+                speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.Dictation.Segmentation.Mode", "Custom")
+                speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.Dictation.Segmentation.SegmentationSilenceTimeoutMs", "200")
                 var sttLocales = document.getElementById('sttLocales').value.split(',')
                 var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
                 speechRecognizer = SpeechSDK.SpeechRecognizer.FromConfig(speechRecognitionConfig, autoDetectSourceLanguageConfig, SpeechSDK.AudioConfig.fromDefaultMicrophoneInput())
@@ -439,6 +444,13 @@ window.microphone = () => {
     }
 
     document.getElementById('microphone').disabled = true
+    speechRecognizer.recognizing = async (s, e) => {
+        if (isFirstRecognizingEvent && isSpeaking) {
+            window.stopSpeaking()
+            isFirstRecognizingEvent = false
+        }
+    }
+
     speechRecognizer.recognized = async (s, e) => {
         if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
             let userQuery = e.result.text.trim()
@@ -468,6 +480,8 @@ window.microphone = () => {
             chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
 
             handleUserQuery(userQuery)
+
+            isFirstRecognizingEvent = true
         }
     }
 
