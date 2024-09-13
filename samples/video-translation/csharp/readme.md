@@ -1,6 +1,6 @@
-# Video Dubbing
+# Video translation
 
-Video dubbing client tool and API sample code
+Video translation client tool and API sample code
 
 # Solution:
    [VideoTranslationApiSampleCode.sln](VideoTranslationSample/VideoTranslationSample.sln)
@@ -52,9 +52,19 @@ Video dubbing client tool and API sample code
    | -translationId | MyTranslateVideo1FromZhCNToEnUS2024050601 | Translation ID. |
    | -iterationId | MyFirstIteration2024050601 | Iteration ID. |
    | -videoFileAzureBlobUrl |  | Video file URL with SAS(or not) which is hosted in Azure storage blob. |
-   | -webvttFileAzureBlobUrl |  | Webvtt file URL with SAS(or not) which is hosted in Azure storage blob. |
+   | -webvttFileAzureBlobUrl |  | Webvtt file URL with SAS(or not) which is hosted in Azure storage blob, it is optional for the first iteration of the translation, but required from the second iteration. |
    | -webvttFileKind | TargetLocaleSubtitle/SourceLocaleSubtitle/MetadataJson | Webvtt file kind. |
    | -subtitleMaxCharCountPerSegment | 100 | Subtitle max char count per segment. |
    | -speakerCount | 1 | Speaker count of the video. |
-   | -enableLipSync | false | Enable lip sync. |
    | -exportSubtitleInVideo | false | Export subtitle in video. |
+
+# Best practice
+   ## Escape char for argument -videoFileAzureBlobUrl and -webvttFileAzureBlobUrl
+   If you run client sample tool in windows shell, if there is & in the URL arguments for example SAS in Azure blob URL, it need to be converted to && for escape.
+
+   For example if the actual URL for argument videoFileAzureBlobUrl is htts://a/b?c&d, then if  you run the command in windows shell, you need run the command like this:
+
+      -videoFileAzureBlobUrl "htts://a/b?c&&d"
+
+   ## How to retry?
+   If you run command to create an translation or iteration, and then restart windows, the translation/iteration job will still run at server side, you can then query translation/iteration job status by using the query translation/iteration tool commmand or API with the iteration translation/iteration ID.
