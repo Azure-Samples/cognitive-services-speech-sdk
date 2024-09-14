@@ -19,6 +19,7 @@ proguard-rules.pro text
 *.config text
 *.cpp text
 *.cs text
+*.cshtml text
 *.csproj text
 *.css text
 *.editorconfig text
