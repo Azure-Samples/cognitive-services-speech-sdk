@@ -21,45 +21,18 @@
             "Linux",
             "Windows",
             "IOS",
-            "MacOS"
+            "MacOS",
+            ".NET Framework",
+            ".NET Core",
+            "Browser",
+            "Node.js"
         ]
     },
     "samples": [
         {
-            "id": "quickstart-recognize-speech-from-microphone-csharp-windows",
+            "id": "quickstart-recognize-speech-from-a-microphone-cpp-linux",
             "onboardDate": "2024-09-18",
-            "title": "Quickstart: Recognize speech from a microphone in C# under .NET Framework for Windows",
-            "shortId": "recognize-speech-csharp-windows",
-            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
-            "fullDescription": "This sample demonstrates how to recognize speech  with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.",
-            "types": [
-                "Speech To Text",
-                "Realtime STT"
-            ],
-            "tags": [
-                "Speech To Text",
-                "Realtime STT",
-                "C#",
-                "Windows"
-            ],
-            "time": "5min to run",
-            "configuration": "Ready for debug",
-            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
-            "gifPath": "assets/sampleDemo.gif",
-            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnet/from-microphone/README.md",
-            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/from-microphone",
-            "suggested": true,
-            "downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/dotnet/from-microphone"
-			}
-        },
-        {
-            "id": "quickstart-recognize-speech-from-microphone-cpp-linux",
-            "onboardDate": "2024-09-18",
-            "title": "Quickstart: Recognize speech from microphone in C++ using Speech SDK for Linux",
+            "title": "Quickstart: Recognize speech from a microphone in C++ using Speech SDK for Linux",
             "shortId": "recognize-speech-cpp-linux",
             "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
             "fullDescription": "This sample demonstrates how to recognize speech with C++ using the Speech SDK for Linux.",
@@ -79,7 +52,7 @@
             "gifPath": "assets/sampleDemo.gif",
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/linux/from-microphone/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/from-microphone",
-            "suggested": false,
+            "suggested": true,
             "downloadUrlInfo": {
 				"owner": "Azure-Samples",
 				"repository": "cognitive-services-speech-sdk",
@@ -88,17 +61,242 @@
 			}
         },
         {
-            "id": "batch-transcription-from-blob-restapi-csharp",
-            "onboardDate": "2024-09-06",
-            "title": "Batch Transcription From Blob (REST API) C#",
-            "shortId": "template-batch-transcrpition-csharp",
-            "shortDescription": "An app template of Speech Batch Transcription in C#",
-            "fullDescription": "An app template of Azure AI Speech Batch Transcription with REST API in C#",
+            "id": "quickstart-recognize-speech-from-a-microphone-cpp-windows",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from a microphone in C++ using Speech SDK for Windows",
+            "shortId": "recognize-speech-cpp-windows",
+            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
+            "fullDescription": "This sample demonstrates how to recognize speech with C++ using the Speech SDK for Windows.",
             "types": [
-                "Speech To Text"
+                "Speech To Text",
+                "Realtime STT"
             ],
             "tags": [
                 "Speech To Text",
+                "Realtime STT",
+                "C++",
+                "Windows"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/windows/from-microphone/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/windows/from-microphone",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/cpp/windows/from-microphone"
+			}
+        },
+        {
+            "id": "quickstart-recognize-speech-from-a-microphone-cpp-macos",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from a microphone in C++ using Speech SDK for macOS",
+            "shortId": "recognize-speech-cpp-macos",
+            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
+            "fullDescription": "This sample demonstrates how to recognize speech with C++ using the Speech SDK for macOS.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "C++",
+                "MacOS"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/macos/from-microphone/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/macos/from-microphone",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/cpp/macos/from-microphone"
+			}
+        },
+        {
+            "id": "quickstart-recognize-speech-from-a-microphone-csharp-windows",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from a microphone in C# under .NET Framework for Windows",
+            "shortId": "recognize-speech-csharp-windows",
+            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
+            "fullDescription": "This sample demonstrates how to recognize speech  with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "C#",
+                "Windows",
+                ".NET Framework"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnet/from-microphone/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/from-microphone",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/dotnet/from-microphone"
+			}
+        },
+        {
+            "id": "quickstart-recognize-speech-from-a-microphone-csharp-dotnetcore",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from a microphone in C# under .NET 6.0 (Windows, macOS, or Linux)",
+            "shortId": "recognize-speech-csharp-dotnetcore",
+            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
+            "fullDescription": "This sample demonstrates how to recognize speech with C# under .NET 6.0 (Windows, macOS, or Linux) using the Speech SDK.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "C#",
+                "Windows",
+                "MacOS",
+                "Linux",
+                ".NET Core"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnetcore/from-microphone/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnetcore/from-microphone",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/dotnetcore/from-microphone"
+			}
+        },
+
+        {
+            "id": "quickstart-recognize-speech-from-a-file-cpp-windows",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from a file in C++ for Windows",
+            "shortId": "recognize-speech-cpp-dotnetcore",
+            "shortDescription": "Demonstrates one-shot speech recognition from a wave file.",
+            "fullDescription": "This sample demonstrates how to recognize speech using wave file as an input with C++ using the Speech SDK for Windows.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "C++",
+                "Windows"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/windows/from-file/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/windows/from-file/from-microphone",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/cpp/windows/from-file"
+			}
+        },
+        {
+            "id": "quickstart-recognize-speech-from-a-file-csharp-dotnet",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from a file in C# under .NET Framework for Windows",
+            "shortId": "recognize-speech-csharp-dotnet",
+            "shortDescription": "Demonstrates one-shot speech recognition from a wave file.",
+            "fullDescription": "This sample demonstrates how to recognize speech from a wave file with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "C#",
+                "Windows",
+                ".NET Framework"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnet/from-file/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/from-file/from-microphone",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/dotnet/from-file"
+			}
+        },
+        {
+            "id": "quickstart-recognize-speech-from-a-file-javascript-browser",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from an audio file in JavaScript on a Web Browser",
+            "shortId": "recognize-speech-javascript-browser",
+            "shortDescription": "Demonstrates one-shot speech recognition from a wave file.",
+            "fullDescription": "This sample demonstrates how to recognize speech from an audio file using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "JavaScript",
+                "Browser"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/javascript/browser/from-file/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/javascript/browser/from-file/from-microphone",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/javascript/browser/from-file"
+			}
+        },
+        {
+            "id": "batch-transcription-from-blob-restapi-csharp",
+            "onboardDate": "2024-09-18",
+            "title": "Batch Transcription From Blob (REST API) C#",
+            "shortId": "template-batch-transcrpition-csharp",
+            "shortDescription": "Demonstrates usage of batch transcription from blob through Rest API.",
+            "fullDescription": "This sample demonstrates how to use the Speech Service Batch Transcription API in C#.",
+            "types": [
+                "Speech To Text",
+                "Batch STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Batch STT",
                 "C#",
                 "Linux",
                 "Windows",
@@ -107,7 +305,7 @@
             ],
             "time": "5min to run",
             "configuration": "Ready for debug",
-            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/asr_csharp.jpg",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/batch-speech-to-text.png",
             "gifPath": "assets/sampleDemo.gif", 
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/csharp/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/csharp",
@@ -124,22 +322,21 @@
             "onboardDate": "2024-09-06",
             "title": "Batch Transcription From Blob (REST API) Node JS",
             "shortId": "template-batch-transcrpition-js",
-            "shortDescription": "An app template of Speech Batch Transcription in Node JS",
-            "fullDescription": "An app template of Azure AI Speech Batch Transcription with REST API in Node JS",
+            "shortDescription": "Demonstrates usage of batch transcription from blob through Rest API.",
+            "fullDescription": "This sample demonstrates how to use the Speech Service Batch Transcription API from Node.js.",
             "types": [
-                "Speech To Text"
+                "Speech To Text",
+                "Batch STT"
             ],
             "tags": [
                 "Speech To Text",
+                "Batch STT",
                 "JavaScript",
-                "Linux",
-                "Windows",
-                "IOS",
-                "MacOS"
+                "Node.js"
             ],
             "time": "5min to run",
             "configuration": "Ready for debug",
-            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/asr_js.jpg",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/batch-speech-to-text.png",
             "gifPath": "assets/sampleDemo.gif",
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/js/node/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/js/node",
@@ -156,13 +353,15 @@
             "onboardDate": "2024-09-06",
             "title": "Batch Transcription From Blob (REST API) Python",
             "shortId": "template-batch-transcrpition-python",
-            "shortDescription": "An app template of Speech Batch Transcription in Python",
-            "fullDescription": "An app template of Azure AI Speech Batch Transcription with REST API in Python",
+            "shortDescription": "Demonstrates usage of batch transcription from blob through Rest API.",
+            "fullDescription": "This sample demonstrates how to use the Speech Service Batch Transcription API from Python",
             "types": [
-                "Speech To Text"
+                "Speech To Text",
+                "Batch STT"
             ],
             "tags": [
                 "Speech To Text",
+                "Batch STT",
                 "Python",
                 "Linux",
                 "Windows",
@@ -171,7 +370,7 @@
             ],
             "time": "5min to run",
             "configuration": "Ready for debug",
-            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/asr_python.jpg",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/batch-speech-to-text.png",
             "gifPath": "assets/sampleDemo.gif",
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/python/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/python",
