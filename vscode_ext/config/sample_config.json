@@ -1,0 +1,156 @@
+{
+    "filterOptions": {
+        "capabilities": [
+            "Speech To Text",
+            "Text To Speech",
+            "Speech Translation",
+            "Realtime STT",
+            "Batch STT",
+            "Speech Translation"
+        ],
+        "languages": [
+            "C++",
+            "C#",
+            "Java",
+            "JavaScript",
+            "Objective-C",
+            "Swift",
+            "Python"
+        ],
+        "platform": [
+            "Linux",
+            "Windows",
+            "IOS",
+            "MacOS"
+        ]
+    },
+    "samples": [
+        {
+            "id": "quickstart-recognize-speech-from-microphone-cpp-linux",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from microphone in C++ using Speech SDK for Linux",
+            "shortId": "recognize-speech-cpp-linux",
+            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
+            "fullDescription": "This sample demonstrates how to recognize speech with C++ using the Speech SDK for Linux.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "C++",
+                "Linux"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/jiamguo/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.jpg",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/linux/from-microphone/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/from-microphone",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/cpp/linux/from-microphone"
+			}
+        },
+        {
+            "id": "batch-transcription-from-blob-restapi-csharp",
+            "onboardDate": "2024-09-06",
+            "title": "Batch Transcription From Blob (REST API) C#",
+            "shortId": "template-batch-transcrpition-csharp",
+            "shortDescription": "An app template of Speech Batch Transcription in C#",
+            "fullDescription": "An app template of Azure AI Speech Batch Transcription with REST API in C#",
+            "types": [
+                "Speech To Text"
+            ],
+            "tags": [
+                "Speech To Text",
+                "C#",
+                "Linux",
+                "Windows",
+                "IOS",
+                "MacOS"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/jiamguo/cognitive-services-speech-sdk/extension/vscode_ext/img/asr_csharp.jpg",
+            "gifPath": "assets/sampleDemo.gif", 
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/csharp/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/csharp",
+            "suggested": false,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/batch/csharp"
+			}
+        },
+        {
+            "id": "batch-transcription-from-blob-restapi-js",
+            "onboardDate": "2024-09-06",
+            "title": "Batch Transcription From Blob (REST API) Node JS",
+            "shortId": "template-batch-transcrpition-js",
+            "shortDescription": "An app template of Speech Batch Transcription in Node JS",
+            "fullDescription": "An app template of Azure AI Speech Batch Transcription with REST API in Node JS",
+            "types": [
+                "Speech To Text"
+            ],
+            "tags": [
+                "Speech To Text",
+                "JavaScript",
+                "Linux",
+                "Windows",
+                "IOS",
+                "MacOS"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/jiamguo/cognitive-services-speech-sdk/extension/vscode_ext/img/asr_js.jpg",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/js/node/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/js/node",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/batch/js/node"
+			}
+        },
+        {
+            "id": "batch-transcription-from-blob-restapi-python",
+            "onboardDate": "2024-09-06",
+            "title": "Batch Transcription From Blob (REST API) Python",
+            "shortId": "template-batch-transcrpition-python",
+            "shortDescription": "An app template of Speech Batch Transcription in Python",
+            "fullDescription": "An app template of Azure AI Speech Batch Transcription with REST API in Python",
+            "types": [
+                "Speech To Text"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Python",
+                "Linux",
+                "Windows",
+                "IOS",
+                "MacOS"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/jiamguo/cognitive-services-speech-sdk/extension/vscode_ext/img/asr_python.jpg",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/python/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/python",
+            "suggested": true,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/batch/python"
+			}
+        }   
+    ]
+}
