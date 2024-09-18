@@ -21,11 +21,12 @@ jobs:
 
       - name: Install Bicep CLI
         run: |
-          if ! command -v az bicep &> /dev/null; then
-              az bicep install --version v0.29.47
-          else
-              az bicep upgrade
+          BICEP_VERSION="v0.29.47"
+          
+          if ! command -v az bicep &> /dev/null || [ "$(az bicep version --query 'bicepVersion' -o tsv)" != "$BICEP_VERSION" ]; then
+              az bicep install --version "$BICEP_VERSION"
           fi
+          
           az bicep version
 
       - name: Convert Bicep to ARM Template
