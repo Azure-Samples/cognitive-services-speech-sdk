@@ -17,7 +17,7 @@ namespace Connector
     using Polly;
     using Polly.Retry;
 
-    public static class BatchClient
+    public class BatchClient
     {
         private const string TranscriptionsBasePath = "speechtotext/v3.0/Transcriptions/";
 
@@ -29,36 +29,42 @@ namespace Connector
 
         private static readonly TimeSpan GetFilesTimeout = TimeSpan.FromMinutes(5);
 
-        private static readonly HttpClient HttpClient = new HttpClient() { Timeout = Timeout.InfiniteTimeSpan };
-
         private static readonly AsyncRetryPolicy RetryPolicy =
             Policy
                 .Handle<Exception>(e => e is HttpStatusCodeException || e is HttpRequestException)
                 .WaitAndRetryAsync(MaxNumberOfRetries, retryAttempt => TimeSpan.FromSeconds(5));
 
-        public static Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri)
+        private readonly HttpClient httpClient;
+
+        public BatchClient(IHttpClientFactory httpClientFactory)
         {
-            return GetAsync<TranscriptionReportFile>(sasUri, null, DefaultTimeout);
+            ArgumentNullException.ThrowIfNull(httpClientFactory, nameof(httpClientFactory));
+            this.httpClient = httpClientFactory.CreateClient(nameof(BatchClient));
         }
 
-        public static Task<SpeechTranscript> GetSpeechTranscriptFromSasAsync(string sasUri)
+        public Task<TranscriptionReportFile> GetTranscriptionReportFileFromSasAsync(string sasUri)
         {
-            return GetAsync<SpeechTranscript>(sasUri, null, DefaultTimeout);
+            return this.GetAsync<TranscriptionReportFile>(sasUri, null, DefaultTimeout);
         }
 
-        public static Task<Transcription> GetTranscriptionAsync(string transcriptionLocation, string subscriptionKey)
+        public Task<SpeechTranscript> GetSpeechTranscriptFromSasAsync(string sasUri)
         {
-            return GetAsync<Transcription>(transcriptionLocation, subscriptionKey, DefaultTimeout);
+            return this.GetAsync<SpeechTranscript>(sasUri, null, DefaultTimeout);
         }
 
-        public static async Task<TranscriptionFiles> GetTranscriptionFilesAsync(string transcriptionLocation, string subscriptionKey)
+        public Task<Transcription> GetTranscriptionAsync(string transcriptionLocation, string subscriptionKey)
+        {
+            return this.GetAsync<Transcription>(transcriptionLocation, subscriptionKey, DefaultTimeout);
+        }
+
+        public async Task<TranscriptionFiles> GetTranscriptionFilesAsync(string transcriptionLocation, string subscriptionKey)
         {
             var path = $"{transcriptionLocation}/files";
             var combinedTranscriptionFiles = new List<TranscriptionFile>();
 
             do
             {
-                var transcriptionFiles = await GetAsync<TranscriptionFiles>(path, subscriptionKey, GetFilesTimeout).ConfigureAwait(false);
+                var transcriptionFiles = await this.GetAsync<TranscriptionFiles>(path, subscriptionKey, GetFilesTimeout).ConfigureAwait(false);
                 combinedTranscriptionFiles.AddRange(transcriptionFiles.Values);
                 path = transcriptionFiles.NextLink;
             }
@@ -67,39 +73,39 @@ namespace Connector
             return new TranscriptionFiles(combinedTranscriptionFiles, null);
         }
 
-        public static Task DeleteTranscriptionAsync(string transcriptionLocation, string subscriptionKey)
+        public Task DeleteTranscriptionAsync(string transcriptionLocation, string subscriptionKey)
         {
-            return DeleteAsync(transcriptionLocation, subscriptionKey, DefaultTimeout);
+            return this.DeleteAsync(transcriptionLocation, subscriptionKey, DefaultTimeout);
         }
 
-        public static async Task<Uri> PostTranscriptionAsync(TranscriptionDefinition transcriptionDefinition, string hostName, string subscriptionKey)
+        public async Task<Uri> PostTranscriptionAsync(TranscriptionDefinition transcriptionDefinition, string hostName, string subscriptionKey)
         {
             var path = $"{hostName}{TranscriptionsBasePath}";
             var payloadString = JsonConvert.SerializeObject(transcriptionDefinition);
 
-            return await PostAsync(path, subscriptionKey, payloadString, PostTimeout).ConfigureAwait(false);
+            return await this.PostAsync(path, subscriptionKey, payloadString, PostTimeout).ConfigureAwait(false);
         }
 
-        private static async Task<Uri> PostAsync(string path, string subscriptionKey, string payloadString, TimeSpan timeout)
+        private async Task<Uri> PostAsync(string path, string subscriptionKey, string payloadString, TimeSpan timeout)
         {
-            var responseMessage = await SendHttpRequestMessage(HttpMethod.Post, path, subscriptionKey, payloadString, timeout).ConfigureAwait(false);
+            var responseMessage = await this.SendHttpRequestMessage(HttpMethod.Post, path, subscriptionKey, payloadString, timeout).ConfigureAwait(false);
             return responseMessage.Headers.Location;
         }
 
-        private static async Task DeleteAsync(string path, string subscriptionKey, TimeSpan timeout)
+        private async Task DeleteAsync(string path, string subscriptionKey, TimeSpan timeout)
         {
-            await SendHttpRequestMessage(HttpMethod.Delete, path, subscriptionKey, payload: null, timeout: timeout).ConfigureAwait(false);
+            await this.SendHttpRequestMessage(HttpMethod.Delete, path, subscriptionKey, payload: null, timeout: timeout).ConfigureAwait(false);
         }
 
-        private static async Task<TResponse> GetAsync<TResponse>(string path, string subscriptionKey, TimeSpan timeout)
+        private async Task<TResponse> GetAsync<TResponse>(string path, string subscriptionKey, TimeSpan timeout)
         {
-            var responseMessage = await SendHttpRequestMessage(HttpMethod.Get, path, subscriptionKey, payload: null, timeout: timeout).ConfigureAwait(false);
+            var responseMessage = await this.SendHttpRequestMessage(HttpMethod.Get, path, subscriptionKey, payload: null, timeout: timeout).ConfigureAwait(false);
 
             var contentString = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
             return JsonConvert.DeserializeObject<TResponse>(contentString);
         }
 
-        private static async Task<HttpResponseMessage> SendHttpRequestMessage(HttpMethod httpMethod, string path, string subscriptionKey, string payload, TimeSpan timeout)
+        private async Task<HttpResponseMessage> SendHttpRequestMessage(HttpMethod httpMethod, string path, string subscriptionKey, string payload, TimeSpan timeout)
         {
             try
             {
@@ -110,6 +116,7 @@ namespace Connector
                     async (token) =>
                     {
                         using var httpRequestMessage = new HttpRequestMessage(httpMethod, path);
+
                         if (!string.IsNullOrEmpty(subscriptionKey))
                         {
                             httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
@@ -120,7 +127,7 @@ namespace Connector
                             httpRequestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
                         }
 
-                        var responseMessage = await HttpClient.SendAsync(httpRequestMessage, token).ConfigureAwait(false);
+                        var responseMessage = await this.httpClient.SendAsync(httpRequestMessage, token).ConfigureAwait(false);
 
                         await responseMessage.EnsureSuccessStatusCodeAsync().ConfigureAwait(false);
                         return responseMessage;

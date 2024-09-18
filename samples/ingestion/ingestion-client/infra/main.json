@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.29.47.4906",
-      "templateHash": "10256299698599007648"
+      "version": "0.30.3.12046",
+      "templateHash": "11589854528010395557"
     }
   },
   "parameters": {
@@ -224,7 +224,7 @@
     }
   },
   "variables": {
-    "Version": "v2.1.10",
+    "Version": "v2.1.11",
     "AudioInputContainer": "audio-input",
     "AudioProcessedContainer": "audio-processed",
     "ErrorFilesOutputContainer": "audio-failed",
@@ -817,6 +817,7 @@
         "PunctuationMode": "[parameters('PunctuationMode')]",
         "RetryLimit": "[variables('RetryLimit')]",
         "StartTranscriptionServiceBusConnectionString": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/queues/authorizationRules', variables('ServiceBusName'), 'start_transcription_queue', 'StartTranscription'), '2017-04-01').primaryConnectionString]",
+        "Version": "[variables('Version')]",
         "WEBSITE_RUN_FROM_PACKAGE": "[if(variables('TimerBasedExecution'), variables('StartTranscriptionByTimerBinary'), variables('StartTranscriptionByServiceBusBinary'))]"
       },
       "dependsOn": [
@@ -893,7 +894,8 @@
         "ConversationPiiInferenceSource": "[variables('ConversationPiiInferenceSource')]",
         "ConversationPiiSetting": "[variables('ConversationPiiRedaction')]",
         "ConversationSummarizationOptions": "[variables('ConversationSummarizationOptions')]",
-        "CompletedServiceBusConnectionString": "[parameters('CompletedServiceBusConnectionString')]"
+        "CompletedServiceBusConnectionString": "[parameters('CompletedServiceBusConnectionString')]",
+        "Version": "[variables('Version')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Insights/components', variables('AppInsightsName'))]",

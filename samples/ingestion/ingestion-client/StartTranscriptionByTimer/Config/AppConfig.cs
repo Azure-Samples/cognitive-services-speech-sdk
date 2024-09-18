@@ -79,5 +79,7 @@ namespace StartTranscriptionByTimer
         public string StartTranscriptionServiceBusConnectionString { get; set; }
 
         public string StartTranscriptionFunctionTimeInterval { get; set; }
+
+        public string Version { get; set; }
     }
 }
