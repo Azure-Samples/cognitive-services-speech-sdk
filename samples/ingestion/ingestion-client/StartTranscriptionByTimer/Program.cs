@@ -6,6 +6,9 @@
 namespace StartTranscriptionByTimer
 {
     using System.IO;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Threading;
 
     using Azure.Storage;
     using Azure.Storage.Blobs;
@@ -56,6 +59,16 @@ namespace StartTranscriptionByTimer
                         clientBuilder.AddServiceBusClient(config.FetchTranscriptionServiceBusConnectionString)
                             .WithName(ServiceBusClientName.FetchTranscriptionServiceBusClient.ToString());
                     });
+
+                    services.AddHttpClient(nameof(BatchClient), httpClient =>
+                    {
+                        // timeouts are managed by BatchClient directly:
+                        httpClient.Timeout = Timeout.InfiniteTimeSpan;
+                        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"Ingestion Client ({config.Version})");
+                    });
+
+                    services.AddSingleton<BatchClient>();
+
                     services.Configure<AppConfig>(configuration);
                 })
                 .Build();
