@@ -22,7 +22,7 @@ jobs:
       - name: Install Bicep CLI
         run: |
           if ! command -v az bicep &> /dev/null; then
-              az bicep install
+              az bicep install --version v0.30.3
           else
               az bicep upgrade
           fi

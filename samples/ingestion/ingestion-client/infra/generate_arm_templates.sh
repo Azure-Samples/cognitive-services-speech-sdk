@@ -2,11 +2,13 @@
 
 set -e
 
+BICEP_VERSION="v0.30.3"
+
 # if az bicep is not installed, install it else upgrade it
 if ! command -v az bicep &> /dev/null; then
-    az bicep install
-else
-    az bicep upgrade
+    az bicep install --version "$BICEP_VERSION"
+elif [ "$(az bicep version --query 'bicepVersion' -o tsv)" != "$BICEP_VERSION" ]; then
+    az bicep install --version "$BICEP_VERSION"
 fi
 
 TEMPLATES=()
