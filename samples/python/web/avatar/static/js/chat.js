@@ -111,6 +111,15 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
             }
 
+            // Clean up existing audio element if there is any
+            remoteVideoDiv = document.getElementById('remoteVideo')
+            for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
+                if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
+                    remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
+                }
+            }
+
+            // Append the new audio element
             document.getElementById('remoteVideo').appendChild(audioElement)
         }
 
