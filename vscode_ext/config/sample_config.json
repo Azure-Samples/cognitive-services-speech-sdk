@@ -26,6 +26,37 @@
     },
     "samples": [
         {
+            "id": "quickstart-recognize-speech-from-microphone-csharp-windows",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize speech from a microphone in C# under .NET Framework for Windows",
+            "shortId": "recognize-speech-csharp-windows",
+            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
+            "fullDescription": "This sample demonstrates how to recognize speech  with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "C#",
+                "Windows"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnet/from-microphone/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/from-microphone",
+            "suggested": true,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/dotnet/from-microphone"
+			}
+        },
+        {
             "id": "quickstart-recognize-speech-from-microphone-cpp-linux",
             "onboardDate": "2024-09-18",
             "title": "Quickstart: Recognize speech from microphone in C++ using Speech SDK for Linux",
@@ -44,7 +75,7 @@
             ],
             "time": "5min to run",
             "configuration": "Ready for debug",
-            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.jpg",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
             "gifPath": "assets/sampleDemo.gif",
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/linux/from-microphone/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/from-microphone",
