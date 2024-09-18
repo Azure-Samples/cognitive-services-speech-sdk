@@ -104,5 +104,7 @@ namespace FetchTranscription
         public bool CreateAudioProcessedContainer { get; set; }
 
         public string AudioProcessedContainer { get; set; }
+
+        public string Version { get; set; }
     }
 }

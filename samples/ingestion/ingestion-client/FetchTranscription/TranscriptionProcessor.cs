@@ -39,16 +39,20 @@ namespace FetchTranscription
 
         private readonly IStorageConnector storageConnector;
 
+        private readonly BatchClient batchClient;
+
         private readonly AppConfig appConfig;
 
         public TranscriptionProcessor(
             IStorageConnector storageConnector,
             IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
             IngestionClientDbContext databaseContext,
+            BatchClient batchClient,
             IOptions<AppConfig> appConfig)
         {
             this.storageConnector = storageConnector;
             this.databaseContext = databaseContext;
+            this.batchClient = batchClient;
             this.appConfig = appConfig?.Value;
 
             ArgumentNullException.ThrowIfNull(serviceBusClientFactory, nameof(serviceBusClientFactory));
@@ -86,7 +90,7 @@ namespace FetchTranscription
 
             try
             {
-                var transcription = await BatchClient.GetTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
+                var transcription = await this.batchClient.GetTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
                 log.LogInformation($"Polled {serviceBusMessage.PollingCounter} time(s) for results in total, delay job for {messageDelayTime.TotalMinutes} minutes if not completed.");
                 switch (transcription.Status)
                 {
@@ -189,13 +193,13 @@ namespace FetchTranscription
 
             log.LogInformation(logMessage);
 
-            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
+            var transcriptionFiles = await this.batchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
 
             var errorReportOutput = logMessage;
             var reportFile = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.TranscriptionReport).FirstOrDefault();
             if (reportFile?.Links?.ContentUrl != null)
             {
-                var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
+                var reportFileContent = await this.batchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
                 errorReportOutput += $"\nReport file: \n {JsonConvert.SerializeObject(reportFileContent)}";
             }
 
@@ -237,7 +241,7 @@ namespace FetchTranscription
                 }
             }
 
-            await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
+            await this.batchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
         }
 
         private async Task ProcessReportFileAsync(TranscriptionReportFile transcriptionReportFile, ILogger log)
@@ -290,7 +294,7 @@ namespace FetchTranscription
             else
             {
                 await this.WriteFailedJobLogToStorageAsync(message, errorMessage, jobName, log).ConfigureAwait(false);
-                await BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
+                await this.batchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
             }
         }
 
@@ -347,7 +351,7 @@ namespace FetchTranscription
                 return;
             }
 
-            var transcriptionFiles = await BatchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
+            var transcriptionFiles = await this.batchClient.GetTranscriptionFilesAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false);
             log.LogInformation($"Received transcription files.");
             var resultFiles = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.Transcription);
 
@@ -360,7 +364,7 @@ namespace FetchTranscription
 
                 try
                 {
-                    var transcriptionResult = await BatchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl).ConfigureAwait(false);
+                    var transcriptionResult = await this.batchClient.GetSpeechTranscriptFromSasAsync(resultFile.Links.ContentUrl).ConfigureAwait(false);
 
                     if (string.IsNullOrEmpty(transcriptionResult.Source))
                     {
@@ -522,10 +526,10 @@ namespace FetchTranscription
             }
 
             var reportFile = transcriptionFiles.Values.Where(t => t.Kind == TranscriptionFileKind.TranscriptionReport).FirstOrDefault();
-            var reportFileContent = await BatchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
+            var reportFileContent = await this.batchClient.GetTranscriptionReportFileFromSasAsync(reportFile.Links.ContentUrl).ConfigureAwait(false);
             await this.ProcessReportFileAsync(reportFileContent, log).ConfigureAwait(false);
 
-            BatchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false).GetAwaiter().GetResult();
+            this.batchClient.DeleteTranscriptionAsync(transcriptionLocation, subscriptionKey).ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 }

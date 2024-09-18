@@ -27,6 +27,7 @@ namespace FetchTranscription
         private readonly IStorageConnector storageConnector;
         private readonly IAzureClientFactory<ServiceBusClient> serviceBusClientFactory;
         private readonly ILogger<FetchTranscription> logger;
+        private readonly BatchClient batchClient;
         private readonly AppConfig appConfig;
 
         /// <summary>
@@ -36,18 +37,21 @@ namespace FetchTranscription
         /// <param name="logger">The FetchTranscription logger.</param>
         /// <param name="storageConnector">Storage Connector dependency</param>
         /// <param name="serviceBusClientFactory">Azure client factory for service bus clients</param>
+        /// <param name="batchClient">The client to call the Azure Speech-To-Text batch API</param>
         /// <param name="appConfig">Environment configuration</param>
         public FetchTranscription(
             IServiceProvider serviceProvider,
             ILogger<FetchTranscription> logger,
             IStorageConnector storageConnector,
             IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
+            BatchClient batchClient,
             IOptions<AppConfig> appConfig)
         {
             this.serviceProvider = serviceProvider;
             this.logger = logger;
             this.storageConnector = storageConnector;
             this.serviceBusClientFactory = serviceBusClientFactory;
+            this.batchClient = batchClient;
             this.appConfig = appConfig?.Value;
         }
 
@@ -72,7 +76,12 @@ namespace FetchTranscription
 
             var databaseContext = this.appConfig.UseSqlDatabase ? this.serviceProvider.GetRequiredService<IngestionClientDbContext>() : null;
 
-            var transcriptionProcessor = new TranscriptionProcessor(this.storageConnector, this.serviceBusClientFactory, databaseContext, Options.Create(this.appConfig));
+            var transcriptionProcessor = new TranscriptionProcessor(
+                this.storageConnector,
+                this.serviceBusClientFactory,
+                databaseContext,
+                this.batchClient,
+                Options.Create(this.appConfig));
 
             await transcriptionProcessor.ProcessTranscriptionJobAsync(serviceBusMessage, this.serviceProvider,  this.logger).ConfigureAwait(false);
         }
