@@ -29,7 +29,7 @@ public class TranslationClient<TDeploymentEnvironment, TIteration, TIterationInp
     {
     }
 
-    public override string ControllerName => "Translations";
+    public override string ControllerName => "translations";
 
 
     public async Task<IFlurlResponse> DeleteTranslationAsync(string translationId)
