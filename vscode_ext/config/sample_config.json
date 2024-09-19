@@ -6,7 +6,12 @@
             "Speech Translation",
             "Realtime STT",
             "Batch STT",
-            "Speech Translation"
+            "Batch TTS",
+            "Speech Translation",
+            "Keyword Recognition",
+            "Custom Keyword",
+            "Video Translation",
+            "Text to Speech Avatar"
         ],
         "languages": [
             "C++",
@@ -25,7 +30,8 @@
             ".NET Framework",
             ".NET Core",
             "Browser",
-            "Node.js"
+            "Node.js",
+            "Universal Windows Platform"
         ]
     },
     "samples": [
@@ -381,6 +387,509 @@
 				"ref": "master",
 				"dir": "samples/batch/python"
 			}
-        }   
+        },
+        {
+            "id": "quickstart-synthesize-speech-cpp-linux",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Synthesize speech in C++ for Linux",
+            "shortId": "synthesize-speech-cpp-linux",
+            "shortDescription": "Demonstrates one-shot speech synthesis to the default speaker.",
+            "fullDescription": "This sample demonstrates how to synthesize speech with C++ using the Speech SDK for Linux.",
+            "types": [
+                "Text to Speech"
+            ],
+            "tags": [
+                "Text to Speech",
+                "C++",
+                "Linux"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/synthesis-speech.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/linux/text-to-speech/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/text-to-speech",
+            "suggested": true,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/cpp/linux/text-to-speech"
+			}
+        },
+        {
+            "id": "quickstart-synthesize-speech-cpp-windows",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Synthesize speech in C++ for Windows",
+            "shortId": "synthesize-speech-cpp-windows",
+            "shortDescription": "Demonstrates one-shot speech synthesis to the default speaker.",
+            "fullDescription": "This sample demonstrates how to synthesize speech with C++ using the Speech SDK for Windows.",
+            "types": [
+                "Text to Speech"
+            ],
+            "tags": [
+                "Text to Speech",
+                "C++",
+                "Windows"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/synthesis-speech.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/windows/text-to-speech/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/windows/text-to-speech",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/cpp/windows/text-to-speech"
+			}
+        },
+        {
+            "id": "quickstart-synthesize-speech-cpp-macOS",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Synthesize speech in C++ for macOS",
+            "shortId": "synthesize-speech-cpp-macOS",
+            "shortDescription": "Demonstrates one-shot speech synthesis to the default speaker.",
+            "fullDescription": "This sample demonstrates how to synthesize speech with C++ using the Speech SDK for macOS.",
+            "types": [
+                "Text to Speech"
+            ],
+            "tags": [
+                "Text to Speech",
+                "C++",
+                "MacOS"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/synthesis-speech.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/macOS/text-to-speech/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/macOS/text-to-speech",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/cpp/macOS/text-to-speech"
+			}
+        },
+        {
+            "id": "quickstart-synthesize-speech-csharp-dotnet",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Synthesize speech in C# under .NET Framework for Windows",
+            "shortId": "synthesize-speech-csharp-dotnet",
+            "shortDescription": "Demonstrates one-shot speech synthesis to the default speaker.",
+            "fullDescription": "This sample demonstrates how to synthesize speech with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.",
+            "types": [
+                "Text to Speech"
+            ],
+            "tags": [
+                "Text to Speech",
+                "C#",
+                "Windows",
+                ".NET Framework"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/synthesis-speech.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnet/text-to-speech/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/text-to-speech",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/dotnet/text-to-speech"
+			}
+        },
+        {
+            "id": "quickstart-synthesize-speech-csharp-uwp",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Synthesize speech in C# under Universal Windows Platform",
+            "shortId": "synthesize-speech-csharp-uwp",
+            "shortDescription": "Demonstrates one-shot speech synthesis to the default speaker.",
+            "fullDescription": "This sample demonstrates how to synthesize speech with C# under the Universal Windows Platform using the Speech SDK. ",
+            "types": [
+                "Text to Speech"
+            ],
+            "tags": [
+                "Text to Speech",
+                "C#",
+                "Universal Windows Platform"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/synthesis-speech.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/uwp/text-to-speech/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/uwp/text-to-speech",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/uwp/text-to-speech"
+			}
+        },
+        {
+            "id": "quickstart-translate-speech-cpp-windows",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Translate speech in C++ for Windows",
+            "shortId": "translate-speech-cpp-windows",
+            "shortDescription": "Demonstrates one-shot speech translation/transcription from a microphone.",
+            "fullDescription": "This sample demonstrates how to translate speech with C++ using the Speech SDK for Windows.",
+            "types": [
+                "Speech Translation"
+            ],
+            "tags": [
+                "Speech Translation",
+                "C++",
+                "Windows"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/speech-translation.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/windows/translate-speech-to-text/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/windows/translate-speech-to-text",
+            "suggested": true,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/cpp/windows/translate-speech-to-text"
+			}
+        },
+        {
+            "id": "quickstart-translate-speech-csharp-dotnet",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Translate speech in C# for .NET Framework for Windows",
+            "shortId": "translate-speech-csharp-dotnet",
+            "shortDescription": "Demonstrates one-shot speech translation/transcription from a microphone.",
+            "fullDescription": "This sample demonstrates how to translate speech with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.",
+            "types": [
+                "Speech Translation"
+            ],
+            "tags": [
+                "Speech Translation",
+                "C#",
+                "Windows",
+                ".NET Framework"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/speech-translation.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnet/translate-speech-to-text/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/translate-speech-to-text",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/dotnet/translate-speech-to-text"
+			}
+        },
+        {
+            "id": "quickstart-translate-speech-csharp-dotnetcore",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Translate speech in C# for .NET Core on Windows or Linux",
+            "shortId": "translate-speech-csharp-dotnetcore",
+            "shortDescription": "Demonstrates one-shot speech translation/transcription from a microphone.",
+            "fullDescription": "This sample demonstrates how to translate speech with C# under .NET 6.0 (Windows or Linux) using the Speech SDK.",
+            "types": [
+                "Speech Translation"
+            ],
+            "tags": [
+                "Speech Translation",
+                "C#",
+                "Windows",
+                "Linux",
+                ".NET Core"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/speech-translation.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnetcore/translate-speech-to-text/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnetcore/translate-speech-to-text",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/dotnetcore/translate-speech-to-text"
+			}
+        },
+        {
+            "id": "quickstart-translate-speech-csharp-uwp",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Translate speech from a microphone in C# for Universal Windows Platform",
+            "shortId": "translate-speech-csharp-uwp",
+            "shortDescription": "Demonstrates one-shot speech translation/transcription from a microphone.",
+            "fullDescription": "This sample demonstrates how to translate speech with C# under the Universal Windows Platform using the Speech SDK.",
+            "types": [
+                "Speech Translation"
+            ],
+            "tags": [
+                "Speech Translation",
+                "C#",
+                "Universal Windows Platform"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/speech-translation.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/uwp/translate-speech-to-text/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/uwp/translate-speech-to-text",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/uwp/translate-speech-to-text"
+			}
+        },
+        {
+            "id": "quickstart-translate-speech-java-jre",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Translate speech in Java on Windows, macOS or Linux",
+            "shortId": "translate-speech-java-jre",
+            "shortDescription": "Demonstrates one-shot speech translation/transcription from a microphone.",
+            "fullDescription": "This sample demonstrates how to translate speech with the Speech SDK for Java on Windows, macOS or Linux.",
+            "types": [
+                "Speech Translation"
+            ],
+            "tags": [
+                "Speech Translation",
+                "Java",
+                "Windows",
+                "Linux",
+                "MacOS"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/speech-translation.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/java/jre/translate-speech-to-text/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/java/jre/translate-speech-to-text",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/java/jre/translate-speech-to-text"
+			}
+        },
+        {
+            "id": "samples-recognize-speech-in-compressed-audio-input-stream-cpp-linux",
+            "onboardDate": "2024-09-18",
+            "title": "Sample: Recognize speech in C++ for Linux from an MP3/Opus file",
+            "shortId": "recognize-speech-in-compressed-audio-input-stream-cpp-linux",
+            "shortDescription": "Demonstrates speech recognition from an MP3/Opus file",
+            "fullDescription": "This sample demonstrates how to recognize speech in compressed audio input stream with C++ using the Speech SDK for Linux.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "C++",
+                "Linux"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/cpp/linux/compressed-audio-input/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/cpp/linux/compressed-audio-input",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/cpp/linux/compressed-audio-input"
+			}
+        },
+        {
+            "id": "quickstart-recognize-keywords-csharp-uwp",
+            "onboardDate": "2024-09-18",
+            "title": "Quickstart: Recognize keywords in C# under Universal Windows Platform",
+            "shortId": "recognize-keywords-csharp-uwp",
+            "shortDescription": "Demonstrates speech recognition from an MP3/Opus file",
+            "fullDescription": "This sample demonstrates how to recognize keywords with C# under the Universal Windows Platform using the Speech SDK.",
+            "types": [
+                "Keyword Recognition",
+                "Custom Keyword"
+            ],
+            "tags": [
+                "Keyword Recognition",
+                "Custom Keyword",
+                "C++",
+                "Linux"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/custom-keyword.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/uwp/keyword-recognizer/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/uwp/keyword-recognizer",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/csharp/uwp/keyword-recognizer"
+			}
+        },
+        {
+            "id": "sample-video-translation-csharp-windows",
+            "onboardDate": "2024-09-18",
+            "title": "Video Translation (REST API) C#",
+            "shortId": "video-translation-csharp-windows",
+            "shortDescription": "Demonstrates video translation API",
+            "fullDescription": "This sample demonstrates how to use the Speech Service Video Translation API in C# on Windows.",
+            "types": [
+                "Video Translation"
+            ],
+            "tags": [
+                "Video Translation",
+                "C#",
+                "Windows"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/video-translation.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/video-translation/csharp/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/video-translation/csharp",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/video-translation/csharp"
+			}
+        },
+        {
+            "id": "sample-batch-avatar-csharp",
+            "onboardDate": "2024-09-18",
+            "title": "Batch Avatar Synthesis (REST API) C#",
+            "shortId": "batch-avatar-csharp",
+            "shortDescription": "Demonstrates batch avatar API",
+            "fullDescription": "The Batch avatar synthesis API (Preview) provides asynchronous synthesis of talking avatar to generate avatar video content with the text input.",
+            "types": [
+                "Text to Speech Avatar"
+            ],
+            "tags": [
+                "Text to Speech Avatar",
+                "C#"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/batch-avatar.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch-avatar/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-avatar/",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/batch-avatar/csharp/BatchAvatarSample"
+			}
+        },
+        {
+            "id": "sample-batch-avatar-python",
+            "onboardDate": "2024-09-18",
+            "title": "Batch Avatar Synthesis (REST API) Python",
+            "shortId": "batch-avatar-python",
+            "shortDescription": "Demonstrates batch avatar API",
+            "fullDescription": "The Batch avatar synthesis API (Preview) provides asynchronous synthesis of talking avatar to generate avatar video content with the text input.",
+            "types": [
+                "Text to Speech Avatar"
+            ],
+            "tags": [
+                "Text to Speech Avatar",
+                "Python"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/batch-avatar.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch-avatar/python/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-avatar/python/",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/batch-avatar/python"
+			}
+        },
+        {
+            "id": "sample-batch-synthesis-csharp",
+            "onboardDate": "2024-09-18",
+            "title": "Batch Synthesis (REST API) C#",
+            "shortId": "batch-synthesis-csharp",
+            "shortDescription": "Demonstrates batch synthesis API",
+            "fullDescription": "The Batch synthesis API provides asynchronous synthesis of long-form text to speech.",
+            "types": [
+                "Text to Speech",
+                "Batch TTS"
+            ],
+            "tags": [
+                "Text to Speech",
+                "Batch TTS",
+                "C#"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/synthesis-speec.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch-synthesis/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-synthesis",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/batch-synthesis/csharp"
+			}
+        },
+        {
+            "id": "sample-batch-synthesis-python",
+            "onboardDate": "2024-09-18",
+            "title": "Batch Synthesis (REST API) Python",
+            "shortId": "batch-synthesis-python",
+            "shortDescription": "Demonstrates batch synthesis API",
+            "fullDescription": "The Batch synthesis API provides asynchronous synthesis of long-form text to speech.",
+            "types": [
+                "Text to Speech",
+                "Batch TTS"
+            ],
+            "tags": [
+                "Text to Speech",
+                "Batch TTS",
+                "Python"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/synthesis-speec.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch-synthesis/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-synthesis",
+            "suggested": false,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "samples/batch-synthesis/python"
+			}
+        }
     ]
 }
