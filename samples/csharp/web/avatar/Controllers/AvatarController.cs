@@ -484,13 +484,24 @@ namespace Avatar.Controllers
 #pragma warning restore AOAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             }
 
+            var aoaiStartTime = DateTime.Now;
             var chatUpdates = chatClient.CompleteChatStreaming(messages, chatOptions);
 
+            var isFirstChunk = true;
+            var isFirstSentence = true;
             foreach (var chatUpdate in chatUpdates)
             {
                 foreach (var contentPart in chatUpdate.ContentUpdate)
                 {
                     var responseToken = contentPart.Text;
+                    if (isFirstChunk)
+                    {
+                        var aoaiFirstTokenLatency = (int)(DateTime.Now.Subtract(aoaiStartTime).TotalMilliseconds + 0.5);
+                        Console.WriteLine($"AOAI first token latency: {aoaiFirstTokenLatency}ms");
+                        await httpResponse.WriteAsync($"<FTL>{aoaiFirstTokenLatency}</FTL>");
+                        isFirstChunk = false;
+                    }
+
                     if (ClientSettings.OydDocRegex.IsMatch(responseToken))
                     {
                         responseToken = ClientSettings.OydDocRegex.Replace(responseToken, string.Empty);
@@ -501,6 +512,14 @@ namespace Avatar.Controllers
                     assistantReply.Append(responseToken);
                     if (responseToken == "\n" || responseToken == "\n\n")
                     {
+                        if (isFirstSentence)
+                        {
+                            var aoaiFirstSentenceLatency = (int)(DateTime.Now.Subtract(aoaiStartTime).TotalMilliseconds + 0.5);
+                            Console.WriteLine($"AOAI first sentence latency: {aoaiFirstSentenceLatency}ms");
+                            await httpResponse.WriteAsync($"<FSL>{aoaiFirstSentenceLatency}</FSL>");
+                            isFirstSentence = false;
+                        }
+
                         await SpeakWithQueue(spokenSentence.ToString().Trim(), 0, clientId);
                         spokenSentence.Clear();
                     }
@@ -514,6 +533,14 @@ namespace Avatar.Controllers
                             {
                                 if (responseToken.StartsWith(punctuation))
                                 {
+                                    if (isFirstSentence)
+                                    {
+                                        var aoaiFirstSentenceLatency = (int)(DateTime.Now.Subtract(aoaiStartTime).TotalMilliseconds + 0.5);
+                                        Console.WriteLine($"AOAI first sentence latency: {aoaiFirstSentenceLatency}ms");
+                                        await httpResponse.WriteAsync($"<FSL>{aoaiFirstSentenceLatency}</FSL>");
+                                        isFirstSentence = false;
+                                    }
+
                                     await SpeakWithQueue(spokenSentence.ToString().Trim(), 0, clientId);
                                     spokenSentence.Clear();
                                     break;

@@ -6,6 +6,7 @@
 namespace FetchTranscription
 {
     using System.IO;
+    using System.Threading;
 
     using Azure.Storage;
     using Azure.Storage.Blobs;
@@ -70,6 +71,16 @@ namespace FetchTranscription
                                 .WithName(ServiceBusClientName.CompletedTranscriptionServiceBusClient.ToString());
                         }
                     });
+
+                    services.AddHttpClient(nameof(BatchClient), httpClient =>
+                    {
+                        // timeouts are managed by BatchClient directly:
+                        httpClient.Timeout = Timeout.InfiniteTimeSpan;
+                        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"Ingestion Client ({config.Version})");
+                    });
+
+                    services.AddSingleton<BatchClient>();
+
                     services.Configure<AppConfig>(configuration);
                 })
                 .Build();

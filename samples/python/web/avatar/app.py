@@ -381,19 +381,29 @@ def handleUserQuery(user_query: str, client_id: uuid.UUID):
         messages=messages,
         extra_body={ 'data_sources' : data_sources } if len(data_sources) > 0 else None,
         stream=True)
-    aoai_reponse_time = datetime.datetime.now(pytz.UTC)
-    print(f"AOAI latency: {(aoai_reponse_time - aoai_start_time).total_seconds() * 1000}ms")
 
+    is_first_chunk = True
+    is_first_sentence = True
     for chunk in response:
         if len(chunk.choices) > 0:
             response_token = chunk.choices[0].delta.content
             if response_token is not None:
                 # Log response_token here if need debug
+                if is_first_chunk:
+                    first_token_latency_ms = round((datetime.datetime.now(pytz.UTC) - aoai_start_time).total_seconds() * 1000)
+                    print(f"AOAI first token latency: {first_token_latency_ms}ms")
+                    yield f"<FTL>{first_token_latency_ms}</FTL>"
+                    is_first_chunk = False
                 if oyd_doc_regex.search(response_token):
                     response_token = oyd_doc_regex.sub('', response_token).strip()
                 yield response_token # yield response token to client as display text
                 assistant_reply += response_token  # build up the assistant message
                 if response_token == '\n' or response_token == '\n\n':
+                    if is_first_sentence:
+                        first_sentence_latency_ms = round((datetime.datetime.now(pytz.UTC) - aoai_start_time).total_seconds() * 1000)
+                        print(f"AOAI first sentence latency: {first_sentence_latency_ms}ms")
+                        yield f"<FSL>{first_sentence_latency_ms}</FSL>"
+                        is_first_sentence = False
                     speakWithQueue(spoken_sentence.strip(), 0, client_id)
                     spoken_sentence = ''
                 else:
@@ -402,6 +412,11 @@ def handleUserQuery(user_query: str, client_id: uuid.UUID):
                     if len(response_token) == 1 or len(response_token) == 2:
                         for punctuation in sentence_level_punctuations:
                             if response_token.startswith(punctuation):
+                                if is_first_sentence:
+                                    first_sentence_latency_ms = round((datetime.datetime.now(pytz.UTC) - aoai_start_time).total_seconds() * 1000)
+                                    print(f"AOAI first sentence latency: {first_sentence_latency_ms}ms")
+                                    yield f"<FSL>{first_sentence_latency_ms}</FSL>"
+                                    is_first_sentence = False
                                 speakWithQueue(spoken_sentence.strip(), 0, client_id)
                                 spoken_sentence = ''
                                 break

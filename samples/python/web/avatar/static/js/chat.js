@@ -7,8 +7,12 @@ var speechRecognizer
 var peerConnection
 var isSpeaking = false
 var sessionActive = false
+var recognitionStartedTime
+var chatResponseReceivedTime
 var lastSpeakTime
 var isFirstRecognizingEvent = true
+var firstTokenLatencyRegex = new RegExp(/<FTL>(\d+)<\/FTL>/)
+var firstSentenceLatencyRegex = new RegExp(/<FSL>(\d+)<\/FSL>/)
 
 // Connect to avatar service
 function connectAvatar() {
@@ -107,6 +111,15 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
             }
 
+            // Clean up existing audio element if there is any
+            remoteVideoDiv = document.getElementById('remoteVideo')
+            for (var i = 0; i < remoteVideoDiv.childNodes.length; i++) {
+                if (remoteVideoDiv.childNodes[i].localName === event.track.kind) {
+                    remoteVideoDiv.removeChild(remoteVideoDiv.childNodes[i])
+                }
+            }
+
+            // Append the new audio element
             document.getElementById('remoteVideo').appendChild(audioElement)
         }
 
@@ -134,6 +147,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 document.getElementById('stopSession').disabled = false
                 document.getElementById('remoteVideo').style.width = '960px'
                 document.getElementById('chatHistory').hidden = false
+                document.getElementById('latencyLog').hidden = false
                 document.getElementById('showTypeMessage').disabled = false
 
                 if (document.getElementById('useLocalVideoForIdle').checked) {
@@ -155,6 +169,16 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
 
             if (e.data.includes("EVENT_TYPE_SWITCH_TO_SPEAKING")) {
+                if (chatResponseReceivedTime !== undefined) {
+                    let speakStartTime = new Date()
+                    let ttsLatency = speakStartTime - chatResponseReceivedTime
+                    console.log(`TTS latency: ${ttsLatency} ms`)
+                    let latencyLogTextArea = document.getElementById('latencyLog')
+                    latencyLogTextArea.innerHTML += `TTS latency: ${ttsLatency} ms\n\n`
+                    latencyLogTextArea.scrollTop = latencyLogTextArea.scrollHeight
+                    chatResponseReceivedTime = undefined
+                }
+
                 isSpeaking = true
                 document.getElementById('stopSpeaking').disabled = false
             } else if (e.data.includes("EVENT_TYPE_SWITCH_TO_IDLE")) {
@@ -254,6 +278,7 @@ function connectToAvatarService(peerConnection) {
 
 // Handle user query. Send user query to the chat API and display the response.
 function handleUserQuery(userQuery) {
+    let chatRequestSentTime = new Date()
     fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -284,6 +309,32 @@ function handleUserQuery(userQuery) {
 
                 // Process the chunk of data (value)
                 let chunkString = new TextDecoder().decode(value, { stream: true })
+
+                if (firstTokenLatencyRegex.test(chunkString)) {
+                    let aoaiFirstTokenLatency = parseInt(firstTokenLatencyRegex.exec(chunkString)[0].replace('<FTL>', '').replace('</FTL>', ''))
+                    // console.log(`AOAI first token latency: ${aoaiFirstTokenLatency} ms`)
+                    chunkString = chunkString.replace(firstTokenLatencyRegex, '')
+                    if (chunkString === '') {
+                        return read()
+                    }
+                }
+
+                if (firstSentenceLatencyRegex.test(chunkString)) {
+                    let aoaiFirstSentenceLatency = parseInt(firstSentenceLatencyRegex.exec(chunkString)[0].replace('<FSL>', '').replace('</FSL>', ''))
+                    chatResponseReceivedTime = new Date()
+                    let chatLatency = chatResponseReceivedTime - chatRequestSentTime
+                    let appServiceLatency = chatLatency - aoaiFirstSentenceLatency
+                    console.log(`App service latency: ${appServiceLatency} ms`)
+                    console.log(`AOAI latency: ${aoaiFirstSentenceLatency} ms`)
+                    let latencyLogTextArea = document.getElementById('latencyLog')
+                    latencyLogTextArea.innerHTML += `App service latency: ${appServiceLatency} ms\n`
+                    latencyLogTextArea.innerHTML += `AOAI latency: ${aoaiFirstSentenceLatency} ms\n`
+                    latencyLogTextArea.scrollTop = latencyLogTextArea.scrollHeight
+                    chunkString = chunkString.replace(firstSentenceLatencyRegex, '')
+                    if (chunkString === '') {
+                        return read()
+                    }
+                }
 
                 chatHistoryTextArea.innerHTML += `${chunkString}`
                 chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
@@ -355,6 +406,7 @@ window.startSession = () => {
         document.getElementById('localVideo').hidden = false
         document.getElementById('remoteVideo').style.width = '0.1px'
         document.getElementById('chatHistory').hidden = false
+        document.getElementById('latencyLog').hidden = false
         document.getElementById('showTypeMessage').disabled = false
         return
     }
@@ -387,6 +439,7 @@ window.stopSession = () => {
     document.getElementById('stopSession').disabled = true
     document.getElementById('configuration').hidden = false
     document.getElementById('chatHistory').hidden = true
+    document.getElementById('latencyLog').hidden = true
     document.getElementById('showTypeMessage').checked = false
     document.getElementById('showTypeMessage').disabled = true
     document.getElementById('userMessageBox').hidden = true
@@ -409,6 +462,7 @@ window.clearChatHistory = () => {
     .then(response => {
         if (response.ok) {
             document.getElementById('chatHistory').innerHTML = ''
+            document.getElementById('latencyLog').innerHTML = ''
         } else {
             throw new Error(`Failed to clear chat history: ${response.status} ${response.statusText}`)
         }
@@ -458,6 +512,14 @@ window.microphone = () => {
                 return
             }
 
+            let recognitionResultReceivedTime = new Date()
+            let speechFinishedOffset = (e.result.offset + e.result.duration) / 10000
+            let sttLatency = recognitionResultReceivedTime - recognitionStartedTime - speechFinishedOffset
+            console.log(`STT latency: ${sttLatency} ms`)
+            let latencyLogTextArea = document.getElementById('latencyLog')
+            latencyLogTextArea.innerHTML += `STT latency: ${sttLatency} ms\n`
+            latencyLogTextArea.scrollTop = latencyLogTextArea.scrollHeight
+
             // Auto stop microphone when a phrase is recognized, when it's not continuous conversation mode
             if (!document.getElementById('continuousConversation').checked) {
                 document.getElementById('microphone').disabled = true
@@ -485,6 +547,7 @@ window.microphone = () => {
         }
     }
 
+    recognitionStartedTime = new Date()
     speechRecognizer.startContinuousRecognitionAsync(
         () => {
             document.getElementById('microphone').innerHTML = 'Stop Microphone'
@@ -517,6 +580,10 @@ window.updateTypeMessageBox = () => {
 
                     chatHistoryTextArea.innerHTML += "User: " + userQuery.trim('\n') + '\n\n'
                     chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+
+                    if (isSpeaking) {
+                        window.stopSpeaking()
+                    }
 
                     handleUserQuery(userQuery.trim('\n'))
                     document.getElementById('userMessageBox').value = ''

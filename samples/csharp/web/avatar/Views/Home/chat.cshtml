@@ -80,8 +80,18 @@
         background-color: transparent;
         overflow: hidden;" hidden></textarea>
   </div>
+  <div id="overlayArea" style="position: absolute; left: 720px">
+    <textarea id="latencyLog" style="
+        width: 360px;
+        height: 500px;
+        font-size: medium;
+        border: none;
+        resize: none;
+        background-color: transparent;
+        overflow: hidden;" hidden></textarea>
+  </div>
   <div id="localVideo" hidden>
-      <video src="@Url.Content("~/Content/video/lisa-casual-sitting-idle.mp4")" autoplay loop muted></video>
+      <video src="@Url.Content("~/video/lisa-casual-sitting-idle.mp4")" autoplay loop muted></video>
   </div>
   <div id="remoteVideo"></div>
 </div>

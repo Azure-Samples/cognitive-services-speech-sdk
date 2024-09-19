@@ -41,16 +41,20 @@ namespace StartTranscriptionByTimer
 
         private readonly IStorageConnector storageConnector;
 
+        private readonly BatchClient batchClient;
+
         private readonly AppConfig appConfig;
 
         public StartTranscriptionHelper(
             ILogger<StartTranscriptionHelper> logger,
             IStorageConnector storageConnector,
             IAzureClientFactory<ServiceBusClient> serviceBusClientFactory,
+            BatchClient batchClient,
             IOptions<AppConfig> appConfig)
         {
             this.logger = logger;
             this.storageConnector = storageConnector;
+            this.batchClient = batchClient;
             this.appConfig = appConfig?.Value;
             this.locale = this.appConfig.Locale.Split('|')[0].Trim();
 
@@ -229,7 +233,7 @@ namespace StartTranscriptionByTimer
 
                 var transcriptionDefinition = TranscriptionDefinition.Create(jobName, "StartByTimerTranscription", this.locale, audioUrls, properties, modelIdentity);
 
-                var transcriptionLocation = await BatchClient.PostTranscriptionAsync(
+                var transcriptionLocation = await this.batchClient.PostTranscriptionAsync(
                     transcriptionDefinition,
                     this.appConfig.AzureSpeechServicesEndpointUri,
                     this.appConfig.AzureSpeechServicesKey).ConfigureAwait(false);
