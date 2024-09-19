@@ -1,17 +1,19 @@
+@model Guid
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Talking Avatar Chat Demo</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='image/favicon.ico') }}">
-    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <link rel="stylesheet" href="~/css/styles.css">
+    <link rel="icon" href="~/image/favicon.ico">
+    <script src="~/js/chat.js"></script>
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 </head>
 <body>
 <h1>Talking Avatar Chat Demo</h1>
 
-<input type="hidden" id="clientId" value="{{ client_id }}"></input>
+    <input type="hidden" id="clientId" value="@Model.ToString()"></input>
 
 <div id="configuration">
   <h2 style="background-color: white; width: 300px;">Chat Configuration</h2>
@@ -89,7 +91,7 @@
         overflow: hidden;" hidden></textarea>
   </div>
   <div id="localVideo" hidden>
-    <video src="{{ url_for('static', filename='video/lisa-casual-sitting-idle.mp4') }}" autoplay loop muted></video>
+      <video src="@Url.Content("~/video/lisa-casual-sitting-idle.mp4")" autoplay loop muted></video>
   </div>
   <div id="remoteVideo"></div>
 </div>
