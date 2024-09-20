@@ -9,6 +9,7 @@ var messages = []
 var messageInitiated = false
 var dataSources = []
 var sentenceLevelPunctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ]
+var enableDisplayTextAlignmentWithSpeech = true
 var enableQuickReply = false
 var quickReplies = [ 'Let me take a look.', 'Let me check.', 'One moment, please.' ]
 var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
@@ -322,9 +323,11 @@ function speakNext(text, endingSilenceMs = 0) {
         ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></mstts:ttsembedding></voice></speak>`
     }
 
-    let chatHistoryTextArea = document.getElementById('chatHistory')
-    chatHistoryTextArea.innerHTML += text.replace(/\n/g, '<br/>')
-    chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+    if (enableDisplayTextAlignmentWithSpeech) {
+        let chatHistoryTextArea = document.getElementById('chatHistory')
+        chatHistoryTextArea.innerHTML += text.replace(/\n/g, '<br/>')
+        chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+    }
 
     lastSpeakTime = new Date()
     isSpeaking = true
@@ -535,6 +538,12 @@ function handleUserQuery(userQuery, userQueryHTML, imgUrlPath) {
                         console.log(chunkString)
                     }
                 })
+
+                if (!enableDisplayTextAlignmentWithSpeech) {
+                    chatHistoryTextArea.innerHTML += displaySentence.replace(/\n/g, '<br/>')
+                    chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+                    displaySentence = ''
+                }
 
                 // Continue reading the next chunk
                 return read()
