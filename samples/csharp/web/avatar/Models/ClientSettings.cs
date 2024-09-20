@@ -19,6 +19,8 @@ namespace Avatar.Models
 
         public static readonly bool EnableQuickReply = false;
 
+        public static readonly bool EnableDisplayTextAlignmentWithSpeech = false;
+
         public string? SpeechRegion { get; set; }
 
         public string? SpeechKey { get; set; }
