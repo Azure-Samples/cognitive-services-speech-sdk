@@ -60,11 +60,11 @@ Video translation client tool and API sample code
 
 # Best practice
    ## Escape char for argument -videoFileAzureBlobUrl and -webvttFileAzureBlobUrl
-   If you run a client sample tool in a Windows shell and there is an & in the URL arguments (for example, a SAS token in an Azure blob URL), the & needs to be converted to && to escape it.
+   If you run a client sample tool in a Windows shell and there is an & in the URL arguments (for example, a SAS token in an Azure blob URL), the & needs to be converted to ^& to escape it.
 
    For example, if the actual URL for the argument videoFileAzureBlobUrl is https://a/b?c&d, then when you run the command in the Windows shell, you need to run the command like this:
 
-      -videoFileAzureBlobUrl "https://a/b?c&&d"
+      -videoFileAzureBlobUrl "https://a/b?c^&d"
 
    ## How to retry?
    If you initiate a command to create a translation or iteration job and subsequently restart Windows, the job will continue to run on the server side. To check the status of the translation/iteration job, you can use the query translation/iteration tool command or the API, providing the specific translation/iteration ID.
