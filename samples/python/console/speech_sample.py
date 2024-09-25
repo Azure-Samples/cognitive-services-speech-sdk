@@ -37,7 +37,7 @@ weatherfilename = "whatstheweatherlike.wav"
 weatherfilenamemp3 = "whatstheweatherlike.mp3"
 weatherfilenamemulaw = "whatstheweatherlike-mulaw.wav"
 seasonsfilename = "pronunciation_assessment_fall.wav"
-zhcnfilename = "zhcn_sample.wav"
+zhcnfilename = "zhcn_short_dummy_sample.wav"
 
 
 def speech_recognize_once_from_mic():
