@@ -59,9 +59,9 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/python/from-microphone",
             "suggested": true,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
+				"owner": "BinarywoodB",
 				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
+				"ref": "extension",
 				"dir": "quickstart/python/from-microphone"
 			}
         },
