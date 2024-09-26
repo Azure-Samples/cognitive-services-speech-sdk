@@ -36,6 +36,36 @@
     },
     "samples": [
         {
+            "id": "quickstart-recognize-speech-from-a-microphone-python",
+            "onboardDate": "2024-09-26",
+            "title": "Quickstart: Recognize speech from a microphone from Python using the Speech Service",
+            "shortId": "recognize-speech-python",
+            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
+            "fullDescription": "This sample shows how to use the Speech Service through the Speech SDK for Python.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "Python"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/python/from-microphone/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/python/from-microphone",
+            "suggested": true,
+            "downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/python/from-microphone"
+			}
+        },
+        {
             "id": "quickstart-recognize-speech-from-a-microphone-cpp-linux",
             "onboardDate": "2024-09-18",
             "title": "Quickstart: Recognize speech from a microphone in C++ using Speech SDK for Linux",
@@ -58,7 +88,7 @@
             "gifPath": "assets/sampleDemo.gif",
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/linux/from-microphone/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/from-microphone",
-            "suggested": true,
+            "suggested": false,
             "downloadUrlInfo": {
 				"owner": "BinarywoodB",
 				"repository": "cognitive-services-speech-sdk",
@@ -389,6 +419,34 @@
 			}
         },
         {
+            "id": "quickstart-synthesize-speech-python",
+            "onboardDate": "2024-09-26",
+            "title": "Quickstart: Synthesize speech from Python using the Speech Service",
+            "shortId": "synthesize-speech-python",
+            "shortDescription": "Demonstrates one-shot speech synthesis to the default speaker.",
+            "fullDescription": "This sample demonstrates how to synthesize speech with C++ using the Speech SDK for Linux.",
+            "types": [
+                "Text to Speech"
+            ],
+            "tags": [
+                "Text to Speech",
+                "Python"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/synthesis-speech.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/python/text-to-speech/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/python/text-to-speech",
+            "suggested": true,
+			"downloadUrlInfo": {
+				"owner": "Azure-Samples",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "master",
+				"dir": "quickstart/python/text-to-speech"
+			}
+        },
+        {
             "id": "quickstart-synthesize-speech-cpp-linux",
             "onboardDate": "2024-09-18",
             "title": "Quickstart: Synthesize speech in C++ for Linux",
@@ -409,7 +467,7 @@
             "gifPath": "assets/sampleDemo.gif",
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/linux/text-to-speech/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/text-to-speech",
-            "suggested": true,
+            "suggested": false,
 			"downloadUrlInfo": {
 				"owner": "Azure-Samples",
 				"repository": "cognitive-services-speech-sdk",
