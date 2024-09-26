@@ -909,7 +909,7 @@ def pronunciation_assessment_continuous_from_file():
         pronunciation_config.enable_prosody_assessment()
 
     # Creates a speech recognizer using a file as audio input.
-    language = 'en-US'
+    language = 'zh-CN'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
