@@ -6,14 +6,51 @@
 // <code>
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
+#include <fstream>
+#include <string>
+#include <unordered_map>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
+unordered_map<string, string> loadConfig(const string& filename) {
+    unordered_map<string, string> config;
+    ifstream file(filename);
+    string line;
+
+    if (!file.is_open()) {
+        cerr << "Could not open the config file: " << filename << endl;
+        return config;
+    }
+
+    while (getline(file, line)) {
+        if (line.empty() || line[0] == '#') {
+            continue;  // Skip empty lines and comments
+        }
+
+        size_t delimiterPos = line.find('=');
+        if (delimiterPos != string::npos) {
+            string key = line.substr(0, delimiterPos);
+            string value = line.substr(delimiterPos + 1);
+            config[key] = value;
+        }
+    }
+
+    file.close();
+    return config;
+}
+
 void recognizeSpeech() {
+    string configFilePath = "./.env/.env.dev";
+    auto envConfig = loadConfig(configFilePath);
+
+    // Retrieve the values
+    string subscriptionKey = envConfig["SPEECH_SERVICE_KEY"];
+    string serviceRegion = envConfig["SERVICE_REGION"];
+
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    auto config = SpeechConfig::FromSubscription(subscriptionKey, serviceRegion);
 
     // Creates a speech recognizer
     auto recognizer = SpeechRecognizer::FromConfig(config);
