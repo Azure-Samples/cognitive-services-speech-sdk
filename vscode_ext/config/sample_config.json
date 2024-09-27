@@ -88,12 +88,43 @@
             "gifPath": "assets/sampleDemo.gif",
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/linux/from-microphone/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/from-microphone",
-            "suggested": false,
+            "suggested": true,
             "downloadUrlInfo": {
 				"owner": "BinarywoodB",
 				"repository": "cognitive-services-speech-sdk",
 				"ref": "extension",
 				"dir": "quickstart/cpp/linux/from-microphone"
+			}
+        },
+        {
+            "id": "quickstart-recognize-speech-from-a-microphone-javascript-browser",
+            "onboardDate": "2024-09-26",
+            "title": "Quickstart: Recognize speech in JavaScript on a Web Browser",
+            "shortId": "recognize-speech-javascript-browser",
+            "shortDescription": "Demonstrates one-shot speech recognition from a microphone.",
+            "fullDescription": "These samples demonstrate how to recognize speech using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.",
+            "types": [
+                "Speech To Text",
+                "Realtime STT"
+            ],
+            "tags": [
+                "Speech To Text",
+                "Realtime STT",
+                "JavaScript",
+                "Browser"
+            ],
+            "time": "5min to run",
+            "configuration": "Ready for debug",
+            "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/realtime-speech-to-text.png",
+            "gifPath": "assets/sampleDemo.gif",
+            "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/javascript/browser/from-microphone/README.md",
+            "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/javascript/browser/from-microphone/from-microphone",
+            "suggested": true,
+            "downloadUrlInfo": {
+				"owner": "BinarywoodB",
+				"repository": "cognitive-services-speech-sdk",
+				"ref": "extension",
+				"dir": "quickstart/javascript/browser/from-microphone"
 			}
         },
         {
