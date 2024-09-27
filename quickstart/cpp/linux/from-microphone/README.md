@@ -6,6 +6,13 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 > **Note:**
 > We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
 
+## Run the Sample within VS Code
+- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Download this sample from sample gallery to local machine.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
+- Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
+- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
