@@ -4,6 +4,12 @@
 These samples demonstrate how to recognize speech from an audio file using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 * See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-file?pivots=programming-language-javascript) on the SDK documentation page which describes how to build this sample from scratch in your favorite editor.
 
+## Run the Sample within VS Code
+- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Download this sample from sample gallery to local machine.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
+- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
