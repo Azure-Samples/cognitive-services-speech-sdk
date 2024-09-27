@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run Python App",
+            "label": "Run the App",
             "type": "shell",
             "command": "python",
             "args": [
@@ -15,7 +15,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Install Dependencies",
+            "label": "Build the App",
             "type": "shell",
             "command": "pip",
             "args": [
