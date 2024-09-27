@@ -344,7 +344,7 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/javascript/browser/from-file/from-microphone",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
+				"owner": "BinarywoodB",
 				"repository": "cognitive-services-speech-sdk",
 				"ref": "master",
 				"dir": "quickstart/javascript/browser/from-file"
