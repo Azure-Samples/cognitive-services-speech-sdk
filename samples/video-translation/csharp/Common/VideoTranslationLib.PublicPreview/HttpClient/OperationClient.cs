@@ -23,7 +23,7 @@ public class OperationClient<TDeploymentEnvironment> : HttpClientBase<TDeploymen
     {
     }
 
-    public override string ControllerName => "Operations";
+    public override string ControllerName => "operations";
 
     public async Task QueryOperationUntilTerminateAsync(
         Uri operationLocation)
