@@ -8,7 +8,8 @@ These samples demonstrate how to recognize speech from an audio file using the S
 - Install "Azure AI Speech Toolkit" extension in VS Code.
 - Download this sample from sample gallery to local machine.
 - Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
-- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample. This will open the `index.html` file in your default browser.
+- Use value of `SPEECH_RESOURCE_KEY` and `SERVICE_REGION` in `./.env/.env/dev` file to set in the input fields `Subscription` and `Region`. Select a wave file to recognize. Click `Start Recognition` button to start recognizing speech.
 
 ## Prerequisites
 
