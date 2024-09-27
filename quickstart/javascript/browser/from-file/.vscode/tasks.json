@@ -9,7 +9,7 @@
             "detail": "Install the http-server globally."
         },
         {
-            "label": "Build the App",
+            "label": "Run the App",
             "type": "shell",
             "command": "http-server . -o index.html",
             "problemMatcher": [],
