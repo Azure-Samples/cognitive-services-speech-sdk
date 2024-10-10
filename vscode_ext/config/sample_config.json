@@ -4,9 +4,9 @@
             "Speech To Text",
             "Text To Speech",
             "Speech Translation",
-            "Realtime STT",
-            "Batch STT",
-            "Batch TTS",
+            "Realtime Speech To Text",
+            "Batch Speech To Text",
+            "Batch Text to Speech",
             "Speech Translation",
             "Keyword Recognition",
             "Custom Keyword",
@@ -44,11 +44,11 @@
             "fullDescription": "This sample shows how to use the Speech Service through the Speech SDK for Python.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "Python"
             ],
             "time": "5min to run",
@@ -74,11 +74,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech with C++ using the Speech SDK for Linux.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "C++",
                 "Linux"
             ],
@@ -105,11 +105,11 @@
             "fullDescription": "These samples demonstrate how to recognize speech using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "JavaScript",
                 "Browser"
             ],
@@ -136,11 +136,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech with C++ using the Speech SDK for Windows.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "C++",
                 "Windows"
             ],
@@ -167,11 +167,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech with C++ using the Speech SDK for macOS.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "C++",
                 "MacOS"
             ],
@@ -198,11 +198,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech  with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "C#",
                 "Windows",
                 ".NET Framework"
@@ -230,11 +230,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech with C# under .NET 6.0 (Windows, macOS, or Linux) using the Speech SDK.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "C#",
                 "Windows",
                 "MacOS",
@@ -265,11 +265,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech using wave file as an input with C++ using the Speech SDK for Windows.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "C++",
                 "Windows"
             ],
@@ -296,11 +296,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech from a wave file with C# under the .NET Framework (version 4.6.1 or above) using the Speech SDK for Windows.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "C#",
                 "Windows",
                 ".NET Framework"
@@ -328,11 +328,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech from an audio file using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "JavaScript",
                 "Browser"
             ],
@@ -351,24 +351,20 @@
 			}
         },
         {
-            "id": "batch-transcription-from-blob-restapi-csharp",
+            "id": "batch-transcription-restapi-csharp",
             "onboardDate": "2024-09-18",
-            "title": "Batch Transcription From Blob (REST API) C#",
+            "title": "Batch Transcription API in C#",
             "shortId": "template-batch-transcrpition-csharp",
-            "shortDescription": "Demonstrates usage of batch transcription from blob through Rest API.",
+            "shortDescription": "Demonstrates usage of batch transcription through Rest API.",
             "fullDescription": "This sample demonstrates how to use the Speech Service Batch Transcription API in C#.",
             "types": [
                 "Speech To Text",
-                "Batch STT"
+                "Batch Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Batch STT",
-                "C#",
-                "Linux",
-                "Windows",
-                "IOS",
-                "MacOS"
+                "Batch Speech To Text",
+                "C#"
             ],
             "time": "5min to run",
             "configuration": "Ready for debug",
@@ -385,19 +381,19 @@
 			}
         },
         {
-            "id": "batch-transcription-from-blob-restapi-js",
+            "id": "batch-transcription-restapi-js",
             "onboardDate": "2024-09-06",
-            "title": "Batch Transcription From Blob (REST API) Node JS",
+            "title": "Batch Transcription API in Node JS",
             "shortId": "template-batch-transcrpition-js",
-            "shortDescription": "Demonstrates usage of batch transcription from blob through Rest API.",
+            "shortDescription": "Demonstrates usage of batch transcription through Rest API.",
             "fullDescription": "This sample demonstrates how to use the Speech Service Batch Transcription API from Node.js.",
             "types": [
                 "Speech To Text",
-                "Batch STT"
+                "Batch Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Batch STT",
+                "Batch Speech To Text",
                 "JavaScript",
                 "Node.js"
             ],
@@ -416,24 +412,20 @@
 			}
         },
         {
-            "id": "batch-transcription-from-blob-restapi-python",
+            "id": "batch-transcription-restapi-python",
             "onboardDate": "2024-09-06",
-            "title": "Batch Transcription From Blob (REST API) Python",
+            "title": "Batch Transcription API in Python",
             "shortId": "template-batch-transcrpition-python",
-            "shortDescription": "Demonstrates usage of batch transcription from blob through Rest API.",
+            "shortDescription": "Demonstrates usage of batch transcription through Rest API.",
             "fullDescription": "This sample demonstrates how to use the Speech Service Batch Transcription API from Python",
             "types": [
                 "Speech To Text",
-                "Batch STT"
+                "Batch Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Batch STT",
-                "Python",
-                "Linux",
-                "Windows",
-                "IOS",
-                "MacOS"
+                "Batch Speech To Text",
+                "Python"
             ],
             "time": "5min to run",
             "configuration": "Ready for debug",
@@ -782,11 +774,11 @@
             "fullDescription": "This sample demonstrates how to recognize speech in compressed audio input stream with C++ using the Speech SDK for Linux.",
             "types": [
                 "Speech To Text",
-                "Realtime STT"
+                "Realtime Speech To Text"
             ],
             "tags": [
                 "Speech To Text",
-                "Realtime STT",
+                "Realtime Speech To Text",
                 "C++",
                 "Linux"
             ],
@@ -929,11 +921,11 @@
             "fullDescription": "The Batch synthesis API provides asynchronous synthesis of long-form text to speech.",
             "types": [
                 "Text to Speech",
-                "Batch TTS"
+                "Batch Text to Speech"
             ],
             "tags": [
                 "Text to Speech",
-                "Batch TTS",
+                "Batch Text to Speech",
                 "C#"
             ],
             "time": "5min to run",
@@ -959,11 +951,11 @@
             "fullDescription": "The Batch synthesis API provides asynchronous synthesis of long-form text to speech.",
             "types": [
                 "Text to Speech",
-                "Batch TTS"
+                "Batch Text to Speech"
             ],
             "tags": [
                 "Text to Speech",
-                "Batch TTS",
+                "Batch Text to Speech",
                 "Python"
             ],
             "time": "5min to run",
