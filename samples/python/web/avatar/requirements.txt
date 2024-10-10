@@ -1,6 +1,7 @@
 azure-cognitiveservices-speech
 azure-identity
 flask
+flask-socketio
 openai
 pytz
 requests

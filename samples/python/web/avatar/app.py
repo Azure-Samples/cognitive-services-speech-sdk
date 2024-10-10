@@ -2,6 +2,7 @@
 # Licensed under the MIT license.
 
 import azure.cognitiveservices.speech as speechsdk
+import base64
 import datetime
 import html
 import json
@@ -15,11 +16,15 @@ import time
 import traceback
 import uuid
 from flask import Flask, Response, render_template, request
+from flask_socketio import SocketIO, join_room
 from azure.identity import DefaultAzureCredential
 from openai import AzureOpenAI
 
 # Create the Flask app
 app = Flask(__name__, template_folder='.')
+
+# Create the SocketIO instance
+socketio = SocketIO(app)
 
 # Environment variables
 # Speech resource (required)
@@ -43,6 +48,8 @@ ice_server_username = os.environ.get('ICE_SERVER_USERNAME') # The ICE username
 ice_server_password = os.environ.get('ICE_SERVER_PASSWORD') # The ICE password
 
 # Const variables
+enable_websockets = False # Enable websockets between client and server for real-time communication optimization
+enable_token_auth_for_speech = False # Enable token authentication for speech service
 default_tts_voice = 'en-US-JennyMultilingualV2Neural' # Default TTS voice
 sentence_level_punctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ] # Punctuations that indicate the end of a sentence
 enable_quick_reply = False # Enable quick reply for certain chat models which take longer time to respond
@@ -71,7 +78,7 @@ def basicView():
 # The chat route, which shows the chat web page
 @app.route("/chat")
 def chatView():
-    return render_template("chat.html", methods=["GET"], client_id=initializeClient())
+    return render_template("chat.html", methods=["GET"], client_id=initializeClient(), enable_websockets=enable_websockets)
 
 # The API route to get the speech token
 @app.route("/api/getSpeechToken", methods=["GET"])
@@ -115,9 +122,21 @@ def connectAvatar() -> Response:
     try:
         if speech_private_endpoint:
             speech_private_endpoint_wss = speech_private_endpoint.replace('https://', 'wss://')
-            speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=f'{speech_private_endpoint_wss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+            if enable_token_auth_for_speech:
+                while not speech_token:
+                    time.sleep(0.2)
+                speech_config = speechsdk.SpeechConfig(endpoint=f'{speech_private_endpoint_wss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+                speech_config.authorization_token = speech_token
+            else:
+                speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=f'{speech_private_endpoint_wss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
         else:
-            speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=f'wss://{speech_region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+            if enable_token_auth_for_speech:
+                while not speech_token:
+                    time.sleep(0.2)
+                speech_config = speechsdk.SpeechConfig(endpoint=f'wss://{speech_region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+                speech_config.authorization_token = speech_token
+            else:
+                speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=f'wss://{speech_region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
 
         if custom_voice_endpoint_id:
             speech_config.endpoint_id = custom_voice_endpoint_id
@@ -202,6 +221,107 @@ def connectAvatar() -> Response:
     except Exception as e:
         return Response(f"Result ID: {speech_sythesis_result.result_id}. Error message: {e}", status=400)
 
+# The API route to connect the STT service
+@app.route("/api/connectSTT", methods=["POST"])
+def connectSTT() -> Response:
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    system_prompt = request.headers.get('SystemPrompt')
+    client_context = client_contexts[client_id]
+    try:
+        if speech_private_endpoint:
+            speech_private_endpoint_wss = speech_private_endpoint.replace('https://', 'wss://')
+            if enable_token_auth_for_speech:
+                while not speech_token:
+                    time.sleep(0.2)
+                speech_config = speechsdk.SpeechConfig(endpoint=f'{speech_private_endpoint_wss}/stt/speech/universal/v2')
+                speech_config.authorization_token = speech_token
+            else:
+                speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=f'{speech_private_endpoint_wss}/stt/speech/universal/v2')
+        else:
+            if enable_token_auth_for_speech:
+                while not speech_token:
+                    time.sleep(0.2)
+                speech_config = speechsdk.SpeechConfig(endpoint=f'wss://{speech_region}.stt.speech.microsoft.com/speech/universal/v2')
+                speech_config.authorization_token = speech_token
+            else:
+                speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=f'wss://{speech_region}.stt.speech.microsoft.com/speech/universal/v2')
+
+        audio_input_stream = speechsdk.audio.PushAudioInputStream()
+        client_context['audio_input_stream'] = audio_input_stream
+
+        audio_config = speechsdk.audio.AudioConfig(stream=audio_input_stream)
+        speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+        client_context['speech_recognizer'] = speech_recognizer
+
+        speech_recognizer.session_started.connect(lambda evt: print(f'STT session started - session id: {evt.session_id}'))
+        speech_recognizer.session_stopped.connect(lambda evt: print(f'STT session stopped.'))
+
+        speech_recognition_start_time = datetime.datetime.now(pytz.UTC)
+
+        def stt_recognized_cb(evt):
+            if evt.result.reason == speechsdk.ResultReason.RecognizedSpeech:
+                try:
+                    user_query = evt.result.text.strip()
+                    if user_query == '':
+                        return
+
+                    socketio.emit("response", { 'path': 'api.chat', 'chatResponse': '\n\nUser: ' + user_query + '\n\n' }, room=client_id)
+                    recognition_result_received_time = datetime.datetime.now(pytz.UTC)
+                    speech_finished_offset = (evt.result.offset + evt.result.duration) / 10000
+                    stt_latency = round((recognition_result_received_time - speech_recognition_start_time).total_seconds() * 1000 - speech_finished_offset)
+                    print(f'STT latency: {stt_latency}ms')
+                    socketio.emit("response", { 'path': 'api.chat', 'chatResponse': f"<STTL>{stt_latency}</STTL>" }, room=client_id)
+                    chat_initiated = client_context['chat_initiated']
+                    if not chat_initiated:
+                        initializeChatContext(system_prompt, client_id)
+                        client_context['chat_initiated'] = True
+                    first_response_chunk = True
+                    for chat_response in handleUserQuery(user_query, client_id):
+                        if first_response_chunk:
+                            socketio.emit("response", { 'path': 'api.chat', 'chatResponse': 'Assistant: ' }, room=client_id)
+                            first_response_chunk = False
+                        socketio.emit("response", { 'path': 'api.chat', 'chatResponse': chat_response }, room=client_id)
+                except Exception as e:
+                    print(f"Error in handling user query: {e}")
+        speech_recognizer.recognized.connect(stt_recognized_cb)
+
+        def stt_recognizing_cb(evt):
+            is_speaking = client_context['is_speaking']
+            if is_speaking:
+                stopSpeakingInternal(client_id)
+        speech_recognizer.recognizing.connect(stt_recognizing_cb)
+
+        def stt_canceled_cb(evt):
+            cancellation_details = speechsdk.CancellationDetails(evt.result)
+            print(f'STT connection canceled. Error message: {cancellation_details.error_details}')
+        speech_recognizer.canceled.connect(stt_canceled_cb)
+
+        speech_recognizer.start_continuous_recognition()
+        return Response(status=200)
+
+    except Exception as e:
+        return Response(f"STT connection failed. Error message: {e}", status=400)
+
+# The API route to disconnect the STT service
+@app.route("/api/disconnectSTT", methods=["POST"])
+def disconnectSTT() -> Response:
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    client_context = client_contexts[client_id]
+    speech_recognizer = client_context['speech_recognizer']
+    audio_input_stream = client_context['audio_input_stream']
+    try:
+        if speech_recognizer:
+            speech_recognizer.stop_continuous_recognition()
+            client_context['speech_recognizer'] = None
+        if audio_input_stream:
+            audio_input_stream.close()
+            client_context['audio_input_stream'] = None
+        return Response('STT Disconnected.', status=200)
+    except Exception as e:
+        return Response(f"STT disconnection failed. Error message: {e}", status=400)
+
 # The API route to speak a given SSML
 @app.route("/api/speak", methods=["POST"])
 def speak() -> Response:
@@ -262,10 +382,44 @@ def disconnectAvatar() -> Response:
     except:
         return Response(traceback.format_exc(), status=400)
 
+@socketio.on("connect")
+def handleWsConnection():
+    client_id = uuid.UUID(request.args.get('clientId'))
+    join_room(client_id)
+    print(f"WebSocket connected for client {client_id}.")
+
+@socketio.on("message")
+def handleWsMessage(message):
+    global client_contexts
+    client_id = uuid.UUID(message.get('clientId'))
+    path = message.get('path')
+    client_context = client_contexts[client_id]
+    if path == 'api.audio':
+        chat_initiated = client_context['chat_initiated']
+        audio_chunk = message.get('audioChunk')
+        audio_chunk_binary = base64.b64decode(audio_chunk)
+        audio_input_stream = client_context['audio_input_stream']
+        if audio_input_stream:
+            audio_input_stream.write(audio_chunk_binary)
+    elif path == 'api.chat':
+        chat_initiated = client_context['chat_initiated']
+        if not chat_initiated:
+            initializeChatContext(message.get('systemPrompt'), client_id)
+            client_context['chat_initiated'] = True
+        user_query = message.get('userQuery')
+        for chat_response in handleUserQuery(user_query, client_id):
+            socketio.emit("response", { 'path': 'api.chat', 'chatResponse': chat_response }, room=client_id)
+    elif path == 'api.stopSpeaking':
+        is_speaking = client_contexts[client_id]['is_speaking']
+        if is_speaking:
+            stopSpeakingInternal(client_id)
+
 # Initialize the client by creating a client id and an initial context
 def initializeClient() -> uuid.UUID:
     client_id = uuid.uuid4()
     client_contexts[client_id] = {
+        'audio_input_stream': None, # Audio input stream for speech recognition
+        'speech_recognizer': None, # Speech recognizer for user speech
         'azure_openai_deployment_name': azure_openai_deployment_name, # Azure OpenAI deployment name
         'cognitive_search_index_name': cognitive_search_index_name, # Cognitive search index name
         'tts_voice': default_tts_voice, # TTS voice
@@ -288,9 +442,19 @@ def initializeClient() -> uuid.UUID:
 def refreshIceToken() -> None:
     global ice_token
     if speech_private_endpoint:
-        ice_token = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
+        if enable_token_auth_for_speech:
+            while not speech_token:
+                time.sleep(0.2)
+            ice_token = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'}).text
+        else:
+            ice_token = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
     else:
-        ice_token = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
+        if enable_token_auth_for_speech:
+            while not speech_token:
+                time.sleep(0.2)
+            ice_token = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'}).text
+        else:
+            ice_token = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
 
 # Refresh the speech token every 9 minutes
 def refreshSpeechToken() -> None:

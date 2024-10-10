@@ -153,8 +153,16 @@ namespace Avatar.Controllers
                     speechConfig.EndpointId = customVoiceEndpointId;
                 }
 
-                var speechSynthesizer = new SpeechSynthesizer(speechConfig);
+                var speechSynthesizer = new SpeechSynthesizer(speechConfig, null);
                 clientContext.SpeechSynthesizer = speechSynthesizer;
+
+                if (ClientSettings.EnableAudioAudit)
+                {
+                    speechSynthesizer.Synthesizing += (o, e) =>
+                    {
+                        Console.WriteLine($"Audio chunk received: {e.Result.AudioData.Length} bytes.");
+                    };
+                }
 
                 if (string.IsNullOrEmpty(GlobalVariables.IceToken))
                 {
@@ -168,7 +176,7 @@ namespace Avatar.Controllers
                 {
                     iceTokenObj = new Dictionary<string, object>
                     {
-                        { "Urls", string.IsNullOrEmpty(_clientSettings.IceServerUrlRemote) ? [_clientSettings.IceServerUrl] : new[] { _clientSettings.IceServerUrlRemote } },
+                        { "Urls", string.IsNullOrEmpty(_clientSettings.IceServerUrlRemote) ? new JArray(_clientSettings.IceServerUrl) : new JArray(_clientSettings.IceServerUrlRemote) },
                         { "Username", _clientSettings.IceServerUsername },
                         { "Password", _clientSettings.IceServerPassword }
                     };
@@ -189,7 +197,7 @@ namespace Avatar.Controllers
                 var videoCrop = Request.Headers["VideoCrop"].FirstOrDefault() ?? "false";
 
                 // Configure avatar settings
-                var urlsArray = iceTokenObj?.TryGetValue("Urls", out var value) == true ? value as string[] : null;
+                var urlsArray = iceTokenObj?.TryGetValue("Urls", out var value) == true ? value as JArray : null;
 
                 var firstUrl = urlsArray?.FirstOrDefault()?.ToString();
 
@@ -213,7 +221,8 @@ namespace Avatar.Controllers
                                             username = iceTokenObj!["Username"],
                                             credential = iceTokenObj["Password"]
                                         }
-                                    }
+                                    },
+                                    auditAudio = ClientSettings.EnableAudioAudit
                                 }
                             },
                             format = new
@@ -255,7 +264,7 @@ namespace Avatar.Controllers
                 connection.SetMessageProperty("speech.config", "context", JsonConvert.SerializeObject(avatarConfig));
 
                 var speechSynthesisResult = speechSynthesizer.SpeakTextAsync("").Result;
-                    Console.WriteLine($"Result ID: {speechSynthesisResult.ResultId}");
+                Console.WriteLine($"Result ID: {speechSynthesisResult.ResultId}");
                 if (speechSynthesisResult.Reason == ResultReason.Canceled)
                 {
                     var cancellationDetails = SpeechSynthesisCancellationDetails.FromResult(speechSynthesisResult);
@@ -456,7 +465,7 @@ namespace Avatar.Controllers
             // We return some quick reply here before the chat API returns to mitigate.
             if (ClientSettings.EnableQuickReply)
             {
-                await SpeakWithQueue(ClientSettings.QuickReplies[new Random().Next(ClientSettings.QuickReplies.Count)], 2000, clientId);
+                await SpeakWithQueue(ClientSettings.QuickReplies[new Random().Next(ClientSettings.QuickReplies.Count)], 2000, clientId, httpResponse);
             }
 
             // Process the responseContent as needed
@@ -507,9 +516,13 @@ namespace Avatar.Controllers
                         responseToken = ClientSettings.OydDocRegex.Replace(responseToken, string.Empty);
                     }
 
-                    await httpResponse.WriteAsync(responseToken).ConfigureAwait(false);
+                    if (!ClientSettings.EnableDisplayTextAlignmentWithSpeech)
+                    {
+                        await httpResponse.WriteAsync(responseToken).ConfigureAwait(false);
+                    }
 
                     assistantReply.Append(responseToken);
+                    spokenSentence.Append(responseToken); // build up the spoken sentence
                     if (responseToken == "\n" || responseToken == "\n\n")
                     {
                         if (isFirstSentence)
@@ -520,13 +533,12 @@ namespace Avatar.Controllers
                             isFirstSentence = false;
                         }
 
-                        await SpeakWithQueue(spokenSentence.ToString().Trim(), 0, clientId);
+                        await SpeakWithQueue(spokenSentence.ToString(), 0, clientId, httpResponse);
                         spokenSentence.Clear();
                     }
                     else
                     {
                         responseToken = responseToken.Replace("\n", string.Empty);
-                        spokenSentence.Append(responseToken); // build up the spoken sentence
                         if (responseToken.Length == 1 || responseToken.Length == 2)
                         {
                             foreach (var punctuation in ClientSettings.SentenceLevelPunctuations)
@@ -541,7 +553,7 @@ namespace Avatar.Controllers
                                         isFirstSentence = false;
                                     }
 
-                                    await SpeakWithQueue(spokenSentence.ToString().Trim(), 0, clientId);
+                                    await SpeakWithQueue(spokenSentence.ToString(), 0, clientId, httpResponse);
                                     spokenSentence.Clear();
                                     break;
                                 }
@@ -553,11 +565,21 @@ namespace Avatar.Controllers
 
             if (spokenSentence.Length > 0)
             {
-                await SpeakWithQueue(spokenSentence.ToString().Trim(), 0, clientId);
+                await SpeakWithQueue(spokenSentence.ToString(), 0, clientId, httpResponse);
             }
 
             var assistantMessage = new AssistantChatMessage(assistantReply.ToString());
             messages.Add(assistantMessage);
+
+            if (ClientSettings.EnableDisplayTextAlignmentWithSpeech)
+            {
+                while (clientContext.SpokenTextQueue.Count > 0)
+                {
+                    await Task.Delay(200);
+                }
+
+                await Task.Delay(200);
+            }
         }
 
         public void InitializeChatContext(string systemPrompt, Guid clientId)
@@ -572,7 +594,7 @@ namespace Avatar.Controllers
         }
 
         // Speak the given text. If there is already a speaking in progress, add the text to the queue. For chat scenario.
-        public Task SpeakWithQueue(string text, int endingSilenceMs, Guid clientId)
+        public Task SpeakWithQueue(string text, int endingSilenceMs, Guid clientId, HttpResponse httpResponse)
         {
             var clientContext = _clientService.GetClientContext(clientId);
 
@@ -595,6 +617,11 @@ namespace Avatar.Controllers
                         while (spokenTextQueue.Count > 0)
                         {
                             var currentText = spokenTextQueue.Dequeue();
+                            if (ClientSettings.EnableDisplayTextAlignmentWithSpeech)
+                            {
+                                httpResponse.WriteAsync(currentText);
+                            }
+
                             await SpeakText(currentText, ttsVoice!, personalVoiceSpeakerProfileId!, endingSilenceMs, clientId);
                             clientContext.LastSpeakTime = DateTime.UtcNow;
                         }
