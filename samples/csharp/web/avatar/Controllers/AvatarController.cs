@@ -153,8 +153,16 @@ namespace Avatar.Controllers
                     speechConfig.EndpointId = customVoiceEndpointId;
                 }
 
-                var speechSynthesizer = new SpeechSynthesizer(speechConfig);
+                var speechSynthesizer = new SpeechSynthesizer(speechConfig, null);
                 clientContext.SpeechSynthesizer = speechSynthesizer;
+
+                if (ClientSettings.EnableAudioAudit)
+                {
+                    speechSynthesizer.Synthesizing += (o, e) =>
+                    {
+                        Console.WriteLine($"Audio chunk received: {e.Result.AudioData.Length} bytes.");
+                    };
+                }
 
                 if (string.IsNullOrEmpty(GlobalVariables.IceToken))
                 {
@@ -168,7 +176,7 @@ namespace Avatar.Controllers
                 {
                     iceTokenObj = new Dictionary<string, object>
                     {
-                        { "Urls", string.IsNullOrEmpty(_clientSettings.IceServerUrlRemote) ? [_clientSettings.IceServerUrl] : new[] { _clientSettings.IceServerUrlRemote } },
+                        { "Urls", string.IsNullOrEmpty(_clientSettings.IceServerUrlRemote) ? new JArray(_clientSettings.IceServerUrl) : new JArray(_clientSettings.IceServerUrlRemote) },
                         { "Username", _clientSettings.IceServerUsername },
                         { "Password", _clientSettings.IceServerPassword }
                     };
@@ -189,7 +197,7 @@ namespace Avatar.Controllers
                 var videoCrop = Request.Headers["VideoCrop"].FirstOrDefault() ?? "false";
 
                 // Configure avatar settings
-                var urlsArray = iceTokenObj?.TryGetValue("Urls", out var value) == true ? value as string[] : null;
+                var urlsArray = iceTokenObj?.TryGetValue("Urls", out var value) == true ? value as JArray : null;
 
                 var firstUrl = urlsArray?.FirstOrDefault()?.ToString();
 
@@ -213,7 +221,8 @@ namespace Avatar.Controllers
                                             username = iceTokenObj!["Username"],
                                             credential = iceTokenObj["Password"]
                                         }
-                                    }
+                                    },
+                                    auditAudio = ClientSettings.EnableAudioAudit
                                 }
                             },
                             format = new
@@ -255,7 +264,7 @@ namespace Avatar.Controllers
                 connection.SetMessageProperty("speech.config", "context", JsonConvert.SerializeObject(avatarConfig));
 
                 var speechSynthesisResult = speechSynthesizer.SpeakTextAsync("").Result;
-                    Console.WriteLine($"Result ID: {speechSynthesisResult.ResultId}");
+                Console.WriteLine($"Result ID: {speechSynthesisResult.ResultId}");
                 if (speechSynthesisResult.Reason == ResultReason.Canceled)
                 {
                     var cancellationDetails = SpeechSynthesisCancellationDetails.FromResult(speechSynthesisResult);

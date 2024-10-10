@@ -21,6 +21,8 @@ namespace Avatar.Models
 
         public static readonly bool EnableDisplayTextAlignmentWithSpeech = false;
 
+        public static readonly bool EnableAudioAudit = false;
+
         public string? SpeechRegion { get; set; }
 
         public string? SpeechKey { get; set; }
