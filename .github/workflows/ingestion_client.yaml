@@ -37,6 +37,13 @@ jobs:
         run: |
           if ! cmp -s ./samples/ingestion/ingestion-client/infra/main.json ./samples/ingestion/ingestion-client/infra/generated_main.json; then
             echo "Generated ARM template does not match the existing main.json. Please update main.json accordingly." >&2
+            echo "====================main.json"===================="
+            cat main.json
+            echo "=================================================="
+            echo
+            echo "===============generated_main.json"==============="
+            cat generated_main.json
+            echo "=================================================="
             exit 1
           fi
 
