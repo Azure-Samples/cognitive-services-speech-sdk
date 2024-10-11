@@ -51,7 +51,7 @@ def speech_language_detection_once_from_mic():
     print("Say something in English or German...")
 
     # Starts speech language detection, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -93,7 +93,7 @@ def speech_language_detection_once_from_file():
         audio_config=audio_config)
 
     # Starts speech language detection, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the detection text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot detection like command or query.

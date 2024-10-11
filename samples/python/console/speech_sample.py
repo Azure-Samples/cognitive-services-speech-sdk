@@ -48,7 +48,7 @@ def speech_recognize_once_from_mic():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -78,7 +78,7 @@ def speech_recognize_once_from_file():
         speech_config=speech_config, language="de-DE", audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -120,7 +120,7 @@ def speech_recognize_once_from_file_with_detailed_recognition_results():
         speech_config=speech_config, language="en-US", audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -203,7 +203,7 @@ def speech_recognize_once_compressed_input():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config, audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -239,7 +239,7 @@ def speech_recognize_once_from_file_with_customized_model():
         speech_config=speech_config, source_language_config=source_language_config, audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -274,7 +274,7 @@ def speech_recognize_once_from_file_with_custom_endpoint_parameters():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.

@@ -80,7 +80,7 @@ param AzureSpeechServicesRegion string = 'westus'
 @description('Enter the address of your private endpoint here (e.g. https://mycustomendpoint.cognitiveservices.azure.com/) if you are connecting with a private endpoint')
 param CustomEndpoint string = ''
 
-@description('The time interval for the timer trigger in the StartTranscription function (https://learn.microsoft.com/en-us/azure/azure-functions/functions-bindings-timer?tabs=python-v2%2Cisolated-process%2Cnodejs-v4&pivots=programming-language-csharp#ncrontab-expressions). The default value is every 2 minutes.')
+@description('The time interval for the timer trigger in the StartTranscription function (https://learn.microsoft.com/azure/azure-functions/functions-bindings-timer?tabs=python-v2%2Cisolated-process%2Cnodejs-v4&pivots=programming-language-csharp#ncrontab-expressions). The default value is every 2 minutes.')
 param StartTranscriptionFunctionTimeInterval string = '0 */2 * * * *'
 
 @description('The requested profanity filter mode.')
