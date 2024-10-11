@@ -144,7 +144,7 @@ param DeploymentId string = utcNow()
 param CompletedServiceBusConnectionString string = ''
 
 // Don't change the format for Version variable
-var Version = 'v2.1.10'
+var Version = 'v2.1.11'
 var AudioInputContainer = 'audio-input'
 var AudioProcessedContainer = 'audio-processed'
 var ErrorFilesOutputContainer = 'audio-failed'
@@ -665,6 +665,7 @@ resource StartTranscriptionFunctionName_AppSettings 'Microsoft.Web/sites/config@
       ServiceBusName_start_transcription_queue_StartTranscription.id,
       '2017-04-01'
     ).primaryConnectionString
+    Version: Version
     WEBSITE_RUN_FROM_PACKAGE: (TimerBasedExecution
       ? StartTranscriptionByTimerBinary
       : StartTranscriptionByServiceBusBinary)
@@ -740,6 +741,7 @@ resource FetchTranscriptionFunctionName_AppSettings 'Microsoft.Web/sites/config@
     ConversationPiiSetting: ConversationPiiRedaction
     ConversationSummarizationOptions: ConversationSummarizationOptions
     CompletedServiceBusConnectionString: CompletedServiceBusConnectionString
+    Version: Version
   }
   dependsOn: [
     KeyVault

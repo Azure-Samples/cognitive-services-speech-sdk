@@ -32,15 +32,15 @@
 
   <h2 style="background-color: white; width: 300px;">Speech Configuration</h2>
   <label style="font-size: medium;" for="sttLocale">STT Locale(s):</label>
-  <input id="sttLocales" type="text" size="64" style="font-size: medium;" value="en-US,de-DE,es-ES,fr-FR,it-IT,ja-JP,ko-KR,zh-CN"></input><br />
+  <input id="sttLocales" type="text" size="64" style="font-size: medium;" value="en-US"></input><br />
   <label style="font-size: medium;" for="ttsVoice">TTS Voice:</label>
-  <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyMultilingualV2Neural"></input><br />
+  <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyNeural"></input><br />
   <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
   <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
   <label style="font-size: medium;" for="personalVoiceSpeakerProfileID">Personal Voice Speaker Profile ID:</label>
   <input id="personalVoiceSpeakerProfileID" type="text" size="32" style="font-size: medium;" value=""></input><br />
   <div style="background-color: white; width: 300px;">
-    <input type="checkbox" id="continuousConversation">Continuous Conversation</input><br />
+    <input type="checkbox" id="continuousConversation" checked>Continuous Conversation</input><br />
   </div>
   <br />
 
@@ -70,6 +70,16 @@
 <div id="videoContainer" style="position: relative; width: 960px;">
   <div id="overlayArea" style="position: absolute;">
     <textarea id="chatHistory" style="
+        width: 360px;
+        height: 500px;
+        font-size: medium;
+        border: none;
+        resize: none;
+        background-color: transparent;
+        overflow: hidden;" hidden></textarea>
+  </div>
+  <div id="overlayArea" style="position: absolute; left: 720px">
+    <textarea id="latencyLog" style="
         width: 360px;
         height: 500px;
         font-size: medium;
