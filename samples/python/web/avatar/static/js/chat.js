@@ -3,14 +3,20 @@
 
 // Global objects
 var clientId
+var enableWebSockets
+var socket
+var audioContext
+var isFirstResponseChunk
 var speechRecognizer
 var peerConnection
 var isSpeaking = false
 var sessionActive = false
 var recognitionStartedTime
+var chatRequestSentTime
 var chatResponseReceivedTime
 var lastSpeakTime
 var isFirstRecognizingEvent = true
+var sttLatencyRegex = new RegExp(/<STTL>(\d+)<\/STTL>/)
 var firstTokenLatencyRegex = new RegExp(/<FTL>(\d+)<\/FTL>/)
 var firstSentenceLatencyRegex = new RegExp(/<FSL>(\d+)<\/FSL>/)
 
@@ -85,6 +91,51 @@ function disconnectAvatar(closeSpeechRecognizer = false) {
     }
 
     sessionActive = false
+}
+
+function setupWebSocket() {
+    socket = io.connect(`${window.location.origin}?clientId=${clientId}`)
+    socket.on('connect', function() {
+        console.log('WebSocket connected.')
+    })
+
+    socket.on('response', function(data) {
+        let path = data.path
+        if (path === 'api.chat') {
+            let chatHistoryTextArea = document.getElementById('chatHistory')
+            let chunkString = data.chatResponse
+            if (sttLatencyRegex.test(chunkString)) {
+                let sttLatency = parseInt(sttLatencyRegex.exec(chunkString)[0].replace('<STTL>', '').replace('</STTL>', ''))
+                console.log(`STT latency: ${sttLatency} ms`)
+                let latencyLogTextArea = document.getElementById('latencyLog')
+                latencyLogTextArea.innerHTML += `STT latency: ${sttLatency} ms\n`
+                chunkString = chunkString.replace(sttLatencyRegex, '')
+            }
+
+            if (firstTokenLatencyRegex.test(chunkString)) {
+                let aoaiFirstTokenLatency = parseInt(firstTokenLatencyRegex.exec(chunkString)[0].replace('<FTL>', '').replace('</FTL>', ''))
+                // console.log(`AOAI first token latency: ${aoaiFirstTokenLatency} ms`)
+                chunkString = chunkString.replace(firstTokenLatencyRegex, '')
+            }
+
+            if (firstSentenceLatencyRegex.test(chunkString)) {
+                let aoaiFirstSentenceLatency = parseInt(firstSentenceLatencyRegex.exec(chunkString)[0].replace('<FSL>', '').replace('</FSL>', ''))
+                chatResponseReceivedTime = new Date()
+                console.log(`AOAI latency: ${aoaiFirstSentenceLatency} ms`)
+                let latencyLogTextArea = document.getElementById('latencyLog')
+                latencyLogTextArea.innerHTML += `AOAI latency: ${aoaiFirstSentenceLatency} ms\n`
+                latencyLogTextArea.scrollTop = latencyLogTextArea.scrollHeight
+                chunkString = chunkString.replace(firstSentenceLatencyRegex, '')
+            }
+
+            chatHistoryTextArea.innerHTML += `${chunkString}`
+            if (chatHistoryTextArea.innerHTML.startsWith('\n\n')) {
+                chatHistoryTextArea.innerHTML = chatHistoryTextArea.innerHTML.substring(2)
+            }
+
+            chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+        }
+    })
 }
 
 // Setup WebRTC
@@ -278,7 +329,13 @@ function connectToAvatarService(peerConnection) {
 
 // Handle user query. Send user query to the chat API and display the response.
 function handleUserQuery(userQuery) {
-    let chatRequestSentTime = new Date()
+    chatRequestSentTime = new Date()
+    if (socket !== undefined) {
+        socket.emit('message', { clientId: clientId, path: 'api.chat', systemPrompt: document.getElementById('prompt').value, userQuery: userQuery })
+        isFirstResponseChunk = true
+        return
+    }
+
     fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -391,12 +448,17 @@ function checkHung() {
 
 window.onload = () => {
     clientId = document.getElementById('clientId').value
+    enableWebSockets = document.getElementById('enableWebSockets').value === 'True'
     setInterval(() => {
         checkHung()
     }, 2000) // Check session activity every 2 seconds
 }
 
 window.startSession = () => {
+    if (enableWebSockets) {
+        setupWebSocket()
+    }
+
     createSpeechRecognizer()
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('startSession').disabled = true
@@ -416,6 +478,11 @@ window.startSession = () => {
 
 window.stopSpeaking = () => {
     document.getElementById('stopSpeaking').disabled = true
+
+    if (socket !== undefined) {
+        socket.emit('message', { clientId: clientId, path: 'api.stopSpeaking' })
+        return
+    }
 
     fetch('/api/stopSpeaking', {
         method: 'POST',
@@ -471,6 +538,26 @@ window.clearChatHistory = () => {
 
 window.microphone = () => {
     if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
+        // Stop microphone for websocket mode
+        if (socket !== undefined) {
+            document.getElementById('microphone').disabled = true
+            fetch('/api/disconnectSTT', {
+                method: 'POST',
+                headers: {
+                    'ClientId': clientId
+                },
+                body: ''
+            })
+            .then(() => {
+                document.getElementById('microphone').innerHTML = 'Start Microphone'
+                document.getElementById('microphone').disabled = false
+                if (audioContext !== undefined) {
+                    audioContext.close()
+                    audioContext = undefined
+                }
+            })
+        }
+
         // Stop microphone
         document.getElementById('microphone').disabled = true
         speechRecognizer.stopContinuousRecognitionAsync(
@@ -481,6 +568,87 @@ window.microphone = () => {
                 console.log("Failed to stop continuous recognition:", err)
                 document.getElementById('microphone').disabled = false
             })
+
+        return
+    }
+
+    // Start microphone for websocket mode
+    if (socket !== undefined) {
+        document.getElementById('microphone').disabled = true
+        // Audio worklet script (https://developer.chrome.com/blog/audio-worklet) for recording audio
+        const audioWorkletScript = `class MicAudioWorkletProcessor extends AudioWorkletProcessor {
+                constructor(options) {
+                    super(options)
+                }
+
+                process(inputs, outputs, parameters) {
+                    const input = inputs[0]
+                    const output = []
+                    for (let channel = 0; channel < input.length; channel += 1) {
+                        output[channel] = input[channel]
+                    }
+                    this.port.postMessage(output[0])
+                    return true
+                }
+            }
+
+            registerProcessor('mic-audio-worklet-processor', MicAudioWorkletProcessor)`
+        const audioWorkletScriptBlob = new Blob([audioWorkletScript], { type: 'application/javascript; charset=utf-8' })
+        const audioWorkletScriptUrl = URL.createObjectURL(audioWorkletScriptBlob)
+
+        fetch('/api/connectSTT', {
+            method: 'POST',
+            headers: {
+                'ClientId': clientId,
+                'SystemPrompt': document.getElementById('prompt').value
+            },
+            body: ''
+        })
+        .then(response => {
+            document.getElementById('microphone').disabled = false
+            if (response.ok) {
+                document.getElementById('microphone').innerHTML = 'Stop Microphone'
+
+                navigator.mediaDevices
+                .getUserMedia({
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 16000
+                    }
+                })
+                .then((stream) => {
+                    audioContext = new AudioContext({ sampleRate: 16000 })
+                    const audioSource = audioContext.createMediaStreamSource(stream)
+                    audioContext.audioWorklet
+                        .addModule(audioWorkletScriptUrl)
+                        .then(() => {
+                            const audioWorkletNode = new AudioWorkletNode(audioContext, 'mic-audio-worklet-processor')
+                            audioWorkletNode.port.onmessage = (e) => {
+                                const audioDataFloat32 = e.data
+                                const audioDataInt16 = new Int16Array(audioDataFloat32.length)
+                                for (let i = 0; i < audioDataFloat32.length; i++) {
+                                    audioDataInt16[i] = Math.max(-0x8000, Math.min(0x7FFF, audioDataFloat32[i] * 0x7FFF))
+                                }
+                                const audioDataBytes = new Uint8Array(audioDataInt16.buffer)
+                                const audioDataBase64 = btoa(String.fromCharCode(...audioDataBytes))
+                                socket.emit('message', { clientId: clientId, path: 'api.audio', audioChunk: audioDataBase64 })
+                            }
+
+                            audioSource.connect(audioWorkletNode)
+                            audioWorkletNode.connect(audioContext.destination)
+                        })
+                        .catch((err) => {
+                            console.log('Failed to add audio worklet module:', err)
+                        })
+                })
+                .catch((err) => {
+                    console.log('Failed to get user media:', err)
+                })
+            } else {
+                throw new Error(`Failed to connect STT service: ${response.status} ${response.statusText}`)
+            }
+        })
 
         return
     }
