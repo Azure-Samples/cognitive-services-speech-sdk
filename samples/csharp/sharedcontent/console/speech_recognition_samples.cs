@@ -16,7 +16,6 @@ using Microsoft.CognitiveServices.Speech.PronunciationAssessment;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
-using Microsoft.CognitiveServices.Speech.Diagnostics.Logging;
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -1492,9 +1491,6 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 }
             }
-
-            // Stop logging
-            FileLogger.Stop();
         }
 
         private static async Task<RecognitionResult> RecognizeOnceAsyncInternal(string key, string region)
