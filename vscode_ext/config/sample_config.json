@@ -3,29 +3,18 @@
         "capabilities": [
             "Speech To Text",
             "Text To Speech",
-            "Speech Translation",
-            "Realtime Speech To Text",
-            "Batch Speech To Text",
-            "Batch Text to Speech",
-            "Speech Translation",
-            "Keyword Recognition",
-            "Custom Keyword",
-            "Video Translation",
-            "Text to Speech Avatar"
+            "Speech Translation"
         ],
         "languages": [
             "C++",
             "C#",
             "Java",
             "JavaScript",
-            "Objective-C",
-            "Swift",
             "Python"
         ],
         "platform": [
             "Linux",
             "Windows",
-            "IOS",
             "MacOS",
             ".NET Framework",
             ".NET Core",
@@ -59,11 +48,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/python/from-microphone",
             "suggested": true,
             "downloadUrlInfo": {
-				"owner": "BinarywoodB",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "extension",
-				"dir": "quickstart/python/from-microphone"
-			}
+                "owner": "BinarywoodB",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "extension",
+                "dir": "quickstart/python/from-microphone"
+            }
         },
         {
             "id": "quickstart-recognize-speech-from-a-microphone-cpp-linux",
@@ -90,11 +79,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/from-microphone",
             "suggested": true,
             "downloadUrlInfo": {
-				"owner": "BinarywoodB",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "extension",
-				"dir": "quickstart/cpp/linux/from-microphone"
-			}
+                "owner": "BinarywoodB",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "extension",
+                "dir": "quickstart/cpp/linux/from-microphone"
+            }
         },
         {
             "id": "quickstart-recognize-speech-from-a-microphone-javascript-browser",
@@ -121,11 +110,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/javascript/browser/from-microphone/from-microphone",
             "suggested": true,
             "downloadUrlInfo": {
-				"owner": "BinarywoodB",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "extension",
-				"dir": "quickstart/javascript/browser/from-microphone"
-			}
+                "owner": "BinarywoodB",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "extension",
+                "dir": "quickstart/javascript/browser/from-microphone"
+            }
         },
         {
             "id": "quickstart-recognize-speech-from-a-microphone-cpp-windows",
@@ -152,11 +141,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/windows/from-microphone",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/cpp/windows/from-microphone"
-			}
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/cpp/windows/from-microphone"
+            }
         },
         {
             "id": "quickstart-recognize-speech-from-a-microphone-cpp-macos",
@@ -183,11 +172,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/macos/from-microphone",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/cpp/macos/from-microphone"
-			}
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/cpp/macos/from-microphone"
+            }
         },
         {
             "id": "quickstart-recognize-speech-from-a-microphone-csharp-windows",
@@ -215,11 +204,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/from-microphone",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/dotnet/from-microphone"
-			}
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/dotnet/from-microphone"
+            }
         },
         {
             "id": "quickstart-recognize-speech-from-a-microphone-csharp-dotnetcore",
@@ -249,13 +238,12 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnetcore/from-microphone",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/dotnetcore/from-microphone"
-			}
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/dotnetcore/from-microphone"
+            }
         },
-
         {
             "id": "quickstart-recognize-speech-from-a-file-cpp-windows",
             "onboardDate": "2024-09-18",
@@ -281,11 +269,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/windows/from-file/from-microphone",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/cpp/windows/from-file"
-			}
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/cpp/windows/from-file"
+            }
         },
         {
             "id": "quickstart-recognize-speech-from-a-file-csharp-dotnet",
@@ -313,11 +301,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/from-file/from-microphone",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/dotnet/from-file"
-			}
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/dotnet/from-file"
+            }
         },
         {
             "id": "quickstart-recognize-speech-from-a-file-javascript-browser",
@@ -344,11 +332,11 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/javascript/browser/from-file/from-microphone",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "BinarywoodB",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/javascript/browser/from-file"
-			}
+                "owner": "BinarywoodB",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/javascript/browser/from-file"
+            }
         },
         {
             "id": "batch-transcription-restapi-csharp",
@@ -369,16 +357,16 @@
             "time": "5min to run",
             "configuration": "Ready for debug",
             "thumbnailPath": "https://raw.githubusercontent.com/BinarywoodB/cognitive-services-speech-sdk/extension/vscode_ext/img/batch-speech-to-text.png",
-            "gifPath": "assets/sampleDemo.gif", 
+            "gifPath": "assets/sampleDemo.gif",
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/csharp/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/csharp",
             "suggested": false,
             "downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/batch/csharp"
-			}
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/batch/csharp"
+            }
         },
         {
             "id": "batch-transcription-restapi-js",
@@ -404,12 +392,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/js/node/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/js/node",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/batch/js/node"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/batch/js/node"
+            }
         },
         {
             "id": "batch-transcription-restapi-python",
@@ -434,12 +422,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch/python/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch/python",
             "suggested": true,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/batch/python"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/batch/python"
+            }
         },
         {
             "id": "quickstart-synthesize-speech-python",
@@ -462,12 +450,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/python/text-to-speech/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/python/text-to-speech",
             "suggested": true,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/python/text-to-speech"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/python/text-to-speech"
+            }
         },
         {
             "id": "quickstart-synthesize-speech-cpp-linux",
@@ -491,12 +479,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/linux/text-to-speech/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/linux/text-to-speech",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/cpp/linux/text-to-speech"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/cpp/linux/text-to-speech"
+            }
         },
         {
             "id": "quickstart-synthesize-speech-cpp-windows",
@@ -520,12 +508,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/windows/text-to-speech/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/windows/text-to-speech",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/cpp/windows/text-to-speech"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/cpp/windows/text-to-speech"
+            }
         },
         {
             "id": "quickstart-synthesize-speech-cpp-macOS",
@@ -549,12 +537,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/macOS/text-to-speech/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/macos/text-to-speech",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/cpp/macOS/text-to-speech"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/cpp/macOS/text-to-speech"
+            }
         },
         {
             "id": "quickstart-synthesize-speech-csharp-dotnet",
@@ -579,12 +567,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnet/text-to-speech/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/text-to-speech",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/dotnet/text-to-speech"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/dotnet/text-to-speech"
+            }
         },
         {
             "id": "quickstart-synthesize-speech-csharp-uwp",
@@ -608,12 +596,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/uwp/text-to-speech/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/uwp/text-to-speech",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/uwp/text-to-speech"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/uwp/text-to-speech"
+            }
         },
         {
             "id": "quickstart-translate-speech-cpp-windows",
@@ -637,12 +625,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/cpp/windows/translate-speech-to-text/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/cpp/windows/translate-speech-to-text",
             "suggested": true,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/cpp/windows/translate-speech-to-text"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/cpp/windows/translate-speech-to-text"
+            }
         },
         {
             "id": "quickstart-translate-speech-csharp-dotnet",
@@ -667,12 +655,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnet/translate-speech-to-text/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnet/translate-speech-to-text",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/dotnet/translate-speech-to-text"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/dotnet/translate-speech-to-text"
+            }
         },
         {
             "id": "quickstart-translate-speech-csharp-dotnetcore",
@@ -698,12 +686,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/dotnetcore/translate-speech-to-text/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnetcore/translate-speech-to-text",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/dotnetcore/translate-speech-to-text"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/dotnetcore/translate-speech-to-text"
+            }
         },
         {
             "id": "quickstart-translate-speech-csharp-uwp",
@@ -727,12 +715,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/uwp/translate-speech-to-text/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/uwp/translate-speech-to-text",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/uwp/translate-speech-to-text"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/uwp/translate-speech-to-text"
+            }
         },
         {
             "id": "quickstart-translate-speech-java-jre",
@@ -758,12 +746,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/java/jre/translate-speech-to-text/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/java/jre/translate-speech-to-text",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/java/jre/translate-speech-to-text"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/java/jre/translate-speech-to-text"
+            }
         },
         {
             "id": "samples-recognize-speech-in-compressed-audio-input-stream-cpp-linux",
@@ -789,12 +777,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/cpp/linux/compressed-audio-input/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/cpp/linux/compressed-audio-input",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/cpp/linux/compressed-audio-input"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/cpp/linux/compressed-audio-input"
+            }
         },
         {
             "id": "quickstart-recognize-keywords-csharp-uwp",
@@ -820,12 +808,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/quickstart/csharp/uwp/keyword-recognizer/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/uwp/keyword-recognizer",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "quickstart/csharp/uwp/keyword-recognizer"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "quickstart/csharp/uwp/keyword-recognizer"
+            }
         },
         {
             "id": "sample-video-translation-csharp-windows",
@@ -849,12 +837,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/video-translation/csharp/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/video-translation/csharp",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/video-translation/csharp"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/video-translation/csharp"
+            }
         },
         {
             "id": "sample-batch-avatar-csharp",
@@ -877,12 +865,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch-avatar/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-avatar/",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/batch-avatar/csharp/BatchAvatarSample"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/batch-avatar/csharp/BatchAvatarSample"
+            }
         },
         {
             "id": "sample-batch-avatar-python",
@@ -905,12 +893,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch-avatar/python/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-avatar/python/",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/batch-avatar/python"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/batch-avatar/python"
+            }
         },
         {
             "id": "sample-batch-synthesis-csharp",
@@ -935,12 +923,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch-synthesis/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-synthesis",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/batch-synthesis/csharp"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/batch-synthesis/csharp"
+            }
         },
         {
             "id": "sample-batch-synthesis-python",
@@ -965,12 +953,12 @@
             "readmePath": "https://api.github.com/repos/Azure-Samples/cognitive-services-speech-sdk/contents/samples/batch-synthesis/README.md",
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/batch-synthesis",
             "suggested": false,
-			"downloadUrlInfo": {
-				"owner": "Azure-Samples",
-				"repository": "cognitive-services-speech-sdk",
-				"ref": "master",
-				"dir": "samples/batch-synthesis/python"
-			}
+            "downloadUrlInfo": {
+                "owner": "Azure-Samples",
+                "repository": "cognitive-services-speech-sdk",
+                "ref": "master",
+                "dir": "samples/batch-synthesis/python"
+            }
         }
     ]
 }
