@@ -91,10 +91,10 @@ namespace PostCallAnalytics
         {
             var inputAudio = new Option<FileInfo>(name: "--inputAudio", description: "Path to the input audio. Required.");
             var speechKey = new Option<string>(name: "--speechKey", description: "Your Cognitive Services or Speech resource key. Required.");
-            var speechRegion = new Option<string>(name: "--speechRegion", description: "Your Cognitive Services or Speech resource region. Required for audio transcriptions. Examples: eastus, northeurope. Required.");
+            var speechRegion = new Option<string>(name: "--speechRegion", description: "Your Cognitive Services or Speech resource region. Required for audio transcriptions. Example: eastus, northeurope. Required.");
             var openAiKey = new Option<string>(name: "--openAiKey", description: "Your Azure OpenAI resource key. Required.");
-            var openAiEndpoint = new Option<string>(name: "--openAiEndpoint", description: "Your Azure OpenAI resource endpoint. Required.");
-            var openAiDeploymentName = new Option<string>(name: "--openAiDeploymentName", description: "Your Azure OpenAI deployment name. Required.");
+            var openAiEndpoint = new Option<string>(name: "--openAiEndpoint", description: "Your Azure OpenAI resource endpoint. Required. Example: https://YourResourceName.openai.azure.com");
+            var openAiDeploymentName = new Option<string>(name: "--openAiDeploymentName", description: "Your Azure OpenAI deployment name. Required. Example: my-gpt-4o-mini");
 
             var rootCommand = new RootCommand()
             {
