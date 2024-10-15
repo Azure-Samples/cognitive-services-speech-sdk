@@ -9,7 +9,7 @@ namespace PostCallAnalytics
 {
     public sealed class FastTranscriptionOptions
     {
-        public string[] Locales { get; set; } = new string[] { "en-US" };
+        public string[] Locales { get; set; } = { "en-US" };
     }
 
     public class Program
@@ -26,7 +26,7 @@ namespace PostCallAnalytics
             return new ByteArrayContent(byteArray);
         }
 
-        internal static async Task<string?> GetTranscriptionAsync(string speechKey, string speechRegion, FileInfo inputAudio)
+        internal static async Task<string?> TranscribeAsync(string speechKey, string speechRegion, FileInfo inputAudio)
         {
             var speechEndpoint = $"https://{speechRegion}.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2024-05-15-preview";
 
@@ -59,10 +59,11 @@ namespace PostCallAnalytics
             var azureClient = new AzureOpenAIClient(new Uri(openAiEndpoint), new ApiKeyCredential(openAiKey));
             var chatClient = azureClient.GetChatClient(deploymentOrModelName);
 
+            var prompt = $"You are an AI assistant that helps extract information from customer call center transcripts. " +
+                $"Summarize the conversation in a couple sentences. \n\"\"\"\n{transcription}\n\"\"\"\n";
+
             var completion = await chatClient.CompleteChatAsync(
-                // System messages represent instructions or other guidance about how the assistant should behave
-                new SystemChatMessage($"You are an AI assistant that helps extract information from customer call center transcripts. " +
-                $"Summarize the conversation in a couple sentences. \n\"\"\"\n{transcription}\n\"\"\"\n")
+                new SystemChatMessage(prompt)
             );
 
             Console.WriteLine($"{openAiEndpoint} : {completion.GetRawResponse().Status}");
@@ -71,42 +72,41 @@ namespace PostCallAnalytics
             return summary;
         }
 
+        internal static async Task AnalyzeAudioAsync(string speechKey, string speechRegion, FileInfo? inputAudio, string openAiKey, string openAiEndpoint, string deploymentOrModelName)
+        {
+            if (string.IsNullOrEmpty(speechKey) || string.IsNullOrEmpty(speechRegion) || inputAudio == null || string.IsNullOrEmpty(openAiKey) || string.IsNullOrEmpty(openAiEndpoint) || string.IsNullOrEmpty(deploymentOrModelName))
+            {
+                Console.WriteLine("Error: missing required option");
+                return;
+            }
+
+            var transcription = await TranscribeAsync(speechKey, speechRegion, inputAudio);
+            Console.WriteLine($"Transcription: {transcription}");
+
+            var summary = await SummarizeAsync(openAiKey, openAiEndpoint, deploymentOrModelName, transcription);
+            Console.WriteLine($"Summary: {summary}");
+        }
+
         public async static Task<int> Main(string[] args)
         {
-            var inputAudio = new Option<FileInfo>(
-                name: "--inputAudio");
+            var inputAudio = new Option<FileInfo>(name: "--inputAudio", description: "Path to the input audio. Required.");
+            var speechKey = new Option<string>(name: "--speechKey", description: "Your Cognitive Services or Speech resource key. Required.");
+            var speechRegion = new Option<string>(name: "--speechRegion", description: "Your Cognitive Services or Speech resource region. Required for audio transcriptions. Examples: eastus, northeurope. Required.");
+            var openAiKey = new Option<string>(name: "--openAiKey", description: "Your Azure OpenAI resource key. Required.");
+            var openAiEndpoint = new Option<string>(name: "--openAiEndpoint", description: "Your Azure OpenAI resource endpoint. Required.");
+            var openAiDeploymentName = new Option<string>(name: "--openAiDeploymentName", description: "Your Azure OpenAI deployment name. Required.");
 
-            var speechKey = new Option<string>(
-                name: "--speechKey");
-
-            var speechRegion = new Option<string>(
-                name: "--speechRegion");
-
-            var openAiKey = new Option<string>(
-                name: "--openAiKey");
-
-            var openAiEndpoint = new Option<string>(
-                name: "--openAiEndpoint");
-
-            var openAiDeploymentName = new Option<string>(
-                name: "--openAiDeploymentName");
-
-            var rootCommand = new RootCommand("PostCallAnalytics Sample");
-            rootCommand.AddOption(inputAudio);
-            rootCommand.AddOption(speechKey);
-            rootCommand.AddOption(speechRegion);
-            rootCommand.AddOption(openAiKey);
-            rootCommand.AddOption(openAiEndpoint);
-            rootCommand.AddOption(openAiDeploymentName);
-
-            rootCommand.SetHandler(async (speechKey, speechRegion, openAiKey, openAiEndpoint, openAiDeploymentName, inputAudio) =>
+            var rootCommand = new RootCommand()
             {
-                var transcription = await GetTranscriptionAsync(speechKey, speechRegion, inputAudio);
-                Console.WriteLine($"Transcription: {transcription}");
+                inputAudio,
+                speechKey,
+                speechRegion,
+                openAiKey,
+                openAiEndpoint,
+                openAiDeploymentName
+            };
 
-                var summary = await SummarizeAsync(openAiKey, openAiEndpoint, openAiDeploymentName, transcription);
-                Console.WriteLine($"Summary: {summary}");
-            }, speechKey, speechRegion, openAiKey, openAiEndpoint, openAiDeploymentName, inputAudio);
+            rootCommand.SetHandler(AnalyzeAudioAsync, speechKey, speechRegion, inputAudio, openAiKey, openAiEndpoint, openAiDeploymentName);
 
             return await rootCommand.InvokeAsync(args);
         }
