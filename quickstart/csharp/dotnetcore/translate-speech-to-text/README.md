@@ -6,6 +6,13 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 > **Note:**
 > We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
 
+## Run the Sample within VS Code
+- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Download this sample from sample gallery to local machine.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
+- Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
+- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
@@ -33,10 +40,10 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * If you are using Microsoft Visual Studio 2017 on Windows:
   * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
   * Navigate to the folder containing this sample, and select the solution file contained within it.
-* Edit the `Program.cs` source:
-  * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
+  * Edit the `config.json` source in the helloworld C# project:
+    * Replace the `your_actual_subscription_key` with your own subscription key.
+    * Replace the `your_actual_service_region` with the service region of your subscription.
+      For example, replace with `westus` if you are using the 30-day free trial subscription.
 * If you are using Microsoft Visual Studio 2017 on Windows, press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 * If you are using the .NET Core CLI, run the following command from the directory that contains this sample:
 
