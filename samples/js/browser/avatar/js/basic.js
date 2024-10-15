@@ -291,7 +291,7 @@ window.stopSession = () => {
     avatarSynthesizer.close()
 }
 
-window.updataTransparentBackground = () => {
+window.updateTransparentBackground = () => {
     if (document.getElementById('transparentBackground').checked) {
         document.body.background = './image/background.png'
         document.getElementById('backgroundColor').value = '#00FF00FF'
