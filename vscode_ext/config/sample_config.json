@@ -687,9 +687,9 @@
             "githubPath": "https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/dotnetcore/translate-speech-to-text",
             "suggested": false,
             "downloadUrlInfo": {
-                "owner": "Azure-Samples",
+                "owner": "BinarywoodB",
                 "repository": "cognitive-services-speech-sdk",
-                "ref": "master",
+                "ref": "v-shaota/SynthesizeSpeechCppLinux",
                 "dir": "quickstart/csharp/dotnetcore/translate-speech-to-text"
             }
         },
