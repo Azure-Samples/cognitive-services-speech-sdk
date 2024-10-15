@@ -37,6 +37,8 @@ weatherfilename = "whatstheweatherlike.wav"
 weatherfilenamemp3 = "whatstheweatherlike.mp3"
 weatherfilenamemulaw = "whatstheweatherlike-mulaw.wav"
 seasonsfilename = "pronunciation_assessment_fall.wav"
+zhcnfilename = "zhcn_short_dummy_sample.wav"
+zhcnlongfilename = "zhcn_continuous_mode_sample.wav"
 
 
 def speech_recognize_once_from_mic():
@@ -843,6 +845,44 @@ def pronunciation_assessment_from_microphone():
                 print("Error details: {}".format(cancellation_details.error_details))
 
 
+def get_reference_words(wave_filename, reference_text, language):
+    audio_config = speechsdk.audio.AudioConfig(filename=wave_filename)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, language=language, audio_config=audio_config
+    )
+
+    # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    enable_miscue = True
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
+        reference_text=reference_text,
+        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
+        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
+        enable_miscue=enable_miscue)
+
+    # Apply pronunciation assessment config to speech recognizer
+    pronunciation_config.apply_to(speech_recognizer)
+    result = speech_recognizer.recognize_once_async().get()
+
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        pronunciation_result = json.loads(result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult))
+        reference_words = []
+        nb = pronunciation_result["NBest"][0]
+        for idx, word in enumerate(nb["Words"]):
+            if word["PronunciationAssessment"]["ErrorType"] != "Insertion":
+                reference_words.append(word["Word"])
+        return reference_words
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized")
+        return None
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+        return None
+
+
 def pronunciation_assessment_continuous_from_file():
     """Performs continuous pronunciation assessment asynchronously with input from an audio file.
         See more information at https://aka.ms/csspeech/pa"""
@@ -854,9 +894,9 @@ def pronunciation_assessment_continuous_from_file():
     # Replace with your own subscription key and service region (e.g., "westus").
     # Note: The sample is for en-US language.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+    audio_config = speechsdk.audio.AudioConfig(filename=zhcnlongfilename)
 
-    reference_text = "What's the weather like?"
+    reference_text = "秋天总是那么富有诗意。树叶渐渐变红，街道旁的银杏树也开始落叶。人们穿上厚重的外套，享受着凉爽的秋风。黄昏时分，夕阳洒在街道上，给忙碌的一天增添了一抹温暖。无论是散步还是小憩，这个季节总能带来宁静和满足。清晨，薄雾笼罩大地，空气中弥漫着一丝清新的凉意。中午阳光明媚，照在身上暖洋洋的，仿佛是一场心灵的抚慰。傍晚时分，天空被染成了金黄和橙红，街上的行人脚步也不由得慢了下来，享受这份静谧和美好。你最喜欢哪个季节？"
     # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     enable_miscue = True
     enable_prosody_assessment = True
@@ -869,7 +909,7 @@ def pronunciation_assessment_continuous_from_file():
         pronunciation_config.enable_prosody_assessment()
 
     # Creates a speech recognizer using a file as audio input.
-    language = 'en-US'
+    language = 'zh-CN'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
@@ -879,6 +919,8 @@ def pronunciation_assessment_continuous_from_file():
     prosody_scores = []
     fluency_scores = []
     durations = []
+    startOffset = 0
+    endOffset = 0
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -901,7 +943,10 @@ def pronunciation_assessment_continuous_from_file():
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo["NBest"][0]
-        durations.append(sum([int(w["Duration"]) for w in nb["Words"]]))
+        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"] if w["PronunciationAssessment"]["ErrorType"] == "None"])
+        if startOffset == 0:
+            startOffset = nb["Words"][0]["Offset"]
+        endOffset = nb["Words"][-1]["Offset"] + nb["Words"][-1]["Duration"] + 100000
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
@@ -921,11 +966,8 @@ def pronunciation_assessment_continuous_from_file():
 
     # We need to convert the reference text to lower case, and split to words, then remove the punctuations.
     if language == 'zh-CN':
-        # Use jieba package to split words for Chinese
-        import jieba
-        import zhon.hanzi
-        jieba.suggest_freq([x.word for x in recognized_words], True)
-        reference_words = [w for w in jieba.cut(reference_text) if w not in zhon.hanzi.punctuation]
+        # Split words for Chinese using the reference text and any short wave file
+        reference_words = get_reference_words(zhcnfilename, reference_text, language)
     else:
         reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
 
@@ -938,8 +980,7 @@ def pronunciation_assessment_continuous_from_file():
         for tag, i1, i2, j1, j2 in diff.get_opcodes():
             if tag in ['insert', 'replace']:
                 for word in recognized_words[j1:j2]:
-                    if word.error_type == 'None':
-                        word._error_type = 'Insertion'
+                    word._error_type = 'Insertion'
                     final_words.append(word)
             if tag in ['delete', 'replace']:
                 for word_text in reference_words[i1:i2]:
@@ -969,9 +1010,12 @@ def pronunciation_assessment_continuous_from_file():
     else:
         prosody_score = sum(prosody_scores) / len(prosody_scores)
     # Re-calculate fluency score
-    fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
+    fluency_score = 0
+    if startOffset > 0:
+        fluency_score = sum(durations) / (endOffset - startOffset) * 100
     # Calculate whole completeness score
-    completeness_score = len([w for w in recognized_words if w.error_type == "None"]) / len(reference_words) * 100
+    handled_final_words = [w.word for w in final_words if w.error_type != "Insertion"]
+    completeness_score = len([w for w in final_words if w.error_type == "None"]) / len(handled_final_words) * 100
     completeness_score = completeness_score if completeness_score <= 100 else 100
 
     print('    Paragraph accuracy score: {}, prosody score: {}, completeness score: {}, fluency score: {}'.format(
