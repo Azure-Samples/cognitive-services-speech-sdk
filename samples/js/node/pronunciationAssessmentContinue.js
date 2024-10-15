@@ -45,8 +45,8 @@ export const main = async (settings) => {
     const allWords = [];
     var recognizedWordStrList = [];
     var startOffset = 0;
+    var endOffset = 0;
     var recognizedWords = [];
-    var fluencyScores = [];
     var prosodyScores = [];
     var durations = [];
     var jo = {};
@@ -76,23 +76,26 @@ export const main = async (settings) => {
 
         jo = JSON.parse(e.result.properties.getProperty(sdk.PropertyId.SpeechServiceResponse_JsonResult));
         const nb = jo["NBest"][0];
-        startOffset = nb.Words[0].Offset;
         const localtext = _.map(nb.Words, (item) => item.Word.toLowerCase());
         recognizedWordStrList = recognizedWordStrList.concat(localtext);
-        fluencyScores.push(nb.PronunciationAssessment.FluencyScore);
         prosodyScores.push(nb.PronunciationAssessment.ProsodyScore);
         const isSucceeded = jo.RecognitionStatus === 'Success';
         const nBestWords = jo.NBest[0].Words;
-        const durationList = [];
         _.forEach(nBestWords, (word) => {
+            if (word.PronunciationAssessment.ErrorType == "None") {
+                durations.push(Number(word.Duration) + 100000);
+            }
             recognizedWords.push(word);
-            durationList.push(word.Duration);
         });
-        durations.push(_.sum(durationList));
 
         if (isSucceeded && nBestWords) {
             allWords.push(...nBestWords);
         }
+
+        if (startOffset == 0) {
+            startOffset = nb.Words[0].Offset;
+        }
+        endOffset = nb.Words.slice(-1)[0].Offset + nb.Words.slice(-1)[0].Duration + 100000;
     };
 
     async function getReferenceWords(waveFilename, referenceText, language) {
@@ -219,12 +222,9 @@ export const main = async (settings) => {
         });
         scoreNumber.accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(0));
 
-        if (startOffset) {
-            const sumRes = [];
-            _.forEach(fluencyScores, (x, index) => {
-                sumRes.push(x * durations[index]);
-            });
-            scoreNumber.fluencyScore = _.sum(sumRes) / _.sum(durations);
+        // Re-calculate fluency score
+        if (startOffset > 0) {
+            scoreNumber.fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(0));
         }
 
         scoreNumber.prosodyScore = _.sum(prosodyScores) / prosodyScores.length;
