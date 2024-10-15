@@ -4,6 +4,13 @@ This sample shows how to use the Speech Service through the Speech SDK for Pytho
 
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/text-to-speech?tabs=dotnet%2Clinux%2Cjre%2Cwindowsinstall&pivots=programming-language-python) on the SDK documentation page for step-by-step instructions.
 
+## Run the Sample within VS Code
+- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Download this sample from sample gallery to local machine.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
+- Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
+- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+
 ## Prerequisites
 
 Before you get started, here's a list of prerequisites:
