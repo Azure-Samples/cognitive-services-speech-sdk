@@ -18,12 +18,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   * On Windows or Linux:
     * [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
     * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
-* On Ubuntu or Debian, run the following commands for the installation of required packages:
-
-  ```sh
-  sudo apt-get update
-  sudo apt-get install libssl-dev libasound2
-  ```
+* On Linux, see the [Linux platform requirements](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux&pivots=programming-language-csharp#platform-requirements) for installing the required dependencies.
 
 ## Build the sample
 
