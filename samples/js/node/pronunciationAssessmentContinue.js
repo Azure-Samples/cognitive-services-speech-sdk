@@ -194,11 +194,12 @@ export const main = async (settings) => {
             }
         }
 
-        // Calculate whole completeness score
+        const accuracyScores = [];
         const handledLastWords = [];
         let validWordCount = 0;
         _.forEach(lastWords, (word) => {
-            if (word.PronunciationAssessment.ErrorType != "Insertion") {
+            if (word && word.PronunciationAssessment.ErrorType != "Insertion") {
+                accuracyScores.push(Number(word.PronunciationAssessment.AccuracyScore ?? 0));
                 handledLastWords.push(word.Word);
             }
             if (word.PronunciationAssessment.ErrorType == "None" && (word.PronunciationAssessment.AccuracyScore ?? 0) >= 0) {
@@ -206,24 +207,20 @@ export const main = async (settings) => {
                 durations.push(Number(word.Duration) + 100000);
             }
         });
+
+        // Calculate completeness score
         let compScore = handledLastWords.length > 0 ? Number(((validWordCount / handledLastWords.length) * 100).toFixed(2)) : 0;
         scoreNumber.compScore = compScore > 100 ? 100 : compScore;
 
-        // calculate accuracy score
-        const accuracyScores = [];
-        _.forEach(lastWords, (word) => {
-            if (word && word?.PronunciationAssessment?.ErrorType != "Insertion") {
-                accuracyScores.push(Number(word?.PronunciationAssessment.AccuracyScore ?? 0));
-            }
-        });
+        // Calculate accuracy score
         scoreNumber.accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(2));
 
-        // Re-calculate fluency score
+        // Calculate fluency score
         if (startOffset > 0) {
             scoreNumber.fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(2));
         }
 
-        // calculate prosody score
+        // Calculate prosody score
         scoreNumber.prosodyScore = Number((_.sum(prosodyScores) / prosodyScores.length).toFixed(2));
 
         const sortScore = Object.keys(scoreNumber).sort(function (a, b) {
