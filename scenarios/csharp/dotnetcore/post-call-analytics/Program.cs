@@ -59,11 +59,11 @@ namespace PostCallAnalytics
             var azureClient = new AzureOpenAIClient(new Uri(openAiEndpoint), new ApiKeyCredential(openAiKey));
             var chatClient = azureClient.GetChatClient(deploymentOrModelName);
 
-            var prompt = $"You are an AI assistant that helps extract information from customer call center transcripts. " +
-                $"Summarize the conversation in a couple sentences. \n\"\"\"\n{transcription}\n\"\"\"\n";
-
             var completion = await chatClient.CompleteChatAsync(
-                new SystemChatMessage(prompt)
+                [
+                    new SystemChatMessage("You are an AI assistant that helps extract information from customer call center transcripts. Summarize the conversation in a couple sentences."),
+                    new UserChatMessage(transcription)
+                ]
             );
 
             Console.WriteLine($"{openAiEndpoint} : {completion.GetRawResponse().Status}");
@@ -72,9 +72,9 @@ namespace PostCallAnalytics
             return summary;
         }
 
-        internal static async Task AnalyzeAudioAsync(string speechKey, string speechRegion, FileInfo? inputAudio, string openAiKey, string openAiEndpoint, string deploymentOrModelName)
+        internal static async Task AnalyzeAudioAsync(string speechKey, string speechRegion, FileInfo inputAudio, string openAiKey, string openAiEndpoint, string deploymentOrModelName)
         {
-            if (string.IsNullOrEmpty(speechKey) || string.IsNullOrEmpty(speechRegion) || inputAudio == null || string.IsNullOrEmpty(openAiKey) || string.IsNullOrEmpty(openAiEndpoint) || string.IsNullOrEmpty(deploymentOrModelName))
+            if (string.IsNullOrEmpty(speechKey) || string.IsNullOrEmpty(speechRegion) || (inputAudio == null || !inputAudio.Exists) || string.IsNullOrEmpty(openAiKey) || string.IsNullOrEmpty(openAiEndpoint) || string.IsNullOrEmpty(deploymentOrModelName))
             {
                 Console.WriteLine("Error: missing required option");
                 return;
