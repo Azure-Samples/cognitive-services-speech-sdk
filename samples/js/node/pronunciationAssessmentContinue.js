@@ -49,7 +49,7 @@ export const main = async (settings) => {
     var prosodyScores = [];
     var durations = [];
     var jo = {};
-        
+
     // Before beginning speech recognition, setup the callbacks to be invoked when an event occurs.
 
     // The event recognizing signals that an intermediate recognition result is received.
@@ -208,46 +208,48 @@ export const main = async (settings) => {
             }
         });
 
-        // Calculate completeness score
+        // Calculate whole completeness score
         let compScore = handledLastWords.length > 0 ? Number(((validWordCount / handledLastWords.length) * 100).toFixed(2)) : 0;
         scoreNumber.compScore = compScore > 100 ? 100 : compScore;
 
-        // Calculate accuracy score
+        // We can calculate whole accuracy by averaging
         scoreNumber.accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(2));
 
-        // Calculate fluency score
+        // Re-calculate fluency score
         if (startOffset > 0) {
             scoreNumber.fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(2));
         }
 
-        // Calculate prosody score
+        // Re-calculate the prosody score by averaging
         scoreNumber.prosodyScore = Number((_.sum(prosodyScores) / prosodyScores.length).toFixed(2));
 
         const sortScore = Object.keys(scoreNumber).sort(function (a, b) {
             return scoreNumber[a] - scoreNumber[b];
         });
-        if (
-            jo.RecognitionStatus == "Success" ||
-            jo.RecognitionStatus == "Failed"
-        ) {
-            scoreNumber.pronScore = Number(
-                (
-                    scoreNumber[sortScore["0"]] * 0.4 +
-                    scoreNumber[sortScore["1"]] * 0.2 +
-                    scoreNumber[sortScore["2"]] * 0.2 +
-                    scoreNumber[sortScore["3"]] * 0.2
-                ).toFixed(0)
-            );
-        } else {
-            scoreNumber.pronScore = Number(
-                (scoreNumber.accuracyScore * 0.6 + scoreNumber.fluencyScore * 0.2 + scoreNumber.prosodyScore * 0.2).toFixed(0)
-            );
-        }
 
-        console.log("    Paragraph accuracy score: ", scoreNumber.accuracyScore, ", completeness score: ", scoreNumber.compScore, ", fluency score: ", scoreNumber.fluencyScore, ", prosody score: ", scoreNumber.prosodyScore);        
+        scoreNumber.pronScore = Number(
+            (
+                scoreNumber[sortScore["0"]] * 0.4 +
+                scoreNumber[sortScore["1"]] * 0.2 +
+                scoreNumber[sortScore["2"]] * 0.2 +
+                scoreNumber[sortScore["3"]] * 0.2
+            ).toFixed(0)
+        );
+
+        console.log(
+            "    Paragraph pronunciation score: ", scoreNumber.pronScore,
+            ", accuracy score: ", scoreNumber.accuracyScore,
+            ", completeness score: ", scoreNumber.compScore,
+            ", fluency score: ", scoreNumber.fluencyScore,
+            ", prosody score: ", scoreNumber.prosodyScore
+        );
 
         _.forEach(lastWords, (word, ind) => {
-            console.log("    ", ind + 1, ": word: ", word.Word, "\taccuracy score: ", word.PronunciationAssessment.AccuracyScore, "\terror type: ", word.PronunciationAssessment.ErrorType, ";");
+            console.log(
+                "    ", ind + 1, ": word: ", word.Word,
+                "\taccuracy score: ", word.PronunciationAssessment.AccuracyScore,
+                "\terror type: ", word.PronunciationAssessment.ErrorType, ";"
+            );
         });
 
     };
