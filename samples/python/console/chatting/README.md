@@ -20,7 +20,7 @@ Update the following strings before running the sample:
 * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
 * `YourOaiResourceName`: replace with the name of your Azure OAI Resource.
 * `YourOaiDeploymentName`: replace with the name of your model deployment. You're required to first deploy a model before you can make calls.
-* `YourOaiApiVersion`: replace with the [API version](https://learn.microsoft.com/en-US/azure/ai-services/openai/reference#chat-completions) to use for this operation. For example, `2023-05-15`.
+* `YourOaiApiVersion`: replace with the [API version](https://learn.microsoft.com/azure/ai-services/openai/reference#chat-completions) to use for this operation. For example, `2023-05-15`.
 * `YourOaiApiKey`: replace with the Azure OAI resource key.
 
 To run the app, navigate to the `samples/python/console/chatting` directory in your local copy of the samples repository.

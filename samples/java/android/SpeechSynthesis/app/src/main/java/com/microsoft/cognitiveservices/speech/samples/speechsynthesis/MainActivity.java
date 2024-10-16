@@ -94,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Release speech synthesizer and its dependencies
         if (synthesizer != null) {
-            synthesizer.close();
             connection.close();
+            synthesizer.close();
         }
         if (speechConfig != null) {
             speechConfig.close();
@@ -112,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
     public void onCreateSynthesizerButtonClicked(View v) {
         if (synthesizer != null) {
             speechConfig.close();
-            synthesizer.close();
             connection.close();
+            synthesizer.close();
         }
 
         // Reuse the synthesizer to lower the latency.

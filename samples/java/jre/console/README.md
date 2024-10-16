@@ -11,12 +11,7 @@ This sample demonstrates various forms of speech recognition, intent recognition
 * A PC (Windows x64 or a supported Linux distribution) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) some sample scenarios require a working microphone.
 * Java 8 or 11 JRE/JDK.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
-* On Ubuntu or Debian, run the following commands for the installation of required packages:
-
-  ```sh
-  sudo apt-get update
-  sudo apt-get install libssl-dev libasound2
-  ```
+* On Linux, see the [Linux platform requirements](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux&pivots=programming-language-java#platform-requirements) for installing the required dependencies.
 
 <small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM platforms.</small>
 
