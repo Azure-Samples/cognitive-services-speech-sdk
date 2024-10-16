@@ -10,6 +10,7 @@ from sys import argv
 from typing import List, Optional
 import azure.cognitiveservices.speech as speechsdk # type: ignore
 import helper
+import json
 
 class CaptioningMode(Enum):
     OFFLINE = 1
@@ -68,17 +69,18 @@ def get_profanity_option() -> speechsdk.ProfanityOption :
         else : return speechsdk.ProfanityOption.Masked
 
 def user_config_from_args(usage : str) -> helper.Read_Only_Dict :
-    keyEnv = environ["SPEECH_KEY"] if "SPEECH_KEY" in environ else None
-    keyOption = get_cmd_option("--key")
-    key = keyOption if keyOption is not None else keyEnv
-    if key is None :
-        raise RuntimeError("Please set the SPEECH_KEY environment variable or provide a Speech resource key with the --key option.{}{}".format(linesep, usage))
+    # Creates an instance of a speech config with specified subscription key and service region.
+    # Replace with your own subscription key and service region (e.g., "westus").
+    with open('config.json', 'r') as config_file:
+        config = json.load(config_file)
 
-    regionEnv = environ["SPEECH_REGION"] if "SPEECH_REGION" in environ else None
-    regionOption = get_cmd_option("--region")
-    region = regionOption if regionOption is not None else regionEnv
+    key = config.get("YourSubscriptionKey")
+    if key is None :
+        raise RuntimeError("Please config YourSubscriptionKey in config.json")
+
+    region = config.get("YourServiceRegion")
     if region is None :
-        raise RuntimeError("Please set the SPEECH_REGION environment variable or provide a Speech resource region with the --region option.{}{}".format(linesep, usage))
+        raise RuntimeError("Please config YourServiceRegion in config.json")
 
     captioning_mode = CaptioningMode.REALTIME if cmd_option_exists("--realtime") and not cmd_option_exists("--offline") else CaptioningMode.OFFLINE
 
