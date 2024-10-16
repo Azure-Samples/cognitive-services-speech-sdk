@@ -12,13 +12,10 @@ The compressed audio input stream should be either in MP3 or Opus format.
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC with a [supported Linux distribution](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
-* On Ubuntu or Debian, install these packages to build and run this sample:
-
-  ```sh
-  sudo apt-get update
-  sudo apt-get install build-essential libssl-dev libasound2 wget
-  sudo apt-get install libgstreamer1.0-0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
-  ```
+* See
+the [Linux platform requirements](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux&pivots=programming-language-cpp#platform-requirements)
+and [how to use compressed audio](https://learn.microsoft.com/azure/ai-services/speech-service/how-to-use-codec-compressed-audio-input-streams?tabs=linux&pivots=programming-language-cpp)
+for installing the required dependencies.
 
 ## Build the sample
 
