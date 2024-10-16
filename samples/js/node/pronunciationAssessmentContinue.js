@@ -46,7 +46,6 @@ export const main = async (settings) => {
     var recognizedWordStrList = [];
     var startOffset = 0;
     var endOffset = 0;
-    var recognizedWords = [];
     var prosodyScores = [];
     var durations = [];
     var jo = {};
@@ -81,12 +80,6 @@ export const main = async (settings) => {
         prosodyScores.push(nb.PronunciationAssessment.ProsodyScore);
         const isSucceeded = jo.RecognitionStatus === 'Success';
         const nBestWords = jo.NBest[0].Words;
-        _.forEach(nBestWords, (word) => {
-            if (word.PronunciationAssessment.ErrorType == "None") {
-                durations.push(Number(word.Duration) + 100000);
-            }
-            recognizedWords.push(word);
-        });
 
         if (isSucceeded && nBestWords) {
             allWords.push(...nBestWords);
@@ -201,33 +194,37 @@ export const main = async (settings) => {
             }
         }
 
-        let recognizedWordsRes = [];
-        _.forEach(recognizedWords, (word) => {
-            if (word.PronunciationAssessment.ErrorType == "None") {
-                recognizedWordsRes.push(word);
+        // Calculate whole completeness score
+        const handledLastWords = [];
+        let validWordCount = 0;
+        _.forEach(lastWords, (word) => {
+            if (word.PronunciationAssessment.ErrorType != "Insertion") {
+                handledLastWords.push(word.Word);
+            }
+            if (word.PronunciationAssessment.ErrorType == "None" && (word.PronunciationAssessment.AccuracyScore ?? 0) >= 0) {
+                validWordCount++;
+                durations.push(Number(word.Duration) + 100000);
             }
         });
+        let compScore = handledLastWords.length > 0 ? Number(((validWordCount / handledLastWords.length) * 100).toFixed(2)) : 0;
+        scoreNumber.compScore = compScore > 100 ? 100 : compScore;
 
-        let compScore = Number(((recognizedWordsRes.length / referenceWords.length) * 100).toFixed(0));
-        if (compScore > 100) {
-            compScore = 100;
-        }
-        scoreNumber.compScore = compScore;
-
+        // calculate accuracy score
         const accuracyScores = [];
         _.forEach(lastWords, (word) => {
             if (word && word?.PronunciationAssessment?.ErrorType != "Insertion") {
                 accuracyScores.push(Number(word?.PronunciationAssessment.AccuracyScore ?? 0));
             }
         });
-        scoreNumber.accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(0));
+        scoreNumber.accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(2));
 
         // Re-calculate fluency score
         if (startOffset > 0) {
-            scoreNumber.fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(0));
+            scoreNumber.fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(2));
         }
 
-        scoreNumber.prosodyScore = _.sum(prosodyScores) / prosodyScores.length;
+        // calculate prosody score
+        scoreNumber.prosodyScore = Number((_.sum(prosodyScores) / prosodyScores.length).toFixed(2));
 
         const sortScore = Object.keys(scoreNumber).sort(function (a, b) {
             return scoreNumber[a] - scoreNumber[b];
