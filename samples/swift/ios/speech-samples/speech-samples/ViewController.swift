@@ -6,6 +6,7 @@
 import UIKit
 import MicrosoftCognitiveServicesSpeech
 import Differ
+import AVFoundation
 
 extension StringProtocol {
     var words: [SubSequence] {
@@ -84,8 +85,14 @@ class ViewController: UIViewController {
     }
     
     @objc func pronunciationAssessmentWithMicrophoneButtonClicked(){
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.pronunciationAssessmentWithMicrophone()
+        AVAudioSession.sharedInstance().requestRecordPermission { granted in
+            if granted {
+                DispatchQueue.global(qos: .userInitiated).async {
+                    self.pronunciationAssessmentWithMicrophone()
+                }
+            } else {
+                print("Microphone is not permitted!")
+            }
         }
     }
     
