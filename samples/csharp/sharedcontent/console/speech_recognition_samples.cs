@@ -16,6 +16,8 @@ using Microsoft.CognitiveServices.Speech.PronunciationAssessment;
 using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
+using System.Text.Json;
+using System.Text;
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -995,6 +997,10 @@ namespace MicrosoftSpeechSDKSamples
             // Creates a speech recognizer for the specified language, using microphone as audio input.
             using (var recognizer = new SpeechRecognizer(config, language))
             {
+                recognizer.SessionStarted += (s, e) => {
+                    Console.WriteLine($"SESSION ID: {e.SessionId}");
+                };
+
                 while (true)
                 {
                     // Receives reference text from console input.
@@ -1096,6 +1102,10 @@ namespace MicrosoftSpeechSDKSamples
 
                 pronAssessmentConfig.EnableProsodyAssessment();
 
+                speechRecognizer.SessionStarted += (s, e) => {
+                    Console.WriteLine($"SESSION ID: {e.SessionId}");
+                };
+
                 pronAssessmentConfig.ApplyTo(speechRecognizer);
 
                 audioInputStream.Write(audioData);
@@ -1142,6 +1152,11 @@ namespace MicrosoftSpeechSDKSamples
             // Creates a speech recognizer for the specified language
             using (var recognizer = new SpeechRecognizer(config, language, audioConfig))
             {
+
+                recognizer.SessionStarted += (s, e) => {
+                    Console.WriteLine($"SESSION ID: {e.SessionId}");
+                };
+
                 // Starts recognizing.
                 pronunciationConfig.ApplyTo(recognizer);
 
@@ -1185,6 +1200,68 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
+        public static List<string> GetReferenceWords(string waveFilename, string referenceText, string language, SpeechConfig speechConfig)
+        {
+            var audioConfig = AudioConfig.FromWavFileInput(waveFilename);
+            //var speechConfig = SpeechConfig.FromSubscription(speechKey, serviceRegion);
+            speechConfig.SpeechRecognitionLanguage = language;
+
+            var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+            // Create pronunciation assessment config, set grading system, granularity, and enable miscue based on requirement
+            bool enableMiscue = true;
+            var pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
+                GradingSystem.HundredMark, Granularity.Phoneme, enableMiscue);
+
+            // Apply pronunciation assessment config to speech recognizer
+            pronunciationConfig.ApplyTo(speechRecognizer);
+
+            // Perform speech recognition
+            var result = speechRecognizer.RecognizeOnceAsync().Result;
+
+            if (result.Reason == ResultReason.RecognizedSpeech)
+            {
+                var referenceWords = new List<string>();
+
+                var responseJson = result.Properties.GetProperty(PropertyId.SpeechServiceResponse_JsonResult);
+                // Parse the JSON result to extract NBest and Words
+                JsonDocument doc = JsonDocument.Parse(responseJson);
+                JsonElement root = doc.RootElement;
+
+
+                JsonElement words = root.GetProperty("NBest")[0].GetProperty("Words");
+                foreach (JsonElement item in words.EnumerateArray())
+                {
+                    string word_item = item.GetProperty("Word").GetString();
+                    string errorType_item = item.GetProperty("PronunciationAssessment").GetProperty("ErrorType").GetString();
+
+                    if (errorType_item != "Insertion")
+                    {
+                        referenceWords.Add(word_item);
+                    }
+                }
+
+                return referenceWords;
+            }
+            else if (result.Reason == ResultReason.NoMatch)
+            {
+                Console.WriteLine("No speech could be recognized");
+                return null;
+            }
+            else if (result.Reason == ResultReason.Canceled)
+            {
+                var cancellation = CancellationDetails.FromResult(result);
+                Console.WriteLine($"Speech Recognition canceled: {cancellation.Reason}");
+                if (cancellation.Reason == CancellationReason.Error)
+                {
+                    Console.WriteLine($"Error details: {cancellation.ErrorDetails}");
+                }
+                return null;
+            }
+
+            return null;
+        }
+
         // Pronunciation assessment continous from file
         // See more information at https://aka.ms/csspeech/pa
         public static async Task PronunciationAssessmentContinuousWithFile()
@@ -1192,30 +1269,42 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var waveFileName = @"zhcn_continuous_mode_sample.wav";
+            var scriptFileName = @"zhcn_continuous_mode_sample.txt";
+            var referenceText = File.ReadAllText(scriptFileName);
+
+            // Switch to other languages for example Spanish, change language "en-US" to "es-ES". Language name is not case sensitive.
+            var language = "zh-CN";
+            if (language == "zh-CN")
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+            }
 
             // Creates a speech recognizer using file as audio input. 
-            using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
+            using (var audioInput = AudioConfig.FromWavFileInput(waveFileName))
             {
-                // Switch to other languages for example Spanish, change language "en-US" to "es-ES". Language name is not case sensitive.
-                var language = "en-US";
 
                 using (var recognizer = new SpeechRecognizer(config, language, audioInput))
                 {
-                    var referenceText = "what's the weather like";
 
                     bool enableMiscue = true;
 
                     var pronConfig = new PronunciationAssessmentConfig(referenceText, GradingSystem.HundredMark, Granularity.Phoneme, enableMiscue);
 
                     pronConfig.EnableProsodyAssessment();
-                    
+
+                    recognizer.SessionStarted += (s, e) => {
+                        Console.WriteLine($"SESSION ID: {e.SessionId}");
+                    };
+
                     pronConfig.ApplyTo(recognizer);
 
                     var recognizedWords = new List<string>();
                     var pronWords = new List<Word>();
                     var finalWords = new List<Word>();
-                    var fluency_scores = new List<double>();
                     var prosody_scores = new List<double>();
+                    var startOffset = 0L;
+                    var endOffset = 0L;
                     var durations = new List<int>();
                     var done = false;
 
@@ -1234,7 +1323,6 @@ namespace MicrosoftSpeechSDKSamples
                         var pronResult = PronunciationAssessmentResult.FromResult(e.Result);
                         Console.WriteLine($"    Accuracy score: {pronResult.AccuracyScore}, prosody score:{pronResult.ProsodyScore}, pronunciation score: {pronResult.PronunciationScore}, completeness score: {pronResult.CompletenessScore}, fluency score: {pronResult.FluencyScore}");
 
-                        fluency_scores.Add(pronResult.FluencyScore);
                         prosody_scores.Add(pronResult.ProsodyScore);
 
                         foreach(var word in pronResult.Words)
@@ -1245,9 +1333,12 @@ namespace MicrosoftSpeechSDKSamples
 
                         foreach (var result in e.Result.Best())
                         {
-                            durations.Add(result.Words.Sum(item => item.Duration));
+                            durations.AddRange(result.Words.Select(item => item.Duration + 100000).ToList());
                             recognizedWords.AddRange(result.Words.Select(item => item.Word).ToList());
 
+                            if (startOffset == 0) startOffset = result.Words.First().Offset;
+
+                            endOffset = result.Words.Last().Offset + result.Words.Last().Duration + 100000;
                         }
                     };
 
@@ -1263,13 +1354,25 @@ namespace MicrosoftSpeechSDKSamples
                     // Waits for completion.
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
+                    // set the duration of Word in pronWords
+                    pronWords.Zip(durations, (word, duration) => word.Duration = duration).ToList();
+
                     // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
                     // even if miscue is enabled.
                     // We need to compare with the reference text after received all recognized words to get these error words.
-                    string[] referenceWords = referenceText.ToLower().Split(' ');
-                    for (int j = 0; j < referenceWords.Length; j++)
+                    string[] referenceWords;
+
+                    if (language == "zh-CN")
                     {
-                        referenceWords[j] = Regex.Replace(referenceWords[j], "^[\\p{P}\\s]+|[\\p{P}\\s]+$", "");
+                        referenceWords = GetReferenceWords(waveFileName, referenceText, language, config).ToArray();
+                    }
+                    else
+                    {
+                        referenceWords = referenceText.ToLower().Split(' ');
+                        for (int j = 0; j < referenceWords.Length; j++)
+                        {
+                            referenceWords[j] = Regex.Replace(referenceWords[j], "^[\\p{P}\\s]+|[\\p{P}\\s]+$", "");
+                        }
                     }
 
                     if (enableMiscue)
@@ -1297,7 +1400,7 @@ namespace MicrosoftSpeechSDKSamples
 
                             if (delta.Type == ChangeType.Inserted || delta.Type == ChangeType.Modified)
                             {
-                                Word w = pronWords[currentIdx];
+                                Word w = new Word(pronWords[currentIdx].WordText, pronWords[currentIdx].ErrorType, pronWords[currentIdx].AccuracyScore, pronWords[currentIdx].Duration);
                                 if (w.ErrorType == "None")
                                 {
                                     w.ErrorType = "Insertion";
@@ -1321,13 +1424,20 @@ namespace MicrosoftSpeechSDKSamples
                     var prosodyScore = prosody_scores.Average();
 
                     // Recalculate fluency score
-                    var fluencyScore = fluency_scores.Zip(durations, (x, y) => x * y).Sum() / durations.Sum();
+                    var durations_sum = finalWords.Where(item => item.ErrorType == "None")
+                        .Sum(item => item.Duration);
+
+                    var fluencyScore = durations_sum * 1.0 / (endOffset - startOffset) * 100;
 
                     // Calculate whole completeness score
-                    var completenessScore = (double)pronWords.Count(item => item.ErrorType == "None") / referenceWords.Length * 100;
+                    var completenessScore = (double)finalWords.Count(item => item.ErrorType == "None") / filteredWords.Count() * 100;
                     completenessScore = completenessScore <= 100 ? completenessScore : 100;
 
-                    Console.WriteLine("Paragraph accuracy score: {0}, prosody score: {1} completeness score: {2}, fluency score: {3}", accuracyScore, prosodyScore, completenessScore, fluencyScore);
+                    List<double> scores_list = new List<double> {accuracyScore, prosodyScore, completenessScore, fluencyScore };
+
+                    double pronunciationScore = scores_list.Sum(n => n * 0.2) + scores_list.Min() * 0.2;
+
+                    Console.WriteLine("Paragraph accuracy score: {0}, prosody score: {1} completeness score: {2}, fluency score: {3}, pronunciation score: {4}", accuracyScore, prosodyScore, completenessScore, fluencyScore, pronunciationScore);
 
                     for (int idx = 0; idx < finalWords.Count(); idx++)
                     {
@@ -1363,6 +1473,10 @@ namespace MicrosoftSpeechSDKSamples
 
                     pronConfig.EnableProsodyAssessment();
                     pronConfig.EnableContentAssessmentWithTopic(theTopic);
+
+                    recognizer.SessionStarted += (s, e) => {
+                        Console.WriteLine($"SESSION ID: {e.SessionId}");
+                    };
 
                     pronConfig.ApplyTo(recognizer);
 
@@ -1921,17 +2035,24 @@ namespace MicrosoftSpeechSDKSamples
         public string WordText { get; set; }
         public string ErrorType { get; set; }
         public double AccuracyScore { get; set; }
+        public double Duration { get; set; }
 
         public Word(string wordText, string errorType)
         {
             WordText = wordText;
             ErrorType = errorType;
             AccuracyScore = 0;
+            Duration = 0;
         }
 
         public Word(string wordText, string errorType, double accuracyScore) : this(wordText, errorType)
         {
             AccuracyScore = accuracyScore;
+        }
+
+        public Word(string wordText, string errorType, double accuracyScore, double duration) : this(wordText, errorType, accuracyScore)
+        {
+            Duration = duration;
         }
     }
 

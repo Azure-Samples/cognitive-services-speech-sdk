@@ -1032,6 +1032,10 @@ public class SpeechRecognitionSamples {
                 // Starts recognizing.
                 System.out.println("Read out \"" + referenceText + "\" for pronunciation assessment ...");
 
+                recognizer.sessionStarted.addEventListener((s, e) -> {
+                    System.out.println("SESSION ID: " + e.getSessionId());
+                });
+
                 pronunciationConfig.applyTo(recognizer);
 
                 // Starts speech recognition, and returns after a single utterance is recognized.
@@ -1151,6 +1155,10 @@ public class SpeechRecognitionSamples {
         
         pronunciationConfig.enableProsodyAssessment();
         
+        recognizer.sessionStarted.addEventListener((s, e) -> {
+            System.out.println("SESSION ID: " + e.getSessionId());
+        });
+
         pronunciationConfig.applyTo(recognizer);
 
         System.out.println("Assessing...");
@@ -1220,6 +1228,10 @@ public class SpeechRecognitionSamples {
         // Creates a speech recognizer for the specified language
         SpeechRecognizer recognizer = new SpeechRecognizer(config, lang, audioInput);
         {
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("SESSION ID: " + e.getSessionId());
+            });
+
             pronunciationConfig.applyTo(recognizer);
 
             // Starts speech recognition, and returns after a single utterance is recognized.
@@ -1260,17 +1272,77 @@ public class SpeechRecognitionSamples {
         config.close();
     }
 
+    public static List<String> getReferenceWords(String waveFilename, String referenceText, String language, SpeechConfig speechConfig) {
+        try {
+            AudioConfig audioConfig = AudioConfig.fromWavFileInput(waveFilename);
+            speechConfig.setSpeechRecognitionLanguage(language);
+
+            SpeechRecognizer speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
+
+            // Create pronunciation assessment config
+            boolean enableMiscue = true;
+            PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
+                    PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Phoneme, enableMiscue);
+
+            // Apply pronunciation assessment config to speech recognizer
+            pronunciationConfig.applyTo(speechRecognizer);
+
+            // Perform speech recognition
+            SpeechRecognitionResult result = speechRecognizer.recognizeOnceAsync().get();
+
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
+                List<String> referenceWords = new ArrayList<>();
+
+                String responseJson = result.getProperties().getProperty(PropertyId.SpeechServiceResponse_JsonResult);
+
+                // Parse the JSON result to extract NBest and Words
+                JsonReader jsonReader = Json.createReader(new StringReader(responseJson));
+                JsonObject root = jsonReader.readObject();
+                JsonArray words = root.getJsonArray("NBest").getJsonObject(0).getJsonArray("Words");
+
+                for (int i = 0; i < words.size(); i++) {
+                    JsonObject item = words.getJsonObject(i);
+                    String wordItem = item.getString("Word");
+                    String errorTypeItem = item.getJsonObject("PronunciationAssessment").getString("ErrorType");
+
+                    if (!"Insertion".equals(errorTypeItem)) {
+                        referenceWords.add(wordItem);
+                    }
+                }
+
+                return referenceWords;
+            } else if (result.getReason() == ResultReason.NoMatch) {
+                System.out.println("No speech could be recognized");
+                return null;
+            } else if (result.getReason() == ResultReason.Canceled) {
+                CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                System.out.println("Speech Recognition canceled: " + cancellation.getReason());
+                if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("Error details: " + cancellation.getErrorDetails());
+                }
+                return null;
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return null;
+    }
+
     // Pronunciation assessment continuous with file.
     // See more information at https://aka.ms/csspeech/pa
     public static void pronunciationAssessmentContinuousWithFile() throws ExecutionException, InterruptedException {
         // Creates an instance of a speech config with specified subscription key and service region.
         // Replace with your own subscription key and service region (e.g., "westus").
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+
         // Replace the language with your language in BCP-47 format, e.g., en-US.
-        String lang = "en-US";
+        String lang = "zh-CN";
+        String wavFileName = "YourAudioFile.wav";
 
         // Creates a speech recognizer using wav file.
-        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        AudioConfig audioInput = AudioConfig.fromWavFileInput(wavFileName);
 
         stopRecognitionSemaphore = new Semaphore(0);
         List<String> recognizedWords = new ArrayList<>();
@@ -1278,7 +1350,7 @@ public class SpeechRecognitionSamples {
         List<Word> finalWords = new ArrayList<>();
         List<Double> fluencyScores = new ArrayList<>();
         List<Double> prosodyScores = new ArrayList<>();
-        List<Long> durations = new ArrayList<>();
+        List<Long> start_end_offsets = new ArrayList<>();
 
         SpeechRecognizer recognizer = new SpeechRecognizer(config, lang, audioInput);
         {
@@ -1306,17 +1378,24 @@ public class SpeechRecognitionSamples {
                         JsonObject nBestItem = nBestArray.getJsonObject(i);
 
                         JsonArray wordsArray = nBestItem.getJsonArray("Words");
-                        long durationSum = 0;
 
                         for (int j = 0; j < wordsArray.size(); j++) {
                             JsonObject wordItem = wordsArray.getJsonObject(j);
                             recognizedWords.add(wordItem.getString("Word"));
-                            durationSum += wordItem.getJsonNumber("Duration").longValue();
+
+                            long offset = wordItem.getJsonNumber("Offset").longValue();
+                            long duration = wordItem.getJsonNumber("Duration").longValue();
+
+                            if (start_end_offsets.size() == 0)
+                            {
+                                start_end_offsets.add(offset);
+                            }
+
+                            start_end_offsets.add(offset + duration + 100000);
 
                             JsonObject pronAssessment = wordItem.getJsonObject("PronunciationAssessment");
-                            pronWords.add(new Word(wordItem.getString("Word"), pronAssessment.getString("ErrorType"), pronAssessment.getJsonNumber("AccuracyScore").doubleValue()));
+                            pronWords.add(new Word(wordItem.getString("Word"), pronAssessment.getString("ErrorType"), pronAssessment.getJsonNumber("AccuracyScore").doubleValue(), duration));
                         }
-                        durations.add(durationSum);
                     }
                 }
                 else if (e.getResult().getReason() == ResultReason.NoMatch) {
@@ -1354,6 +1433,10 @@ public class SpeechRecognitionSamples {
 
             pronunciationConfig.enableProsodyAssessment();
 
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("SESSION ID: " + e.getSessionId());
+            });
+
             pronunciationConfig.applyTo(recognizer);
 
             // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
@@ -1367,9 +1450,17 @@ public class SpeechRecognitionSamples {
             // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
             // even if miscue is enabled.
             // We need to compare with the reference text after received all recognized words to get these error words.
-            String[] referenceWords = referenceText.toLowerCase().split(" ");
-            for (int j = 0; j < referenceWords.length; j++) {
-                referenceWords[j] = referenceWords[j].replaceAll("^\\p{Punct}+|\\p{Punct}+$","");
+            String[] referenceWords;
+            if (lang == "zh-CN")
+            {
+                referenceWords = getReferenceWords(wavFileName, referenceText, lang, config).toArray(new String[0]);
+            }
+            else
+            {
+                referenceWords = referenceText.toLowerCase().split(" ");
+                for (int j = 0; j < referenceWords.length; j++) {
+                    referenceWords[j] = referenceWords[j].replaceAll("^\\p{Punct}+|\\p{Punct}+$","");
+                }
             }
 
             if (enableMiscue) {
@@ -1406,6 +1497,7 @@ public class SpeechRecognitionSamples {
             double totalAccuracyScore = 0;
             int accuracyCount = 0;
             int validCount = 0;
+            long durationSum = 0;
             for (Word word : finalWords) {
                 if (!"Insertion".equals(word.errorType)) {
                     totalAccuracyScore += word.accuracyScore;
@@ -1414,18 +1506,13 @@ public class SpeechRecognitionSamples {
 
                 if ("None".equals(word.errorType)) {
                     validCount += 1;
+                    durationSum += word.duration + 100000;
                 }
             }
             double accuracyScore = totalAccuracyScore / accuracyCount;
 
             //Re-calculate fluency score
-            double fluencyScoreSum = 0;
-            long durationSum = 0;
-            for (int i = 0; i < durations.size(); i++) {
-                fluencyScoreSum += fluencyScores.get(i)*durations.get(i);
-                durationSum += durations.get(i);
-            }
-            double fluencyScore = fluencyScoreSum / durationSum;
+            double fluencyScore = durationSum * 1.0 / (start_end_offsets.getLast() - start_end_offsets.getFirst()) * 100;
 
             //Re-calculate prosody score
             double prosodyScoreSum = 0;
@@ -1435,12 +1522,16 @@ public class SpeechRecognitionSamples {
             double prosodyScore = prosodyScoreSum / prosodyScores.size();
 
             // Calculate whole completeness score
-            double completenessScore = (double)validCount / referenceWords.length * 100;
+            double completenessScore = (double)validCount / accuracyCount * 100;
             completenessScore = completenessScore <= 100 ? completenessScore : 100;
+
+            double[] scores_all = {accuracyScore, prosodyScore, completenessScore, fluencyScore};
+            double minValue = Arrays.stream(scores_all).min().orElse(0.0);
+            double pronunciationScore = Arrays.stream(scores_all).map(x -> x * 0.2).sum() + minValue * 0.2;
 
             System.out.println("Paragraph accuracy score: " + accuracyScore + " prosody score: " + prosodyScore +
                 ", completeness score: " +completenessScore +
-                " , fluency score: " + fluencyScore);
+                " , fluency score: " + fluencyScore + " , pronunciation score: " + pronunciationScore);
             for (Word w : finalWords) {
                 System.out.println(" word: " + w.word + "\taccuracy score: " +
                     w.accuracyScore + "\terror type: " + w.errorType);
@@ -1513,6 +1604,10 @@ public class SpeechRecognitionSamples {
 
             pronunciationConfig.enableProsodyAssessment();
             pronunciationConfig.enableContentAssessmentWithTopic(theTopic);
+
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("SESSION ID: " + e.getSessionId());
+            });
 
             pronunciationConfig.applyTo(recognizer);
 
@@ -1908,15 +2003,22 @@ public class SpeechRecognitionSamples {
         public String word;
         public String errorType;
         public double accuracyScore;
+        public double duration;
         public Word(String word, String errorType) {
             this.word = word;
             this.errorType = errorType;
             this.accuracyScore = 0;
+            this.duration = 0;
         }
 
         public Word(String word, String errorType, double accuracyScore) {
             this(word, errorType);
             this.accuracyScore = accuracyScore;
+        }
+
+        public Word(String word, String errorType, double accuracyScore, double duration) {
+            this(word, errorType, accuracyScore);
+            this.duration = duration;
         }
     }
 }

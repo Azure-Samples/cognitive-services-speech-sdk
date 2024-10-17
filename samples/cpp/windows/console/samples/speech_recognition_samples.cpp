@@ -568,6 +568,10 @@ void PronunciationAssessmentWithMicrophone()
     // Creates a speech recognizer using microphone as audio input.
     auto recognizer = SpeechRecognizer::FromConfig(config, "en-US");
 
+    recognizer->SessionStarted.Connect([](const SessionEventArgs& e) {
+        std::cout << "SESSION ID: " << e.SessionId << std::endl;
+        });
+
     while (true)
     {
         // Receives reference text from console input.
@@ -631,6 +635,10 @@ void PronunciationAssessmentWithStreamInternalAsync(shared_ptr<SpeechConfig> spe
     auto pronAssessmentConfig = PronunciationAssessmentConfig::Create(referenceText, PronunciationAssessmentGradingSystem::HundredMark, PronunciationAssessmentGranularity::Phoneme, false);
 
     pronAssessmentConfig->EnableProsodyAssessment();
+
+    speechRecognizer->SessionStarted.Connect([](const SessionEventArgs& e) {
+        std::cout << "SESSION ID: " << e.SessionId << std::endl;
+        });
 
     pronAssessmentConfig->ApplyTo(speechRecognizer);
 
@@ -712,6 +720,10 @@ void PronunciationAssessmentConfiguredWithJson()
     // Creates a speech recognizer.
     auto recognizer = SpeechRecognizer::FromConfig(config, "en-US", audioConfig);
 
+    recognizer->SessionStarted.Connect([](const SessionEventArgs& e) {
+        std::cout << "SESSION ID: " << e.SessionId << std::endl;
+        });
+
     pronunciationConfig->ApplyTo(recognizer);
 
     // Starts speech recognition, and returns after a single utterance is recognized.
@@ -768,6 +780,10 @@ void PronunciationAssessmentWithContentAssessment()
 
     // Creates a speech recognizer.
     auto recognizer = SpeechRecognizer::FromConfig(config, "en-US", audioConfig);
+
+    recognizer->SessionStarted.Connect([](const SessionEventArgs& e) {
+        std::cout << "SESSION ID: " << e.SessionId << std::endl;
+        });
 
     pronunciationConfig->ApplyTo(recognizer);
 
