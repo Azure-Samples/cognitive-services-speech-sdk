@@ -10,12 +10,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A Linux PC with a working microphone.
-* On Ubuntu or Debian, install these packages to build and run this sample:
-
-  ```sh
-  sudo apt-get update
-  sudo apt-get install build-essential libssl-dev libasound2 wget
-  ```
+* See the [Linux platform requirements](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux&pivots=programming-language-cpp#platform-requirements) for installing the required dependencies.
 
 ## Build the sample
 

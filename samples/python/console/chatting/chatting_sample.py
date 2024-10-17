@@ -31,7 +31,7 @@ except ImportError:
     sys.exit(1)
 
 
-Set up the subscription info for the Speech Service
+# Set up the subscription info for the Speech Service
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
 # Set up the parameters for Azure OAI Services
@@ -103,7 +103,7 @@ def get_mispronunciation_clip(offset, duration, save_path, merged_audio_path):
 
 
 def strip_end_silence(file_path):
-    y, _ = sf.read(file_path, start=0, stop=-int(sample_rate*0.8), dtype=np.float32)
+    y, _ = sf.read(file_path, start=0, stop=-int(sample_rate * 0.8), dtype=np.float32)
     sf.write(file_path, y, sample_rate)
 
 
@@ -380,11 +380,11 @@ def chatting_from_file():
 
         def set_error_dict(json_words):
             for idx, word in enumerate(json_words):
-                if get_prosody_error("MissingBreak", word, json_words[idx-1]):
+                if get_prosody_error("MissingBreak", word, json_words[idx - 1]):
                     error_dict["Missing break"].append(word)
-                elif get_prosody_error("UnexpectedBreak", word, json_words[idx-1]):
+                elif get_prosody_error("UnexpectedBreak", word, json_words[idx - 1]):
                     error_dict["Unexpected break"].append(word)
-                elif get_prosody_error("Monotone", word, json_words[idx-1]):
+                elif get_prosody_error("Monotone", word, json_words[idx - 1]):
                     error_dict["Monotone"].append(word)
 
         def get_error_message(error_types):

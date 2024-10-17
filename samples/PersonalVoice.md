@@ -16,7 +16,7 @@ REST API doc: Personal voice REST API is a part of [custom voice REST API](https
 > [!NOTE]
 > You need an Azure AI services [subscription key](https://learn.microsoft.com/azure/ai-services/speech-service/get-started-text-to-speech?tabs=windows%2Cterminal&pivots=programming-language-rest#prerequisites) resource to run the sample code provided here. Personal voice is only available for paid resources (S0); free resources (F0) aren't supported.
 
-> Personal voice access is [limited](https://learn.microsoft.com/en-us/legal/cognitive-services/speech-service/custom-neural-voice/limited-access-custom-neural-voice?context=%2fazure%2fcognitive-services%2fspeech-service%2fcontext%2fcontext) based on eligibility and usage criteria. [Request access](https://aka.ms/customneural) before using the sample code here.
+> Personal voice access is [limited](https://learn.microsoft.com/legal/cognitive-services/speech-service/custom-neural-voice/limited-access-custom-neural-voice?context=%2fazure%2fcognitive-services%2fspeech-service%2fcontext%2fcontext) based on eligibility and usage criteria. [Request access](https://aka.ms/customneural) before using the sample code here.
 
 > Personal voice is available in these regions: West Europe, East US, and Southeast Asia.
 
