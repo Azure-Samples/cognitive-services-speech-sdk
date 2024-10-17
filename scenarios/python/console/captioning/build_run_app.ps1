@@ -86,7 +86,8 @@ if ($action -eq "build") {
     else {
         Install-Packages -pythonDirectory $tempPythonInstallationDirectory
     }
-
+}
+elseif ($action -eq "run") {
     $envFilePath = ".env/.env.dev"
     if (Test-Path $envFilePath) {
         Get-Content $envFilePath | ForEach-Object {
@@ -106,8 +107,7 @@ if ($action -eq "build") {
     } else {
         Write-Host "File not found: $envFilePath"
     }
-}
-elseif ($action -eq "run") {
+
     if ($pythonPath) {
         & python .\captioning.py
     }
