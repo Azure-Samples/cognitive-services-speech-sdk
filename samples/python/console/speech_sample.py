@@ -812,6 +812,8 @@ def pronunciation_assessment_from_microphone():
             break
 
         pronunciation_config.reference_text = reference_text
+        # (Optional) get the session ID
+        recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
         pronunciation_config.apply_to(recognizer)
 
         # Starts recognizing.
@@ -952,7 +954,8 @@ def pronunciation_assessment_continuous_from_file():
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
     # Stop continuous recognition on either session stopped or canceled events
@@ -1061,6 +1064,8 @@ def pronunciation_assessment_from_stream():
     # Create a speech recognizer using a file as audio input.
     language = 'en-US'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
 
@@ -1120,6 +1125,8 @@ def pronunciation_assessment_configured_with_json():
     # Create a speech recognizer using a file as audio input.
     language = 'en-US'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
 
@@ -1186,7 +1193,8 @@ def pronunciation_assessment_with_content_assessment():
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.session_started.connect(lambda evt: print("SESSION STARTED: {}".format(evt)))
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     speech_recognizer.session_stopped.connect(lambda evt: print("SESSION STOPPED {}".format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
     # Stop continuous recognition on either session stopped or canceled events

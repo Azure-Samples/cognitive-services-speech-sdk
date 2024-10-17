@@ -34,6 +34,10 @@ export const main = async (settings) => {
 
     // create the speech recognizer.
     var reco = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+    // (Optional) get the session ID
+    reco.sessionStarted = (_s, e) => {
+        console.log(`SESSION ID: ${e.sessionId}`);
+    };
     pronunciationAssessmentConfig.applyTo(reco);
 
     const scoreNumber = {
@@ -268,9 +272,6 @@ export const main = async (settings) => {
         }
         reco.stopContinuousRecognitionAsync();
     };
-
-    // Signals that a new session has started with the speech service
-    reco.sessionStarted = function (s, e) {};
 
     // Signals the end of a session with the speech service.
     reco.sessionStopped = function (s, e) {
