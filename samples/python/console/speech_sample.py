@@ -943,7 +943,7 @@ def pronunciation_assessment_continuous_from_file():
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo["NBest"][0]
-        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"] if w["PronunciationAssessment"]["ErrorType"] == "None"])
+        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"]])
         if startOffset == 0:
             startOffset = nb["Words"][0]["Offset"]
         endOffset = nb["Words"][-1]["Offset"] + nb["Words"][-1]["Duration"] + 100000
@@ -996,6 +996,8 @@ def pronunciation_assessment_continuous_from_file():
     else:
         final_words = recognized_words
 
+    durations_sum = sum([d for w, d in zip(recognized_words, durations) if w.error_type == "None"])
+
     # We can calculate whole accuracy by averaging
     final_accuracy_scores = []
     for word in final_words:
@@ -1012,14 +1014,16 @@ def pronunciation_assessment_continuous_from_file():
     # Re-calculate fluency score
     fluency_score = 0
     if startOffset > 0:
-        fluency_score = sum(durations) / (endOffset - startOffset) * 100
+        fluency_score = durations_sum / (endOffset - startOffset) * 100
     # Calculate whole completeness score
     handled_final_words = [w.word for w in final_words if w.error_type != "Insertion"]
     completeness_score = len([w for w in final_words if w.error_type == "None"]) / len(handled_final_words) * 100
     completeness_score = completeness_score if completeness_score <= 100 else 100
+    sorted_scores = sorted([accuracy_score, prosody_score, completeness_score, fluency_score])
+    pronunciation_score = sorted_scores[0] * 0.4 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2 + sorted_scores[3] * 0.2
 
-    print('    Paragraph accuracy score: {}, prosody score: {}, completeness score: {}, fluency score: {}'.format(
-        accuracy_score, prosody_score, completeness_score, fluency_score
+    print('    Paragraph pronunciation score: {:.2f}, accuracy score: {:.2f}, prosody score: {:.2f}, completeness score: {:.2f}, fluency score: {:.2f}'.format(
+        pronunciation_score, accuracy_score, prosody_score, completeness_score, fluency_score
     ))
 
     for idx, word in enumerate(final_words):
