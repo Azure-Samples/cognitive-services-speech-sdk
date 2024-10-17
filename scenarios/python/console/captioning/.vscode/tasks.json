@@ -14,8 +14,12 @@
             },
             "problemMatcher": [],
             "windows": {
-                "command": "${workspaceFolder}/build_run_app.ps1",
+                "command": "powershell",
                 "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/build_run_app.ps1",
                     "run"
                 ]
             },
@@ -39,8 +43,12 @@
             },
             "problemMatcher": [],
             "windows": {
-                "command": "${workspaceFolder}/build_run_app.ps1",
+                "command": "powershell",
                 "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/build_run_app.ps1",
                     "build"
                 ]
             },
