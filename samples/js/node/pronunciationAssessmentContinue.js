@@ -19,7 +19,7 @@ export const main = async (settings) => {
     var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream, format);
     var speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
 
-    var reference_text = "秋天总是那么富有诗意。树叶渐渐变红，街道旁的银杏树也开始落叶。人们穿上厚重的外套，享受着凉爽的秋风。黄昏时分，夕阳洒在街道上，给忙碌的一天增添了一抹温暖。无论是散步还是小憩，这个季节总能带来宁静和满足。清晨，薄雾笼罩大地，空气中弥漫着一丝清新的凉意。中午阳光明媚，照在身上暖洋洋的，仿佛是一场心灵的抚慰。傍晚时分，天空被染成了金黄和橙红，街上的行人脚步也不由得慢了下来，享受这份静谧和美好。你最喜欢哪个季节？";
+    var reference_text = fs.readFileSync(settings.refTextFilename, 'utf8');
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     const pronunciationAssessmentConfig = new sdk.PronunciationAssessmentConfig(
         reference_text,
@@ -233,7 +233,7 @@ export const main = async (settings) => {
                 scoreNumber[sortScore["1"]] * 0.2 +
                 scoreNumber[sortScore["2"]] * 0.2 +
                 scoreNumber[sortScore["3"]] * 0.2
-            ).toFixed(0)
+            ).toFixed(2)
         );
 
         console.log(
