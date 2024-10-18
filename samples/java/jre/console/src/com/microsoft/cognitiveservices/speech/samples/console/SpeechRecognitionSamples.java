@@ -1339,10 +1339,9 @@ public class SpeechRecognitionSamples {
 
         // Replace the language with your language in BCP-47 format, e.g., en-US.
         String lang = "zh-CN";
-        String wavFileName = "YourAudioFile.wav";
 
         // Creates a speech recognizer using wav file.
-        AudioConfig audioInput = AudioConfig.fromWavFileInput(wavFileName);
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
 
         stopRecognitionSemaphore = new Semaphore(0);
         List<String> recognizedWords = new ArrayList<>();
@@ -1453,7 +1452,8 @@ public class SpeechRecognitionSamples {
             String[] referenceWords;
             if (lang == "zh-CN")
             {
-                referenceWords = getReferenceWords(wavFileName, referenceText, lang, config).toArray(new String[0]);
+                // Split words for Chinese using the reference text and any short wave file
+                referenceWords = getReferenceWords("zhcn_short_dummy_audio.wav", referenceText, lang, config).toArray(new String[0]);
             }
             else
             {

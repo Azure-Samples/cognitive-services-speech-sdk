@@ -1203,7 +1203,6 @@ namespace MicrosoftSpeechSDKSamples
         public static List<string> GetReferenceWords(string waveFilename, string referenceText, string language, SpeechConfig speechConfig)
         {
             var audioConfig = AudioConfig.FromWavFileInput(waveFilename);
-            //var speechConfig = SpeechConfig.FromSubscription(speechKey, serviceRegion);
             speechConfig.SpeechRecognitionLanguage = language;
 
             var speechRecognizer = new SpeechRecognizer(speechConfig, audioConfig);
@@ -1364,7 +1363,8 @@ namespace MicrosoftSpeechSDKSamples
 
                     if (language == "zh-CN")
                     {
-                        referenceWords = GetReferenceWords(waveFileName, referenceText, language, config).ToArray();
+                        // Split words for Chinese using the reference text and any short wave file
+                        referenceWords = GetReferenceWords(@"zhcn_short_dummy_sample.wav", referenceText, language, config).ToArray();
                     }
                     else
                     {
