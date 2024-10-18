@@ -149,7 +149,8 @@ export const main = async (settings) => {
 
         // The sample code provides only zh-CN and en-US locales
         if (["zh-cn"].includes(settings.language.toLowerCase())) {
-            referenceWords = await getReferenceWords(settings.filename, reference_text, settings.language);
+            // Split words for Chinese using the reference text and any short wave file
+            referenceWords = await getReferenceWords(settings.dummyFilename, reference_text, settings.language);
         } else {
             const referenceText = (reference_text.toLocaleLowerCase() ?? "").replace(new RegExp("[!\"#$%&()*+,-./:;<=>?@[^_`{|}~]+", "g"), "").replace(new RegExp("]+", "g"), "");
             referenceWords = _.map(
