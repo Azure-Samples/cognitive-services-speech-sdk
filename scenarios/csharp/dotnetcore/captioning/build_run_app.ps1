@@ -55,6 +55,28 @@ if ($action -eq "build") {
     }
 }
 elseif ($action -eq "run") {
+    $envFilePath = ".env/.env.dev"
+    if (Test-Path $envFilePath) {
+        Get-Content $envFilePath | ForEach-Object {
+            if ($_ -and $_ -notmatch '^\s*#') {
+                $pair = $_ -split '='
+                $key = $pair[0].Trim()
+                $value = $pair[1].Trim()
+    
+                if ($key -eq "SPEECH_RESOURCE_KEY") {
+                    [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $value)
+                }
+                elseif ($key -eq "SERVICE_REGION") {
+                    [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $value)
+                }
+            }
+        }
+        Write-Host "Environment variables loaded from $envFilePath"
+    }
+    else {
+        Write-Host "File not found: $envFilePath"
+    }
+
     # Run the generated executable
     $exePath = Join-Path $ProjectDir "bin\Debug\net6.0\captioning.exe"
 
