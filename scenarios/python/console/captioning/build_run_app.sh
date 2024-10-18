@@ -34,15 +34,15 @@ install_packages() {
     "$real_python_path" -m pip install azure-cognitiveservices-speech
 }
 
-if [[ "$action" == "build" ]]; then
+if [ "$action" == "build" ]; then
     if test_python3_installed; then
         python_directory=$(dirname "$(command -v python)")
         install_packages "$python_directory"
-    elif [[ ! -f "$tempPythonPath" ]]; then
+    elif [ ! -f "$tempPythonPath" ]; then
         echo "Python 3 is not installed. Installing Python 3 to $tempPythonInstallationDirectory..."
         mkdir -p "$tempPythonInstallationDirectory"
 
-        if [[ "$(uname -m)" == "x86_64" ]]; then
+        if [ "$(uname -m)" == "x86_64" ]; then
             python_download_url="https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe"
         else
             python_download_url="https://www.python.org/ftp/python/3.10.0/python-3.10.0-win32.exe"
@@ -54,7 +54,7 @@ if [[ "$action" == "build" ]]; then
         # Assuming 'wine' is installed for running Windows executables
         wine "$python_installer_path" /quiet InstallAllUsers=0 PrependPath=0 TargetDir="$tempPythonInstallationDirectory"
 
-        if [[ ! -f "$tempPythonPath" ]]; then
+        if [ ! -f "$tempPythonPath" ]; then
             echo "Python installation failed, exiting..." >&2
             exit 1
         fi
@@ -67,15 +67,15 @@ if [[ "$action" == "build" ]]; then
     fi
 
     env_file_path=".env/.env.dev"
-    if [[ -f "$env_file_path" ]]; then
+    if [ -f "$env_file_path" ]; then
         while IFS= read -r line; do
-            if [[ "$line" && ! "$line" =~ ^\s*# ]]; then
+            if [ "$line" && ! "$line" =~ ^\s*# ]; then
                 key=$(echo "$line" | cut -d '=' -f 1 | xargs)
                 value=$(echo "$line" | cut -d '=' -f 2- | xargs)
 
-                if [[ "$key" == "SPEECH_RESOURCE_KEY" ]]; then
+                if [ "$key" == "SPEECH_RESOURCE_KEY" ]; then
                     export SPEECH_KEY="$value"
-                elif [[ "$key" == "SERVICE_REGION" ]]; then
+                elif [ "$key" == "SERVICE_REGION" ]; then
                     export SPEECH_REGION="$value"
                 fi
             fi
@@ -84,10 +84,10 @@ if [[ "$action" == "build" ]]; then
     else
         echo "File not found: $env_file_path"
     fi
-elif [[ "$action" == "run" ]]; then
+elif [ "$action" == "run" ]; then
     if command -v python &> /dev/null; then
         python ./captioning.py
-    elif [[ -f "$tempPythonPath" ]]; then
+    elif [ -f "$tempPythonPath" ]; then
         "$tempPythonPath" ./captioning.py
     else
         echo "Python is not found. Please first run the script with build action to install Python." >&2
