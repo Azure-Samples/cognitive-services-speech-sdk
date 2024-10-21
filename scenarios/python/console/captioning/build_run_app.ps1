@@ -109,7 +109,7 @@ elseif ($action -eq "run") {
     }
 
     if ($pythonPath) {
-        & python .\captioning.py
+        & python .\captioning.py -- input Sample.mp4
     }
     elseif (Get-Command $tempPythonPath -ErrorAction SilentlyContinue) {
         & $tempPythonPath .\captioning.py
