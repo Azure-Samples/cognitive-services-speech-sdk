@@ -19,7 +19,7 @@ export const main = async (settings) => {
     var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream, format);
     var speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
 
-    var reference_text = fs.readFileSync(settings.refTextFilename, 'utf8');
+    var reference_text = "What's the weather like?";
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     const pronunciationAssessmentConfig = new sdk.PronunciationAssessmentConfig(
         reference_text,
