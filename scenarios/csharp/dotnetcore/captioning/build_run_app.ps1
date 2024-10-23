@@ -1,72 +1,106 @@
-# Check if an argument (build or run) is passed
-if ($args.Length -gt 0) {
-    $action = $args[0]
-} else {
-    Write-Host "Action is not specified. Use 'build' or 'run'." -ForegroundColor Red
-    exit 1
-}
+param(
+    [string]$action
+)
 
-# Set project directory using relative path
-$ProjectDir = ".\captioning"
+$dotnetPath = "C:\Program Files\dotnet"
+$env:PATH = "$dotnetPath;$env:PATH"
+$dotnetInstallationTempDirectory = "$env:TEMP\dotnet"
+$dotnetTempPath = Join-Path $dotnetInstallationTempDirectory "dotnet.exe"
 
-# Change to project directory
-Set-Location $ProjectDir
-
-# Function to install .NET 6.0 SDK
-function Install-DotnetSdk {
-    Write-Host ".NET 6.0 SDK is not installed. Installing..."
-
-    # Download and install .NET 6.0 SDK
-    $url = "https://dotnet.microsoft.com/download/dotnet/6.0"
-    Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $url /quiet /norestart" -Wait
-
-    # Check version again
-    $dotnetVersion = & dotnet --version 2>$null
-    if ($dotnetVersion -ne "6.0") {
-        Write-Host "Failed to install .NET 6.0 SDK. Please install it manually."
+function Install-DotNet6 {
+    Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
+    if (-not $?) {
+        Write-Host "Failed to download dotnet-install.ps1, exiting..." -ForegroundColor Red
         exit 1
     }
+
+    & .\dotnet-install.ps1 -InstallDir $dotnetInstallationTempDirectory -Version 6.0.427
+    if (-not $?) {
+        Write-Host "Failed to install .NET SDK, exiting..." -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host ".NET 6 installed successfully." -ForegroundColor Green
+    Remove-Item -Force dotnet-install.ps1
 }
 
+
 if ($action -eq "build") {
-    # Check .NET SDK version
-    $dotnetVersion = & dotnet --version 2>$null
+    if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -or ([version]$(dotnet --version) -lt [version]"6.0")) {
+        Write-Host "Installing .NET SDK 6.0..."
 
-    # Check if .NET 6.0 SDK is installed
-    if (-not $dotnetVersion -or $dotnetVersion -ne "6.0") {
-        Install-DotnetSdk
+        Install-DotNet6
+
+        & $dotnetTempPath add .\captioning package Microsoft.CognitiveServices.Speech --interactive --source https://api.nuget.org/v3/index.json
+        if ($?) {
+            Write-Host "Installation Microsoft.CognitiveServices.Speech package is succeeded." -ForegroundColor Green
+        }
+        else {
+            Write-Host "Installation Microsoft.CognitiveServices.Speech package is failed, exiting..." -ForegroundColor Red
+            exit 1
+        }
+
+        & $dotnetTempPath build .\captioning --configuration release
+        if ($?) {
+            Write-Host "Building is succeeded." -ForegroundColor Green
+        }
+        else {
+            Write-Host "Building is failed, exiting..." -ForegroundColor Red
+            exit 1
+        }
     }
+    else {
+        & dotnet add .\captioning package Microsoft.CognitiveServices.Speech --interactive --source https://api.nuget.org/v3/index.json
+        if ($?) {
+            Write-Host "Installation Microsoft.CognitiveServices.Speech package is succeeded." -ForegroundColor Green
+        }
+        else {
+            Write-Host "Installation Microsoft.CognitiveServices.Speech package is failed, exiting..." -ForegroundColor Red
+            exit 1
+        }
 
-    # Install NuGet package Microsoft.CognitiveServices.Speech
-    $packageName = "Microsoft.CognitiveServices.Speech"
-    dotnet add package $packageName
-
-    # Check if package installation was successful
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Failed to install NuGet package $packageName. Please check the error."
-        exit $LASTEXITCODE
-    }
-
-    # Run dotnet build command
-    dotnet build
-
-    # Check if compilation was successful
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Compilation failed. Please check the error."
-        exit $LASTEXITCODE
+        & dotnet build .\captioning --configuration release
+        if ($?) {
+            Write-Host "Building is succeeded." -ForegroundColor Green
+        }
+        else {
+            Write-Host "Building is failed, exiting..." -ForegroundColor Red
+            exit 1
+        }
     }
 }
 elseif ($action -eq "run") {
-    # Run the generated executable
-    $exePath = Join-Path $ProjectDir "bin\Debug\net6.0\captioning.exe"
-
-    # Check if executable file exists
-    if (Test-Path $exePath) {
-        Write-Host "Running the generated executable..."
-        & $exePath
+    $envFilePath = ".env/.env.dev"
+    if (Test-Path $envFilePath) {
+        Get-Content $envFilePath | ForEach-Object {
+            if ($_ -and $_ -notmatch '^\s*#') {
+                $pair = $_ -split '='
+                $key = $pair[0].Trim()
+                $value = $pair[1].Trim()
+    
+                if ($key -eq "SPEECH_RESOURCE_KEY") {
+                    [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $value)
+                }
+                elseif ($key -eq "SERVICE_REGION") {
+                    [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $value)
+                }
+            }
+        }
+        Write-Host "Environment variables loaded from $envFilePath"
     }
     else {
-        Write-Host "Executable not found. Please check the project settings."
+        Write-Host "File not found: $envFilePath"
+    }
+
+    if (Get-Command dotnet -ErrorAction SilentlyContinue) {
+        & dotnet run --project .\captioning\captioning.csproj --configuration release --input Sample.mp4 --format any --output caption.output.txt --srt --realTime --threshold 5 --delay 0 --profanity mask --phrases "Contoso;Jessie;Rehaan"
+    }
+    elseif (Get-Command $dotnetTempPath -ErrorAction SilentlyContinue) {
+        & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --input Sample.mp4 --format any --output caption.output.txt --srt --realTime --threshold 5 --delay 0 --profanity mask --phrases "Contoso;Jessie;Rehaan"
+    }
+    else {
+        Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 6.0." -ForegroundColor Red
+        exit 1
     }
 }
 else {
