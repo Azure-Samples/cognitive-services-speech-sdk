@@ -17,14 +17,21 @@ pip install requests
 ## Run the sample code
 
 The sample code itself is [main.py](python_client/main.py) and can be run using Python 3.8 or higher.
+
+```shell
+python3 main.py
+```
 You will need to adapt the following information to run the sample:
 
-1. Your AI Services subscription key and region.
-    
+1. Your AI Services subscription key and region. 
+
+    * `YourSubscriptionKey`: replace with your subscription key.
+    * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
+    For example, `westus` or `northeurope`.
+     * `YourAudio_FilePath`: The file path for your audio file with speech to be transcribed. See for example a file named `test_call_audio.wav` located in same folder
+
     Some notes:
     - You can get the subscription key from the "Keys and Endpoint" tab on your Speech resource in the Azure Portal.
-
-1. The audio fileThe URI of an audio recording in blob storage. Please refer to the [Azure Storage documentation](https://docs.microsoft.com//rest/api/storageservices/authorize-requests-to-azure-storage) on information on how to authorize accesses against blob storage.
 
 You can use a development environment like Visual Studio Code to edit, debug, and execute the sample.
 
