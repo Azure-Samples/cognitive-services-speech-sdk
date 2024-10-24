@@ -17,45 +17,8 @@ function Test-Python3Installed {
     return $false
 }
 
-function Install-Packages {
-    param (
-        [string]$pythonDirectory
-    )
-
-    $realPythonPath = Join-Path $pythonDirectory "python.exe"
-    try {
-        & $realPythonPath -m pip install azure-cognitiveservices-speech
-    }
-    catch {
-        Write-Host "The pip is not installed. Installing pip..."
-
-        Invoke-WebRequest -Uri "https://bootstrap.pypa.io/get-pip.py" -OutFile "$pythonDirectory\get-pip.py"
-        if (-not $?) {
-            Write-Host "Failed to download pip, exiting..." -ForegroundColor Red
-            exit 1
-        }
-        & $realPythonPath "$pythonDirectory\get-pip.py" --no-warn-script-location --prefix $pythonDirectory
-        if (-not $?) {
-            Write-Host "The pip installation failed, exiting..." -ForegroundColor Red
-            exit 1
-        }
-
-        Remove-Item -Force -Path "$pythonDirectory\get-pip.py"
-
-        & $realPythonPath -m pip install azure-cognitiveservices-speech
-        if (-not $?) {
-            Write-Host "The azure-cognitiveservices-speech package installation failed, exiting..." -ForegroundColor Red
-            exit 1
-        }
-    }
-}
-
 if ($action -eq "build") {
-    if (Test-Python3Installed) {
-        $pythonDirectory = Split-Path $pythonPath.Path
-        Install-Packages -pythonDirectory $pythonDirectory
-    }
-    elseif (-not (Get-Command $tempPythonPath -ErrorAction SilentlyContinue)) {
+    if (-not (Test-Python3Installed)) {
         Write-Host "Python 3 is not installed. Installing Python 3 to $tempPythonInstallationDirectory..."
 
         New-Item -ItemType Directory -Force -Path $tempPythonInstallationDirectory
@@ -80,11 +43,6 @@ if ($action -eq "build") {
         }
 
         Remove-Item -Force -Path $pythonInstallerPath
-
-        Install-Packages -pythonDirectory $tempPythonInstallationDirectory
-    }
-    else {
-        Install-Packages -pythonDirectory $tempPythonInstallationDirectory
     }
 }
 elseif ($action -eq "run") {
