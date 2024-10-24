@@ -1,4 +1,4 @@
-# Quickstart: Call Center Transcription and Analytics in python on Windows or Linux
+# Quickstart: Call Center Transcription and Analytics with python on Windows or Linux
 
 This sample demonstrates how to use call center transcription and analytics with python on Windows or Linux.
 Visit the call center transcription quickstart for a detailed guide on how to get started transcribing call recordings using the Speech and Language Services.
