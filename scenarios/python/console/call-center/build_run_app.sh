@@ -12,20 +12,20 @@ fi
 
 # Function to install packages
 install_packages() {
-    if ! command -v pip &> /dev/null; then
-        echo "The pip is not installed. Installing..."
+    if ! command -v pip3 &> /dev/null; then
+        echo "The pip3 is not installed. Installing..."
         sudo apt update
         sudo apt install python3-pip -y
 
         if [ $? -eq 0 ]; then
-            echo "The pip was successfully installed!"
+            echo "The pip3 was successfully installed!"
         else
-            echo "The pip installation failed."
+            echo "The pip3 installation failed."
             exit 1
         fi
     fi
 
-    pip install azure-cognitiveservices-speech
+    pip3 install azure-cognitiveservices-speech
     if [ $? -eq 0 ]; then
         echo "The azure-cognitiveservices-speech package was successfully installed!"
     else
@@ -52,7 +52,7 @@ if [ "$action" == "build" ]; then
 
     install_packages
 elif [ "$action" == "run" ]; then
-    python ./call_center.py --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint ***
+    python ./call_center.py --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint *** --languageEndpoint *** --input sample.wav --output out.txt
 
     if [ $? -ne 0 ]; then
         echo "Python is not found. Please first run the script with build action to install Python." >&2

@@ -89,10 +89,10 @@ if ($action -eq "build") {
 }
 elseif ($action -eq "run") {
     if ($pythonPath) {
-        & python .\call_center.py --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint ***
+        & python .\call_center.py --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint *** --input sample.wav --output out.txt
     }
     elseif (Get-Command $tempPythonPath -ErrorAction SilentlyContinue) {
-        & $tempPythonPath .\call_center.py --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint ***
+        & $tempPythonPath .\call_center.py --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint *** --input sample.wav --output out.txt
     }
     else {
         Write-Host "Python is not found. Please first run the script with build action to install Python." -ForegroundColor Red
