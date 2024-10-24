@@ -1,4 +1,4 @@
-# Quickstart: Call Center Transcription and Analytics in C# for .NET Core on Windows
+# Quickstart: Call Center Transcription and Analytics with C# for .NET Core on Windows
 
 This sample demonstrates how to use call center transcription and analytics with C# under .NET 6.0 (Windows).
 Visit the call center transcription quickstart for a detailed guide on how to get started transcribing call recordings using the Speech and Language Services.
