@@ -11,7 +11,7 @@ This sample demonstrates how to use post-call transcription and analytics with p
   - `--speechKey KEY` and `--languageKey KEY` will use the key of the selected Azure AI services.
   - `--speechRegion REGION` will use the region of the selected Azure AI services.
   - `--languageEndpoint ENDPOINT` will use the Speech STT endpoint of the selected Azure AI services.
-  - If you want to use something else, see [Run the sample without VS Code](#run-the-sample-without-vs-code).
+  - If you want to use other Speech services, please see [Run the sample without VS Code](#run-the-sample-without-vs-code).
 - Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 - Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
 
