@@ -1,23 +1,22 @@
-# Quickstart: Call Center Transcription and Analytics with C# for .NET Core on Windows
+# Scenarios: Post-call transcription and analytics with C# for .NET Core on Windows
 
-This sample demonstrates how to use call center transcription and analytics with C# under .NET 6.0 (Windows).
-Visit the call center transcription quickstart for a detailed guide on how to get started transcribing call recordings using the Speech and Language Services.
+This sample demonstrates how to use post-call transcription and analytics with C# .NET 6.0 on Windows.
 
 ## Run the Sample within VS Code
 - Install "Azure AI Speech Toolkit" extension in VS Code.
 - Download this sample from sample gallery to local machine.
-- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources (AI Services)" command from command palette to select an Azure AI services resource.
+  - In this extension, we will use the selected Azure AI services to make the sample run automatically.
+  - `speechKey KEY` and `--languageKey KEY` will use the key of the selected Azure AI services.
+  - `speechRegion REGION` will use the region of the selected Azure AI services.
+  - `languageEndpoint ENDPOINT` will use the Speech STT endpoint of the selected Azure AI services.
+  - If you want to use something else, see [Run the sample without VS Code](#run-the-sample-without-vs-code).
 - Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 - Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
 
-## Prerequisites
+## Run the Sample without VS Code
 
-* A subscription key for the Speech service. See [Try the cognitive speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A subscription key for the AI service. See [Try the AI speech service for free](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/call-center-overview).
-* A Windows PC.
-  * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
-  * The **.NET Core cross-platform development** workload in Visual Studio.
-    You can enable it in **Tools** \> **Get Tools and Features**.
+Visit the [call center transcription quickstart](https://learn.microsoft.com/azure/cognitive-services/speech-service/call-center-quickstart) for a detailed guide on how to get started transcribing call recordings using the Speech and Language Services.
 
 ### Usage and arguments
 
