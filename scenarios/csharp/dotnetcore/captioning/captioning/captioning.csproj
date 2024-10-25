@@ -10,11 +10,5 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.41.1" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Sample.mp4">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
+  
 </Project>
