@@ -11,25 +11,25 @@ if [ "$#" -lt 1 ]; then
 fi
 
 if [ "$action" == "build" ]; then
-    if ! command -v python3 &>/dev/null; then
-        echo "Python 3 is not installed. Installing..."
-        sudo apt update
-        sudo apt install -y python3.10
-
-        PYTHON_PATH=$(command -v python3.10)
-        if [ -z "$PYTHON_PATH" ]; then
-            echo "Python 3.10 installation failed. Exiting..."
-            exit 1
-        else
-            echo "Python 3.10 is installed."
-            sudo update-alternatives --install /usr/bin/python3 python3 "$PYTHON_PATH" 1
-        fi
+    command -v python3 >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "Python 3 is not found. Please install python3 first. Exiting..."
+        exit 1
     fi
 elif [ "$action" == "run" ]; then
-    python ./call_center.py --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint *** --languageEndpoint *** --input sample.wav --output out.txt
+    configFilePath="config.json"
+    if [ -f "$configFilePath" ]; then
+        aiServiceKey=$(jq -r '.YourSubscriptionKey' "$configFilePath")
+        aiServiceRegion=$(jq -r '.YourServiceRegion' "$configFilePath")
+    else
+        echo -e "The config.json file is not found."
+        exit 1
+    fi
 
-    if [ $? -ne 0 ]; then
-        echo "Python is not found. Please first run the script with build action to install Python." >&2
+    if command -v python3 &> /dev/null; then
+        python3 ./call_center.py --speechKey "$aiServiceKey" --speechRegion "$aiServiceRegion" --languageKey "$aiServiceKey" --languageEndpoint "https://$aiServiceRegion.stt.speech.microsoft.com" --input "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav" --output summary.json
+    else
+        echo -e "Python 3 is not found. Please install python3 first. Exiting..."
         exit 1
     fi
 else
