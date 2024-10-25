@@ -24,8 +24,17 @@ function Install-DotNet6 {
     Remove-Item -Force dotnet-install.ps1
 }
 
+function Test-GStreamer {
+    if (-not (Get-Command gst-launch-1.0 -ErrorAction SilentlyContinue)) {
+        Write-Host "GStreamer is not installed. Please install it before running the build." -ForegroundColor Yellow
+        exit 1
+    }
+    Write-Host "GStreamer is installed." -ForegroundColor Green
+}
 
 if ($action -eq "build") {
+    Test-GStreamer
+
     if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -or ([version]$(dotnet --version) -lt [version]"6.0")) {
         Write-Host "Installing .NET SDK 6.0..."
 
@@ -92,15 +101,23 @@ elseif ($action -eq "run") {
         Write-Host "File not found: $envFilePath"
     }
 
-    if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-        & dotnet run --project .\captioning\captioning.csproj --configuration release --input Sample.mp4 --format any --output caption.output.txt --srt --realTime --threshold 5 --delay 0 --profanity mask --phrases "Contoso;Jessie;Rehaan"
-    }
-    elseif (Get-Command $dotnetTempPath -ErrorAction SilentlyContinue) {
-        & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --input Sample.mp4 --format any --output caption.output.txt --srt --realTime --threshold 5 --delay 0 --profanity mask --phrases "Contoso;Jessie;Rehaan"
+    $useInputFile = Read-Host "Do you want to specify an input file? (y/n)"
+    if ($useInputFile -eq 'y') {
+        $inputFile = Read-Host "Please enter the path to the input .wav file"
+        if (Get-Command dotnet -ErrorAction SilentlyContinue) {
+            & dotnet run --project .\captioning\captioning.csproj --configuration release --input $inputFile
+        }
+        else {
+            & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --input $inputFile
+        }
     }
     else {
-        Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 6.0." -ForegroundColor Red
-        exit 1
+        if (Get-Command dotnet -ErrorAction SilentlyContinue) {
+            & dotnet run --project .\captioning\captioning.csproj --configuration release
+        }
+        else {
+            & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release
+        }
     }
 }
 else {
