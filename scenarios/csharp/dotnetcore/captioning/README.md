@@ -1,14 +1,5 @@
-# Real-Time and Offline Speech Recognition Captioning Tool
-
-This project is a captioning tool that utilizes the Microsoft Azure Cognitive Services Speech SDK to perform real-time and offline speech recognition and output captions in WebVTT or SubRip Text (SRT) format. 
-
-## Features
-- Real-time and offline caption generation.
-- Support for both microphone and audio file inputs.
-- Support for compressed audio formats like MP3, FLAC, and OGG.
-- Configurable output formats (WebVTT or SRT) and customization options such as maximum line length and number of lines per caption.
-- Ability to customize delay and remain time for captions.
-- Option to include custom phrases to improve speech recognition accuracy.
+# Scenarios: Create captions with speech to text
+In this quickstart, you run a console app to create captions with speech to text.
 
 ## Run the Sample within VS Code
 1. Install "Azure AI Speech Toolkit" extension in VS Code.
@@ -16,40 +7,49 @@ This project is a captioning tool that utilizes the Microsoft Azure Cognitive Se
 3. Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
 4. Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 5. Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+6. You can choose to use a specified input file or use the microphone as input data by default.
+7. In other IDEs you can refer to [captioning-quickstart](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/captioning-quickstart?tabs=windows%2Cterminal&pivots=programming-language-csharp)
 
 ## Prerequisites
 - .NET 6.0 SDK
-- Microsoft Azure Cognitive Services Speech SDK
-  - Install using NuGet: 
-    ```
-    dotnet add package Microsoft.CognitiveServices.Speech
-    ```
 - GStreamer for handling compressed audio inputs. Instructions are [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams).
 
-## Installation
-1. Clone the repository:
-2. Navigate to the project directory:
-3. Install the required NuGet package:
-4. (Optional) Install GStreamer for handling compressed audio files.
+### Usage and arguments
 
-## Usage
-To run the program, use the following command:
+Connection:
 
-### Command-line options
-- **--language**: Specify the language for captioning (default: `en-US`).
-- **--input**: Specify the input audio file. If not provided, the default input will be the microphone.
-- **--format**: Specify the compressed audio format (`alaw`, `flac`, `mp3`, etc.). Only valid with the `--input` option.
-- **--offline**: Use offline mode for caption generation (default mode).
-- **--realTime**: Use real-time caption generation mode.
-- **--output**: Specify the output file for captions.
-- **--srt**: Output captions in SubRip Text (SRT) format (default is WebVTT).
-- **--maxLineLength**: Set the maximum number of characters per line (default: 37).
-- **--lines**: Set the number of lines for a caption (default: 2).
-- **--delay**: Delay the appearance of each caption by a certain number of milliseconds (default: 1000ms).
-- **--remainTime**: Set how long a caption should remain on the screen (default: 1000ms).
-- **--profanity**: Set the profanity option (`raw`, `remove`, `mask`, default: `mask`).
-- **--phrases**: Specify custom phrases to improve recognition accuracy.
+* `--key`: Your Speech resource key. Overrides the SPEECH_KEY environment variable. VS Code will set SPEECH_KEY environment variable or use the `--key` option.
+* `--region REGION`: Your Speech resource region. Overrides the SPEECH_REGION environment variable. VS Code will set SPEECH_REGION environment variable or use the `--region` option. Examples: `westus`, `northeurope`
 
-### Example Usage
-1. Real-time captioning with microphone input.
-2. Offline captioning with an audio file input.
+Input:
+
+* `--input FILE`: Input audio from file. The default input is the microphone. 
+* `--format FORMAT`: Use compressed audio format. Valid only with `--file`. Valid values are `alaw`, `any`, `flac`, `mp3`, `mulaw`, and `ogg_opus`. The default value is `any`. To use a `wav` file, don't specify the format. This option is not available with the JavaScript captioning sample. For compressed audio files such as MP4, install GStreamer and see [How to use compressed input audio](~/articles/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams.md). 
+
+Language:
+
+* `--language LANG`: Specify a language using one of the corresponding [supported locales](~/articles/cognitive-services/speech-service/language-support.md?tabs=stt-tts). This is used when breaking captions into lines. Default value is `en-US`.
+
+Recognition:
+
+* `--offline`: Output offline results. Overrides `--realTime`. Default output mode is offline.
+* `--realTime`: Output real-time results. 
+
+Real-time output includes `Recognizing` event results. The default offline output is `Recognized` event results only. These are always written to the console, never to an output file. The `--quiet` option overrides this. For more information, see [Get speech recognition results](~/articles/cognitive-services/speech-service/get-speech-recognition-results.md).
+
+Accuracy options:
+
+* `--phrases PHRASE1;PHRASE2`: You can specify a list of phrases to be recognized, such as `Contoso;Jessie;Rehaan`. For more information, see [Improve recognition with phrase list](~/articles/cognitive-services/speech-service/improve-accuracy-phrase-list.md).
+
+Output:
+
+* `--help`: Show this help and stop
+* `--output FILE`: Output captions to the specified `file`. This flag is required.
+* `--srt`: Output captions in SRT (SubRip Text) format. The default format is WebVTT (Web Video Text Tracks). For more information about SRT and WebVTT caption file formats, see [Caption output format](~/articles/cognitive-services/speech-service/captioning-concepts.md#caption-output-format).
+* `--maxLineLength LENGTH`: Set the maximum number of characters per line for a caption to LENGTH. Minimum is 20. Default is 37 (30 for Chinese).
+* `--lines LINES`: Set the number of lines for a caption to LINES. Minimum is 1. Default is 2.
+* `--delay MILLISECONDS`: How many MILLISECONDS to delay the display of each caption, to mimic a real-time experience. This option is only applicable when you use the `realTime` flag. Minimum is 0.0. Default is 1000.
+* `--remainTime MILLISECONDS`: How many MILLISECONDS a caption should remain on screen if it is not replaced by another. Minimum is 0.0. Default is 1000.
+* `--quiet`: Suppress console output, except errors.
+* `--profanity OPTION`: Valid values: raw, remove, mask. For more information, see [Profanity filter](~/articles/cognitive-services/speech-service/display-text-format.md#profanity-filter) concepts.
+* `--threshold NUMBER`: Set stable partial result threshold. The default value is `3`. This option is only applicable when you use the `realTime` flag. For more information, see [Get partial results](~/articles/cognitive-services/speech-service/captioning-concepts.md#get-partial-results) concepts.
