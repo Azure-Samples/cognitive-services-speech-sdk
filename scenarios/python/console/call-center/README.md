@@ -6,7 +6,7 @@ This sample demonstrates how to use post-call transcription and analytics with p
 
 - Install "Azure AI Speech Toolkit" extension in VS Code.
 - Download this sample from sample gallery to local machine.
-- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources (AI Services)" command from command palette to select speech resource.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources (AI Services)" command from command palette to select an Azure AI services resource.
   - In this extension, we will use the selected Azure AI services to make the sample run automatically.
   - `--speechKey KEY` and `--languageKey KEY` will use the key of the selected Azure AI services.
   - `--speechRegion REGION` will use the region of the selected Azure AI services.
