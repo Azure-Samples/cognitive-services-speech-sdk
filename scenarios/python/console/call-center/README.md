@@ -12,8 +12,8 @@ Visit the call center transcription quickstart for a detailed guide on how to ge
 
 ## Prerequisites
 
-* A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A subscription key for the AI service. See [Try the speech service for free](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/call-center-overview).
+* A subscription key for the Speech service. See [Try the cognitive speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
+* A subscription key for the AI service. See [Try the AI speech service for free](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/call-center-overview).
 
 ### Usage and arguments
 
