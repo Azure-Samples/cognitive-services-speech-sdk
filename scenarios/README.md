@@ -18,6 +18,7 @@ This folder hosts code and input **samples** for popular Speech-to-text scenario
 
 The current scenarios showcased here are:
 * [Captioning](#captioning)
+* [Post-call analytics with Fast Transcription API and Azure OpenAI SDK](#post-call-analytics-with-fast-transcription-api-and-azure-openai-sdk)
 * [Call center transcription and analytics](#call-center-transcription-and-analytics)
 
 ## Captioning
