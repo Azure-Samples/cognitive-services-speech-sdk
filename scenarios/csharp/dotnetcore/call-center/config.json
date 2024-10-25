@@ -1,7 +1,4 @@
 {
   "YourSubscriptionKey": "cd281650d4ba4063bee7edf4a24ce7f7",
-  "YourServiceRegion": "eastus",
-  "YourLanguageKey": "<Your Azure Cognitive Language subscription key>",
-  "YourLanguageEndpoint": "<Your Azure Cognitive Language endpoint>",
-  "OutputFile": "out.txt"
+  "YourServiceRegion": "eastus"
 }

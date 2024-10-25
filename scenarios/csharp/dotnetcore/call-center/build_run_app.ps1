@@ -24,7 +24,6 @@ function Install-DotNet6 {
     Remove-Item -Force dotnet-install.ps1
 }
 
-
 if ($action -eq "build") {
     if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -or ([version]$(dotnet --version) -lt [version]"6.0")) {
         Write-Host "Installing .NET SDK 6.0..."
@@ -52,11 +51,22 @@ if ($action -eq "build") {
     }
 }
 elseif ($action -eq "run") {
+    $configFilePath = "config.json"
+    if (Test-Path $configFilePath) {
+        $jsonContent = Get-Content -Path $configFilePath -Raw | ConvertFrom-Json
+        $aiServiceKey = $jsonContent.YourSubscriptionKey
+        $aiServiceRegion = $jsonContent.YourServiceRegion
+    }
+    else {
+        Write-Host "The config.json file is not found." -ForegroundColor Red
+        exit 1
+    }
+
     if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-        & dotnet run --project .\call-center\call-center.csproj --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint *** --input sample.wav --output out.txt --configuration release
+        & dotnet run --project .\call-center\call-center.csproj --speechKey $aiServiceKey --speechRegion $aiServiceRegion --languageKey $aiServiceKey --languageEndpoint "https://$aiServiceRegion.stt.speech.microsoft.com" --input "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav" --output summary.json --configuration release
     }
     elseif (Get-Command $dotnetTempPath -ErrorAction SilentlyContinue) {
-        & $dotnetTempPath run --project .\call-center\call-center.csproj --speechKey *** --speechRegion *** --languageKey *** --languageEndpoint *** --input sample.wav --output out.txt --configuration release
+        & $dotnetTempPath run --project .\call-center\call-center.csproj --speechKey $aiServiceKey --speechRegion $aiServiceRegion --languageKey $aiServiceKey --languageEndpoint "https://$aiServiceRegion.stt.speech.microsoft.com" --input "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav" --output summary.json --configuration release
     }
     else {
         Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 6.0." -ForegroundColor Red
