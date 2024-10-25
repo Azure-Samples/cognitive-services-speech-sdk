@@ -14,6 +14,6 @@ This sample application transcribes an audio recording using <a href="https://le
 * `--openAiEndpoint ENDPOINT`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create an Azure OpenAI resource" target="_blank">Azure OpenAI</a> resource endpoint. Example: `https://YourResourceName.openai.azure.com` Required.
 * `--openAiDeploymentName OPENAIDEPLOYMENTNAME`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create an Azure OpenAI resource" target="_blank">Azure OpenAI</a> deployment name. Example: my-gpt-4o-mini Required.
 
-* `--inputAudio URL`: Input audio from URL. Required.
+* `--inputAudio FILEPATH`: File path to audio. Required.
 
 * `--help`: Show the usage help and stop
