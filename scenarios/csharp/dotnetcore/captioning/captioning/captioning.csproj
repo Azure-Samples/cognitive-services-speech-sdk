@@ -10,5 +10,5 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
   </ItemGroup>
-  
+
 </Project>
