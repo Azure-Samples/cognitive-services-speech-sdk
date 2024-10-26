@@ -23,7 +23,7 @@ print("Say something...")
 
 
 # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-# single utterance is determined by listening for silence at the end or until a maximum of 15
+# single utterance is determined by listening for silence at the end or until a maximum of about 30
 # seconds of audio is processed.  The task returns the recognition text as result. 
 # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
 # shot recognition like command or query. 
