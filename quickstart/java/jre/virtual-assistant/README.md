@@ -13,12 +13,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Java 8 or 11 JRE/JDK.
 * Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
 * A pre-configured bot created using Bot Framework version 4.2 or above. See [here for steps on how to create a bot](https://blog.botframework.com/2018/05/07/build-a-microsoft-bot-framework-bot-with-the-bot-builder-sdk-v4/). The bot would need to subscribe to the new "Direct Line Speech" channel to receive voice inputs.
-* On Ubuntu or Debian, run the following commands for the installation of required packages:
-
-  ```sh
-  sudo apt-get update
-  sudo apt-get install libssl-dev libasound2
-  ```
+* On Linux, see the [Linux platform requirements](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux&pivots=programming-language-java#platform-requirements) for installing the required dependencies.
 
 <small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM platforms.</small>
 
