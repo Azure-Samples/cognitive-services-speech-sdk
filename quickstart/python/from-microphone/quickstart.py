@@ -6,14 +6,13 @@ import azure.cognitiveservices.speech as speechsdk
 import json
 
 # Creates an instance of a speech config with specified subscription key and service region.
-# Replace with your own subscription key and service region (e.g., "westus").
-# speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
+# Replace with your own subscription key and service region (e.g., "westus") in config.json.
 # Load the configuration from the config.json file
 with open('config.json', 'r') as config_file:
     config = json.load(config_file)
 
-speech_key = config.get("YourSubscriptionKey")
-service_region = config.get("YourServiceRegion")
+speech_key = config.get("SubscriptionKey")
+service_region = config.get("ServiceRegion")
 speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
 # Creates a recognizer with the given settings
