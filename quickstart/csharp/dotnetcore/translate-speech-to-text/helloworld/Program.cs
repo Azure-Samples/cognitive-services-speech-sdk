@@ -29,9 +29,6 @@ namespace helloworld
             string jsonString = await File.ReadAllTextAsync(configFilePath);
             ConfigSettings configSettings = JsonSerializer.Deserialize<ConfigSettings>(jsonString);
 
-            Console.WriteLine($"YourSubscriptionKey: {configSettings.YourSubscriptionKey}");
-            Console.WriteLine($"YourServiceRegion: {configSettings.YourServiceRegion}");
-
             var config = SpeechTranslationConfig.FromSubscription(configSettings.YourSubscriptionKey, configSettings.YourServiceRegion);
 
             // Sets source and target languages.

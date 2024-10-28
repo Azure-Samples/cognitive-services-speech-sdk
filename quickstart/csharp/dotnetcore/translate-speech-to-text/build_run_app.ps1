@@ -4,7 +4,7 @@ param(
 
 $dotnetPath = "C:\Program Files\dotnet"
 $env:PATH = "$dotnetPath;$env:PATH"
-$dotnetInstallationTempDirectory = "$env:TEMP\dotnet"
+$dotnetInstallationTempDirectory = "$env:LOCALAPPDATA\dotnet"
 $dotnetTempPath = Join-Path $dotnetInstallationTempDirectory "dotnet.exe"
 
 function Install-DotNet6 {
