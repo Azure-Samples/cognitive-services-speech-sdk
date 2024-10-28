@@ -32,26 +32,25 @@ if ($action -eq "build") {
     }
 }
 elseif ($action -eq "run") {
-    $envFilePath = ".env/.env.dev"
-    if (Test-Path $envFilePath) {
-        Get-Content $envFilePath | ForEach-Object {
-            if ($_ -and $_ -notmatch '^\s*#') {
-                $pair = $_ -split '='
-                $key = $pair[0].Trim()
-                $value = $pair[1].Trim()
+    $configFilePath = "config.json"
+    if (Test-Path $configFilePath) {
+        $configContent = Get-Content -Raw -Path $configFilePath | ConvertFrom-Json
+    
+        $subscriptionKey = $configContent.YourSubscriptionKey
+        $serviceRegion = $configContent.YourServiceRegion
 
-                if ($key -eq "SPEECH_RESOURCE_KEY") {
-                    [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $value)
-                }
-                elseif ($key -eq "SERVICE_REGION") {
-                    [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $value)
-                }
-            }
+        if ($subscriptionKey) {
+            [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $subscriptionKey)
         }
-        Write-Host "Environment variables loaded from $envFilePath"
+    
+        if ($serviceRegion) {
+            [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $serviceRegion)
+        }
+
+        Write-Host "Environment variables loaded from $configFilePath"
     }
     else {
-        Write-Host "File not found: $envFilePath"
+        Write-Host "File not found: $configFilePath"
     }
 
     $useInputFile = Read-Host "Do you want to specify an input file? (y/n)"
