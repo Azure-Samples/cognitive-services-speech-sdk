@@ -7,12 +7,14 @@ In this quickstart, you run a console app to create captions with speech to text
 3. Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
 4. Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 5. Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
-6. You can choose to use a specified input file or use the microphone as input data by default.
-7. In other IDEs you can refer to [captioning-quickstart](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/captioning-quickstart?tabs=windows%2Cterminal&pivots=programming-language-csharp)
+This command will run the sample as a task in terminal. Interactively input local audio file if you would like to use file instead of default microphone as audio input.
+
+## Run the Sample out of VS Code
+In other IDEs, please refer to [captioning-quickstart](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/captioning-quickstart?tabs=windows%2Cterminal&pivots=programming-language-csharp) for a detailed guide.
 
 ## Prerequisites
-- .NET 6.0 SDK
-- GStreamer for handling compressed audio inputs. Instructions are [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams).
+- Microsoft Azure Cognitive Services Speech SDK
+- (Optional) GStreamer for handling compressed audio inputs. Instructions are [here](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams).
 
 ### Usage and arguments
 
