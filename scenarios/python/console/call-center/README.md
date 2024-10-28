@@ -3,17 +3,17 @@
 This sample demonstrates how to use post-call transcription and analytics with python on Windows or Linux.
 
 ## Run the Sample within VS Code
-
 - Install "Azure AI Speech Toolkit" extension in VS Code.
 - Download this sample from sample gallery to local machine.
-- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources (AI Services)" command from command palette to select an Azure AI services resource.
-  - In this extension, we will use the selected Azure AI services to make the sample run automatically.
-  - `--speechKey KEY` and `--languageKey KEY` will use the key of the selected Azure AI services.
-  - `--speechRegion REGION` will use the region of the selected Azure AI services.
-  - `--languageEndpoint ENDPOINT` will use the Speech STT endpoint of the selected Azure AI services.
-  - If you want to use other Speech services, please see [Run the sample without VS Code](#run-the-sample-without-vs-code).
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **Azure AI services** resource.
 - Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 - Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+
+"Azure AI Speech Toolkit" extension will use the same selected Azure AI service for speechKey / languageKey / speechRegion / languageEndpoint arguments. If you prefer to run with separate Speech Services, you can open a terminal and execute commands like this:
+```
+dotnet run --languageKey YourResourceKey --languageEndpoint YourResourceEndpoint --speechKey YourResourceKey --speechRegion YourResourceRegion --input "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav" --stereo  --output summary.json
+```
+Check more argument usage in below section.
 
 ## Run the Sample without VS Code
 
