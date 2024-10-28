@@ -15,7 +15,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Build the App",
+            "label": "Configuration and Setup",
             "type": "shell",
             "command": "pip",
             "args": [
