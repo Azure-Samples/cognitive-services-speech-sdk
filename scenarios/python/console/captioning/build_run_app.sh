@@ -29,23 +29,22 @@ if [[ $action == "build" ]]; then
         exit 1
     fi
 elif [[ $action == "run" ]]; then
-    envFilePath=".env/.env.dev"
-    if [[ -f $envFilePath ]]; then
-        while IFS='=' read -r key value; do
-            if [[ -n $key && $key != \#* ]]; then
-                key=$(echo $key | xargs)
-                value=$(echo $value | xargs)
+    configFilePath="config.json"
+    if [[ -f $configFilePath ]]; then
+        SPEECH_KEY=$(jq -r '.YourSubscriptionKey' "$configFilePath")
+        SERVICE_REGION=$(jq -r '.YourServiceRegion' "$configFilePath")
 
-                if [[ $key == "SPEECH_RESOURCE_KEY" ]]; then
-                    export SPEECH_KEY=$value
-                elif [[ $key == "SERVICE_REGION" ]]; then
-                    export SPEECH_REGION=$value
-                fi
-            fi
-        done < "$envFilePath"
-        echo "Environment variables loaded from $envFilePath"
+        if [[ -n $SPEECH_KEY ]]; then
+            export SPEECH_KEY
+        fi
+
+        if [[ -n $SERVICE_REGION ]]; then
+            export SPEECH_REGION
+        fi
+
+        echo "Environment variables loaded from $configFilePath"
     else
-        echo "File not found: $envFilePath" >&2
+        echo "File not found: $configFilePath" >&2
     fi
 
     read -p "Do you want to specify an input file? (y/n) " useInputFile
