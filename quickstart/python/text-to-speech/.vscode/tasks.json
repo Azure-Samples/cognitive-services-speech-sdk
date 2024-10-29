@@ -4,52 +4,29 @@
         {
             "label": "Run the App",
             "type": "shell",
-            "command": "${workspaceFolder}/build_run_app.sh",
+            "command": "python",
             "args": [
-                "run"
+                "${workspaceFolder}/quickstart.py"
             ],
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             },
-            "problemMatcher": [],
-            "windows": {
-                "command": "${workspaceFolder}/build_run_app.ps1",
-                "args": [
-                    "run"
-                ]
-            },
-            "linux": {
-                "command": "${workspaceFolder}/build_run_app.sh",
-                "args": [
-                    "run"
-                ]
-            }
+            "problemMatcher": []
         },
         {
-            "label": "Build the App",
+            "label": "Configuration and Setup",
             "type": "shell",
-            "command": "./build_run_app.sh",
+            "command": "pip",
             "args": [
-                "build"
+                "install",
+                "azure-cognitiveservices-speech"
             ],
             "group": {
                 "kind": "build",
                 "isDefault": false
             },
-            "problemMatcher": [],
-            "windows": {
-                "command": "${workspaceFolder}/build_run_app.ps1",
-                "args": [
-                    "build"
-                ]
-            },
-            "linux": {
-                "command": "${workspaceFolder}/build_run_app.sh",
-                "args": [
-                    "build"
-                ]
-            }
+            "problemMatcher": []
         }
     ]
 }
