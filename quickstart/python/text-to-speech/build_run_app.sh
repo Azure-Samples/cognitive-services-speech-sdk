@@ -11,28 +11,26 @@ if [ "$#" -lt 1 ]; then
 fi
 
 if [[ $action == "build" ]]; then
-    if ! command -v python3 &> /dev/null; then
-        echo "Python3 is not installed. Please install Python3 first. Exiting..."
+    if ! command -v python &> /dev/null; then
+        echo "Python is not installed. Please install Python first. Exiting..."
         exit 1
     fi
 
-    if ! command -v pip3 &> /dev/null; then
-        echo "pip3 is not installed. Please install pip3 first. Exiting..."
+    if ! command -v pip &> /dev/null; then
+        echo "pip is not installed. Please install pip first. Exiting..."
         exit 1
     fi
 
-    pip3 install azure-cognitiveservices-speech
-    if [ $? -eq 0 ]; then
-        echo "Installation Microsoft.CognitiveServices.Speech package is succeeded."
-    else
+    pip install azure-cognitiveservices-speech
+    if [ $? -ne 0 ]; then
         echo "Installation Microsoft.CognitiveServices.Speech package is failed, exiting..."
         exit 1
     fi
 elif [[ $action == "run" ]]; then
-    if command -v python3 &> /dev/null; then
-        python3 quickstart.py
+    if command -v python &> /dev/null; then
+        python quickstart.py
     else
-        echo "Python3 is not installed. Please install Python3 first. Exiting..." >&2
+        echo "Python is not installed. Please install Python first. Exiting..." >&2
         exit 1
     fi
 else
