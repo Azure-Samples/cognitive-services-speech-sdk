@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Install http-server",
+            "label": "Configuration and Setup",
             "type": "shell",
             "command": "npm install -g http-server",
             "problemMatcher": [],
@@ -13,7 +13,6 @@
             "type": "shell",
             "command": "http-server . -o index.html",
             "problemMatcher": [],
-            "dependsOn": "Install http-server",
             "detail": "Launches index.html in the default browser after installing http-server."
         }
     ]
