@@ -8,7 +8,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 - Install "Azure AI Speech Toolkit" extension in VS Code.
 - Download this sample from sample gallery to local machine.
 - Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
-- Trigger "Azure AI Speech Toolkit: Configure and Setup the Sample App" command from command palette to configure and setup the sample.
+- Trigger "Azure AI Speech Toolkit: Configure and Setup the Sample App" command from command palette to configure and setup the sample. This command only needs to be run once.
 - Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
 
 ## Prerequisites
