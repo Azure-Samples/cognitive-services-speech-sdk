@@ -11,10 +11,8 @@
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.41.1" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="config.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+  <Target Name="CopyConfigFile" AfterTargets="Build">
+    <Copy SourceFiles="..\config.json" DestinationFolder="$(OutputPath)" />
+  </Target>
 
 </Project>

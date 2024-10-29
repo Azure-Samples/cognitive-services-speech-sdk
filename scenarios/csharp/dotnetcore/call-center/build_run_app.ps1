@@ -54,8 +54,8 @@ elseif ($action -eq "run") {
     $configFilePath = "config.json"
     if (Test-Path $configFilePath) {
         $jsonContent = Get-Content -Path $configFilePath -Raw | ConvertFrom-Json
-        $aiServiceKey = $jsonContent.YourSubscriptionKey
-        $aiServiceRegion = $jsonContent.YourServiceRegion
+        $aiServiceKey = $jsonContent.SubscriptionKey
+        $aiServiceRegion = $jsonContent.ServiceRegion
     }
     else {
         Write-Host "The config.json file is not found." -ForegroundColor Red

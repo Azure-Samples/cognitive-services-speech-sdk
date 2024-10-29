@@ -35,15 +35,6 @@ SPEECHSDK_ROOT="$(pwd)/SpeechSDKLib"
 mkdir -p "$SPEECHSDK_ROOT"
 
 if [ "$action" == "build" ]; then
-    # if [ "$#" -ne 3 ]; then
-    #     echo "Error: Invalid number of arguments for build."
-    #     echo "Usage: $0 build <subscription_key> <region>"
-    #     exit 1
-    # fi
-    
-    # subscription_key=$2
-    # region=$3
-
     # Install SDKs and libraries
     echo "Installing SDKs and libraries..."
     sudo apt-get update
@@ -70,14 +61,6 @@ if [ "$action" == "build" ]; then
     # Replace the TARGET_PLATFORM line in the Makefile
     platform=$(get_platform)
     sed -i "s/^TARGET_PLATFORM:=.*/TARGET_PLATFORM:=$platform/" "$makefile_path"
-
-    # # Update Subscription Key and Region in project source code
-    # source_path="$(pwd)/helloworld.cpp"
-
-    # # update the subscription key and region in the source code
-    # sed -i "s|YourSubscriptionKey|$subscription_key|" "$source_path"
-    # sed -i "s|YourServiceRegion|$region|" "$source_path"
-    # echo "Updated the subscription key and region in $source_path"
 
     # Build the project
     make

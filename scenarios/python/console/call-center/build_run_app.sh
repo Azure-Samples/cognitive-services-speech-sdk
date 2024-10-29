@@ -19,8 +19,8 @@ if [ "$action" == "build" ]; then
 elif [ "$action" == "run" ]; then
     configFilePath="config.json"
     if [ -f "$configFilePath" ]; then
-        aiServiceKey=$(grep '"YourSubscriptionKey"' "$configFilePath" | sed 's/.*: *"\(.*\)".*/\1/')
-        aiServiceRegion=$(grep '"YourServiceRegion"' "$configFilePath" | sed 's/.*: *"\(.*\)".*/\1/')
+        aiServiceKey=$(grep '"SubscriptionKey"' "$configFilePath" | sed 's/.*: *"\(.*\)".*/\1/')
+        aiServiceRegion=$(grep '"ServiceRegion"' "$configFilePath" | sed 's/.*: *"\(.*\)".*/\1/')
     else
         echo -e "The config.json file is not found."
         exit 1
