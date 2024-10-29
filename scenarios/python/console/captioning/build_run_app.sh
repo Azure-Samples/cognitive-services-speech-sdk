@@ -31,8 +31,8 @@ if [[ $action == "build" ]]; then
 elif [[ $action == "run" ]]; then
     configFilePath="config.json"
     if [[ -f $configFilePath ]]; then
-        SPEECH_KEY=$(jq -r '.YourSubscriptionKey' "$configFilePath")
-        SERVICE_REGION=$(jq -r '.YourServiceRegion' "$configFilePath")
+        SPEECH_KEY=$(jq -r '.SubscriptionKey' "$configFilePath")
+        SERVICE_REGION=$(jq -r '.ServiceRegion' "$configFilePath")
 
         if [[ -n $SPEECH_KEY ]]; then
             export SPEECH_KEY

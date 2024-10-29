@@ -17,8 +17,8 @@ namespace helloworld
     {
         public class ConfigSettings
         {
-            public string YourSubscriptionKey { get; set; }
-            public string YourServiceRegion { get; set; }
+            public string SubscriptionKey { get; set; }
+            public string ServiceRegion { get; set; }
         }
 
         public static async Task TranslationContinuousRecognitionAsync()
@@ -29,7 +29,7 @@ namespace helloworld
             string jsonString = await File.ReadAllTextAsync(configFilePath);
             ConfigSettings configSettings = JsonSerializer.Deserialize<ConfigSettings>(jsonString);
 
-            var config = SpeechTranslationConfig.FromSubscription(configSettings.YourSubscriptionKey, configSettings.YourServiceRegion);
+            var config = SpeechTranslationConfig.FromSubscription(configSettings.SubscriptionKey, configSettings.ServiceRegion);
 
             // Sets source and target languages.
             string fromLanguage = "en-US";

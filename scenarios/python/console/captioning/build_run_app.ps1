@@ -36,8 +36,8 @@ elseif ($action -eq "run") {
     if (Test-Path $configFilePath) {
         $configContent = Get-Content -Raw -Path $configFilePath | ConvertFrom-Json
     
-        $subscriptionKey = $configContent.YourSubscriptionKey
-        $serviceRegion = $configContent.YourServiceRegion
+        $subscriptionKey = $configContent.SubscriptionKey
+        $serviceRegion = $configContent.ServiceRegion
 
         if ($subscriptionKey) {
             [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $subscriptionKey)
