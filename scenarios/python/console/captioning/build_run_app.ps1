@@ -53,13 +53,11 @@ elseif ($action -eq "run") {
         Write-Host "File not found: $configFilePath"
     }
 
-    $useInputFile = Read-Host "Do you want to specify an input file? (y/n)"
-    if ($useInputFile -eq 'y') {
-        $inputFile = Read-Host "Please enter the path to the input .wav file"
-        & python .\captioning.py --input $inputFile
-    }
-    else {
+    $inputFile = Read-Host "Please enter the path to the input .wav file (press Enter to use the default microphone)"
+    if ([string]::IsNullOrEmpty($inputFile)) {
         & python .\captioning.py
+    } else {
+        & python .\captioning.py --input $inputFile
     }
 }
 else {

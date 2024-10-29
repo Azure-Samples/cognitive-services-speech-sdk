@@ -47,13 +47,13 @@ elif [[ $action == "run" ]]; then
         echo "File not found: $configFilePath" >&2
     fi
 
-    read -p "Do you want to specify an input file? (y/n) " useInputFile
-    if [[ $useInputFile == 'y' ]]; then
-        read -p "Please enter the path to the input .wav file: " inputFile
-        python3 ./captioning.py --input "$inputFile"
-    else
+    read -p "Please enter the path to the input .wav file (press Enter to use the default microphone): " inputFile
+    if [[ -z "$inputFile" ]]; then
         python3 ./captioning.py
+    else
+        python3 ./captioning.py --input "$inputFile"
     fi
+
 else
     echo "Invalid action: $action" >&2
     echo "Usage: $0 build or $0 run" >&2
