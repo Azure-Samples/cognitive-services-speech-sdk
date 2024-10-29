@@ -38,23 +38,13 @@ if [ "$action" = "build" ]; then
         install_dotnet6
     fi
 
-    dotnet add ./helloworld package Microsoft.CognitiveServices.Speech --interactive
-    if [ $? -eq 0 ]; then
-        echo "Installation Microsoft.CognitiveServices.Speech package is succeeded."
-    else
-        echo "Installation Microsoft.CognitiveServices.Speech package is failed, exiting..."
-        exit 1
-    fi
-
-    dotnet build ./helloworld --configuration release
-    if [ $? -eq 0 ]; then
-        echo "Build succeeded."
-    else
+    dotnet build helloworld/helloworld.csproj
+    if [ $? -ne 0 ]; then
         echo "Build failed, exiting..."
         exit 1
     fi
 elif [ "$action" = "run" ]; then
-    dotnet run --project ./helloworld/helloworld.csproj --configuration release
+    dotnet helloworld/bin/Debug/net6.0/helloworld.dll
 else
     echo "Invalid action: $action"
     echo "Usage: $0 {build|run}"
