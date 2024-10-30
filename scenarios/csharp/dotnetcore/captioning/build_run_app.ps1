@@ -83,8 +83,8 @@ elseif ($action -eq "run") {
     if (Test-Path $configFilePath) {
         $configContent = Get-Content -Raw -Path $configFilePath | ConvertFrom-Json
     
-        $subscriptionKey = $configContent.YourSubscriptionKey
-        $serviceRegion = $configContent.YourServiceRegion
+        $subscriptionKey = $configContent.SubscriptionKey
+        $serviceRegion = $configContent.ServiceRegion
 
         if ($subscriptionKey) {
             [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $subscriptionKey)
@@ -104,18 +104,18 @@ elseif ($action -eq "run") {
     if ($useInputFile -eq 'y') {
         $inputFile = Read-Host "Please enter the path to the input .wav file"
         if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-            & dotnet run --project .\captioning\captioning.csproj --configuration release --input $inputFile
+            & dotnet run --project .\captioning\captioning.csproj --configuration release --realtime --input $inputFile
         }
         else {
-            & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --input $inputFile
+            & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --realtime --input $inputFile
         }
     }
     else {
         if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-            & dotnet run --project .\captioning\captioning.csproj --configuration release
+            & dotnet run --project .\captioning\captioning.csproj --configuration release --realtime
         }
         else {
-            & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release
+            & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --realtime
         }
     }
 }
