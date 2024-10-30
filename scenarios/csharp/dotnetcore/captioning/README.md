@@ -7,10 +7,11 @@ In this quickstart, you run a console app to create captions with speech to text
 3. Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
 4. Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 5. Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
-This command will run the sample as a task in terminal. Interactively input local audio file if you would like to use file instead of default microphone as audio input.
+
+    This command will run the sample as a task in terminal. Interactively input local audio file if you would like to use file instead of default microphone as audio input. (You can download this audio file as an example: [Call1_separated_16k_health_insurance.wav](https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav))
 
 ## Run the Sample out of VS Code
-In other IDEs, please refer to [captioning-quickstart](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/captioning-quickstart?tabs=windows%2Cterminal&pivots=programming-language-csharp) for a detailed guide.
+In other IDEs, please refer to [captioning-quickstart](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/captioning-quickstart?tabs=windows%2Cterminal&pivots=programming-language-python) for a detailed guide.
 
 ## Prerequisites
 - Microsoft Azure Cognitive Services Speech SDK
