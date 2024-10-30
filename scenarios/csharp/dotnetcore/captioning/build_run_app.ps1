@@ -100,17 +100,15 @@ elseif ($action -eq "run") {
         Write-Host "File not found: $configFilePath"
     }
 
-    $useInputFile = Read-Host "Do you want to specify an input file? (y/n)"
-    if ($useInputFile -eq 'y') {
-        $inputFile = Read-Host "Please enter the path to the input .wav file"
+    $inputFile = Read-Host "Please enter the path to the input .wav file (press Enter to use the default microphone)"
+    if ([string]::IsNullOrEmpty($inputFile)) {
         if (Get-Command dotnet -ErrorAction SilentlyContinue) {
             & dotnet run --project .\captioning\captioning.csproj --configuration release --realtime --input $inputFile
         }
         else {
             & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --realtime --input $inputFile
         }
-    }
-    else {
+    } else {
         if (Get-Command dotnet -ErrorAction SilentlyContinue) {
             & dotnet run --project .\captioning\captioning.csproj --configuration release --realtime
         }
