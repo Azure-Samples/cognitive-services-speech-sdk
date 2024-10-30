@@ -4,23 +4,30 @@
         {
             "label": "Run the App",
             "type": "shell",
-            "command": "python",
+            "command": "powershell",
             "args": [
-                "${workspaceFolder}/quickstart.py"
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/build_run_app.ps1",
+                "run"
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             },
             "problemMatcher": []
         },
         {
-            "label": "Configuration and Setup",
+            "label": "Build the App",
             "type": "shell",
-            "command": "pip",
+            "command": "powershell",
             "args": [
-                "install",
-                "azure-cognitiveservices-speech"
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/build_run_app.ps1",
+                "build"
             ],
             "group": {
                 "kind": "build",

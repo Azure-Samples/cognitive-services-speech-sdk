@@ -10,8 +10,8 @@ import json
 with open('config.json', 'r') as config_file:
     config = json.load(config_file)
 
-speech_key = config.get("YourSubscriptionKey")
-service_region = config.get("YourServiceRegion")
+speech_key = config.get("SubscriptionKey")
+service_region = config.get("ServiceRegion")
 speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
 # Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
