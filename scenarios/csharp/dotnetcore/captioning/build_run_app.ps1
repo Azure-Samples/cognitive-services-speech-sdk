@@ -101,20 +101,11 @@ elseif ($action -eq "run") {
     }
 
     $inputFile = Read-Host "Please enter the path to the input .wav file (press Enter to use the default microphone)"
-    if ([string]::IsNullOrEmpty($inputFile)) {
-        if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-            & dotnet run --project .\captioning\captioning.csproj --configuration release --realtime --input $inputFile
-        }
-        else {
-            & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --realtime --input $inputFile
-        }
-    } else {
-        if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-            & dotnet run --project .\captioning\captioning.csproj --configuration release --realtime
-        }
-        else {
-            & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --realtime
-        }
+    if (Get-Command dotnet -ErrorAction SilentlyContinue) {
+        & dotnet run --project .\captioning\captioning.csproj --configuration release --realtime  --input $inputFile
+    }
+    else {
+        & $dotnetTempPath run --project .\captioning\captioning.csproj --configuration release --realtime  --input $inputFile
     }
 }
 else {
