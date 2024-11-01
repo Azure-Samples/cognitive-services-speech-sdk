@@ -37,6 +37,9 @@ weatherfilename = "whatstheweatherlike.wav"
 weatherfilenamemp3 = "whatstheweatherlike.mp3"
 weatherfilenamemulaw = "whatstheweatherlike-mulaw.wav"
 seasonsfilename = "pronunciation_assessment_fall.wav"
+zhcnfilename = "zhcn_short_dummy_sample.wav"
+zhcnlongfilename = "zhcn_continuous_mode_sample.wav"
+zhcnlongtxtfilename = "zhcn_continuous_mode_sample.txt"
 
 
 def speech_recognize_once_from_mic():
@@ -48,7 +51,7 @@ def speech_recognize_once_from_mic():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -78,7 +81,7 @@ def speech_recognize_once_from_file():
         speech_config=speech_config, language="de-DE", audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -120,7 +123,7 @@ def speech_recognize_once_from_file_with_detailed_recognition_results():
         speech_config=speech_config, language="en-US", audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -203,7 +206,7 @@ def speech_recognize_once_compressed_input():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config, audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -239,7 +242,7 @@ def speech_recognize_once_from_file_with_customized_model():
         speech_config=speech_config, source_language_config=source_language_config, audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -274,7 +277,7 @@ def speech_recognize_once_from_file_with_custom_endpoint_parameters():
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
     # Starts speech recognition, and returns after a single utterance is recognized. The end of a
-    # single utterance is determined by listening for silence at the end or until a maximum of 15
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
     # seconds of audio is processed. It returns the recognition text as result.
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot recognition like command or query.
@@ -809,6 +812,8 @@ def pronunciation_assessment_from_microphone():
             break
 
         pronunciation_config.reference_text = reference_text
+        # (Optional) get the session ID
+        recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
         pronunciation_config.apply_to(recognizer)
 
         # Starts recognizing.
@@ -843,6 +848,44 @@ def pronunciation_assessment_from_microphone():
                 print("Error details: {}".format(cancellation_details.error_details))
 
 
+def get_reference_words(wave_filename, reference_text, language):
+    audio_config = speechsdk.audio.AudioConfig(filename=wave_filename)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, language=language, audio_config=audio_config
+    )
+
+    # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+    enable_miscue = True
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
+        reference_text=reference_text,
+        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
+        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
+        enable_miscue=enable_miscue)
+
+    # Apply pronunciation assessment config to speech recognizer
+    pronunciation_config.apply_to(speech_recognizer)
+    result = speech_recognizer.recognize_once_async().get()
+
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        pronunciation_result = json.loads(result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult))
+        reference_words = []
+        nb = pronunciation_result["NBest"][0]
+        for idx, word in enumerate(nb["Words"]):
+            if word["PronunciationAssessment"]["ErrorType"] != "Insertion":
+                reference_words.append(word["Word"])
+        return reference_words
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized")
+        return None
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+        return None
+
+
 def pronunciation_assessment_continuous_from_file():
     """Performs continuous pronunciation assessment asynchronously with input from an audio file.
         See more information at https://aka.ms/csspeech/pa"""
@@ -854,9 +897,10 @@ def pronunciation_assessment_continuous_from_file():
     # Replace with your own subscription key and service region (e.g., "westus").
     # Note: The sample is for en-US language.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+    audio_config = speechsdk.audio.AudioConfig(filename=zhcnlongfilename)
 
-    reference_text = "What's the weather like?"
+    with open(zhcnlongtxtfilename, "r", encoding="utf-8") as t:
+        reference_text = t.readline()
     # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     enable_miscue = True
     enable_prosody_assessment = True
@@ -869,7 +913,7 @@ def pronunciation_assessment_continuous_from_file():
         pronunciation_config.enable_prosody_assessment()
 
     # Creates a speech recognizer using a file as audio input.
-    language = 'en-US'
+    language = 'zh-CN'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
@@ -879,6 +923,8 @@ def pronunciation_assessment_continuous_from_file():
     prosody_scores = []
     fluency_scores = []
     durations = []
+    startOffset = 0
+    endOffset = 0
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -893,7 +939,7 @@ def pronunciation_assessment_continuous_from_file():
             pronunciation_result.accuracy_score, pronunciation_result.prosody_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words, prosody_scores, fluency_scores, durations
+        nonlocal recognized_words, prosody_scores, fluency_scores, durations, startOffset, endOffset
         recognized_words += pronunciation_result.words
         fluency_scores.append(pronunciation_result.fluency_score)
         if pronunciation_result.prosody_score is not None:
@@ -901,11 +947,15 @@ def pronunciation_assessment_continuous_from_file():
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo["NBest"][0]
-        durations.append(sum([int(w["Duration"]) for w in nb["Words"]]))
+        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"]])
+        if startOffset == 0:
+            startOffset = nb["Words"][0]["Offset"]
+        endOffset = nb["Words"][-1]["Offset"] + nb["Words"][-1]["Duration"] + 100000
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
     # Stop continuous recognition on either session stopped or canceled events
@@ -921,11 +971,8 @@ def pronunciation_assessment_continuous_from_file():
 
     # We need to convert the reference text to lower case, and split to words, then remove the punctuations.
     if language == 'zh-CN':
-        # Use jieba package to split words for Chinese
-        import jieba
-        import zhon.hanzi
-        jieba.suggest_freq([x.word for x in recognized_words], True)
-        reference_words = [w for w in jieba.cut(reference_text) if w not in zhon.hanzi.punctuation]
+        # Split words for Chinese using the reference text and any short wave file
+        reference_words = get_reference_words(zhcnfilename, reference_text, language)
     else:
         reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
 
@@ -938,8 +985,7 @@ def pronunciation_assessment_continuous_from_file():
         for tag, i1, i2, j1, j2 in diff.get_opcodes():
             if tag in ['insert', 'replace']:
                 for word in recognized_words[j1:j2]:
-                    if word.error_type == 'None':
-                        word._error_type = 'Insertion'
+                    word._error_type = 'Insertion'
                     final_words.append(word)
             if tag in ['delete', 'replace']:
                 for word_text in reference_words[i1:i2]:
@@ -955,6 +1001,8 @@ def pronunciation_assessment_continuous_from_file():
     else:
         final_words = recognized_words
 
+    durations_sum = sum([d for w, d in zip(recognized_words, durations) if w.error_type == "None"])
+
     # We can calculate whole accuracy by averaging
     final_accuracy_scores = []
     for word in final_words:
@@ -969,13 +1017,18 @@ def pronunciation_assessment_continuous_from_file():
     else:
         prosody_score = sum(prosody_scores) / len(prosody_scores)
     # Re-calculate fluency score
-    fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
+    fluency_score = 0
+    if startOffset > 0:
+        fluency_score = durations_sum / (endOffset - startOffset) * 100
     # Calculate whole completeness score
-    completeness_score = len([w for w in recognized_words if w.error_type == "None"]) / len(reference_words) * 100
+    handled_final_words = [w.word for w in final_words if w.error_type != "Insertion"]
+    completeness_score = len([w for w in final_words if w.error_type == "None"]) / len(handled_final_words) * 100
     completeness_score = completeness_score if completeness_score <= 100 else 100
+    sorted_scores = sorted([accuracy_score, prosody_score, completeness_score, fluency_score])
+    pronunciation_score = sorted_scores[0] * 0.4 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2 + sorted_scores[3] * 0.2
 
-    print('    Paragraph accuracy score: {}, prosody score: {}, completeness score: {}, fluency score: {}'.format(
-        accuracy_score, prosody_score, completeness_score, fluency_score
+    print('    Paragraph pronunciation score: {:.2f}, accuracy score: {:.2f}, prosody score: {:.2f}, completeness score: {:.2f}, fluency score: {:.2f}'.format(
+        pronunciation_score, accuracy_score, prosody_score, completeness_score, fluency_score
     ))
 
     for idx, word in enumerate(final_words):
@@ -1011,6 +1064,8 @@ def pronunciation_assessment_from_stream():
     # Create a speech recognizer using a file as audio input.
     language = 'en-US'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
 
@@ -1070,6 +1125,8 @@ def pronunciation_assessment_configured_with_json():
     # Create a speech recognizer using a file as audio input.
     language = 'en-US'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
 
@@ -1136,7 +1193,8 @@ def pronunciation_assessment_with_content_assessment():
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.session_started.connect(lambda evt: print("SESSION STARTED: {}".format(evt)))
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     speech_recognizer.session_stopped.connect(lambda evt: print("SESSION STOPPED {}".format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
     # Stop continuous recognition on either session stopped or canceled events

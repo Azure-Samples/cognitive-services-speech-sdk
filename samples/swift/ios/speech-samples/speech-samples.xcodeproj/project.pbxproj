@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,6 +15,9 @@
 		3CB230BA2692E546009AD484 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CB230B92692E546009AD484 /* Assets.xcassets */; };
 		3CB230BD2692E546009AD484 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CB230BB2692E546009AD484 /* LaunchScreen.storyboard */; };
 		3CB230E526943123009AD484 /* pronunciation_assessment.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CB230E426943123009AD484 /* pronunciation_assessment.wav */; };
+		520398BD2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav in Resources */ = {isa = PBXBuildFile; fileRef = 520398BA2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav */; };
+		520398BE2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt in Resources */ = {isa = PBXBuildFile; fileRef = 520398BB2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt */; };
+		520398BF2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav in Resources */ = {isa = PBXBuildFile; fileRef = 520398BC2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav */; };
 		52CF43DF2AEBC4D200227EF3 /* pronunciation_assessment_fall.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52CF43DE2AEBC4D200227EF3 /* pronunciation_assessment_fall.wav */; };
 		52FC64FE29CC4CB2000C8918 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52FC64FD29CC4CB2000C8918 /* whatstheweatherlike.wav */; };
 /* End PBXBuildFile section */
@@ -29,6 +32,9 @@
 		3CB230BC2692E546009AD484 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3CB230BE2692E546009AD484 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3CB230E426943123009AD484 /* pronunciation_assessment.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pronunciation_assessment.wav; sourceTree = "<group>"; };
+		520398BA2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = zhcn_short_dummy_sample.wav; sourceTree = "<group>"; };
+		520398BB2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zhcn_continuous_mode_sample.txt; sourceTree = "<group>"; };
+		520398BC2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = zhcn_continuous_mode_sample.wav; sourceTree = "<group>"; };
 		52CF43DE2AEBC4D200227EF3 /* pronunciation_assessment_fall.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pronunciation_assessment_fall.wav; sourceTree = "<group>"; };
 		52FC64FD29CC4CB2000C8918 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = whatstheweatherlike.wav; sourceTree = "<group>"; };
 		7216C25C7CBBBBCE69D14199 /* Pods-speech-samples.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-speech-samples.debug.xcconfig"; path = "Target Support Files/Pods-speech-samples/Pods-speech-samples.debug.xcconfig"; sourceTree = "<group>"; };
@@ -59,6 +65,9 @@
 		3CB230A42692E52F009AD484 = {
 			isa = PBXGroup;
 			children = (
+				520398BB2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt */,
+				520398BC2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav */,
+				520398BA2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav */,
 				52CF43DE2AEBC4D200227EF3 /* pronunciation_assessment_fall.wav */,
 				52FC64FD29CC4CB2000C8918 /* whatstheweatherlike.wav */,
 				3CB230E426943123009AD484 /* pronunciation_assessment.wav */,
@@ -160,7 +169,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CB230BD2692E546009AD484 /* LaunchScreen.storyboard in Resources */,
+				520398BD2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav in Resources */,
 				3CB230BA2692E546009AD484 /* Assets.xcassets in Resources */,
+				520398BE2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt in Resources */,
+				520398BF2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav in Resources */,
 				52FC64FE29CC4CB2000C8918 /* whatstheweatherlike.wav in Resources */,
 				52CF43DF2AEBC4D200227EF3 /* pronunciation_assessment_fall.wav in Resources */,
 				3CB230E526943123009AD484 /* pronunciation_assessment.wav in Resources */,

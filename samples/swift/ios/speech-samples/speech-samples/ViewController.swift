@@ -17,10 +17,11 @@ struct Word {
     var word: String
     var errorType: String
     var accuracyScore = 0.0
+    var duration = 0.0
 }
 
 class ViewController: UIViewController {
-    var label: UILabel!
+    var label: UITextView!
     var continuousPronunciationAssessmentButton: UIButton!
     var pronunciationAssessmentWithStreamButton: UIButton!
     var pronunciationAssessmentWithMicrophoneButton: UIButton!
@@ -57,10 +58,9 @@ class ViewController: UIViewController {
         pronunciationAssessmentWithContentAssessmentButton.setTitleColor(UIColor.black, for: .normal)
 
 
-        label = UILabel(frame: CGRect(x: 30, y: 240, width: 300, height: 400))
+        label = UITextView(frame: CGRect(x: 30, y: 280, width: 300, height: 400))
         label.textColor = UIColor.black
-        label.lineBreakMode = .byWordWrapping
-        label.numberOfLines = 0
+        label.isEditable = false
         label.text = "Recognition Result"
 
         self.view.addSubview(label)
@@ -95,6 +95,76 @@ class ViewController: UIViewController {
         }
     }
 
+    func getReferenceWords(waveFilename: String, referenceText: String, language: String, speechConfig: SPXSpeechConfiguration) -> [String]? {
+        // Configure audio input
+        let audioConfig = SPXAudioConfiguration(wavFileInput: waveFilename)
+        
+        // Check if audioConfig is nil
+        if audioConfig == nil {
+            print("Error creating audio configuration.")
+            return nil
+        }
+
+        // Set speech recognition language
+        speechConfig.speechRecognitionLanguage = language
+
+        // Create speech recognizer
+        guard let speechRecognizer = try? SPXSpeechRecognizer(speechConfiguration: speechConfig, audioConfiguration: audioConfig!) else {
+            print("Error creating speech recognizer.")
+            return nil
+        }
+
+        // Configure pronunciation assessment, set grading system, granularity, and enable miscue
+        let enableMiscue = true
+        guard let pronunciationConfig = try? SPXPronunciationAssessmentConfiguration(referenceText, gradingSystem: .hundredMark, granularity: .phoneme, enableMiscue: enableMiscue) else {
+            print("Error creating pronunciation assessment configuration.")
+            return nil
+        }
+
+        // Apply pronunciation assessment config to speech recognizer
+        try! pronunciationConfig.apply(to: speechRecognizer)
+
+        // Perform speech recognition
+        var referenceWords = [String]()
+        let group = DispatchGroup()
+        group.enter()
+
+        try! speechRecognizer.recognizeOnceAsync { result in
+            defer { group.leave() }
+
+            if result.reason == SPXResultReason.recognizedSpeech {
+                if let responseJson = result.properties?.getPropertyBy(SPXPropertyId.speechServiceResponseJsonResult) {
+                    // Parse the JSON result to extract NBest and Words
+                    if let data = responseJson.data(using: .utf8),
+                       let json = try? JSONSerialization.jsonObject(with: data, options: []),
+                       let jsonDict = json as? [String: Any],
+                       let nBestArray = jsonDict["NBest"] as? [[String: Any]],
+                       let wordsArray = nBestArray.first?["Words"] as? [[String: Any]] {
+                        for wordInfo in wordsArray {
+                            if let word = wordInfo["Word"] as? String,
+                               let errorType = (wordInfo["PronunciationAssessment"] as? [String: Any])?["ErrorType"] as? String {
+                                if errorType != "Insertion" {
+                                    referenceWords.append(word)
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if result.reason == SPXResultReason.noMatch {
+                print("No speech could be recognized.")
+            } else if result.reason == SPXResultReason.canceled {
+                let cancellationDetails = try! SPXCancellationDetails(fromCanceledRecognitionResult: result)
+                print("Speech recognition canceled: \(cancellationDetails.reason)")
+                if cancellationDetails.reason == SPXCancellationReason.error {
+                    print("Error details: \(String(describing: cancellationDetails.errorDetails))")
+                }
+            }
+        }
+
+        group.wait()
+        return referenceWords.isEmpty ? nil : referenceWords
+    }
+    
     /**
      * Continuous Pronunciation Assessment Sample.
      *
@@ -108,10 +178,13 @@ class ViewController: UIViewController {
             print("error \(error) happened")
             speechConfig = nil
         }
-        speechConfig?.speechRecognitionLanguage = "en-US"
+        
+        let language = "zh-CN"
+        
+        speechConfig?.speechRecognitionLanguage = language
 
         let bundle = Bundle.main
-        let path = bundle.path(forResource: "pronunciation_assessment", ofType: "wav")
+        let path = bundle.path(forResource: "zhcn_continuous_mode_sample", ofType: "wav")
         if (path == nil) {
             print("Cannot find audio file!");
             self.updateLabel(text: "Cannot find audio file", color: UIColor.red)
@@ -119,9 +192,12 @@ class ViewController: UIViewController {
         }
         print("pronunciation assessment audio file path: ", path!)
 
+        let short_audio = bundle.path(forResource: "zhcn_short_dummy_sample", ofType: "wav")
+        let referencePath = bundle.path(forResource: "zhcn_continuous_mode_sample", ofType: "txt")
+        
         let audioConfig = SPXAudioConfiguration.init(wavFileInput: path!)
 
-        let referenceText = "Hello world hello. Today is a nice day."
+        let referenceText = try! String(contentsOfFile: referencePath!, encoding: .utf8)
 
         var pronConfig: SPXPronunciationAssessmentConfiguration?
         do {
@@ -135,6 +211,11 @@ class ViewController: UIViewController {
         pronConfig?.enableProsodyAssessment()
 
         let reco = try! SPXSpeechRecognizer(speechConfiguration: speechConfig!, audioConfiguration: audioConfig!)
+        
+        reco.addSessionStartedEventHandler { (reco, evt) in
+            print("SESSION ID: \(evt.sessionId)")
+        }
+        
         try! pronConfig!.apply(to: reco)
 
         reco.addRecognizingEventHandler() {reco, evt in
@@ -142,8 +223,6 @@ class ViewController: UIViewController {
             self.updateLabel(text: evt.result.text, color: .gray)
         }
 
-        var sumAccuracy: Double = 0;
-        var sumDuration: TimeInterval = 0, validDuration: TimeInterval = 0;
         var startOffset: TimeInterval = 0, endOffset: TimeInterval = 0;
         var pronWords: [SPXWordLevelTimingResult] = []
         var recognizedWords: [String] = []
@@ -159,11 +238,6 @@ class ViewController: UIViewController {
             for word in pronunciationResult.words! {
                 pronWords.append(word)
                 recognizedWords.append(word.word!)
-                sumAccuracy += word.accuracyScore * Double(word.duration)
-                sumDuration += word.duration;
-                if (word.errorType == "None") {
-                    validDuration += word.duration + 0.01
-                }
                 endOffset = word.offset + word.duration + 0.01
             }
         }
@@ -183,41 +257,77 @@ class ViewController: UIViewController {
         try! reco.stopContinuousRecognition()
 
         var referenceWords: [String] = []
-        for w in referenceText.words {
-            referenceWords.append(String(w).lowercased().trimmingCharacters(in: .punctuationCharacters))
-        }
-        let diff = referenceWords.outputDiffPathTraces(to: recognizedWords)
-        var finalWords: [Word] = []
-        var validWordCount = 0
-        for e in diff {
-            if e.from.x + 1 == e.to.x && e.from.y + 1 == e.to.y {
-                let v = pronWords[e.from.y]
-                finalWords.append(Word(word: v.word!,errorType: v.errorType!,accuracyScore: v.accuracyScore))
-                validWordCount += 1
-            } else if e.from.y < e.to.y {
-                let v = pronWords[e.from.y]
-                finalWords.append(Word(word: v.word!,errorType: "Insertion"))
-            } else {
-                finalWords.append(Word(word:referenceWords[e.from.x],errorType: "Omission"))
-            }
-        }
+        if (language == "zh-CN"){
+             // Split words for Chinese using the reference text and any short wave file
+             referenceWords = getReferenceWords(waveFilename: short_audio!, referenceText: referenceText, language: language, speechConfig: speechConfig!)!
+         }
+         else {
+             for w in referenceText.words {
+                 referenceWords.append(String(w).lowercased().trimmingCharacters(in: .punctuationCharacters))
+             }
+         }
+         let enableMiscue = true
+         var finalWords: [Word] = []
+         var validWordCount = 0
+         
+         if (enableMiscue){
+             let diff = referenceWords.outputDiffPathTraces(to: recognizedWords)
+             for e in diff {
+                 if e.from.x + 1 == e.to.x && e.from.y + 1 == e.to.y {
+                     let v = pronWords[e.from.y]
+                     finalWords.append(Word(word: v.word!,errorType: v.errorType!,accuracyScore: v.accuracyScore,duration: v.duration))
+                     validWordCount += 1
+                 } else if e.from.y < e.to.y {
+                     let v = pronWords[e.from.y]
+                     finalWords.append(Word(word: v.word!,errorType: "Insertion"))
+                 } else {
+                     finalWords.append(Word(word:referenceWords[e.from.x],errorType: "Omission"))
+                 }
+             }
+         }
+         else {
+             for v in pronWords {
+                 finalWords.append(Word(word: v.word!,errorType: v.errorType!,accuracyScore: v.accuracyScore,duration: v.duration))
+             }
+         }
 
-        if (recognizedWords.count > 0) {
-            // Overall accuracy and fluency scores are the weighted average of scores of all sentences.
-            startOffset = pronWords[0].offset
-            let fluencyScore: Double = Double(validDuration) / Double(endOffset - startOffset) * 100.0
-            let completenessScore: Double = Double(validWordCount) / Double(referenceWords.count)
-            
-            let prosodyScore: Double = Double(prosodyScores.reduce(0, +)) / Double(prosodyScores.count)
-            
-            var resultText = "Assessment finished. \nOverall accuracy score: \(sumAccuracy / Double(sumDuration)), prosody score: \(prosodyScore), fluency score: \(fluencyScore), completeness score: \(completenessScore)"
 
-            for w in finalWords {
-                resultText += "\n"
-                resultText += " word: \(w.word)\taccuracy score: \(w.accuracyScore)\terror type: \(w.errorType);"
-            }
-            self.updateLabel(text: resultText, color: UIColor.black)
-        }
+         if (recognizedWords.count > 0) {
+             // Overall accuracy and fluency scores are the weighted average of scores of all sentences.
+             var totalAccuracyScore: Double = 0.0
+             var accuracyCount: Int = 0
+             var validCount: Int = 0
+             var durationSum: Double = 0.0
+             
+             for word in finalWords {
+                 if word.errorType != "Insertion" {
+                     totalAccuracyScore += word.accuracyScore
+                     accuracyCount += 1
+                 }
+                 
+                 if word.errorType == "None" {
+                     durationSum += word.duration + 0.01
+                     validCount += 1
+                 }
+             }
+             let accuracyScore = totalAccuracyScore / Double(accuracyCount)
+             
+             startOffset = pronWords[0].offset
+             let fluencyScore: Double = durationSum / Double(endOffset - startOffset) * 100.0
+             
+             let completenessScore: Double = Double(validCount) / Double(accuracyCount) * 100.0
+             
+             let scores_all: [Double] = [accuracyScore, fluencyScore, completenessScore]
+             let pronunciationScore = scores_all.map{$0 * 0.2}.reduce(0, +) + scores_all.min()! * 0.4
+             
+             var resultText = String(format: "Assessment finished. \nOverall accuracy score: %.2f, fluency score: %.2f, completeness score: %.2f, pronunciation score: %.2f", accuracyScore, fluencyScore, completenessScore, pronunciationScore)
+
+             for w in finalWords {
+                 resultText += "\n"
+                 resultText += " word: \(w.word)\taccuracy score: \(w.accuracyScore)\terror type: \(w.errorType);"
+             }
+             self.updateLabel(text: resultText, color: UIColor.black)
+         }
     }
 
     func pronunciationAssessmentWithStream() {
@@ -255,6 +365,11 @@ class ViewController: UIViewController {
         
         let speechRecognizer = try! SPXSpeechRecognizer(speechConfiguration: speechConfig, language: "en-US", audioConfiguration: audioConfig)
         
+        let stopRecognitionSemaphore = DispatchSemaphore(value: 0)
+        speechRecognizer.addSessionStartedEventHandler { (recognizer, eventArgs) in
+            print("SESSION ID: \(eventArgs.sessionId)")
+        }
+        
         let referenceText = "what's the weather like"
         let pronAssessmentConfig = try! SPXPronunciationAssessmentConfiguration(referenceText, gradingSystem: SPXPronunciationAssessmentGradingSystem.hundredMark, granularity: SPXPronunciationAssessmentGranularity.word, enableMiscue: true)
         
@@ -266,33 +381,38 @@ class ViewController: UIViewController {
         audioInputStream.write(Data())
         
         self.updateLabel(text: "Analysising", color: UIColor.black)
-        // Handle the recognition result
-        try! speechRecognizer.recognizeOnceAsync { result in
-            guard let pronunciationResult = SPXPronunciationAssessmentResult(result) else {
-                print("Error: pronunciationResult is Nil")
-                return
-            }
-            self.updateLabel(text: "generating result...", color: UIColor.black)
-            var finalResult = ""
-            let resultText = "Accuracy score: \(pronunciationResult.accuracyScore), Prosody score: \(pronunciationResult.prosodyScore), Pronunciation score: \(pronunciationResult.pronunciationScore), Completeness Score: \(pronunciationResult.completenessScore), Fluency score: \(pronunciationResult.fluencyScore)"
-            print(resultText)
-            finalResult.append("\(resultText)\n")
-            finalResult.append("\nword    accuracyScore   errorType\n")
-            
-            if let words = pronunciationResult.words {
-                for word in words {
-                    let wordString = word.word ?? ""
-                    let errorType = word.errorType ?? ""
-                    finalResult.append("\(wordString)    \(word.accuracyScore)   \(errorType)\n")
+        
+        DispatchQueue.global().async {
+            // Handle the recognition result
+            try! speechRecognizer.recognizeOnceAsync { result in
+                guard let pronunciationResult = SPXPronunciationAssessmentResult(result) else {
+                    print("Error: pronunciationResult is Nil")
+                    return
                 }
+                self.updateLabel(text: "generating result...", color: UIColor.black)
+                var finalResult = ""
+                let resultText = "Accuracy score: \(pronunciationResult.accuracyScore), Prosody score: \(pronunciationResult.prosodyScore), Pronunciation score: \(pronunciationResult.pronunciationScore), Completeness Score: \(pronunciationResult.completenessScore), Fluency score: \(pronunciationResult.fluencyScore)"
+                print(resultText)
+                finalResult.append("\(resultText)\n")
+                finalResult.append("\nword    accuracyScore   errorType\n")
+                
+                if let words = pronunciationResult.words {
+                    for word in words {
+                        let wordString = word.word ?? ""
+                        let errorType = word.errorType ?? ""
+                        finalResult.append("\(wordString)    \(word.accuracyScore)   \(errorType)\n")
+                    }
+                }
+                
+                self.updateLabel(text: finalResult, color: UIColor.black)
+                
+                let endTime = Date()
+                let timeCost = endTime.timeIntervalSince(startTime) * 1000
+                print("Time cost: \(timeCost)ms")
+                stopRecognitionSemaphore.signal()
             }
-            
-            self.updateLabel(text: finalResult, color: UIColor.black)
-            
-            let endTime = Date()
-            let timeCost = endTime.timeIntervalSince(startTime) * 1000
-            print("Time cost: \(timeCost)ms")
         }
+        stopRecognitionSemaphore.wait()
     }
     
     func pronunciationAssessmentConfiguredWithJson() {
@@ -329,6 +449,11 @@ class ViewController: UIViewController {
         // Creates a speech recognizer for the specified language
         let recognizer = try! SPXSpeechRecognizer(speechConfiguration: speechConfig, language: language, audioConfiguration: audioInput)
         
+        let stopRecognitionSemaphore = DispatchSemaphore(value: 0)
+        recognizer.addSessionStartedEventHandler { (sender, evt) in
+            print("SESSION ID: \(evt.sessionId)")
+        }
+        
         try! pronAssessmentConfig.apply(to: recognizer)
         
         self.updateLabel(text: "Analysising", color: UIColor.black)
@@ -354,7 +479,9 @@ class ViewController: UIViewController {
             }
             
             self.updateLabel(text: finalResult, color: UIColor.black)
+            stopRecognitionSemaphore.signal()
         }
+        stopRecognitionSemaphore.wait()
     }
     
     func pronunciationAssessmentWithMicrophone() {
@@ -384,6 +511,11 @@ class ViewController: UIViewController {
         // Create a speech recognizer
         let recognizer = try! SPXSpeechRecognizer(speechConfiguration: speechConfig, language: language)
         
+        let stopRecognitionSemaphore = DispatchSemaphore(value: 0)
+        recognizer.addSessionStartedEventHandler { (sender, evt) in
+            print("SESSION ID: \(evt.sessionId)")
+        }
+        
         // Apply the pronunciation assessment config object
         try! pronunciationConfig.apply(to: recognizer)
         
@@ -409,7 +541,9 @@ class ViewController: UIViewController {
                 }
             }
             self.updateLabel(text: finalResult, color: UIColor.black)
+            stopRecognitionSemaphore.signal()
         }
+        stopRecognitionSemaphore.wait()
     }
     
     func pronunciationAssessmentWithContentAssessment() {
@@ -455,6 +589,10 @@ class ViewController: UIViewController {
         var recognizedTexts: [String] = []
         var pronContents: [SPXContentAssessmentResult] = []
         var end = false
+        
+        reco.addSessionStartedEventHandler { (reco, evt) in
+            print("SESSION ID: \(evt.sessionId)")
+        }
         
         reco.addRecognizedEventHandler() {reco, evt in
             let text: String = evt.result.text ?? ""

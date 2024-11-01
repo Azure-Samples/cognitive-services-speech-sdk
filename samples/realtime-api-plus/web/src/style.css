@@ -1,0 +1,105 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  margin: 0;
+}
+
+#received-text-container {
+  flex: 6;
+  overflow-y: auto;
+  padding: 1rem;
+  background-color: #ebebeb;
+  border: 1px solid #646cff;
+  border-radius: 8px;
+  margin-right: 2rem;
+}
+
+.controls {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.input-group input,
+.input-group textarea {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #ebebeb;
+  margin-bottom: 0.5rem;
+  transition: border-color 0.25s;
+}
+
+.input-group input:hover,
+.input-group textarea:hover {
+  border-color: #646cff;
+}
+
+.input-group input:focus,
+.input-group textarea:focus,
+.input-group input:focus-visible,
+.input-group textarea:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.toggle-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.toggle-group label {
+  margin-right: 0.5rem;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #444df5;
+  color: white;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+button:disabled,
+button[disabled] {
+  border: 1px solid #999999;
+  background-color: #cccccc;
+  color: #666666;
+}

@@ -8,7 +8,7 @@
     "axios": "^0.21.1",
     "bootstrap": "^4.5.3",
     "dotenv": "^8.2.0",
-    "microsoft-cognitiveservices-speech-sdk": "^1.18",
+    "microsoft-cognitiveservices-speech-sdk": "^1.41",
     "universal-cookie": "^4.0.4",
     "web-vitals": "^0.2.4"
   },
