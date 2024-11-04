@@ -1,0 +1,27 @@
+{
+  "name": "realtime-sample-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write src public"
+  },
+  "devDependencies": {
+    "@types/audioworklet": "^0.0.57",
+    "@types/node": "^22.7.4",
+    "prettier": "^3.3.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.4.8"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.4.1",
+    "rt-client": "file:../rt-client-0.5.0.tgz"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "dist/index.d.ts"
+}
