@@ -6,7 +6,7 @@ $dotnetPath = "C:\Program Files\dotnet\dotnet.exe"
 $dotnetInstallationTempDirectory = "$env:LOCALAPPDATA\dotnet"
 $dotnetTempPath = Join-Path $dotnetInstallationTempDirectory "dotnet.exe"
 
-function Install-DotNet7 {
+function Install-DotNet {
     Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
     if (-not $?) {
         Write-Host "Failed to download dotnet-install.ps1, exiting..." -ForegroundColor Red
@@ -29,10 +29,10 @@ if ($action -eq "build") {
     if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -or ([version]$(dotnet --version) -lt [version]"7.0")) {
         Write-Host "Installing .NET SDK 7.0..."
 
-        Install-DotNet7
+        Install-DotNet
     }
 
-    & $dotnetPath VideoTranslationSample/VideoTranslationSample/VideoTranslationSample.csproj
+    & $dotnetPath build VideoTranslationSample/VideoTranslationSample/VideoTranslationSample.csproj
     if (! $?) {
         Write-Host "Building is failed, exiting..." -ForegroundColor Red
         exit 1
@@ -57,14 +57,10 @@ elseif ($action -eq "run") {
 
     if (Get-Command $dotnetPath -ErrorAction SilentlyContinue) {
         $videoFileAzureBlobUrl = Read-Host "Please enter the Azure Blob URL (for example, Azure blob SAS token URL) of the input video file for translation"
-        if ([string]::IsNullOrWhiteSpace($targetLocale)) {
+        if ([string]::IsNullOrWhiteSpace($videoFileAzureBlobUrl)) {
             Write-Host "Not enter the Azure Blob URL of the input video file." -ForegroundColor Red
             exit 1
         }
-        # else {
-        #     # Escape char for argument -videoFileAzureBlobUrl
-        #     $videoFileAzureBlobUrl = $videoFileAzureBlobUrl.Replace("&", "^&")
-        # }
 
         $sourceLocale = Read-Host "Please enter the source locale of the video (e.g. en-US, zh-CN, etc.)"
         if ([string]::IsNullOrWhiteSpace($sourceLocale)) {
@@ -81,12 +77,26 @@ elseif ($action -eq "run") {
         if ([string]::IsNullOrWhiteSpace($voiceKind)) {
             $voiceKind = "PlatformVoice"
         }
-        if ($voiceKind -ne "PlatformVoice" -or $voiceKind -ne "PersonalVoice") {
+
+        $validVoices = @("PlatformVoice", "PersonalVoice")
+        if ($voiceKind -notin $validVoices) {
             Write-Host "Wrong voice kind $voiceKind entered." -ForegroundColor Red
             exit 1
         }
 
-        & $dotnetPath "VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.exe" -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion "2024-05-20-preview" -subscriptionKey $subscriptionKey -region $subscriptionRegion -sourceLocale $sourceLocale -targetLocale $targetLocale -voiceKind $voiceKind -videoFileAzureBlobUrl $videoFileAzureBlobUrl
+        $translationId = Read-Host "Please enter the translation resource ID (example: PersonalRecording_en-US_2024_110501)"
+        if ([string]::IsNullOrWhiteSpace($translationId)) {
+            Write-Host "Not enter the translation resource ID." -ForegroundColor Red
+            exit 1
+        }
+
+        $iterationId = Read-Host "Please enter the iteration resource ID (example: Iteration-2024110501)"
+        if ([string]::IsNullOrWhiteSpace($iterationId)) {
+            Write-Host "Not enter the iteration resource ID." -ForegroundColor Red
+            exit 1
+        }
+
+        & $dotnetPath "VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll" -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion "2024-05-20-preview" -subscriptionKey $subscriptionKey -region $subscriptionRegion -sourceLocale $sourceLocale -targetLocale $targetLocale -voiceKind $voiceKind -videoFileAzureBlobUrl $videoFileAzureBlobUrl -translationId $translationId -iterationId $iterationId
     }
     else {
         Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 7.0." -ForegroundColor Red
