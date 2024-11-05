@@ -2,6 +2,15 @@
 
 Video translation client tool and API sample code
 
+## Run the Sample within VS Code
+- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Download this sample from sample gallery to local machine.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **eastus** regional speech resource.
+- Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
+- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+
+Video translation currently only supports Azure Speech resources in the **eastus** region. Support for **North Europe** is planned in the coming months.
+
 # Solution:
    [VideoTranslationApiSampleCode.sln](VideoTranslationSample/VideoTranslationSample.sln)
 
