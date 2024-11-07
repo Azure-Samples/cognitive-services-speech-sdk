@@ -109,7 +109,7 @@ elseif ($action -eq "run") {
             "-translationId", $translationId,
             "-iterationId", $iterationId
         )
-        Write-Host "Current command line is: dotnet $projectPath $($commandLineArgs -join ' ')" -ForegroundColor Green
+        Write-Host "Running command: $dotnetPath $projectPath $($commandLineArgs -join ' ')" -ForegroundColor Green
         & $dotnetPath $projectPath $commandLineArgs
     }
     else {
