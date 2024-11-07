@@ -92,9 +92,9 @@ namespace CallCenter
 
         // These should not change unless you switch to a new version of the Cognitive Language REST API.
         private const string sentimentAnalysisPath = "language/:analyze-text";
-        private const string sentimentAnalysisQuery = "api-version=2022-05-01";
+        private const string sentimentAnalysisQuery = "api-version=2024-11-01";
         private const string conversationAnalysisPath = "/language/analyze-conversations/jobs";
-        private const string conversationAnalysisQuery = "api-version=2022-10-01-preview";
+        private const string conversationAnalysisQuery = "api-version=2024-11-01";
         private const string conversationSummaryModelVersion = "latest";
 
 

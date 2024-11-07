@@ -5,17 +5,17 @@ Video translation client tool and API sample code
 ## Run the Sample within VS Code
 - Install "Azure AI Speech Toolkit" extension in VS Code.
 - Download this sample from sample gallery to local machine.
-- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **eastus** regional speech resource.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **eastus** regional speech resource. (Video translation currently only supports Azure Speech resources in the **eastus** region.)
 - Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 - Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
 
-Video translation currently only supports Azure Speech resources in the **eastus** region.
+   Upload an input video to Azure Blob Storage and copy the Blob SAS URL. Paste the Azure Blob URL when the run task terminal ask for it. Interactively enter other arguments in the run task terminal. The `Azure AI Speech Toolkit: Run the Sample App` command will run in mode `CreateTranslationAndIterationAndWaitUntilTerminated`:
 
-As a sample, only execute commands with the mode parameter is CreateTranslationAndIterationAndWaitUntilTerminated:
-```
-dotnet VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion 2024-05-20-preview -subscriptionKey <YourSubscriptionKey> -region <YourSubscriptionRegion> -videoFileAzureBlobUrl YourVideoFileAzureBlobSASUrl -sourceLocale <YourVideoLocale> -targetLocale <OutputVideoLocale> -voiceKind <TTSSynthesisVoiceKind> -translationId <YourTranslationIdString> -iterationId <YourIterationIdString>
-```
-Check more modes and corresponding arguments usage in [Command line sample](#Command-line-sample) and [Command line tool arguments](#Command-line-tool-arguments) sections.
+   ```
+   dotnet VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion 2024-05-20-preview -subscriptionKey <YourSubscriptionKey> -region <YourSubscriptionRegion> -videoFileAzureBlobUrl <YourVideoFileAzureBlobSASUrl> -sourceLocale <YourVideoLocale> -targetLocale <OutputVideoLocale> -voiceKind <TTSSynthesisVoiceKind> -translationId <YourTranslationIdString> -iterationId <YourIterationIdString>
+   ```
+
+- Check more modes and arguments usage in [Command line sample](#Command-line-sample) and [Command line tool arguments](#Command-line-tool-arguments) sections. Try them out in new terminal.
 
 # Solution:
    [VideoTranslationApiSampleCode.sln](VideoTranslationSample/VideoTranslationSample.sln)
@@ -62,8 +62,8 @@ Check more modes and corresponding arguments usage in [Command line sample](#Com
    | -subscriptionKey | | Provide your speech resource key. |
    | -apiVersion | 2024-05-20-preview | Provide the version of the API request. |
    | -VoiceKind | PlatformVoice/PersonalVoice | Synthesize TTS for the translated target video using either PlatformVoice or PersonalVoice. |
-   | -sourceLocale | en-US | The locale of the input video file. |
-   | -targetLocales | en-US | Target locale of the translation. |
+   | -sourceLocale | en-US | The locale of the input video file. Check locale in [this list](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=stt). |
+   | -targetLocales | en-US | Target locale of the translation. Check locale in [this list](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=stt). |
    | -translationId | MyTranslateVideo1FromZhCNToEnUS2024050601 | Translation ID. |
    | -iterationId | MyFirstIteration2024050601 | Iteration ID. |
    | -videoFileAzureBlobUrl |  | Please proivde video file URL, with or without SAS, which is hosted in an Azure storage blob. |
