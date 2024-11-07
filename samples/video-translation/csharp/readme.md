@@ -11,7 +11,7 @@ Video translation client tool and API sample code
 
 Video translation currently only supports Azure Speech resources in the **eastus** region.
 
-As a sample, there is only execute the command what the mode parameter is CreateTranslationAndIterationAndWaitUntilTerminated:
+As a sample, only execute commands with the mode parameter is CreateTranslationAndIterationAndWaitUntilTerminated:
 ```
 dotnet VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion 2024-05-20-preview -subscriptionKey <YourSubscriptionKey> -region <YourSubscriptionRegion> -videoFileAzureBlobUrl YourVideoFileAzureBlobSASUrl -sourceLocale <YourVideoLocale> -targetLocale <OutputVideoLocale> -voiceKind <TTSSynthesisVoiceKind> -translationId <YourTranslationIdString> -iterationId <YourIterationIdString>
 ```
