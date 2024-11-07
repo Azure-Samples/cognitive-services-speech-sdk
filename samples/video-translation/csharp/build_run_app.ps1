@@ -96,7 +96,21 @@ elseif ($action -eq "run") {
             exit 1
         }
 
-        & $dotnetPath "VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll" -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion "2024-05-20-preview" -subscriptionKey $subscriptionKey -region $subscriptionRegion -sourceLocale $sourceLocale -targetLocale $targetLocale -voiceKind $voiceKind -videoFileAzureBlobUrl $videoFileAzureBlobUrl -translationId $translationId -iterationId $iterationId
+        $projectPath = "VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll"
+        $commandLineArgs = @(
+            "-mode", "CreateTranslationAndIterationAndWaitUntilTerminated",
+            "-apiVersion", "2024-05-20-preview",
+            "-subscriptionKey", $subscriptionKey,
+            "-region", $subscriptionRegion,
+            "-sourceLocale", $sourceLocale,
+            "-targetLocale", $targetLocale,
+            "-voiceKind", $voiceKind,
+            "-videoFileAzureBlobUrl", $videoFileAzureBlobUrl,
+            "-translationId", $translationId,
+            "-iterationId", $iterationId
+        )
+        Write-Host "Current command line is: dotnet $projectPath $($commandLineArgs -join ' ')" -ForegroundColor Green
+        & $dotnetPath $projectPath $commandLineArgs
     }
     else {
         Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 7.0." -ForegroundColor Red

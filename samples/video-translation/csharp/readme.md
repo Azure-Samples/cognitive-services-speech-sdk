@@ -9,7 +9,13 @@ Video translation client tool and API sample code
 - Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 - Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
 
-Video translation currently only supports Azure Speech resources in the **eastus** region. Support for **North Europe** is planned in the coming months.
+Video translation currently only supports Azure Speech resources in the **eastus** region.
+
+"Azure AI Speech Toolkit" extension will execute commands like this:
+```
+dotnet VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion 2024-05-20-preview -subscriptionKey <YourSubscriptionKey> -region YourSubscriptionRegion -videoFileAzureBlobUrl YourVideoFileAzureBlobSASUrl -sourceLocale <YourVideoLocale> -targetLocale <OutputVideoLocale> -voiceKind <TTSSynthesisVoiceKind> -translationId <YourTranslationIdString> -iterationId <YourIterationIdString>
+```
+Check more modes and corresponding arguments usage in [Command line sample](#Command-line-sample) and [Command line tool arguments](#Command-line-tool-arguments) sections.
 
 # Solution:
    [VideoTranslationApiSampleCode.sln](VideoTranslationSample/VideoTranslationSample.sln)
