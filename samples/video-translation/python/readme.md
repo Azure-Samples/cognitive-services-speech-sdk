@@ -1,7 +1,12 @@
 
 # Video translation client sample code for python
 
-# Dependency
+# Dependency for VS code:
+## Create environment with command, Ctrl+Shift+P:
+    Python: Create Environment
+    Python: Select Interpreter
+    Python: 3.11.10
+## Install below dependencies under this .\python folder in terminal:
     pip3 install orjson
     pip3 install urllib3
     pip3 install requests
@@ -54,9 +59,6 @@ Video translation client is defined as class VideoTranslationClient in file [vid
 | request_list_translations  | Query list translations LIST API |
 | request_get_iteration  | Query get iteration GET API |
 | request_list_iterations  | Query list iterations LIST API |
-
-
-
 
 # Usage sample for client class:
 ```
