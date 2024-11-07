@@ -2,6 +2,21 @@
 
 Video translation client tool and API sample code
 
+## Run the Sample within VS Code
+- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Download this sample from sample gallery to local machine.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **eastus** regional speech resource.
+- Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
+- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+
+Video translation currently only supports Azure Speech resources in the **eastus** region.
+
+As a sample, only execute commands with the mode parameter is CreateTranslationAndIterationAndWaitUntilTerminated:
+```
+dotnet VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion 2024-05-20-preview -subscriptionKey <YourSubscriptionKey> -region <YourSubscriptionRegion> -videoFileAzureBlobUrl YourVideoFileAzureBlobSASUrl -sourceLocale <YourVideoLocale> -targetLocale <OutputVideoLocale> -voiceKind <TTSSynthesisVoiceKind> -translationId <YourTranslationIdString> -iterationId <YourIterationIdString>
+```
+Check more modes and corresponding arguments usage in [Command line sample](#Command-line-sample) and [Command line tool arguments](#Command-line-tool-arguments) sections.
+
 # Solution:
    [VideoTranslationApiSampleCode.sln](VideoTranslationSample/VideoTranslationSample.sln)
 
@@ -60,7 +75,7 @@ Video translation client tool and API sample code
 
 # Best practice
    ## Escape char for argument -videoFileAzureBlobUrl and -webvttFileAzureBlobUrl
-   If you run a client sample tool in a Windows shell and there is an & in the URL arguments (for example, a SAS token in an Azure blob URL), the & needs to be converted to ^& to escape it.
+   If you run a client sample tool in a Windows CMD (Command Prompt) and there is an & in the URL arguments (for example, a SAS token in an Azure blob URL), the & needs to be converted to ^& to escape it.
 
    For example, if the actual URL for the argument videoFileAzureBlobUrl is https://a/b?c&d, then when you run the command in the Windows shell, you need to run the command like this:
 
