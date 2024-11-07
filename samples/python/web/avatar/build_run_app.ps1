@@ -38,13 +38,20 @@ elseif ($action -eq "run") {
     
         $subscriptionKey = $configContent.SubscriptionKey
         $serviceRegion = $configContent.ServiceRegion
+        $resourceName = $configContent.ResourceName
+        $endpoint = "https://$resourceName.openai.azure.com/"
 
         if ($subscriptionKey) {
             [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $subscriptionKey)
+            [System.Environment]::SetEnvironmentVariable("AZURE_OPENAI_API_KEY", $subscriptionKey)
         }
     
         if ($serviceRegion) {
             [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $serviceRegion)
+        }
+
+        if($endpoint){
+            [System.Environment]::SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", $endpoint)
         }
 
         Write-Host "Environment variables loaded from $configFilePath"

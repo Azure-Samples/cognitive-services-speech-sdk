@@ -1,4 +1,5 @@
 {
     "SubscriptionKey": "your_subscription_key",
-    "ServiceRegion": "your_service_region"
+    "ServiceRegion": "your_service_region",
+    "ResourceName": "your_resource_name"
 }
