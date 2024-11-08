@@ -7,6 +7,7 @@ $dotnetInstallationTempDirectory = "$env:LOCALAPPDATA\dotnet"
 $dotnetTempPath = Join-Path $dotnetInstallationTempDirectory "dotnet.exe"
 
 function Install-DotNet6 {
+    Write-Host "Installing .NET SDK 6.0..."
     Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
     if (-not $?) {
         Write-Host "Failed to download dotnet-install.ps1, exiting..." -ForegroundColor Red
@@ -24,14 +25,14 @@ function Install-DotNet6 {
     Remove-Item -Force dotnet-install.ps1
 }
 
-
-if ($action -eq "build") {
+if ($action -eq "configure") {
     if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -or ([version]$(dotnet --version) -lt [version]"6.0")) {
-        Write-Host "Installing .NET SDK 6.0..."
-
         Install-DotNet6
+    } else {
+        Write-Host ".NET 6 is already installed." -ForegroundColor Green
     }
-
+}
+elseif ($action -eq "build") {
     & $dotnetPath build helloworld/helloworld.csproj
     if (! $?) {
         Write-Host "Building is failed, exiting..." -ForegroundColor Red
@@ -49,6 +50,6 @@ elseif ($action -eq "run") {
 }
 else {
     Write-Host "Invalid action: $action" -ForegroundColor Red
-    Write-Host "Usage: build or run"
+    Write-Host "Usage: build, run, or configure"
     exit 1
 }
