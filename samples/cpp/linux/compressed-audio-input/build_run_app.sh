@@ -70,9 +70,10 @@ elif [ "$action" == "run" ]; then
     platform=$(get_platform)
     export LD_LIBRARY_PATH="$SPEECHSDK_ROOT/lib/$platform"
 
-    read -p "Please enter an MP3/Opus file path, otherwise the default path will be used: " audioInputPath
+    read -p "Please enter an local MP3/Opus file path: " audioInputPath
     if [ -z "$audioInputPath" ]; then
-        audioInputPath="https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/sampledata/audiofiles/whatstheweatherlike.mp3"
+        echo "Not input audio file apth"
+        exit 1
     fi
 
     # Run the project
