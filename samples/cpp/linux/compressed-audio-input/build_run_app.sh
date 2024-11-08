@@ -72,7 +72,7 @@ elif [ "$action" == "run" ]; then
 
     read -p "Please enter an MP3/Opus file path, otherwise the default path will be used: " audioInputPath
     if [ -z "$audioInputPath" ]; then
-        audioInputPath="https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/samples/compressed-audio-input/sampledata/whatstheweatherlike.mp3"
+        audioInputPath="https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/sampledata/audiofiles/whatstheweatherlike.mp3"
     fi
 
     # Run the project
