@@ -60,7 +60,18 @@ elseif ($action -eq "run") {
         Write-Host "File not found: $configFilePath"
     }
 
-    & python -m flask run -h 0.0.0.0 -p 5000
+    Start-Process "python" -ArgumentList "-m", "flask", "run", "-h", "0.0.0.0", "-p", "5000"
+
+    # Add a small delay to give the server time to start
+    Start-Sleep -Seconds 5
+
+    # Open the URL in the default browser
+    Start-Process "http://127.0.0.1:5000"
+
+    # Keep the terminal session alive to prevent VS Code from closing the terminal and stopping the server
+    Write-Host "Server is running. Press any key to exit." -ForegroundColor Green
+    [System.Console]::ReadKey($true) | Out-Null
+
 }
 else {
     Write-Host "Invalid action: $action" -ForegroundColor Red

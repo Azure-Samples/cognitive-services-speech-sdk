@@ -4,9 +4,11 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
 ## Run the Sample within VS Code
 1. Install "Azure AI Speech Toolkit" extension in VS Code.
 2. Download this sample from sample gallery to local machine.
-3. Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
+3. Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations).
 4. Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 5. Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+
+    This command will start the avatar web server and open the browser for you. After the `http://127.0.0.1:5000/` link opens in default browser, type in "Spoken Text" and click "Start Session". Then click "Speak".
 
 # The Speech SDK for Python is compatible with Windows, Linux, and macOS.
 - On Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, 2019, and 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170&preserve-view=true) for your platform. Installing this package might require a restart.
