@@ -71,17 +71,16 @@ elseif ($action -eq "run") {
         "--languageEndpoint", "https://$aiServiceRegion.stt.speech.microsoft.com",
         "--input", "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav",
         "--output", "summary.json",
-        "--configuration", "release"
+        "--configuration", "release",
+        "--stereo"
     )
     if (Get-Command dotnet -ErrorAction SilentlyContinue) {
         Write-Host "Running command: dotnet run $($commandLineArgs -join ' ')" -ForegroundColor Green
         & dotnet run $commandLineArgs
-        # & dotnet run --project .\call-center\call-center.csproj --speechKey $aiServiceKey --speechRegion $aiServiceRegion --languageKey $aiServiceKey --languageEndpoint "https://$aiServiceRegion.stt.speech.microsoft.com" --input "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav" --output summary.json --configuration release
     }
     elseif (Get-Command $dotnetTempPath -ErrorAction SilentlyContinue) {
         Write-Host "Running command: $dotnetTempPath run $($commandLineArgs -join ' ')" -ForegroundColor Green
         & $dotnetTempPath run $commandLineArgs
-        # & $dotnetTempPath run --project .\call-center\call-center.csproj --speechKey $aiServiceKey --speechRegion $aiServiceRegion --languageKey $aiServiceKey --languageEndpoint "https://$aiServiceRegion.stt.speech.microsoft.com" --input "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav" --output summary.json --configuration release
     }
     else {
         Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 6.0." -ForegroundColor Red
