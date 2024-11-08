@@ -1,5 +1,5 @@
 {
     "SubscriptionKey": "your_subscription_key",
     "ServiceRegion": "your_service_region",
-    "CustomSubDomainName": "your_custom_sub_domain_name"
+    "CustomSubDomainName": "your_custom_subdomain_name"
 }
