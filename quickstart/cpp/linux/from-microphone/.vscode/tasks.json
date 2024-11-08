@@ -2,9 +2,23 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Configuration and Setup",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "chmod u+x ${workspaceFolder}/app_manager.sh && ${workspaceFolder}/app_manager.sh configure"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Run the App",
             "type": "shell",
-            "command": "./build_run_app.sh",
+            "command": "${workspaceFolder}/app_manager.sh",
             "args": [
                 "run"
             ],
@@ -17,7 +31,7 @@
         {
             "label": "Build the App",
             "type": "shell",
-            "command": "./build_run_app.sh",
+            "command": "${workspaceFolder}/app_manager.sh",
             "args": [
                 "build"
             ],
