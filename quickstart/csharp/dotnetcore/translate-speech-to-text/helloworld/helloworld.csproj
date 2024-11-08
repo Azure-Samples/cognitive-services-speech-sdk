@@ -10,6 +10,10 @@
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <RestoreSources>https://api.nuget.org/v3/index.json</RestoreSources> <!-- Explicitly use nuget.org -->
+  </PropertyGroup>
+
   <Target Name="CopyConfigFile" AfterTargets="Build">
     <Copy SourceFiles="..\config.json" DestinationFolder="$(OutputPath)" />
   </Target>
