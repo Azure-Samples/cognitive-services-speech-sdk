@@ -23,10 +23,7 @@ void recognizeSpeech() {
     const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
     const char* serviceRegion = getEnvVar("SERVICE_REGION");
 
-    auto config = SpeechConfig::FromSubscription(subscriptionKey, serviceRegion);
-
     // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription(subscriptionKey, serviceRegion);
 
     // Creates a speech recognizer

@@ -83,6 +83,8 @@ elif [ "$action" == "run" ]; then
         echo "Environment file $ENV_FILE not found. You can create one to set environment variables or manually set secrets in environment variables."
     fi
 
+    ./helloworld
+
 else
     echo "Invalid action: $action"
     echo "Usage: $0 {configure|build|run}"
