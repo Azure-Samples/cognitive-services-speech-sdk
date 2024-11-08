@@ -1,5 +1,5 @@
 {
     "SubscriptionKey": "your_subscription_key",
     "ServiceRegion": "your_service_region",
-    "ResourceName": "your_resource_name"
+    "CustomSubDomainName": "your_custom_sub_domain_name"
 }

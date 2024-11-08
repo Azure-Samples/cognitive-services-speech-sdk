@@ -38,8 +38,8 @@ elseif ($action -eq "run") {
     
         $subscriptionKey = $configContent.SubscriptionKey
         $serviceRegion = $configContent.ServiceRegion
-        $resourceName = $configContent.ResourceName
-        $endpoint = "https://$resourceName.openai.azure.com/"
+        $customSubDomainName = $configContent.CustomSubDomainName
+        $endpoint = "https://$customSubDomainName.openai.azure.com/"
 
         if ($subscriptionKey) {
             [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $subscriptionKey)
