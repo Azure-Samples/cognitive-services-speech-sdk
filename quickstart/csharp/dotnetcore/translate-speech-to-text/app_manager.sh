@@ -6,7 +6,7 @@ action="$1"
 
 # Check if the correct number of arguments is provided
 if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 {build|run}"
+    echo "Usage: $0 {build|run|configure}"
     exit 1
 fi
 
@@ -14,6 +14,7 @@ dotnetInstallPath="/usr/share/dotnet"
 export PATH=$PATH:$dotnetInstallPath
 
 install_dotnet6() {
+    echo "Installing .NET SDK 6.0..."
     wget https://dot.net/v1/dotnet-install.sh
     chmod +x dotnet-install.sh
     sudo ./dotnet-install.sh --version 6.0.427 --install-dir $dotnetInstallPath
@@ -29,15 +30,18 @@ install_dotnet6() {
     fi
 }
 
-if [ "$action" = "build" ]; then
+if [ "$action" = "configure" ]; then
+    echo "Installing Linux dependencies..."
     sudo apt-get update
-    sudo apt-get install libssl-dev libasound2
+    sudo apt-get install -y libssl-dev libasound2
 
+    # Install .NET SDK if it's not already installed or version is less than 6.0
     if ! command -v dotnet &> /dev/null || [[ "$(dotnet --version)" < "6.0" ]]; then
-        echo "Installing .NET SDK 6.0..."
         install_dotnet6
+    else
+        echo ".NET SDK 6.0 is already installed"
     fi
-
+elif [ "$action" = "build" ]; then
     dotnet build helloworld/helloworld.csproj
     if [ $? -ne 0 ]; then
         echo "Build failed, exiting..."
@@ -47,6 +51,6 @@ elif [ "$action" = "run" ]; then
     dotnet helloworld/bin/Debug/net6.0/helloworld.dll
 else
     echo "Invalid action: $action"
-    echo "Usage: $0 {build|run}"
+    echo "Usage: $0 {build|run|configure}"
     exit 1
 fi
