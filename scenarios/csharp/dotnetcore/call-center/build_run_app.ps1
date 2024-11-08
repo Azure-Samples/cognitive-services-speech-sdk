@@ -56,6 +56,7 @@ elseif ($action -eq "run") {
         $jsonContent = Get-Content -Path $configFilePath -Raw | ConvertFrom-Json
         $aiServiceKey = $jsonContent.SubscriptionKey
         $aiServiceRegion = $jsonContent.ServiceRegion
+        $customSubDomainName = $jsonContent.CustomSubDomainName
     }
     else {
         Write-Host "The config.json file is not found." -ForegroundColor Red
@@ -68,7 +69,7 @@ elseif ($action -eq "run") {
         "--speechKey", $aiServiceKey,
         "--speechRegion", $aiServiceRegion,
         "--languageKey", $aiServiceKey,
-        "--languageEndpoint", "https://$aiServiceRegion.stt.speech.microsoft.com",
+        "--languageEndpoint", "https://$customSubDomainName.cognitiveservices.azure.com/",
         "--input", "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav",
         "--output", "summary.json",
         "--configuration", "release",
