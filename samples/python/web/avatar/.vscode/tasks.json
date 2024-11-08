@@ -2,15 +2,30 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Make Script Executable",
+            "type": "shell",
+            "command": "chmod",
+            "args": [
+                "u+x",
+                "${workspaceFolder}/build_run_app.sh"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
             "label": "Run the App",
             "type": "shell",
             "command": "${workspaceFolder}/build_run_app.sh",
             "args": [
                 "run"
             ],
+            "dependsOn": "Make Script Executable",
             "group": {
                 "kind": "build",
-                "isDefault": false
+                "isDefault": true
             },
             "problemMatcher": [],
             "windows": {
@@ -20,12 +35,6 @@
                     "Bypass",
                     "-File",
                     "${workspaceFolder}/build_run_app.ps1",
-                    "run"
-                ]
-            },
-            "linux": {
-                "command": "chmod u+x ${workspaceFolder}/build_run_app.sh",
-                "args": [
                     "run"
                 ]
             }
@@ -33,10 +42,11 @@
         {
             "label": "Build the App",
             "type": "shell",
-            "command": "./build_run_app.sh",
+            "command": "${workspaceFolder}/build_run_app.sh",
             "args": [
                 "build"
             ],
+            "dependsOn": "Make Script Executable",
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -49,12 +59,6 @@
                     "Bypass",
                     "-File",
                     "${workspaceFolder}/build_run_app.ps1",
-                    "build"
-                ]
-            },
-            "linux": {
-                "command": "chmod u+x ${workspaceFolder}/build_run_app.sh",
-                "args": [
                     "build"
                 ]
             }
