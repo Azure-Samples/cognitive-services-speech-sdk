@@ -6,47 +6,24 @@
 // <code>
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
-#include <fstream>
-#include <string>
-#include <unordered_map>
+#include <cstdlib>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
-unordered_map<string, string> loadConfig(const string& filename) {
-    unordered_map<string, string> config;
-    ifstream file(filename);
-    string line;
-
-    if (!file.is_open()) {
-        cerr << "Could not open the config file: " << filename << endl;
-        return config;
+const char* getEnvVar(const char* var) {
+    const char* val = getenv(var);
+    if (val == nullptr) {
+        throw std::logic_error("Environment variable not set: " + std::string(var));
     }
-
-    while (getline(file, line)) {
-        if (line.empty() || line[0] == '#') {
-            continue;  // Skip empty lines and comments
-        }
-
-        size_t delimiterPos = line.find('=');
-        if (delimiterPos != string::npos) {
-            string key = line.substr(0, delimiterPos);
-            string value = line.substr(delimiterPos + 1);
-            config[key] = value;
-        }
-    }
-
-    file.close();
-    return config;
+    return val;
 }
 
 void recognizeSpeech() {
-    string configFilePath = "./.env/.env.dev";
-    auto envConfig = loadConfig(configFilePath);
+    const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
+    const char* serviceRegion = getEnvVar("SERVICE_REGION");
 
-    // Retrieve the values
-    string subscriptionKey = envConfig["SPEECH_SERVICE_KEY"];
-    string serviceRegion = envConfig["SERVICE_REGION"];
+    auto config = SpeechConfig::FromSubscription(subscriptionKey, serviceRegion);
 
     // Creates an instance of a speech config with specified subscription key and service region.
     // Replace with your own subscription key and service region (e.g., "westus").
