@@ -60,7 +60,7 @@ elseif ($action -eq "run") {
         Write-Host "File not found: $configFilePath"
     }
 
-    & python -m flask run -h 0.0.0.0 -p 5000
+    & python -m flask run -h 0.0.0.0 -p
 }
 else {
     Write-Host "Invalid action: $action" -ForegroundColor Red
