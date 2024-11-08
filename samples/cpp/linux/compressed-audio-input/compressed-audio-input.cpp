@@ -5,7 +5,11 @@
 
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
+#include <fstream>
+#include <string>
+#include <unordered_map>
 
+using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
@@ -77,15 +81,15 @@ void recognizeSpeech(const std::string& compressedFileName)
         return;
     }
 
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    string configFilePath = "./config.json";
+    string configFilePath = "./.env/.env.dev";
     auto envConfig = loadConfig(configFilePath);
 
     // Retrieve the values
-    string subscriptionKey = envConfig["SubscriptionKey"];
-    string serviceRegion = envConfig["ServiceRegion"];
+    string subscriptionKey = envConfig["SPEECH_RESOURCE_KEY"];
+    string serviceRegion = envConfig["SERVICE_REGION"];
 
+    // Creates an instance of a speech config with specified subscription key and service region.
+    // Replace with your own subscription key and service region (e.g., "westus").
     auto config = SpeechConfig::FromSubscription(subscriptionKey, serviceRegion);
 
     AudioStreamContainerFormat inputFormat;
