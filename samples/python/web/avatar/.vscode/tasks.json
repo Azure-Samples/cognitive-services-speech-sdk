@@ -24,7 +24,7 @@
                 ]
             },
             "linux": {
-                "command": "${workspaceFolder}/build_run_app.sh",
+                "command": "chmod u+x ${workspaceFolder}/build_run_app.sh",
                 "args": [
                     "run"
                 ]
@@ -53,7 +53,7 @@
                 ]
             },
             "linux": {
-                "command": "${workspaceFolder}/build_run_app.sh",
+                "command": "chmod u+x ${workspaceFolder}/build_run_app.sh",
                 "args": [
                     "build"
                 ]

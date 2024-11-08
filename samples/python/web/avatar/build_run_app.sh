@@ -11,6 +11,9 @@ function check_pip_installed() {
 }
 
 if [ "$action" == "build" ]; then
+    sudo apt update
+    sudo apt install -y jq
+
     if ! check_python_installed; then
         echo -e "\e[31mPython is not installed. Please install Python to proceed.\e[0m"
         exit 1
@@ -54,7 +57,21 @@ elif [ "$action" == "run" ]; then
         echo "File not found: $configFilePath"
     fi
 
-    python -m flask run -h 0.0.0.0 -p 5000
+    # Start the Flask server in the background
+    python -m flask run -h 0.0.0.0 -p 5000 &
+
+    # Capture the PID of the Flask process
+    FLASK_PID=$!
+
+    # Add a small delay to give the server time to start
+    sleep 5
+
+    # Open the URL in the default browser
+    xdg-open "http://127.0.0.1:5000" &
+
+    # Keep the terminal session alive to prevent it from closing
+    echo -e "\e[32mServer is running. Press any key to exit.\e[0m"
+    read -n 1 -s
 else
     echo -e "\e[31mInvalid action: $action\e[0m"
     echo "Usage: $0 build or $0 run"
