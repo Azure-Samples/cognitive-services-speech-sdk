@@ -28,6 +28,8 @@ function Install-DotNet6 {
 if ($action -eq "configure") {
     if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -or ([version]$(dotnet --version) -lt [version]"6.0")) {
         Install-DotNet6
+    } else {
+        Write-Host ".NET 6 is already installed." -ForegroundColor Green
     }
 }
 elseif ($action -eq "build") {
