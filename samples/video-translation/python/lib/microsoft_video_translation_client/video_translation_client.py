@@ -25,19 +25,18 @@ import time
 class VideoTranslationClient:
     URL_SEGMENT_NAME_TRANSLATIONS = "translations"
     URL_SEGMENT_NAME_ITERATIONS = "iterations"
-    API_VERSION_20240520PREVIEW = "2024-05-20-preview"
     URL_PATH_ROOT = "videotranslation"
     
     region = ""
     sub_key = ""
     api_version = ""
 
-    def __init__(self, region, sub_key):
+    def __init__(self, region, sub_key, api_version):
         if region is None or sub_key is None:
             raise ValueError
         self.region = region
         self.sub_key = sub_key
-        self.api_version = self.API_VERSION_20240520PREVIEW
+        self.api_version = api_version
         
         # not retry for below response code:
         #   OK = 200,
