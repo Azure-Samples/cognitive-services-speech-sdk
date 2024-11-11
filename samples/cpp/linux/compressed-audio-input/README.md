@@ -42,39 +42,40 @@ for installing the required dependencies.
   * In the line `SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK` change the right-hand side to point to the location of your extract Speech SDK for Linux.
   * If you are running on Linux x86 (32-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=x86`.
   * If you are running on Linux ARM64 (64-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=arm64`.
-* Edit the `compressed-audio-input.cpp` source:
-  * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
-* Run the command `make` to build the sample, the resulting executable will be called `compressed-audio-input`.
 
 ## Run the sample
 
-To run the sample, you'll need to configure the loader's library path to point to the Speech SDK library.
+1. To run the sample, you'll need to configure the loader's library path to point to the Speech SDK library.
 
-* On an x64 machine, run:
+    * On an x64 machine, run:
 
-  ```sh
-  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/x64"
-  ```
+      ```sh
+      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/x64"
+      ```
 
-* On an x86 machine, run:
+    * On an x86 machine, run:
 
-  ```sh
-  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/x86"
-  ```
+      ```sh
+      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/x86"
+      ```
 
-* On an ARM64 machine, run:
+    * On an ARM64 machine, run:
 
-  ```sh
-  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/arm64"
-  ```
+      ```sh
+      export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/arm64"
+      ```
+2. Export speech resource key and region as environment variables. For example, use `westus` as `SERVICE_REGION` if you are using the 30-day free trial subscription.
 
-Run the application:
+    ```sh
+    export SPEECH_RESOURCE_KEY="{your_speech_service_key}"
+    export SERVICE_REGION="{your_speech_service_region}"
+    ```
 
-```sh
-./compressed-audio-input <path to MP3 or Opus file>
-```
+3. Run the application:
+
+    ```sh
+    ./compressed-audio-input <path to MP3 or Opus file>
+    ```
 
 ## References
 
