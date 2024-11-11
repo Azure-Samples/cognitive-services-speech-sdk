@@ -5,7 +5,13 @@
 // <code>
 package speechsdk.quickstart;
 
+package speechsdk.quickstart;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
+import java.nio.file.Path;
+import org.json.JSONObject;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -16,15 +22,19 @@ public class Main {
 
     public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException
     {
+        Path configPath = Paths.get(System.getProperty("user.dir"), "config.json");
+        String content = new String(Files.readAllBytes(configPath));
+        JSONObject jsonObject = new JSONObject(content);
+
         // Replace with your own subscription key.
-        String speechSubscriptionKey = "YourSubscriptionKey";
+        String speechSubscriptionKey = jsonObject.getString("SubscriptionKey");
         // Replace below with your own service region (e.g., "westus").
-        String speechServiceRegion = "YourServiceRegion";
-        
+        String speechServiceRegion = jsonObject.getString("ServiceRegion");
+
         // Creates an instance of a translation recognizer using speech translation configuration with specified
         // subscription key and service region and microphone as default audio input.
         try (SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription(speechSubscriptionKey, speechServiceRegion)) {
-            
+
             // Sets source and target language(s).
             String fromLanguage = "en-US";
             config.setSpeechRecognitionLanguage(fromLanguage);
@@ -33,7 +43,7 @@ public class Main {
             // Sets voice name of synthesis output.
             String GermanVoice = "de-DE-AmalaNeural";
             config.setVoiceName(GermanVoice);
-            
+
             try (TranslationRecognizer recognizer = new TranslationRecognizer(config)) {
                 // Subscribes to events.
                 recognizer.recognizing.addEventListener((s, e) -> {
