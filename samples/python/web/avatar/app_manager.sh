@@ -36,10 +36,6 @@ elif [ "$action" == "run" ]; then
     if [ -f "$ENV_FILE" ]; then
         source "$ENV_FILE"
 
-        echo "SPEECH_RESOURCE_KEY:" $SPEECH_RESOURCE_KEY
-        echo "SERVICE_REGION:" $SERVICE_REGION
-        echo "CUSTOM_SUBDOMAIN_NAME:" $CUSTOM_SUBDOMAIN_NAME
-
         # Ensure environment variables are available to the C++ binary
         export SPEECH_KEY=$SPEECH_RESOURCE_KEY
         export AZURE_OPENAI_API_KEY=$SPEECH_RESOURCE_KEY
@@ -50,46 +46,7 @@ elif [ "$action" == "run" ]; then
     else
         echo "Environment file $ENV_FILE not found. You can create one to set environment variables or manually set secrets in environment variables."
     fi
-    # configFilePath="config.json"
-    # if [ -f "$configFilePath" ]; then
-    #     subscriptionKey=$(jq -r '.SubscriptionKey' "$configFilePath")
-    #     serviceRegion=$(jq -r '.ServiceRegion' "$configFilePath")
-    #     customSubDomainName=$(jq -r '.CustomSubDomainName' "$configFilePath")
-    #     endpoint="https://${customSubDomainName}.openai.azure.com/"
-
-    #     if [ -n "$subscriptionKey" ]; then
-    #         export SPEECH_KEY="$subscriptionKey"
-    #         export AZURE_OPENAI_API_KEY="$subscriptionKey"
-    #     fi
-
-    #     if [ -n "$serviceRegion" ]; then
-    #         export SPEECH_REGION="$serviceRegion"
-    #     fi
-
-    #     if [ -n "$endpoint" ]; then
-    #         export AZURE_OPENAI_ENDPOINT="$endpoint"
-    #     fi
-
-    #     echo "Environment variables loaded from $configFilePath"
-    # else
-    #     echo "File not found: $configFilePath"
-    # fi
-
-    # Start the Flask server in the background
-    python -m flask run -h 0.0.0.0 -p 5000 &
-
-    # Capture the PID of the Flask process
-    # FLASK_PID=$!
-
-    # # Add a small delay to give the server time to start
-    # sleep 5
-
-    # # Open the URL in the default browser
-    # xdg-open "http://127.0.0.1:5000" &
-
-    # # Keep the terminal session alive to prevent it from closing
-    # echo -e "\e[32mServer is running. Press any key to exit.\e[0m"
-    # read -n 1 -s
+    python -m flask run -h 0.0.0.0 -p 5000
 else
     echo -e "\e[31mInvalid action: $action\e[0m"
     echo "Usage: $0 configure or $0 run"
