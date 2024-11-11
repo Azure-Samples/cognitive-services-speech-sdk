@@ -5,13 +5,19 @@
 
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
-#include <fstream>
-#include <string>
-#include <unordered_map>
+#include <cstdlib>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
+
+const char* getEnvVar(const char* var) {
+    const char* val = getenv(var);
+    if (val == nullptr) {
+        throw logic_error("Environment variable not set: " + string(var));
+    }
+    return val;
+}
 
 static void* OpenCompressedFile(const std::string& compressedFileName)
 {
@@ -41,33 +47,6 @@ static int ReadCompressedBinaryData(void *stream, uint8_t *ptr, uint32_t bufSize
     }
 }
 
-unordered_map<string, string> loadConfig(const string& filename) {
-    unordered_map<string, string> config;
-    ifstream file(filename);
-    string line;
-
-    if (!file.is_open()) {
-        cerr << "Could not open the config file: " << filename << endl;
-        return config;
-    }
-
-    while (getline(file, line)) {
-        if (line.empty() || line[0] == '#') {
-            continue;  // Skip empty lines and comments
-        }
-
-        size_t delimiterPos = line.find('=');
-        if (delimiterPos != string::npos) {
-            string key = line.substr(0, delimiterPos);
-            string value = line.substr(delimiterPos + 1);
-            config[key] = value;
-        }
-    }
-
-    file.close();
-    return config;
-}
-
 void recognizeSpeech(const std::string& compressedFileName)
 {
     std::shared_ptr<SpeechRecognizer> recognizer;
@@ -81,15 +60,8 @@ void recognizeSpeech(const std::string& compressedFileName)
         return;
     }
 
-    string configFilePath = "./.env/.env.dev";
-    auto envConfig = loadConfig(configFilePath);
-
-    // Retrieve the values
-    string subscriptionKey = envConfig["SPEECH_RESOURCE_KEY"];
-    string serviceRegion = envConfig["SERVICE_REGION"];
-
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
+    const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
+    const char* serviceRegion = getEnvVar("SERVICE_REGION");
     auto config = SpeechConfig::FromSubscription(subscriptionKey, serviceRegion);
 
     AudioStreamContainerFormat inputFormat;
