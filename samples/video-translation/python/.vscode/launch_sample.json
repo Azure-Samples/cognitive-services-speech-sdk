@@ -5,11 +5,8 @@
             "name": "eus-translate",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/client/main.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib/"
-            },
             "args": [
                 "--region", "eastus",
                 "--sub_key", "xx",
@@ -28,11 +25,8 @@
             "name": "eus-api-create-translation",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/client/main.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib/"
-            },
             "args": [
                 "--region", "eastus",
                 "--subKey", "xx",
@@ -55,11 +49,8 @@
             "name": "eus-api-create-iteration",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/client/main.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib/"
-            },
             "args": [
                 "--region", "eastus",
                 "--sub_key", "xx",
@@ -80,11 +71,8 @@
             "name": "eus-api-get-operation",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/client/main.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib/"
-            },
             "args": [
                 "--region", "eastus",
                 "--sub_key", "xx",
@@ -97,11 +85,8 @@
             "name": "eus-api-get-translation",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/client/main.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib/"
-            },
             "args": [
                 "--region", "eastus",
                 "--sub_key", "xx",
@@ -114,11 +99,8 @@
             "name": "eus-api-get-iteration",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/client/main.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib/"
-            },
             "args": [
                 "--region", "eastus",
                 "--sub_key", "xx",
@@ -132,11 +114,8 @@
             "name": "eus-api-list-translations",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/client/main.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib/"
-            },
             "args": [
                 "--region", "eastus",
                 "--sub_key", "xx",
@@ -148,11 +127,8 @@
             "name": "eus-api-delete-translation",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/client/main.py",
+            "program": "${workspaceFolder}/main.py",
             "console": "integratedTerminal",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}/lib/"
-            },
             "args": [
                 "--region", "eastus",
                 "--sub_key", "xx",
