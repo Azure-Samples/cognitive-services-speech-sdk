@@ -25,10 +25,6 @@
     Copy .\.vscode\launch_sample.json file to .\.vscode\launch.json
     And replace the placeholder with actual vaules like: sub_key, source_locale, target_locale, translation_id, video_file_blob_url etc.
 
-## Linux(Ubuntu)
-    Append video translation lib path, for example:
-    export PYTHONPATH=$PYTHONPATH:/home/xx/video_translation/python/lib
-
 # Conda support:
     conda create -n VideoTranslation_ClientSampleCode python=3.11.10
     conda activate VideoTranslation_ClientSampleCode
@@ -37,11 +33,11 @@
 | Files | Description |
 | --- | --- |
 | [main.py](client\\main.py)  | client tool main definition |
-| [video_translation_client.py](lib\\microsoft_video_translation_client\video_translation_client.py)  | video translation client definition  |
-| [video_translation_dataclass.py](lib\\microsoft_video_translation_client\video_translation_dataclass.py)  | video translation data contract definition  |
-| [video_translation_enum.py](lib\\microsoft_video_translation_client\video_translation_enum.py)  | video translation enum definition  |
-| [video_translation_const.py](lib\\microsoft_video_translation_client\video_translation_const.py)  | video translation constant definition  |
-| [video_translation_util.py](lib\\microsoft_video_translation_client\video_translation_util.py)  | video translation utility function definition  |
+| [video_translation_client.py](microsoft_video_translation_client\video_translation_client.py)  | video translation client definition  |
+| [video_translation_dataclass.py](microsoft_video_translation_client\video_translation_dataclass.py)  | video translation data contract definition  |
+| [video_translation_enum.py](microsoft_video_translation_client\video_translation_enum.py)  | video translation enum definition  |
+| [video_translation_const.py](microsoft_video_translation_client\video_translation_const.py)  | video translation constant definition  |
+| [video_translation_util.py](microsoft_video_translation_client\video_translation_util.py)  | video translation utility function definition  |
 
 # Usage for command line tool:
 ## Usage
@@ -69,7 +65,7 @@ Run main.py with command in below pattern:
 | request_get_iteration_api  | Request get iteration API |
 
 ## HTTP client library
-Video translation client is defined as class VideoTranslationClient in file [video_translation_client.py](lib\\microsoft_video_translation_client\video_translation_client.py)
+Video translation client is defined as class VideoTranslationClient in file [video_translation_client.py](microsoft_video_translation_client\video_translation_client.py)
 ### Function definitions:
 | Function | Description |
 | --- | --- |
