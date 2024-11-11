@@ -2,53 +2,38 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Make Script Executable",
+            "label": "Configuration and Setup",
             "type": "shell",
-            "command": "chmod",
+            "command": "/bin/bash",
             "args": [
-                "u+x",
-                "${workspaceFolder}/build_run_app.sh"
+                "-c",
+                "chmod u+x ${workspaceFolder}/app_manager.sh && ${workspaceFolder}/app_manager.sh configure"
             ],
-            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": false
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/app_manager.ps1",
+                    "configure"
+                ]
             }
         },
         {
             "label": "Run the App",
             "type": "shell",
-            "command": "${workspaceFolder}/build_run_app.sh",
+            "command": "${workspaceFolder}/app_manager.sh",
             "args": [
                 "run"
             ],
-            "dependsOn": "Make Script Executable",
             "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": [],
-            "windows": {
-                "command": "powershell",
-                "args": [
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-File",
-                    "${workspaceFolder}/build_run_app.ps1",
-                    "run"
-                ]
-            }
-        },
-        {
-            "label": "Build the App",
-            "type": "shell",
-            "command": "${workspaceFolder}/build_run_app.sh",
-            "args": [
-                "build"
-            ],
-            "dependsOn": "Make Script Executable",
-            "group": {
-                "kind": "build",
+                "kind": "none",
                 "isDefault": false
             },
             "problemMatcher": [],
@@ -58,8 +43,8 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/build_run_app.ps1",
-                    "build"
+                    "${workspaceFolder}/app_manager.ps1",
+                    "run"
                 ]
             }
         }
