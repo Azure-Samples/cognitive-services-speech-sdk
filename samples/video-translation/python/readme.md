@@ -32,7 +32,7 @@
 # File Description
 | Files | Description |
 | --- | --- |
-| [main.py](client\\main.py)  | client tool main definition |
+| [main.py](main.py)  | client tool main definition |
 | [video_translation_client.py](microsoft_video_translation_client\video_translation_client.py)  | video translation client definition  |
 | [video_translation_dataclass.py](microsoft_video_translation_client\video_translation_dataclass.py)  | video translation data contract definition  |
 | [video_translation_enum.py](microsoft_video_translation_client\video_translation_enum.py)  | video translation enum definition  |
@@ -102,6 +102,6 @@ Video translation client is defined as class VideoTranslationClient in file [vid
         return
     print(colored("success", 'green'))
 ```
-Reference function handleCreateTranslationAndIterationAndWaitUntilTerminated in [main.py](client\\main.py)
+Reference function handleCreateTranslationAndIterationAndWaitUntilTerminated in [main.py](main.py)
 
 
