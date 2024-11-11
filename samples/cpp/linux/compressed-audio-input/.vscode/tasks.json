@@ -2,27 +2,26 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Make Script Executable",
+            "label": "Configuration and Setup",
             "type": "shell",
-            "command": "chmod",
+            "command": "/bin/bash",
             "args": [
-                "u+x",
-                "${workspaceFolder}/build_run_app.sh"
+                "-c",
+                "chmod u+x ${workspaceFolder}/app_manager.sh && ${workspaceFolder}/app_manager.sh configure"
             ],
-            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": false
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "Run the App",
             "type": "shell",
-            "command": "${workspaceFolder}/build_run_app.sh",
+            "command": "${workspaceFolder}/app_manager.sh",
             "args": [
                 "run"
             ],
-            "dependsOn": "Make Script Executable",
             "group": {
                 "kind": "build",
                 "isDefault": false
@@ -32,11 +31,10 @@
         {
             "label": "Build the App",
             "type": "shell",
-            "command": "${workspaceFolder}/build_run_app.sh",
+            "command": "${workspaceFolder}/app_manager.sh",
             "args": [
                 "build"
             ],
-            "dependsOn": "Make Script Executable",
             "group": {
                 "kind": "build",
                 "isDefault": false
