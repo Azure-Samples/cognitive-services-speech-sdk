@@ -46,47 +46,20 @@ elseif ($action -eq "run") {
                 $value = $parts[1].Trim()
 
                 # Set the environment variable
-                [System.Environment]::SetEnvironmentVariable($key, $value, "Process")
+                [System.Environment]::SetEnvironmentVariable($key, $value)
             }
-            
-            # Test by printing the values (optional)
-            Write-Output "SPEECH_RESOURCE_KEY: $env:SPEECH_RESOURCE_KEY"
-            Write-Output "SERVICE_REGION: $env:SERVICE_REGION"
-            Write-Output "CUSTOM_SUBDOMAIN_NAME: $env:CUSTOM_SUBDOMAIN_NAME"
 
+            [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $env:SPEECH_RESOURCE_KEY)
+            [System.Environment]::SetEnvironmentVariable("AZURE_OPENAI_API_KEY", $env:SPEECH_RESOURCE_KEY)
+            [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $env:SERVICE_REGION)
             [System.Environment]::SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", "https://$env:CUSTOM_SUBDOMAIN_NAME.openai.azure.com/")
-            Write-Output "AZURE_OPENAI_ENDPOINT: $env:AZURE_OPENAI_ENDPOINT"
         }
+
+        Write-Host "Environment variables loaded from $envFilePath"
     }
     else {
         Write-Host "File not found: $envFilePath. You can create one to set environment variables or manually set secrets in environment variables."
     }
-    # if (Test-Path $envFile) {
-    #     $configContent = Get-Content -Raw -Path $envFile | ConvertFrom-Json
-    
-    #     $subscriptionKey = $configContent.SubscriptionKey
-    #     $serviceRegion = $configContent.ServiceRegion
-    #     $customSubDomainName = $configContent.CustomSubDomainName
-    #     $endpoint = "https://$customSubDomainName.openai.azure.com/"
-
-    #     if ($subscriptionKey) {
-    #         [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $subscriptionKey)
-    #         [System.Environment]::SetEnvironmentVariable("AZURE_OPENAI_API_KEY", $subscriptionKey)
-    #     }
-    
-    #     if ($serviceRegion) {
-    #         [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $serviceRegion)
-    #     }
-
-    #     if($endpoint){
-    #         [System.Environment]::SetEnvironmentVariable("AZURE_OPENAI_ENDPOINT", $endpoint)
-    #     }
-
-    #     Write-Host "Environment variables loaded from $envFile"
-    # }
-    # else {
-    #     Write-Host "File not found: $envFile"
-    # }
 
     Start-Process "python" -ArgumentList "-m", "flask", "run", "-h", "0.0.0.0", "-p", "5000"
 
