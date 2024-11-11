@@ -27,6 +27,10 @@ export const main = (settings) => {
 
     // create the speech recognizer.
     var reco = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+    // (Optional) get the session ID
+    reco.sessionStarted = (_s, e) => {
+        console.log(`SESSION ID: ${e.sessionId}`);
+    };
     pronunciationAssessmentConfig.applyTo(reco);
 
     function onRecognizedResult(result) {

@@ -39,6 +39,7 @@ weatherfilenamemulaw = "whatstheweatherlike-mulaw.wav"
 seasonsfilename = "pronunciation_assessment_fall.wav"
 zhcnfilename = "zhcn_short_dummy_sample.wav"
 zhcnlongfilename = "zhcn_continuous_mode_sample.wav"
+zhcnlongtxtfilename = "zhcn_continuous_mode_sample.txt"
 
 
 def speech_recognize_once_from_mic():
@@ -811,6 +812,8 @@ def pronunciation_assessment_from_microphone():
             break
 
         pronunciation_config.reference_text = reference_text
+        # (Optional) get the session ID
+        recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
         pronunciation_config.apply_to(recognizer)
 
         # Starts recognizing.
@@ -896,7 +899,8 @@ def pronunciation_assessment_continuous_from_file():
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=zhcnlongfilename)
 
-    reference_text = "秋天总是那么富有诗意。树叶渐渐变红，街道旁的银杏树也开始落叶。人们穿上厚重的外套，享受着凉爽的秋风。黄昏时分，夕阳洒在街道上，给忙碌的一天增添了一抹温暖。无论是散步还是小憩，这个季节总能带来宁静和满足。清晨，薄雾笼罩大地，空气中弥漫着一丝清新的凉意。中午阳光明媚，照在身上暖洋洋的，仿佛是一场心灵的抚慰。傍晚时分，天空被染成了金黄和橙红，街上的行人脚步也不由得慢了下来，享受这份静谧和美好。你最喜欢哪个季节？"
+    with open(zhcnlongtxtfilename, "r", encoding="utf-8") as t:
+        reference_text = t.readline()
     # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     enable_miscue = True
     enable_prosody_assessment = True
@@ -935,7 +939,7 @@ def pronunciation_assessment_continuous_from_file():
             pronunciation_result.accuracy_score, pronunciation_result.prosody_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words, prosody_scores, fluency_scores, durations
+        nonlocal recognized_words, prosody_scores, fluency_scores, durations, startOffset, endOffset
         recognized_words += pronunciation_result.words
         fluency_scores.append(pronunciation_result.fluency_score)
         if pronunciation_result.prosody_score is not None:
@@ -943,14 +947,15 @@ def pronunciation_assessment_continuous_from_file():
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo["NBest"][0]
-        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"] if w["PronunciationAssessment"]["ErrorType"] == "None"])
+        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"]])
         if startOffset == 0:
             startOffset = nb["Words"][0]["Offset"]
         endOffset = nb["Words"][-1]["Offset"] + nb["Words"][-1]["Duration"] + 100000
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
     # Stop continuous recognition on either session stopped or canceled events
@@ -996,6 +1001,8 @@ def pronunciation_assessment_continuous_from_file():
     else:
         final_words = recognized_words
 
+    durations_sum = sum([d for w, d in zip(recognized_words, durations) if w.error_type == "None"])
+
     # We can calculate whole accuracy by averaging
     final_accuracy_scores = []
     for word in final_words:
@@ -1012,14 +1019,16 @@ def pronunciation_assessment_continuous_from_file():
     # Re-calculate fluency score
     fluency_score = 0
     if startOffset > 0:
-        fluency_score = sum(durations) / (endOffset - startOffset) * 100
+        fluency_score = durations_sum / (endOffset - startOffset) * 100
     # Calculate whole completeness score
     handled_final_words = [w.word for w in final_words if w.error_type != "Insertion"]
     completeness_score = len([w for w in final_words if w.error_type == "None"]) / len(handled_final_words) * 100
     completeness_score = completeness_score if completeness_score <= 100 else 100
+    sorted_scores = sorted([accuracy_score, prosody_score, completeness_score, fluency_score])
+    pronunciation_score = sorted_scores[0] * 0.4 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2 + sorted_scores[3] * 0.2
 
-    print('    Paragraph accuracy score: {}, prosody score: {}, completeness score: {}, fluency score: {}'.format(
-        accuracy_score, prosody_score, completeness_score, fluency_score
+    print('    Paragraph pronunciation score: {:.2f}, accuracy score: {:.2f}, prosody score: {:.2f}, completeness score: {:.2f}, fluency score: {:.2f}'.format(
+        pronunciation_score, accuracy_score, prosody_score, completeness_score, fluency_score
     ))
 
     for idx, word in enumerate(final_words):
@@ -1055,6 +1064,8 @@ def pronunciation_assessment_from_stream():
     # Create a speech recognizer using a file as audio input.
     language = 'en-US'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
 
@@ -1114,6 +1125,8 @@ def pronunciation_assessment_configured_with_json():
     # Create a speech recognizer using a file as audio input.
     language = 'en-US'
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language=language, audio_config=audio_config)
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     # Apply pronunciation assessment config to speech recognizer
     pronunciation_config.apply_to(speech_recognizer)
 
@@ -1180,7 +1193,8 @@ def pronunciation_assessment_with_content_assessment():
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.session_started.connect(lambda evt: print("SESSION STARTED: {}".format(evt)))
+    # (Optional) get the session ID
+    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     speech_recognizer.session_stopped.connect(lambda evt: print("SESSION STOPPED {}".format(evt)))
     speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
     # Stop continuous recognition on either session stopped or canceled events
