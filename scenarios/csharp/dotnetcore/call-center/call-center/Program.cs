@@ -94,7 +94,7 @@ namespace CallCenter
         private const string sentimentAnalysisPath = "language/:analyze-text";
         private const string sentimentAnalysisQuery = "api-version=2022-05-01";
         private const string conversationAnalysisPath = "/language/analyze-conversations/jobs";
-        private const string conversationAnalysisQuery = "api-version=2022-10-01-preview";
+        private const string conversationAnalysisQuery = "api-version=2024-05-15-preview";
         private const string conversationSummaryModelVersion = "latest";
 
 
