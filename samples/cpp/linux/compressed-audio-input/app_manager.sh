@@ -20,11 +20,9 @@ get_platform() {
     esac
 }
 
-
 # Check if the correct number of arguments is provided
 if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 {build|run}"
-    # echo "Usage: $0 {build|run} [subscription_key] [region]"
+    echo "Usage: $0 {configure|build|run}"
     exit 1
 fi
 
@@ -34,12 +32,12 @@ action=$1
 SPEECHSDK_ROOT="$(pwd)/SpeechSDKLib"
 mkdir -p "$SPEECHSDK_ROOT"
 
-if [ "$action" == "build" ]; then
+if [ "$action" == "configure" ]; then
     # Install SDKs and libraries
-    echo "Installing SDKs and libraries..."
+    echo "Installing Linux platform required dependencies..."
     sudo apt-get update
-    sudo apt-get install build-essential libssl-dev libasound2 wget
-
+    sudo apt-get install -y build-essential libssl-dev libasound2 wget
+elif [ "$action" == "build" ]; then
     # if SPEECHSDK_ROOT is empty, download the Speech SDK
     if [ -z "$(ls -A $SPEECHSDK_ROOT)" ]; then
         echo "Downloading the Speech SDK..."
@@ -70,6 +68,20 @@ elif [ "$action" == "run" ]; then
     platform=$(get_platform)
     export LD_LIBRARY_PATH="$SPEECHSDK_ROOT/lib/$platform"
 
+    # Load environment variables from .env file
+    ENV_FILE=".env/.env.dev" 
+    if [ -f "$ENV_FILE" ]; then
+        source "$ENV_FILE"
+
+        # Ensure environment variables are available to the C++ binary
+        export SPEECH_RESOURCE_KEY
+        export SERVICE_REGION
+        echo "Environment variables loaded from $ENV_FILE"
+
+    else
+        echo "Environment file $ENV_FILE not found. You can create one to set environment variables or manually set secrets in environment variables."
+    fi
+
     read -p "Please enter an local MP3/Opus file path: " audioInputPath
     if [ -z "$audioInputPath" ]; then
         echo "Not input audio file apth"
@@ -78,8 +90,9 @@ elif [ "$action" == "run" ]; then
 
     # Run the project
     ./compressed-audio-input $audioInputPath
+
 else
     echo "Invalid action: $action"
-    echo "Usage: $0 {build|run}"
+    echo "Usage: $0 {configure|build|run}"
     exit 1
 fi

@@ -14,7 +14,7 @@ using namespace Microsoft::CognitiveServices::Speech;
 const char* getEnvVar(const char* var) {
     const char* val = getenv(var);
     if (val == nullptr) {
-        throw std::logic_error("Environment variable not set: " + std::string(var));
+        throw logic_error("Environment variable not set: " + std::string(var));
     }
     return val;
 }
