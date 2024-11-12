@@ -5,6 +5,8 @@ param (
 $downloadPath = "$env:TEMP"
 $javaInstallPath = Join-Path $env:LOCALAPPDATA "Java"
 $mavenInstallPath = Join-Path $env:LOCALAPPDATA "Maven"
+$env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+$env:JAVA_HOME = [System.Environment]::GetEnvironmentVariable("JAVA_HOME", [System.EnvironmentVariableTarget]::User)
 
 if ($env:PROCESSOR_ARCHITECTURE -ne "AMD64") {
     Write-Host "Your Windows is not 64-bit architecture. Please use a computer with a 64-bit architecture running Windows 10 or later." -ForegroundColor Red
@@ -72,41 +74,27 @@ function Install-OpenJDK {
         Write-Host "JAVA_HOME has been set as: $javaHomePath"
     }
 
-    $currentUserPath = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
-    $javaJDKPath = "$javaHomePath\bin"
-    if ($currentUserPath -notlike "*$javaJDKPath*") {
-        $newUserPathValue = "$currentUserPath;$javaJDKPath"
-        [System.Environment]::SetEnvironmentVariable("PATH", $newUserPathValue, [System.EnvironmentVariableTarget]::User)
-    }
-
     Write-Output "Java JDK 11 installed to $javaInstallPath."
 }
 
 function Find-OpenJDK {
     # Check if Java is installed and if the version is at least 11
-    if (-not (Get-Command java -ErrorAction SilentlyContinue)) {
+    if ($env:JAVA_HOME -notlike "*$javaInstallPath*" -or $env:JAVA_HOME -eq $null) {
         Write-Output "Installing Java JDK 11..."
         Install-OpenJDK
-    }
-    else {
-        $javaVersion = & java -version 2>&1 | Select-String -Pattern 'version "(\d+)\.(\d+)\.(\d+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
-        if ($javaVersion -lt 11) {
-            Write-Host "The installed Java version is lower than 11, installing Microsoft Build of OpenJDK 11..."
-            Install-OpenJDK
-        }
     }
 }
 
 function Install-Maven {
     # Check if Maven is installed
-    if (-not (Get-Command mvn -ErrorAction SilentlyContinue)) {
+    if ($env:PATH -notlike "*$mavenInstallPath*" -or $env:PATH -eq $null) {
         Write-Output "Installing Maven..."
         Get-And-Extract -url "https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.zip" -destinationPath $mavenInstallPath -zipPrefix "apache-maven"
 
         $currentUserPath = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
-        $mvnCmd = Join-Path $mavenInstallPath "apache-maven-3.9.9\bin"
-        if ($currentUserPath -notlike "*$mvnCmd*") {
-            $newUserPathValue = "$currentUserPath;$mvnCmd"
+        $mvnPath = Join-Path $mavenInstallPath "apache-maven-3.9.9\bin"
+        if ($currentUserPath -notlike "*$mvnPath*") {
+            $newUserPathValue = "$mvnPath;$currentUserPath"
             [System.Environment]::SetEnvironmentVariable("PATH", $newUserPathValue, [System.EnvironmentVariableTarget]::User)
         }
 
@@ -118,9 +106,10 @@ if ($action -eq "configure") {
     Find-OpenJDK
     Install-Maven
 
-    # Install dependencies for the Java project in pom.xml
-    Write-Output "Resolving Maven dependencies..."
-    & mvn dependency:resolve
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+    $env:JAVA_HOME = [System.Environment]::GetEnvironmentVariable("JAVA_HOME", [System.EnvironmentVariableTarget]::User)
+
+    mvn clean install
     if (-not $?) {
         Write-Host "Java project dependencies installation failed." -BackgroundColor Red
         exit 1
@@ -128,7 +117,7 @@ if ($action -eq "configure") {
 }
 elseif ($action -eq "build") {
     Write-Host "Compiling Java files..."
-    & mvn compile
+    mvn compile
     if (-not $?) {
         Write-Host "Java file compilation failed." -BackgroundColor Red
         exit 1
@@ -137,7 +126,7 @@ elseif ($action -eq "build") {
 }
 elseif ($action -eq "run") {
     Write-Host "Running Java application..."
-    & mvn exec:java -Dexec.mainClass="speechsdk.quickstart.Main"
+    mvn exec:java '-Dexec.mainClass="speechsdk.quickstart.Main"'
 }
 else {
     Write-Host "Invalid action: $action"
