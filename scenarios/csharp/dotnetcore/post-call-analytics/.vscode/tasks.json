@@ -1,0 +1,51 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build the App",
+            "type": "shell",
+            "command": "${workspaceFolder}/build_run_app.ps1",
+            "args": [
+                "build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/build_run_app.ps1",
+                    "build"
+                ]
+            }
+        },
+        {
+            "label": "Run the App",
+            "type": "shell",
+            "command": "${workspaceFolder}/build_run_app.ps1",
+            "args": [
+                "run"
+            ],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/build_run_app.ps1",
+                    "run"
+                ]
+            }
+        }
+    ]
+}
