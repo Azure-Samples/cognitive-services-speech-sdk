@@ -65,14 +65,14 @@ elseif ($action -eq "run") {
     $customSubDomainName = $configContent.CustomSubDomainName
 
     $openAiEndpoint = "https://$customSubDomainName.openai.azure.com/"
-    $openAiDeploymentName = "my-gpt-4o-mini"
+    $openAiDeploymentName = $configContent.OpenAiDeploymentName
 
     $inputFile = Read-Host "Please enter the path to the input audio file."
     if (Get-Command dotnet -ErrorAction SilentlyContinue) {
-        & dotnet run --project .\post-call-analytics.csproj --speechKey $subscriptionKey --speechRegion $serviceRegion --openAiKey $subscriptionKey --openAiEndpoint $openAiEndpoint --openAiDeploymentName $openAiDeploymentName --input $inputFile
+        & dotnet run --project .\post-call-analytics.csproj --speechKey $subscriptionKey --speechRegion $serviceRegion --openAiKey $subscriptionKey --openAiEndpoint $openAiEndpoint --openAiDeploymentName $openAiDeploymentName --inputAudio $inputFile
     }
     else {
-        & $dotnetTempPath run --project .\post-call-analytics.csproj --speechKey $subscriptionKey --speechRegion $serviceRegion --openAiKey $subscriptionKey --openAiEndpoint $openAiEndpoint --openAiDeploymentName $openAiDeploymentName --input $inputFile
+        & $dotnetTempPath run --project .\post-call-analytics.csproj --speechKey $subscriptionKey --speechRegion $serviceRegion --openAiKey $subscriptionKey --openAiEndpoint $openAiEndpoint --openAiDeploymentName $openAiDeploymentName --inputAudio $inputFile
     }
 }
 else {
