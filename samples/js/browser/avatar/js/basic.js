@@ -4,6 +4,7 @@
 // Global objects
 var avatarSynthesizer
 var peerConnection
+var useTcpForWebRTC = false
 var previousAnimationFrameTimestamp = 0;
 
 // Logger
@@ -16,10 +17,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // Create WebRTC peer connection
     peerConnection = new RTCPeerConnection({
         iceServers: [{
-            urls: [ iceServerUrl ],
+            urls: [ useTcpForWebRTC ? iceServerUrl.replace(':3478', ':443?transport=tcp') : iceServerUrl ],
             username: iceServerUsername,
             credential: iceServerCredential
-        }]
+        }],
+        iceTransportPolicy: useTcpForWebRTC ? 'relay' : 'all'
     })
 
     // Fetch WebRTC video stream and mount it to an HTML video element
@@ -216,14 +218,7 @@ window.startSession = () => {
     const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle, videoFormat)
     avatarConfig.customized = document.getElementById('customizedAvatar').checked
     avatarConfig.backgroundColor = document.getElementById('backgroundColor').value
-    avatarSynthesizer = new SpeechSDK.AvatarSynthesizer(speechSynthesisConfig, avatarConfig)
-    avatarSynthesizer.avatarEventReceived = function (s, e) {
-        var offsetMessage = ", offset from session start: " + e.offset / 10000 + "ms."
-        if (e.offset === 0) {
-            offsetMessage = ""
-        }
-        console.log("[" + (new Date()).toISOString() + "] Event received: " + e.description + offsetMessage)
-    }
+    avatarConfig.backgroundImage = document.getElementById('backgroundImageUrl').value
 
     document.getElementById('startSession').disabled = true
     
@@ -240,6 +235,22 @@ window.startSession = () => {
             const iceServerUrl = responseData.Urls[0]
             const iceServerUsername = responseData.Username
             const iceServerCredential = responseData.Password
+
+            avatarConfig.remoteIceServers = [{
+                urls: [ iceServerUrl ],
+                username: iceServerUsername,
+                credential: iceServerCredential
+            }]
+
+            avatarSynthesizer = new SpeechSDK.AvatarSynthesizer(speechSynthesisConfig, avatarConfig)
+            avatarSynthesizer.avatarEventReceived = function (s, e) {
+                var offsetMessage = ", offset from session start: " + e.offset / 10000 + "ms."
+                if (e.offset === 0) {
+                    offsetMessage = ""
+                }
+                console.log("[" + (new Date()).toISOString() + "] Event received: " + e.description + offsetMessage)
+            }
+
             setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
         }
     })
