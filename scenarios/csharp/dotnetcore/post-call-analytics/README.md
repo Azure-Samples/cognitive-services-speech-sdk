@@ -4,7 +4,7 @@ This sample application transcribes an audio recording using <a href="https://le
 ## Run the Sample within VS Code
 1. Install "Azure AI Speech Toolkit" extension in VS Code.
 2. Download this sample from sample gallery to local machine.
-3. Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
+- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **Azure AI services** resource.
 4. Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
 5. Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
 
