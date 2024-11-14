@@ -42,8 +42,15 @@ check_and_install_maven() {
 }
 
 if [ "$action" = "configure" ]; then
-    check_and_install_openJDK
+    if ! command -v java &> /dev/null || ! command -v mvn &> /dev/null; then
+        read -p "Whether allow us to install java sdk and other dependencies? Please enter Y/N: " isAllow
+        if [[ "$isAllow" != "Y" && "$isAllow" != "y" ]]; then
+            echo "The operation was canceled."
+            exit 1
+        fi
+    fi
 
+    check_and_install_openJDK
     check_and_install_maven
 
     echo "Installing Linux dependencies..."
@@ -58,6 +65,11 @@ if [ "$action" = "configure" ]; then
         exit 1
     fi
 elif [ "$action" = "build" ]; then
+    if ! command -v java &> /dev/null || ! command -v mvn &> /dev/null; then
+        echo "Please execute the 'Azure AI Speech Toolkit: Configure and Setup the Sample App' command to install dependencies."
+        exit 1
+    fi
+
     echo "Compiling Java files..."
     sudo mvn compile
     if [ $? -ne 0 ]; then
@@ -67,6 +79,11 @@ elif [ "$action" = "build" ]; then
 
     echo "Compilation succeeded."
 elif [ "$action" = "run" ]; then
+    if ! command -v java &> /dev/null || ! command -v mvn &> /dev/null; then
+        echo "Please execute the 'Azure AI Speech Toolkit: Configure and Setup the Sample App' command to install dependencies."
+        exit 1
+    fi
+
     sudo mvn exec:java -Dexec.mainClass="speechsdk.quickstart.Main"
 else
     echo "Invalid action: $action"
