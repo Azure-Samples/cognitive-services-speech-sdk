@@ -57,15 +57,27 @@ if ($action -eq "build") {
     }
 }
 elseif ($action -eq "run") {
-    $configFilePath = "config.json"
-    $configContent = Get-Content -Raw -Path $configFilePath | ConvertFrom-Json
+    # Define the path to your .env file
+    $envFilePath = ".env/.env.dev"
+
+    Get-Content -Path $envFilePath | ForEach-Object {
+        # Ignore empty lines and lines that start with `#` (comments)
+        if ($_ -and $_ -notmatch '^\s*#') {
+            # Split each line into key and value
+            $parts = $_ -split '=', 2
+            $key = $parts[0].Trim()
+            $value = $parts[1].Trim()
+
+            # Set the environment variable
+            [System.Environment]::SetEnvironmentVariable($key, $value)
+        }
     
-    $subscriptionKey = $configContent.SubscriptionKey
-    $serviceRegion = $configContent.ServiceRegion
-    $customSubDomainName = $configContent.CustomSubDomainName
+    $subscriptionKey = $env:SPEECH_RESOURCE_KEY
+    $serviceRegion = $env:SERVICE_REGION
+    $customSubDomainName = $env:CUSTOM_SUBDOMAIN_NAME
 
     $openAiEndpoint = "https://$customSubDomainName.openai.azure.com/"
-    $openAiDeploymentName = $configContent.OpenAiDeploymentName
+    $openAiDeploymentName = "gpt-4"
 
     $inputFile = Read-Host "Please enter the path to the input audio file."
     if (Get-Command dotnet -ErrorAction SilentlyContinue) {
