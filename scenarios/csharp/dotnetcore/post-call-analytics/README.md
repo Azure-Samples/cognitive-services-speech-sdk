@@ -11,15 +11,17 @@ This sample application transcribes an audio recording using <a href="https://le
 ## Prerequisites
 - .NET 8.0 SDK or higher
 
-## Command-line Options
+## Usage
 
-* `--speechKey KEY`: the key of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
-* `--speechRegion REGION`: the region of your Azure AI Service resource, e.g. westus2. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
+`Usage : post-call-analytics <inputAudio> [options]`
 
-* `--openAiKey KEY`: the key of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
-* `--openAiEndpoint ENDPOINT`: the Open AI Endpoint of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
-* `--openAiDeploymentName OPENAIDEPLOYMENTNAME`: the Azure OpenAI resource deployment name of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.) Default value: gpt-4
+Arguments:
+* ``<inputAudio>``: Path to the audio file. Required.
 
-* `--inputAudio FILEPATH`: File path to audio. Required.
-
+Options:
+* `--speechKey KEY`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create a Cognitive Services resource"  target="_blank">Cognitive Services</a> or <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Speech</a> resource key. The value can also be set via SPEECH_KEY environment variable. Required.
+* `--speechRegion REGION`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create a Cognitive Services resource"  target="_blank">Cognitive Services</a> or <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Speech</a> resource region. The value can also be set via SPEECH_REGION environment variable. Examples: `eastus`, `northeurope`. Required.
+* `--openAiKey KEY`: Your <a href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI" title="Create an Azure OpenAI resource" target="_blank">Azure OpenAI</a> resource key. The value can also be set via AOAI_KEY environment variable. Optional.
+* `--openAiEndpoint ENDPOINT`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create an Azure OpenAI resource" target="_blank">Azure OpenAI</a> resource endpoint. Example: `https://YourResourceName.openai.azure.com`. The value can also be set via AOAI_ENDPOINT environment variable. Optional.
+* `--openAiDeploymentName OPENAIDEPLOYMENTNAME`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create an Azure OpenAI resource" target="_blank">Azure OpenAI</a> deployment name.  The value can also be set via AOAI_DEPLOYMENT_NAME environment variable. Example: my-gpt-4o-mini. Optional.
 * `--help`: Show the usage help and stop
