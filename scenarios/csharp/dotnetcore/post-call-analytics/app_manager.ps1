@@ -61,6 +61,8 @@ function Install-DotNet8 {
 if ($action -eq "configure") {
     if (-not (Is-DotNetMeetRequirement -dotnetPath $dotnetExe)) {
         Install-DotNet8
+    } else {
+        Write-Host ".NET SDK 8.0 is already installed." -ForegroundColor Green
     }
 }
 elseif ($action -eq "build") {
@@ -90,25 +92,30 @@ elseif ($action -eq "run") {
                 [System.Environment]::SetEnvironmentVariable($key, $value)
             }
         }
-
-        [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $env:SPEECH_RESOURCE_KEY)
-        [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $env:SERVICE_REGION)
-        [System.Environment]::SetEnvironmentVariable("AOAI_KEY", $env:SPEECH_RESOURCE_KEY)
-        [System.Environment]::SetEnvironmentVariable("AOAI_ENDPOINT", "https://$env:CUSTOM_SUBDOMAIN_NAME.openai.azure.com/")
     }
     else {
         Write-Host "File not found: $envFilePath. You can create one to set environment variables or manually set secrets in environment variables."
     }
 
+    [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $env:SPEECH_RESOURCE_KEY)
+    [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $env:SERVICE_REGION)
+
     $aoaiDeploymentName = Read-Host "Please enter the name of your Azure OpenAI deployment name (hit Enter to skip)"
-    if (![string]::IsNullOrEmpty($aoaiDeploymentName)) {
+    if ([string]::IsNullOrEmpty($aoaiDeploymentName)) {
+        [System.Environment]::SetEnvironmentVariable("AOAI_KEY", "")
+        [System.Environment]::SetEnvironmentVariable("AOAI_ENDPOINT", "")
+        [System.Environment]::SetEnvironmentVariable("AOAI_DEPLOYMENT_NAME", "")
+
+    } else {
+        [System.Environment]::SetEnvironmentVariable("AOAI_KEY", $env:SPEECH_RESOURCE_KEY)
+        [System.Environment]::SetEnvironmentVariable("AOAI_ENDPOINT", "https://$env:CUSTOM_SUBDOMAIN_NAME.openai.azure.com/")
         [System.Environment]::SetEnvironmentVariable("AOAI_DEPLOYMENT_NAME", $aoaiDeploymentName)
     }
     Write-Host "Environment variables set:`nSPEECH_KEY=$env:SPEECH_KEY`nSPEECH_REGION=$env:SPEECH_REGION`nAOAI_KEY=$env:AOAI_KEY`nAOAI_ENDPOINT=$env:AOAI_ENDPOINT`nAOAI_DEPLOYMENT_NAME=$env:AOAI_DEPLOYMENT_NAME"
 
     $inputFile = Read-Host "Please enter the path to the input audio file"
 
-    & $dotnetExe run --project .\post-call-analytics.csproj $inputFile --openAiDeploymentName $aoaiDeploymentName
+    & $dotnetExe run --project .\post-call-analytics.csproj $inputFile
 
     # Check if the command was successful
     if (-not $?) {

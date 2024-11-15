@@ -54,13 +54,24 @@ elif [ "$action" = "run" ]; then
     if [ -f "$ENV_FILE" ]; then
         source "$ENV_FILE"
 
-        # Ensure environment variables are available to the C++ binary
-        export SPEECH_KEY=$SPEECH_RESOURCE_KEY
-        export SPEECH_REGION=$SERVICE_REGION
+    else
+        echo "Environment file $ENV_FILE not found. You can create one to set environment variables or manually set secrets in environment variables."
+    fi
+
+    export SPEECH_KEY=$SPEECH_RESOURCE_KEY
+    export SPEECH_REGION=$SERVICE_REGION
+
+    echo "Please enter the name of your Azure OpenAI deployment name (hit Enter to skip):"
+    read aoaiDeploymentName
+    if [ ! -z "$aoaiDeploymentName" ]; then
+        export AOAI_DEPLOYMENT_NAME=$aoaiDeploymentName
         export AOAI_KEY=$SPEECH_RESOURCE_KEY
         export AOAI_ENDPOINT="https://${CUSTOM_SUBDOMAIN_NAME}.openai.azure.com/"
     else
-        echo "Environment file $ENV_FILE not found. You can create one to set environment variables or manually set secrets in environment variables."
+        # unset APAI parameters if deployment name is not provided
+        export AOAI_DEPLOYMENT_NAME=""
+        export AOAI_KEY=""
+        export AOAI_ENDPOINT=""
     fi
 
     echo "Please enter the path to the input audio file:"
@@ -70,16 +81,9 @@ elif [ "$action" = "run" ]; then
         exit 1
     fi
 
-    echo "Please enter the name of your Azure OpenAI deployment name (hit Enter to skip):"
-    read aoaiDeploymentName
-    # if aoaiDeploymentName is not empty, set it as an environment variable
-    if [ ! -z "$aoaiDeploymentName" ]; then
-        export AOAI_DEPLOYMENT_NAME=$aoaiDeploymentName
-    fi
-
     echo "Environment variables set:\n SPEECH_KEY=$SPEECH_KEY\n SPEECH_REGION=$SPEECH_REGION\n AOAI_KEY=$AOAI_KEY\n AOAI_ENDPOINT=$AOAI_ENDPOINT\n AOAI_DEPLOYMENT_NAME=$AOAI_DEPLOYMENT_NAME"
 
-    dotnet run --project ./post-call-analytics.csproj $inputFile --openAiDeploymentName $aoaiDeploymentName
+    dotnet run --project ./post-call-analytics.csproj $inputFile
 else
     echo "Invalid action: $action"
     echo "Usage: $0 {build|run|configure}"
