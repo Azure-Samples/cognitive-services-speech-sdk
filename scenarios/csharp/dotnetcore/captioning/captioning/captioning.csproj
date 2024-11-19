@@ -11,8 +11,4 @@
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
   </ItemGroup>
 
-  <Target Name="CopyConfigFile" AfterTargets="Build">
-    <Copy SourceFiles="..\config.json" DestinationFolder="$(OutputPath)" />
-  </Target>
-
 </Project>
