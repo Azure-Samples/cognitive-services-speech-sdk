@@ -24,6 +24,7 @@ SPEECH_TRANSCRIPTION_PATH = "/speechtotext/v3.2/transcriptions"
 SENTIMENT_ANALYSIS_PATH = "/language/:analyze-text"
 SENTIMENT_ANALYSIS_QUERY = "?api-version=2024-11-01"
 CONVERSATION_ANALYSIS_PATH = "/language/analyze-conversations/jobs"
+
 CONVERSATION_ANALYSIS_QUERY = "?api-version=2024-11-01"
 CONVERSATION_SUMMARY_MODEL_VERSION = "2024-11-01"
 
