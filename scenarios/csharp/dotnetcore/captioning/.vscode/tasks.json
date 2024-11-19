@@ -2,9 +2,32 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Configuration and Setup",
+            "type": "shell",
+            "command": "${workspaceFolder}/app_manager.ps1",
+            "args": [
+                "configure"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/app_manager.ps1",
+                    "configure"
+                ]
+            }
+        },
+        {
             "label": "Build the App",
             "type": "shell",
-            "command": "${workspaceFolder}/build_run_app.ps1",
+            "command": "${workspaceFolder}/app_manager.ps1",
             "args": [
                 "build"
             ],
@@ -19,7 +42,7 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/build_run_app.ps1",
+                    "${workspaceFolder}/app_manager.ps1",
                     "build"
                 ]
             }
@@ -27,7 +50,7 @@
         {
             "label": "Run the App",
             "type": "shell",
-            "command": "${workspaceFolder}/build_run_app.ps1",
+            "command": "${workspaceFolder}/app_manager.ps1",
             "args": [
                 "run"
             ],
@@ -42,7 +65,7 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/build_run_app.ps1",
+                    "${workspaceFolder}/app_manager.ps1",
                     "run"
                 ]
             }
