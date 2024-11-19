@@ -18,9 +18,6 @@ function test_pip_installed {
     command -v pip3 &>/dev/null
 }
 
-
-
-
 if [ "$action" = "configure" ]; then
     if ! test_python_installed; then
         echo "Python is not installed. Please install Python to proceed." >&2
