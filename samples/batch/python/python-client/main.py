@@ -13,6 +13,8 @@ import swagger_client
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
         format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
 
+API_VERSION = "2024-11-15"
+
 # Your subscription key and region for the speech service
 SUBSCRIPTION_KEY = "YourSubscriptionKey"
 SERVICE_REGION = "YourServiceRegion"
@@ -143,7 +145,7 @@ def transcribe():
     # Specify transcription properties by passing a dict to the properties parameter. See
     # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options
     # for supported parameters.
-    properties = swagger_client.TranscriptionProperties()
+    properties = swagger_client.TranscriptionProperties(time_to_live_hours=6)
     # properties.word_level_timestamps_enabled = True
     # properties.display_form_word_level_timestamps_enabled = True
     # properties.punctuation_mode = "DictatedAndAutomatic"
@@ -169,10 +171,10 @@ def transcribe():
     # Uncomment this block to transcribe all files from a container.
     # transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
 
-    created_transcription, status, headers = api.transcriptions_create_with_http_info(transcription=transcription_definition)
+    created_transcription, status, headers = api.transcriptions_submit_with_http_info(body=transcription_definition, api_version=API_VERSION)
 
     # get the transcription Id from the location URI
-    transcription_id = headers["location"].split("/")[-1]
+    transcription_id = headers["location"].split("/")[-1].split("?")[0]
 
     # Log information about the created transcription. If you should ask for support, please
     # include this information.
@@ -186,7 +188,7 @@ def transcribe():
         # wait for 5 seconds before refreshing the transcription status
         time.sleep(5)
 
-        transcription = api.transcriptions_get(transcription_id)
+        transcription = api.transcriptions_get(transcription_id, api_version=API_VERSION)
         logging.info(f"Transcriptions status: {transcription.status}")
 
         if transcription.status in ("Failed", "Succeeded"):
@@ -197,7 +199,7 @@ def transcribe():
                 logging.info("Transcription succeeded. Results are located in your Azure Blob Storage.")
                 break
 
-            pag_files = api.transcriptions_list_files(transcription_id)
+            pag_files = api.transcriptions_list_files(transcription_id, api_version=API_VERSION)
             for file_data in _paginate(api, pag_files):
                 if file_data.kind != "Transcription":
                     continue
