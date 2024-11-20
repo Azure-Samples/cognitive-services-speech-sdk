@@ -151,7 +151,6 @@ def transcribe():
     # properties.punctuation_mode = "DictatedAndAutomatic"
     # properties.profanity_filter_mode = "Masked"
     # properties.destination_container_url = "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>"
-    # properties.time_to_live = "PT1H"
 
     # uncomment the following block to enable and configure speaker separation
     # properties.diarization_enabled = True
