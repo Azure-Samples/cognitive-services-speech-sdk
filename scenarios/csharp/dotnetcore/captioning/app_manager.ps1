@@ -69,8 +69,11 @@ function Test-GStreamer {
 if ($action -eq "configure") {
     if (-not (Is-DotNetMeetRequirement -dotnetPath $dotnetExe)) {
         Install-DotNet6
-        Test-GStreamer
     }
+    else{
+        Write-Host "The machine already has .NET 6.0." -ForegroundColor Green
+    }
+    Test-GStreamer
 }
 elseif ($action -eq "build") {
     Write-Host "Running command: $dotnetExe build .\captioning.sln" -ForegroundColor Cyan

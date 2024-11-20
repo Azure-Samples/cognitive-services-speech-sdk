@@ -4,15 +4,6 @@
         {
             "label": "Configuration and Setup",
             "type": "shell",
-            "command": "${workspaceFolder}/app_manager.ps1",
-            "args": [
-                "configure"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": [],
             "windows": {
                 "command": "powershell",
                 "args": [
@@ -22,20 +13,16 @@
                     "${workspaceFolder}/app_manager.ps1",
                     "configure"
                 ]
-            }
-        },
-        {
-            "label": "Build the App",
-            "type": "shell",
-            "command": "${workspaceFolder}/app_manager.ps1",
-            "args": [
-                "build"
-            ],
+            },
             "group": {
                 "kind": "build",
                 "isDefault": false
             },
             "problemMatcher": "$msCompile",
+        },
+        {
+            "label": "Build the App",
+            "type": "shell",
             "windows": {
                 "command": "powershell",
                 "args": [
@@ -45,20 +32,16 @@
                     "${workspaceFolder}/app_manager.ps1",
                     "build"
                 ]
-            }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
         },
         {
             "label": "Run the App",
             "type": "shell",
-            "command": "${workspaceFolder}/app_manager.ps1",
-            "args": [
-                "run"
-            ],
-            "group": {
-                "kind": "none",
-                "isDefault": false
-            },
-            "problemMatcher": [],
             "windows": {
                 "command": "powershell",
                 "args": [
@@ -68,7 +51,12 @@
                     "${workspaceFolder}/app_manager.ps1",
                     "run"
                 ]
-            }
+            },
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
         }
     ]
 }
