@@ -13,7 +13,7 @@
                 "kind": "build",
                 "isDefault": false
             },
-            "problemMatcher": [],
+            "problemMatcher": "$msCompile",
             "windows": {
                 "command": "powershell",
                 "args": [
@@ -59,7 +59,7 @@
                 "kind": "none",
                 "isDefault": false
             },
-            "problemMatcher": [],
+            "problemMatcher": "$msCompile",
             "windows": {
                 "command": "powershell",
                 "args": [
