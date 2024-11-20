@@ -4,6 +4,16 @@
         {
             "label": "Configuration and Setup",
             "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "chmod u+x ${workspaceFolder}/app_manager.sh && ${workspaceFolder}/app_manager.sh configure"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
             "windows": {
                 "command": "powershell",
                 "args": [
@@ -13,16 +23,20 @@
                     "${workspaceFolder}/app_manager.ps1",
                     "configure"
                 ]
-            },
+            }
+        },
+        {
+            "label": "Build the App",
+            "type": "shell",
+            "command": "${workspaceFolder}/app_manager.sh",
+            "args": [
+                "build"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": false
             },
             "problemMatcher": "$msCompile",
-        },
-        {
-            "label": "Build the App",
-            "type": "shell",
             "windows": {
                 "command": "powershell",
                 "args": [
@@ -32,16 +46,20 @@
                     "${workspaceFolder}/app_manager.ps1",
                     "build"
                 ]
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": "$msCompile",
+            }
         },
         {
             "label": "Run the App",
             "type": "shell",
+            "command": "${workspaceFolder}/app_manager.sh",
+            "args": [
+                "run"
+            ],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
             "windows": {
                 "command": "powershell",
                 "args": [
@@ -51,12 +69,7 @@
                     "${workspaceFolder}/app_manager.ps1",
                     "run"
                 ]
-            },
-            "group": {
-                "kind": "none",
-                "isDefault": false
-            },
-            "problemMatcher": "$msCompile",
+            }
         }
     ]
 }
