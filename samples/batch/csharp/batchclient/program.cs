@@ -101,11 +101,11 @@ namespace BatchClient
                     IsDisplayFormWordLevelTimestampsEnabled = false,
 
                     // uncomment the following block to enable and configure speaker separation
-                    Diarization = new DiarizationProperties
-                    {
-                        Enabled = true,
-                        MaxSpeakers = 5
-                    },
+                    // Diarization = new DiarizationProperties
+                    // {
+                    //     Enabled = true,
+                    //     MaxSpeakers = 5
+                    // },
 
                     // // uncomment the following block to enable and configure language identification prior to transcription. Available modes are "Single" and "Continuous".
                     // LanguageIdentification = new LanguageIdentificationProperties
