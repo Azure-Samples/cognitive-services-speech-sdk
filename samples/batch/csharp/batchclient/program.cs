@@ -47,7 +47,7 @@ namespace BatchClient
         private static async Task RunAsync()
         {
             // create the client object and authenticate
-            using (var client = BatchClient.CreateApiV3Client(SubscriptionKey, $"{Region}.api.cognitive.microsoft.com"))
+            using (var client = BatchClient.CreateApiClient(SubscriptionKey, $"{Region}.api.cognitive.microsoft.com", "2024-11-15"))
             {
                 // uncomment next line when using web hooks
                 // await SetupWebHookAsync(client).ConfigureAwait(false);
@@ -96,19 +96,15 @@ namespace BatchClient
                 Model = CustomModel,
                 Properties = new TranscriptionProperties
                 {
-                    TimeToLive = TimeSpan.FromDays(1),
+                    TimeToLiveHours = 6,
                     IsWordLevelTimestampsEnabled = true,
                     IsDisplayFormWordLevelTimestampsEnabled = false,
 
                     // uncomment the following block to enable and configure speaker separation
-                    // IsDiarizationEnabled = true,
                     // Diarization = new DiarizationProperties
                     // {
-                    //     Speakers = new DiarizationSpeakersProperties
-                    //     {
-                    //         MinCount = 1,
-                    //         MaxCount = 5
-                    //     }
+                    //     Enabled = true,
+                    //     MaxSpeakers = 5
                     // },
 
                     // // uncomment the following block to enable and configure language identification prior to transcription. Available modes are "Single" and "Continuous".
