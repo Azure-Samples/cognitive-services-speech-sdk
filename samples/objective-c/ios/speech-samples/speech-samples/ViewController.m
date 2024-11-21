@@ -732,6 +732,10 @@
     
     [pronunicationConfig enableProsodyAssessment];
     
+    [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *sender, SPXSessionEventArgs *eventArgs) {
+        NSLog(@"SESSION ID: %@", eventArgs.sessionId);
+    }];
+    
     [pronunicationConfig applyToRecognizer:speechRecognizer];
     [self updateRecognitionStatusText:(@"Assessing...")];
     [self->recorder record];
@@ -798,15 +802,19 @@
     
     [pronunicationConfig enableProsodyAssessment];
     
+    [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *sender, SPXSessionEventArgs *eventArgs) {
+        NSLog(@"SESSION ID: %@", eventArgs.sessionId);
+    }];
+    
     [pronunicationConfig applyToRecognizer:speechRecognizer];
     [self updateRecognitionStatusText:(@"Assessing...")];
 
     // connect callbacks
-    __block double sumAccuracy = 0;
     __block double sumProsody = 0;
-    __block double sumFluency = 0;
     __block int sumWords = 0;
     __block int countProsody = 0;
+    NSMutableArray *recognizedWords = [NSMutableArray array];
+    
     [speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
         NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
         SPXPronunciationAssessmentResult *pronunciationResult = [[SPXPronunciationAssessmentResult alloc]init:eventArgs.result];
@@ -816,9 +824,9 @@
         [self updateRecognitionResultText:resultText];
         NSArray *words = [eventArgs.result.text componentsSeparatedByString:@" "];
         NSUInteger wordCount = [words count];
-        sumAccuracy += pronunciationResult.accuracyScore * wordCount;
-        sumFluency += pronunciationResult.fluencyScore * wordCount;
         sumWords += wordCount;
+        
+        [recognizedWords addObjectsFromArray:pronunciationResult.words];
     }];
 
     __block bool end = false;
@@ -844,9 +852,58 @@
     [speechRecognizer stopContinuousRecognition];
 
     if (sumWords > 0) {
-        // Overall accuracy and fluency scores are the weighted average of scores of all sentences.
-        NSString *resultText = [NSString stringWithFormat:@"Assessment finished. \nOverall accuracy score: %.2f, prosody score: %.2f, fluency score: %.2f.", sumAccuracy / sumWords, sumProsody / countProsody, sumFluency / sumWords];
+        // Accuracy score
+        double totalAccurayScore = 0;
+        int accuracyCount = 0;
+        int validCount = 0;
+        double durationSum = 0.0;
+        
+        for (SPXWordLevelTimingResult *word in recognizedWords) {
+            if (![word.errorType isEqualToString:@"Insertion"]) {
+                totalAccurayScore += word.accuracyScore;
+                accuracyCount += 1;
+            }
+            
+            if ([word.errorType isEqualToString:@"None"]) {
+                durationSum += word.duration + 0.01;
+                validCount += 1;
+            }
+            
+        }
+        double accurayScore = (accuracyCount > 0) ? (totalAccurayScore) / accuracyCount : NAN;
+        
+        // Fluency score
+        SPXWordLevelTimingResult *firstWord = [recognizedWords firstObject];
+        double startOffset = firstWord.offset;
+
+        SPXWordLevelTimingResult *lastWord = [recognizedWords lastObject];
+        double endOffset = lastWord.offset + lastWord.duration + 0.01;
+
+        double fluencyScore = durationSum / (endOffset - startOffset) * 100.0;
+        
+        // Completeness score
+        double completenessScore = (double)validCount / (double)accuracyCount * 100.0;
+        if (completenessScore > 100) {
+            completenessScore = 100;
+        }
+        
+        // Prosody score
+        double prosodyScore = sumProsody / countProsody;
+        
+        double minScore = MIN(accurayScore, MIN(prosodyScore, MIN(completenessScore, fluencyScore)));
+        
+        // Pronunciation score
+        double pronunciationScore = 0.2 * (accurayScore + prosodyScore + completenessScore + fluencyScore) + 0.2 * minScore;
+        
+        // Overall scores.
+        NSString *resultText = [NSString stringWithFormat:@"Assessment finished. \nOverall accuracy score: %.2f, prosody score: %.2f, fluency score: %.2f, completeness score: %.2f, pronunciation score: %.2f", accurayScore, prosodyScore, fluencyScore, completenessScore, pronunciationScore];
         [self updateRecognitionResultText:resultText];
+        
+        for (NSInteger idx = 0; idx < recognizedWords.count; idx++) {
+            SPXWordLevelTimingResult *word = recognizedWords[idx];
+            NSLog(@"    %ld: word: %@\taccuracy score: %.2f\terror type: %@",
+                  (long)(idx + 1), word.word, word.accuracyScore, word.errorType);
+        }
     }
 }
 
@@ -891,6 +948,11 @@
     
     [pronAssessmentConfig enableProsodyAssessment];
     
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *sender, SPXSessionEventArgs *eventArgs) {
+        NSLog(@"SESSION ID: %@", eventArgs.sessionId);
+    }];
+    
     [pronAssessmentConfig applyToRecognizer:speechRecognizer error:nil];
 
     [audioInputStream write:audioData];
@@ -924,7 +986,9 @@
         NSDate *endTime = [NSDate date];
         double timeCost = [endTime timeIntervalSinceDate:startTime] * 1000;
         NSLog(@"Time cost: %fms", timeCost);
+        dispatch_semaphore_signal(semaphore);
     }];
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
 /*
@@ -955,6 +1019,11 @@
     
     [pronAssessmentConfig enableProsodyAssessment];
     
+    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
+    [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *sender, SPXSessionEventArgs *eventArgs) {
+        NSLog(@"SESSION ID: %@", eventArgs.sessionId);
+    }];
+    
     [pronAssessmentConfig applyToRecognizer:speechRecognizer error:nil];
 
     [self updateRecognitionResultText:@"Analysising"];
@@ -981,7 +1050,9 @@
         NSString *finalResult = [NSString stringWithString:mResult];
         NSLog(@"%@", finalResult);
         [self updateRecognitionResultText:finalResult];
+        dispatch_semaphore_signal(semaphore);
     }];
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 }
 
 /*
@@ -1017,6 +1088,10 @@
         [self updateRecognitionResultText:(@"Speech Recognition Error")];
         return;
     }
+    
+    [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *sender, SPXSessionEventArgs *eventArgs) {
+        NSLog(@"SESSION ID: %@", eventArgs.sessionId);
+    }];
 
     // Create pronunciation assessment config, set grading system, granularity
     SPXPronunciationAssessmentConfiguration *pronunicationConfig =

@@ -18,14 +18,15 @@ import rest_helper
 import user_config_helper
 
 # This should not change unless you switch to a new version of the Speech REST API.
-SPEECH_TRANSCRIPTION_PATH = "/speechtotext/v3.0/transcriptions"
+SPEECH_TRANSCRIPTION_PATH = "/speechtotext/v3.2/transcriptions"
 
 # These should not change unless you switch to a new version of the Cognitive Language REST API.
 SENTIMENT_ANALYSIS_PATH = "/language/:analyze-text"
-SENTIMENT_ANALYSIS_QUERY = "?api-version=2022-05-01"
+SENTIMENT_ANALYSIS_QUERY = "?api-version=2024-11-01"
 CONVERSATION_ANALYSIS_PATH = "/language/analyze-conversations/jobs"
-CONVERSATION_ANALYSIS_QUERY = "?api-version=2022-05-15-preview"
-CONVERSATION_SUMMARY_MODEL_VERSION = "2022-05-15-preview"
+
+CONVERSATION_ANALYSIS_QUERY = "?api-version=2024-11-01"
+CONVERSATION_SUMMARY_MODEL_VERSION = "2024-11-01"
 
 # How long to wait while polling batch transcription and conversation analysis status.
 WAIT_SECONDS = 10

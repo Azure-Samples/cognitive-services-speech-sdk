@@ -11,9 +11,6 @@ namespace BatchClient
 
     public class TranscriptionProperties
     {
-        [JsonProperty(PropertyName = "diarizationEnabled")]
-        public bool IsDiarizationEnabled { get; set; }
-
         [JsonProperty(PropertyName = "wordLevelTimestampsEnabled")]
         public bool IsWordLevelTimestampsEnabled { get; set; }
 
@@ -33,8 +30,7 @@ namespace BatchClient
 
         public Uri DestinationContainerUrl { get; set; }
 
-        [JsonConverter(typeof(TimeSpanConverter))]
-        public TimeSpan TimeToLive { get; set; }
+        public int TimeToLiveHours { get; set; }
 
         public DiarizationProperties Diarization { get; set; }
 

@@ -60,10 +60,11 @@ oyd_doc_regex = re.compile(r'\[doc(\d+)\]') # Regex to match the OYD (on-your-da
 client_contexts = {} # Client contexts
 speech_token = None # Speech token
 ice_token = None # ICE token
-azure_openai = AzureOpenAI(
-    azure_endpoint=azure_openai_endpoint,
-    api_version='2024-06-01',
-    api_key=azure_openai_api_key)
+if azure_openai_endpoint and azure_openai_api_key:
+    azure_openai = AzureOpenAI(
+        azure_endpoint=azure_openai_endpoint,
+        api_version='2024-06-01',
+        api_key=azure_openai_api_key)
 
 # The default route, which shows the default web page (basic.html)
 @app.route("/")

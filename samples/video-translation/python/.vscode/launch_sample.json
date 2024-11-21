@@ -1,0 +1,141 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "eus-translate",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--sub_key", "xx",
+                "--api_version", "2024-05-20-preview",
+                "create_translation_and_iteration_and_wait_until_terminated",
+                "--source_locale", "zh-CN",
+                "--target_locale", "en-US",
+                "--voice_kind", "PlatformVoice",
+                "--speaker_count", "1",
+                "--subtitle_max_char_count_per_segment", "20",
+                "--export_subtitle_in_video", "true",
+                "--video_file_blob_url", "https://xx.blob.core.windows.net/xx.mp4?sv=xx"
+            ]
+        },
+        {
+            "name": "eus-api-create-translation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--subKey", "xx",
+                "--api_version", "2024-05-20-preview",
+                "request_create_translation_api",
+                "--translation_id", "xx",
+                "--operation_id", "xx",
+                "--translation_display_name", "xx",
+                "--translation_description", "xx",
+                "--source_locale", "zh-CN",
+                "--target_locale", "en-US",
+                "--voice_kind", "PlatformVoice",
+                "--speaker_count", "1",
+                "--subtitle_max_char_count_per_segment", "20",
+                "--export_subtitle_in_video", "true",
+                "--video_file_blob_url", "https://xx.blob.core.windows.net/xx.mp4?sv=xx"
+            ]
+        },
+        {
+            "name": "eus-api-create-iteration",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--sub_key", "xx",
+                "--api_version", "2024-05-20-preview",
+                "request_create_iteration_api",
+                "--translation_id", "xx",
+                "--iteration_id", "xx",
+                "--operation_id", "xx",
+                "--iteration_description", "xx",
+                "--speaker_count", "1",
+                "--subtitle_max_char_count_per_segment", "20",
+                "--export_subtitle_in_video", "true",
+                "--webvtt_file_kind", "MetadataJson",
+                "--webvtt_file_blob_url", "https://xx.blob.core.windows.net/xx.vtt?sv=xx"
+            ]
+        },
+        {
+            "name": "eus-api-get-operation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--sub_key", "xx",
+                "--api_version", "2024-05-20-preview",
+                "request_get_operation_api",
+                "--operation_location", "https://xx.api.cognitive.microsoft.com/videotranslation/operations/xx?api-version=2024-05-20-preview"
+            ]
+        },
+        {
+            "name": "eus-api-get-translation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--sub_key", "xx",
+                "--api_version", "2024-05-20-preview",
+                "request_get_translation_api",
+                "--translation_id", "xx"
+            ]
+        },
+        {
+            "name": "eus-api-get-iteration",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--sub_key", "xx",
+                "--api_version", "2024-05-20-preview",
+                "request_get_iteration_api",
+                "--translation_id", "xx",
+                "--iteration_id", "xx"
+            ]
+        },
+        {
+            "name": "eus-api-list-translations",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--sub_key", "xx",
+                "--api_version", "2024-05-20-preview",
+                "request_list_translations_api"
+            ]
+        },
+        {
+            "name": "eus-api-delete-translation",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--sub_key", "xx",
+                "--api_version", "2024-05-20-preview",
+                "request_delete_translation_api",
+                "--translation_id", "xx"
+            ]
+        }
+    ]
+}
