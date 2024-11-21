@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
+from abc import ABC, abstractmethod
 import asyncio
 import logging
 import os
@@ -29,7 +30,7 @@ def calculate_energy(frame_data):
     energy = np.sum(data**2) / len(data)
     return energy
 
-class AioStream:
+class AioOutputStream:
     def __init__(self):
         self._queue = asyncio.Queue()
 
@@ -51,6 +52,47 @@ class AioStream:
     async def __anext__(self):
         return await self.read()
 
+class InputTextStream(ABC):
+    @abstractmethod
+    def write(self, data: str):
+        pass
+
+    @abstractmethod
+    def close(self):
+        pass
+
+class InputTextStreamFromSDK(InputTextStream):
+    def __init__(self, sdk_stream: speechsdk.SpeechSynthesisRequest.InputStream):
+        self.sdk_stream = sdk_stream
+
+    def write(self, data: str):
+        self.sdk_stream.write(data)
+
+    def close(self):
+        self.sdk_stream.close()
+
+class InputTextStreamFromQueue(InputTextStream):
+    def __init__(self):
+        self._queue = asyncio.Queue()
+
+    def write(self, data: str):
+        self._queue.put_nowait(data)
+
+    def close(self):
+        self._queue.put_nowait(None)
+
+    async def read(self) -> str:
+        chunk = await self._queue.get()
+        if chunk is None:
+            raise StopAsyncIteration
+        return chunk
+
+    def __aiter__(self) -> AsyncIterator[str]:
+        return self
+
+    async def __anext__(self):
+        return await self.read()
+
 class Client:
     def __init__(self, synthesis_pool_size: int = 2):
         if synthesis_pool_size < 1:
@@ -61,19 +103,21 @@ class Client:
 
     def configure(self, voice: str):
         logger.info(f"Configuring voice: {voice}")
-        endpoint_id = ""
+        self.endpoint_id = ""
         endpoint_prefix = "tts"
+        endpoint_version = "v2"
         if voice.startswith("CNV:"):
             voice = voice[4:]
-            endpoint_id = CNV_DEPLOYMENT_ID
+            self.endpoint_id = CNV_DEPLOYMENT_ID
             endpoint_prefix = "voice"
+            endpoint_version = "v1"
 
         self.voice = voice
 
         auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
-        self.speech_config = speechsdk.SpeechConfig(endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/v2?debug=3&trafficType=AzureSpeechRealtime")
+        self.speech_config = speechsdk.SpeechConfig(endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/{endpoint_version}?debug=3&trafficType=AzureSpeechRealtime")
         self.speech_config.speech_synthesis_voice_name = voice
-        self.speech_config.endpoint_id = endpoint_id
+        self.speech_config.endpoint_id = self.endpoint_id
         self.speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm)
         self.speech_synthesizers = [speechsdk.SpeechSynthesizer(speech_config=self.speech_config, audio_config=None) for _ in range(self.synthesis_pool_size)]
         for s in self.speech_synthesizers:
@@ -82,8 +126,10 @@ class Client:
             s.synthesis_canceled.connect(lambda evt: logger.error(f"Synthesis canceled: {evt.result.reason}"))
             s.authorization_token = auth_token
 
-    def text_to_speech(self, voice: str, speed: str = "medium") -> Tuple[speechsdk.SpeechSynthesisRequest.InputStream, AioStream]:
-        # input_stream = sp
+    def text_to_speech(self, voice: str, speed: str = "medium") -> Tuple[InputTextStream, AioOutputStream]:
+        if self.endpoint_id:
+            # CNV does not support input streaming
+            return self.text_to_speech_non_streaming(voice, speed)
         logger.info(f"Synthesizing text with voice: {voice}")
         synthesis_request = speechsdk.SpeechSynthesisRequest(
             input_type=speechsdk.SpeechSynthesisRequestInputType.TextStream)
@@ -93,7 +139,7 @@ class Client:
 
         result = current_synthesizer.start_speaking(synthesis_request)
         stream = speechsdk.AudioDataStream(result)
-        aio_stream = AioStream()
+        aio_stream = AioOutputStream()
         async def read_from_data_stream():
             leading_silence_skipped = False
             silence_detection_frames_size = int(50 * 24000 * 2 / 1000)  # 50 ms
@@ -125,7 +171,56 @@ class Client:
             aio_stream.end_of_stream()
 
         asyncio.create_task(read_from_data_stream())
-        return synthesis_request.input_stream, aio_stream
+        return InputTextStreamFromSDK(synthesis_request.input_stream), aio_stream
+
+    def text_to_speech_non_streaming(self, voice: str, speed: str = "medium") -> Tuple[InputTextStream, AioOutputStream]:
+        """
+        This method is to support non-streaming TTS synthesis. e.g., CNV
+        """
+        logger.warning("non-streaming TTS synthesis is being used")
+        logger.info(f"Synthesizing text with voice: {voice}")
+        self._counter = (self._counter + 1) % len(self.speech_synthesizers)
+        current_synthesizer = self.speech_synthesizers[self._counter]
+
+        input_stream = InputTextStreamFromQueue()
+        aio_stream = AioOutputStream()
+        async def read_from_data_stream():
+            inputs = []
+            async for chunk in input_stream:
+                inputs.append(chunk)
+            result = current_synthesizer.start_speaking_text("".join(inputs))
+            stream = speechsdk.AudioDataStream(result)
+            leading_silence_skipped = False
+            silence_detection_frames_size = int(50 * 24000 * 2 / 1000)  # 50 ms
+            loop = asyncio.get_running_loop()
+            while True:
+                if not leading_silence_skipped:
+                    if stream.position >= 3 * silence_detection_frames_size:
+                        leading_silence_skipped = True
+                        continue
+                    frame_data = bytes(silence_detection_frames_size)
+                    lenx = await loop.run_in_executor(None, stream.read_data, frame_data)
+                    if lenx == 0:
+                        if stream.status != speechsdk.StreamStatus.AllData:
+                            logger.error(f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}")
+                        break
+                    energy = await loop.run_in_executor(None, calculate_energy, frame_data)
+                    if energy < 500:
+                        logger.info("Silence detected, skipping")
+                        continue
+                    leading_silence_skipped = True
+                    stream.position = stream.position - silence_detection_frames_size
+                chunk = bytes(2400*4)
+                read = await loop.run_in_executor(None, stream.read_data, chunk)
+                if read == 0:
+                    break
+                aio_stream.write_data(chunk[:read])
+            if stream.status != speechsdk.StreamStatus.AllData:
+                logger.error(f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}")
+            aio_stream.end_of_stream()
+
+        asyncio.create_task(read_from_data_stream())
+        return input_stream, aio_stream
 
 if __name__ == "__main__":
     async def main():
