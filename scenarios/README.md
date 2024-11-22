@@ -18,6 +18,7 @@ This folder hosts code and input **samples** for popular Speech-to-text scenario
 
 The current scenarios showcased here are:
 * [Captioning](#captioning)
+* [Post-call analytics with Fast Transcription API and Azure OpenAI SDK](#post-call-analytics-with-fast-transcription-api-and-azure-openai-sdk)
 * [Call center transcription and analytics](#call-center-transcription-and-analytics)
 
 ## Captioning
@@ -33,8 +34,8 @@ Connection:
 
 Input:
 
-* `--input FILE`: Input audio from file. The default input is the microphone. 
-* `--format FORMAT`: Use compressed audio format. Valid only with `--file`. Valid values are `alaw`, `any`, `flac`, `mp3`, `mulaw`, and `ogg_opus`. The default value is `any`. To use a `wav` file, don't specify the format. This option is not available with the JavaScript captioning sample. For compressed audio files such as MP4, install GStreamer and see [How to use compressed input audio](~/articles/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams.md). 
+* `--input FILE`: Input audio from file. The default input is the microphone.
+* `--format FORMAT`: Use compressed audio format. Valid only with `--file`. Valid values are `alaw`, `any`, `flac`, `mp3`, `mulaw`, and `ogg_opus`. The default value is `any`. To use a `wav` file, don't specify the format. This option is not available with the JavaScript captioning sample. For compressed audio files such as MP4, install GStreamer and see [How to use compressed input audio](~/articles/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams.md).
 
 Language:
 
@@ -43,7 +44,7 @@ Language:
 Recognition:
 
 * `--offline`: Output offline results. Overrides `--realTime`. Default output mode is offline.
-* `--realTime`: Output real-time results. 
+* `--realTime`: Output real-time results.
 
 Real-time output includes `Recognizing` event results. The default offline output is `Recognized` event results only. These are always written to the console, never to an output file. The `--quiet` option overrides this. For more information, see [Get speech recognition results](~/articles/cognitive-services/speech-service/get-speech-recognition-results.md).
 
@@ -64,6 +65,26 @@ Output:
 * `--profanity OPTION`: Valid values: raw, remove, mask. For more information, see [Profanity filter](~/articles/cognitive-services/speech-service/display-text-format.md#profanity-filter) concepts.
 * `--threshold NUMBER`: Set stable partial result threshold. The default value is `3`. This option is only applicable when you use the `realTime` flag. For more information, see [Get partial results](~/articles/cognitive-services/speech-service/captioning-concepts.md#get-partial-results) concepts.
 
+## Post-call analytics with Fast Transcription API and Azure OpenAI SDK
+
+This sample application transcribes an audio recording using <a href="https://learn.microsoft.com/azure/ai-services/speech-service/fast-transcription-create" title="Fast Transcription API" target="_blank">Fast Transcription API</a> the summarizes the conversation transcription with <a href="https://azure.microsoft.com/products/ai-services/openai-service" title="Azure OpenAI SDK" target="_blank">Azure OpenAI SDK</a>.
+
+### Usage
+
+`Usage : post-call-analytics <inputAudio> [options]`
+
+Arguments:
+* ``<inputAudio>``: Path to the audio file. Required.
+
+Options:
+* `--speechKey KEY`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create a Cognitive Services resource"  target="_blank">Cognitive Services</a> or <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Speech</a> resource key. The value can also be set via SPEECH_KEY environment variable. Required.
+* `--speechRegion REGION`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create a Cognitive Services resource"  target="_blank">Cognitive Services</a> or <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"  title="Create a Speech resource"  target="_blank">Speech</a> resource region. The value can also be set via SPEECH_REGION environment variable. Examples: `eastus`, `northeurope`. Required.
+* `--openAiKey KEY`: Your <a href="https://ms.portal.azure.com/#create/Microsoft.CognitiveServicesOpenAI" title="Create an Azure OpenAI resource" target="_blank">Azure OpenAI</a> resource key. The value can also be set via AOAI_KEY environment variable. Optional.
+* `--openAiEndpoint ENDPOINT`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create an Azure OpenAI resource" target="_blank">Azure OpenAI</a> resource endpoint. Example: `https://YourResourceName.openai.azure.com`. The value can also be set via AOAI_ENDPOINT environment variable. Optional.
+* `--openAiDeploymentName OPENAIDEPLOYMENTNAME`: Your <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesAllInOne" title="Create an Azure OpenAI resource" target="_blank">Azure OpenAI</a> deployment name.  The value can also be set via AOAI_DEPLOYMENT_NAME environment variable. Example: my-gpt-4o-mini. Optional.
+* `--help`: Show the usage help and stop
+
+
 ## Call Center Transcription and Analytics
 
 Visit the [call center transcription quickstart](https://learn.microsoft.com/azure/cognitive-services/speech-service/call-center-quickstart) for a detailed guide on how to get started transcribing call recordings using the Speech and Language Services.
@@ -80,10 +101,10 @@ Connection:
 
 Input:
 
-* `--input URL`: Input audio from URL. You must set either the `--input` or `--jsonInput` option. 
+* `--input URL`: Input audio from URL. You must set either the `--input` or `--jsonInput` option.
 * `--jsonInput FILE`: Input an existing batch transcription JSON result from FILE. With this option, you only need a Language resource to process a transcription that you already have. With this option, you don't need an audio file or a Speech resource. Overrides `--input`. You must set either the `--input` or `--jsonInput` option.
 * `--stereo`: Indicates that the audio via ```input URL` should be in stereo format. If stereo isn't specified, then mono 16khz 16 bit PCM wav files are assumed. Diarization of mono files is used to separate multiple speakers. Diarization of stereo files isn't supported, since 2-channel stereo files should already have one speaker per channel.
-* `--certificate`: The PEM certificate file. Required for C++. 
+* `--certificate`: The PEM certificate file. Required for C++.
 
 Language:
 

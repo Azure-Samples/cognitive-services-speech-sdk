@@ -1,6 +1,7 @@
 .flake8 text
 .gitattributes text
 .gitignore text
+Dockerfile text
 Podfile text
 
 .classpath text
@@ -34,6 +35,7 @@ proguard-rules.pro text
 *.json text
 *.kt text
 *.lst text
+*.lock text
 *.m text
 *.manifest text
 *.mat text
@@ -55,6 +57,7 @@ proguard-rules.pro text
 *.storyboard text
 *.svg text
 *.swift text
+*.toml text
 *.ts text
 *.txt text
 *.unity text

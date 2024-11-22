@@ -1,0 +1,64 @@
+<!--
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT license.
+-->
+
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Realtime API Plus Demo</title>
+</head>
+
+<body>
+  <div id="app">
+    <form>
+      <div class="container">
+        <div id="received-text-container">
+          <div id="videoContainer" style="position: relative; width: 100%;">
+            <div id="remoteVideo"></div>
+          </div>
+          <br/>
+        </div>
+        <div class="controls">
+          <div class="input-group">
+            <label for="deployment-or-model">Deployment</label>
+            <select id="deployment-or-model">
+              <option value="gpt4o-realtime">gpt4o-realtime</option>
+              <option value="gpt4o-realtime-azure-voice">gpt4o-realtime-azure-voice</option>
+              <option value="gpt4o-realtime-azure-avatar">gpt4o-realtime-azure-avatar</option>
+            </select>
+          </div>
+          <div class="input-group">
+          <div class="button-group">
+            <button id="start-recording" type="button">Record</button>
+            <button id="stop-recording" type="button" disabled="true">Stop</button>
+          </div>
+          <div class="input-group">
+            <label for="session-instructions">System Message</label>
+            <textarea id="session-instructions" placeholder="Optional instructions for the session, e.g. 'You talk like a pirate.'" rows="4"></textarea>
+          </div>
+          <div class="input-group">
+            <label for="temperature">Temperature</label>
+            <input id="temperature" type="number" min="0.6" max="1.2" step="0.05" placeholder="0.6-1.2 (default 0.8)"/>
+          </div>
+          <div class="input-group">
+            <label for="voice">Voice</label>
+              <select id="voice">
+                <option></option>
+                <option>alloy</option>
+                <option>echo</option>
+                <option>shimmer</option>
+              </select>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
