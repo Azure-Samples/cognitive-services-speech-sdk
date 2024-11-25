@@ -5,10 +5,10 @@ import asyncio
 import json
 import logging
 import os
-from typing import AsyncIterator, Tuple
+import time
+from typing import Tuple
 
 import azure.cognitiveservices.speech as speechsdk
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from aiohttp import ClientSession
 from data_models import IceServer
 from azure_tts import AioOutputStream, InputTextStream, InputTextStreamFromQueue, token_provider
@@ -16,11 +16,15 @@ from azure_tts import AioOutputStream, InputTextStream, InputTextStreamFromQueue
 logger = logging.getLogger(__name__)
 
 SPEECH_REGION = os.environ.get("SPEECH_REGION")
+SPEECH_KEY = os.environ.get('SPEECH_KEY')
 SPEECH_RESOURCE_ID = os.environ.get("SPEECH_RESOURCE_ID")
 CNV_DEPLOYMENT_ID = os.environ.get("CNV_DEPLOYMENT_ID", "bfab6398-3c4a-4b85-8e7b-c155ca8bfa50")
 
-if not SPEECH_REGION or not SPEECH_RESOURCE_ID:
-    raise ValueError("SPEECH_REGION and SPEECH_RESOURCE_ID must be set")
+if not SPEECH_REGION:
+    raise ValueError("SPEECH_REGION must be set")
+
+if not (SPEECH_KEY or SPEECH_RESOURCE_ID):
+    raise ValueError("SPEECH_KEY or SPEECH_RESOURCE_ID must be set")
 
 
 class Client:
@@ -30,6 +34,8 @@ class Client:
         self.synthesis_pool_size = synthesis_pool_size
         self._counter = 0
         self.voice = None
+        self.interruption_time = 0
+        self.tts_host = f"https://{SPEECH_REGION}.tts.speech.microsoft.com"
 
     def configure(self, voice: str):
         logger.info(f"Configuring voice: {voice}")
@@ -42,11 +48,13 @@ class Client:
 
         self.voice = voice
 
-        auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
-        self.speech_config = speechsdk.SpeechConfig(
-            endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/v1?debug=3&trafficType=AzureSpeechRealtime&enableTalkingAvatar=true"
+        if SPEECH_KEY:
+            self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
+        else:
+            auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
+            self.speech_config = speechsdk.SpeechConfig(
+                endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/v1?debug=3&trafficType=AzureSpeechRealtime&enableTalkingAvatar=true"
         )
-        self.tts_host = f"https://{SPEECH_REGION}.tts.speech.microsoft.com"
         self.speech_config.speech_synthesis_voice_name = voice
         self.speech_config.endpoint_id = endpoint_id
         self.speech_config.set_speech_synthesis_output_format(
@@ -63,18 +71,17 @@ class Client:
         self.speech_synthesizer.synthesis_canceled.connect(
             lambda evt: logger.error(f"Synthesis canceled: {evt.result.reason}")
         )
-        self.speech_synthesizer.authorization_token = auth_token
+        if not SPEECH_KEY:
+            self.speech_synthesizer.authorization_token = auth_token
 
     def text_to_speech(
         self, voice: str, speed: str = "medium"
     ) -> Tuple[InputTextStream, AioOutputStream]:
         # input_stream = sp
         logger.info(f"Synthesizing text with voice: {voice}")
-        synthesis_request = speechsdk.SpeechSynthesisRequest(
-            input_type=speechsdk.SpeechSynthesisRequestInputType.TextStream
-        )
         # synthesis_request.rate = speed
         current_synthesizer = self.speech_synthesizer
+        start_time = time.time()
 
         aio_stream = AioOutputStream()
         input_stream = InputTextStreamFromQueue()
@@ -84,6 +91,9 @@ class Client:
             async for chunk in input_stream:
                 inputs.append(chunk)
             contents = "".join(inputs)
+            if start_time < self.interruption_time:
+                logger.info("Synthesis interrupted, ignoring this turn")
+                return
             result = current_synthesizer.start_speaking_text(contents)
             stream = speechsdk.AudioDataStream(result)
             loop = asyncio.get_running_loop()
@@ -93,7 +103,7 @@ class Client:
                 if read == 0:
                     break
                 aio_stream.write_data(chunk[:read])
-            if stream.status != speechsdk.StreamStatus.AllData:
+            if stream.status == speechsdk.StreamStatus.Canceled:
                 logger.error(
                     f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}"
                 )
@@ -102,10 +112,24 @@ class Client:
         asyncio.create_task(read_from_data_stream())
         return input_stream, aio_stream
 
+    async def interrupt(self):
+        self.interruption_time = time.time()
+        # todo: uncomment this when the service supports it
+        # try:
+        #     connection = speechsdk.Connection.from_speech_synthesizer(self.speech_synthesizer)
+        #     sending = connection.send_message_async('synthesis.control', '{"action":"stop"}')
+        #     loop = asyncio.get_running_loop()
+        #     await loop.run_in_executor(None, sending.get)
+        # except Exception as e:
+        #     logger.error(f"Error interrupting synthesis: {e}")
+
     async def get_ice_servers(self):
-        async with ClientSession(
-            headers={"Authorization": f"Bearer aad#{SPEECH_RESOURCE_ID}#{token_provider()}"}
-        ) as session:
+        headers = {}
+        if SPEECH_KEY:
+            headers["Ocp-Apim-Subscription-Key"] = SPEECH_KEY
+        else:
+            headers["Authorization"] = f"Bearer aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
+        async with ClientSession(headers=headers) as session:
             async with session.get(f"{self.tts_host}/cognitiveservices/avatar/relay/token/v1") as response:
                 response.raise_for_status()
                 j = await response.text()
@@ -130,8 +154,8 @@ class Client:
                     },
                     "talkingAvatar": {
                         "customized": False,
-                        "character": "lori",
-                        "style": "casual",
+                        "character": "meg",
+                        "style": "formal",
                     },
                 }
             }
