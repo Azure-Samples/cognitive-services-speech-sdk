@@ -21,5 +21,9 @@ namespace BatchClient
         public double OffsetInTicks { get; set; }
 
         public double DurationInTicks { get; set; }
+
+        public long OffsetMilliseconds { get; set; }
+
+        public long DurationMilliseconds { get; set; }
     }
 }
