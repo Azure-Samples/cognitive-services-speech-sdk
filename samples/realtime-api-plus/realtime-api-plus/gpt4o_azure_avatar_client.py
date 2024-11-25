@@ -8,19 +8,25 @@ from rtclient import RTClient
 import os
 from rtclient import models as rt_models
 from azure.identity.aio import DefaultAzureCredential
+from azure.core.credentials import AzureKeyCredential
 from realtime_audio_session_handler import RealtimeAudioSessionHandler
 import rtclient
 from azure_avatar import Client as AzureAvatarClient
 from data_models import Session
 endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+key = os.getenv("AZURE_OPENAI_KEY")
 deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 logger = logging.getLogger(__name__)
 
 
 class GPT4oAzureAvatarClient:
     def __init__(self, realtime_handler: RealtimeAudioSessionHandler):
-        self._rt_client = RTClient(
-            url=endpoint, azure_deployment=deployment, token_credential=DefaultAzureCredential())
+        if key:
+            self._rt_client = self._client = RTClient(
+                url=endpoint, azure_deployment=deployment, key_credential=AzureKeyCredential(key))
+        else:
+            self._rt_client = self._client = RTClient(
+                url=endpoint, azure_deployment=deployment, token_credential=DefaultAzureCredential())
         self._realtime_handler = realtime_handler
         self._tts_client = AzureAvatarClient()
         self._voice = None
@@ -29,7 +35,7 @@ class GPT4oAzureAvatarClient:
         await self._rt_client.connect()
         await self._realtime_handler.on_session_created(self._rt_client.session)
 
-    async def configure(self, session_config: rt_models.SessionUpdateParams) -> rt_models.Session:
+    async def configure(self, session_config: rt_models.SessionUpdateParams) -> Session:
         self._voice = session_config.voice or "en-US-AvaNeural"
         self._tts_client.configure(voice=self._voice)
         ice_server = self._tts_client.get_ice_servers()
@@ -137,6 +143,7 @@ class GPT4oAzureAvatarClient:
 
     async def receive_input_item(self, item: rtclient.RTInputAudioItem):
         await self._realtime_handler.on_input_audio_buffer_speech_started(item.id, item.audio_start_ms)
+        await self._tts_client.interrupt()
         await item
         await self._realtime_handler.on_input_audio_buffer_speech_stopped(item.id, item.audio_end_ms)
         if item.transcript:

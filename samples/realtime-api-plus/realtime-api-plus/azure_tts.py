@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 import asyncio
 import logging
 import os
+import time
 from typing import AsyncIterator, Tuple
 
 import azure.cognitiveservices.speech as speechsdk
@@ -14,11 +15,15 @@ from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 logger = logging.getLogger(__name__)
 
 SPEECH_REGION = os.environ.get('SPEECH_REGION')
+SPEECH_KEY = os.environ.get('SPEECH_KEY')
 SPEECH_RESOURCE_ID = os.environ.get("SPEECH_RESOURCE_ID")
 CNV_DEPLOYMENT_ID = os.environ.get("CNV_DEPLOYMENT_ID", "bfab6398-3c4a-4b85-8e7b-c155ca8bfa50")
 
-if not SPEECH_REGION or not SPEECH_RESOURCE_ID:
-    raise ValueError("SPEECH_REGION and SPEECH_RESOURCE_ID must be set")
+if not SPEECH_REGION:
+    raise ValueError("SPEECH_REGION must be set")
+
+if not (SPEECH_KEY or SPEECH_RESOURCE_ID):
+    raise ValueError("SPEECH_KEY or SPEECH_RESOURCE_ID must be set")
 
 token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
 
@@ -100,6 +105,7 @@ class Client:
         self.synthesis_pool_size = synthesis_pool_size
         self._counter = 0
         self.voice = None
+        self.interruption_time = 0
 
     def configure(self, voice: str):
         logger.info(f"Configuring voice: {voice}")
@@ -114,8 +120,11 @@ class Client:
 
         self.voice = voice
 
-        auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
-        self.speech_config = speechsdk.SpeechConfig(endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/{endpoint_version}?debug=3&trafficType=AzureSpeechRealtime")
+        if SPEECH_KEY:
+            self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
+        else:
+            auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
+            self.speech_config = speechsdk.SpeechConfig(endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/{endpoint_version}?debug=3&trafficType=AzureSpeechRealtime")
         self.speech_config.speech_synthesis_voice_name = voice
         self.speech_config.endpoint_id = self.endpoint_id
         self.speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm)
@@ -124,9 +133,14 @@ class Client:
             s.synthesis_started.connect(lambda evt: logger.info(f"Synthesis started: {evt.result.reason}"))
             s.synthesis_completed.connect(lambda evt: logger.info(f"Synthesis completed: {evt.result.reason}"))
             s.synthesis_canceled.connect(lambda evt: logger.error(f"Synthesis canceled: {evt.result.reason}"))
-            s.authorization_token = auth_token
+            if not SPEECH_KEY:
+                s.authorization_token = auth_token
+
+    def interrupt(self):
+        self.interruption_time = time.time()
 
     def text_to_speech(self, voice: str, speed: str = "medium") -> Tuple[InputTextStream, AioOutputStream]:
+        start_time = time.time()
         if self.endpoint_id:
             # CNV does not support input streaming
             return self.text_to_speech_non_streaming(voice, speed)
@@ -165,8 +179,11 @@ class Client:
                 read = await loop.run_in_executor(None, stream.read_data, chunk)
                 if read == 0:
                     break
+                if start_time < self.interruption_time:
+                    logger.warning("Interruption detected, stopping synthesis")
+                    break
                 aio_stream.write_data(chunk[:read])
-            if stream.status != speechsdk.StreamStatus.AllData:
+            if stream.status == speechsdk.StreamStatus.Canceled:
                 logger.error(f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}")
             aio_stream.end_of_stream()
 
@@ -177,6 +194,7 @@ class Client:
         """
         This method is to support non-streaming TTS synthesis. e.g., CNV
         """
+        start_time = time.time()
         logger.warning("non-streaming TTS synthesis is being used")
         logger.info(f"Synthesizing text with voice: {voice}")
         self._counter = (self._counter + 1) % len(self.speech_synthesizers)
@@ -214,8 +232,11 @@ class Client:
                 read = await loop.run_in_executor(None, stream.read_data, chunk)
                 if read == 0:
                     break
+                if start_time < self.interruption_time:
+                    logger.warning("Interruption detected, stopping synthesis")
+                    break
                 aio_stream.write_data(chunk[:read])
-            if stream.status != speechsdk.StreamStatus.AllData:
+            if stream.status == speechsdk.StreamStatus.Canceled:
                 logger.error(f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}")
             aio_stream.end_of_stream()
 

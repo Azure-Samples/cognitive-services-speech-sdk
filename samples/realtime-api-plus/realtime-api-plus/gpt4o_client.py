@@ -2,44 +2,65 @@
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 import asyncio
+import base64
 import logging
 import os
 from typing import Optional
 
+import aiohttp
 import rtclient
 from azure.core.credentials import AzureKeyCredential
 from azure.identity.aio import DefaultAzureCredential
 from realtime_audio_session_handler import RealtimeAudioSessionHandler
 from rtclient import RTClient
 from rtclient import models as rt_models
+from data_models import Session
+from azure_avatar import Client as AzureAvatarClient
 
 logger = logging.getLogger(__name__)
 endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+key = os.getenv("AZURE_OPENAI_KEY")
 deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+# note: gpt4o real-time + avatar (audio driven) is in preview
+enable_avatar = os.getenv("ENABLE_AVATAR")
+avatar_service_host = os.getenv("AVATAR_SERVICE_HOST")
+
+ice_servers = [None]
+
 
 class GPT4OClient:
-    def __init__(self,
-                 realtime_handler: RealtimeAudioSessionHandler,
+    def __init__(
+        self,
+        realtime_handler: RealtimeAudioSessionHandler,
         url: Optional[str] = None,
         key_credential: Optional[AzureKeyCredential] = None,
-        azure_deployment: Optional[str] = None,):
+        azure_deployment: Optional[str] = None,
+    ):
 
         self._realtime_handler = realtime_handler
 
         if url is None:
             if endpoint is None:
                 raise ValueError("No gpt4o endpoint provided")
-            self._client = RTClient(url=endpoint, azure_deployment=deployment, token_credential=DefaultAzureCredential())
+            self._client = RTClient(
+                url=endpoint, azure_deployment=deployment, token_credential=DefaultAzureCredential()
+            )
         else:
             logger.info("Using gpt4o deployment from user input")
             self._client = RTClient(url=url, azure_deployment=azure_deployment, key_credential=key_credential)
 
+        self.avatar_ws_client = None
+
     async def connect(self):
         await self._client.connect()
         await self._realtime_handler.on_session_created(self._client.session)
-
-    async def configure(self, session_config: rt_models.SessionUpdateParams):
-        return await self._client.configure(
+        if enable_avatar:
+            self.avatar_ws_client_session = aiohttp.ClientSession()
+            self.avatar_ws_client = await self.avatar_ws_client_session.ws_connect(f"wss://{avatar_service_host}/talking-avatar/live")
+            if self.avatar_ws_client.closed:
+                raise ConnectionError("Failed to connect to the avatar WebSocket service")
+    async def configure(self, session_config: rt_models.SessionUpdateParams) -> Session:
+        response = await self._client.configure(
             model=session_config.model,
             modalities=session_config.modalities,
             voice=session_config.voice,
@@ -51,29 +72,79 @@ class GPT4OClient:
             tools=session_config.tools,
             tool_choice=session_config.tool_choice,
             temperature=session_config.temperature,
-            max_response_output_tokens=session_config.max_response_output_tokens
+            max_response_output_tokens=session_config.max_response_output_tokens,
         )
+        if enable_avatar:
+            if not ice_servers[0]:
+                ice_servers[0] = await AzureAvatarClient().get_ice_servers()
+            response = Session(**response.model_dump())
+            self.ice_server = ice_servers[0]
+            response.ice_servers = [self.ice_server]
+        return response
 
     async def send_audio(self, audio_message: rt_models.InputAudioBufferAppendMessage):
         return await self._client._client.send(audio_message)
+
+    async def connect_avatar(self, client_description: str) -> str:
+        await self.avatar_ws_client.send_json(
+            {
+                "type": "session.update",
+                "session": {
+                    "avatar": {
+                        "character": "meg",
+                        "style": "formal",
+                    },
+                    "ice_servers": [
+                        {
+                            "urls": [self.ice_server.urls[0]],
+                            "username": self.ice_server.username,
+                            "credential": self.ice_server.credential,
+                        }
+                    ],
+                    "input_audio": {
+                        "sample_rate": 24000,
+                    },
+                },
+            }
+        )
+        r = await self.avatar_ws_client.receive()
+        logger.info(f"Received message: {r.data}")
+        await self.avatar_ws_client.send_json(
+            {"type": "webrtc.local.description", "local_description": client_description}
+        )
+        msg = await self.avatar_ws_client.receive()
+        return msg.json()["remote_description"]
 
     async def receive_message_item(self, message: rt_models.MessageItem, response_id: str):
         item_id = message.id
         async for m in message:
             if type(m) is rtclient.RTAudioContent:
-                await self._realtime_handler.on_response_content_part_added(response_id, item_id, m.content_index, m._part)
+                await self._realtime_handler.on_response_content_part_added(
+                    response_id, item_id, m.content_index, m._part
+                )
+
                 async def on_audio_chunk(chunks):
+                    if enable_avatar:
+                        await self.avatar_ws_client.send_json({"type": "audio.start", "turn_id": item_id})
                     async for a in chunks:
-                        await self._realtime_handler.on_audio_chunk(response_id, item_id, m.content_index, a)
+                        if enable_avatar:
+                            await self.avatar_ws_client.send_json(
+                                {"type": "audio.delta", "chunk": base64.b64encode(a).decode(), "turn_id": item_id}
+                            )
+                        else:
+                            await self._realtime_handler.on_audio_chunk(response_id, item_id, m.content_index, a)
+                    if enable_avatar:
+                        await self.avatar_ws_client.send_json({"type": "audio.end", "turn_id": item_id})
+
                 async def on_transcript_chunk(chunks):
                     async for t in chunks:
                         await self._realtime_handler.on_transcript_chunk(response_id, item_id, m.content_index, t)
+
                 await asyncio.gather(on_audio_chunk(m.audio_chunks()), on_transcript_chunk(m.transcript_chunks()))
             elif type(m) is rtclient.RTTextContent:
                 raise NotImplementedError
         await self._realtime_handler.on_response_content_part_done(response_id, item_id, m.content_index, m._part)
         await self._realtime_handler.on_response_output_item_done(response_id, message._item)
-
 
     async def receive_response(self, response: rtclient.RTResponse):
         await self._realtime_handler.on_response_created(response._response)
