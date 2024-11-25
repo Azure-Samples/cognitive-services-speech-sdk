@@ -24,8 +24,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.WebApi.Client" version="5.2.9" PrivateAssets="All" />
-    <PackageReference Include="Newtonsoft.Json" version="13.0.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" version="6.0.0" PrivateAssets="All" />
+    <PackageReference Include="Newtonsoft.Json" version="13.0.3" PrivateAssets="All" />
     <PackageReference Include="Polly" version="7.2.3" PrivateAssets="All" />
   </ItemGroup>
 </Project>

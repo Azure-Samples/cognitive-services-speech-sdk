@@ -5,7 +5,7 @@
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.8",
     "@testing-library/user-event": "^12.6.0",
-    "axios": "^0.21.1",
+    "axios": "^1.7.7",
     "bootstrap": "^4.5.3",
     "dotenv": "^8.2.0",
     "microsoft-cognitiveservices-speech-sdk": "^1.41",

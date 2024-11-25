@@ -8,18 +8,24 @@ from rtclient import RTClient
 import os
 from rtclient import models as rt_models
 from azure.identity.aio import DefaultAzureCredential
+from azure.core.credentials import AzureKeyCredential
 from realtime_audio_session_handler import RealtimeAudioSessionHandler
 import rtclient
 from azure_tts import Client as AzureTTSClient
 endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
 deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+key = os.getenv("AZURE_OPENAI_KEY")
 logger = logging.getLogger(__name__)
 
 
 class GPT4oAzureVoiceClient:
     def __init__(self, realtime_handler: RealtimeAudioSessionHandler):
-        self._rt_client = self._client = RTClient(
-            url=endpoint, azure_deployment=deployment, token_credential=DefaultAzureCredential())
+        if key:
+            self._rt_client = self._client = RTClient(
+                url=endpoint, azure_deployment=deployment, key_credential=AzureKeyCredential(key))
+        else:
+            self._rt_client = self._client = RTClient(
+                url=endpoint, azure_deployment=deployment, token_credential=DefaultAzureCredential())
         self._realtime_handler = realtime_handler
         self._tts_client = AzureTTSClient()
         self._voice = None
@@ -127,6 +133,7 @@ class GPT4oAzureVoiceClient:
 
     async def receive_input_item(self, item: rtclient.RTInputAudioItem):
         await self._realtime_handler.on_input_audio_buffer_speech_started(item.id, item.audio_start_ms)
+        self._tts_client.interrupt()
         await item
         await self._realtime_handler.on_input_audio_buffer_speech_stopped(item.id, item.audio_end_ms)
         if item.transcript:

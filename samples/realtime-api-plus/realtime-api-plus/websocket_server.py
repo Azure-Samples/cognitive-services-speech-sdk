@@ -11,6 +11,7 @@ from aiohttp import WSMsgType
 from aiohttp.web import Request, WebSocketResponse
 from azure.core.credentials import AzureKeyCredential
 from gpt4o_azure_voice_client import GPT4oAzureVoiceClient
+from gpt4o_azure_avatar_client import GPT4oAzureAvatarClient
 from gpt4o_client import GPT4OClient
 from realtime_audio_session_handler import RealtimeAudioSessionHandlerImpl
 from rtclient import models as rt_models
@@ -27,6 +28,8 @@ class RealtimeAudioSession(RealtimeAudioSessionHandlerImpl):
                 self._client = GPT4OClient(realtime_handler=self, url=gpt4o_endpoint, key_credential=AzureKeyCredential(aoai_api_key))
         elif deployment == "gpt4o-realtime-azure-voice":
             self._client = GPT4oAzureVoiceClient(realtime_handler=self)
+        elif deployment == "gpt4o-realtime-azure-avatar":
+            self._client = GPT4oAzureAvatarClient(realtime_handler=self)
         super().__init__()
 
     async def connect(self):
@@ -49,6 +52,9 @@ class RealtimeAudioSession(RealtimeAudioSessionHandlerImpl):
 
     async def receive_messages(self):
         asyncio.gather(self._client.receive_messages())
+
+    async def connect_avatar(self, client_description: str):
+        return await self._client.connect_avatar(client_description)
 
     async def close(self):
         await self._client.close()
@@ -79,7 +85,7 @@ class WebSocketServer:
         logger.info(f"Received config: {config}")
         session_config = custom_models.SessionUpdateParams.model_validate(config.get("session"))
         configure_response = await session.configure(session_config)
-        configure_response_message = rt_models.SessionUpdatedMessage(
+        configure_response_message = custom_models.SessionUpdatedMessage(
             session=configure_response,
             event_id="event_AIsUqs9MsJYCeO1U0rGEY"
         )
@@ -107,6 +113,15 @@ class WebSocketServer:
                         await session.generate_response()
                     case "input_audio_buffer.clear":
                         await session.clear_audio()
+                    case "extension.avatar.connect":
+                        client_description = payload.get("client_description")
+                        async def connect_avatar():
+                            remote_sdp = await session.connect_avatar(client_description)
+                            await ws.send_str(custom_models.AvatarConnectingMessage(
+                                server_description=remote_sdp,
+                                event_id="event_AIsUqs9MsJYCeO1U0rGEY"
+                            ).model_dump_json(exclude_none=True))
+                        asyncio.create_task(connect_avatar())
                     case _:
                         logger.warning(f"Unknown message type: {payload.get('type')}")
             elif msg.type == WSMsgType.ERROR:

@@ -74,27 +74,46 @@ namespace PostCallAnalytics
 
         internal static async Task AnalyzeAudioAsync(string speechKey, string speechRegion, FileInfo inputAudio, string openAiKey, string openAiEndpoint, string deploymentOrModelName)
         {
-            if (string.IsNullOrEmpty(speechKey) || string.IsNullOrEmpty(speechRegion) || (inputAudio == null || !inputAudio.Exists) || string.IsNullOrEmpty(openAiKey) || string.IsNullOrEmpty(openAiEndpoint) || string.IsNullOrEmpty(deploymentOrModelName))
-            {
-                Console.WriteLine("Error: missing required option");
-                return;
-            }
-
             var transcription = await TranscribeAsync(speechKey, speechRegion, inputAudio);
             Console.WriteLine($"Transcription: {transcription}");
 
-            var summary = await SummarizeAsync(openAiKey, openAiEndpoint, deploymentOrModelName, transcription);
-            Console.WriteLine($"Summary: {summary}");
+            if (!string.IsNullOrEmpty(openAiKey) && !string.IsNullOrEmpty(openAiEndpoint) && !string.IsNullOrEmpty(deploymentOrModelName))
+            {
+                var summary = await SummarizeAsync(openAiKey, openAiEndpoint, deploymentOrModelName, transcription);
+                Console.WriteLine($"Summary: {summary}");
+            }
+            else
+            {
+                Console.WriteLine($"Missing AOAI configuration. Skipping Summarization");
+            }
         }
 
         public async static Task<int> Main(string[] args)
         {
-            var inputAudio = new Option<FileInfo>(name: "--inputAudio", description: "Path to the audio file. Required.");
-            var speechKey = new Option<string>(name: "--speechKey", description: "Your Cognitive Services or Speech resource key. Required.");
-            var speechRegion = new Option<string>(name: "--speechRegion", description: "Your Cognitive Services or Speech resource region. Example: eastus, northeurope. Required.");
-            var openAiKey = new Option<string>(name: "--openAiKey", description: "Your Azure OpenAI resource key. Required.");
-            var openAiEndpoint = new Option<string>(name: "--openAiEndpoint", description: "Your Azure OpenAI resource endpoint. Required. Example: https://YourResourceName.openai.azure.com");
-            var openAiDeploymentName = new Option<string>(name: "--openAiDeploymentName", description: "Your Azure OpenAI deployment name. Example: my-gpt-4o-mini. Required.");
+            var inputAudio = new Argument<FileInfo>(name: "inputAudio", description: "Path to the audio file. Required.");
+
+            // Speech service is used for transcription.
+            var speechKey = new Option<string>(name: "--speechKey", description: "Your Cognitive Services or Speech resource key. Required.", getDefaultValue: () => Environment.GetEnvironmentVariable("SPEECH_KEY"));
+            speechKey.AddValidator(result =>
+            {
+                if (string.IsNullOrEmpty(result.GetValueForOption(speechKey)))
+                {
+                    result.ErrorMessage = $"Speech key is required. Set via --{speechKey.Name} or SPEECH_KEY environment variable.";
+                }
+            });
+            var speechRegion = new Option<string>(name: "--speechRegion", description: "Your Cognitive Services or Speech resource region. Example: eastus, northeurope. Required.", getDefaultValue: () => Environment.GetEnvironmentVariable("SPEECH_REGION"));
+            speechRegion.AddValidator(result =>
+            {
+                if (string.IsNullOrEmpty(result.GetValueForOption(speechRegion)))
+                {
+                    result.ErrorMessage = $"Speech region is required. Set via --{speechRegion.Name} or SPEECH_REGION environment variable.";
+                }
+            });
+
+            // AOAI is used for summarization. This step is optional.
+            var openAiKey = new Option<string>(name: "--openAiKey", description: "Your Azure OpenAI resource key. Optional.", getDefaultValue: () => Environment.GetEnvironmentVariable("AOAI_KEY"));
+            var openAiEndpoint = new Option<string>(name: "--openAiEndpoint", description: "Your Azure OpenAI resource endpoint. Optional. Example: https://YourResourceName.openai.azure.com", getDefaultValue: () => Environment.GetEnvironmentVariable("AOAI_ENDPOINT"));
+            var openAiDeploymentName = new Option<string>(name: "--openAiDeploymentName", description: "Your Azure OpenAI deployment name. Example: my-gpt-4o-mini. Optional.", getDefaultValue: () => Environment.GetEnvironmentVariable("AOAI_DEPLOYMENT_NAME"));
 
             var rootCommand = new RootCommand()
             {
