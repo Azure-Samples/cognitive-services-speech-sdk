@@ -3,7 +3,7 @@
 ACTION=$1
 DOTNET_PATH="dotnet"
 DOTNET_VERSION="6.0"
-DOTNET_TEMP_DIR="$TEMP/dotnet"
+DOTNET_TEMP_DIR="${TEMP:-/tmp}/dotnet"
 DOTNET_TEMP_PATH="$DOTNET_TEMP_DIR/dotnet"
 
 function is_dotnet_meet_requirement {
@@ -36,10 +36,6 @@ function install_dotnet6 {
     fi
 
     export PATH="$PATH:$DOTNET_TEMP_DIR"
-    echo "Added .NET SDK to PATH."
-
-    # Print updated PATH for verification
-    echo "Updated PATH: $PATH"
 
     echo ".NET 6.0 installed successfully."
     rm -f dotnet-install.sh
@@ -54,17 +50,21 @@ function test_gstreamer {
 }
 
 if [[ "$ACTION" == "configure" ]]; then
-    if ! is_dotnet_meet_requirement; then
+    echo "Installing Linux dependencies..."
+    sudo apt-get update
+    sudo apt-get install -y libssl-dev libasound2
+    
+    # Install .NET SDK if it's not already installed or version is less than 6.0
+    if ! command -v dotnet &> /dev/null || [[ "$(dotnet --version)" < "6.0" ]]; then
         install_dotnet6
     else
-        echo "The machine already has .NET 6.0."
+        echo ".NET SDK 6.0 is already installed"
     fi
     test_gstreamer
 elif [[ "$ACTION" == "build" ]]; then
-    echo "Running command: $DOTNET_PATH build ./captioning.sln"
-    $DOTNET_PATH build ./captioning.sln
-    if [[ $? -ne 0 ]]; then
-        echo "Build failed, exiting with status 1." >&2
+    dotnet build ./captioning.sln
+    if [ $? -ne 0 ]; then
+        echo "Build failed, exiting..."
         exit 1
     fi
 elif [[ "$ACTION" == "run" ]]; then
