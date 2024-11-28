@@ -127,9 +127,20 @@ def chatting_from_file():
     sample_sentence1 = "OK the movie i like to talk about is the cove it is very say phenomenal sensational documentary about adopting hunting practices in japan i think the director is called well i think the name escapes me anyway but well let's talk about the movie basically it's about dolphin hunting practices in japan there's a small village where where villagers fisherman Q almost twenty thousand dolphins on a yearly basis which is brutal and just explain massacre this book has influenced me a lot i still remember the first time i saw this movie i think it was in middle school one of my teachers showed it to all the class or the class and i remember we were going through some really boring topics like animal protection at that time it was really boring to me but right before everyone was going to just sleep in the class the teacher decided to put the textbook down and show us a clear from this document documentary we were shocked speechless to see the has of the dolphins chopped off and left on the beach and the C turning bloody red with their blood which is i felt sick i couldn't need fish for a whole week and it was lasting impression if not scarring impression and i think this movie is still very meaningful and it despite me a lot especially on wildlife protection dolphins or search beautiful intelligent animals of the sea and why do villagers and fishermen in japan killed it i assume there was a great benefit to its skin or some scientific research but the ironic thing is that they only kill them for the meat because the meat taste great that sickens me for awhile and i think the book inspired me to do a lot of different to do a lot of things about well i protection i follow news like"
     sample_sentence2 = "yes i can speak how to this movie is it is worth young wolf young man this is this movie from korea it's a crime movies the movies on the movies speaker speaker or words of young man love hello a cow are you saying they end so i have to go to the go to the america or ha ha ha lots of years a go on the woman the woman is very old he talk to korea he carpool i want to go to the this way this whole home house this house is a is hey so what's your man and at the end the girl cause so there's a woman open open hum finally finds other wolf so what's your young man so the young man don't so yeah man the young man remember he said here's a woman also so am i it's very it's very very sad she is she is a crack credit thank you "
     sample_sentence3 = "yes i want i want to talk about the TV series are enjoying watching a discount name is a friends and it's uh accommodate in the third decades decades an it come out the third decades and its main characters about a six friends live in the NYC but i watched it a long time ago i can't remember the name of them and the story is about what they are happening in their in their life and there are many things treating them and how the friendship are hard friendship and how the french how the strong strongly friendship they obtain them and they always have some funny things happen they only have happened something funny things and is a comedy so that was uh so many and i like this be cause of first adult cause it has a funding it has a farming serious and it can improve my english english words and on the other hand it can i can know about a lot of cultures about the united states and i i first hear about death TV series it's come out of a website and i took into and i watch it after my after my finish my studies and when i was a bad mood when i when i'm in a bad mood or i "
+    type_of_feedback = {
+        "comment_on_vocabulary": "lexical",
+        "comment_on_grammar": "grammatical",
+    }
 
-    def get_request_data(send_text, scenario=Literal["chat", "assess"]):
-        if scenario == "assess":
+    def get_request_data(send_text, scenario=Literal["chat", "content_assess", "comment_on_vocabulary", "comment_on_grammar"]):
+        promptForFeedback = (
+            'From a professional perspective, provide a {type_of_feedback} evaluation of the following passage: "{passage}" First, give a summary evaluation, then list the issues and provide suggestions, keeping it within 50 words. output format as '
+            '"Summary Evaluation: *'
+            'Issues and Suggestions:'
+            '  1. *'
+            '  ..."'
+        )
+        if scenario == "content_assess":
             data = [
                 {
                     "role": "system",
@@ -148,6 +159,16 @@ def chatting_from_file():
                 }
             ]
             return data
+        elif scenario == "comment_on_vocabulary":
+            return [{
+                "role": "user",
+                "content": promptForFeedback.format(type_of_feedback=type_of_feedback["comment_on_vocabulary"], passage=send_text)
+            }]
+        elif scenario == "comment_on_grammar":
+            return [{
+                "role": "user",
+                "content": promptForFeedback.format(type_of_feedback=type_of_feedback["comment_on_grammar"], passage=send_text)
+            }]
         else:
             chat_history.append(
                 {
@@ -190,7 +211,7 @@ def chatting_from_file():
         print("YOU: ", text)
         return text
 
-    def call_gpt(send_text, scenario=Literal["chat", "assess"]):
+    def call_gpt(send_text, scenario=Literal["chat", "content_assess", "comment_on_vocabulary", "comment_on_grammar"]):
         url = (
             f"https://{oai_resource_name}.openai.azure.com/openai/deployments/{oai_deployment_name}/"
             f"chat/completions?api-version={oai_api_version}"
@@ -317,7 +338,7 @@ def chatting_from_file():
         push_stream_writer_thread.join()
 
         # Get content scores
-        content_result = json.loads(call_gpt(display_text, "assess"))
+        content_result = json.loads(call_gpt(display_text, "content_assess"))
 
         durations_sum = sum([d for w, d in zip(recognized_words, durations) if w.error_type == "None"])
 
@@ -365,7 +386,8 @@ def chatting_from_file():
                 if word["PronunciationAssessment"]["ErrorType"] == "Mispronunciation"
                 or word["PronunciationAssessment"]["AccuracyScore"] < 60
             ],
-            merged_audio_path
+            merged_audio_path,
+            display_text
         )
 
     def set_punctuation(json_words, display_text):
@@ -374,7 +396,7 @@ def chatting_from_file():
                 json_words[idx]["has_punctuation"] = True
         return json_words
 
-    def comment_result(scores_dict, json_words, mis_pronunciation_words, merged_audio_path):
+    def comment_result(scores_dict, json_words, mis_pronunciation_words, merged_audio_path, content):
         message_dict = {
             "Excellent": [],
             "Good": [],
@@ -434,18 +456,18 @@ def chatting_from_file():
             for error_type in error_types:
                 if len(error_dict[error_type]) != 0:
                     message += f"{error_type} count is {len(error_dict[error_type])}. near the word "
-                    message += f"{' '.join([word['Word'].strip() for word in error_dict[error_type]])}. "
+                    message += f"{', '.join([word['Word'].strip() for word in error_dict[error_type]])}. "
 
             return message
 
-        def get_report(json_words, mis_pronunciation_words, merged_audio_path):
+        def get_report(json_words, mis_pronunciation_words, merged_audio_path, content):
 
             set_error_dict(json_words)
 
             report_audio_list = []
-            accuracy_report_audio_list = []
             report_path = "output/chat_report.wav"
             if len(mis_pronunciation_words) != 0:
+                accuracy_report_audio_list = []
                 accuracy_report_path = "output/accuracy_report.wav"
                 for idx, mis_word in enumerate(mis_pronunciation_words):
                     origin_content = ""
@@ -482,6 +504,12 @@ def chatting_from_file():
                 tts(origin_content, fluency_prosody_report_path)
                 report_audio_list.append(fluency_prosody_report_path)
 
+            if content.strip() != "":
+                vocabulary_feedback_path = "output/vocabulary_feedback.wav"
+                grammar_feedback_path = "output/grammar_feedback.wav"
+                tts(call_gpt(content, "comment_on_vocabulary"), vocabulary_feedback_path, "vocabulary feedback")
+                tts(call_gpt(content, "comment_on_grammar"), grammar_feedback_path, "grammar feedback")
+
             merge_wav(report_audio_list, report_path, "report")
 
         def get_score_comment(scores_dict):
@@ -497,7 +525,7 @@ def chatting_from_file():
             tts(messages, "output/chat_score_comment.wav", "score comment")
 
         get_score_comment(scores_dict)
-        get_report(json_words, mis_pronunciation_words, merged_audio_path)
+        get_report(json_words, mis_pronunciation_words, merged_audio_path, content)
 
     if not os.path.exists("output"):
         os.makedirs("output")
