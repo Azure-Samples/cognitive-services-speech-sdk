@@ -2,7 +2,19 @@
 
 ## Getting Started
 
-> Note: the following is not a step by step instructions, but a high level overview of the deployment process.
+> Note: most browsers only support localhost or https for the microphone. So please ensure you are using https or localhost to access the webpage.
+
+You have a few options foe getting started with this project.
+
+### Option 1: Build dockers and run locally
+
+Fill the environment variables in the `docker-compose.yml` file.
+
+```sh
+docker compose up
+```
+
+### Option 1: Deploy to Azure Container APP
 
 1. Build the docker and push it to the Azure Container Registry.
    - e.g., `docker build . -t xx.azurecr.io/full-duplex-bot --progress=plain --push`

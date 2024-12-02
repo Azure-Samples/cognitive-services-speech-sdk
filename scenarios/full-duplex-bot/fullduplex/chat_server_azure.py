@@ -27,8 +27,8 @@ token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://co
 SPEECH_REGION = os.getenv("SPEECH_REGION")
 SPEECH_RESOURCE_ID = os.getenv("SPEECH_RESOURCE_ID")
 
-if not SPEECH_REGION or not SPEECH_RESOURCE_ID:
-    raise EnvironmentError("SPEECH_REGION and SPEECH_RESOURCE_ID environment variables must be set")
+if not SPEECH_REGION and not SPEECH_RESOURCE_ID:
+    raise EnvironmentError("SPEECH_REGION or SPEECH_RESOURCE_ID environment variables must be set")
 
 loop = asyncio.new_event_loop()
 

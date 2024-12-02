@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 WEBSOCKET_URL = os.environ.get("WEBSOCKET_URL")
 
 if not WEBSOCKET_URL:
-    raise ValueError("WEBSOCKET_URL environment variable is not set")
+    raise ValueError("WEBSOCKET_URL must be set")
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")

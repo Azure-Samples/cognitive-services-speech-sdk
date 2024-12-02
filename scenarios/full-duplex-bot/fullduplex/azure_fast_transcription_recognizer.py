@@ -121,6 +121,10 @@ class AzureFastTranscriptionRecognizer:
         )
         self._locale = "en-US"
 
+    @classmethod
+    def cache_model(cls):
+        torch.hub.load("snakers4/silero-vad", "silero_vad")
+
     @property
     def locale(self):
         return self._locale

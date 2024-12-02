@@ -15,6 +15,8 @@ RUN poetry install --no-dev --no-root
 
 COPY fullduplex /app
 
+RUN python3 cache.py
+
 ENV FORWARDED_ALLOW_IPS="*"
 
 ENTRYPOINT [ "uvicorn", "webapp:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers" ]
