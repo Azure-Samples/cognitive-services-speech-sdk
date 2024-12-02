@@ -30,11 +30,6 @@ SPEECH_RESOURCE_ID = os.getenv("SPEECH_RESOURCE_ID")
 if not SPEECH_REGION or not SPEECH_RESOURCE_ID:
     raise EnvironmentError("SPEECH_REGION and SPEECH_RESOURCE_ID environment variables must be set")
 
-# SPEECH_ENDPOINT = "wss://{}.sr.speech.microsoft.com/speech/recognition/dictation/bingchat/v1"
-# SPEECH_ENDPOINT_URL = SPEECH_ENDPOINT.format(SPEECH_REGION)
-
-# loop = asyncio.get_running_loop()
-
 loop = asyncio.new_event_loop()
 
 class AzureChatServer:

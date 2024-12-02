@@ -19,6 +19,8 @@
          - `SPEECH_RESOURCE_ID`
          - `AZURE_OPENAI_ENDPOINT`
          - `AZURE_CLIENT_ID` (optional)
+      4. Choose SR provider (optional). We support Azure real-time SR and Azure fast transcription as the SR provider. If you want to use Azure fast transcription, you need to set the following env variable:
+         - `SPEECH_RECOGNIZER_PROVIDER` to `azure-fast-transcription`
 
    5. Get the ingress DNS of the WebSocket server, and set it in the webpage.
       1. `WEBSOCKET_URL`
