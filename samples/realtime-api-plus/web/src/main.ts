@@ -337,5 +337,16 @@ function setupPeerConnection() {
 
   peerConnection.addTransceiver('video', { direction: 'sendrecv' });
   peerConnection.addTransceiver('audio', { direction: 'sendrecv' });
+
+  peerConnection.addEventListener("datachannel", event => {
+    const dataChannel = event.channel
+    dataChannel.onmessage = e => {
+        console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+    }
+    dataChannel.onclose = () => {
+      console.log("Data channel closed");
+    };
+  });
+  peerConnection.createDataChannel("eventChannel")
 }
 // guessIfIsAzureOpenAI();

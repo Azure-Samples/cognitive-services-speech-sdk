@@ -11,11 +11,11 @@ import aiohttp
 import rtclient
 from azure.core.credentials import AzureKeyCredential
 from azure.identity.aio import DefaultAzureCredential
+from azure_avatar import Client as AzureAvatarClient
+from data_models import Session
 from realtime_audio_session_handler import RealtimeAudioSessionHandler
 from rtclient import RTClient
 from rtclient import models as rt_models
-from data_models import Session
-from azure_avatar import Client as AzureAvatarClient
 
 logger = logging.getLogger(__name__)
 endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
@@ -23,7 +23,11 @@ key = os.getenv("AZURE_OPENAI_KEY")
 deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 # note: gpt4o real-time + avatar (audio driven) is in preview
 enable_avatar = os.getenv("ENABLE_AVATAR")
-avatar_service_host = os.getenv("AVATAR_SERVICE_HOST")
+avatar_service_host = os.getenv("AVATAR_SERVICE_HOST", "")
+if enable_avatar and not avatar_service_host:
+    raise ValueError("Avatar service host must be set")
+if not avatar_service_host.startswith("ws"):
+    avatar_service_host = f"wss://{avatar_service_host}"
 
 ice_servers = [None]
 
@@ -38,13 +42,16 @@ class GPT4OClient:
     ):
 
         self._realtime_handler = realtime_handler
+        self._token_credential = DefaultAzureCredential()
 
         if url is None:
             if endpoint is None:
                 raise ValueError("No gpt4o endpoint provided")
-            self._client = RTClient(
-                url=endpoint, azure_deployment=deployment, token_credential=DefaultAzureCredential()
-            )
+            logger.info("Using gpt4o endpoint from environment variables")
+            if key:
+                self._client = RTClient(url=endpoint, azure_deployment=deployment, key_credential=AzureKeyCredential(key))
+            else:
+                self._client = RTClient(url=endpoint, azure_deployment=deployment, token_credential=self._token_credential)
         else:
             logger.info("Using gpt4o deployment from user input")
             self._client = RTClient(url=url, azure_deployment=azure_deployment, key_credential=key_credential)
@@ -55,10 +62,19 @@ class GPT4OClient:
         await self._client.connect()
         await self._realtime_handler.on_session_created(self._client.session)
         if enable_avatar:
-            self.avatar_ws_client_session = aiohttp.ClientSession()
-            self.avatar_ws_client = await self.avatar_ws_client_session.ws_connect(f"wss://{avatar_service_host}/talking-avatar/live")
+            auth = await self._get_auth()
+            self.avatar_ws_client_session = aiohttp.ClientSession(headers=auth)
+            self.avatar_ws_client = await self.avatar_ws_client_session.ws_connect(
+                f"{avatar_service_host}/talking-avatar/live"
+            )
             if self.avatar_ws_client.closed:
                 raise ConnectionError("Failed to connect to the avatar WebSocket service")
+
+    async def _get_auth(self):
+        scope = "https://cognitiveservices.azure.com/.default"
+        token = await self._token_credential.get_token(scope)
+        return {"Authorization": f"Bearer {token.token}"}
+
     async def configure(self, session_config: rt_models.SessionUpdateParams) -> Session:
         response = await self._client.configure(
             model=session_config.model,
@@ -163,6 +179,8 @@ class GPT4OClient:
 
     async def receive_input_item(self, item: rtclient.RTInputAudioItem):
         await self._realtime_handler.on_input_audio_buffer_speech_started(item.id, item.audio_start_ms)
+        if enable_avatar:
+            await self.avatar_ws_client.send_json({"type": "input.interrupt"})
         await item
         await self._realtime_handler.on_input_audio_buffer_speech_stopped(item.id, item.audio_end_ms)
         if item.transcript:
@@ -182,3 +200,6 @@ class GPT4OClient:
 
     async def close(self):
         await self._client.close()
+        if enable_avatar:
+            await self.avatar_ws_client.close()
+            await self.avatar_ws_client_session.close()
