@@ -18,6 +18,8 @@ RUN poetry install --no-dev --no-root
 
 COPY realtime-api-plus /app
 
+EXPOSE 8080
+
 ENTRYPOINT [ "python3", "app.py" ]
 
 FROM mcr.microsoft.com/azurelinux/base/nodejs:20 AS web-builder

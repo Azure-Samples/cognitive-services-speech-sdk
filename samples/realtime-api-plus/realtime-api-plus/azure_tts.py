@@ -120,11 +120,13 @@ class Client:
 
         self.voice = voice
 
+        endpoint = endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/{endpoint_version}?debug=3&trafficType=AzureSpeechRealtime"
+
         if SPEECH_KEY:
-            self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
+            self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, endpoint=endpoint)
         else:
             auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
-            self.speech_config = speechsdk.SpeechConfig(endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/{endpoint_version}?debug=3&trafficType=AzureSpeechRealtime")
+            self.speech_config = speechsdk.SpeechConfig(endpoint=endpoint)
         self.speech_config.speech_synthesis_voice_name = voice
         self.speech_config.endpoint_id = self.endpoint_id
         self.speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm)

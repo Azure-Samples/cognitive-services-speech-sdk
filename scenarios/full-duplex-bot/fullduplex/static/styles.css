@@ -1,0 +1,165 @@
+#controlMessagesLog {
+    font-family: Arial, sans-serif;
+    margin: 10px 0;
+    padding: 20px;
+    max-width: 700px;
+    height: 70vh;
+    /* Make container take the full viewport height */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow-y: auto;
+}
+
+
+body {
+    font-family: 'Arial', sans-serif;
+    /* Default font family for the body */
+}
+
+
+.message {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    /* Smaller font size */
+    color: #888;
+    margin-bottom: 4px;
+    /* Space between header and message box */
+}
+
+.message-header .role {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.message-header .timestamp {
+    font-size: 0.8rem;
+    /* Smaller font size */
+    color: #888;
+}
+
+.message-content {
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 75%;
+    word-wrap: break-word;
+    position: relative;
+}
+
+.recognized {
+    align-items: flex-end;
+}
+
+.user-message {
+    background-color: #e0f7fa;
+    color: #00796b;
+}
+
+.ai-response {
+    align-items: flex-start;
+}
+
+.ai-message {
+    background-color: #ffeb3b;
+    color: #f57f17;
+}
+
+.system-message {
+    color: #888;
+    /* Subtle color for hint text */
+    font-size: 0.75rem;
+    /* Smaller font size for hint */
+    text-align: left;
+    /* Centered text */
+    margin: 0;
+    /* No additional margin */
+    padding: 0;
+    /* No padding */
+    background-color: transparent;
+    /* Remove background color */
+    border: none;
+    /* Remove any borders */
+}
+
+.unknown {
+    background-color: #ffcdd2;
+    color: #d32f2f;
+    align-self: center;
+    max-width: 80%;
+    text-align: center;
+}
+
+.latency {
+    font-weight: bold;
+    color: #9b41ad;
+    /* Highlight color for latency */
+}
+
+.error {
+    background-color: #ffebee;
+    color: #d32f2f;
+    align-self: center;
+    max-width: 80%;
+    text-align: center;
+}
+
+.message::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 10px solid transparent;
+}
+
+.message.user-message::before {
+    border-left: 10px solid #e0f7fa;
+    /* Color for user-message */
+    left: -10px;
+}
+
+.message.ai-message::before {
+    border-left: 10px solid #ffeb3b;
+    /* Color for ai-message */
+    right: -10px;
+}
+
+.status {
+    font-weight: 600;
+    color: #181c18;
+}
+
+.status-connected {
+    color: #107c10;
+}
+
+.status-disconnected {
+    color: #bb6724;
+}
+
+.status-error {
+    color: #a80000;
+}
+
+.select-container {
+    display: flex;
+    gap: 20px;
+}
+
+.select-container label {
+    display: block;
+}
+
+.select-container fluent-button {
+    width: 80px
+}
