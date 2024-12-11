@@ -47,14 +47,13 @@ class Client:
             endpoint_prefix = "voice"
 
         self.voice = voice
+        endpoint = f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/v1?trafficType=RealtimePlus&enableTalkingAvatar=true"
 
         if SPEECH_KEY:
-            self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
+            self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, endpoint=endpoint)
         else:
             auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
-            self.speech_config = speechsdk.SpeechConfig(
-                endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/v1?debug=3&trafficType=AzureSpeechRealtime&enableTalkingAvatar=true"
-        )
+            self.speech_config = speechsdk.SpeechConfig(endpoint=endpoint)
         self.speech_config.speech_synthesis_voice_name = voice
         self.speech_config.endpoint_id = endpoint_id
         self.speech_config.set_speech_synthesis_output_format(
