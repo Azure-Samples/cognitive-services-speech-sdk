@@ -13,7 +13,7 @@ namespace BatchClient
     {
         public Task<PaginatedTranscriptions> GetTranscriptionsAsync()
         {
-            var path = $"{this.speechToTextBasePath}transcriptions";
+            var path = $"{this.speechToTextBasePath}transcriptions?api-version={this.apiVersion}";
             return this.GetAsync<PaginatedTranscriptions>(path);
         }
 
@@ -69,7 +69,7 @@ namespace BatchClient
                 throw new ArgumentNullException(nameof(transcription));
             }
 
-            var path = $"{this.speechToTextBasePath}transcriptions/";
+            var path = $"{this.speechToTextBasePath}transcriptions:submit?api-version={this.apiVersion}";
 
             return this.PostAsJsonAsync<Transcription, Transcription>(path, transcription);
         }

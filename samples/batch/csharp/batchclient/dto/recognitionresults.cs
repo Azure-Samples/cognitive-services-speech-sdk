@@ -17,6 +17,8 @@ namespace BatchClient
 
         public long DurationInTicks { get; set; }
 
+        public long DurationMilliseconds { get; set; }
+
         [JsonConverter(typeof(TimeSpanConverter))]
         public TimeSpan Duration { get; set; }
 

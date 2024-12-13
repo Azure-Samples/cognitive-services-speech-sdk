@@ -9,6 +9,7 @@ import { LowLevelRTClient, SessionUpdateMessage, Voice } from "rt-client";
 let realtimeStreaming: LowLevelRTClient;
 let audioRecorder: Recorder;
 let audioPlayer: Player;
+let peerConnection: RTCPeerConnection;
 
 async function start_realtime(endpoint: string, apiKey: string, deploymentOrModel: string) {
   realtimeStreaming = new LowLevelRTClient(new URL(endpoint), { key: apiKey }, { deployment: deploymentOrModel });
@@ -67,6 +68,29 @@ async function handleRealtimeMessages() {
         makeNewTextBlock("<< Session Started >>");
         makeNewTextBlock();
         break;
+      case "session.updated":
+        if (message.session?.ice_servers) {
+          console.log("Received ICE servers" + JSON.stringify(message.session.ice_servers));
+          consoleLog += " " + JSON.stringify(message.session.ice_servers);
+          peerConnection = new RTCPeerConnection({ iceServers: message.session.ice_servers });
+
+          setupPeerConnection();
+          peerConnection.onicegatheringstatechange = (): void => {
+            if (peerConnection.iceGatheringState === "complete") {
+            }
+          };
+
+          const sdp = await peerConnection.createOffer();
+          await peerConnection.setLocalDescription(sdp);
+          // sleep 2 seconds to wait for ICE candidates to be gathered
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          console.log("getting local description" + JSON.stringify(peerConnection.localDescription));
+          await realtimeStreaming.send({
+            type: "extension.avatar.connect",
+            client_description: btoa(JSON.stringify(peerConnection.localDescription)),
+          });
+        }
+        break;
       case "response.audio_transcript.delta":
         appendToTextBlock(message.delta);
         break;
@@ -89,6 +113,12 @@ async function handleRealtimeMessages() {
         break;
       case "response.done":
         formReceivedTextContainer.appendChild(document.createElement("hr"));
+        break;
+      case "extension.avatar.connecting":
+        const sdpAnswer: RTCSessionDescription = new RTCSessionDescription(
+          JSON.parse(atob(message.server_description)) as RTCSessionDescriptionInit,
+        );
+        await peerConnection.setRemoteDescription(sdpAnswer);
         break;
       default:
         consoleLog = JSON.stringify(message, null, 2);
@@ -167,6 +197,7 @@ const formSessionInstructionsField =
   document.querySelector<HTMLTextAreaElement>("#session-instructions")!;
 const formTemperatureField = document.querySelector<HTMLInputElement>("#temperature")!;
 const formVoiceSelection = document.querySelector<HTMLInputElement>("#voice")!;
+const formAvatarVideo = document.getElementById('remoteVideo')!;
 
 let latestInputSpeechBlock: Element;
 
@@ -181,6 +212,7 @@ function setFormInputState(state: InputState) {
   formStartButton.disabled = state != InputState.ReadyToStart;
   formStopButton.disabled = state != InputState.ReadyToStop;
   formSessionInstructionsField.disabled = state != InputState.ReadyToStart;
+  formVoiceSelection.disabled = state != InputState.ReadyToStart;
 }
 
 function getSystemMessage(): string {
@@ -247,29 +279,31 @@ formDeploymentOrModelField.addEventListener("change", async () => {
     }
     formVoiceSelection.value = "";
   } else {
+    const cnvVoice = import.meta.env.VITE_CNV_VOICE;
     const voiceOptions = [
-      // { id: 'en-us-ava:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Ava (HD)'},
-      // { id: 'en-us-steffan:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Steffan (HD)'},
-      // { id: 'en-us-andrew:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Andrew (HD)'},
-      // { id: 'zh-cn-xiaochen:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Xiaochen (HD)'},
-      // { id: 'en-us-emma:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Emma (HD)'},
-      // { id: 'en-us-emma2:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Emma (HD 2)'},
-      // { id: 'en-us-andrew2:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Andrew (HD 2)'},
-      // { id: 'de-DE-Seraphina:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Seraphina (HD)'},
-      // { id: 'en-us-aria:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Aria (HD)'},
-      // { id: 'en-us-davis:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Davis (HD)'},
-      // { id: 'en-us-jenny:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Jenny (HD)'},
-      // { id: 'ja-jp-masaru:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Masaru (HD)'},
+      { id: 'en-us-ava:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Ava (HD)'},
+      { id: 'en-us-steffan:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Steffan (HD)'},
+      { id: 'en-us-andrew:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Andrew (HD)'},
+      { id: 'zh-cn-xiaochen:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Xiaochen (HD)'},
+      { id: 'en-us-emma:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Emma (HD)'},
+      { id: 'en-us-emma2:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Emma (HD 2)'},
+      { id: 'en-us-andrew2:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Andrew (HD 2)'},
+      { id: 'de-DE-Seraphina:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Seraphina (HD)'},
+      { id: 'en-us-aria:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Aria (HD)'},
+      { id: 'en-us-davis:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Davis (HD)'},
+      { id: 'en-us-jenny:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Jenny (HD)'},
+      { id: 'ja-jp-masaru:DragonHDLatestNeural', name: 'DragonHDLatestNeural, Masaru (HD)'},
       { id: 'en-US-AvaNeural', name: 'Ava' },
-      // { id: 'en-US-AvaMultilingualNeural', name: 'Ava Multilingual' },
+      { id: 'en-US-AvaMultilingualNeural', name: 'Ava Multilingual' },
       { id: 'en-US-AlloyTurboMultilingualNeural', name: 'Alloy Turbo Multilingual'},
       { id: 'en-US-AndrewNeural', name: 'Andrew' },
-      // { id: 'en-US-AndrewMultilingualNeural', name: 'Andrew Multilingual' },
-      // { id: 'en-US-BrianMultilingualNeural', name: 'Brian Multilingual' },
+      { id: 'en-US-AndrewMultilingualNeural', name: 'Andrew Multilingual' },
+      { id: 'en-US-BrianMultilingualNeural', name: 'Brian Multilingual' },
       { id: 'en-US-EmmaMultilingualNeural', name: 'Emma Multilingual' },
       { id: 'en-US-NovaTurboMultilingualNeural', name: 'Nova Turbo Multilingual'},
       { id: 'zh-CN-XiaoxiaoMultilingualNeural', name: 'Xiaoxiao Multilingual' },
-      // { id: 'CNV:GirlFillerNeural', name: 'TAL Girl (Custom Neural Voice)' },
+      { id: 'en-US-JennyNeural', name: 'Jenny' },
+      { id: 'CNV:' + cnvVoice, name: cnvVoice + ' (Custom Neural Voice)' },
     ];
 
     function generateOptions() {
@@ -284,4 +318,35 @@ formDeploymentOrModelField.addEventListener("change", async () => {
   }
 });
 
+
+function setupPeerConnection() {
+  // Clean up existing video element if there is any
+  for (var i = 0; i < formAvatarVideo.childNodes.length; i++) {
+    formAvatarVideo.removeChild(formAvatarVideo.childNodes[i])
+  }
+
+  peerConnection.ontrack = function (event) {
+    const mediaPlayer = document.createElement(event.track.kind) as HTMLMediaElement
+    mediaPlayer.id = event.track.kind
+    mediaPlayer.srcObject = event.streams[0]
+    mediaPlayer.autoplay = true
+    formAvatarVideo.appendChild(mediaPlayer)
+    // document.getElementById('videoLabel').hidden = true
+    // document.getElementById('overlayArea').hidden = false
+  }
+
+  peerConnection.addTransceiver('video', { direction: 'sendrecv' });
+  peerConnection.addTransceiver('audio', { direction: 'sendrecv' });
+
+  peerConnection.addEventListener("datachannel", event => {
+    const dataChannel = event.channel
+    dataChannel.onmessage = e => {
+        console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
+    }
+    dataChannel.onclose = () => {
+      console.log("Data channel closed");
+    };
+  });
+  peerConnection.createDataChannel("eventChannel")
+}
 // guessIfIsAzureOpenAI();

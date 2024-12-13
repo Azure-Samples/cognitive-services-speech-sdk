@@ -20,6 +20,7 @@ namespace BatchClient
 
         private readonly HttpClient client;
         private readonly string speechToTextBasePath;
+        private readonly string apiVersion;
 
         private static AsyncRetryPolicy<HttpResponseMessage> transientFailureRetryingPolicy = Policy
             .Handle<HttpRequestException>()
@@ -30,13 +31,14 @@ namespace BatchClient
                 Console.WriteLine($"Request failed with {result.Exception?.ToString() ?? result.Result?.StatusCode.ToString()}. Waiting {timeSpan} before next retry. Retry attempt {retryCount}");
             });
 
-        private BatchClient(HttpClient client)
+        private BatchClient(HttpClient client, string apiVersion)
         {
             this.client = client;
-            speechToTextBasePath = "speechtotext/v3.2/";
+            this.speechToTextBasePath = "speechtotext/";
+            this.apiVersion = apiVersion;
         }
 
-        public static BatchClient CreateApiV3Client(string key, string hostName)
+        public static BatchClient CreateApiClient(string key, string hostName, string apiVersion)
         {
             var client = new HttpClient();
             client.Timeout = TimeSpan.FromMinutes(25);
@@ -44,7 +46,7 @@ namespace BatchClient
 
             client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", key);
 
-            return new BatchClient(client);
+            return new BatchClient(client, apiVersion);
         }
 
         private async Task<TResponse> PostAsJsonAsync<TPayload, TResponse>(string path, TPayload payload)

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Full Duplex Bot</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='styles.css') }}?v=0.2"
+    />
+    <script
+      type="module"
+      src="https://unpkg.com/@fluentui/web-components"
+    ></script>
+  </head>
+
+  <body>
+    <hr />
+    <div class="select-container">
+      <div>
+        <label for="voice">Select AI voice:</label>
+        <br />
+        <fluent-select id="voiceSelect" onselect="voiceChanged"></fluent-select>
+        <br />
+        <br />
+      </div>
+      <div>
+        <label for="langSelect">Select your spoken language:</label>
+        <br />
+        <fluent-select id="langSelect" onselect="langChanged">
+          <fluent-option value="en-US">English</fluent-option>
+          <fluent-option value="zh-CN">Chinese</fluent-option>
+          <fluent-option value="hi-IN">Hindi</fluent-option>
+          <fluent-option value="ta-IN">Tamil</fluent-option>
+        </fluent-select>
+      </div>
+    </div>
+    <br />
+    <fluent-button id="startButton" appearance="accent">Start</fluent-button>
+    <fluent-button id="stopButton" appearance="primary" disabled>
+      Stop
+    </fluent-button>
+    <p>
+      <small>
+        Buffer size:
+        <span id="bufferSizeDisplay">0</span>
+        bytes | WebSocket Status:
+        <span id="webSocketStatusElement" class="status status-disconnected">
+          Disconnected
+        </span>
+      </small>
+    </p>
+    <hr />
+    <!-- Add a section to display control messages log -->
+    Control Messages Log:
+    <div id="controlMessagesLog"></div>
+
+    <script src="{{ url_for('static', path='message_formatter.js') }}?v=0"></script>
+    <script>
+      let audioContextIn;
+      let audioContextOut;
+      const startButton = document.getElementById("startButton");
+      const voiceSelect = document.getElementById("voiceSelect");
+      const langSelect = document.getElementById("langSelect");
+      const bufferSizeDisplay = document.getElementById("bufferSizeDisplay");
+      const webSocketStatusElement = document.getElementById(
+        "webSocketStatusElement"
+      );
+      const controlMessagesLog = document.getElementById("controlMessagesLog"); // Reference to the control messages log
+      let nextBufferTime = 0; // Track when the next audio buffer should start playing
+      let latestBufferSize = 0; // Store the latest buffer size
+      let webSocketStatus = "Disconnected"; // Track the WebSocket connection status
+      let ws;
+
+      document.addEventListener("DOMContentLoaded", function () {
+        fetch("/voices")
+          .then((response) => response.json())
+          .then(({ voices }) => {
+            Object.keys(voices)
+              .forEach((voiceId) => {
+                const option = document.createElement("fluent-option");
+                option.value = voiceId;
+                option.textContent = voices[voiceId];
+                voiceSelect.appendChild(option);
+              })
+              .catch((error) => {
+                console.error("Error fetching voices:", error);
+              });
+          });
+      });
+
+      startButton.addEventListener("click", () => {
+        // Initialize or resume AudioContext on user gesture
+        toggleActionButtons(!startButton.disabled);
+        updateDisplayBufferSize("Connecting...", latestBufferSize);
+
+        if (!audioContextIn) {
+          audioContextIn = new AudioContext({ sampleRate: 16000 });
+          audioContextOut = new AudioContext({ sampleRate: 24000 });
+        } else if (audioContextIn.state === "suspended") {
+          audioContextIn.resume();
+        }
+
+        // Reset nextBufferTime in case the context was suspended
+        nextBufferTime = audioContextOut.currentTime;
+
+        // Start WebSocket connection and audio capture
+        startWebSocketAndAudioCapture();
+      });
+
+      stopButton.addEventListener("click", () => {
+        toggleActionButtons(!stopButton.disabled);
+        updateDisplayBufferSize("Disconnecting...", latestBufferSize);
+
+        if (audioContextIn) {
+          audioContextIn.close();
+          audioContextOut.close();
+          audioContextIn = null;
+          audioContextOut = null;
+        }
+
+        if (ws) {
+          ws.close();
+        }
+      });
+
+      function toggleActionButtons(onlyWhen) {
+        if (onlyWhen) {
+          startButton.disabled = !startButton.disabled;
+          stopButton.disabled = !stopButton.disabled;
+          langSelect.disabled = !langSelect.disabled;
+        }
+      }
+
+      function startWebSocketAndAudioCapture() {
+        const audioWebSocketUrl = `{{ ws_url }}?lang=${
+          langSelect.value ?? "en-US"
+        }`; // WebSocket URL with language query parameter
+        ws = new WebSocket(audioWebSocketUrl);
+
+        ws.onopen = () => {
+          console.log("WebSocket connection established");
+          webSocketStatus = "Connected";
+          updateDisplayBufferSize(webSocketStatus, latestBufferSize);
+          voiceChanged();
+          startAudioCapture(ws);
+          toggleActionButtons(!startButton.disabled);
+        };
+
+        ws.onclose = () => {
+          webSocketStatus = "Disconnected";
+          updateDisplayBufferSize(webSocketStatus, latestBufferSize);
+          toggleActionButtons(startButton.disabled);
+        };
+
+        ws.onerror = () => {
+          webSocketStatus = "Error";
+          updateDisplayBufferSize(webSocketStatus, latestBufferSize);
+          toggleActionButtons(startButton.disabled);
+        };
+
+        ws.onmessage = (event) => {
+          if (typeof event.data === "string") {
+            // Handle JSON text frame
+            try {
+              updateControlMessagesLog([event.data]);
+            } catch (e) {
+              console.error("Error parsing JSON message", e);
+            }
+          } else if (event.data instanceof Blob) {
+            console.log("Received audio data with size: ", event.data.size);
+            const reader = new FileReader();
+
+            reader.onload = async () => {
+              const arrayBuffer = reader.result;
+              const audioData = new Int16Array(arrayBuffer);
+
+              // Update the latest buffer size
+              latestBufferSize = audioData.byteLength;
+              updateDisplayBufferSize(webSocketStatus, latestBufferSize);
+              if (audioData.length > 0) {
+                try {
+                  await navigator.locks.request("audio-playback", async () => {
+                    await playAudio(audioData);
+                  });
+                } catch (error) {
+                  console.error("Error playing audio:", error);
+                }
+              } else {
+                console.log("Received empty audio data after conversion");
+              }
+            };
+
+            reader.readAsArrayBuffer(event.data);
+          }
+        };
+      }
+
+      function updateDisplayBufferSize(webSocketStatus, latestBufferSize) {
+        webSocketStatusElement.textContent = webSocketStatus;
+        webSocketStatusElement.classList.remove(
+          "status-connected",
+          "status-disconnected",
+          "status-error"
+        );
+        webSocketStatusElement.classList.add(
+          `status-${webSocketStatus.toLowerCase()}`
+        );
+        bufferSizeDisplay.textContent = latestBufferSize;
+      }
+
+      function startAudioCapture(ws) {
+        navigator.mediaDevices
+          .getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              sampleRate: 16000,
+            },
+          })
+          .then((stream) => {
+            const source = audioContextIn.createMediaStreamSource(stream);
+            const processor = audioContextIn.createScriptProcessor(1024, 1, 1);
+            source.connect(processor);
+            processor.connect(audioContextIn.destination);
+
+            processor.onaudioprocess = (e) => {
+              const inputData = e.inputBuffer.getChannelData(0);
+              const outputData = new Int16Array(inputData.length);
+
+              for (let i = 0; i < inputData.length; i++) {
+                outputData[i] = convertFloat32ToInt16(inputData[i]);
+              }
+
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(outputData.buffer);
+              }
+            };
+          })
+          .catch((error) => {
+            console.error("getUserMedia error:", error);
+          });
+      }
+
+      async function playAudio(int16Array) {
+        const float32Array = new Float32Array(int16Array.length);
+        for (let i = 0; i < int16Array.length; i++) {
+          float32Array[i] = int16Array[i] / 32768.0;
+        }
+        const audioBuffer = audioContextOut.createBuffer(
+          1,
+          float32Array.length,
+          24000
+        );
+        audioBuffer.getChannelData(0).set(float32Array);
+
+        const source = audioContextOut.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContextOut.destination);
+
+        const bufferDuration = audioBuffer.length / audioBuffer.sampleRate;
+        if (nextBufferTime < audioContextOut.currentTime) {
+          nextBufferTime = audioContextOut.currentTime;
+        }
+
+        source.start(nextBufferTime);
+
+        nextBufferTime += bufferDuration;
+        console.log("Next buffer time:", nextBufferTime);
+      }
+
+      function convertFloat32ToInt16(sample) {
+        return Math.max(-32768, Math.min(32767, sample * 32767));
+      }
+
+      function voiceChanged() {
+        const voice = document.getElementById("voiceSelect").value;
+        console.log("Selected voice:", voice);
+        if (ws !== undefined && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "voice", value: voice }));
+        }
+      }
+
+      voiceSelect.addEventListener("change", voiceChanged);
+    </script>
+  </body>
+</html>
