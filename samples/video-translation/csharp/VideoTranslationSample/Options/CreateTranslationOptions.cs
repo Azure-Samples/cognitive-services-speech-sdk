@@ -6,9 +6,6 @@
 namespace Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 
 using CommandLine;
-using System;
-using System.Globalization;
-using VoiceKind = Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview.VoiceKind;
 
 [Verb("createTranslation", HelpText = "Create translation.")]
 public partial class CreateTranslationOptions : CreateTranslationBaseOptions
