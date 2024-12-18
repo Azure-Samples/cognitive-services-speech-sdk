@@ -7,7 +7,7 @@ namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public
 
 using System;
 
-public class IterationResult
+public partial class IterationResult
 {
     public Uri TranslatedVideoFileUrl { get; set; }
 

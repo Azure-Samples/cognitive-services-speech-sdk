@@ -5,7 +5,7 @@
 
 namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
 
-public class IterationInput
+public partial class IterationInput
 {
     public int? SpeakerCount { get; set; }
 

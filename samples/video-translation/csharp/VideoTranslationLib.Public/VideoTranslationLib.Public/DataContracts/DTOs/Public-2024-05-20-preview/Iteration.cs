@@ -5,9 +5,7 @@
 
 namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
 
-using Newtonsoft.Json;
-
-public class Iteration : StatefulResourceBase
+public partial class Iteration : StatefulResourceBase
 {
     public IterationInput Input { get; set; }
 

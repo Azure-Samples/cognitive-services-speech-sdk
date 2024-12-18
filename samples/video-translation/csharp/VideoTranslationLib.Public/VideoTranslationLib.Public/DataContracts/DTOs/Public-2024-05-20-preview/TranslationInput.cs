@@ -9,7 +9,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 
-public class TranslationInput
+public partial class TranslationInput
 {
     public CultureInfo SourceLocale { get; set; }
 

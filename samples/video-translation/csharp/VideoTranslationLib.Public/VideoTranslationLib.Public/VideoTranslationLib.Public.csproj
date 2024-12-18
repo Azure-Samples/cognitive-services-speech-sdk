@@ -13,7 +13,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="DataContracts\DTOs\Public-2024-05-20-preview\Enum\" />
 	  <Folder Include="HttpClient\" />
 	</ItemGroup>
 
