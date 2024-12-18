@@ -17,13 +17,19 @@
   <div id="app">
     <form>
       <div class="container">
-        <div id="received-text-container"></div>
+        <div id="received-text-container">
+          <div id="videoContainer" style="position: relative; width: 100%;">
+            <div id="remoteVideo"></div>
+          </div>
+          <br/>
+        </div>
         <div class="controls">
           <div class="input-group">
             <label for="deployment-or-model">Deployment</label>
             <select id="deployment-or-model">
               <option value="gpt4o-realtime">gpt4o-realtime</option>
               <option value="gpt4o-realtime-azure-voice">gpt4o-realtime-azure-voice</option>
+              <option value="gpt4o-realtime-azure-avatar">gpt4o-realtime-azure-avatar</option>
             </select>
           </div>
           <div class="input-group">

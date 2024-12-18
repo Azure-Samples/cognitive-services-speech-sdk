@@ -103,3 +103,7 @@ button[disabled] {
   background-color: #cccccc;
   color: #666666;
 }
+
+#video {
+  width: 100%;
+}
