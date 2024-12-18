@@ -21,9 +21,6 @@ public partial class CreateTranslationBaseOptions : BaseOptions
     [Option('v', "voiceKind", Required = true, HelpText = "Specify voice kind: PlatformVoice or PersonalVoice.")]
     public VoiceKind VoiceKind { get; set; }
 
-    [Option('v', "videoFileAzureBlobUrl", Required = true, HelpText = "Specify video file Azure blob URL.")]
-    public Uri VideoFileAzureBlobUrl { get; set; }
-
     [Option('s', "speakerCount", Required = false, HelpText = "Specify speaker count.")]
     public int? SpeakerCount { get; set; }
 

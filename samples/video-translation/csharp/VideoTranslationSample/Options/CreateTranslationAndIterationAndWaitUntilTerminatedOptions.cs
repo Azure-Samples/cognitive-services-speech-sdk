@@ -18,6 +18,9 @@ public partial class CreateTranslationAndIterationAndWaitUntilTerminatedOptions 
     [Option('i', "iterationId", Required = true, HelpText = "Specify iteration ID.")]
     public string IterationId { get; set; }
 
+    [Option('v', "videoFileAzureBlobUrl", Required = true, HelpText = "Specify video file Azure blob URL.")]
+    public Uri VideoFileAzureBlobUrl { get; set; }
+
     [Option('w', "webvttFileAzureBlobUrl", Required = false, HelpText = "Specify webvtt file Azure blob URL, it is required from secondary iteration.")]
     public Uri WebvttFileAzureBlobUrl { get; set; }
 
