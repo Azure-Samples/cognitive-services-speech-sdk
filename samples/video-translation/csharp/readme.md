@@ -62,17 +62,17 @@ Video translation client tool and API sample code
    | --region  | True | eastus | Provide the region of the API request. |
    | --subscriptionKey | True | | Provide your speech resource key. |
    | --apiVersion | True | 2024-05-20-preview | Provide the version of the API request. |
-   | --VoiceKind | True | PlatformVoice/PersonalVoice | Synthesize TTS for the translated target video using either PlatformVoice or PersonalVoice. |
+   | --voiceKind | True | PlatformVoice/PersonalVoice | Synthesize TTS for the translated target video using either PlatformVoice or PersonalVoice. |
    | --sourceLocale | True | en-US | The locale of the input video file. |
    | --targetLocales | True | en-US | Target locale of the translation. |
    | --translationId | True | MyTranslateVideo1FromZhCNToEnUS2024050601 | Translation ID. |
    | --iterationId | True | MyFirstIteration2024050601 | Iteration ID. |
-   | --videoFileAzureBlobUrl | True |  | Please proivde video file URL, with or without SAS, which is hosted in an Azure storage blob. |
-   | --webvttFileAzureBlobUrl | False |  | Please provide the WebVTT file URL, with or without SAS, which is hosted in an Azure storage blob. It is optional for the first iteration of the translation but required from the second iteration. |
+   | --videoFileAzureBlobUrl | True | URL | Please proivde video file URL, with or without SAS, which is hosted in an Azure storage blob. |
+   | --webvttFileAzureBlobUrl | False | URL | Please provide the WebVTT file URL, with or without SAS, which is hosted in an Azure storage blob. It is optional for the first iteration of the translation but required from the second iteration. |
    | --webvttFileKind | False | TargetLocaleSubtitle/SourceLocaleSubtitle/MetadataJson | Please specify the kind of WebVTT file with a value of TargetLocaleSubtitle, SourceLocaleSubtitle, or MetadataJson. |
    | --subtitleMaxCharCountPerSegment | False | 100 | Please specify the maximum display character count per segment for the subtitles. |
    | --speakerCount | False | 1 | Please specify the speaker count of the video. |
-   | --exportSubtitleInVideo | False | false | Please indicate whether to export subtitles in the video. |
+   | --exportSubtitleInVideo | False | False | Please indicate whether to export subtitles in the video. |
 
 # Argument definitions
 ## Supported regions
