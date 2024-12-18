@@ -330,5 +330,5 @@ samples/js/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*
 **/objectivec/**/Podfile.lock
 **/objectivec/**/*.xcworkspace/
 
-# iOS framwork
+# iOS framework
 samples/objective-c/ios/MicrosoftCognitiveServicesSpeech.framework/

@@ -1,0 +1,194 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://speech.microsoft.com/transcriptionresult_v2024-11-15.schema.json",
+    "title": "Transcription result",
+    "allOf": [{ "$ref": "https://speech.microsoft.com/transcriptionresult_v3_2.schema.json" }],
+    "required": [
+        "source",
+        "timestamp",
+        "durationInTicks",
+        "duration",
+        "combinedRecognizedPhrases",
+        "recognizedPhrases",
+        "durationMilliseconds"
+    ],
+    "properties": {
+        "durationMilliseconds": {
+            "$id": "#root/durationMilliseconds",
+            "title": "Duration in milliseconds",
+            "type": "integer",
+            "format": "int64",
+            "description": "total audio duration in milliseconds",
+            "examples": [
+                41200
+            ],
+            "default": 0,
+            "minimum": 0
+        },
+        "recognizedPhrases": {
+            "$id": "#root/recognizedPhrases",
+            "title": "Recognized phrases",
+            "type": "array",
+            "default": [],
+            "items": {
+                "$id": "#root/recognizedPhrases/items",
+                "title": "Items",
+                "type": "object",
+                "required": [
+                    "recognitionStatus",
+                    "channel",
+                    "offset",
+                    "duration",
+                    "offsetInTicks",
+                    "durationInTicks",
+                    "nBest",
+                    "durationMilliseconds",
+                    "offsetMilliseconds"
+                ],
+                "properties": {
+                    "offsetMilliseconds": {
+                        "$id": "#root/recognizedPhrases/items/offsetMilliseconds",
+                        "title": "Offset in milliseconds",
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "offset in audio of this phrase in milliseconds",
+                        "examples": [
+                            700
+                        ],
+                        "default": 0,
+                        "minimum": 0
+                    },
+                    "durationMilliseconds": {
+                        "$id": "#root/recognizedPhrases/items/durationMilliseconds",
+                        "title": "Duration in milliseconds",
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "audio duration of this phrase in milliseconds",
+                        "examples": [
+                            15900
+                        ],
+                        "default": 0,
+                        "minimum": 0
+                    },
+                    "nBest": {
+                        "$id": "#root/recognizedPhrases/items/nBest",
+                        "title": "NBest",
+                        "type": "array",
+                        "description": "possible transcriptions of the current phrase with confidences",
+                        "default": [],
+                        "items": {
+                            "$id": "#root/recognizedPhrases/items/nBest/items",
+                            "title": "Items",
+                            "type": "object",
+                            "required": [
+                                "confidence",
+                                "lexical",
+                                "itn",
+                                "maskedITN",
+                                "display"
+                            ],
+                            "properties": {
+                                "words": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/words",
+                                    "title": "Words",
+                                    "type": "array",
+                                    "default": [],
+                                    "description": "if `wordLevelTimestampsEnabled` is `true`, there will be a result for each word of the phrase, otherwise this property is not present",
+                                    "items": {
+                                        "$id": "#root/recognizedPhrases/items/nBest/items/words/items",
+                                        "title": "Items",
+                                        "type": "object",
+                                        "required": [
+                                            "word",
+                                            "offset",
+                                            "duration",
+                                            "offsetInTicks",
+                                            "durationInTicks",
+                                            "durationMilliseconds",
+                                            "offsetMilliseconds",
+                                            "confidence"
+                                        ],
+                                        "properties": {
+                                            "offsetMilliseconds": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/words/items/offsetMilliseconds",
+                                                "title": "Offset in milliseconds",
+                                                "type": "integer",
+                                                "format": "int64",
+                                                "description": "offset in audio of this phrase in milliseconds",
+                                                "examples": [
+                                                    900
+                                                ],
+                                                "default": 0,
+                                                "minimum": 0
+                                            },
+                                            "durationMilliseconds": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/words/items/durationMilliseconds",
+                                                "title": "Duration in milliseconds",
+                                                "type": "integer",
+                                                "format": "int64",
+                                                "description": "audio duration of this phrase in milliseconds",
+                                                "examples": [
+                                                    4800
+                                                ],
+                                                "default": 0,
+                                                "minimum": -100000
+                                            }
+                                        }
+                                    }
+                                },
+                                "displayWords": {
+                                    "$id": "#root/recognizedPhrases/items/nBest/items/displayWords",
+                                    "title": "DisplayWords",
+                                    "type": "array",
+                                    "default": [],
+                                    "description": "if `displayFormWordLevelTimestampsEnabled` is `true`, there will be a result for each word of the phrase, otherwise this property is not present",
+                                    "items": {
+                                        "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items",
+                                        "title": "Items",
+                                        "type": "object",
+                                        "required": [
+                                            "displayText",
+                                            "offset",
+                                            "duration",
+                                            "offsetInTicks",
+                                            "durationInTicks",
+                                            "offsetMilliseconds",
+                                            "durationMilliseconds"
+                                        ],
+                                        "properties": {
+                                            "offsetMilliseconds": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items/offsetMilliseconds",
+                                                "title": "Offset in milliseconds",
+                                                "type": "integer",
+                                                "format": "int64",
+                                                "description": "offset in audio of this phrase in milliseconds",
+                                                "examples": [
+                                                    900
+                                                ],
+                                                "default": 0,
+                                                "minimum": 0
+                                            },
+                                            "durationMilliseconds": {
+                                                "$id": "#root/recognizedPhrases/items/nBest/items/displayWords/items/durationMilliseconds",
+                                                "title": "Duration in milliseconds",
+                                                "type": "integer",
+                                                "format": "int64",
+                                                "description": "audio duration of this phrase in milliseconds",
+                                                "examples": [
+                                                    4800
+                                                ],
+                                                "default": 0,
+                                                "minimum": 0
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
