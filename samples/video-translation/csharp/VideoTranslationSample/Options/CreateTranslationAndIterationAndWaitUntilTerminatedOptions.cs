@@ -10,7 +10,7 @@ using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public2024
 using System;
 
 [Verb("createTranslationAndIterationAndWaitUntilTerminated", HelpText = "Create translation and create first iteration until terminated.")]
-public partial class CreateTranslationAndIterationAndWaitUntilTerminatedOptions : CreateTranslationBaseOptions
+public class CreateTranslationAndIterationAndWaitUntilTerminatedOptions : CreateTranslationBaseOptions
 {
     [Option('t', "translationId", Required = true, HelpText = "Specify translation ID.")]
     public string TranslationId { get; set; }
