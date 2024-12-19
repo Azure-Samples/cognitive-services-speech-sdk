@@ -15,13 +15,13 @@ public partial class CreateTranslationBaseOptions : BaseOptions
     [Option('l', "sourceLocale", Required = true, HelpText = "Specify source locale of the video.")]
     public CultureInfo SourceLocale { get; set; }
 
-    [Option('t', "targetLocale", Required = true, HelpText = "Specify target locale of the video.")]
+    [Option('a', "targetLocale", Required = true, HelpText = "Specify target locale of the video.")]
     public CultureInfo TargetLocale { get; set; }
 
     [Option('v', "voiceKind", Required = true, HelpText = "Specify voice kind: PlatformVoice or PersonalVoice.")]
     public VoiceKind VoiceKind { get; set; }
 
-    [Option('s', "speakerCount", Required = false, HelpText = "Specify speaker count.")]
+    [Option('c', "speakerCount", Required = false, HelpText = "Specify speaker count.")]
     public int? SpeakerCount { get; set; }
 
     [Option('m', "subtitleMaxCharCountPerSegment", Required = false, HelpText = "Specify subtitle max visiable char count per segment.")]
