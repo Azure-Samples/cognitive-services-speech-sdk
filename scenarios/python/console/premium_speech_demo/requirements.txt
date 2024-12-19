@@ -1,0 +1,2 @@
+azure-cognitiveservices-speech
+openai
