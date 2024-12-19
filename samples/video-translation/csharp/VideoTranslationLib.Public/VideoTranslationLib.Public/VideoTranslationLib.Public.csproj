@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Microsoft.SpeechServices.VideoTranslationLib.Public</AssemblyName>
+    <RootNamespace>Microsoft.SpeechServices.VideoTranslationLib.Public</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\IterationClient.cs" Link="HttpClient\IterationClient.cs" />
+    <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\OperationClient.cs" Link="HttpClient\OperationClient.cs" />
+    <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\TranslationClient.cs" Link="HttpClient\TranslationClient.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="HttpClient\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\CommonLib.Public\CommonLib.Public.csproj" />
+    <ProjectReference Include="..\VideoTranslationLib.PublicBase\VideoTranslationLib.PublicBase.csproj" />
+  </ItemGroup>
+
+</Project>
