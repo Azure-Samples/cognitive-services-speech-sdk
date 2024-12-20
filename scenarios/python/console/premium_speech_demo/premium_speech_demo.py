@@ -1,75 +1,85 @@
 import os
 import azure.cognitiveservices.speech as speechsdk
-from openai import AzureOpenAI, OpenAI
+from openai import AzureOpenAI
 
-# Inialize speech recognition engine
+# Initialize speech recognition engine
 service_region = os.environ.get('SPEECH_REGION')
-speech_key=os.environ.get('SPEECH_KEY')
+speech_key = os.environ.get('SPEECH_KEY')
 speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, language="en-us")
 
-# Inialize AOAI engine
+# Initialize Azure OpenAI client
 client = AzureOpenAI(
-  azure_endpoint = os.environ.get('AZURE_OPENAI_ENDPOINT'), 
-  api_key=os.environ.get('AZURE_OPENAI_API_KEY'), 
-  api_version="2024-10-21"
+    azure_endpoint=os.environ.get('AZURE_OPENAI_ENDPOINT'), 
+    api_key=os.environ.get('AZURE_OPENAI_API_KEY'), 
+    api_version="2024-10-21"
 )
 
-
 def rewrite_content(input_reco):
+    """
+    Refines the user's input sentence by fixing grammar issues, making it more readable,
+    and ensuring spelling correctness for specific phrases.
 
-    my_messages=[
-            {"role": "system", "content": "You are a helpful assistant to help user to rewrite sentences."
-                "Please fix the grammar errors in the user provided sentence and make it more reading friendly."
-                "You can do some minor rewriting, but DON'T do big change, especially don't change the meaning of the sentence."
-                "DON'T make up any new content. DON'T do question answering. User is not asking you to answer questions."
-                "You just need to copy and refine the sentences from user."
-                "Meanwhile, this is a list of phrases relevant to the sentences \"{}\"."
-                "If they appear in the sentence and wrongly spelled, please fix them."
-                "Here is some examples:\n"
-                "User: how ar you\n"
-                "Your response: How are you?\n\n"
-                "User: what yur name?\n"
-                "Your response: What's your name?\n\n"
-                ""
-            },
-            {"role": "user", "content": ""}
-          ]
+    Args:
+        input_reco (str): The raw input sentence to rewrite.
 
-    my_messages[0]["content"] = my_messages[0]["content"].format(
-            "PAFE music festival, non-profit 501(c)(3), Changliang Liu"
-    )
-    my_messages[1]["content"] = input_reco
+    Returns:
+        str: The refined sentence.
+    """
+
+    # A list of phrases relevant to the context, used to ensure their correct spelling and formatting.
+    # Users can customize these phrases based on their specific use case or domain.
+    relevant_phrases = "Azure Cognitive Services, non-profit organization, speech recognition, OpenAI API"
     
+    my_messages = [
+        {
+            "role": "system", 
+            "content": (
+                "You are a helpful assistant to help the user rewrite sentences. "
+                "Please fix the grammar errors in the user-provided sentence and make it more readable. "
+                "You can do minor rewriting but MUST NOT change the sentence's meaning. "
+                "DO NOT make up new content. DO NOT answer questions. "
+                "Here are phrases relevant to the sentences: '{}'. "
+                "If they appear in the sentence and are misspelled, please fix them. "
+                "Example corrections:\n"
+                "User: how ar you\nYour response: How are you?\n\n"
+                "User: what yur name?\nYour response: What's your name?\n\n"
+            ).format(relevant_phrases)
+        },
+        {"role": "user", "content": input_reco}
+    ]
+
     response = client.chat.completions.create(
-      model="gpt-4o-mini",
-      messages=my_messages
+        model="gpt-4o-mini",
+        messages=my_messages
     )
 
-    return response.choices[0].message.content 
-
+    return response.choices[0].message.content
 
 def recognized_cb(evt: speechsdk.SpeechRecognitionEventArgs):
+    """
+    Callback function triggered when speech is recognized.
+
+    Args:
+        evt (SpeechRecognitionEventArgs): The event argument containing recognized text.
+    """
     current_sentence = evt.result.text
-    if current_sentence == "":
+    if not current_sentence:
         return
-    
 
-    print("RAW RECO: ", current_sentence)
-    print("REWRITE : ", rewrite_content(current_sentence))
+    print("RAW RECO:", current_sentence)
+    print("REWRITE:", rewrite_content(current_sentence))
 
-
+# Connect the speech recognizer to the callback
 speech_recognizer.recognized.connect(recognized_cb)
 result_future = speech_recognizer.start_continuous_recognition_async()
-result_future.get()  # wait for voidfuture, so we know engine initialization is done.
+result_future.get()  # Ensure engine initialization is complete
 
-print('Continuous Recognition is now running, say something.')
+print('Continuous Recognition is now running. Say something.')
 while True:
-    # No real sample parallel work to do on this thread, so just wait for user to type stop.
-    # Can't exit function or speech_recognizer will go out of scope and be destroyed while running.
-    print('type "stop" then enter when done')
+    print('Type "stop" then press Enter to stop recognition.')
     stop = input()
-    if (stop.lower() == "stop"):
-        print('Stopping async recognition.')
+    if stop.lower() == "stop":
+        print('Stopping async recognition...')
         speech_recognizer.stop_continuous_recognition_async()
         break
