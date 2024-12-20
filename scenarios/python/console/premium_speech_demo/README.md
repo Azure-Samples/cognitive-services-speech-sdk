@@ -1,4 +1,4 @@
-# Instructions to run Speech + LLM Samples
+# Scenario: Continuous Speech Recognition and Rewriting via Azure OpenAI
 This project integrates Azure Cognitive Services Speech SDK with Azure OpenAI Service to perform real-time speech recognition and refine the recognized text for improved grammar and readability.
 
 # Features
@@ -27,15 +27,10 @@ This project integrates Azure Cognitive Services Speech SDK with Azure OpenAI Se
 ---
 
 ## Example Output
+Speak into the microphone. The sample application will print both the recognition result and the rewritten version.
+For instance, if you speak "how ar you" into the microphone, the output will be:
 
-When you say "how ar you" into the microphone:
-
-### Raw Transcription:
 ```
 RAW RECO: how ar you
-```
-
-### Refined Output:
-```
 REWRITE: How are you?
 ```
