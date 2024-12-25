@@ -25,7 +25,7 @@ This project integrates Azure Cognitive Services Speech SDK with Azure OpenAI Se
   - `AZURE_OPENAI_API_KEY`: API key for Azure OpenAI Service.
 
 When running the sample app, you can set --relevant_phrases parameter.
-  - `--relevant_phrases`: (ODptional) Default: Azure Cognitive Services, non-profit organization, speech recognition, OpenAI API
+  - `--relevant_phrases`: (Optional) Default: Azure Cognitive Services, non-profit organization, speech recognition, OpenAI API
 
 ---
 
