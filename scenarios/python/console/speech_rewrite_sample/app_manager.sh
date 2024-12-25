@@ -46,7 +46,13 @@ elif [ "$action" == "run" ]; then
     else
         echo "Environment file $ENV_FILE not found. You can create one to set environment variables or manually set secrets in environment variables."
     fi
-    python premium_speech_demo.py
+
+    read -p "Enter relevant phrases (or press Enter to use defaults): " relevant_phrases
+    if [ -z "$relevant_phrases" ]; then
+        relevant_phrases="Azure Cognitive Services, non-profit organization, speech recognition, OpenAI API"
+    fi
+    echo "Running app.py with relevant phrases: $relevant_phrases"
+    python app.py --relevant_phrases "$relevant_phrases"
 else
     echo -e "\e[31mInvalid action: $action\e[0m"
     echo "Usage: $0 configure or $0 run"

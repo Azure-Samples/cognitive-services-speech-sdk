@@ -61,7 +61,12 @@ elseif ($action -eq "run") {
         Write-Host "File not found: $envFilePath. You can create one to set environment variables or manually set secrets in environment variables."
     }
 
-    Start-Process "python" -ArgumentList "premium_speech_demo.py"
+    $relevantPhrases = Read-Host "Enter relevant phrases (or press Enter to use defaults)"
+    if ([string]::IsNullOrEmpty($relevantPhrases)) {
+        $relevantPhrases = "Azure Cognitive Services, non-profit organization, speech recognition, OpenAI API"
+    }
+    Write-Host "Running app.py with relevant phrases: $relevantPhrases"
+    python app.py --relevant_phrases "$relevantPhrases"
 }
 else {
     Write-Host "Invalid action: $action" -ForegroundColor Red
