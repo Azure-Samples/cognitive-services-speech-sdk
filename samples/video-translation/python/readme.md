@@ -33,11 +33,11 @@
 | Files | Description |
 | --- | --- |
 | [main.py](main.py)  | client tool main definition |
-| [video_translation_client.py](microsoft_video_translation_client\video_translation_client.py)  | video translation client definition  |
-| [video_translation_dataclass.py](microsoft_video_translation_client\video_translation_dataclass.py)  | video translation data contract definition  |
-| [video_translation_enum.py](microsoft_video_translation_client\video_translation_enum.py)  | video translation enum definition  |
-| [video_translation_const.py](microsoft_video_translation_client\video_translation_const.py)  | video translation constant definition  |
-| [video_translation_util.py](microsoft_video_translation_client\video_translation_util.py)  | video translation utility function definition  |
+| [video_translation_client.py](microsoft_video_translation_client/video_translation_client.py)  | video translation client definition  |
+| [video_translation_dataclass.py](microsoft_video_translation_client/video_translation_dataclass.py)  | video translation data contract definition  |
+| [video_translation_enum.py](microsoft_video_translation_client/video_translation_enum.py)  | video translation enum definition  |
+| [video_translation_const.py](microsoft_video_translation_client/video_translation_const.py)  | video translation constant definition  |
+| [video_translation_util.py](microsoft_video_translation_client/video_translation_util.py)  | video translation utility function definition  |
 
 # Usage for command line tool:
 ## Usage
@@ -65,7 +65,7 @@ Run main.py with command in below pattern:
 | request_get_iteration_api  | Request get iteration API |
 
 ## HTTP client library
-Video translation client is defined as class VideoTranslationClient in file [video_translation_client.py](microsoft_video_translation_client\video_translation_client.py)
+Video translation client is defined as class VideoTranslationClient in file [video_translation_client.py](microsoft_video_translation_client/video_translation_client.py)
 ### Function definitions:
 | Function | Description |
 | --- | --- |
