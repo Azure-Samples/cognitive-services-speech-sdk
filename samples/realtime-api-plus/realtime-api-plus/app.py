@@ -8,7 +8,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description="aiohttp server example")
 parser.add_argument('--path')
-parser.add_argument('--port', type=int)
+parser.add_argument('--port', type=int, default=8080)
 
 app = web.Application()
 server = WebSocketServer()

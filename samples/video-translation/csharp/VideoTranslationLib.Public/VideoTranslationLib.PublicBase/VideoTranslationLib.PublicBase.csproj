@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Microsoft.SpeechServices.VideoTranslationLib.PublicBase</AssemblyName>
+    <RootNamespace>Microsoft.SpeechServices.VideoTranslationLib.PublicBase</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\CommonLib.Public\CommonLib.Public.csproj" />
+  </ItemGroup>
+
+</Project>
