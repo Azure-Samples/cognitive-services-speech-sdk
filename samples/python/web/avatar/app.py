@@ -207,8 +207,12 @@ def connectAvatar() -> Response:
         
         connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
         connection.connected.connect(lambda evt: print(f'TTS Avatar service connected.'))
-        connection.disconnected.connect(lambda evt: print(f'TTS Avatar service disconnected.'))
+        def tts_disconnected_cb(evt):
+            print(f'TTS Avatar service disconnected.')
+            client_context['speech_synthesizer_connection'] = None
+        connection.disconnected.connect(tts_disconnected_cb)
         connection.set_message_property('speech.config', 'context', json.dumps(avatar_config))
+        client_context['speech_synthesizer_connection'] = connection
 
         speech_sythesis_result = speech_synthesizer.speak_text_async('').get()
         print(f'Result id for avatar connection: {speech_sythesis_result.result_id}')
@@ -376,14 +380,13 @@ def disconnectAvatar() -> Response:
 
 # The API route to release the client context, to be invoked when the client is closed
 @app.route("/api/releaseClient", methods=["POST"])
-def release() -> Response:
+def releaseClient() -> Response:
     global client_contexts
     client_id = uuid.UUID(json.loads(request.data)['clientId'])
     try:
-        stopSpeakingInternal(client_id)
-        time.sleep(3) # Wait for the speaking thread to stop
         disconnectAvatarInternal(client_id)
         disconnectSttInternal(client_id)
+        time.sleep(2) # Wait some time for the connection to close
         client_contexts.pop(client_id)
         print(f"Client context released for client {client_id}.")
         return Response('Client context released.', status=200)
@@ -435,6 +438,7 @@ def initializeClient() -> uuid.UUID:
         'custom_voice_endpoint_id': None, # Endpoint ID (deployment ID) for custom voice
         'personal_voice_speaker_profile_id': None, # Speaker profile ID for personal voice
         'speech_synthesizer': None, # Speech synthesizer for avatar
+        'speech_synthesizer_connection': None, # Speech synthesizer connection for avatar
         'speech_token': None, # Speech token for client side authentication with speech service
         'ice_token': None, # ICE token for ICE/TURN/Relay server connection
         'chat_initiated': False, # Flag to indicate if the chat context is initiated
@@ -679,19 +683,19 @@ def stopSpeakingInternal(client_id: uuid.UUID) -> None:
     client_context = client_contexts[client_id]
     spoken_text_queue = client_context['spoken_text_queue']
     spoken_text_queue.clear()
-    speech_synthesizer = client_context['speech_synthesizer']
-    if speech_synthesizer:
-        connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
-        connection.send_message_async('synthesis.control', '{"action":"stop"}').get()
+    avatar_connection = client_context['speech_synthesizer_connection']
+    if avatar_connection:
+        avatar_connection.send_message_async('synthesis.control', '{"action":"stop"}').get()
 
 # Disconnect avatar internal function
 def disconnectAvatarInternal(client_id: uuid.UUID) -> None:
     global client_contexts
     client_context = client_contexts[client_id]
-    speech_synthesizer = client_context['speech_synthesizer']
-    if speech_synthesizer:
-        connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
-        connection.close()
+    stopSpeakingInternal(client_id)
+    time.sleep(2) # Wait for the speaking thread to stop
+    avatar_connection = client_context['speech_synthesizer_connection']
+    if avatar_connection:
+        avatar_connection.close()
 
 # Disconnect STT internal function
 def disconnectSttInternal(client_id: uuid.UUID) -> None:
