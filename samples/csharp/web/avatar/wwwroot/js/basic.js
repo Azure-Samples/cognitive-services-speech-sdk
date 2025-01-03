@@ -322,3 +322,7 @@ window.updataTransparentBackground = () => {
         document.getElementById('backgroundImageUrl').disabled = false
     }
 }
+
+window.onbeforeunload = () => {
+    navigator.sendBeacon('/api/releaseClient', JSON.stringify({ clientId: clientId }))
+}

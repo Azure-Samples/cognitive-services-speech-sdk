@@ -52,5 +52,10 @@ namespace Avatar.Services
 
             return context;
         }
+
+        public void RemoveClient(Guid clientId)
+        {
+            _clientContexts.TryRemove(clientId, out _);
+        }
     }
 }
