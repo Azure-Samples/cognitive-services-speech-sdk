@@ -109,6 +109,8 @@ def getIceToken() -> Response:
 def connectAvatar() -> Response:
     global client_contexts
     client_id = uuid.UUID(request.headers.get('ClientId'))
+    # disconnect avatar if already connected
+    disconnectAvatarInternal(client_id)
     client_context = client_contexts[client_id]
 
     # Override default values with client provided values
@@ -204,7 +206,13 @@ def connectAvatar() -> Response:
         }
         
         connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
+        connection.connected.connect(lambda evt: print(f'TTS Avatar service connected.'))
+        def tts_disconnected_cb(evt):
+            print(f'TTS Avatar service disconnected.')
+            client_context['speech_synthesizer_connection'] = None
+        connection.disconnected.connect(tts_disconnected_cb)
         connection.set_message_property('speech.config', 'context', json.dumps(avatar_config))
+        client_context['speech_synthesizer_connection'] = connection
 
         speech_sythesis_result = speech_synthesizer.speak_text_async('').get()
         print(f'Result id for avatar connection: {speech_sythesis_result.result_id}')
@@ -227,6 +235,8 @@ def connectAvatar() -> Response:
 def connectSTT() -> Response:
     global client_contexts
     client_id = uuid.UUID(request.headers.get('ClientId'))
+    # disconnect STT if already connected
+    disconnectSttInternal(client_id)
     system_prompt = request.headers.get('SystemPrompt')
     client_context = client_contexts[client_id]
     try:
@@ -307,21 +317,13 @@ def connectSTT() -> Response:
 # The API route to disconnect the STT service
 @app.route("/api/disconnectSTT", methods=["POST"])
 def disconnectSTT() -> Response:
-    global client_contexts
     client_id = uuid.UUID(request.headers.get('ClientId'))
-    client_context = client_contexts[client_id]
-    speech_recognizer = client_context['speech_recognizer']
-    audio_input_stream = client_context['audio_input_stream']
     try:
-        if speech_recognizer:
-            speech_recognizer.stop_continuous_recognition()
-            client_context['speech_recognizer'] = None
-        if audio_input_stream:
-            audio_input_stream.close()
-            client_context['audio_input_stream'] = None
+        disconnectSttInternal(client_id)
         return Response('STT Disconnected.', status=200)
     except Exception as e:
         return Response(f"STT disconnection failed. Error message: {e}", status=400)
+
 
 # The API route to speak a given SSML
 @app.route("/api/speak", methods=["POST"])
@@ -339,9 +341,7 @@ def speak() -> Response:
 def stopSpeaking() -> Response:
     global client_contexts
     client_id = uuid.UUID(request.headers.get('ClientId'))
-    is_speaking = client_contexts[client_id]['is_speaking']
-    if is_speaking:
-        stopSpeakingInternal(client_id)
+    stopSpeakingInternal(client_id)
     return Response('Speaking stopped.', status=200)
 
 # The API route for chat
@@ -362,7 +362,6 @@ def chat() -> Response:
 # The API route to clear the chat history
 @app.route("/api/chat/clearHistory", methods=["POST"])
 def clearChatHistory() -> Response:
-    global client_contexts
     client_id = uuid.UUID(request.headers.get('ClientId'))
     client_context = client_contexts[client_id]
     initializeChatContext(request.headers.get('SystemPrompt'), client_id)
@@ -372,16 +371,28 @@ def clearChatHistory() -> Response:
 # The API route to disconnect the TTS avatar
 @app.route("/api/disconnectAvatar", methods=["POST"])
 def disconnectAvatar() -> Response:
-    global client_contexts
     client_id = uuid.UUID(request.headers.get('ClientId'))
-    client_context = client_contexts[client_id]
-    speech_synthesizer = client_context['speech_synthesizer']
     try:
-        connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
-        connection.close()
+        disconnectAvatarInternal(client_id)
         return Response('Disconnected avatar', status=200)
     except:
         return Response(traceback.format_exc(), status=400)
+
+# The API route to release the client context, to be invoked when the client is closed
+@app.route("/api/releaseClient", methods=["POST"])
+def releaseClient() -> Response:
+    global client_contexts
+    client_id = uuid.UUID(json.loads(request.data)['clientId'])
+    try:
+        disconnectAvatarInternal(client_id)
+        disconnectSttInternal(client_id)
+        time.sleep(2) # Wait some time for the connection to close
+        client_contexts.pop(client_id)
+        print(f"Client context released for client {client_id}.")
+        return Response('Client context released.', status=200)
+    except Exception as e:
+        print(f"Client context release failed. Error message: {e}")
+        return Response(f"Client context release failed. Error message: {e}", status=400)
 
 @socketio.on("connect")
 def handleWsConnection():
@@ -427,6 +438,7 @@ def initializeClient() -> uuid.UUID:
         'custom_voice_endpoint_id': None, # Endpoint ID (deployment ID) for custom voice
         'personal_voice_speaker_profile_id': None, # Speaker profile ID for personal voice
         'speech_synthesizer': None, # Speech synthesizer for avatar
+        'speech_synthesizer_connection': None, # Speech synthesizer connection for avatar
         'speech_token': None, # Speech token for client side authentication with speech service
         'ice_token': None, # ICE token for ICE/TURN/Relay server connection
         'chat_initiated': False, # Flag to indicate if the chat context is initiated
@@ -620,9 +632,13 @@ def speakWithQueue(text: str, ending_silence_ms: int, client_id: uuid.UUID) -> N
             client_context['is_speaking'] = True
             while len(spoken_text_queue) > 0:
                 text = spoken_text_queue.pop(0)
-                speakText(text, tts_voice, personal_voice_speaker_profile_id, ending_silence_ms, client_id)
+                try:
+                    speakText(text, tts_voice, personal_voice_speaker_profile_id, ending_silence_ms, client_id)
+                except Exception as e:
+                    print(f"Error in speaking text: {e}")
                 client_context['last_speak_time'] = datetime.datetime.now(pytz.UTC)
             client_context['is_speaking'] = False
+            print(f"Speaking thread stopped.")
         client_context['speaking_thread'] = threading.Thread(target=speakThread)
         client_context['speaking_thread'].start()
 
@@ -665,14 +681,36 @@ def speakSsml(ssml: str, client_id: uuid.UUID, asynchronized: bool) -> str:
 def stopSpeakingInternal(client_id: uuid.UUID) -> None:
     global client_contexts
     client_context = client_contexts[client_id]
-    speech_synthesizer = client_context['speech_synthesizer']
     spoken_text_queue = client_context['spoken_text_queue']
     spoken_text_queue.clear()
-    try:
-        connection = speechsdk.Connection.from_speech_synthesizer(speech_synthesizer)
-        connection.send_message_async('synthesis.control', '{"action":"stop"}').get()
-    except:
-        print("Sending message through connection object is not yet supported by current Speech SDK.")
+    avatar_connection = client_context['speech_synthesizer_connection']
+    if avatar_connection:
+        avatar_connection.send_message_async('synthesis.control', '{"action":"stop"}').get()
+
+# Disconnect avatar internal function
+def disconnectAvatarInternal(client_id: uuid.UUID) -> None:
+    global client_contexts
+    client_context = client_contexts[client_id]
+    stopSpeakingInternal(client_id)
+    time.sleep(2) # Wait for the speaking thread to stop
+    avatar_connection = client_context['speech_synthesizer_connection']
+    if avatar_connection:
+        avatar_connection.close()
+
+# Disconnect STT internal function
+def disconnectSttInternal(client_id: uuid.UUID) -> None:
+    global client_contexts
+    client_context = client_contexts[client_id]
+    speech_recognizer = client_context['speech_recognizer']
+    audio_input_stream = client_context['audio_input_stream']
+    if speech_recognizer:
+        speech_recognizer.stop_continuous_recognition()
+        connection = speechsdk.Connection.from_recognizer(speech_recognizer)
+        connection.close()
+        client_context['speech_recognizer'] = None
+    if audio_input_stream:
+        audio_input_stream.close()
+        client_context['audio_input_stream'] = None
 
 # Start the speech token refresh thread
 speechTokenRefereshThread = threading.Thread(target=refreshSpeechToken)

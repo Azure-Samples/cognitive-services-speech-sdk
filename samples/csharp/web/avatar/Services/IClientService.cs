@@ -12,5 +12,7 @@ namespace Avatar.Services
         Guid InitializeClient();
 
         ClientContext GetClientContext(Guid clientId);
+
+        void RemoveClient(Guid clientId);
     }
 }
