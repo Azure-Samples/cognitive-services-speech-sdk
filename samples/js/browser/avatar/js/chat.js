@@ -594,6 +594,12 @@ function checkHung() {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
                         console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                        // Release the existing avatar connection
+                        if (avatarSynthesizer !== undefined) {
+                            avatarSynthesizer.close()
+                        }
+
+                        // Setup a new avatar connection
                         connectAvatar()
                     }
                 }
