@@ -8,10 +8,10 @@ This Speech SDK sample demonstrates how to use speech to text functionalities wi
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* [Supported platforms for MAUI application development](https://learn.microsoft.com/dotnet/maui/supported-platforms?view=net-maui-7.0)
+* [Supported platforms for MAUI application development](https://learn.microsoft.com/dotnet/maui/supported-platforms)
 * [Microsoft Visual Studio 2022](https://www.visualstudio.com/), Community Edition or higher is preferred.
-* [.NET 7.0 or later](https://learn.microsoft.com/dotnet/core/install/windows?tabs=net70).
-* [Prerequisites for MAUI](https://learn.microsoft.com/dotnet/maui/get-started/installation?view=net-maui-7.0&tabs=vswin)
+* [.NET 8.0 or later](https://learn.microsoft.com/dotnet/core/install/windows).
+* [Prerequisites for MAUI](https://learn.microsoft.com/dotnet/maui/get-started/installation)
 
 ## Prepare the sample
 
@@ -42,7 +42,7 @@ This Speech SDK sample demonstrates how to use speech to text functionalities wi
   is that speech will be transcribed to text in the application screen.
 
 ## Build and run the sample for iOS
-* Set the target machine to iOS device or emulator of your choice. Note that MAUI will need access to MAC device to use required Xcode tools before you can run the sample using iOS machine target. See the [Pair to Mac for iOS development](https://learn.microsoft.com/dotnet/maui/ios/pair-to-mac?view=net-maui-7.0)
+* Set the target machine to iOS device or emulator of your choice. Note that MAUI will need access to MAC device to use required Xcode tools before you can run the sample using iOS machine target. See the [Pair to Mac for iOS development](https://learn.microsoft.com/dotnet/maui/ios/pair-to-mac)
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 * To run the sample app, press F5 or click the selected iOS device or emulator, see **iOS simulators** or **iOS Remote or Local devices** in target device drop down selector.
 * The application will request the microphone access which you need to allow in order to use the speech to text functionality using microphone as input.
@@ -50,7 +50,7 @@ This Speech SDK sample demonstrates how to use speech to text functionalities wi
   is that speech will be transcribed to text in the application screen.
 
 ## Build and run the sample for Maccatalyst
-* Read the instructions here on how to build MAUI application on Mac [Build a Mac Catalyst app with .NET CLI](https://learn.microsoft.com/dotnet/maui/macos/cli?view=net-maui-7.0)
+* Read the instructions here on how to build MAUI application on Mac [Build a Mac Catalyst app with .NET CLI](https://learn.microsoft.com/dotnet/maui/mac-catalyst/cli)
 * In order to run the sample on Mac, you need to ensure your Mac has been installed with required workloads for Android and Mac.
   dotnet command will prompt with error and information if some of those workloads are missing.
 * The application will request the microphone access which you need to allow in order to use the speech to text functionality using microphone as input.

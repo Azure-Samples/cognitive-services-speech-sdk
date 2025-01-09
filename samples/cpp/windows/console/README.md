@@ -11,16 +11,13 @@ This sample demonstrates various forms of speech recognition, intent recognition
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Windows PC; some sample scenarios require a working microphone.
-* [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
-* The **Desktop development with C++** workload in Visual Studio and the **NuGet package manager** component in Visual Studio.
-  You can enable both in **Tools** \> **Get Tools and Features**, under the **Workloads** and **Individual components** tabs, respectively.
+* A Windows PC with [Microsoft Visual Studio](https://www.visualstudio.com/) installed; some sample scenarios require a working microphone. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-cpp) for details on system requirements and setup.
 
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
-* Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
+* Start Microsoft Visual Studio and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample, and select the solution file contained within it.
 * To tailor the sample to your configuration, use search and replace across the whole solution (for example, via **Edit** \> **Find and Replace** \> **Quick Replace**) to update the following strings:
 

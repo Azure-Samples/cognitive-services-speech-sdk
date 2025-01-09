@@ -9,9 +9,9 @@ This sample demonstrates how to recognize speech and intents with Java using the
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows, Linux, Mac) capable to run Android Studio.
-* Version 4.2 or higher of [Android Studio](https://developer.android.com/studio/).
-* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher; API 26 or higher for Pronunciation Assessment samples) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone. Make sure that "USB debugging" is enabled on your device.
+* A PC (Windows, Linux, Mac) capable to run [Android Studio](https://developer.android.com/studio/).
+* An ARM-based Android device (API 26 or higher for Pronunciation Assessment samples) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone. Make sure that "USB debugging" is enabled on your device.
+* See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-java) for details on system requirements and setup.
 
 ## Build the sample
 

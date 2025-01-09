@@ -1,4 +1,4 @@
 target 'helloworld' do
   platform :osx, '10.13'
-  pod 'MicrosoftCognitiveServicesSpeech-macOS', '~> 1.41.1'
+  pod 'MicrosoftCognitiveServicesSpeech-macOS', '~> 1.42.0'
 end

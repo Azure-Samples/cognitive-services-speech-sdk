@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net7.0-android</TargetFrameworks>
-        <!-- <TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks> -->
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
+        <TargetFrameworks>net8.0-android</TargetFrameworks>
+        <!-- <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks> -->
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-        <!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
+        <!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
         <WindowsPackageType>None</WindowsPackageType>
         <OutputType>Exe</OutputType>
         <RootNamespace>EmbeddedSpeechSample</RootNamespace>
@@ -32,7 +32,7 @@
         <!-- <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion> -->
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(TargetFramework)'=='net7.0-ios'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
       <ProvisioningType>manual</ProvisioningType>
     </PropertyGroup>
 
@@ -55,11 +55,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.41.1" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.41.1" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.41.1" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.41.1" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.41.1" />
+        <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.82" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.42.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.42.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.42.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.42.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
     </ItemGroup>
 
