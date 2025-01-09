@@ -27,7 +27,7 @@ This project integrates Azure Cognitive Services Speech SDK with Azure OpenAI Se
 When running the sample app, you can set --relevant_phrases parameter.
   - `--relevant_phrases`: (Optional) Default: Azure Cognitive Services, non-profit organization, speech recognition, OpenAI API
 
----
+----
 
 ## Example Output
 Speak into the microphone. The sample application will print both the recognition result and the rewritten version.
