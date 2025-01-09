@@ -13,6 +13,8 @@ import time
 import threading
 import wave
 import utils
+import sys
+import io
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -23,9 +25,9 @@ except ImportError:
     https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python for
     installation instructions.
     """)
-    import sys
     sys.exit(1)
 
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and service region (e.g., "westus").
@@ -899,9 +901,20 @@ def pronunciation_assessment_continuous_from_file():
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=zhcnlongfilename)
 
+<<<<<<< HEAD
+    reference_text = (
+        "秋天总是那么富有诗意。树叶渐渐变红，街道旁的银杏树也开始落叶。人们穿上厚重的外套，享受着凉爽的秋风。"
+        "黄昏时分，夕阳洒在街道上，给忙碌的一天增添了一抹温暖。无论是散步还是小憩，这个季节总能带来宁静和满足。"
+        "清晨，薄雾笼罩大地，空气中弥漫着一丝清新的凉意。中午阳光明媚，照在身上暖洋洋的，仿佛是一场心灵的抚慰。"
+        "傍晚时分，天空被染成了金黄和橙红，街上的行人脚步也不由得慢了下来，享受这份静谧和美好。你最喜欢哪个季节？"
+    )
+
+# Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+=======
     with open(zhcnlongtxtfilename, "r", encoding="utf-8") as t:
         reference_text = t.readline()
     # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+>>>>>>> 42ca78e6ea (pull public samples changes since 1.41 back to carbon master)
     enable_miscue = True
     enable_prosody_assessment = True
     pronunciation_config = speechsdk.PronunciationAssessmentConfig(
@@ -923,8 +936,8 @@ def pronunciation_assessment_continuous_from_file():
     prosody_scores = []
     fluency_scores = []
     durations = []
-    startOffset = 0
-    endOffset = 0
+    startOffset = None
+    endOffset = None
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -933,6 +946,7 @@ def pronunciation_assessment_continuous_from_file():
         done = True
 
     def recognized(evt: speechsdk.SpeechRecognitionEventArgs):
+        nonlocal startOffset, endOffset
         print("pronunciation assessment for: {}".format(evt.result.text))
         pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
         print("    Accuracy score: {}, prosody score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}".format(
@@ -947,8 +961,13 @@ def pronunciation_assessment_continuous_from_file():
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo["NBest"][0]
+<<<<<<< HEAD
+        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"] if w["PronunciationAssessment"]["ErrorType"] == "None"])
+        if startOffset is None:
+=======
         durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"]])
         if startOffset == 0:
+>>>>>>> 42ca78e6ea (pull public samples changes since 1.41 back to carbon master)
             startOffset = nb["Words"][0]["Offset"]
         endOffset = nb["Words"][-1]["Offset"] + nb["Words"][-1]["Duration"] + 100000
 
@@ -957,7 +976,7 @@ def pronunciation_assessment_continuous_from_file():
     # (Optional) get the session ID
     speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
-    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt.cancellation_details)))
     # Stop continuous recognition on either session stopped or canceled events
     speech_recognizer.session_stopped.connect(stop_cb)
     speech_recognizer.canceled.connect(stop_cb)
@@ -1018,8 +1037,13 @@ def pronunciation_assessment_continuous_from_file():
         prosody_score = sum(prosody_scores) / len(prosody_scores)
     # Re-calculate fluency score
     fluency_score = 0
+<<<<<<< HEAD
+    if startOffset is not None and endOffset is not None:
+        fluency_score = sum(durations) / (endOffset - startOffset) * 100
+=======
     if startOffset > 0:
         fluency_score = durations_sum / (endOffset - startOffset) * 100
+>>>>>>> 42ca78e6ea (pull public samples changes since 1.41 back to carbon master)
     # Calculate whole completeness score
     handled_final_words = [w.word for w in final_words if w.error_type != "Insertion"]
     completeness_score = len([w for w in final_words if w.error_type == "None"]) / len(handled_final_words) * 100

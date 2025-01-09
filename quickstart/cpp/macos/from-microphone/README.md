@@ -6,7 +6,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Mac with a working microphone.
+* A Mac with a working microphone. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-cpp) for details on system requirements and setup.
 
 ## Build the sample
 

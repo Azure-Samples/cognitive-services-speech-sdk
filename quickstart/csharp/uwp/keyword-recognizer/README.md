@@ -1,21 +1,17 @@
 # Quickstart: Recognize keywords in C# under Universal Windows Platform
 
 This sample demonstrates how to recognize keywords with C# under the Universal Windows Platform using the Speech SDK.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=uwp%2Cx-android%2Clinux%2Candroid%2Cwindowsinstall&pivots=programming-language-csharp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio 2017.
+See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/speech-to-text-from-microphone?tabs=uwp%2Cx-android%2Clinux%2Candroid%2Cwindowsinstall&pivots=programming-language-csharp) on the SDK documentation page which describes how to build this sample from scratch in Visual Studio.
 
 ## Prerequisites
 
-* A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later and with a working microphone.
-* [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
-* The **Universal Windows Platform development** workload in Visual Studio.
-
-  You can enable it in **Tools** \> **Get Tools and Features**.
+* A Windows PC with a working microphone and [Microsoft Visual Studio](https://www.visualstudio.com/) installed. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-csharp) for details on system requirements and setup.
 
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
-* Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
+* Start Microsoft Visual Studio and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample, and select the solution file contained within it.
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.

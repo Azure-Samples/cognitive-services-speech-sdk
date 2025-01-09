@@ -6,7 +6,7 @@ Note that a Speech SDK version 1.38.0 or later is required.
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://learn.microsoft.com/azure/ai-services/speech-service/overview#get-started).
-* A macOS (10.14 or later) machine with a microphone and [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) version 9.4.1 or later.
+* A macOS machine with a microphone and [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) installed. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-objectivec) for details on system requirements and setup.
 
 ## Get the code for the sample app
 

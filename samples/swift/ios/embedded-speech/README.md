@@ -6,7 +6,7 @@ For an introduction to the embedded Speech SDK, please refer to the [article for
 
 ## Prerequisites
 
-- A Mac with Xcode installed as an iOS development environment. These samples target iOS versions 13.0 or later.
+- A Mac with Xcode installed as an iOS development environment. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-swift) for details on system requirements and setup.
 
 ## Get the Code for the Samples
 

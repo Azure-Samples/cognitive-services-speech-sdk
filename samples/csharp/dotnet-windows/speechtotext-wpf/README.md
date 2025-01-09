@@ -9,16 +9,13 @@ The sample runs on .NET Framework 4.6.1 (or above) on Windows.
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Windows PC; some sample scenarios require a working microphone.
-* [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
-* The **.NET desktop development** workload in Visual Studio.
-  You can enable it in **Tools** \> **Get Tools and Features**.
+* A Windows PC with [Microsoft Visual Studio](https://www.visualstudio.com/) installed; some sample scenarios require a working microphone. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-csharp) for details on system requirements and setup.
 
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
-* Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
+* Start Microsoft Visual Studio and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample, and select the solution file contained within it.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 

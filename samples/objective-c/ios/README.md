@@ -25,7 +25,7 @@ The [synthesis sample app](./synthesis-samples) shows various other techniques t
 ## Prerequisites
 
 - A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-- A Mac with Xcode installed as iOS development environment. These samples target iOS versions 11.0 or later.
+- A Mac with Xcode installed as iOS development environment. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-objectivec) for details on system requirements and setup.
 
 ## Get the code for the samples
 
