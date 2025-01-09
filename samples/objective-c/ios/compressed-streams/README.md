@@ -7,7 +7,7 @@ The Speech SDK's **Compressed Audio Input Stream** API provides a way to stream 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Mac with [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) version 9.4.1 or later installed as iOS development environment. This tutorial targets iOS versions 9.2 or later.
+* A Mac with [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) installed as iOS development environment. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-objectivec) for details on system requirements and setup.
 
 ## Get the Code for the Sample App
 

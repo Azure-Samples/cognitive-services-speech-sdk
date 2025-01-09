@@ -12,7 +12,7 @@
             <layout>default</layout>
             <url>https://repo1.maven.org/maven2</url>
             <snapshots>
-              <enabled>false</enabled>
+                <enabled>false</enabled>
             </snapshots>
         </repository>
         <repository>
@@ -20,13 +20,13 @@
             <name>Microsoft Cognitive Services Local Maven Repository</name>
             <url>file:///localplaceholder//maven//</url>
         </repository>
-      </repositories>
+    </repositories>
     <!-- <dependencies> -->
     <dependencies>
         <dependency>
             <groupId>com.microsoft.cognitiveservices.speech</groupId>
             <artifactId>client-sdk</artifactId>
-            <version>1.41.1</version>
+            <version>1.42.0</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -80,6 +80,11 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
             </plugin>
         </plugins>
     </build>
