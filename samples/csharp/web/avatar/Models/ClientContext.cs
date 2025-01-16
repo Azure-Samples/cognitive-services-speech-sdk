@@ -28,6 +28,8 @@ namespace Avatar.Models
 
         public object? SpeechSynthesizer { get; set; }
 
+        public object? SpeechSynthesizerConnection { get; set; }
+
         public string? SpeechToken { get; set; }
 
         public string? IceToken { get; set; }

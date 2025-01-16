@@ -1,3 +1,6 @@
+[tool.black]
+line-length = 120
+
 [tool.poetry]
 name = "realtime-api-plus"
 version = "0.1.0"
@@ -8,10 +11,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-aiohttp = "^3.10.10"
-rtclient = {url = "https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/py%2Fv0.5.2/rtclient-0.5.2-py3-none-any.whl"}
-azure-cognitiveservices-speech = "^1.41.1"
+aiohttp = "^3.10.11"
+azure-cognitiveservices-speech = "^1.42.0"
 numpy = "^2.1.2"
+rtclient = {url = "https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/py%2Fv0.5.2/rtclient-0.5.2-py3-none-any.whl"}
 
 
 [tool.poetry.group.dev.dependencies]

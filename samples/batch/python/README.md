@@ -8,7 +8,7 @@ Follow these steps for the installation:
 
 1. Go to https://editor.swagger.io.
 1. Click **File**, then click **Import URL**.
-1. Enter the Swagger URL for the Speech Services API: `https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/cognitiveservices/data-plane/Speech/SpeechToText/stable/v3.2/speechtotext.json`.
+1. Enter the Swagger URL for the Speech Services API: `https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/cognitiveservices/data-plane/Speech/SpeechToText/stable/2024-11-15/speechtotext.json`.
 1. Click **Generate Client** and select **Python**.
 1. Save the client library.
 1. Extract the downloaded python-client-generated.zip somewhere in your file system.

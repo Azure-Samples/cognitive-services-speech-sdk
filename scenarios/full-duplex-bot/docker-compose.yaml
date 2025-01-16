@@ -1,0 +1,29 @@
+services:
+  web:
+    build:
+      context: .
+    container_name: full-duplex-bot-web
+    ports:
+      - 8081:8080
+    environment:
+      - WEBSOCKET_URL=ws://localhost:5000
+    # or use a env file
+    # env_file: ".env"
+  backend:
+    build:
+      context: .
+    container_name: full-duplex-bot-backend
+    ports:
+      - 5000:5000
+    entrypoint: python3 ws_server.py
+    environment:
+      - AZURE_OPENAI_ENDPOINT=https://<your aoai resource>.openai.azure.com
+      - AZURE_OPENAI_DEPLOYMENT=gpt-4o-realtime-preview
+      - AZURE_OPENAI_KEY=<your openai key> # optional, set this for key based auth
+      - SPEECH_REGION=<region>
+      - SPEECH_RESOURCE_ID=<your speech resource id> # optional, set either this or SPEECH_KEY
+      - SPEECH_KEY=<your speech key> # optional, set either this or SPEECH_RESOURCE_ID
+      - SPEECH_RECOGNIZER_PROVIDER=azure-fast-transcription  # or azure, see readme for details
+      - AZURE_CLIENT_ID=<your azure client id> # optional, set this for Entra ID auth
+    # or use a env file
+    env_file: ".env"

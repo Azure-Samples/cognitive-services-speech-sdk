@@ -3,18 +3,13 @@
 This sample demonstrates how to perform speaker recognition with the Speech SDK for Java on Windows, macOS or Linux.
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-java-jre) on the SDK documentation page which describes how to build this sample from scratch in Eclipse.
 
-> **Note:**
-> The Speech SDK for the JRE currently supports the Windows x64 platform, macOS x64 (10.14 or later), macOS M1 arm64 (11.0 or later), and [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
-
 **Note:** Microsoft limits access to speaker recognition. You can apply for access through the [Azure Cognitive Services speaker recognition limited access review](https://aka.ms/azure-speaker-recognition). For more information, see [Limited access for speaker recognition](https://docs.microsoft.com/legal/cognitive-services/speech-service/speaker-recognition/limited-access-speaker-recognition).
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64 or a supported Linux distribution) or Mac (macOS 10.14 or later) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) with a working microphone.
-* Java 8 or 11 JRE/JDK.
-* Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
-* On Linux, see the [Linux platform requirements](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux&pivots=programming-language-java#platform-requirements) for installing the required dependencies.
+* A PC (Windows, Linux, Mac) capable to run [Eclipse](https://www.eclipse.org),[<sup>[1]</sup>](#footnote1) with a working microphone.
+* See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-java) for details on system requirements and setup.
 
 <small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM platforms.</small>
 

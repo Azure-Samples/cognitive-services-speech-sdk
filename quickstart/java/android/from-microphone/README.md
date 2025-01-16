@@ -6,9 +6,9 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows, Linux, Mac) capable to run Android Studio.
-* [Android Studio](https://developer.android.com/studio/).
-* An ARM-based Android device (API 23: Android 6.0 Marshmallow or higher) [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
+* A PC (Windows, Linux, Mac) capable to run [Android Studio](https://developer.android.com/studio/).
+* An ARM-based Android device [enabled for development](https://developer.android.com/studio/debug/dev-options) with a working microphone.
+* See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-java) for details on system requirements and setup.
 
 ## Build the sample
 

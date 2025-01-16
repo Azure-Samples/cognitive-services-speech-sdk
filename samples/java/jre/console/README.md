@@ -2,16 +2,11 @@
 
 This sample demonstrates various forms of speech recognition, intent recognition, speech synthesis, and translation using the Speech SDK for Java on Windows or Linux.
 
-> **Note:**
-> The Speech SDK for the JRE currently supports only the Windows x64 platform, and [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
-
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64 or a supported Linux distribution) capable to run Eclipse,[<sup>[1]</sup>](#footnote1) some sample scenarios require a working microphone.
-* Java 8 or 11 JRE/JDK.
-* Version 4.8 of [Eclipse](https://www.eclipse.org), 64-bit.[<sup>[1]</sup>](#footnote1)
-* On Linux, see the [Linux platform requirements](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux&pivots=programming-language-java#platform-requirements) for installing the required dependencies.
+* A PC (Windows, Linux, Mac) capable to run [Eclipse](https://www.eclipse.org),[<sup>[1]</sup>](#footnote1) some sample scenarios require a working microphone.
+* See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-java) for details on system requirements and setup.
 
 <small><a name="footnote1">1</a>. This sample has not been verified with Eclipse on ARM platforms.</small>
 

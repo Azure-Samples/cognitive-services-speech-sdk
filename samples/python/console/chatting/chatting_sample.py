@@ -15,6 +15,8 @@ import sys
 import time
 import threading
 import wave
+import string
+from typing import Literal
 
 import numpy as np
 import soundfile as sf
@@ -111,9 +113,70 @@ def chatting_from_file():
     """Performs chatting with Azure OAI and Azure Pronunciation Assessment asynchronously from audio files.
         See more information at https://aka.ms/csspeech/pa"""
 
-    topic = "describe working dogs"
     input_files = ["resources/chat_input_1.wav", "resources/chat_input_2.wav"]
     reference_text = ""
+    chat_history = [
+        {
+            "role": "system",
+            "content": (
+                "You are a voice assistant, and when you answer questions,"
+                "your response should not exceed 25 words."
+            )
+        }
+    ]
+    sample_sentence1 = "OK the movie i like to talk about is the cove it is very say phenomenal sensational documentary about adopting hunting practices in japan i think the director is called well i think the name escapes me anyway but well let's talk about the movie basically it's about dolphin hunting practices in japan there's a small village where where villagers fisherman Q almost twenty thousand dolphins on a yearly basis which is brutal and just explain massacre this book has influenced me a lot i still remember the first time i saw this movie i think it was in middle school one of my teachers showed it to all the class or the class and i remember we were going through some really boring topics like animal protection at that time it was really boring to me but right before everyone was going to just sleep in the class the teacher decided to put the textbook down and show us a clear from this document documentary we were shocked speechless to see the has of the dolphins chopped off and left on the beach and the C turning bloody red with their blood which is i felt sick i couldn't need fish for a whole week and it was lasting impression if not scarring impression and i think this movie is still very meaningful and it despite me a lot especially on wildlife protection dolphins or search beautiful intelligent animals of the sea and why do villagers and fishermen in japan killed it i assume there was a great benefit to its skin or some scientific research but the ironic thing is that they only kill them for the meat because the meat taste great that sickens me for awhile and i think the book inspired me to do a lot of different to do a lot of things about well i protection i follow news like"
+    sample_sentence2 = "yes i can speak how to this movie is it is worth young wolf young man this is this movie from korea it's a crime movies the movies on the movies speaker speaker or words of young man love hello a cow are you saying they end so i have to go to the go to the america or ha ha ha lots of years a go on the woman the woman is very old he talk to korea he carpool i want to go to the this way this whole home house this house is a is hey so what's your man and at the end the girl cause so there's a woman open open hum finally finds other wolf so what's your young man so the young man don't so yeah man the young man remember he said here's a woman also so am i it's very it's very very sad she is she is a crack credit thank you "
+    sample_sentence3 = "yes i want i want to talk about the TV series are enjoying watching a discount name is a friends and it's uh accommodate in the third decades decades an it come out the third decades and its main characters about a six friends live in the NYC but i watched it a long time ago i can't remember the name of them and the story is about what they are happening in their in their life and there are many things treating them and how the friendship are hard friendship and how the french how the strong strongly friendship they obtain them and they always have some funny things happen they only have happened something funny things and is a comedy so that was uh so many and i like this be cause of first adult cause it has a funding it has a farming serious and it can improve my english english words and on the other hand it can i can know about a lot of cultures about the united states and i i first hear about death TV series it's come out of a website and i took into and i watch it after my after my finish my studies and when i was a bad mood when i when i'm in a bad mood or i "
+    type_of_feedback = {
+        "comment_on_vocabulary": "lexical",
+        "comment_on_grammar": "grammatical",
+    }
+
+    def get_request_data(send_text, scenario=Literal["chat", "content_assess", "comment_on_vocabulary", "comment_on_grammar"]):
+        promptForFeedback = (
+            'From a professional perspective, provide a {type_of_feedback} evaluation of the following passage: "{passage}" First, give a summary evaluation, then list the issues and provide suggestions, keeping it within 50 words. output format as '
+            '"Summary Evaluation: *'
+            'Issues and Suggestions:'
+            '  1. *'
+            '  ..."'
+        )
+        if scenario == "content_assess":
+            data = [
+                {
+                    "role": "system",
+                    "content":
+                        'You are an English teacher and please help to grade a student\'s essay from vocabulary and grammar relevance on how well the essay aligns, and output format as: {"vocabulary": *.**(0-100), "grammar": *.**(0-100)}.',
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f'Example1: this essay: "{sample_sentence1}" has vocabulary and grammar scores of 80 and 80, respectively.'
+                        f'Example2: this essay: "{sample_sentence2}" has vocabulary and grammar scores of 40 and 43, respectively.'
+                        f'Example3: this essay: "{sample_sentence3}" has vocabulary and grammar scores of 50 and 50, respectively.'
+                        f'The essay for you to score is "{send_text}".'
+                        'The script is from speech recognition so that please first add punctuations when needed, remove duplicates and unnecessary un uh from oral speech, then find all the misuse of words and grammar errors in this essay, find advanced words and grammar usages, and finally give scores based on this information. Please only response as this format {"vocabulary": *.**(0-100), "grammar": *.**(0-100)}.'
+                    )
+                }
+            ]
+            return data
+        elif scenario == "comment_on_vocabulary":
+            return [{
+                "role": "user",
+                "content": promptForFeedback.format(type_of_feedback=type_of_feedback["comment_on_vocabulary"], passage=send_text)
+            }]
+        elif scenario == "comment_on_grammar":
+            return [{
+                "role": "user",
+                "content": promptForFeedback.format(type_of_feedback=type_of_feedback["comment_on_grammar"], passage=send_text)
+            }]
+        else:
+            chat_history.append(
+                {
+                    "role": "user",
+                    "content": send_text
+                }
+            )
+            return chat_history
 
     def stt(filename):
         result_text = []
@@ -148,30 +211,25 @@ def chatting_from_file():
         print("YOU: ", text)
         return text
 
-    def call_gpt(send_text):
+    def call_gpt(send_text, scenario=Literal["chat", "content_assess", "comment_on_vocabulary", "comment_on_grammar"]):
         url = (
             f"https://{oai_resource_name}.openai.azure.com/openai/deployments/{oai_deployment_name}/"
             f"chat/completions?api-version={oai_api_version}"
         )
         headers = {"Content-Type": "application/json", "api-key": oai_api_key}
-        data = {"messages": [
-            {
-                "role": "system",
-                "content": (
-                    "You are a voice assistant, and when you answer questions,"
-                    "your response should not exceed 25 words."
-                )
-            },
-            {
-                "role": "user",
-                "content": send_text
-            }
-        ]}
+        data = {"messages": get_request_data(send_text, scenario)}
 
         text = json.loads(
             requests.post(url=url, headers=headers, data=json.dumps(data)).content
         )["choices"][0]["message"]["content"]
-        print("GPT: ", text)
+        if scenario == "chat":
+            chat_history.append(
+                {
+                    "role": "assistant",
+                    "content": text
+                }
+            )
+            print("GPT: ", text)
         return text
 
     def tts(text, output_path, tag=None):
@@ -218,7 +276,6 @@ def chatting_from_file():
         }
         pronunciation_config = speechsdk.PronunciationAssessmentConfig(json_string=json.dumps(json_string))
         pronunciation_config.enable_prosody_assessment()
-        pronunciation_config.enable_content_assessment_with_topic(topic)
         pronunciation_config.reference_text = reference_text.strip()
 
         # Creates a speech recognizer using a file as audio input.
@@ -236,9 +293,10 @@ def chatting_from_file():
         prosody_scores = []
         fluency_scores = []
         durations = []
-        results = []
         json_words = []
         display_text = ""
+        startOffset = 0
+        endOffset = 0
 
         def stop_cb(evt):
             """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -247,17 +305,19 @@ def chatting_from_file():
 
         def recognized(evt):
             pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
-            nonlocal recognized_words, prosody_scores, fluency_scores, durations, results, json_words, display_text
-            results.append(pronunciation_result)
+            nonlocal recognized_words, prosody_scores, fluency_scores, durations, json_words, display_text, startOffset, endOffset
             recognized_words += pronunciation_result.words
             fluency_scores.append(pronunciation_result.fluency_score)
             json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
             jo = json.loads(json_result)
             nb = jo["NBest"][0]
-            display_text += nb["Display"]
+            display_text += nb["Display"] + " "
             json_words += nb["Words"]
             prosody_scores.append(pronunciation_result.prosody_score)
-            durations.append(sum([int(w["Duration"]) for w in nb["Words"]]))
+            durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"]])
+            if startOffset == 0:
+                startOffset = nb["Words"][0]["Offset"]
+            endOffset = nb["Words"][-1]["Offset"] + nb["Words"][-1]["Duration"] + 100000
 
         # Connect callbacks to the events fired by the speech recognizer
         speech_recognizer.recognized.connect(recognized)
@@ -277,6 +337,11 @@ def chatting_from_file():
         speech_recognizer.stop_continuous_recognition()
         push_stream_writer_thread.join()
 
+        # Get content scores
+        content_result = json.loads(call_gpt(display_text, "content_assess"))
+
+        durations_sum = sum([d for w, d in zip(recognized_words, durations) if w.error_type == "None"])
+
         # We can calculate whole accuracy by averaging
         final_accuracy_scores = []
         for word in recognized_words:
@@ -293,29 +358,27 @@ def chatting_from_file():
             prosody_score = sum(prosody_scores) / len(prosody_scores)
 
         # Re-calculate fluency score
-        fluency_score = sum([x * y for (x, y) in zip(fluency_scores, durations)]) / sum(durations)
+        fluency_score = 0
+        if startOffset > 0:
+            fluency_score = durations_sum / (endOffset - startOffset) * 100
 
-        pron_score = accuracy_score * 0.6 + fluency_score * 0.2 + prosody_score * 0.2
+        sorted_scores = sorted([accuracy_score, prosody_score, fluency_score])
+        pron_score = sorted_scores[0] * 0.6 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2
         print(f"Pronunciation score: {pron_score:.1f}")
         print(f"Accuracy Score: {accuracy_score:.1f}")
         if not math.isnan(prosody_score):
             print(f"Prosody Score: {prosody_score:.1f}")
         print(f"Fluency Score: {fluency_score:.1f}")
-        # Content assessment result is in the last pronunciation assessment block
-        assert results[-1].content_assessment_result is not None
-        content_result = results[-1].content_assessment_result
-        print(f"Vocabulary score: {content_result.vocabulary_score:.1f}")
-        print(f"Grammar score: {content_result.grammar_score:.1f}")
-        print(f"Topic score: {content_result.topic_score:.1f}")
+        print(f"Vocabulary score: {content_result['vocabulary']:.1f}")
+        print(f"Grammar score: {content_result['grammar']:.1f}")
 
         comment_result(
             {
                 "accuracy score": accuracy_score,
                 "fluency score": fluency_score,
                 "prosody score": prosody_score,
-                "vocabulary score": content_result.vocabulary_score,
-                "grammar score": content_result.grammar_score,
-                "topic score": content_result.topic_score
+                "vocabulary score": content_result["vocabulary"],
+                "grammar score": content_result["grammar"],
             },
             set_punctuation(json_words, display_text),
             [
@@ -323,16 +386,17 @@ def chatting_from_file():
                 if word["PronunciationAssessment"]["ErrorType"] == "Mispronunciation"
                 or word["PronunciationAssessment"]["AccuracyScore"] < 60
             ],
-            merged_audio_path
+            merged_audio_path,
+            display_text
         )
 
     def set_punctuation(json_words, display_text):
         for idx, word in enumerate(display_text.split(" ")):
-            if not word[-1].isalpha() and not word[-1].isdigit():
-                json_words[idx]["is_punctuation"] = True
+            if word.strip() and word.strip()[-1] in string.punctuation:
+                json_words[idx]["has_punctuation"] = True
         return json_words
 
-    def comment_result(scores_dict, json_words, mis_pronunciation_words, merged_audio_path):
+    def comment_result(scores_dict, json_words, mis_pronunciation_words, merged_audio_path, content):
         message_dict = {
             "Excellent": [],
             "Good": [],
@@ -366,10 +430,10 @@ def chatting_from_file():
                 if break_error_info == "null":
                     return False
                 if error_type == "MissingBreak":
-                    if break_error_info["Confidence"] >= threshold and last_word.get("is_punctuation", False):
+                    if break_error_info["Confidence"] >= threshold and last_word.get("has_punctuation", False):
                         return True
                 if error_type == "UnexpectedBreak":
-                    if break_error_info["Confidence"] >= threshold and not last_word.get("is_punctuation", False):
+                    if break_error_info["Confidence"] >= threshold and not last_word.get("has_punctuation", False):
                         return True
                 return False
             elif error_type == "Monotone" and \
@@ -392,18 +456,18 @@ def chatting_from_file():
             for error_type in error_types:
                 if len(error_dict[error_type]) != 0:
                     message += f"{error_type} count is {len(error_dict[error_type])}. near the word "
-                    message += f"{' '.join([word['Word'].strip() for word in error_dict[error_type]])}. "
+                    message += f"{', '.join([word['Word'].strip() for word in error_dict[error_type]])}. "
 
             return message
 
-        def get_report(json_words, mis_pronunciation_words, merged_audio_path):
+        def get_report(json_words, mis_pronunciation_words, merged_audio_path, content):
 
             set_error_dict(json_words)
 
             report_audio_list = []
-            accuracy_report_audio_list = []
             report_path = "output/chat_report.wav"
             if len(mis_pronunciation_words) != 0:
+                accuracy_report_audio_list = []
                 accuracy_report_path = "output/accuracy_report.wav"
                 for idx, mis_word in enumerate(mis_pronunciation_words):
                     origin_content = ""
@@ -440,6 +504,12 @@ def chatting_from_file():
                 tts(origin_content, fluency_prosody_report_path)
                 report_audio_list.append(fluency_prosody_report_path)
 
+            if content.strip() != "":
+                vocabulary_feedback_path = "output/vocabulary_feedback.wav"
+                grammar_feedback_path = "output/grammar_feedback.wav"
+                tts(call_gpt(content, "comment_on_vocabulary"), vocabulary_feedback_path, "vocabulary feedback")
+                tts(call_gpt(content, "comment_on_grammar"), grammar_feedback_path, "grammar feedback")
+
             merge_wav(report_audio_list, report_path, "report")
 
         def get_score_comment(scores_dict):
@@ -455,12 +525,12 @@ def chatting_from_file():
             tts(messages, "output/chat_score_comment.wav", "score comment")
 
         get_score_comment(scores_dict)
-        get_report(json_words, mis_pronunciation_words, merged_audio_path)
+        get_report(json_words, mis_pronunciation_words, merged_audio_path, content)
 
     if not os.path.exists("output"):
         os.makedirs("output")
     for idx, file in enumerate(input_files):
-        tts(call_gpt(stt(file)), f"output/gpt_output_{idx+1}.wav", "GPT output")
+        tts(call_gpt(stt(file), "chat"), f"output/gpt_output_{idx+1}.wav", "GPT output")
     print("Generate the final report ......")
     pronunciation_assessment()
 

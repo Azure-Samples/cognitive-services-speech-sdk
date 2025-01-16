@@ -59,7 +59,7 @@ namespace MicrosoftSpeechSDKSamples
             FileLogger.Stop();
 
             // Clear filters
-            EventLogger.SetFilters();
+            FileLogger.SetFilters();
 
             // Now look at the log file that was created.. 
         }

@@ -23,6 +23,7 @@ proguard-rules.pro text
 *.cshtml text
 *.csproj text
 *.css text
+*.csv text
 *.editorconfig text
 *.entitlements text
 *.go text
@@ -68,6 +69,7 @@ proguard-rules.pro text
 *.xml text
 *.yaml text
 *.yml text
+*.ps1 text
 
 
 # Bash only likes Unix line endings

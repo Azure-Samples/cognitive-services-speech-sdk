@@ -21,9 +21,9 @@ Requirements specific to embedded speech samples are as follows.
   * Linux - `x64`, `ARM64`.
   * macOS - `x64`, `ARM64`.
 * If using Visual Studio (Windows, macOS):
-  * [Microsoft Visual Studio 2022 or newer](https://www.visualstudio.com/) with **.NET 6.0**.
+  * [Microsoft Visual Studio 2022 or newer](https://www.visualstudio.com/) with **.NET 8.0**.
 * If using the command line:
-  * [.NET 6.0](https://learn.microsoft.com/dotnet/core/install/) (dotnet)
+  * [.NET 8.0](https://learn.microsoft.com/dotnet/core/install/) (dotnet)
 * For speech recognition or translation:
   * A working microphone device (and permission to access it for audio capture).
   * One or more embedded speech recognition or translation models. See https://aka.ms/embedded-speech for the latest information on how to obtain embedded models.
@@ -144,11 +144,11 @@ Choose the scenarios that you are interested in.
 
 Navigate to the folder containing this sample and run
 ```sh
-dotnet samples/bin/Debug/net6.0/samples.dll
+dotnet samples/bin/Debug/net8.0/samples.dll
 ```
 or
 ```sh
-dotnet samples/bin/Release/net6.0/samples.dll
+dotnet samples/bin/Release/net8.0/samples.dll
 ```
 according to the build configuration that was used.
 

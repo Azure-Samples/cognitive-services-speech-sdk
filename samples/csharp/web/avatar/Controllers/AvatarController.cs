@@ -44,7 +44,7 @@ namespace Avatar.Controllers
         }
 
         [HttpGet("chat")]
-        public ActionResult ChatView()
+        public IActionResult ChatView()
         {
             var clientId = _clientService.InitializeClient();
             if (chatClient == null)
@@ -124,8 +124,10 @@ namespace Avatar.Controllers
             try
             {
                 var clientId = new Guid(Request.Headers["ClientId"]!);
-
                 var clientContext = _clientService.GetClientContext(clientId);
+
+                // disconnect avatar if already connected
+                await DisconnectAvatarInternal(clientId);
 
                 // Override default values with client provided values
                 clientContext.AzureOpenAIDeploymentName = Request.Headers["AoaiDeploymentName"].FirstOrDefault() ?? _clientSettings.AzureOpenAIDeploymentName;
@@ -262,6 +264,18 @@ namespace Avatar.Controllers
 
                 var connection = Connection.FromSpeechSynthesizer(speechSynthesizer);
                 connection.SetMessageProperty("speech.config", "context", JsonConvert.SerializeObject(avatarConfig));
+                connection.Connected += (sender, args) =>
+                {
+                    Console.WriteLine("TTS Avatar service connected.");
+                };
+
+                connection.Disconnected += (sender, args) =>
+                {
+                    Console.WriteLine("TTS Avatar service disconnected.");
+                    clientContext.SpeechSynthesizerConnection = null;
+                };
+
+                clientContext.SpeechSynthesizerConnection = connection;
 
                 var speechSynthesisResult = speechSynthesizer.SpeakTextAsync("").Result;
                 Console.WriteLine($"Result ID: {speechSynthesisResult.ResultId}");
@@ -285,7 +299,7 @@ namespace Avatar.Controllers
         }
 
         [HttpPost("api/speak")]
-        public async Task<ActionResult> Speak()
+        public async Task<IActionResult> Speak()
         {
             try
             {
@@ -314,7 +328,7 @@ namespace Avatar.Controllers
         }
 
         [HttpPost("api/stopSpeaking")]
-        public async Task<ActionResult> StopSpeaking()
+        public async Task<IActionResult> StopSpeaking()
         {
             try
             {
@@ -342,7 +356,7 @@ namespace Avatar.Controllers
         }
 
         [HttpPost("api/chat")]
-        public async Task<ActionResult> Chat()
+        public async Task<IActionResult> Chat()
         {
             // Retrieve and parse the ClientId from headers
             var clientIdHeaderValues = Request.Headers["ClientId"];
@@ -392,7 +406,7 @@ namespace Avatar.Controllers
                 // Retrieve the client context and clear chat history
                 var clientContext = _clientService.GetClientContext(clientId);
                 var systemPrompt = Request.Headers["SystemPrompt"].FirstOrDefault() ?? string.Empty;
-                InitializeChatContext(systemPrompt, clientId); 
+                InitializeChatContext(systemPrompt, clientId);
                 clientContext.ChatInitiated = true;
 
                 return Ok("Chat history cleared.");
@@ -404,7 +418,7 @@ namespace Avatar.Controllers
         }
 
         [HttpPost("api/disconnectAvatar")]
-        public IActionResult DisconnectAvatar()
+        public async Task<IActionResult> DisconnectAvatar()
         {
             try
             {
@@ -415,21 +429,7 @@ namespace Avatar.Controllers
                     return BadRequest("Invalid ClientId");
                 }
 
-                // Retrieve the client context
-                var clientContext = _clientService.GetClientContext(clientId);
-
-                if (clientContext == null)
-                {
-                    return StatusCode(StatusCodes.Status204NoContent, "Client context not found");
-                }
-
-                var speechSynthesizer = clientContext.SpeechSynthesizer as SpeechSynthesizer;
-                if (speechSynthesizer != null)
-                {
-                    var connection = Connection.FromSpeechSynthesizer(speechSynthesizer);
-                    connection.Close();
-                }
-
+                await DisconnectAvatarInternal(clientId);
                 return Ok("Disconnected avatar");
             }
             catch (Exception ex)
@@ -439,7 +439,7 @@ namespace Avatar.Controllers
         }
 
         [HttpGet("api/initializeClient")]
-        public ActionResult InitializeClient()
+        public IActionResult InitializeClient()
         {
             try
             {
@@ -452,7 +452,36 @@ namespace Avatar.Controllers
             }
         }
 
-        public async Task HandleUserQuery(string userQuery, Guid clientId, HttpResponse httpResponse)
+        [HttpPost("api/releaseClient")]
+        public async Task<IActionResult> ReleaseClient()
+        {
+            // Extract the client ID from the request body
+            var clientIdString = string.Empty;
+            using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                clientIdString = JObject.Parse(await reader.ReadToEndAsync()).Value<string>("clientId");
+            }
+
+            if (!Guid.TryParse(clientIdString, out Guid clientId))
+            {
+                return BadRequest("Invalid ClientId");
+            }
+
+            try
+            {
+                await DisconnectAvatarInternal(clientId);
+                await Task.Delay(2000); // Wait some time for the connection to close
+                _clientService.RemoveClient(clientId);
+                Console.WriteLine($"Client context released for client id {clientId}.");
+                return Ok($"Client context released for client id {clientId}.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Client context release failed for client id {clientId}. Error message: {ex.Message}");
+            }
+        }
+
+        private async Task HandleUserQuery(string userQuery, Guid clientId, HttpResponse httpResponse)
         {
             var clientContext = _clientService.GetClientContext(clientId);
             var azureOpenaiDeploymentName = clientContext.AzureOpenAIDeploymentName;
@@ -594,7 +623,7 @@ namespace Avatar.Controllers
         }
 
         // Speak the given text. If there is already a speaking in progress, add the text to the queue. For chat scenario.
-        public Task SpeakWithQueue(string text, int endingSilenceMs, Guid clientId, HttpResponse httpResponse)
+        private Task SpeakWithQueue(string text, int endingSilenceMs, Guid clientId, HttpResponse httpResponse)
         {
             var clientContext = _clientService.GetClientContext(clientId);
 
@@ -636,7 +665,7 @@ namespace Avatar.Controllers
             return Task.CompletedTask;
         }
 
-        public async Task<string> SpeakText(string text, string voice, string speakerProfileId, int endingSilenceMs, Guid clientId)
+        private async Task<string> SpeakText(string text, string voice, string speakerProfileId, int endingSilenceMs, Guid clientId)
         {
             var escapedText = HttpUtility.HtmlEncode(text);
             string ssml;
@@ -668,7 +697,7 @@ namespace Avatar.Controllers
             return await SpeakSsml(ssml, clientId);
         }
 
-        public async Task<string> SpeakSsml(string ssml, Guid clientId)
+        private async Task<string> SpeakSsml(string ssml, Guid clientId)
         {
             var clientContext = _clientService.GetClientContext(clientId);
 
@@ -695,22 +724,44 @@ namespace Avatar.Controllers
             return speechSynthesisResult.ResultId;
         }
 
-        public async Task StopSpeakingInternal(Guid clientId)
+        private async Task StopSpeakingInternal(Guid clientId)
         {
             var clientContext = _clientService.GetClientContext(clientId);
-
-            var speechSynthesizer = clientContext.SpeechSynthesizer as SpeechSynthesizer;
             var spokenTextQueue = clientContext.SpokenTextQueue;
             spokenTextQueue.Clear();
 
             try
             {
-                var connection = Connection.FromSpeechSynthesizer(speechSynthesizer);
-                await connection.SendMessageAsync("synthesis.control", "{\"action\":\"stop\"}");
+                var connection = clientContext.SpeechSynthesizerConnection as Connection;
+                if (connection != null)
+                {
+                    await connection.SendMessageAsync("synthesis.control", "{\"action\":\"stop\"}");
+                    Console.WriteLine("Stop speaking message sent.");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+            }
+        }
+
+        private async Task DisconnectAvatarInternal(Guid clientId)
+        {
+            // Retrieve the client context
+            var clientContext = _clientService.GetClientContext(clientId);
+
+            if (clientContext == null)
+            {
+                throw new Exception("Client context not found");
+            }
+
+            await StopSpeakingInternal(clientId);
+            await Task.Delay(2000); // Wait for the last speech to finish
+
+            var connection = clientContext.SpeechSynthesizerConnection as Connection;
+            if (connection != null)
+            {
+                connection.Close();
             }
         }
     }

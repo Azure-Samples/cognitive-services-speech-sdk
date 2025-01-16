@@ -594,6 +594,12 @@ function checkHung() {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
                         console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                        // Release the existing avatar connection
+                        if (avatarSynthesizer !== undefined) {
+                            avatarSynthesizer.close()
+                        }
+
+                        // Setup a new avatar connection
                         connectAvatar()
                     }
                 }
@@ -759,13 +765,13 @@ window.updateTypeMessageBox = () => {
             }
         })
         document.getElementById('uploadImgIcon').addEventListener('click', function() {
-            imgUrl = "https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg"
+            imgUrl = "https://wallpaperaccess.com/full/528436.jpg"
             const userMessage = document.getElementById("userMessageBox");
             const childImg = userMessage.querySelector("#picInput");
             if (childImg) {
                 userMessage.removeChild(childImg)
             }
-            userMessage.innerHTML+='<br/><img id="picInput" src="https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg" style="width:100px;height:100px"/><br/><br/>'   
+            userMessage.innerHTML+='<br/><img id="picInput" src="https://wallpaperaccess.com/full/528436.jpg" style="width:100px;height:100px"/><br/><br/>'   
         });
     } else {
         document.getElementById('userMessageBox').hidden = true

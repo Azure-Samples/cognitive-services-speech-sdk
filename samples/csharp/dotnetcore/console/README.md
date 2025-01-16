@@ -1,21 +1,12 @@
 # C# Console app for .NET Core (Windows or Linux)
 
 This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for C#.
-It runs under .NET 6.0 or later on Windows or Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
+It runs under .NET 8.0 or later on Windows or Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A PC (Windows x64 or a supported Linux distribution); some sample scenarios require a working microphone.
-* Either one of the following:
-  * On Windows:
-    * [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
-    * The **.NET Core cross-platform development** workload in Visual Studio.
-      You can enable it in **Tools** \> **Get Tools and Features**.
-  * On Windows or Linux:
-    * [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
-    * On Windows you also need the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017 and 2019](https://support.microsoft.com/help/2977003/the-latest-supported-visual-c-downloads) for your platform.
-* On Linux, see the [Linux platform requirements](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?tabs=linux&pivots=programming-language-csharp#platform-requirements) for installing the required dependencies.
+* A PC (Windows, Linux, Mac); some sample scenarios require a working microphone. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-csharp) for details on system requirements and setup.
 
 ## Build the sample
 
@@ -25,8 +16,8 @@ It runs under .NET 6.0 or later on Windows or Linux (see the list of [supported 
   > **Note:** make sure to download the complete set of samples, not just this directory.
   > This sample references code in the directory [../../sharedcontent/console](../../sharedcontent/console), which is shared across samples.
 
-* If you are using Microsoft Visual Studio 2017 on Windows:
-  * Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
+* If you are using Microsoft Visual Studio on Windows:
+  * Start Microsoft Visual Studio and select **File** \> **Open** \> **Project/Solution**.
   * Navigate to the folder containing this sample, and select the solution file contained within it.
 * To tailor the sample to your configuration, use search and replace across the whole solution (for example, in Visual Studio, via **Edit** \> **Find and Replace** \> **Quick Replace**) to update the following strings:
 
@@ -42,7 +33,7 @@ It runs under .NET 6.0 or later on Windows or Linux (see the list of [supported 
   * The following settings apply to keyword-triggered recognition:
     * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
     * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.
-* If you are using Microsoft Visual Studio 2017 on Windows, press <kbd>Ctrl+Shift+B</kbd>, or select **Build** \> **Build Solution**.
+* If you are using Microsoft Visual Studio on Windows, press <kbd>Ctrl+Shift+B</kbd>, or select **Build** \> **Build Solution**.
 * If you are using the .NET Core CLI, run the following command from the directory that contains this sample:
 
   ```bash
@@ -51,7 +42,7 @@ It runs under .NET 6.0 or later on Windows or Linux (see the list of [supported 
 
 ## Run the sample
 
-### Using Visual Studio 2017
+### Using Visual Studio
 
 To debug the app and then run it, press <kbd>F5</kbd> or use **Debug** \> **Start Debugging**. To run the app without debugging, press <kbd>Ctrl+F5</kbd> or use **Debug** \> **Start Without Debugging**.
 
@@ -64,7 +55,7 @@ Run the following command below from the directory that contains this sample.
 (We assume you performed a Debug build earlier)
 
 ```bash
-cd samples/bin/Debug/net6.0
+cd samples/bin/Debug/net8.0
 dotnet samples.dll
 ```
 

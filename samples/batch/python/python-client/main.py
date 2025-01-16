@@ -13,6 +13,8 @@ import swagger_client
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
         format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
 
+API_VERSION = "2024-11-15"
+
 # Your subscription key and region for the speech service
 SUBSCRIPTION_KEY = "YourSubscriptionKey"
 SERVICE_REGION = "YourServiceRegion"
@@ -132,7 +134,7 @@ def transcribe():
     # configure API key authorization: subscription_key
     configuration = swagger_client.Configuration()
     configuration.api_key["Ocp-Apim-Subscription-Key"] = SUBSCRIPTION_KEY
-    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext/v3.2"
+    configuration.host = f"https://{SERVICE_REGION}.api.cognitive.microsoft.com/speechtotext"
 
     # create the client object and authenticate
     client = swagger_client.ApiClient(configuration)
@@ -143,18 +145,15 @@ def transcribe():
     # Specify transcription properties by passing a dict to the properties parameter. See
     # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options
     # for supported parameters.
-    properties = swagger_client.TranscriptionProperties()
+    properties = swagger_client.TranscriptionProperties(time_to_live_hours=6)
     # properties.word_level_timestamps_enabled = True
     # properties.display_form_word_level_timestamps_enabled = True
     # properties.punctuation_mode = "DictatedAndAutomatic"
     # properties.profanity_filter_mode = "Masked"
     # properties.destination_container_url = "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>"
-    # properties.time_to_live = "PT1H"
 
     # uncomment the following block to enable and configure speaker separation
-    # properties.diarization_enabled = True
-    # properties.diarization = swagger_client.DiarizationProperties(
-    #     swagger_client.DiarizationSpeakersProperties(min_count=1, max_count=5))
+    # properties.diarization = swagger_client.DiarizationProperties(max_speakers=5, enabled=True)
 
     # uncomment the following block to enable and configure language identification prior to transcription. Available modes are "single" and "continuous".
     # properties.language_identification = swagger_client.LanguageIdentificationProperties(mode="single", candidate_locales=["en-US", "ja-JP"])
@@ -169,10 +168,10 @@ def transcribe():
     # Uncomment this block to transcribe all files from a container.
     # transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
 
-    created_transcription, status, headers = api.transcriptions_create_with_http_info(transcription=transcription_definition)
+    created_transcription, status, headers = api.transcriptions_submit_with_http_info(transcription=transcription_definition, api_version=API_VERSION)
 
     # get the transcription Id from the location URI
-    transcription_id = headers["location"].split("/")[-1]
+    transcription_id = headers["location"].split("/")[-1].split("?")[0]
 
     # Log information about the created transcription. If you should ask for support, please
     # include this information.
@@ -186,7 +185,7 @@ def transcribe():
         # wait for 5 seconds before refreshing the transcription status
         time.sleep(5)
 
-        transcription = api.transcriptions_get(transcription_id)
+        transcription = api.transcriptions_get(transcription_id, api_version=API_VERSION)
         logging.info(f"Transcriptions status: {transcription.status}")
 
         if transcription.status in ("Failed", "Succeeded"):
@@ -197,7 +196,7 @@ def transcribe():
                 logging.info("Transcription succeeded. Results are located in your Azure Blob Storage.")
                 break
 
-            pag_files = api.transcriptions_list_files(transcription_id)
+            pag_files = api.transcriptions_list_files(transcription_id, api_version=API_VERSION)
             for file_data in _paginate(api, pag_files):
                 if file_data.kind != "Transcription":
                     continue

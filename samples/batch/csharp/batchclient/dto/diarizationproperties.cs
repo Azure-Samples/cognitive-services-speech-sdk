@@ -7,6 +7,8 @@ namespace BatchClient
 {
     public class DiarizationProperties
     {
-        public DiarizationSpeakersProperties Speakers { get; set; }
+        public int MaxSpeakers { get; set; }
+
+        public bool Enabled { get; set; }
     }
 }

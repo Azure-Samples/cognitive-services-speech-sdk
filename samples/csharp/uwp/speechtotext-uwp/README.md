@@ -5,19 +5,13 @@ This sample demonstrates various forms of recognizing speech with C# under the U
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* A Windows PC with Windows 10 Fall Creators Update (10.0; Build 16299) or later.
-  Some sample scenarios require a working microphone.
-* [Microsoft Visual Studio 2017](https://www.visualstudio.com/), Community Edition or higher.
-* The **Universal Windows Platform development** workload in Visual Studio.  You can enable it in **Tools** \> **Get Tools and Features**.
-* Note: processor target ARM is not yet supported.
-
- 
+* A Windows PC with [Microsoft Visual Studio](https://www.visualstudio.com/) installed; some sample scenarios require a working microphone. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-csharp) for details on system requirements and setup.
 
 ## Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
-* Start Microsoft Visual Studio 2017 and select **File** \> **Open** \> **Project/Solution**.
+* Start Microsoft Visual Studio and select **File** \> **Open** \> **Project/Solution**.
 * Navigate to the folder containing this sample, and select the solution file contained within it.
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.

@@ -602,3 +602,7 @@ window.updateLocalVideoForIdle = () => {
         document.getElementById('showTypeMessageCheckbox').hidden = false
     }
 }
+
+window.onbeforeunload = () => {
+    navigator.sendBeacon('/api/releaseClient', JSON.stringify({ clientId: clientId }))
+}
