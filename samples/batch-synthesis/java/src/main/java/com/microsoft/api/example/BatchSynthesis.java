@@ -1,4 +1,4 @@
-package com.micosoft.api.axample;
+package com.microsoft.api.example;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,10 +22,10 @@ import java.util.logging.Logger;
 public class BatchSynthesis {
 
     private static final String SUBSCRIPTION_KEY = "your-key";
-    private static  final  String REGON="eastus";
+    private static  final  String REGION="eastus";
 
     private static final String SPEECH_ENDPOINT = System.getenv("SPEECH_ENDPOINT") != null ? System.getenv("SPEECH_ENDPOINT")
-            : "https://"+REGON+".api.cognitive.microsoft.com";
+            : "https://"+REGION+".api.cognitive.microsoft.com";
     private static final String API_VERSION = "2024-04-01";
     private static final Logger logger = Logger.getLogger(BatchSynthesis.class.getName());
 
