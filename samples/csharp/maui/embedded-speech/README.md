@@ -14,13 +14,13 @@ It is recommended to try them out before this MAUI specific sample.
 
 ## Prerequisites
 
-* [Supported platforms for MAUI application development](https://learn.microsoft.com/dotnet/maui/supported-platforms?view=net-maui-7.0).
+* [Supported platforms for MAUI application development](https://learn.microsoft.com/dotnet/maui/supported-platforms).
   Embedded speech with MAUI currently supports only the following targets:
   * Windows 10 or higher on x64 or ARM64 hardware.
   * Android ARM-based devices with **Android 7.0 (API level 24)** or higher.
     Embedded speech synthesis with neural voices is only supported on ARM64.
-* [Microsoft Visual Studio 2022](https://www.visualstudio.com/) with .NET MAUI workload and [.NET 7.0 or later](https://learn.microsoft.com/dotnet/core/install/windows?tabs=net70).
-  See [prerequisites for MAUI](https://learn.microsoft.com/dotnet/maui/get-started/installation?view=net-maui-7.0&tabs=vswin).
+* [Microsoft Visual Studio 2022](https://www.visualstudio.com/) with .NET MAUI workload and [.NET 8.0 or later](https://learn.microsoft.com/dotnet/core/install/windows).
+  See [prerequisites for MAUI](https://learn.microsoft.com/dotnet/maui/get-started/installation).
 * One or more embedded speech models. See https://aka.ms/embedded-speech for the latest information on how to obtain models.
 
 ## Prepare the sample

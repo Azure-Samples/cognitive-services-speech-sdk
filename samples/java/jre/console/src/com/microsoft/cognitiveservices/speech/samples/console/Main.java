@@ -64,6 +64,12 @@ public class Main {
         System.out.println("47. Continuous speech recognition from file, with at-start language detection.");
         System.out.println("48. Continuous speech recognition from file, with at-start language detection with custom model.");
         System.out.println("49. Continuous speech recognition from file, with continuous language detection with custom models.");
+        System.out.println("50. Diagnostics logging to file (without a filter).");
+        System.out.println("51. Diagnostics logging to file (with a filter).");
+        System.out.println("52. Diagnostics Subscribing to logging event (without a filter).");
+        System.out.println("53. Diagnostics Subscribing to logging event (with a filter).");
+        System.out.println("54. Diagnostics logging to memory buffer with logging level (with or without filter).");
+        System.out.println("55. Diagnostics logging to memory buffer with ingested self-defined SPX trace mark.");
 
         System.out.print(prompt);
 
@@ -219,6 +225,24 @@ public class Main {
                     break;
                 case "49":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels();
+                    break;
+                case "50":
+                    SpeechDiagnosticsLoggingSamples.fileLoggerWithoutFilter();
+                    break;
+                case "51":
+                    SpeechDiagnosticsLoggingSamples.fileLoggerWithFilter();
+                    break;
+                case "52":
+                    SpeechDiagnosticsLoggingSamples.eventLoggerWithoutFilter();
+                    break;
+                case "53":
+                    SpeechDiagnosticsLoggingSamples.eventLoggerWithFilter();
+                    break;
+                case "54":
+                    SpeechDiagnosticsLoggingSamples.memoryLoggerWithOrWithoutFilter();
+                    break;
+                case "55":
+                    SpeechDiagnosticsLoggingSamples.selfDefinedSpxTraceLogging();
                     break;
                 case "0":
                     System.out.println("Exiting...");

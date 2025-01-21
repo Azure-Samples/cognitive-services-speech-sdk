@@ -13,6 +13,8 @@ import time
 import threading
 import wave
 import utils
+import sys
+import io
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -23,9 +25,9 @@ except ImportError:
     https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python for
     installation instructions.
     """)
-    import sys
     sys.exit(1)
 
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and service region (e.g., "westus").
@@ -923,8 +925,8 @@ def pronunciation_assessment_continuous_from_file():
     prosody_scores = []
     fluency_scores = []
     durations = []
-    startOffset = 0
-    endOffset = 0
+    startOffset = None
+    endOffset = None
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -933,6 +935,7 @@ def pronunciation_assessment_continuous_from_file():
         done = True
 
     def recognized(evt: speechsdk.SpeechRecognitionEventArgs):
+        nonlocal startOffset, endOffset
         print("pronunciation assessment for: {}".format(evt.result.text))
         pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
         print("    Accuracy score: {}, prosody score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}".format(
@@ -957,7 +960,7 @@ def pronunciation_assessment_continuous_from_file():
     # (Optional) get the session ID
     speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
     speech_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
-    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+    speech_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt.cancellation_details)))
     # Stop continuous recognition on either session stopped or canceled events
     speech_recognizer.session_stopped.connect(stop_cb)
     speech_recognizer.canceled.connect(stop_cb)

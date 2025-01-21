@@ -69,6 +69,7 @@ proguard-rules.pro text
 *.xml text
 *.yaml text
 *.yml text
+*.ps1 text
 
 
 # Bash only likes Unix line endings

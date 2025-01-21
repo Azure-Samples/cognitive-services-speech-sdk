@@ -44,6 +44,9 @@ Video translation client tool and API sample code
    Do not upgrade Flurl to version 4.0 because it does not support NewtonJson for ReceiveJson.
 
 
+# Runn tool on Windows prerequisite:
+   [Install dotnet 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+
 # Command Line Usage
    | Description | Command line arguments |
    | ------------ | -------------- |

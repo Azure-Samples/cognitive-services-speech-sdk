@@ -153,9 +153,9 @@
     <PackageReference Include="DiffPlex">
       <Version>1.7.1</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.41.1" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.41.1" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.41.1" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.42.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.42.0" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

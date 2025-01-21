@@ -153,9 +153,7 @@ def transcribe():
     # properties.destination_container_url = "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>"
 
     # uncomment the following block to enable and configure speaker separation
-    # properties.diarization_enabled = True
-    # properties.diarization = swagger_client.DiarizationProperties(
-    #     swagger_client.DiarizationSpeakersProperties(min_count=1, max_count=5))
+    # properties.diarization = swagger_client.DiarizationProperties(max_speakers=5, enabled=True)
 
     # uncomment the following block to enable and configure language identification prior to transcription. Available modes are "single" and "continuous".
     # properties.language_identification = swagger_client.LanguageIdentificationProperties(mode="single", candidate_locales=["en-US", "ja-JP"])
@@ -170,7 +168,7 @@ def transcribe():
     # Uncomment this block to transcribe all files from a container.
     # transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
 
-    created_transcription, status, headers = api.transcriptions_submit_with_http_info(body=transcription_definition, api_version=API_VERSION)
+    created_transcription, status, headers = api.transcriptions_submit_with_http_info(transcription=transcription_definition, api_version=API_VERSION)
 
     # get the transcription Id from the location URI
     transcription_id = headers["location"].split("/")[-1].split("?")[0]

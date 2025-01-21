@@ -2,7 +2,7 @@
   <PropertyGroup Label="Microsoft components">
     <AzureAILanguageConversationsPackageVersion>[1.1.0-beta.2]</AzureAILanguageConversationsPackageVersion>
     <AzureAITextAnalyticsPackageVersion>[5.3.0]</AzureAITextAnalyticsPackageVersion>
-    <AzureStorageBlobsPackageVersion>[12.20.0]</AzureStorageBlobsPackageVersion>
+    <AzureStorageBlobsPackageVersion>[12.23.0]</AzureStorageBlobsPackageVersion>
 
     <MSTestTestAdapterPackageVersion>[3.4.3]</MSTestTestAdapterPackageVersion>
     <MSTestTestFrameworkPackageVersion>[3.4.3]</MSTestTestFrameworkPackageVersion>
@@ -16,9 +16,9 @@
     <MicrosoftAzureFunctionsWorkerApplicationInsightsPackageVersion>[1.2.0]</MicrosoftAzureFunctionsWorkerApplicationInsightsPackageVersion>
     <MicrosoftAzureFunctionsWorkerSdkPackageVersion>[1.17.4]</MicrosoftAzureFunctionsWorkerSdkPackageVersion>
 
-    <MicrosoftEntityFrameworkCorePackageVersion>[8.0.6]</MicrosoftEntityFrameworkCorePackageVersion>
-    <MicrosoftEntityFrameworkCoreDesignPackageVersion>[8.0.6]</MicrosoftEntityFrameworkCoreDesignPackageVersion>
-    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>[8.0.6]</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
+    <MicrosoftEntityFrameworkCorePackageVersion>[8.0.11]</MicrosoftEntityFrameworkCorePackageVersion>
+    <MicrosoftEntityFrameworkCoreDesignPackageVersion>[8.0.11]</MicrosoftEntityFrameworkCoreDesignPackageVersion>
+    <MicrosoftEntityFrameworkCoreSqlServerPackageVersion>[8.0.11]</MicrosoftEntityFrameworkCoreSqlServerPackageVersion>
   </PropertyGroup>
 
   <PropertyGroup Label="Third-party components">
