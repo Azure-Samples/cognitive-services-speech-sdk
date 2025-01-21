@@ -10,6 +10,7 @@ Available samples:
 | ---------- | -------- | ----------- |
 | C# | [csharp](csharp) | C# calling batch synthesis REST API through System.Net.Http |
 | Python | [python](python) | Python client calling batch synthesis REST API |
+| Java | [java](java) | Java client calling batch synthesis REST API |
 
 ## Note
 

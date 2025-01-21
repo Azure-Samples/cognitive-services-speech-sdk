@@ -46,7 +46,7 @@ RUN tdnf distro-sync -y && \
 # COPY download-pkg.sh .
 # RUN chmod +x download-pkg.sh
 # RUN ./download-pkg.sh
-COPY --from=web-builder /aoai-realtime-audio-sdk/javascript/standalone/rt-client-0.5.0.tgz /rt-client-0.5.0.tgz
+COPY --from=web-builder /aoai-realtime-audio-sdk/javascript/standalone/rt-client-0.5.2.tgz /rt-client-0.5.2.tgz
 
 WORKDIR /web
 COPY web/package*.json ./
