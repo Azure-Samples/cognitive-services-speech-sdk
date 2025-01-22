@@ -28,4 +28,8 @@
     <PackageReference Include="Newtonsoft.Json" version="13.0.3" PrivateAssets="All" />
     <PackageReference Include="Polly" version="7.2.3" PrivateAssets="All" />
   </ItemGroup>
+
+  <Target Name="CopyConfigFile" AfterTargets="Build">
+    <Copy SourceFiles="..\config.json" DestinationFolder="$(OutputPath)" />
+  </Target>
 </Project>

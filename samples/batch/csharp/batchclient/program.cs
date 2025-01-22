@@ -8,17 +8,24 @@ namespace BatchClient
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
     public class Program
     {
+        public class ConfigSettings
+        {
+            public string SubscriptionKey { get; set; }
+            public string ServiceRegion { get; set; }
+        }
+
         // Replace with your subscription key
-        public const string SubscriptionKey = "YourSubscriptionKey";
+        public static string SubscriptionKey;
 
         // Update with your service region
-        public const string Region = "YourServiceRegion";
+        public static string Region;
 
         // replace with your app service name (check publish on webhook receiver project)
         public const string WebHookAppServiceName = "YourAppServiceName";
@@ -27,8 +34,9 @@ namespace BatchClient
         public const string WebHookSecret = "somethingverysecretisbesthere";
 
         // recordings and locale
-        private const string Locale = "en-US";
-        private static Uri RecordingsBlobUri = new Uri("<SAS URI pointing to an audio file stored in Azure Blob Storage>");
+        private static string Locale;
+        // A SAS URI pointing to an audio file stored in Azure Blob Storage
+        private static Uri RecordingsBlobUri;
         //private static Uri ContentAzureBlobContainer = new Uri("<SAS URI pointing to an container in Azure Blob Storage>");
         private static Uri WebHookCallbackUrl = new Uri($"https://{WebHookAppServiceName}.azurewebsites.net/api/callback");
 
@@ -41,6 +49,14 @@ namespace BatchClient
 
         static void Main(string[] args)
         {
+            string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+            string jsonString = System.IO.File.ReadAllText(configFilePath);
+            ConfigSettings configSettings = System.Text.Json.JsonSerializer.Deserialize<ConfigSettings>(jsonString);
+            SubscriptionKey = configSettings.SubscriptionKey;
+            Region = configSettings.ServiceRegion;
+            Locale = args[0];
+            RecordingsBlobUri = new Uri(args[1]);
+
             RunAsync().Wait();
         }
 
