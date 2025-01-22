@@ -41,13 +41,13 @@ elseif ($action -eq "build") {
 }
 elseif ($action -eq "run") {
     if (Get-Command $dotnetPath -ErrorAction SilentlyContinue) {
-        $recordingsBlobUri = Read-Host "Please enter a SAS URI pointing to an audio file stored in Azure Blob Storage: "
+        $recordingsBlobUri = Read-Host "Please enter a SAS URI pointing to an audio file stored in Azure Blob Storage"
         if ([string]::IsNullOrWhiteSpace($recordingsBlobUri)) {
             Write-Host "Not enter the Azure Blob SAS URL of the input audio file." -ForegroundColor Red
             exit 1
         }
 
-        $recordingsLocale = Read-Host "Please enter the locale of the input audio file (e.g. en-US, zh-CN, etc.): "
+        $recordingsLocale = Read-Host "Please enter the locale of the input audio file (e.g. en-US, zh-CN, etc.)"
         if ([string]::IsNullOrWhiteSpace($recordingsLocale)) {
             Write-Host "Not enter the locale." -ForegroundColor Red
             exit 1
