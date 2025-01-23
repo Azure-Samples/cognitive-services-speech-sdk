@@ -1,0 +1,36 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+    "name": "scenarios-python-console-speech-rewrite-sample-codespaces",
+    // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+    "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+    // Default workspace folder
+    "workspaceFolder": "/workspaces/BinarywoodB/cognitive-services-speech-sdk/scenarios/python/console/speech_rewrite_sample/",
+    // // Features to add to the dev container. More info: https://containers.dev/features.
+    // "features": {
+    // 	"ghcr.io/devcontainers/features/node:1": {},
+    // 	"ghcr.io/devcontainers/features/rust:1": {},
+    // 	"ghcr.io/devcontainers-contrib/features/poetry:2": {},
+    //     "ghcr.io/devcontainers/features/azure-cli:1": {}
+    // },
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    // "onCreateCommand": "poetry install && poetry build",
+    // Configure tool-specific properties.
+    "customizations": {
+        // Configure properties specific to VS Code.
+        "vscode": {
+            // Add the IDs of extensions you want installed when the container is created.
+            "extensions": [
+                "ms-azureaispeech.azure-ai-speech-toolkit"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": ".venv/bin/python" // Point to the Python interpreter in the .venv directory
+            }
+        }
+    },
+    // "postCreateCommand": "python3 setup_sample.py"
+    // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+    // "remoteUser": "root"
+}
