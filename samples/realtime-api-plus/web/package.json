@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@azure/identity": "^4.4.1",
-    "rt-client": "file:../rt-client-0.5.0.tgz"
+    "rt-client": "file:../rt-client-0.5.2.tgz"
   },
   "files": [
     "dist"

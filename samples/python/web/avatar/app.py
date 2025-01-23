@@ -454,20 +454,25 @@ def initializeClient() -> uuid.UUID:
 # Refresh the ICE token which being called
 def refreshIceToken() -> None:
     global ice_token
+    ice_token_response = None
     if speech_private_endpoint:
         if enable_token_auth_for_speech:
             while not speech_token:
                 time.sleep(0.2)
-            ice_token = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'}).text
+            ice_token_response = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'})
         else:
-            ice_token = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
+            ice_token_response = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key})
     else:
         if enable_token_auth_for_speech:
             while not speech_token:
                 time.sleep(0.2)
-            ice_token = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'}).text
+            ice_token_response = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'})
         else:
-            ice_token = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key}).text
+            ice_token_response = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key})
+    if ice_token_response.status_code == 200:
+        ice_token = ice_token_response.text
+    else:
+        raise Exception(f"Failed to get ICE token. Status code: {ice_token_response.status_code}")
 
 # Refresh the speech token every 9 minutes
 def refreshSpeechToken() -> None:
