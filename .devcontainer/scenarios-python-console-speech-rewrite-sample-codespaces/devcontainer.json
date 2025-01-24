@@ -3,7 +3,7 @@
 {
     "name": "scenarios-python-console-speech-rewrite-sample-codespaces",
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-    "image": "mcr.microsoft.com/azure-cognitive-services/speechservices/speech-to-text:latest",
+    "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
     // Default workspace folder
     "workspaceFolder": "/workspaces/cognitive-services-speech-sdk/scenarios/python/console/speech_rewrite_sample/",
     // // Features to add to the dev container. More info: https://containers.dev/features.
