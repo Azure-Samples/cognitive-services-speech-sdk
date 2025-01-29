@@ -5,3 +5,6 @@ flask-socketio
 openai
 pytz
 requests
+torch
+numpy
+torchaudio

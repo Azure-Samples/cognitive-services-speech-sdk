@@ -6,6 +6,7 @@ import base64
 import datetime
 import html
 import json
+import numpy as np
 import os
 import pytz
 import random
@@ -13,12 +14,14 @@ import re
 import requests
 import threading
 import time
+import torch
 import traceback
 import uuid
 from flask import Flask, Response, render_template, request
 from flask_socketio import SocketIO, join_room
 from azure.identity import DefaultAzureCredential
 from openai import AzureOpenAI
+from vad_iterator import VADIterator, int2float
 
 # Create the Flask app
 app = Flask(__name__, template_folder='.')
@@ -49,6 +52,7 @@ ice_server_password = os.environ.get('ICE_SERVER_PASSWORD') # The ICE password
 
 # Const variables
 enable_websockets = False # Enable websockets between client and server for real-time communication optimization
+enable_vad = False # Enable voice activity detection (VAD) for interrupting the avatar speaking
 enable_token_auth_for_speech = False # Enable token authentication for speech service
 default_tts_voice = 'en-US-JennyMultilingualV2Neural' # Default TTS voice
 sentence_level_punctuations = [ '.', '?', '!', ':', ';', '。', '？', '！', '：', '；' ] # Punctuations that indicate the end of a sentence
@@ -65,6 +69,12 @@ if azure_openai_endpoint and azure_openai_api_key:
         azure_endpoint=azure_openai_endpoint,
         api_version='2024-06-01',
         api_key=azure_openai_api_key)
+
+# VAD
+vad_iterator = None
+if enable_vad and enable_websockets:
+    vad_model, _ = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad')
+    vad_iterator = VADIterator(model=vad_model, threshold=0.5, sampling_rate=16000, min_silence_duration_ms=150, speech_pad_ms=100)
 
 # The default route, which shows the default web page (basic.html)
 @app.route("/")
@@ -298,8 +308,7 @@ def connectSTT() -> Response:
         speech_recognizer.recognized.connect(stt_recognized_cb)
 
         def stt_recognizing_cb(evt):
-            is_speaking = client_context['is_speaking']
-            if is_speaking:
+            if not vad_iterator:
                 stopSpeakingInternal(client_id)
         speech_recognizer.recognizing.connect(stt_recognizing_cb)
 
@@ -413,6 +422,17 @@ def handleWsMessage(message):
         audio_input_stream = client_context['audio_input_stream']
         if audio_input_stream:
             audio_input_stream.write(audio_chunk_binary)
+        if vad_iterator:
+            audio_buffer = client_context['vad_audio_buffer']
+            audio_buffer.extend(audio_chunk_binary)
+            if len(audio_buffer) >= 1024:
+                audio_chunk_int = np.frombuffer(bytes(audio_buffer[:1024]), dtype=np.int16)
+                audio_buffer.clear()
+                audio_chunk_float = int2float(audio_chunk_int)
+                vad_detected = vad_iterator(torch.from_numpy(audio_chunk_float))
+                if vad_detected:
+                    print("Voice activity detected.")
+                    stopSpeakingInternal(client_id)
     elif path == 'api.chat':
         chat_initiated = client_context['chat_initiated']
         if not chat_initiated:
@@ -422,15 +442,14 @@ def handleWsMessage(message):
         for chat_response in handleUserQuery(user_query, client_id):
             socketio.emit("response", { 'path': 'api.chat', 'chatResponse': chat_response }, room=client_id)
     elif path == 'api.stopSpeaking':
-        is_speaking = client_contexts[client_id]['is_speaking']
-        if is_speaking:
-            stopSpeakingInternal(client_id)
+        stopSpeakingInternal(client_id)
 
 # Initialize the client by creating a client id and an initial context
 def initializeClient() -> uuid.UUID:
     client_id = uuid.uuid4()
     client_contexts[client_id] = {
         'audio_input_stream': None, # Audio input stream for speech recognition
+        'vad_audio_buffer': [], # Audio input buffer for VAD
         'speech_recognizer': None, # Speech recognizer for user speech
         'azure_openai_deployment_name': azure_openai_deployment_name, # Azure OpenAI deployment name
         'cognitive_search_index_name': cognitive_search_index_name, # Cognitive search index name
