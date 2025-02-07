@@ -64,7 +64,7 @@ elseif ($action -eq "run") {
     }
 
     if (Get-Command $dotnetPath -ErrorAction SilentlyContinue) {
-        $recordingsBlobUri = Read-Host "Please enter SAS URI pointing to audio files stored in Azure Blob Storage. If input multiple, please separate them with commas."
+        $recordingsBlobUri = Read-Host "Please enter SAS URI pointing to audio files stored in Azure Blob Storage. If input multiple, please separate them with commas"
         if ([string]::IsNullOrWhiteSpace($recordingsBlobUri)) {
             Write-Host "Not enter the Azure Blob SAS URL of the input audio file." -ForegroundColor Red
             exit 1

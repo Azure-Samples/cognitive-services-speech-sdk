@@ -16,13 +16,13 @@ namespace BatchClient
         readonly public string region;
 
         public UserConfig(
-            string recordingsBlobSasUris,
+            string recordingsBlobUri,
             string locale,
             string subscriptionKey,
             string region
             )
         {
-            this.recordingsBlobUri = recordingsBlobSasUris
+            this.recordingsBlobUri = recordingsBlobUri
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(uriStr => new Uri(uriStr.Trim()))
                 .ToList();
@@ -48,7 +48,6 @@ namespace BatchClient
         public static UserConfig UserConfigFromArgs(string[] args, string usage)
         {
             string key;
-            Console.WriteLine("key args: " + GetCmdOption(args, "--key"));
             if (GetCmdOption(args, "--key") is string keyOptionValue)
             {
                 key = keyOptionValue;
@@ -76,10 +75,10 @@ namespace BatchClient
                 throw new ArgumentException($"Please set the SPEECH_REGION environment variable or provide a Speech region with the --region option.{Environment.NewLine}Usage: {usage}");
             }
 
-            string recordingsBlobSasUri;
-            if (GetCmdOption(args, "--audiosSasUri") is string audiosSasUriOptionValue)
+            string recordingsBlobUri;
+            if (GetCmdOption(args, "--recordingsBlobUri") is string recordingsBlobUriOptionValue)
             {
-                recordingsBlobSasUri = audiosSasUriOptionValue;
+                recordingsBlobUri = recordingsBlobUriOptionValue;
             }
             else
             {
@@ -97,7 +96,7 @@ namespace BatchClient
             }
 
             return new UserConfig(
-                recordingsBlobSasUri,
+                recordingsBlobUri,
                 locale,
                 key,
                 region
