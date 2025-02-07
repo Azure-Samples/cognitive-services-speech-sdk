@@ -4,7 +4,7 @@
         {
             "label": "Run the App",
             "type": "shell",
-            "command": "${workspaceFolder}/build_run_app.sh",
+            "command": "${workspaceFolder}/app_manager.sh",
             "args": [
                 "run"
             ],
@@ -19,12 +19,12 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/build_run_app.ps1",
+                    "${workspaceFolder}/app_manager.ps1",
                     "run"
                 ]
             },
             "linux": {
-                "command": "${workspaceFolder}/build_run_app.sh",
+                "command": "${workspaceFolder}/app_manager.sh",
                 "args": [
                     "run"
                 ]
@@ -33,7 +33,7 @@
         {
             "label": "Build the App",
             "type": "shell",
-            "command": "./build_run_app.sh",
+            "command": "./app_manager.sh",
             "args": [
                 "build"
             ],
@@ -48,12 +48,12 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/build_run_app.ps1",
+                    "${workspaceFolder}/app_manager.ps1",
                     "build"
                 ]
             },
             "linux": {
-                "command": "${workspaceFolder}/build_run_app.sh",
+                "command": "${workspaceFolder}/app_manager.sh",
                 "args": [
                     "build"
                 ]

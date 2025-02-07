@@ -9,7 +9,7 @@
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                "${workspaceFolder}/build_run_app.ps1",
+                "${workspaceFolder}/app_manager.ps1",
                 "run"
             ],
             "group": {
@@ -26,7 +26,7 @@
                 "-ExecutionPolicy",
                 "Bypass",
                 "-File",
-                "${workspaceFolder}/build_run_app.ps1",
+                "${workspaceFolder}/app_manager.ps1",
                 "build"
             ],
             "group": {
