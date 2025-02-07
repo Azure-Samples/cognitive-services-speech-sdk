@@ -7,25 +7,13 @@ namespace BatchClient
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
     public class Program
     {
-        public class ConfigSettings
-        {
-            public string SubscriptionKey { get; set; }
-            public string ServiceRegion { get; set; }
-        }
-
-        // Replace with your subscription key
-        public static string SubscriptionKey;
-
-        // Update with your service region
-        public static string Region;
+        private static UserConfig _userConfig;
 
         // replace with your app service name (check publish on webhook receiver project)
         public const string WebHookAppServiceName = "YourAppServiceName";
@@ -33,10 +21,6 @@ namespace BatchClient
         // replace with a secure secret (used for hashing)
         public const string WebHookSecret = "somethingverysecretisbesthere";
 
-        // recordings and locale
-        private static string Locale;
-        // A SAS URI pointing to an audio file stored in Azure Blob Storage
-        private static Uri RecordingsBlobUri;
         //private static Uri ContentAzureBlobContainer = new Uri("<SAS URI pointing to an container in Azure Blob Storage>");
         private static Uri WebHookCallbackUrl = new Uri($"https://{WebHookAppServiceName}.azurewebsites.net/api/callback");
 
@@ -49,21 +33,49 @@ namespace BatchClient
 
         static void Main(string[] args)
         {
-            string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
-            string jsonString = System.IO.File.ReadAllText(configFilePath);
-            ConfigSettings configSettings = System.Text.Json.JsonSerializer.Deserialize<ConfigSettings>(jsonString);
-            SubscriptionKey = configSettings.SubscriptionKey;
-            Region = configSettings.ServiceRegion;
-            Locale = args[0];
-            RecordingsBlobUri = new Uri(args[1]);
+            const string usage = @"USAGE: dotnet run -- [...]
 
-            RunAsync().Wait();
+  HELP
+    --help                           Show this help and stop.
+
+  CONNECTION
+    --key KEY                        Your Azure Speech service resource key.
+                                     Overrides the SPEECH_KEY environment variable. You must set the environment variable (recommended) or use the `--key` option.
+    --region REGION                  Your Azure Speech service region.
+                                     Overrides the SPEECH_REGION environment variable. You must set the environment variable (recommended) or use the `--region` option.
+                                     Examples: westus, eastus
+
+  Locale
+
+  INPUT
+    --locale                         Specify locale. The locale of recordings.
+                                     Examples: en-US, ja-JP
+    --recordingsBlobUri              Input audios SAS URI (if input multiple, please separate them with commas) stored in Azure Blob Storage.
+                                     Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_1>?SAS_TOKEN_1,https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_2>?SAS_TOKEN_2
+";
+
+            if (args.Contains("--help"))
+            {
+                Console.WriteLine(usage);
+            }
+            else
+            {
+                Program program = new Program();
+                program.Initialize(args, usage);
+
+                RunAsync().Wait();
+            }
+        }
+
+        private void Initialize(string[] args, string usage)
+        {
+            _userConfig = UserConfig.UserConfigFromArgs(args, usage);
         }
 
         private static async Task RunAsync()
         {
             // create the client object and authenticate
-            using (var client = BatchClient.CreateApiClient(SubscriptionKey, $"{Region}.api.cognitive.microsoft.com", "2024-11-15"))
+            using (var client = BatchClient.CreateApiClient(_userConfig.subscriptionKey, $"{_userConfig.region}.api.cognitive.microsoft.com", "2024-11-15"))
             {
                 // uncomment next line when using web hooks
                 // await SetupWebHookAsync(client).ConfigureAwait(false);
@@ -105,9 +117,9 @@ namespace BatchClient
             // <transcriptiondefinition>
             var newTranscription = new Transcription
             {
-                DisplayName = DisplayName, 
-                Locale = Locale, 
-                ContentUrls = new[] { RecordingsBlobUri },
+                DisplayName = DisplayName,
+                Locale = _userConfig.locale,
+                ContentUrls = _userConfig.recordingsBlobUri,
                 //ContentContainerUrl = ContentAzureBlobContainer,
                 Model = CustomModel,
                 Properties = new TranscriptionProperties

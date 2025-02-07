@@ -7,7 +7,7 @@
             "command": "/bin/bash",
             "args": [
                 "-c",
-                "chmod u+x ${workspaceFolder}/app_manager.sh && ${workspaceFolder}/app_manager.sh configure"
+                "chmod u+x ${workspaceFolder}/build_run_app.sh && ${workspaceFolder}/build_run_app.sh configure"
             ],
             "group": {
                 "kind": "build",
@@ -20,7 +20,7 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/app_manager.ps1",
+                    "${workspaceFolder}/build_run_app.ps1",
                     "configure"
                 ]
             }
@@ -28,7 +28,7 @@
         {
             "label": "Build the App",
             "type": "shell",
-            "command": "${workspaceFolder}/app_manager.sh",
+            "command": "${workspaceFolder}/build_run_app.sh",
             "args": [
                 "build"
             ],
@@ -43,7 +43,7 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/app_manager.ps1",
+                    "${workspaceFolder}/build_run_app.ps1",
                     "build"
                 ]
             }
@@ -51,7 +51,7 @@
         {
             "label": "Run the App",
             "type": "shell",
-            "command": "${workspaceFolder}/app_manager.sh",
+            "command": "${workspaceFolder}/build_run_app.sh",
             "args": [
                 "run"
             ],
@@ -66,7 +66,7 @@
                     "-ExecutionPolicy",
                     "Bypass",
                     "-File",
-                    "${workspaceFolder}/app_manager.ps1",
+                    "${workspaceFolder}/build_run_app.ps1",
                     "run"
                 ]
             }

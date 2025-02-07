@@ -40,8 +40,31 @@ elseif ($action -eq "build") {
     }
 }
 elseif ($action -eq "run") {
+    # Define the path to your .env file
+    $envFilePath = ".env/.env.dev"
+    if (Test-Path $envFilePath) {
+        Get-Content -Path $envFilePath | ForEach-Object {
+            # Ignore empty lines and lines that start with `#` (comments)
+            if ($_ -and $_ -notmatch '^\s*#') {
+                # Split each line into key and value
+                $parts = $_ -split '=', 2
+                $key = $parts[0].Trim()
+                $value = $parts[1].Trim()
+
+                # Set the environment variable
+                [System.Environment]::SetEnvironmentVariable($key, $value)
+            }
+        }
+
+        [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $env:SPEECH_RESOURCE_KEY)
+        [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $env:SERVICE_REGION)
+    }
+    else {
+        Write-Host "File not found: $envFilePath. You can create one to set environment variables or manually set secrets in environment variables."
+    }
+
     if (Get-Command $dotnetPath -ErrorAction SilentlyContinue) {
-        $recordingsBlobUri = Read-Host "Please enter a SAS URI pointing to an audio file stored in Azure Blob Storage"
+        $recordingsBlobUri = Read-Host "Please enter SAS URI pointing to audio files stored in Azure Blob Storage. If input multiple, please separate them with commas."
         if ([string]::IsNullOrWhiteSpace($recordingsBlobUri)) {
             Write-Host "Not enter the Azure Blob SAS URL of the input audio file." -ForegroundColor Red
             exit 1
@@ -53,7 +76,7 @@ elseif ($action -eq "run") {
             exit 1
         }
 
-        & $dotnetPath batchclient/bin/Debug/net8.0/BatchTranscriptions.dll $recordingsLocale $recordingsBlobUri
+        & $dotnetPath batchclient/bin/Debug/net8.0/BatchTranscriptions.dll --recordingsBlobUri $recordingsBlobUri --locale  $recordingsLocale
     }
     else {
         Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 8.0." -ForegroundColor Red

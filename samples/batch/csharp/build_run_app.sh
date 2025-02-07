@@ -48,7 +48,22 @@ elif [ "$action" = "build" ]; then
         exit 1
     fi
 elif [ "$action" = "run" ]; then
-    read -p "Please enter a SAS URI pointing to an audio file stored in Azure Blob Storage: " recordingsBlobUri
+    ENV_FILE_PATH=".env/.env.dev"
+    if [[ -f "$ENV_FILE_PATH" ]]; then
+        while IFS= read -r line; do
+            if [[ -n "$line" && ! "$line" =~ ^\s*# ]]; then
+                IFS='=' read -r key value <<< "$line"
+                export "$key"="$value"
+            fi
+        done < "$ENV_FILE_PATH"
+
+        export SPEECH_KEY=$SPEECH_RESOURCE_KEY
+        export SPEECH_REGION=$SERVICE_REGION
+    else
+        echo "File not found: $ENV_FILE_PATH. You can create one to set environment variables or manually set secrets in environment variables."
+    fi
+
+    read -p "Please enter SAS URI pointing to audio files stored in Azure Blob Storage. If input multiple, please separate them with commas: " recordingsBlobUri
     if [ -z "$recordingsBlobUri" ]; then
         echo "Not enter the Azure Blob SAS URL of the input audio file. Exiting..."
         exit 1
@@ -60,7 +75,7 @@ elif [ "$action" = "run" ]; then
         exit 1
     fi
 
-    dotnet batchclient/bin/Debug/net8.0/BatchTranscriptions.dll $recordingsLocale $recordingsBlobUri
+    dotnet batchclient/bin/Debug/net8.0/BatchTranscriptions.dll --recordingsBlobUri $recordingsBlobUri --locale  $recordingsLocale
 else
     echo "Invalid action: $action"
     echo "Usage: $0 {build|run|configure}"
