@@ -949,7 +949,7 @@ def pronunciation_assessment_continuous_from_file():
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo["NBest"][0]
-        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"]])
+        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"] if w["PronunciationAssessment"]["ErrorType"] == "None"])
         if startOffset == 0:
             startOffset = nb["Words"][0]["Offset"]
         endOffset = nb["Words"][-1]["Offset"] + nb["Words"][-1]["Duration"] + 100000
