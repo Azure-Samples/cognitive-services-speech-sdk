@@ -925,8 +925,8 @@ def pronunciation_assessment_continuous_from_file():
     prosody_scores = []
     fluency_scores = []
     durations = []
-    startOffset = None
-    endOffset = None
+    startOffset = 0
+    endOffset = 0
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -935,7 +935,6 @@ def pronunciation_assessment_continuous_from_file():
         done = True
 
     def recognized(evt: speechsdk.SpeechRecognitionEventArgs):
-        nonlocal startOffset, endOffset
         print("pronunciation assessment for: {}".format(evt.result.text))
         pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
         print("    Accuracy score: {}, prosody score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}".format(
