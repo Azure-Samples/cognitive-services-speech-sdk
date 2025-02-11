@@ -850,6 +850,83 @@ def pronunciation_assessment_from_microphone():
                 print("Error details: {}".format(cancellation_details.error_details))
 
 
+def convert_reference_words(reference_text, reference_words):
+    dictionary = list(set(reference_words))
+    max_length = max([len(word) for word in dictionary])
+
+    # From left to right to do the longest matching to get the word segmentation
+    def left_to_right_segmentation(text, dictionary):
+        result = list()
+        while len(text) > 0:
+            sub_text = ""
+            # If the length of the text is less than the max_length, then the sub_text is the text itself
+            if len(text) < max_length:
+                sub_text = text
+            else:
+                sub_text = text[:max_length]
+            while len(sub_text) > 0:
+                # If the sub_text is in the dictionary or the length of the sub_text is 1, then add it to the result
+                if (sub_text in dictionary) or (len(sub_text) == 1):
+                    result.append(sub_text)
+                    # Remove the sub_text from the text
+                    text = text[len(sub_text):]
+                    break
+                else:
+                    # If the sub_text is not in the dictionary, then remove the last character of the sub_text
+                    sub_text = sub_text[: len(sub_text) - 1]
+        return result
+
+    # From right to left to do the longest matching to get the word segmentation
+    def right_to_left_segmentation(text, dictionary):
+        result = list()
+        while len(text) > 0:
+            sub_text = ""
+            # If the length of the text is less than the max_length, then the sub_text is the text itself
+            if len(text) < max_length:
+                sub_text = text
+            else:
+                sub_text = text[-max_length:]
+            while len(sub_text) > 0:
+                # If the sub_text is in the dictionary or the length of the sub_text is 1, then add it to the result
+                if (sub_text in dictionary) or (len(sub_text) == 1):
+                    result.append(sub_text)
+                    # Remove the sub_text from the text
+                    text = text[: -len(sub_text)]
+                    break
+                else:
+                    # If the sub_text is not in the dictionary, then remove the first character of the sub_text
+                    sub_text = sub_text[1:]
+        # Reverse the result to get the correct order
+        result = result[::-1]
+        return result
+
+    def segment_word(reference_text, dictionary):
+        left_to_right = left_to_right_segmentation(reference_text, dictionary)
+        right_to_left = right_to_left_segmentation(reference_text, dictionary)
+        if "".join(left_to_right) == reference_text:
+            return left_to_right
+        elif "".join(right_to_left) == reference_text:
+            return right_to_left
+        else:
+            print("WW failed to segment the text with the dictionary")
+            if len(left_to_right) < len(right_to_left):
+                return left_to_right
+            elif len(left_to_right) > len(right_to_left):
+                return right_to_left
+            else:
+                # If the word number is the same, then return the one with the smallest single word
+                left_to_right_single = len([word for word in left_to_right if len(word) == 1])
+                right_to_left_single = len([word for word in right_to_left if len(word) == 1])
+                if left_to_right_single < right_to_left_single:
+                    return left_to_right
+                else:
+                    return right_to_left
+
+    # Remove punctuation from the reference text
+    reference_text = "".join([char for char in reference_text if char.isalnum() or char.isspace()])
+    return segment_word(reference_text, dictionary)
+
+
 def get_reference_words(wave_filename, reference_text, language):
     audio_config = speechsdk.audio.AudioConfig(filename=wave_filename)
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
@@ -876,7 +953,7 @@ def get_reference_words(wave_filename, reference_text, language):
         for idx, word in enumerate(nb["Words"]):
             if word["PronunciationAssessment"]["ErrorType"] != "Insertion":
                 reference_words.append(word["Word"])
-        return reference_words
+        return convert_reference_words(reference_text, reference_words)
     elif result.reason == speechsdk.ResultReason.NoMatch:
         print("No speech could be recognized")
         return None
@@ -925,8 +1002,8 @@ def pronunciation_assessment_continuous_from_file():
     prosody_scores = []
     fluency_scores = []
     durations = []
-    startOffset = None
-    endOffset = None
+    startOffset = 0
+    endOffset = 0
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -935,7 +1012,6 @@ def pronunciation_assessment_continuous_from_file():
         done = True
 
     def recognized(evt: speechsdk.SpeechRecognitionEventArgs):
-        nonlocal startOffset, endOffset
         print("pronunciation assessment for: {}".format(evt.result.text))
         pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
         print("    Accuracy score: {}, prosody score: {}, pronunciation score: {}, completeness score : {}, fluency score: {}".format(
@@ -950,7 +1026,7 @@ def pronunciation_assessment_continuous_from_file():
         json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
         jo = json.loads(json_result)
         nb = jo["NBest"][0]
-        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"]])
+        durations.extend([int(w["Duration"]) + 100000 for w in nb["Words"] if w["PronunciationAssessment"]["ErrorType"] == "None"])
         if startOffset == 0:
             startOffset = nb["Words"][0]["Offset"]
         endOffset = nb["Words"][-1]["Offset"] + nb["Words"][-1]["Duration"] + 100000
