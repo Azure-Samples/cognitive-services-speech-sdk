@@ -85,6 +85,9 @@
   <div style="background-color: white; width: 200px;">
     <input type="checkbox" id="useLocalVideoForIdle" onchange="window.updateLocalVideoForIdle()">Use Local Video for Idle</input><br />
   </div>
+  <div style="background-color: white; width: 200px;">
+    <input type="checkbox" id="showSubtitles">Show Subtitles</input><br />
+  </div>
   <br />
 </div>
 
@@ -98,7 +101,7 @@
   <div id="overlayArea" style="position: absolute;">
     <div id="chatHistory" style="
         width: 360px;
-        height: 500px;
+        height: 480px;
         font-size: medium;
         border: none;
         resize: none;
@@ -109,6 +112,15 @@
       <video src="video/lisa-casual-sitting-idle.mp4" autoplay loop muted></video>
     </div>
     <div id="remoteVideo"></div>
+    <div id="subtitles" style="
+        width: 100%;
+        text-align: center;
+        color: white; 
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        font-size: 22px; 
+        position: absolute; 
+        bottom: 5%; 
+        z-index: 999;" hidden></div>
   </div>
   <div margin-top="5px">
     <div id="showTypeMessageCheckbox">

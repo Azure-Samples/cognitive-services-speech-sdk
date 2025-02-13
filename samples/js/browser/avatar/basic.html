@@ -55,6 +55,7 @@
     <input type="checkbox" id="transparentBackground" onchange="window.updataTransparentBackground()">Transparent
     Background</input><br />
     <input type="checkbox" id="videoCrop">Video Crop</input><br />
+    <input type="checkbox" id="showSubtitles">Show Subtitles</input><br />
   </div>
   <br />
 </div>
@@ -76,6 +77,15 @@
     <!-- <img id="overlayImage" src="your-image-source.png" alt="Overlay Image"> -->
   </div>
   <div id="remoteVideo"></div>
+  <div id="subtitles" style="
+        width: 100%;
+        text-align: center;
+        color: white; 
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        font-size: 22px; 
+        position: absolute; 
+        bottom: 5%; 
+        z-index: 999;" hidden></div>
   <canvas id="canvas" width="1920" height="1080" style="background-color: transparent;" hidden="hidden"></canvas>
   <canvas id="tmpCanvas" width="1920" height="1080" hidden="hidden"></canvas>
 </div>
