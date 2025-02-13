@@ -14,6 +14,7 @@ var enableQuickReply = false
 var quickReplies = [ 'Let me take a look.', 'Let me check.', 'One moment, please.' ]
 var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
 var isSpeaking = false
+var speakingText = ""
 var spokenTextQueue = []
 var sessionActive = false
 var lastSpeakTime
@@ -203,6 +204,14 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     peerConnection.addEventListener("datachannel", event => {
         const dataChannel = event.channel
         dataChannel.onmessage = e => {
+            let subtitles = document.getElementById('subtitles')
+            const webRTCEvent = JSON.parse(e.data)
+            if (webRTCEvent.event.eventType === 'EVENT_TYPE_TURN_START' && document.getElementById('showSubtitles').checked) {
+                subtitles.hidden = false
+                subtitles.innerHTML = speakingText
+            } else if (webRTCEvent.event.eventType === 'EVENT_TYPE_SESSION_END' || webRTCEvent.event.eventType === 'EVENT_TYPE_SWITCH_TO_IDLE') {
+                subtitles.hidden = true
+            }
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
         }
     })
@@ -331,6 +340,7 @@ function speakNext(text, endingSilenceMs = 0) {
 
     lastSpeakTime = new Date()
     isSpeaking = true
+    speakingText = text
     document.getElementById('stopSpeaking').disabled = false
     avatarSynthesizer.speakSsmlAsync(ssml).then(
         (result) => {
