@@ -74,6 +74,15 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     peerConnection.addEventListener("datachannel", event => {
         const dataChannel = event.channel
         dataChannel.onmessage = e => {
+            let spokenText = document.getElementById('spokenText').value
+            let subtitles = document.getElementById('subtitles')
+            const webRTCEvent = JSON.parse(e.data)
+            if (webRTCEvent.event.eventType === 'EVENT_TYPE_TURN_START' && document.getElementById('showSubtitles').checked) {
+                subtitles.hidden = false
+                subtitles.innerHTML = spokenText
+            } else if (webRTCEvent.event.eventType === 'EVENT_TYPE_SESSION_END' || webRTCEvent.event.eventType === 'EVENT_TYPE_SWITCH_TO_IDLE') {
+                subtitles.hidden = true
+            }
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
         }
     })
