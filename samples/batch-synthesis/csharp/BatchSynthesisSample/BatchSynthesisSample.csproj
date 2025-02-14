@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" version="5.2.7" PrivateAssets="All" />
     <PackageReference Include="Newtonsoft.Json" version="13.0.1" PrivateAssets="All" />
+    <PackageReference Include="Azure.Identity" Version="1.13.2" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\..\Gatsby-chapter1.txt">
