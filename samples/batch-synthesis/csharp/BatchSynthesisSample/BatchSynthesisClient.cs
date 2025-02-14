@@ -5,6 +5,7 @@
 
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class BatchSynthesisClient
 {
@@ -94,7 +95,7 @@ public class BatchSynthesisClient
         };
 
         // Create JsonSerializer instance with configured options
-        string jsonString = JsonSerializer.Serialize(batchSynthesis, new JsonSerializerOptions { IgnoreNullValues = true });
+        string jsonString = JsonSerializer.Serialize(batchSynthesis, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
         var response = await this.client.PutAsync(uri, new StringContent(jsonString, Encoding.UTF8, "application/json")).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {
