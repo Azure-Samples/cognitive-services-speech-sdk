@@ -45,12 +45,12 @@ namespace BatchClient
   Locale
 
   INPUT
+    --recordingsBlobUris             Input audios SAS URI (if input multiple, please separate them with commas) stored in Azure Blob Storage. Optional.
+                                     Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_1>?SAS_TOKEN_1,https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_2>?SAS_TOKEN_2
+    --recordingsContainerUri         Input audios Azure Blob Storage Container SAS URI. Optional.
+                                     Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>?SAS_TOKEN
     --locale                         Specify locale. The locale of recordings.
                                      Examples: en-US, ja-JP
-    --recordingsBlobUris             Input audios SAS URI (if input multiple, please separate them with commas) stored in Azure Blob Storage.
-                                     Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_1>?SAS_TOKEN_1,https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_2>?SAS_TOKEN_2
-    --recordingsContainerUri         Input audios Azure Blob Storage Container SAS URI.
-                                     Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>?SAS_TOKEN
 ";
 
             if (args.Contains("--help"))

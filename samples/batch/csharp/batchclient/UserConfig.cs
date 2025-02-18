@@ -32,7 +32,7 @@ namespace BatchClient
             this.locale = locale;
             this.subscriptionKey = subscriptionKey;
             this.region = region;
-            this.contentAzureBlobContainer = new Uri(contentAzureBlobContainer.Trim());
+            this.contentAzureBlobContainer = string.IsNullOrEmpty(contentAzureBlobContainer) ? null : new Uri(contentAzureBlobContainer.Trim());
          }
 
         private static string GetCmdOption(string[] args, string option)
@@ -78,7 +78,7 @@ namespace BatchClient
             }
             else
             {
-                throw new ArgumentException($"Please provide SAS URIs (if input multiple audios, please separate them with commas.) pointing to audio files stored in Azure Blob Storage with the --recordingsBlobSasUri option.{Environment.NewLine}Usage: {usage}");
+                recordingsBlobUris = null;
             }
 
             string recordingsContainerUri;
@@ -88,7 +88,7 @@ namespace BatchClient
             }
             else
             {
-                throw new ArgumentException($"Please provide SAS URIs (if input multiple audios, please separate them with commas.) pointing to audio files stored in Azure Blob Storage with the --recordingsBlobSasUri option.{Environment.NewLine}Usage: {usage}");
+                recordingsContainerUri = null;
             }
 
             string locale;
