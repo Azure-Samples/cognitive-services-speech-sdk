@@ -6,9 +6,10 @@ namespace BatchClient
 {
     public class UserConfig
     {
-        /// A SAS URI pointing to an audio file stored in Azure Blob Storage
-        readonly public List<Uri> recordingsBlobUri;
-        /// The locale of the recordings
+        /// SAS URI pointing to an audio files stored in Azure Blob Storage
+        readonly public List<Uri> recordingsBlobUris;
+        /// SAS URI pointing to an container in Azure Blob Storage
+        readonly public Uri contentAzureBlobContainer;
         readonly public string locale;
         /// The resource key for your Speech service subscription.
         readonly public string subscriptionKey;
@@ -16,20 +17,23 @@ namespace BatchClient
         readonly public string region;
 
         public UserConfig(
-            string recordingsBlobUri,
-            string locale,
             string subscriptionKey,
-            string region
+            string region,
+            string locale,
+            string recordingsBlobUris = null,
+            string contentAzureBlobContainer = null
+
             )
         {
-            this.recordingsBlobUri = recordingsBlobUri
+            this.recordingsBlobUris = recordingsBlobUris?
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(uriStr => new Uri(uriStr.Trim()))
+                .Select(uri => new Uri(uri.Trim()))
                 .ToList();
             this.locale = locale;
             this.subscriptionKey = subscriptionKey;
             this.region = region;
-        }
+            this.contentAzureBlobContainer = new Uri(contentAzureBlobContainer.Trim());
+         }
 
         private static string GetCmdOption(string[] args, string option)
         {
@@ -52,13 +56,9 @@ namespace BatchClient
             {
                 key = keyOptionValue;
             }
-            else if (Environment.GetEnvironmentVariable("SPEECH_KEY") is string keyValue)
-            {
-                key = keyValue;
-            }
             else
             {
-                throw new ArgumentException($"Please set the SPEECH_KEY environment variable or provide a Speech resource key with the --subscriptionKey option.{Environment.NewLine}Usage: {usage}");
+                throw new ArgumentException($"Please provide a Speech resource key with the --key option.{Environment.NewLine}Usage: {usage}");
             }
 
             string region;
@@ -66,19 +66,25 @@ namespace BatchClient
             {
                 region = regionOptionValue;
             }
-            else if (Environment.GetEnvironmentVariable("SPEECH_REGION") is string regionValue)
+            else
             {
-                region = regionValue;
+                throw new ArgumentException($"Please provide a Speech region with the --region option.{Environment.NewLine}Usage: {usage}");
+            }
+
+            string recordingsBlobUris;
+            if (GetCmdOption(args, "--recordingsBlobUris") is string recordingsBlobUrisOptionValue)
+            {
+                recordingsBlobUris = recordingsBlobUrisOptionValue;
             }
             else
             {
-                throw new ArgumentException($"Please set the SPEECH_REGION environment variable or provide a Speech region with the --region option.{Environment.NewLine}Usage: {usage}");
+                throw new ArgumentException($"Please provide SAS URIs (if input multiple audios, please separate them with commas.) pointing to audio files stored in Azure Blob Storage with the --recordingsBlobSasUri option.{Environment.NewLine}Usage: {usage}");
             }
 
-            string recordingsBlobUri;
-            if (GetCmdOption(args, "--recordingsBlobUri") is string recordingsBlobUriOptionValue)
+            string recordingsContainerUri;
+            if (GetCmdOption(args, "--recordingsContainerUri") is string recordingsContainerUriOptionValue)
             {
-                recordingsBlobUri = recordingsBlobUriOptionValue;
+                recordingsContainerUri = recordingsContainerUriOptionValue;
             }
             else
             {
@@ -96,10 +102,11 @@ namespace BatchClient
             }
 
             return new UserConfig(
-                recordingsBlobUri,
-                locale,
                 key,
-                region
+                region,
+                locale,
+                recordingsBlobUris,
+                recordingsContainerUri
             );
         }
     }

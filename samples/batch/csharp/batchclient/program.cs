@@ -21,7 +21,6 @@ namespace BatchClient
         // replace with a secure secret (used for hashing)
         public const string WebHookSecret = "somethingverysecretisbesthere";
 
-        //private static Uri ContentAzureBlobContainer = new Uri("<SAS URI pointing to an container in Azure Blob Storage>");
         private static Uri WebHookCallbackUrl = new Uri($"https://{WebHookAppServiceName}.azurewebsites.net/api/callback");
 
         // For use of custom trained model:
@@ -39,10 +38,8 @@ namespace BatchClient
     --help                           Show this help and stop.
 
   CONNECTION
-    --key KEY                        Your Azure Speech service resource key.
-                                     Overrides the SPEECH_KEY environment variable. You must set the environment variable (recommended) or use the `--key` option.
-    --region REGION                  Your Azure Speech service region.
-                                     Overrides the SPEECH_REGION environment variable. You must set the environment variable (recommended) or use the `--region` option.
+    --key KEY                        Your Azure Speech service resource key. Use the `--key` option.
+    --region REGION                  Your Azure Speech service region.Use the `--region` option.
                                      Examples: westus, eastus
 
   Locale
@@ -50,8 +47,10 @@ namespace BatchClient
   INPUT
     --locale                         Specify locale. The locale of recordings.
                                      Examples: en-US, ja-JP
-    --recordingsBlobUri              Input audios SAS URI (if input multiple, please separate them with commas) stored in Azure Blob Storage.
+    --recordingsBlobUris             Input audios SAS URI (if input multiple, please separate them with commas) stored in Azure Blob Storage.
                                      Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_1>?SAS_TOKEN_1,https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_2>?SAS_TOKEN_2
+    --recordingsContainerUri         Input audios Azure Blob Storage Container SAS URI.
+                                     Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>?SAS_TOKEN
 ";
 
             if (args.Contains("--help"))
@@ -119,8 +118,8 @@ namespace BatchClient
             {
                 DisplayName = DisplayName,
                 Locale = _userConfig.locale,
-                ContentUrls = _userConfig.recordingsBlobUri,
-                //ContentContainerUrl = ContentAzureBlobContainer,
+                ContentUrls = _userConfig.recordingsBlobUris,
+                //ContentContainerUrl = _userConfig.contentAzureBlobContainer,
                 Model = CustomModel,
                 Properties = new TranscriptionProperties
                 {

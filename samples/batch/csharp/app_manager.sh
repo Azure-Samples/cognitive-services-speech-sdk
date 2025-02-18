@@ -48,34 +48,67 @@ elif [ "$action" = "build" ]; then
         exit 1
     fi
 elif [ "$action" = "run" ]; then
-    ENV_FILE_PATH=".env/.env.dev"
-    if [[ -f "$ENV_FILE_PATH" ]]; then
+    # Load environment variables from .env file
+    ENV_FILE=".env/.env.dev"
+    if [ -f "$envFilePath" ]; then
+        # Read each line of the file and process it
         while IFS= read -r line; do
+            # Ignore empty lines and lines that start with `#` (comments)
             if [[ -n "$line" && ! "$line" =~ ^\s*# ]]; then
+                # Split each line into key and value
                 IFS='=' read -r key value <<< "$line"
-                export "$key"="$value"
-            fi
-        done < "$ENV_FILE_PATH"
+                key=$(echo "$key" | xargs)   # Trim whitespace from key
+                value=$(echo "$value" | xargs) # Trim whitespace from value
 
-        export SPEECH_KEY=$SPEECH_RESOURCE_KEY
-        export SPEECH_REGION=$SERVICE_REGION
+                # Set the environment variable in the current session
+                export "$key=$value"
+            fi
+        done < "$envFilePath"
     else
-        echo "File not found: $ENV_FILE_PATH. You can create one to set environment variables or manually set secrets in environment variables."
+        echo "File not found: $envFilePath. You can create one to set environment variables or manually set secrets."
     fi
 
-    read -p "Please enter SAS URI pointing to audio files stored in Azure Blob Storage. If input multiple, please separate them with commas: " recordingsBlobUri
-    if [ -z "$recordingsBlobUri" ]; then
-        echo "Not enter the Azure Blob SAS URL of the input audio file. Exiting..."
+    read -p "Do you want to use RecordingsBlobUris [y] or RecordingsContainerUri [n]? Please enter y/n: " useBlobUrisOrContainerUri
+    if [[ "$useBlobUrisOrContainerUri" =~ ^[yY]$ ]]; then
+        choice=0
+    elif [[ "$useBlobUrisOrContainerUri" =~ ^[nN]$ ]]; then
+        choice=1
+    else
+        echo -e "Invalid input. Exiting..."
         exit 1
+    fi
+
+    if [ "$choice" -eq 0 ]; then
+        read -p "Please enter SAS URI pointing to audio files stored in Azure Blob Storage. If input multiple, please separate them with commas: " recordingsBlobUris
+        if [ -z "$recordingsBlobUris" ]; then
+            echo -e "Not enter the Azure Blob SAS URL of the input audio file."
+            exit 1
+        fi
+    else
+        read -p "Please enter the SAS URI of the container in Azure Blob Storage where the audio files are stored: " recordingsContainerUri
+        if [ -z "$recordingsContainerUri" ]; then
+            echo -e "Not enter the Azure Blob Container SAS URI of the input audio file."
+            exit 1
+        fi
     fi
 
     read -p "Please enter the locale of the input audio file (e.g. en-US, zh-CN, etc.): " recordingsLocale
     if [ -z "$recordingsLocale" ]; then
-        echo "Not enter the locale. Exiting..."
+        echo -e "Not enter the locale."
         exit 1
     fi
 
-    dotnet batchclient/bin/Debug/net8.0/BatchTranscriptions.dll --recordingsBlobUri $recordingsBlobUri --locale  $recordingsLocale
+    args=("--key" "$SPEECH_RESOURCE_KEY"
+        "--region" "$SERVICE_REGION"
+        "--locale" "$recordingsLocale")
+
+    if [ "$choice" -eq 0 ]; then
+        args+=("--recordingsBlobUris" "$recordingsBlobUris")
+    else
+        args+=("--recordingsContainerUri" "$recordingsContainerUri")
+    fi
+
+    dotnet batchclient/bin/Debug/net8.0/BatchTranscriptions.dll "${args[@]}"
 else
     echo "Invalid action: $action"
     echo "Usage: $0 {build|run|configure}"

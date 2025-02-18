@@ -3,8 +3,21 @@
 Speech Services Batch Transcription is exposed through a REST API. The samples here do **NOT** require the installation of the Cognitive Service Speech SDK, but use the REST API directly. For detailed explanation see the [batch transcription documentation](https://docs.microsoft.com/azure/cognitive-services/speech-service/batch-transcription).
 
 ## Prerequisites
-- SAS URI pointing to audio files stored in Azure Blob Storage. You can upload your local audio or recording files to your Azure blob storage. Of course, you can also download the example en-US audio files from [sample audio files](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/audiofiles) and then upload it to your Azure blob storage.
-- The locale (e.g. en-US, zh-CN, etc.) of the audio file.
+
+- **recordingsBlobUris** (Azure Blob Storage SAS URI pointing to audio files) or **recordingsContainerUri** (Azure Blob Storage Container SAS URI that stored audio files). You can upload your local audio or recording files to your Azure blob storage. Of course, you can also download the example en-US audio files from [sample audio files](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/audiofiles) and then upload it to your Azure blob storage.
+- The **locale** (e.g. en-US, zh-CN, etc.) of the audio file.
+
+## Tips
+
+The sample code default use `recordingsBlobUris` parameter, if you want to use `recordingsContainerUri` parameter, please comment out 
+```C#
+//ContentContainerUrl = _userConfig.contentAzureBlobContainer,
+```
+and uncomment
+```C#
+ContentUrls = _userConfig.recordingsBlobUris,
+```
+in **batchclient/program.cs**.
 
 ## Run the Sample within VS Code
 1. Install "Azure AI Speech Toolkit" extension in VS Code.
