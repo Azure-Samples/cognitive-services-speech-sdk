@@ -6,6 +6,7 @@
 namespace BatchClient
 {
     using System;
+    using System.IO;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -119,7 +120,7 @@ namespace BatchClient
                 DisplayName = DisplayName,
                 Locale = _userConfig.locale,
                 ContentUrls = _userConfig.recordingsBlobUris,
-                //ContentContainerUrl = _userConfig.contentAzureBlobContainer,
+                // ContentContainerUrl = _userConfig.contentAzureBlobContainer,
                 Model = CustomModel,
                 Properties = new TranscriptionProperties
                 {
@@ -193,10 +194,43 @@ namespace BatchClient
                                 {
                                     var paginatedfiles = await client.GetTranscriptionFilesAsync(transcription.Links.Files).ConfigureAwait(false);
 
-                                    var resultFile = paginatedfiles.Values.FirstOrDefault(f => f.Kind == ArtifactKind.Transcription);
-                                    var result = await client.GetTranscriptionResultAsync(new Uri(resultFile.Links.ContentUrl)).ConfigureAwait(false);
-                                    Console.WriteLine("Transcription succeeded. Results: ");
-                                    Console.WriteLine(JsonConvert.SerializeObject(result, SpeechJsonContractResolver.WriterSettings));
+                                    var resultFiles = paginatedfiles.Values.Where(f => f.Kind == ArtifactKind.Transcription);
+
+                                    if (!resultFiles.Any())
+                                    {
+                                        Console.WriteLine("No transcription results found.");
+                                        return;
+                                    }
+
+                                    Console.WriteLine("Transcription succeeded. Found {0} result files.", resultFiles.Count());
+
+                                    string resultsDir = "results";
+                                    if (!Directory.Exists(resultsDir))
+                                    {
+                                        Directory.CreateDirectory(resultsDir);
+                                    }
+
+                                    foreach (var resultFile in resultFiles)
+                                    {
+                                        var result = await client.GetTranscriptionResultAsync(new Uri(resultFile.Links.ContentUrl)).ConfigureAwait(false);
+                                        string resultJsonStr = JsonConvert.SerializeObject(result, SpeechJsonContractResolver.WriterSettings);
+
+                                        // print the results to console
+                                        Console.WriteLine("Transcription of {0} succeeded. Results: ", resultFile.Name);
+                                        Console.WriteLine(resultJsonStr);
+
+                                        string sanitizedFileName = string.Concat(resultFile.Name.Split(Path.GetInvalidFileNameChars()));
+                                        if (!sanitizedFileName.EndsWith(".json"))
+                                        {
+                                            sanitizedFileName += ".json";
+                                        }
+
+                                        string filePath = Path.Combine(resultsDir, sanitizedFileName);
+
+                                        System.IO.File.WriteAllText(filePath, resultJsonStr);
+
+                                        Console.WriteLine($"Transcription of {resultFile.Name} results written to file: {filePath}");
+                                    }
                                 }
                                 else
                                 {
@@ -222,7 +256,9 @@ namespace BatchClient
 
                 // </transcriptionstatus>
                 // check again after 1 minute
-                await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                if (completed < 1) {
+                    await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                }
             }
 
             Console.WriteLine("Press any key...");
