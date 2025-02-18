@@ -63,10 +63,10 @@ elseif ($action -eq "run") {
         Write-Host "File not found: $envFilePath. You can create one to set environment variables or manually set secrets in environment variables."
     }
 
-    $useBlobUrisOrContainerUri = Read-Host "Do you want to use RecordingsBlobUris [y] or RecordingsContainerUri [n]? Please enter y/n"
-    if ($useBlobUrisOrContainerUri -match "^[yY]$") {
+    $useBlobUrisOrContainerUri = Read-Host "Do you want to use RecordingsBlobUris [1] or RecordingsContainerUri [2]? Please enter 1/2"
+    if ($useBlobUrisOrContainerUri -match "1") {
         $choice = 0
-    } elseif ($useBlobUrisOrContainerUri -match "^[nN]$") {
+    } elseif ($useBlobUrisOrContainerUri -match "2") {
         $choice = 1
     } else {
         Write-Host "Invalid input. Exiting..." -ForegroundColor Red

@@ -60,10 +60,10 @@ elif [ "$action" = "run" ]; then
         echo "Environment file $ENV_FILE not found. You can create one to set environment variables or manually set secrets in environment variables."
     fi
 
-    read -p "Do you want to use RecordingsBlobUris [y] or RecordingsContainerUri [n]? Please enter y/n: " useBlobUrisOrContainerUri
-    if [[ "$useBlobUrisOrContainerUri" =~ ^[yY]$ ]]; then
+    read -p "Do you want to use RecordingsBlobUris [1] or RecordingsContainerUri [2]? Please enter 1/2: " useBlobUrisOrContainerUri
+    if [[ "$useBlobUrisOrContainerUri" == "1" ]]; then
         choice=0
-    elif [[ "$useBlobUrisOrContainerUri" =~ ^[nN]$ ]]; then
+    elif [[ "$useBlobUrisOrContainerUri" == "2" ]]; then
         choice=1
     else
         echo -e "Invalid input. Exiting..."
