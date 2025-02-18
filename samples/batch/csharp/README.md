@@ -11,11 +11,11 @@ Speech Services Batch Transcription is exposed through a REST API. The samples h
 
 The sample code default use `recordingsBlobUris` parameter, if you want to use `recordingsContainerUri` parameter, please comment out 
 ```C#
-//ContentContainerUrl = _userConfig.contentAzureBlobContainer,
+ContentUrls = _userConfig.recordingsBlobUris,
 ```
 and uncomment
 ```C#
-ContentUrls = _userConfig.recordingsBlobUris,
+//ContentContainerUrl = _userConfig.contentAzureBlobContainer,
 ```
 in **batchclient/program.cs**.
 
