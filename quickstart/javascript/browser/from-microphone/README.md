@@ -3,11 +3,11 @@
 These samples demonstrate how to recognize speech using the Speech SDK for JavaScript on a web browser, like Microsoft Edge, or Chrome.
 
 ## Run the Sample within VS Code
-- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
 - Download this sample from sample gallery to local machine.
-- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select speech resource.
-- Trigger "Azure AI Speech Toolkit: Configure and Setup the Sample App" command from command palette to configure environment by install `http-server` globally. This command only needs to be run once.
-- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample. This will open the `index.html` file in your default browser.
+- Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select speech resource.
+- Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure environment by install `http-server` globally. This command only needs to be run once.
+- Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample. This will open the `index.html` file in your default browser.
 - Use value of `SPEECH_RESOURCE_KEY` and `SERVICE_REGION` in `./.env/.env/dev` file to set in the input fields `Subscription` and `Region`. Click `Start Recognition` button to start recognizing speech.
 
 ## Prerequisites

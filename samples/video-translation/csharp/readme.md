@@ -3,11 +3,11 @@
 Video translation client tool and API sample code
 
 ## Run the Sample within VS Code
-- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
 - Download this sample from sample gallery to local machine.
-- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **eastus** regional speech resource. (Video translation currently only supports Azure Speech resources in the **eastus** region.)
-- Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
-- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+- Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select an **eastus** regional speech resource. (Video translation currently only supports Azure Speech resources in the **eastus** region.)
+- Trigger `Azure AI Speech Toolkit: Build the Sample App` command from command palette to build the sample.
+- Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
 
    Upload an input video to Azure Blob Storage and copy the Blob SAS URL. Paste the Azure Blob URL when the run task terminal ask for it. Interactively enter other arguments in the run task terminal. The `Azure AI Speech Toolkit: Run the Sample App` command will run in mode `CreateTranslationAndIterationAndWaitUntilTerminated`:
 

@@ -2,7 +2,7 @@
 
 ## Download and install the API client library
 
-To execute the sample you need to generate the Python library for the REST API which is generated through [Swagger](swagger.io).
+To execute the sample you need to generate the Python library for the REST API which is generated through Swagger.
 
 Follow these steps for the installation:
 
@@ -15,30 +15,33 @@ Follow these steps for the installation:
 1. Install the extracted python-client module in your Python environment using pip: `pip install path/to/package/python-client`.
 1. The installed package has the name `swagger_client`. You can check that the installation worked using the command `python -c "import swagger_client"`.
 
-## Install other dependencies
+## Prerequisites
 
-The sample uses the `requests` library. You can install it with the command
+- **recordings_blob_uris** (Azure Blob Storage SAS URI pointing to audio files) or **recordings_container_uri** (Azure Blob Storage Container SAS URI that stored audio files). You can upload your local audio or recording files to Azure Blob Storage. Alternatively, you can download example en-US audio files from [sample audio files](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/sampledata/audiofiles) and then upload it to your Azure blob storage.
+- The **locale** of the audio file (e.g. en-US, zh-CN, etc.).
 
-```bash
-pip install requests
-```
+## Run the Sample within VS Code
+1. Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+2. Download this sample from sample gallery to local machine.
+3. Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select speech resource.
+4. Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure and setup the sample. This command only needs to be run once.
+5. Trigger `Azure AI Speech Toolkit: Build the Sample App` command from command palette to build the sample.
+6. Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
 
-## Run the sample code
+## Advanced Usage
 
-The sample code itself is [main.py](python-client/main.py) and can be run using Python 3.7 or higher.
-You will need to adapt the following information to run the sample:
+By default, the sample code uses the `recordings_blob_uris` parameter. You can specify either a single recording file blob URL or multiple URLs, separated by commas.
 
-1. Your Cognitive Services subscription key and region.
-    
-    Some notes:
+If you prefer to use the `recordings_container_uri` parameter, follow these steps:
 
-    - You can get the subscription key from the "Keys and Endpoint" tab on your Cognitive Services or Speech resource in the Azure Portal.
-    - Batch transcription is only available for paid subscriptions, free subscriptions are not supported.
-    - Please refer to [this page](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions#rest-apis) for a complete list of region identifiers in the expected format.
+1. In  **python-client/main.py**, comment out the following line:
+    ```python
+    transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URIS, properties)
+    ```
 
-1. The URI of an audio recording in blob storage. Please refer to the [Azure Storage documentation](https://docs.microsoft.com//rest/api/storageservices/authorize-requests-to-azure-storage) on information on how to authorize accesses against blob storage.
-1. (Optional:) The model ID of an adapted model, if you want to use a custom model.
-1. (Optional:) The URI of a container with audio files if you want to transcribe all of them with a single request.
-
-You can use a development environment like Visual Studio Code to edit, debug, and execute the sample.
-
+2. Uncomment the following line:
+    ```python
+    # transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
+    ```
+3. Rebuild the program using the `Azure AI Speech Toolkit: Build the Sample App` command.
+4. Run the sample with `Azure AI Speech Toolkit: Run the Sample App`. Ensure that the SAS URI for the container has `Read` and `List` permissions.

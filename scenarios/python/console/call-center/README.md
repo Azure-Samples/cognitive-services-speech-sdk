@@ -3,13 +3,13 @@
 This sample demonstrates how to use post-call transcription and analytics with python on Windows or Linux.
 
 ## Run the Sample within VS Code
-- Install "Azure AI Speech Toolkit" extension in VS Code.
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
 - Download this sample from sample gallery to local machine.
-- Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **Azure AI services** resource.
-- Trigger "Azure AI Speech Toolkit: Build the Sample App" command from command palette to build the sample.
-- Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+- Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select an **Azure AI services** resource.
+- Trigger `Azure AI Speech Toolkit: Build the Sample App` command from command palette to build the sample.
+- Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
 
-"Azure AI Speech Toolkit" extension will use the same selected Azure AI service for `speechKey` / `languageKey` / `speechRegion` / `languageEndpoint` arguments. If you prefer to run with separate Speech Services, you can open a terminal and execute commands like this:
+[Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension will use the same selected Azure AI service for `speechKey` / `languageKey` / `speechRegion` / `languageEndpoint` arguments. If you prefer to run with separate Speech Services, you can open a terminal and execute commands like this:
 ```
 dotnet run --languageKey YourResourceKey --languageEndpoint YourResourceEndpoint --speechKey YourResourceKey --speechRegion YourResourceRegion --input "https://github.com/Azure-Samples/cognitive-services-speech-sdk/raw/master/scenarios/call-center/sampledata/Call1_separated_16k_health_insurance.wav" --stereo  --output summary.json
 ```

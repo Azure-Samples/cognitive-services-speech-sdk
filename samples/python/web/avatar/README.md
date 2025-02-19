@@ -2,11 +2,11 @@
 This sample demonstrates the basic usage of Azure text-to-speech avatar real-time API.
 
 ## Run the Sample within VS Code
-1. Install "Azure AI Speech Toolkit" extension in VS Code.
+1. Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
 2. Download this sample from sample gallery to local machine.
-3. Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations).
-- Trigger "Azure AI Speech Toolkit: Configure and Setup the Sample App" command from command palette to configure and setup the sample. This command only needs to be run once.
-5. Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+3. Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations).
+- Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure and setup the sample. This command only needs to be run once.
+5. Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
 
     This command will start the avatar web server and open the browser for you. After the `http://127.0.0.1:5000/` link opens in default browser, type in "Spoken Text" and click "Start Session". Then click "Speak".
 
