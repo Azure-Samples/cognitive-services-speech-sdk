@@ -49,23 +49,15 @@ elif [ "$action" = "build" ]; then
     fi
 elif [ "$action" = "run" ]; then
     # Load environment variables from .env file
-    ENV_FILE=".env/.env.dev"
-    if [ -f "$envFilePath" ]; then
-        # Read each line of the file and process it
-        while IFS= read -r line; do
-            # Ignore empty lines and lines that start with `#` (comments)
-            if [[ -n "$line" && ! "$line" =~ ^\s*# ]]; then
-                # Split each line into key and value
-                IFS='=' read -r key value <<< "$line"
-                key=$(echo "$key" | xargs)   # Trim whitespace from key
-                value=$(echo "$value" | xargs) # Trim whitespace from value
+    ENV_FILE=".env/.env.dev" 
+    if [ -f "$ENV_FILE" ]; then
+        source "$ENV_FILE"
 
-                # Set the environment variable in the current session
-                export "$key=$value"
-            fi
-        done < "$envFilePath"
+        # Ensure environment variables are available to the C++ binary
+        export SPEECH_KEY=$SPEECH_RESOURCE_KEY
+        export SPEECH_REGION=$SERVICE_REGION
     else
-        echo "File not found: $envFilePath. You can create one to set environment variables or manually set secrets."
+        echo "Environment file $ENV_FILE not found. You can create one to set environment variables or manually set secrets in environment variables."
     fi
 
     read -p "Do you want to use RecordingsBlobUris [y] or RecordingsContainerUri [n]? Please enter y/n: " useBlobUrisOrContainerUri
@@ -98,8 +90,8 @@ elif [ "$action" = "run" ]; then
         exit 1
     fi
 
-    args=("--key" "$SPEECH_RESOURCE_KEY"
-        "--region" "$SERVICE_REGION"
+    args=("--key" "$SPEECH_KEY"
+        "--region" "$SPEECH_REGION"
         "--locale" "$recordingsLocale")
 
     if [ "$choice" -eq 0 ]; then
