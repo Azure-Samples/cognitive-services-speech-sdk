@@ -66,7 +66,7 @@ def submit_synthesis(job_id: str) -> bool:
     }
     header.update(_authenticate())
 
-    with open(Path(__file__).absolute().parent.parent / 'Gatsby-chapter1.txt', 'r') as f:
+    with open(Path(__file__).absolute().parent / 'Gatsby-chapter1.txt', 'r') as f:
         text = f.read()
 
     payload = {
