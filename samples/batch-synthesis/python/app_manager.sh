@@ -39,6 +39,7 @@ elif [[ "$ACTION" == "run" ]]; then
             fi
         done < "$ENV_FILE_PATH"
 
+        export CUSTOM_DOMAIN=$CUSTOM_SUBDOMAIN_NAME
         export SPEECH_KEY=$SPEECH_RESOURCE_KEY
         export SPEECH_REGION=$SERVICE_REGION
     else

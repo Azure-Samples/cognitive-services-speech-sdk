@@ -48,6 +48,7 @@ elseif ($action -eq "run") {
             }
         }
 
+        [System.Environment]::SetEnvironmentVariable("CUSTOM_DOMAIN", $env:CUSTOM_SUBDOMAIN_NAME)
         [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $env:SPEECH_RESOURCE_KEY)
         [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $env:SERVICE_REGION)
     }
