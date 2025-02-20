@@ -26,29 +26,6 @@
             }
         },
         {
-            "label": "Build the App",
-            "type": "shell",
-            "command": "${workspaceFolder}/app_manager.sh",
-            "args": [
-                "build"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": "$msCompile",
-            "windows": {
-                "command": "powershell",
-                "args": [
-                    "-ExecutionPolicy",
-                    "Bypass",
-                    "-File",
-                    "${workspaceFolder}/app_manager.ps1",
-                    "build"
-                ]
-            }
-        },
-        {
             "label": "Run the App",
             "type": "shell",
             "command": "${workspaceFolder}/app_manager.sh",
