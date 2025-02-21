@@ -20,4 +20,4 @@ Available samples:
     - You can get the subscription key from the "Keys and Endpoint" tab on your Cognitive Services or Speech resource in the Azure Portal.
     - Custom Voice is only available for paid subscriptions, free subscriptions are not supported.
 2. Both professional voice and personal voice access are [limited](https://learn.microsoft.com/legal/cognitive-services/speech-service/custom-neural-voice/limited-access-custom-neural-voice?context=%2fazure%2fcognitive-services%2fspeech-service%2fcontext%2fcontext) based on eligibility and usage criteria. Please [request access](https://aka.ms/customneural) before using sample code here.
-3. Personal voice is available in these regions: West Europe, East US, and South East Asia.
+3. Personal voice is available in these regions: West Europe, East US, West US 2, Southeast Asia and East Asia.

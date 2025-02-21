@@ -10,7 +10,7 @@ public class PersonalVoiceSample
 {
     // Update your key and region here.
     private const string subscriptionKey = "YourSubscriptionKey";
-    private const string region = "YourServiceRegion. E.g., 'eastus'";  // # eastus, westeurope, southeastasia
+    private const string region = "YourServiceRegion. E.g., 'eastus'";  // # eastus, westeurope, southeastasia, westus2, eastasia
 
     public static async Task PersonalVoiceTestAsync()
     {
