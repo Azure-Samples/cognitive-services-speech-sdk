@@ -3,19 +3,35 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-// Your Speech resource key and region
-// This example requires environment variables named "SPEECH_KEY" and "SPEECH_REGION"
-string speechRegion = Environment.GetEnvironmentVariable("SPEECH_REGION") 
-    ?? throw new ArgumentException("Please set SPEECH_REGION environment variable.");
+using Azure.Core;
+using Azure.Identity;
 
-string speechKey = Environment.GetEnvironmentVariable("SPEECH_KEY") 
-    ?? throw new ArgumentException("Please set the SPEECH_KEY environment variable to set speech resource key.");
+// The endpoint (and key) could be gotten from the Keys and Endpoint page in the Speech service resource.
+// The endpoint would be like: https://<region>.api.cognitive.microsoft.com or https://<custom_domain>.cognitiveservices.azure.com
+// If you want to use token authentication, custom domain is required.
+var host = Environment.GetEnvironmentVariable("SPEECH_ENDPOINT");
+BatchSynthesisClient synthesisClient;
+var apiVersion = "2024-04-01";
+if (!string.IsNullOrEmpty(host))
+{
+    // Use Azure Identity SDK to acquire token
+    var credential = new DefaultAzureCredential();
+    var tokenRequestContext = new TokenRequestContext(new[] { "https://cognitiveservices.azure.com/.default" });
+    var accessToken = (await credential.GetTokenAsync(tokenRequestContext)).Token;
 
-string apiVersion = "2024-04-01";
-var host = $"https://{speechRegion}.api.cognitive.microsoft.com";
+    // Use access token for authentication
+    synthesisClient = new BatchSynthesisClient(host, accessToken, apiVersion, isToken: true);
+}
+else
+{
+    string speechRegion = Environment.GetEnvironmentVariable("SPEECH_REGION") ?? throw new ArgumentException("Please set either the SPEECH_REGION or SPEECH_ENDPOINT environment variable.");
+    string speechKey = Environment.GetEnvironmentVariable("SPEECH_KEY") ?? throw new ArgumentException("Please set either the SPEECH_KEY and SPEECH_REGION environment variables, or the SPEECH_ENDPOINT environment variable for authentication.");
+
+    host = $"https://{speechRegion}.api.cognitive.microsoft.com";
+    synthesisClient = new BatchSynthesisClient(host, speechKey, apiVersion);
+}
+
 var sampleScript = await File.ReadAllTextAsync("../../Gatsby-chapter1.txt").ConfigureAwait(false);
-
-var synthesisClient = new BatchSynthesisClient(host, speechKey, apiVersion);
 
 // Get all synthesis jobs.
 var synthesisJobs = await synthesisClient.GetAllSynthesesAsync().ConfigureAwait(false);
