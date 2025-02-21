@@ -84,7 +84,7 @@ def clean_up(project_id: str, consent_id: str, personal_voice_id: str):
     customvoice.Project.delete(config, project_id)
 
 
-region = 'eastus' # eastus, westeurope, southeastasia
+region = 'eastus' # eastus, westeurope, southeastasia, westus2, eastasia
 key = 'your speech key here'
 
 
