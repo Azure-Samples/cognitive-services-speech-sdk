@@ -93,6 +93,7 @@ elseif ($action -eq "run") {
             }
         }
 
+        [System.Environment]::SetEnvironmentVariable("SPEECH_ENDPOINT", "https://$env:CUSTOM_SUBDOMAIN_NAME.cognitiveservices.azure.com")
         [System.Environment]::SetEnvironmentVariable("SPEECH_KEY", $env:SPEECH_RESOURCE_KEY)
         [System.Environment]::SetEnvironmentVariable("SPEECH_REGION", $env:SERVICE_REGION)
     }

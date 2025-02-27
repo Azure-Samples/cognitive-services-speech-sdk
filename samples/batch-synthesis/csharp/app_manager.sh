@@ -68,6 +68,7 @@ elif [[ "$ACTION" == "run" ]]; then
             fi
         done < "$ENV_FILE_PATH"
 
+        export SPEECH_ENDPOINT="https://$CUSTOM_SUBDOMAIN_NAME.cognitiveservices.azure.com"
         export SPEECH_KEY=$SPEECH_RESOURCE_KEY
         export SPEECH_REGION=$SERVICE_REGION
     else
