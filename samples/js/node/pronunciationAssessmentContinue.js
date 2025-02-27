@@ -95,6 +95,97 @@ export const main = async (settings) => {
         endOffset = nb.Words.slice(-1)[0].Offset + nb.Words.slice(-1)[0].Duration + 100000;
     };
 
+    function convertReferenceWords(referenceText, referenceWords) {
+        const dictionary = [...new Set(referenceWords)];
+        const maxLength = Math.max(...dictionary.map(word => word.length));
+
+        // From left to right to do the longest matching to get the word segmentation
+        function leftToRightSegmentation(text, dictionary) {
+            var result = [];
+            while (text.length > 0) {
+                let subText = "";
+                // If the length of the text is less than the maxLength, then the subText is the text itself
+                if (text.length < maxLength) {
+                    subText = text;
+                } else {
+                    subText = text.substring(0, maxLength);
+                }
+                while (subText.length > 0) {
+                    // If the subText is in the dictionary or the length of the subText is 1, then add it to the result
+                    if (dictionary.includes(subText) || subText.length === 1) {
+                        result.push(subText);
+                        // Remove the subText from the text
+                        text = text.slice(subText.length);
+                        break;
+                    } else {
+                        // If the subText is not in the dictionary, then remove the last character of the subText
+                        subText = subText.slice(0, -1);
+                    }
+                }
+            }
+            return result;
+        }
+
+        // From right to left to do the longest matching to get the word segmentation
+        function rightToLeftSegmentation(text, dictionary) {
+            var result = [];
+            while (text.length > 0) {
+                let subText = "";
+                // If the length of the text is less than the maxLength, then the subText is the text itself
+                if (text.length < maxLength) {
+                    subText = text;
+                } else {
+                    subText = text.slice(-maxLength);
+                }
+                while (subText.length > 0) {
+                    // If the subText is in the dictionary or the length of the subText is 1, then add it to the result
+                    if (dictionary.includes(subText) || subText.length === 1) {
+                        result.push(subText);
+                        // Remove the subText from the text
+                        text = text.slice(0, -subText.length);
+                        break
+                    } else {
+                        // If the subText is not in the dictionary, then remove the first character of the subText
+                        subText = subText.slice(1);
+                    }
+                }
+            }
+            // Reverse the result to get the correct order
+            result = result.reverse();
+            return result;
+        }
+
+        function segment_word(referenceText, dictionary) {
+            const leftToRight = leftToRightSegmentation(referenceText, dictionary);
+            const rightToLeft = rightToLeftSegmentation(referenceText, dictionary);
+            if (leftToRight.join("") === referenceText) {
+                return leftToRight;
+            } else if (rightToLeft.join("") === referenceText) {
+                return rightToLeft;
+            } else {
+                console.log("WW failed to segment the text with the dictionary")
+                if (leftToRight.length < rightToLeft.length) {
+                    return leftToRight;
+                } else if (leftToRight.length > rightToLeft.length) {
+                    return rightToLeft;
+                } else {
+                    // If the word number is the same, then return the one with the smallest single word
+                    const leftToRightSingle = leftToRight.filter(word => word.length === 1).length;
+                    const rightToLeftSingle = rightToLeft.filter(word => word.length === 1).length;
+                    if (leftToRightSingle < rightToLeftSingle) {
+                        return leftToRight;
+                    } else {
+                        return rightToLeft;
+                    }
+                }
+            }
+        }
+
+        // Remove punctuation from the reference text
+        referenceText = referenceText.split("").filter(char => /[\p{L}\p{N}\s]/u.test(char)).join("");
+        return segment_word(referenceText, dictionary);
+    }
+
     async function getReferenceWords(waveFilename, referenceText, language) {
         const audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(waveFilename));
         const speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
@@ -131,7 +222,7 @@ export const main = async (settings) => {
                         console.log(`Speech Recognition canceled: ${result.errorDetails}`);
                         reject([]);
                     }
-                    resolve(referenceWords);
+                    resolve(convertReferenceWords(referenceText, referenceWords));
                     speechRecognizer.close();
                 },
                 (err) => {
