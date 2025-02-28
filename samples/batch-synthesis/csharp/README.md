@@ -9,9 +9,17 @@
 6. Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
 
 ## Run the Sample within VS Code
-If you are running the sample **without** the [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension for VS Code, set environment variables with your Speech Service's information:
-* `SPEECH_KEY`: Your speech resource key.
-* `SPEECH_REGION`: Your speech resource region.
+If you are running the sample **without** the [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension for VS Code, use one of the following authentication methods:
+
+Option 1: Token-based authentication (Recommended)
+
+- Set the Speech endpoint (set `SPEECH_ENDPOINT`)
+  - Ensure your Microsoft Entra account is assigned the "Cognitive Services Speech Contributor" or "Cognitive Services User" role.
+
+Option 2: Key-based authentication
+
+- Set the Speech Service subscription key (set `SPEECH_KEY`)
+- Set the region matching your subscription key (set `SPEECH_REGION`)
 
 ## Advanced Usage
 
