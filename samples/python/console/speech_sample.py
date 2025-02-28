@@ -15,6 +15,7 @@ import wave
 import utils
 import sys
 import io
+import requests
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -32,6 +33,12 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and service region (e.g., "westus").
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
+
+# Replace with your own Azure open AI resource.
+aoai_deployment_name = "YourAoaiDeploymentName"
+aoai_api_version = "YourAoaiApiVersion"
+aoai_resource_name = "YourAoaiResourceName"
+aoai_api_key = "YourAoaiApiKey"
 
 # Specify the path to an audio file containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
@@ -1236,6 +1243,12 @@ def pronunciation_assessment_with_content_assessment():
     # Generally, the waveform should longer than 20s and the content should be more than 3 sentences.
     audio_config = speechsdk.audio.AudioConfig(filename=seasonsfilename)
 
+    url = (
+        f'https://{aoai_resource_name}.openai.azure.com/openai/deployments/{aoai_deployment_name}/'
+        f'chat/completions?api-version={aoai_api_version}'
+    )
+    headers = {"Content-Type": "application/json", "api-key": aoai_api_key}
+
     # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     topic = "the season of the fall"
     pronunciation_config = speechsdk.PronunciationAssessmentConfig(
@@ -1243,7 +1256,6 @@ def pronunciation_assessment_with_content_assessment():
         granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
         enable_miscue=False)
     pronunciation_config.enable_prosody_assessment()
-    pronunciation_config.enable_content_assessment_with_topic(topic)
 
     # Create a speech recognizer using a file as audio input.
     language = 'en-US'
@@ -1253,8 +1265,7 @@ def pronunciation_assessment_with_content_assessment():
     pronunciation_config.apply_to(speech_recognizer)
 
     done = False
-    pron_results = []
-    recognized_text = ""
+    recognized_texts = []
 
     def stop_cb(evt):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -1263,12 +1274,40 @@ def pronunciation_assessment_with_content_assessment():
         done = True
 
     def recognized(evt):
-        nonlocal pron_results, recognized_text
+        nonlocal recognized_texts
         if (evt.result.reason == speechsdk.ResultReason.RecognizedSpeech or evt.result.reason == speechsdk.ResultReason.NoMatch):
-            pron_results.append(speechsdk.PronunciationAssessmentResult(evt.result))
-            if evt.result.text.strip().rstrip(".") != "":
-                print(f"Recognizing: {evt.result.text}")
-                recognized_text += " " + evt.result.text.strip()
+            print(f"Recognizing: {evt.result.text}")
+            recognized_texts.append(evt.result.text.strip())
+
+    def get_content_scores(recognized_text, topic):
+        data = {
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are an English teacher and please help to grade a student's essay from vocabulary and grammar and topic relevance on how well the essay aligns with the title, and output format as: {\"vocabulary_score\": *.*(0-10), \"grammar_score\": *.*(0-10), \"topic_score\": *.*(0-10)}."
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        # Please provide your own sample sentences along with their scores.
+                        "Example1: this essay: '{sampleSentence1}' has vocabulary and grammar scores of * and *, respectively. "
+                        "Example2: this essay: '{sampleSentence2}' has vocabulary and grammar scores of * and *, respectively. "
+                        "Example3: this essay: '{sampleSentence3}' has vocabulary and grammar scores of * and *, respectively. "
+                        f"The essay for you to score is '{recognized_text}', and the title is '{topic}'. "
+                        'The script is from speech recognition so that please first add punctuations when needed, remove duplicates and unnecessary un uh from oral speech, then find all the misuse of words and grammar errors in this essay, find advanced words and grammar usages, and finally give scores based on this information. Please only response as this format {"vocabulary_score": *.*(0-10), "grammar_score": *.*(0-10), "topic_score": *.*(0-10)}'
+                    )
+                }
+            ],
+            "temperature": 0,
+            "top_p": 1
+        }
+
+        content = json.loads(
+            requests.post(url=url, headers=headers, data=json.dumps(data))
+            .json()["choices"][0]["message"]["content"]
+        )
+
+        return content
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
@@ -1286,11 +1325,10 @@ def pronunciation_assessment_with_content_assessment():
         time.sleep(.5)
     speech_recognizer.stop_continuous_recognition()
 
-    # Content assessment result is in the last pronunciation assessment block
-    assert pron_results[-1].content_assessment_result is not None
-    content_result = pron_results[-1].content_assessment_result
+    recognized_text = " ".join(recognized_texts)
     print(f"Content Assessment for: {recognized_text.strip()}")
+    content_result = get_content_scores(recognized_text, topic)
     print("Content Assessment results:\n"
-          f"\tGrammar score: {content_result.grammar_score:.1f}\n"
-          f"\tVocabulary score: {content_result.vocabulary_score:.1f}\n"
-          f"\tTopic score: {content_result.topic_score:.1f}")
+          f"\tGrammar score: {content_result['grammar_score']:.1f}\n"
+          f"\tVocabulary score: {content_result['vocabulary_score']:.1f}\n"
+          f"\tTopic score: {content_result['topic_score']:.1f}")
