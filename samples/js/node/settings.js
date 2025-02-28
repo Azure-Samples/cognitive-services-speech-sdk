@@ -7,6 +7,12 @@ export const subscriptionKey =   "YourSubscriptionKey";
 export const serviceRegion =     "YourSubscriptionRegion"; // e.g., "westus"
 export const language =          "en-US";
 
+// Replace with your own Azure open AI resource.
+export const aoaiDeploymentName = "YourAoaiDeploymentName";
+export const aoaiApiVersion = "YourAoaiApiVersion";
+export const aoaiResourceName = "YourAoaiResourceName";
+export const aoaiApiKey = "YourAoaiApiKey";
+
 // Replace with the full path to a wav file you want to recognize or overwrite.
 export const filename =          "YourAudioFile.wav"; // 16000 Hz, Mono
 export const dummyFilename =     "YourDummySample.wav";
