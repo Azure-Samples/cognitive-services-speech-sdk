@@ -1803,9 +1803,9 @@ public class SpeechRecognitionSamples {
                 System.out.printf("Vocabulary score: %.1f\n", vocabularyScore);
                 System.out.printf("Grammar score: %.1f\n", grammarScore);
                 System.out.printf("Topic score: %.1f\n", topicScore);
-	        } catch (IOException | InterruptedException e) {
-	            e.printStackTrace(); // Print the error if it occurs
-	        }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace(); // Print the error if it occurs
+            }
         }
         config.close();
         audioInput.close();
