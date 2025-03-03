@@ -10,4 +10,3 @@ Available samples:
 | ---------- | -------- | ----------- |
 | C# | [csharp](csharp) | C# calling batch transcription REST API through System.Net.Http |
 | Python | [python](python) | Python client calling batch transcription REST API |
-| Node.js | [js/node](js/node) | Node.js client calling batch transcription REST API |
