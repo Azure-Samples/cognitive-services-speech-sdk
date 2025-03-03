@@ -812,6 +812,8 @@ std::string GetChatCompletion(const std::string& oaiResourceName, const std::str
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, jsonData.c_str());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, jsonData.length());
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
         // Set the write function to capture the response
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
