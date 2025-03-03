@@ -5,6 +5,8 @@
 
 // <code>
 using System;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Translation;
@@ -13,11 +15,21 @@ namespace helloworld
 {
     class Program
     {
+        public class ConfigSettings
+        {
+            public string SubscriptionKey { get; set; }
+            public string ServiceRegion { get; set; }
+        }
+
         public static async Task TranslationContinuousRecognitionAsync()
         {
             // Creates an instance of a speech translation config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+            string jsonString = await File.ReadAllTextAsync(configFilePath);
+            ConfigSettings configSettings = JsonSerializer.Deserialize<ConfigSettings>(jsonString);
+
+            var config = SpeechTranslationConfig.FromSubscription(configSettings.SubscriptionKey, configSettings.ServiceRegion);
 
             // Sets source and target languages.
             string fromLanguage = "en-US";
