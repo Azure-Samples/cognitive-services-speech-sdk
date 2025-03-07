@@ -142,7 +142,7 @@ namespace Avatar.Controllers
                 if (!string.IsNullOrEmpty(_clientSettings.SpeechPrivateEndpoint))
                 {
                     var speechPrivateEndpointWss = _clientSettings.SpeechPrivateEndpoint.Replace("https://", "wss://");
-                    speechConfig = SpeechConfig.FromSubscription($"{speechPrivateEndpointWss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true", _clientSettings.SpeechKey);
+                    speechConfig = SpeechConfig.FromEndpoint(new Uri($"{speechPrivateEndpointWss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true"), _clientSettings.SpeechKey);
                 }
                 else
                 {
