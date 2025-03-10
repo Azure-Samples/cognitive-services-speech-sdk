@@ -243,10 +243,10 @@ export const main = async (settings) => {
             // Split words for Chinese using the reference text and any short wave file
             referenceWords = await getReferenceWords(settings.dummyFilename, reference_text, settings.language);
         } else {
-            const referenceText = (reference_text.toLocaleLowerCase() ?? "").replace(new RegExp("[!\"#$%&()*+,-./:;<=>?@[^_`{|}~]+", "g"), "").replace(new RegExp("]+", "g"), "");
+            const referenceText = reference_text.toLocaleLowerCase() ?? "";
             referenceWords = _.map(
                 _.filter(referenceText.split(" "), (item) => !!item),
-                (item) => item.trim()
+                (item) => item.replace(/^[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+|[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+$/g, "")
             );
         }
 
