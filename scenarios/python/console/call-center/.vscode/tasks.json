@@ -1,0 +1,63 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run the App",
+            "type": "shell",
+            "command": "${workspaceFolder}/app_manager.sh",
+            "args": [
+                "run"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/app_manager.ps1",
+                    "run"
+                ]
+            },
+            "linux": {
+                "command": "${workspaceFolder}/app_manager.sh",
+                "args": [
+                    "run"
+                ]
+            }
+        },
+        {
+            "label": "Build the App",
+            "type": "shell",
+            "command": "./app_manager.sh",
+            "args": [
+                "build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/app_manager.ps1",
+                    "build"
+                ]
+            },
+            "linux": {
+                "command": "${workspaceFolder}/app_manager.sh",
+                "args": [
+                    "build"
+                ]
+            }
+        }
+    ]
+}

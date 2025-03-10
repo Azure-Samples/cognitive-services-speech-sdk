@@ -2,16 +2,33 @@
 
 Video translation client tool and API sample code
 
+## Run the Sample within VS Code
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- Download this sample from sample gallery to local machine.
+- Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select an **eastus** regional speech resource. (Video translation currently only supports Azure Speech resources in the **eastus** region.)
+- Trigger `Azure AI Speech Toolkit: Build the Sample App` command from command palette to build the sample.
+- Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
+
+   Upload an input video to Azure Blob Storage and copy the Blob SAS URL. Paste the Azure Blob URL when the run task terminal ask for it. Interactively enter other arguments in the run task terminal. The `Azure AI Speech Toolkit: Run the Sample App` command will run in mode `CreateTranslationAndIterationAndWaitUntilTerminated`:
+
+   ```
+   dotnet VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion 2024-05-20-preview -subscriptionKey <YourSubscriptionKey> -region <YourSubscriptionRegion> -videoFileAzureBlobUrl <YourVideoFileAzureBlobSASUrl> -sourceLocale <YourVideoLocale> -targetLocale <OutputVideoLocale> -voiceKind <TTSSynthesisVoiceKind> -translationId <YourTranslationIdString> -iterationId <YourIterationIdString>
+   ```
+
+- Check more modes and arguments usage in [Command line sample](#Command-line-sample) and [Command line tool arguments](#Command-line-tool-arguments) sections. Try them out in new terminal.
+
 # Supported OS
 ## Windows prerequisite:
    Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
    
    Run tool: VideoTranslationSample.exe [verb] [arguments]
-
 ## Linux prerequisite:
    Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
 
    Run tool: dotnet VideoTranslationSample.dll [verb] [arguments]
+
+# Solution:
+   [VideoTranslationApiSampleCode.sln](VideoTranslationSample/VideoTranslationSample.sln)
 
 # Work Flow
 
@@ -44,7 +61,7 @@ Video translation client tool and API sample code
    Do not upgrade Flurl to version 4.0 because it does not support NewtonJson for ReceiveJson.
 
 
-# Runn tool on Windows prerequisite:
+# Run tool on Windows prerequisite:
    [Install dotnet 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
 # Command Line Usage

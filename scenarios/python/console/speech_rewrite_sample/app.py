@@ -63,10 +63,13 @@ def rewrite_content(input_reco):
         {"role": "user", "content": input_reco}
     ]
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=my_messages
-    )
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=my_messages
+        )
+    except Exception as e:
+        print("Error occurred:", e)
 
     return response.choices[0].message.content
 
