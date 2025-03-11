@@ -18,6 +18,9 @@ using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using System.Text.Json;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Net.Http;
+using System.Collections;
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -1199,8 +1202,96 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+        private static List<string> ConvertReferenceWords(string referenceText, List<string> referenceWords)
+        {
+            HashSet<string> dictionary = new HashSet<string>(referenceWords);
+            int maxLength = dictionary.Max(word => word.Length);
 
-        public static List<string> GetReferenceWords(string waveFilename, string referenceText, string language, SpeechConfig speechConfig)
+            referenceText = RemovePunctuation(referenceText);
+            return SegmentWord(referenceText, dictionary, maxLength);
+        }
+
+        private static string RemovePunctuation(string text)
+        {
+            // Remove punctuation from the reference text
+            return new string(text.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)).ToArray());
+        }
+
+        private static List<string> SegmentWord(string referenceText, HashSet<string> dictionary, int maxLength)
+        {
+            List<string> leftToRight = LeftToRightSegmentation(referenceText, dictionary, maxLength);
+            List<string> rightToLeft = RightToLeftSegmentation(referenceText, dictionary, maxLength);
+
+            if (string.Join("", leftToRight) == referenceText)
+                return leftToRight;
+            if (string.Join("", rightToLeft) == referenceText)
+                return rightToLeft;
+
+            Console.WriteLine("WW failed to segment the text with the dictionary");
+
+            if (leftToRight.Count < rightToLeft.Count)
+                return leftToRight;
+            if (leftToRight.Count > rightToLeft.Count)
+                return rightToLeft;
+
+            // If the word number is the same, then return the one with the smallest single word
+            int leftToRightSingle = leftToRight.Count(word => word.Length == 1);
+            int rightToLeftSingle = rightToLeft.Count(word => word.Length == 1);
+            return leftToRightSingle < rightToLeftSingle ? leftToRight : rightToLeft;
+        }
+
+        // From left to right to do the longest matching to get the word segmentation
+        private static List<string> LeftToRightSegmentation(string text, HashSet<string> dictionary, int maxLength)
+        {
+            List<string> result = new List<string>();
+            while (text.Length > 0)
+            {
+                // If the length of the text is less than the max_length, then the sub_text is the text itself
+                string subText = text.Length < maxLength ? text : text.Substring(0, maxLength);
+                while (subText.Length > 0)
+                {
+                    // If the sub_text is in the dictionary or the length of the sub_text is 1, then add it to the result
+                    if (dictionary.Contains(subText) || subText.Length == 1)
+                    {
+                        result.Add(subText);
+                        text = text.Substring(subText.Length);
+                        break;
+                    }
+                    // # If the sub_text is not in the dictionary, then remove the last character of the sub_text
+                    subText = subText.Substring(0, subText.Length - 1);
+                }
+            }
+            return result;
+        }
+
+        // From right to left to do the longest matching to get the word segmentation
+        private static List<string> RightToLeftSegmentation(string text, HashSet<string> dictionary, int maxLength)
+        {
+            List<string> result = new List<string>();
+            while (text.Length > 0)
+            {
+                // If the length of the text is less than the max_length, then the sub_text is the text itself
+                string subText = text.Length < maxLength ? text : text.Substring(text.Length - maxLength);
+                while (subText.Length > 0)
+                {
+                    // If the sub_text is in the dictionary or the length of the sub_text is 1, then add it to the result
+                    if (dictionary.Contains(subText) || subText.Length == 1)
+                    {
+                        result.Add(subText);
+                        text = text.Substring(0, text.Length - subText.Length);
+                        break;
+                    }
+
+                    // If the sub_text is not in the dictionary, then remove the first character of the sub_text
+                    subText = subText.Substring(1);
+                }
+            }
+
+            // Reverse the result to get the correct order
+            result.Reverse();
+            return result;
+        }
+        private static List<string> GetReferenceWords(string waveFilename, string referenceText, string language, SpeechConfig speechConfig)
         {
             var audioConfig = AudioConfig.FromWavFileInput(waveFilename);
             speechConfig.SpeechRecognitionLanguage = language;
@@ -1240,7 +1331,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 }
 
-                return referenceWords;
+                return ConvertReferenceWords(referenceText, referenceWords);
             }
             else if (result.Reason == ResultReason.NoMatch)
             {
@@ -1449,6 +1540,49 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
+        private static async Task<string> GetChatCompletionAsync(string oaiResourceName, string oaiDeploymentName, string oaiApiVersion, string oaiApiKey, string sendText)
+        {
+            var client = new HttpClient();
+            var sampleSentence1 = "OK the movie i like to talk about is the cove it is very say phenomenal sensational documentary about adopting hunting practices in japan i think the director is called well i think the name escapes me anyway but well let's talk about the movie basically it's about dolphin hunting practices in japan there's a small village where where villagers fisherman Q almost twenty thousand dolphins on a yearly basis which is brutal and just explain massacre this book has influenced me a lot i still remember the first time i saw this movie i think it was in middle school one of my teachers showed it to all the class or the class and i remember we were going through some really boring topics like animal protection at that time it was really boring to me but right before everyone was going to just sleep in the class the teacher decided to put the textbook down and show us a clear from this document documentary we were shocked speechless to see the has of the dolphins chopped off and left on the beach and the C turning bloody red with their blood which is i felt sick i couldn't need fish for a whole week and it was lasting impression if not scarring impression and i think this movie is still very meaningful and it despite me a lot especially on wildlife protection dolphins or search beautiful intelligent animals of the sea and why do villagers and fishermen in japan killed it i assume there was a great benefit to its skin or some scientific research but the ironic thing is that they only kill them for the meat because the meat taste great that sickens me for awhile and i think the book inspired me to do a lot of different to do a lot of things about well i protection i follow news like";
+            var sampleSentence2 = "yes i can speak how to this movie is it is worth young wolf young man this is this movie from korea it's a crime movies the movies on the movies speaker speaker or words of young man love hello a cow are you saying they end so i have to go to the go to the america or ha ha ha lots of years a go on the woman the woman is very old he talk to korea he carpool i want to go to the this way this whole home house this house is a is hey so what's your man and at the end the girl cause so there's a woman open open hum finally finds other wolf so what's your young man so the young man don't so yeah man the young man remember he said here's a woman also so am i it's very it's very very sad she is she is a crack credit thank you ";
+            var sampleSentence3 = "yes i want i want to talk about the TV series are enjoying watching a discount name is a friends and it's uh accommodate in the third decades decades an it come out the third decades and its main characters about a six friends live in the NYC but i watched it a long time ago i can't remember the name of them and the story is about what they are happening in their in their life and there are many things treating them and how the friendship are hard friendship and how the french how the strong strongly friendship they obtain them and they always have some funny things happen they only have happened something funny things and is a comedy so that was uh so many and i like this be cause of first adult cause it has a funding it has a farming serious and it can improve my english english words and on the other hand it can i can know about a lot of cultures about the united states and i i first hear about death TV series it's come out of a website and i took into and i watch it after my after my finish my studies and when i was a bad mood when i when i'm in a bad mood or i ";
+            var topic = "the season of the fall";
+            string url = $"https://{oaiResourceName}.openai.azure.com/openai/deployments/{oaiDeploymentName}/chat/completions?api-version={oaiApiVersion}";
+
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Add("api-key", oaiApiKey);
+
+            var data = new List<Dictionary<string, string>>
+            {
+                new Dictionary<string, string>
+                {
+                    { "role", "system" },
+                    { "content", "You are an English teacher and please help to grade a student's essay from vocabulary and grammar and topic relevance on how well the essay aligns with the title, and output format as: {\"vocabulary\": *.*(0-100), \"grammar\": *.*(0-100), \"topic\": *.*(0-100)}." }
+                },
+                new Dictionary<string, string>
+                {
+                    { "role", "user" },
+                    { "content", $"Example1: this essay: \"{sampleSentence1}\" has vocabulary and grammar scores of 80 and 80, respectively." +
+                                 $"Example2: this essay: \"{sampleSentence2}\" has vocabulary and grammar scores of 40 and 43, respectively." +
+                                 $"Example3: this essay: \"{sampleSentence3}\" has vocabulary and grammar scores of 50 and 50, respectively." +
+                                 $"The essay for you to score is \"{sendText}\", and the title is \"{topic}\"." +
+                                 "The script is from speech recognition so that please first add punctuations when needed, remove duplicates and unnecessary un uh from oral speech, then find all the misuse of words and grammar errors in this essay, find advanced words and grammar usages, and finally give scores based on this information. Please only response as this format {\"vocabulary\": *.*(0-100), \"grammar\": *.*(0-100)}, \"topic\": *.*(0-100)}." }
+                }
+                };
+
+            string jsonData = JsonSerializer.Serialize(new { messages = data, temperature = 0, top_p = 1 }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await client.PostAsync(url, content);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            var jsonDoc = JsonDocument.Parse(responseContent);
+            var root = jsonDoc.RootElement;
+            return root.GetProperty("choices")[0].GetProperty("message").GetProperty("content").GetString();
+
+        }
+
         // Pronunciation assessment with content score
         // See more information at https://aka.ms/csspeech/pa
         public static async Task PronunciationAssessmentWithContentAssessment()
@@ -1456,6 +1590,10 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var oaiResourceName = "YourOaiResourceName";
+            var oaiDeploymentName = "YourOaiDeploymentName";
+            var oaiApiVersion = "YourOaiApiVersion";
+            var oaiApiKey = "YourOaiApiKey";
 
             // Creates a speech recognizer using file as audio input. 
             using (var audioInput = AudioConfig.FromWavFileInput(@"pronunciation_assessment_fall.wav"))
@@ -1465,14 +1603,11 @@ namespace MicrosoftSpeechSDKSamples
 
                 using (var recognizer = new SpeechRecognizer(config, language, audioInput))
                 {
-                    var theTopic = "the season of the fall";
-
                     bool enableMiscue = false;
 
                     var pronConfig = new PronunciationAssessmentConfig("", GradingSystem.HundredMark, Granularity.Phoneme, enableMiscue);
 
                     pronConfig.EnableProsodyAssessment();
-                    pronConfig.EnableContentAssessmentWithTopic(theTopic);
 
                     recognizer.SessionStarted += (s, e) => {
                         Console.WriteLine($"SESSION ID: {e.SessionId}");
@@ -1481,7 +1616,6 @@ namespace MicrosoftSpeechSDKSamples
                     pronConfig.ApplyTo(recognizer);
 
                     var recognizedTexts = new List<string>();
-                    var contentResults = new List<ContentAssessmentResult>();
                     var done = false;
 
                     recognizer.SessionStopped += (s, e) => {
@@ -1499,9 +1633,6 @@ namespace MicrosoftSpeechSDKSamples
                         {
                             recognizedTexts.Add(e.Result.Text);
                         }
-
-                        var contentResult = PronunciationAssessmentResult.FromResult(e.Result).ContentAssessmentResult;
-                        contentResults.Add(contentResult);
                     };
 
                     // Starts continuous recognition.
@@ -1516,19 +1647,62 @@ namespace MicrosoftSpeechSDKSamples
                     // Waits for completion.
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
 
+                    string recognizedString = string.Join(" ", recognizedTexts);
+                    string result = await GetChatCompletionAsync(oaiResourceName, oaiDeploymentName, oaiApiVersion, oaiApiKey, recognizedString);
+
                     // Content assessment result is in the contentResults
-                    Console.WriteLine("Contet assessment for: {0}", string.Join(" ", recognizedTexts.Where(item => !string.IsNullOrEmpty(item))));
+                    Console.WriteLine("Contet assessment for: {0}", recognizedString);
 
-                    if (contentResults.Count > 0)
+                    try
                     {
-                        var content = contentResults[contentResults.Count - 1];
-                        Console.WriteLine("Content Assessment results:\n\tGrammar score: {0}, Vocabulary score: {1}, Topic score: {2}", content.GrammarScore, content.VocabularyScore, content.TopicScore);
-                    }
-                    else
-                    {
-                        Console.WriteLine("The contentResult list is empty!");
-                    }
+                        // Deserialize the JSON string into a dictionary of string keys and double values
+                        var contentResult = JsonSerializer.Deserialize<Dictionary<string, double>>(result);
 
+                        if (contentResult != null)
+                        {
+                            // Ensure that the 'vocabulary' key exists in the dictionary
+                            if (contentResult.ContainsKey("vocabulary"))
+                            {
+                                // Print the vocabulary score with one decimal place
+                                Console.WriteLine($"Vocabulary score: {contentResult["vocabulary"]:0.0}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Vocabulary key not found.");
+                            }
+
+                            // Ensure that the 'grammar' key exists in the dictionary
+                            if (contentResult.ContainsKey("grammar"))
+                            {
+                                // Print the grammar score with one decimal place
+                                Console.WriteLine($"Grammar score: {contentResult["grammar"]:0.0}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Grammar key not found.");
+                            }
+
+                            // Ensure that the 'topic' key exists in the dictionary
+                            if (contentResult.ContainsKey("topic"))
+                            {
+                                // Print the grammar score with one decimal place
+                                Console.WriteLine($"Topic score: {contentResult["topic"]:0.0}");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Topic key not found.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Deserialization failed.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Catch and display any errors that occur during the process
+                        Console.WriteLine($"An error occurred: {ex.Message}");
+                    }
                 }
             }
         }
