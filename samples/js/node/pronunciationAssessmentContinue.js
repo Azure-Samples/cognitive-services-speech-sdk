@@ -19,6 +19,12 @@ export const main = async (settings) => {
     var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream, format);
     var speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
 
+    // You can adjust the segmentation silence timeout based on your real scenario.
+    speechConfig.setProperty(
+        sdk.PropertyId.Speech_SegmentationSilenceTimeoutMs,
+        "1500"
+    );
+
     var reference_text = "What's the weather like?";
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     const pronunciationAssessmentConfig = new sdk.PronunciationAssessmentConfig(
