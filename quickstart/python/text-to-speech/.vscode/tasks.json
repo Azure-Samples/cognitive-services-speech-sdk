@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run the App",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "${workspaceFolder}/quickstart.py"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Configuration and Setup",
+            "type": "shell",
+            "command": "pip",
+            "args": [
+                "install",
+                "azure-cognitiveservices-speech"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}
