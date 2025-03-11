@@ -985,6 +985,12 @@ def pronunciation_assessment_continuous_from_file():
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     audio_config = speechsdk.audio.AudioConfig(filename=zhcnlongfilename)
 
+    # You can adjust the segmentation silence timeout based on your real scenario.
+    speech_config.set_property(
+        speechsdk.PropertyId.Speech_SegmentationSilenceTimeoutMs,
+        "1500"
+    )
+
     with open(zhcnlongtxtfilename, "r", encoding="utf-8") as t:
         reference_text = t.readline()
     # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
