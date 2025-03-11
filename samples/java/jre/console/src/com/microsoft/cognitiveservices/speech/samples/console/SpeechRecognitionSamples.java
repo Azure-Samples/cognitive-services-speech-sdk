@@ -1433,6 +1433,9 @@ public class SpeechRecognitionSamples {
         // Replace with your own subscription key and service region (e.g., "westus").
         SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
 
+        // You can adjust the segmentation silence timeout based on your real scenario.
+        config.setProperty(PropertyId.Speech_SegmentationSilenceTimeoutMs, "1500");
+
         // Replace the language with your language in BCP-47 format, e.g., en-US.
         String lang = "zh-CN";
 
@@ -1476,7 +1479,7 @@ public class SpeechRecognitionSamples {
 
                         for (int j = 0; j < wordsArray.size(); j++) {
                             JsonObject wordItem = wordsArray.getJsonObject(j);
-                            recognizedWords.add(wordItem.getString("Word"));
+                            recognizedWords.add(wordItem.getString("Word").toLowerCase());
 
                             long offset = wordItem.getJsonNumber("Offset").longValue();
                             long duration = wordItem.getJsonNumber("Duration").longValue();
