@@ -1361,7 +1361,11 @@ namespace MicrosoftSpeechSDKSamples
             var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
             var waveFileName = @"zhcn_continuous_mode_sample.wav";
             var scriptFileName = @"zhcn_continuous_mode_sample.txt";
+
             var referenceText = File.ReadAllText(scriptFileName);
+
+            // You can adjust the segmentation silence timeout based on your real scenario.
+            config.SetProperty(PropertyId.Speech_SegmentationSilenceTimeoutMs, "1500");
 
             // Switch to other languages for example Spanish, change language "en-US" to "es-ES". Language name is not case sensitive.
             var language = "zh-CN";
@@ -1424,7 +1428,7 @@ namespace MicrosoftSpeechSDKSamples
                         foreach (var result in e.Result.Best())
                         {
                             durations.AddRange(result.Words.Select(item => item.Duration + 100000).ToList());
-                            recognizedWords.AddRange(result.Words.Select(item => item.Word).ToList());
+                            recognizedWords.AddRange(result.Words.Select(item => item.Word.ToLower()).ToList());
 
                             if (startOffset == 0) startOffset = result.Words.First().Offset;
 
