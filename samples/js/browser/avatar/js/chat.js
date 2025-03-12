@@ -16,6 +16,7 @@ var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
 var isSpeaking = false
 var speakingText = ""
 var spokenTextQueue = []
+var repeatSpeakingSentenceAfterReconnection = true
 var sessionActive = false
 var lastSpeakTime
 var imgUrl = ""
@@ -168,6 +169,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.srcObject = event.streams[0]
             videoElement.autoplay = true
             videoElement.playsInline = true
+
+            // Continue speaking if there are unfinished sentences
+            if (repeatSpeakingSentenceAfterReconnection) {
+                if (speakingText !== '') {
+                    speakNext(speakingText, 0, true)
+                }
+            } else {
+                if (spokenTextQueue.length > 0) {
+                    speakNext(spokenTextQueue.shift())
+                }
+            }
 
             videoElement.onplaying = () => {
                 // Clean up existing video element if there is any
@@ -324,7 +336,7 @@ function speak(text, endingSilenceMs = 0) {
     speakNext(text, endingSilenceMs)
 }
 
-function speakNext(text, endingSilenceMs = 0) {
+function speakNext(text, endingSilenceMs = 0, skipUpdatingChatHistory = false) {
     let ttsVoice = document.getElementById('ttsVoice').value
     let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
     let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</mstts:ttsembedding></voice></speak>`
@@ -332,7 +344,7 @@ function speakNext(text, endingSilenceMs = 0) {
         ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></mstts:ttsembedding></voice></speak>`
     }
 
-    if (enableDisplayTextAlignmentWithSpeech) {
+    if (enableDisplayTextAlignmentWithSpeech && !skipUpdatingChatHistory) {
         let chatHistoryTextArea = document.getElementById('chatHistory')
         chatHistoryTextArea.innerHTML += text.replace(/\n/g, '<br/>')
         chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
@@ -351,6 +363,8 @@ function speakNext(text, endingSilenceMs = 0) {
                 console.log(`Error occurred while speaking the SSML. Result ID: ${result.resultId}`)
             }
 
+            speakingText = ''
+
             if (spokenTextQueue.length > 0) {
                 speakNext(spokenTextQueue.shift())
             } else {
@@ -360,6 +374,8 @@ function speakNext(text, endingSilenceMs = 0) {
         }).catch(
             (error) => {
                 console.log(`Error occurred while speaking the SSML: [ ${error} ]`)
+
+                speakingText = ''
 
                 if (spokenTextQueue.length > 0) {
                     speakNext(spokenTextQueue.shift())

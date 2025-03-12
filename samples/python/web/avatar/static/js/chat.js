@@ -10,6 +10,7 @@ var isFirstResponseChunk
 var speechRecognizer
 var peerConnection
 var isSpeaking = false
+var isReconnecting = false
 var sessionActive = false
 var recognitionStartedTime
 var chatRequestSentTime
@@ -181,6 +182,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.autoplay = true
             videoElement.playsInline = true
 
+            // Continue speaking if there are unfinished sentences while reconnecting
+            if (isReconnecting) {
+                fetch('/api/chat/continueSpeaking', {
+                    method: 'POST',
+                    headers: {
+                        'ClientId': clientId
+                    },
+                    body: ''
+                })
+            }
+
             videoElement.onplaying = () => {
                 // Clean up existing video element if there is any
                 remoteVideoDiv = document.getElementById('remoteVideo')
@@ -208,6 +220,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                     }
                 }
 
+                isReconnecting = false
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
         }
@@ -286,6 +299,10 @@ function connectToAvatarService(peerConnection) {
         'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
         'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
         'IsCustomAvatar': document.getElementById('customizedAvatar').checked
+    }
+
+    if (isReconnecting) {
+        headers['Reconnect'] = true
     }
 
     if (document.getElementById('azureOpenAIDeploymentName').value !== '') {
@@ -437,6 +454,7 @@ function checkHung() {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
                         console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                        isReconnecting = true
                         connectAvatar()
                         createSpeechRecognizer()
                     }
