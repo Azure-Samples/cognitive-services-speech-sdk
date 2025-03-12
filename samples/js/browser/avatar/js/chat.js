@@ -14,10 +14,12 @@ var enableQuickReply = false
 var quickReplies = [ 'Let me take a look.', 'Let me check.', 'One moment, please.' ]
 var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
 var isSpeaking = false
+var isReconnecting = false
 var speakingText = ""
 var spokenTextQueue = []
 var repeatSpeakingSentenceAfterReconnection = true
 var sessionActive = false
+var userClosedSession = false
 var lastSpeakTime
 var imgUrl = ""
 
@@ -207,6 +209,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                     }
                 }
 
+                isReconnecting = false
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
         }
@@ -223,7 +226,23 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 subtitles.innerHTML = speakingText
             } else if (webRTCEvent.event.eventType === 'EVENT_TYPE_SESSION_END' || webRTCEvent.event.eventType === 'EVENT_TYPE_SWITCH_TO_IDLE') {
                 subtitles.hidden = true
+                if (webRTCEvent.event.eventType === 'EVENT_TYPE_SESSION_END') {
+                    if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
+                        // Session disconnected unexpectedly, need reconnect
+                        console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
+                        isReconnecting = true
+
+                        // Release the existing avatar connection
+                        if (avatarSynthesizer !== undefined) {
+                            avatarSynthesizer.close()
+                        }
+
+                        // Setup a new avatar connection
+                        connectAvatar()
+                    }
+                }
             }
+
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
         }
     })
@@ -620,6 +639,7 @@ function checkHung() {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
                         console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                        isReconnecting = true
                         // Release the existing avatar connection
                         if (avatarSynthesizer !== undefined) {
                             avatarSynthesizer.close()
@@ -670,6 +690,7 @@ window.startSession = () => {
         return
     }
 
+    userClosedSession = false
     connectAvatar()
 }
 
@@ -687,6 +708,7 @@ window.stopSession = () => {
         document.getElementById('localVideo').hidden = true
     }
 
+    userClosedSession = true
     disconnectAvatar()
 }
 
