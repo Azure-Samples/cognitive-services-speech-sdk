@@ -285,6 +285,9 @@ class ViewController: UIViewController {
             speechConfig = nil
         }
         
+        // You can adjust the segmentation silence timeout based on your real scenario
+        speechConfig?.setPropertyTo("1500", by: SPXPropertyId.speechSegmentationSilenceTimeoutMs)
+        
         let language = "zh-CN"
         
         speechConfig?.speechRecognitionLanguage = language
@@ -343,7 +346,7 @@ class ViewController: UIViewController {
 
             for word in pronunciationResult.words! {
                 pronWords.append(word)
-                recognizedWords.append(word.word!)
+                recognizedWords.append(word.word!.lowercased())
                 endOffset = word.offset + word.duration + 0.01
             }
         }
