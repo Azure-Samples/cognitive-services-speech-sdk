@@ -12,6 +12,7 @@ var peerConnection
 var isSpeaking = false
 var isReconnecting = false
 var sessionActive = false
+var userClosedSession = false
 var recognitionStartedTime
 var chatRequestSentTime
 var chatResponseReceivedTime
@@ -249,6 +250,14 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 isSpeaking = false
                 lastSpeakTime = new Date()
                 document.getElementById('stopSpeaking').disabled = true
+            } else if (e.data.includes("EVENT_TYPE_SESSION_END")) {
+                if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
+                    // Session disconnected unexpectedly, need reconnect
+                    console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
+                    isReconnecting = true
+                    connectAvatar()
+                    createSpeechRecognizer()
+                }
             }
         }
     })
@@ -477,6 +486,8 @@ window.startSession = () => {
         setupWebSocket()
     }
 
+    userClosedSession = false
+
     createSpeechRecognizer()
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('startSession').disabled = true
@@ -532,6 +543,7 @@ window.stopSession = () => {
         document.getElementById('localVideo').hidden = true
     }
 
+    userClosedSession = true // Indicating the session was closed by user on purpose, not due to network issue
     disconnectAvatar(true)
 }
 
