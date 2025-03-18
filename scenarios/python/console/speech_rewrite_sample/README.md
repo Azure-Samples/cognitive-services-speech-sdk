@@ -7,11 +7,11 @@ This project integrates Azure Cognitive Services Speech SDK with Azure OpenAI Se
 3. Grammar correction, minor rewrites for improved readability, and spelling fixes for predefined phrases.
 
 ## Run the Sample within VS Code
-1. Install "Azure AI Speech Toolkit" extension in VS Code.
+1. Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
 2. Download this sample from sample gallery to local machine.
-3. Trigger "Azure AI Speech Toolkit: Configure Azure Speech Resources" command from command palette to select an **Azure AI Service** resource.
-4. Trigger "Azure AI Speech Toolkit: Configure and Setup the Sample App" command from command palette to configure and setup the sample. This command only needs to be run once.
-5. Trigger "Azure AI Speech Toolkit: Run the Sample App" command from command palette to run the sample.
+3. Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select an **Azure AI Service** resource.
+4. Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure and setup the sample. This command only needs to be run once.
+5. Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
 
 ## Prerequisites
 - Install a version of [Python from 3.7 or later](https://www.python.org/downloads/). 

@@ -1,0 +1,75 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configuration and Setup",
+            "type": "shell",
+            "command": "/bin/bash",
+            "args": [
+                "-c",
+                "chmod u+x ${workspaceFolder}/app_manager.sh && ${workspaceFolder}/app_manager.sh configure"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/app_manager.ps1",
+                    "configure"
+                ]
+            }
+        },
+        {
+            "label": "Build the App",
+            "type": "shell",
+            "command": "${workspaceFolder}/app_manager.sh",
+            "args": [
+                "build"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/app_manager.ps1",
+                    "build"
+                ]
+            }
+        },
+        {
+            "label": "Run the App",
+            "type": "shell",
+            "command": "${workspaceFolder}/app_manager.sh",
+            "args": [
+                "run"
+            ],
+            "group": {
+                "kind": "none",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
+            "windows": {
+                "command": "powershell",
+                "args": [
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "${workspaceFolder}/app_manager.ps1",
+                    "run"
+                ]
+            }
+        }
+    ]
+}
