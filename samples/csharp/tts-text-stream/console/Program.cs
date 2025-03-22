@@ -44,8 +44,8 @@ namespace Demo
             speechConfig.SetProperty(PropertyId.SpeechServiceConnection_SynthVoice, "en-US-BrianMultilingualNeural");
 
             // set timeout value to bigger ones to avoid sdk cancel the request when GPT latency too high
-            speechConfig.SetProperty("SpeechSynthesis_FrameTimeoutInterval", "10000");
-            speechConfig.SetProperty("SpeechSynthesis_RtfTimeoutThreshold", "10");
+            speechConfig.SetProperty(PropertyId.SpeechSynthesis_FrameTimeoutInterval, "10000");
+            speechConfig.SetProperty(PropertyId.SpeechSynthesis_RtfTimeoutThreshold, "10");
 
             speechSynthesizer = new SpeechSynthesizer(speechConfig);
             using var request = new SpeechSynthesisRequest(SpeechSynthesisRequestInputType.TextStream);

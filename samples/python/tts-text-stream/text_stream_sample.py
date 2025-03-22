@@ -17,10 +17,8 @@ speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 speech_synthesizer.synthesizing.connect(lambda evt: print("[audio]", end=""))
 
 # set timeout value to bigger ones to avoid sdk cancel the request when GPT latency too high
-properties = dict()
-properties["SpeechSynthesis_FrameTimeoutInterval"]="100000000"
-properties["SpeechSynthesis_RtfTimeoutThreshold"]="10"
-speech_config.set_properties_by_name(properties)
+speech_config.set_property(speechsdk.PropertyId.SpeechSynthesis_FrameTimeoutInterval, "100000000")
+speech_config.set_property(speechsdk.PropertyId.SpeechSynthesis_RtfTimeoutThreshold, "10")
 
 # create request with TextStream input type
 tts_request = speechsdk.SpeechSynthesisRequest(input_type = speechsdk.SpeechSynthesisRequestInputType.TextStream)

@@ -22,9 +22,9 @@ namespace helloworld
             }
 
 
-            // Creates an instance of a speech config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
             config.SpeechSynthesisVoiceName = "en-US-AriaNeural";

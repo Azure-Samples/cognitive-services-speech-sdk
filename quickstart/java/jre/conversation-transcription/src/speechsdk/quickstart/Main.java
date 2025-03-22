@@ -31,19 +31,19 @@ public class Main {
     /**
      * @param args Arguments are ignored in this sample.
      */
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, java.net.URISyntaxException {
 
         // Replace below with your own subscription key
         String subscriptionKey = "YourSubscriptionKey";
-        // Replace below with your own service region (e.g., "centralus").
-        String serviceRegion = "YourServiceRegion";
+        // Replace below with your own endpoint URL (e.g., "https://centralus.api.cognitive.microsoft.com/")
+        String endpointUrl = "YourEndpointUrl";
 
         // Choose transcription from file or microphone by commenting and uncommenting the following function calls.
-        ConversationTranscriptionFromFile(subscriptionKey, serviceRegion);
-        //ConversationTranscriptionFromMicrophone(subscriptionKey, serviceRegion);
+        ConversationTranscriptionFromFile(subscriptionKey, endpointUrl);
+        //ConversationTranscriptionFromMicrophone(subscriptionKey, endpointUrl);
     }
 
-    public static void ConversationTranscriptionFromFile(String subscriptionKey, String serviceRegion) {
+    public static void ConversationTranscriptionFromFile(String subscriptionKey, String endpointUrl) throws java.net.URISyntaxException {
 
         // Create an audio stream from a wav file using 16-bit PCM audio format. Replace with your own audio file.
         // Update the samplesPerSecond, bitsPerSample and channel variables below according to the format of your file.
@@ -65,8 +65,8 @@ public class Main {
         // Create the push stream
         PushAudioInputStream pushStream = AudioInputStream.createPushStream(AudioStreamFormat.getWaveFormatPCM(samplesPerSecond, bitsPerSample, channels));
   
-        // Creates speech configuration with subscription information
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+        // Creates speech configuration with endpoint information
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(new java.net.URI(endpointUrl), subscriptionKey);
         
         // Creates conversation and transcriber objects using push stream as audio input.
         try (AudioConfig audioInput = AudioConfig.fromStreamInput(pushStream);
@@ -140,10 +140,10 @@ public class Main {
         speechConfig.close();
     }
 
-    public static void ConversationTranscriptionFromMicrophone(String subscriptionKey, String serviceRegion) {
+    public static void ConversationTranscriptionFromMicrophone(String subscriptionKey, String endpointUrl) throws java.net.URISyntaxException {
 
-        // Creates speech configuration with subscription information
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+        // Creates speech configuration with endpoint information
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(new java.net.URI(endpointUrl), subscriptionKey);
         
         try (AudioConfig audioInput = AudioConfig.fromDefaultMicrophoneInput();
              ConversationTranscriber transcriber = new ConversationTranscriber(speechConfig, audioInput)) {

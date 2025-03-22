@@ -61,7 +61,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.82" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.43.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
     </ItemGroup>

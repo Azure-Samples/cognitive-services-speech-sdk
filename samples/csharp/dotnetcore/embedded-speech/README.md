@@ -93,8 +93,8 @@ Sample settings:
    * The full model name must be given (e.g. `Microsoft Speech Translator Many-to-English Model V2`).
 1. `CloudSpeechSubscriptionKey` (`CLOUD_SPEECH_SUBSCRIPTION_KEY`)
    * Cloud speech service subscription key. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
-1. `CloudSpeechServiceRegion` (`CLOUD_SPEECH_SERVICE_REGION`)
-   * Cloud speech service region. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
+1. `CloudSpeechServiceEndpoint` (`CLOUD_SPEECH_SERVICE_ENDPOINT`)
+   * Cloud speech service endpoint. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
 1. `CloudSpeechRecognitionLanguage` (`CLOUD_SPEECH_RECOGNITION_LANGUAGE`)
    * Cloud speech recognition language in BCP-47 format, case-sensitive. This is needed with hybrid speech configuration. If not set, en-US will be assumed.
 1. `CloudSpeechSynthesisLanguage` (`CLOUD_SPEECH_SYNTHESIS_LANGUAGE`)
@@ -129,7 +129,7 @@ for **Release** configuration.
 * To run the application without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
 * If you didn't update `Settings.cs` or want to override built-in settings:
   * Open menu **Debug** \> **samples Debug Properties**, go to **Environment variables**.
-  * Enter *Name* (like `CLOUD_SPEECH_SERVICE_REGION`) and *Value* (for example, `westus`) for each setting as listed in [build instructions](#build-the-sample). Do not use quotation marks around the values.
+  * Enter *Name* (like `CLOUD_SPEECH_SERVICE_ENDPOINT`) and *Value* (for example, `https://westcentralus.api.cognitive.microsoft.com/`) for each setting as listed in [build instructions](#build-the-sample). Do not use quotation marks around the values.
 
 **Note:** On **macOS** there is no access to the microphone from Visual Studio by default, and you must use the command-line for speech recognition to work.
 
@@ -156,13 +156,13 @@ If you didn't update `Settings.cs` or want to override built-in settings, set en
 
 **Windows**
 ```sh
-set CLOUD_SPEECH_SERVICE_REGION=westus
+set CLOUD_SPEECH_SERVICE_ENDPOINT=https://westcentralus.api.cognitive.microsoft.com/
 ```
 **Note:** On Windows, do **not** use quotation marks around the values of environment variables (even if there are spaces in them). Otherwise the quotation marks will end up as part of the setting values which will not work.
 
 **Linux, macOS**
 ```sh
-export CLOUD_SPEECH_SERVICE_REGION="westus"
+export CLOUD_SPEECH_SERVICE_ENDPOINT="https://westcentralus.api.cognitive.microsoft.com/"
 ```
 **Note:** On Linux and macOS, use quotation marks around the values of environment variables set on the command line as shown in the example. Otherwise strings with spaces (like embedded speech model/voice names) will be cut short.
 

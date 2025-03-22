@@ -12,7 +12,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 aiohttp = "^3.10.11"
-azure-cognitiveservices-speech = "^1.42.0"
+azure-cognitiveservices-speech = "^1.43.0"
 numpy = "^2.1.2"
 rtclient = {url = "https://github.com/Azure-Samples/aoai-realtime-audio-sdk/releases/download/py%2Fv0.5.2/rtclient-0.5.2-py3-none-any.whl"}
 

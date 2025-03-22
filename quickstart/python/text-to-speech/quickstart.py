@@ -4,10 +4,10 @@
 # <code>
 import azure.cognitiveservices.speech as speechsdk
 
-# Creates an instance of a speech config with specified subscription key and service region.
-# Replace with your own subscription key and service region (e.g., "westus").
-speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
-speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+# Creates an instance of a speech config with specified endpoint and subscription key.
+# Replace with your own endpoint and subscription key.
+speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
 # Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
 speech_config.speech_synthesis_voice_name = "en-US-AriaNeural"

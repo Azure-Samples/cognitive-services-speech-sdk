@@ -12,6 +12,8 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.commons.text.StringEscapeUtils;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -35,11 +37,11 @@ public class SpeechSynthesisScenarioSamples {
 
         private final SpeechConfig config;
 
-        public SynthesizerPoolFactory(){
+        public SynthesizerPoolFactory() throws URISyntaxException {
             // Creates an instance of a speech config with specified
-            // subscription key and service region. Replace with your own subscription key
-            // and service region (e.g., "westus").
-            config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // subscription key and endpoint URL. Replace with your own subscription key
+            // and endpoint URL.
+            config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
             // Use a compression format e.g. mp3 to save the bandwidth.
             config.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3);
@@ -72,7 +74,7 @@ public class SpeechSynthesisScenarioSamples {
         private static final String SSML_PATTERN = "<speak xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xmlns:emo='http://www.w3.org/2009/10/emotionml' version='1.0' xml:lang='zh-CN'><voice name='%s' style='chat' rate='5%%'>%s</voice></speak>";
         private final GenericObjectPool<SpeechSynthesizer> pool;
 
-        public SpeechSynthesisService() {
+        public SpeechSynthesisService() throws URISyntaxException {
             // For server scenario synthesizing with high concurrency, we recommend two methods to reduce the latency.
             // Firstly, reuse the synthesizers (e.g. use a synthesizer pool )to reduce the connection establish latency;
             //          This is because new synthesizer instance need to take time to connect to the service. Reusing the instance can save time of conenction.
@@ -138,7 +140,7 @@ public class SpeechSynthesisScenarioSamples {
     }
 
     // Speech synthesis sample for server scenario
-    public static void synthesisServerScenarioAsync() throws InterruptedException {
+    public static void synthesisServerScenarioAsync() throws InterruptedException, URISyntaxException {
         List<Long> latencies = new ArrayList<>();
         List<Long> processingTimes = new ArrayList<>();
 

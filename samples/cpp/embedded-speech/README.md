@@ -93,8 +93,8 @@ Sample settings:
    * The full model name must be given (e.g. `Microsoft Speech Translator Many-to-English Model V2`).
 1. `CloudSpeechSubscriptionKey` (`CLOUD_SPEECH_SUBSCRIPTION_KEY`)
    * Cloud speech service subscription key. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
-1. `CloudSpeechServiceRegion` (`CLOUD_SPEECH_SERVICE_REGION`)
-   * Cloud speech service region. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
+1. `CloudSpeechServiceEndpoint` (`CLOUD_SPEECH_SERVICE_ENDPOINT`)
+   * Cloud speech service endpoint. This is needed with hybrid speech configuration. If not set, only embedded speech will be used.
 1. `CloudSpeechRecognitionLanguage` (`CLOUD_SPEECH_RECOGNITION_LANGUAGE`)
    * Cloud speech recognition language in BCP-47 format, case-sensitive. This is needed with hybrid speech configuration. If not set, en-US will be assumed.
 1. `CloudSpeechSynthesisLanguage` (`CLOUD_SPEECH_SYNTHESIS_LANGUAGE`)
@@ -135,7 +135,7 @@ Sample settings:
   * Add environment settings (`name=value`) as listed in [build instructions](#build-the-sample).
     For example:
     ```sh
-    CLOUD_SPEECH_SERVICE_REGION=westus
+    CLOUD_SPEECH_SERVICE_ENDPOINT=https://westcentralus.api.cognitive.microsoft.com/
     ```
     Notes:
     * Make sure that each `name=value` appears on a separate line.
@@ -167,13 +167,13 @@ If you didn't update `settings.cpp` or want to override built-in settings, set e
 
 **Windows**
 ```sh
-set CLOUD_SPEECH_SERVICE_REGION=westus
+set CLOUD_SPEECH_SERVICE_ENDPOINT=https://westcentralus.api.cognitive.microsoft.com/
 ```
 **Note:** On Windows, do **not** use quotation marks around the values of environment variables (even if there are spaces in them). Otherwise the quotation marks will end up as part of the setting values which will not work.
 
 **Linux, macOS**
 ```sh
-export CLOUD_SPEECH_SERVICE_REGION="westus"
+export CLOUD_SPEECH_SERVICE_ENDPOINT="https://westcentralus.api.cognitive.microsoft.com/"
 ```
 **Note:** On Linux and macOS, use quotation marks around the values of environment variables set on the command line as shown in the example. Otherwise strings with spaces (like embedded speech model/voice names) will be cut short.
 

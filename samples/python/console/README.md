@@ -23,8 +23,7 @@ This sample demonstrates various forms of speech recognition, intent recognition
 * To tailor the sample to your configuration, use search and replace across the whole sample directory to update the following strings:
 
   * `YourSubscriptionKey`: replace with your subscription key.
-  * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
-    For example, `westus` or `northeurope`.
+  * `https://YourServiceRegion.api.cognitive.microsoft.com`: replace with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
   * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
     * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
     * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.

@@ -21,6 +21,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 
 // <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
@@ -31,13 +32,13 @@ import com.microsoft.cognitiveservices.speech.translation.*;
 @SuppressWarnings("resource") // scanner
 public class TranslationSamples {
     // Translation from microphone.
-    public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException
+    public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
         // <TranslationWithMicrophoneAsync>
         // Creates an instance of a speech translation config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromEndpoint(new java.net.URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Sets source and target language(s).
         String fromLanguage = "en-US";
@@ -139,14 +140,14 @@ public class TranslationSamples {
     // <TranslationWithFileAsync>
     private static Semaphore stopTranslationWithFileSemaphore;
 
-    public static void translationWithFileAsync() throws InterruptedException, ExecutionException
+    public static void translationWithFileAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         stopTranslationWithFileSemaphore = new Semaphore(0);
 
         // Creates an instance of a speech translation config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromEndpoint(new java.net.URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Sets source and target languages
         String fromLanguage = "en-US";
@@ -227,14 +228,14 @@ public class TranslationSamples {
     // Translation using audio stream.
     private static Semaphore stopTranslationWithAudioStreamSemaphore;
 
-    public static void translationWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException
+    public static void translationWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException, URISyntaxException
     {
         stopTranslationWithAudioStreamSemaphore = new Semaphore(0);
 
         // Creates an instance of a speech translation config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromEndpoint(new java.net.URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Sets source and target languages
         String fromLanguage = "en-US";

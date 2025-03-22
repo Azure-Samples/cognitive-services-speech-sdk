@@ -16,8 +16,8 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Navigate to the folder containing this sample, and select the solution file contained within it.
 * Edit the `MainPage.xaml.cs` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
+  * Replace the endpoint URL `https://YourServiceRegion.api.cognitive.microsoft.com` with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
+    For example, the endpoint might look like `https://westus.api.cognitive.microsoft.com` if your resource is in the West US region.
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
