@@ -858,17 +858,10 @@ std::string GetChatCompletion(const std::string& oaiResourceName, const std::str
 // Pronunciation assessment with content assessment
 void PronunciationAssessmentWithContentAssessment()
 {
-<<<<<<< HEAD
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
     auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
-=======
     using json = nlohmann::json;
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
->>>>>>> c9504acd66 (pull public sampes changes back to carbon release branch.)
-
     std::string oaiResourceName = "YourAoaiResourceName";
     std::string oaiDeploymentName = "YourAoaiDeploymentName";
     std::string oaiApiVersion = "YourAoaiApiVersion";
