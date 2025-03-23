@@ -26,7 +26,10 @@ namespace MicrosoftSpeechSDKSamples
             FileLogger.Start(logFile);
 
             // Do your Speech SDK calls here... for example:
-            SpeechConfig config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+
             SpeechRecognizer recognizer = new SpeechRecognizer(config);
 
             // Stop logging
@@ -52,7 +55,10 @@ namespace MicrosoftSpeechSDKSamples
             FileLogger.Start(logFile);
 
             // Do your Speech SDK calls here... for example:
-            SpeechConfig config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+
             SpeechRecognizer recognizer = new SpeechRecognizer(config);
 
             // Stop logging
@@ -90,11 +96,14 @@ namespace MicrosoftSpeechSDKSamples
 
             // Subscribe an event that will get invoked by Speech SDK on every new log message
             EventLogger.OnMessage += OnMessageEvent;
-  
+
             try
             {
                 // Do your Speech SDK calls here... for example:
-                SpeechConfig config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+                // Creates an instance of a speech config with specified endpoint and subscription key.
+                // Replace with your own endpoint and subscription key.
+                var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+
                 SpeechRecognizer recognizer = new SpeechRecognizer(config);
             }
             finally
@@ -130,8 +139,10 @@ namespace MicrosoftSpeechSDKSamples
 
             try
             {
-                // Do your Speech SDK calls here... for example:
-                SpeechConfig config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+                // Creates an instance of a speech config with specified endpoint and subscription key.
+                // Replace with your own endpoint and subscription key.
+                var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+
                 SpeechRecognizer recognizer = new SpeechRecognizer(config);
             }
             finally
@@ -172,7 +183,10 @@ namespace MicrosoftSpeechSDKSamples
             MemoryLogger.Start();
 
             // Do your Speech SDK calls here... for example:
-            SpeechConfig config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+
             SpeechRecognizer recognizer = new SpeechRecognizer(config);
 
             // Define the full path and name of a log file on your local disk

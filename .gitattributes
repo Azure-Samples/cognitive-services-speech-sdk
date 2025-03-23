@@ -29,6 +29,7 @@ proguard-rules.pro text
 *.go text
 *.gradle text
 *.h text
+*.hpp text
 *.html text
 *.ipynb text
 *.java text
@@ -69,6 +70,8 @@ proguard-rules.pro text
 *.xml text
 *.yaml text
 *.yml text
+*.dockerignore text
+*.proto text
 *.ps1 text
 
 

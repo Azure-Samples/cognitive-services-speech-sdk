@@ -39,8 +39,21 @@ This sample demonstrates how to recognize speech in [Unity](https://unity3d.com/
   * Import the Speech SDK by selecting **Assets** > **Import Package** > **Custom Package**.
   * In the file picker, select the Speech SDK .unitypackage file that you downloaded before.
   * Ensure that all files are selected and click **Import**.
-  * NOTE: If you have installed Unity only for specific platform e.g. Unity CloudBuild for Android, be aware that you may need to remove other 
-  * platform (iOS, Mac, WSA) binaries from the Speech SDK Plugins folder to avoid possible conflicts with the same library name.
+    * NOTE: If you have installed Unity only for specific platform e.g. Unity CloudBuild for Android, be aware that you may need to remove other
+      platform (iOS, Mac, WSA) binaries from the Speech SDK Plugins folder to avoid possible conflicts with the same library name.
+  * If you use the Speech SDK **1.43.0** or newer release, the Unity Editor Console will show errors ending with: "*Unable to resolve reference 'Azure.Core'.*"
+    See the next step for how to resolve this.
+* Install dependencies.
+  * Starting with the Speech SDK **1.43.0** release, the C# bindings depend on the [Azure.Core](https://www.nuget.org/packages/Azure.Core) NuGet package.
+    The following is a suggested method for easy installation:
+    * Download the latest **NuGetForUnity** `.unitypackage` from https://github.com/GlitchEnzo/NuGetForUnity.
+    * In the Unity Editor, open menu **Assets** > **Import Package** > **Custom Package...**.
+    * In the file picker, locate and select the `NuGetForUnity.[version].unitypackage` file that you downloaded earlier.
+    * Ensure that all files from the package are selected and choose **Import**.
+    * Open menu **NuGet** > **Manage NuGet Packages**. (This only appears after the installation of NuGetForUnity.)
+    * Search for **Azure.Core**, select it for installation, and **Install**.
+    * Close the Unity Editor. This is necessary in order to clean up any remaining errors and update the project - otherwise the sample will not work.
+    * Re-open the sample project in Unity. There should be no errors anymore, and you can proceed normally.
 * Select the `HelloWorld` sample scene:
   * In the Project Window (bottom left by default), navigate to **Assets** > **Scenes** and double-click on the `HelloWorld` scene to open it up.
 * Update the sample code with your subscription data:

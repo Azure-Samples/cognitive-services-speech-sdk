@@ -56,7 +56,7 @@
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>1.42.0</version>
+      <version>1.43.0</version>
     </dependency>
     <dependency>
       <groupId>jakarta.json</groupId>

@@ -124,6 +124,8 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" b. Speech recognition with compressed input push audio stream.");
                 Console.WriteLine(" c. Keyword recognizer.");
                 Console.WriteLine(" d. Speech recognition with file input and a switch to secondary region.");
+                Console.WriteLine(" e. Speech continuous recognition authenticated via AAD token crendential.");
+                Console.WriteLine(" f. Speech once recognition authenticated via AAD token crendential.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -180,6 +182,12 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.D:
                         SpeechRecognitionSamples.RecognitionOnceWithFileAsyncSwitchSecondaryRegion().Wait();
+                        break;
+                    case ConsoleKey.E:
+                        SpeechRecognitionSamples.RecognitionContiniusAADTokenCredentialAsync().Wait();
+                        break;
+                    case ConsoleKey.F:
+                        SpeechRecognitionSamples.RecognitionOnceAADTokenCredentialAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -350,6 +358,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 4. Translation with compressed input push audio stream.");
                 Console.WriteLine(" 5. Translation with language detection samples.");
                 Console.WriteLine(" 6. Multilingual Translation with language identification.");
+                Console.WriteLine(" 7. Translation authenticated via AAD token credential.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -382,6 +391,10 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D6:
                     case ConsoleKey.NumPad6:
                         TranslationSamples.MultilingualTranslationWithLanguageIdentificationAsync().Wait();
+                        break;
+                    case ConsoleKey.D7:
+                    case ConsoleKey.NumPad7:
+                        TranslationSamples.TranslationWithAADTokenCredential().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -567,6 +580,8 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 1. Single utterance language detection, with microphone input.");
                 Console.WriteLine(" 2. Single utterance language detection, with WAV file input.");
                 Console.WriteLine(" 3. Continuous language detection with multi-lingual WAV file input.");
+                Console.WriteLine(" 4. Single utterance language detection via aad token crendential.");
+                Console.WriteLine(" 5. Continuous language detection authticated via aad token crendential.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -587,6 +602,14 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D3:
                     case ConsoleKey.NumPad3:
                         StandaloneLanguageDetectionSamples.ContinuousLanguageDetectionWithFileAsync().Wait();
+                        break;
+                    case ConsoleKey.D4:
+                    case ConsoleKey.NumPad4:
+                        StandaloneLanguageDetectionSamples.SingleDetectionWithAADTokenCredentailAsync().Wait();
+                        break;
+                    case ConsoleKey.D5:
+                    case ConsoleKey.NumPad5:
+                        StandaloneLanguageDetectionSamples.ContinuousLanguageDetectionWithAADTokenCredentialAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:

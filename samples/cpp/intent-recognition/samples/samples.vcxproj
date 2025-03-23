@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{6F0FEB3D-1411-4961-9BE0-CA0591077863}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>samples</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+    <Import Project="..\packages\Microsoft.CognitiveServices.Speech.1.43.0\build\native\Microsoft.CognitiveServices.Speech.targets" Condition="Exists('..\packages\Microsoft.CognitiveServices.Speech.1.43.0\build\native\Microsoft.CognitiveServices.Speech.targets')" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/Gw /utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\intent_api;$(ProjectDir)\intent_recognizer\include;$(ProjectDir)\json_parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/Gw /utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\intent_api;$(ProjectDir)\intent_recognizer\include;$(ProjectDir)\json_parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/Gw /utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\intent_api;$(ProjectDir)\intent_recognizer\include;$(ProjectDir)\json_parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/Gw /utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\intent_api;$(ProjectDir)\intent_recognizer\include;$(ProjectDir)\json_parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/Gw /utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\intent_api;$(ProjectDir)\intent_recognizer\include;$(ProjectDir)\json_parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/Gw /utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)\intent_api;$(ProjectDir)\intent_recognizer\include;$(ProjectDir)\json_parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="catch2\catch_amalgamated.cpp" />
+    <ClCompile Include="intent_recognizer\en_integer_parser.cpp" />
+    <ClCompile Include="intent_recognizer\es_integer_parser.cpp" />
+    <ClCompile Include="intent_recognizer\fr_integer_parser.cpp" />
+    <ClCompile Include="intent_recognizer\integer_entity.cpp" />
+    <ClCompile Include="intent_recognizer\intent_match_result.cpp" />
+    <ClCompile Include="intent_recognizer\intent_trigger.cpp" />
+    <ClCompile Include="intent_recognizer\ja_integer_parser.cpp" />
+    <ClCompile Include="intent_recognizer\list_entity.cpp" />
+    <ClCompile Include="intent_recognizer\locale_information.cpp" />
+    <ClCompile Include="intent_recognizer\intent_recognizer.cpp" />
+    <ClCompile Include="intent_recognizer\pattern_any_entity.cpp" />
+    <ClCompile Include="intent_recognizer\pattern_matching_intent.cpp" />
+    <ClCompile Include="intent_recognizer\pattern_matching_model.cpp" />
+    <ClCompile Include="intent_recognizer\pattern_matching_utils.cpp" />
+    <ClCompile Include="intent_recognizer\string_utils.cpp" />
+    <ClCompile Include="intent_recognizer\substrings_matcher.cpp" />
+    <ClCompile Include="intent_recognizer\utf8_utils.cpp" />
+    <ClCompile Include="intent_recognizer\zh_integer_parser.cpp" />
+    <ClCompile Include="samples.cpp" />
+    <ClCompile Include="test_utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test_input/de-de_howistheweather.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/en-us_Open_Microsoft_word.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/en-us_Open_Microsoft_word_on_the_left.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/en-us_TurnOnTheLamp.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/es-es_howstheweather.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/fr-fr_howistheweather.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/fr-fr_select_599.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/ja-jp_id2_its_rain_today.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/ja-jp_select_up_to_the_5th_row.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/zh-cn_howstheweather.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/zh-hk_howstheweather.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="test_input/coffeeMaker.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DeploymentContent>true</DeploymentContent>
+      <Link>test_input/%(RecursiveDir)/%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="catch2\catch_amalgamated.hpp" />
+    <ClInclude Include="intent_api\intentapi_cxx.h" />
+    <ClInclude Include="intent_api\intentapi_cxx_enums.h" />
+    <ClInclude Include="intent_api\intentapi_cxx_intent_recognition_result.h" />
+    <ClInclude Include="intent_api\intentapi_cxx_intent_recognizer.h" />
+    <ClInclude Include="intent_api\intentapi_cxx_language_understanding_model.h" />
+    <ClInclude Include="intent_api\intentapi_cxx_pattern_matching_entity.h" />
+    <ClInclude Include="intent_api\intentapi_cxx_pattern_matching_intent.h" />
+    <ClInclude Include="intent_api\intentapi_cxx_pattern_matching_model.h" />
+    <ClInclude Include="intent_recognizer\include\en_integer_parser.h" />
+    <ClInclude Include="intent_recognizer\include\es_integer_parser.h" />
+    <ClInclude Include="intent_recognizer\include\fr_integer_parser.h" />
+    <ClInclude Include="intent_recognizer\include\integer_entity.h" />
+    <ClInclude Include="intent_recognizer\include\intent_interfaces.h" />
+    <ClInclude Include="intent_recognizer\include\intent_match_result.h" />
+    <ClInclude Include="intent_recognizer\include\intent_recognizer.h" />
+    <ClInclude Include="intent_recognizer\include\intent_trigger.h" />
+    <ClInclude Include="intent_recognizer\include\ja_integer_parser.h" />
+    <ClInclude Include="intent_recognizer\include\list_entity.h" />
+    <ClInclude Include="intent_recognizer\include\locale_information.h" />
+    <ClInclude Include="intent_recognizer\include\maybe.h" />
+    <ClInclude Include="intent_recognizer\include\pattern_any_entity.h" />
+    <ClInclude Include="intent_recognizer\include\pattern_matching_intent.h" />
+    <ClInclude Include="intent_recognizer\include\pattern_matching_model.h" />
+    <ClInclude Include="intent_recognizer\include\pattern_matching_utils.h" />
+    <ClInclude Include="intent_recognizer\include\string_utils.h" />
+    <ClInclude Include="intent_recognizer\include\substrings_matcher.h" />
+    <ClInclude Include="intent_recognizer\include\traits.h" />
+    <ClInclude Include="intent_recognizer\include\utf8_utils.h" />
+    <ClInclude Include="intent_recognizer\include\zh_integer_parser.h" />
+    <ClInclude Include="intent_recognizer\stdafx.h" />
+    <ClInclude Include="json_parser\ajv.h" />
+    <ClInclude Include="json_parser\ajv\common.h" />
+    <ClInclude Include="json_parser\ajv\json.h" />
+    <ClInclude Include="json_parser\ajv\json_builder.h" />
+    <ClInclude Include="json_parser\ajv\json_parser.h" />
+    <ClInclude Include="json_parser\ajv\json_reader.h" />
+    <ClInclude Include="json_parser\ajv\json_reader_view.h" />
+    <ClInclude Include="json_parser\ajv\json_string.h" />
+    <ClInclude Include="json_parser\ajv\json_tests.h" />
+    <ClInclude Include="json_parser\ajv\json_view.h" />
+    <ClInclude Include="samples.h" />
+    <ClInclude Include="test_utils.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.CognitiveServices.Speech.1.43.0\build\native\Microsoft.CognitiveServices.Speech.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CognitiveServices.Speech.1.43.0\build\native\Microsoft.CognitiveServices.Speech.targets'))" />
+  </Target>
+</Project>

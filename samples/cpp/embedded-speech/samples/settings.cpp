@@ -66,7 +66,7 @@ const string EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslation
 // These are needed with hybrid (cloud & embedded) speech configuration.
 // The language must be specified in BCP-47 format, case-sensitive.
 const string CloudSpeechSubscriptionKey = "YourCloudSpeechSubscriptionKey"; // or set CLOUD_SPEECH_SUBSCRIPTION_KEY
-const string CloudSpeechServiceRegion = "YourCloudSpeechServiceRegion"; // or set CLOUD_SPEECH_SERVICE_REGION
+const string CloudSpeechServiceEndpoint = "YourCloudSpeechServiceEndpoint"; // or set CLOUD_SPEECH_SERVICE_ENDPOINT
 const string CloudSpeechRecognitionLanguage = "en-US"; // or set CLOUD_SPEECH_RECOGNITION_LANGUAGE
 const string CloudSpeechSynthesisLanguage = "en-US"; // or set CLOUD_SPEECH_SYNTHESIS_LANGUAGE
 
@@ -210,9 +210,9 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
 // Creates an instance of a hybrid (cloud & embedded) speech config.
 shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig()
 {
-    auto cloudSpeechConfig = SpeechConfig::FromSubscription(
-        GetSetting("CLOUD_SPEECH_SUBSCRIPTION_KEY", CloudSpeechSubscriptionKey),
-        GetSetting("CLOUD_SPEECH_SERVICE_REGION", CloudSpeechServiceRegion)
+    auto cloudSpeechConfig = SpeechConfig::FromEndpoint(
+        GetSetting("CLOUD_SPEECH_SERVICE_ENDPOINT", CloudSpeechServiceEndpoint),
+        GetSetting("CLOUD_SPEECH_SUBSCRIPTION_KEY", CloudSpeechSubscriptionKey)
     );
     // Optional language configuration for cloud speech services.
     // The internal default is en-US.

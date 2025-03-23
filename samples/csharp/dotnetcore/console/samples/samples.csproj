@@ -34,6 +34,9 @@
     <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.wav" Link="whatstheweatherlike.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.mp3" Link="whatstheweatherlike.mp3">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\..\..\sharedcontent\console\wreck-a-nice-beach.wav">
       <Link>wreck-a-nice-beach.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -52,10 +55,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="DiffPlex" Version="1.7.1" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.42.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.42.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.43.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.43.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.43.0" />
   </ItemGroup>
 
 

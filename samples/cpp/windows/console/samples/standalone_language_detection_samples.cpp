@@ -19,9 +19,9 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 void StandaloneLanguageDetectionWithMicrophone()
 {
     // <StandaloneLanguageDetectionWithMicrophone>
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint and subscription key.
+    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
 
     // Define the set of spoken languages that will need to be identified
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "de-DE", "zh-CN", "en-US"});
@@ -67,9 +67,9 @@ void StandaloneLanguageDetectionWithMicrophone()
 void StandaloneLanguageDetectionWithFileInput()
 {
     // <StandaloneLanguageDetectionWithFileInput>
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint and subscription key.
+    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
 
     // Request detailed output format.
     config->SetOutputFormat(OutputFormat::Detailed);
@@ -122,9 +122,9 @@ void StandaloneLanguageDetectionWithFileInput()
 void StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput()
 {
     // <StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput>
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint and subscription key.
+    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
 
     // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
     // Please refer to the documentation of Language ID for more information.

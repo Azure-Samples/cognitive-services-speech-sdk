@@ -21,8 +21,8 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * Edit the `Main` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
+  * Replace the string `YourEndpointUrl` with the endpoint URL of your subscription.
+    For example, replace with `https://westus.api.cognitive.microsoft.com/` if your service region is `westus`.
 * Save the modified file.
 
 ## Run the sample

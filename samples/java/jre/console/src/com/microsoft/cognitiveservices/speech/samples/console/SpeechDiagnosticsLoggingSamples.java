@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.diagnostics.logging.EventLogger;
@@ -23,7 +25,7 @@ import com.microsoft.cognitiveservices.speech.diagnostics.logging.Level;
 public class SpeechDiagnosticsLoggingSamples {
 
     // Enable Speech SDK trace logging to a file
-    public static void fileLoggerWithoutFilter() throws InterruptedException, ExecutionException {
+    public static void fileLoggerWithoutFilter() throws InterruptedException, ExecutionException, URISyntaxException {
         // Define the full path and name of the log file on your local disk
         String logFile = "speech-sdk-log.txt";
 
@@ -32,7 +34,7 @@ public class SpeechDiagnosticsLoggingSamples {
         FileLogger.start(logFile);
 
         // Do your Speech SDK calls here... for example:
-        try (SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
              SpeechRecognizer recognizer = new SpeechRecognizer(config)) {
 
             // ...
@@ -45,7 +47,7 @@ public class SpeechDiagnosticsLoggingSamples {
     }
 
     // Enabled Speech SDK trace logging to a file with a filter
-    public static void fileLoggerWithFilter() throws InterruptedException, ExecutionException {
+    public static void fileLoggerWithFilter() throws InterruptedException, ExecutionException, URISyntaxException {
         // Define the full path and name of the log file
         String logFile = "speech-sdk-log.txt";
 
@@ -59,7 +61,7 @@ public class SpeechDiagnosticsLoggingSamples {
         FileLogger.start(logFile);
 
         // Do your Speech SDK calls here... for example:
-        try (SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
              SpeechRecognizer recognizer = new SpeechRecognizer(config)) {
 
             // ...
@@ -73,7 +75,7 @@ public class SpeechDiagnosticsLoggingSamples {
     }
 
     // Enable Speech SDK trace logging to a subscribed event handler
-    public static void eventLoggerWithoutFilter() throws InterruptedException, ExecutionException {
+    public static void eventLoggerWithoutFilter() throws InterruptedException, ExecutionException, URISyntaxException {
         final Object lockObject = new Object();
         List<String> messages = new ArrayList<>();
 
@@ -86,7 +88,7 @@ public class SpeechDiagnosticsLoggingSamples {
         });
 
         // Do your Speech SDK calls... for example:
-        try (SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
              SpeechRecognizer recognizer = new SpeechRecognizer(config)) {
 
             // ...
@@ -102,7 +104,7 @@ public class SpeechDiagnosticsLoggingSamples {
     }
 
     // Enable Speech SDK trace logging to a subscribed event handler with a filter
-    public static void eventLoggerWithFilter() throws InterruptedException, ExecutionException {
+    public static void eventLoggerWithFilter() throws InterruptedException, ExecutionException, URISyntaxException {
         final Object lockObject = new Object();
         List<String> messages = new ArrayList<>();
 
@@ -120,7 +122,7 @@ public class SpeechDiagnosticsLoggingSamples {
         EventLogger.setFilters(filters);
 
         // Do your Speech SDK calls... for example:
-        try (SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
              SpeechRecognizer recognizer = new SpeechRecognizer(config)) {
 
             // ...
@@ -137,7 +139,7 @@ public class SpeechDiagnosticsLoggingSamples {
     }
 
     // Enable Speech SDK trace logging to memory buffer with or without a filter
-    public static void memoryLoggerWithOrWithoutFilter() throws InterruptedException, ExecutionException {
+    public static void memoryLoggerWithOrWithoutFilter() throws InterruptedException, ExecutionException, URISyntaxException {
         // Optional - Apply a filter, such that only traces that contain either one of the
         // filter strings will be logged. Microsoft will provide the filter when relevant.
         
@@ -149,7 +151,7 @@ public class SpeechDiagnosticsLoggingSamples {
         MemoryLogger.start();
 
         // Do your Speech SDK calls here... for example:
-        try (SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
              SpeechRecognizer recognizer = new SpeechRecognizer(config)) {
 
             // Define the full path and name of a log file on your local disk
@@ -184,7 +186,7 @@ public class SpeechDiagnosticsLoggingSamples {
 
     // Ingest self-defined trace into Speech SDK trace and log the mixed trace to memory buffer such that 
     // the self-defined trace can be used as markers to facliitate the investigation of the issue
-    public static void selfDefinedSpxTraceLogging() throws InterruptedException, ExecutionException {
+    public static void selfDefinedSpxTraceLogging() throws InterruptedException, ExecutionException, URISyntaxException {
         // Set the level of logging to be captured in memory and start logging
         MemoryLogger.setLevel(Level.Info);
         MemoryLogger.start();
@@ -192,7 +194,7 @@ public class SpeechDiagnosticsLoggingSamples {
         SpxTrace.SPX_TRACE_INFO("### This is my trace info -- START ###");
 
         // Do your Speech SDK calls here... for example:
-        try (SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
              SpeechRecognizer recognizer = new SpeechRecognizer(config)) {
 
             // Define the full path and name of a log file on your local disk
