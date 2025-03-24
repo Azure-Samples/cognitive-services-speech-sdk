@@ -20,6 +20,7 @@ var spokenTextQueue = []
 var repeatSpeakingSentenceAfterReconnection = true
 var sessionActive = false
 var userClosedSession = false
+var lastInteractionTime = new Date()
 var lastSpeakTime
 var imgUrl = ""
 
@@ -228,17 +229,20 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 subtitles.hidden = true
                 if (webRTCEvent.event.eventType === 'EVENT_TYPE_SESSION_END') {
                     if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
-                        // Session disconnected unexpectedly, need reconnect
-                        console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
-                        isReconnecting = true
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            // Session disconnected unexpectedly, need reconnect
+                            console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
+                            isReconnecting = true
 
-                        // Release the existing avatar connection
-                        if (avatarSynthesizer !== undefined) {
-                            avatarSynthesizer.close()
+                            // Release the existing avatar connection
+                            if (avatarSynthesizer !== undefined) {
+                                avatarSynthesizer.close()
+                            }
+
+                            // Setup a new avatar connection
+                            connectAvatar()
                         }
-
-                        // Setup a new avatar connection
-                        connectAvatar()
                     }
                 }
             }
@@ -407,6 +411,7 @@ function speakNext(text, endingSilenceMs = 0, skipUpdatingChatHistory = false) {
 }
 
 function stopSpeaking() {
+    lastInteractionTime = new Date()
     spokenTextQueue = []
     avatarSynthesizer.stopSpeakingAsync().then(
         () => {
@@ -422,6 +427,7 @@ function stopSpeaking() {
 }
 
 function handleUserQuery(userQuery, userQueryHTML, imgUrlPath) {
+    lastInteractionTime = new Date()
     let contentMessage = userQuery
     if (imgUrlPath.trim()) {
         contentMessage = [  
@@ -638,15 +644,18 @@ function checkHung() {
                 if (sessionActive) {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
-                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
-                        isReconnecting = true
-                        // Release the existing avatar connection
-                        if (avatarSynthesizer !== undefined) {
-                            avatarSynthesizer.close()
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                            isReconnecting = true
+                            // Release the existing avatar connection
+                            if (avatarSynthesizer !== undefined) {
+                                avatarSynthesizer.close()
+                            }
+    
+                            // Setup a new avatar connection
+                            connectAvatar()
                         }
-
-                        // Setup a new avatar connection
-                        connectAvatar()
                     }
                 }
             }
@@ -678,6 +687,7 @@ window.onload = () => {
 }
 
 window.startSession = () => {
+    lastInteractionTime = new Date()
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('startSession').disabled = true
         document.getElementById('configuration').hidden = true
@@ -695,6 +705,7 @@ window.startSession = () => {
 }
 
 window.stopSession = () => {
+    lastInteractionTime = new Date()
     document.getElementById('startSession').disabled = false
     document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
@@ -713,11 +724,13 @@ window.stopSession = () => {
 }
 
 window.clearChatHistory = () => {
+    lastInteractionTime = new Date()
     document.getElementById('chatHistory').innerHTML = ''
     initMessages()
 }
 
 window.microphone = () => {
+    lastInteractionTime = new Date()
     if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
         // Stop microphone
         document.getElementById('microphone').disabled = true
