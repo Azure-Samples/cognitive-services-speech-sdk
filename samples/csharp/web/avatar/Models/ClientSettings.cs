@@ -15,6 +15,8 @@ namespace Avatar.Models
 
         public static readonly Regex OydDocRegex = new Regex(@"\[doc(\d+)\]");
 
+        public static readonly bool RepeatSpeakingSentenceAfterReconnection = true;  // Repeat the speaking sentence after reconnection
+
         public static readonly string DefaultTtsVoice = "en-US-JennyNeural";
 
         public static readonly bool EnableQuickReply = false;
