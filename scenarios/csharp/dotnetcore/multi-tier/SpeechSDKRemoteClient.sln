@@ -1,0 +1,91 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35004.147
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechSDKRemoteClientApp", "SpeechSDKRemoteClientApp\SpeechSDKRemoteClientApp.csproj", "{65A9D3EE-E4BD-4104-9D62-C51297A43E5C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechSDKRemoteClientCore", "SpeechSDKRemoteClientCore\SpeechSDKRemoteClientCore.csproj", "{D8616A81-10CA-45A3-8FAD-A53E71F57E93}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechSDKRemoteClientWebSocket", "SpeechSDKRemoteClientWebSocket\SpeechSDKRemoteClientWebSocket.csproj", "{77B31564-7464-40CD-B999-1C197FDBF8C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechSDKRemoteClientGRPC", "SpeechSDKRemoteClientGRPC\SpeechSDKRemoteClientGRPC.csproj", "{220C522D-47B1-4B7C-831E-F0C42A1772BC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{AEF0495B-38C9-463A-A417-369FDEB00C83}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechSDKRemoteServiceCore", "SpeechSDKRemoteServiceCore\SpeechSDKRemoteServiceCore.csproj", "{49FB8346-8E21-4D16-98D4-D18D5DE318A4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechSDKRemoteShared", "Messages\SpeechSDKRemoteShared.csproj", "{94C49130-AA03-4975-A102-70E3299450CA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechSDKRemoteServiceGRPC", "SpeechSDKRemoteServiceGRPC\SpeechSDKRemoteServiceGRPC.csproj", "{14B2BE4A-D1D5-440A-9BBF-9A6AD01382CE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestServer", "TestServer\TestServer.csproj", "{A2212531-A6A6-48CC-BEF6-14D407D515B1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpeechSDKRemoteSharedGRPC", "SpeechSDKRemoteSharedGRPC\SpeechSDKRemoteSharedGRPC.csproj", "{B40CE098-99F6-4340-8EFC-90943B1474AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeechSDKRemoteSharedWebSocket", "SpeechSDKRemoteSharedWebSocket\SpeechSDKRemoteSharedWebSocket.csproj", "{73EF5874-3939-4088-A7F8-405A63ED3BF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeechSDKRemoteServiceWebSocket", "SpeechSDKRemoteServiceWebSocket\SpeechSDKRemoteServiceWebSocket.csproj", "{DD7EA1CC-B208-4673-9F16-775B809EA551}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{65A9D3EE-E4BD-4104-9D62-C51297A43E5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65A9D3EE-E4BD-4104-9D62-C51297A43E5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65A9D3EE-E4BD-4104-9D62-C51297A43E5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65A9D3EE-E4BD-4104-9D62-C51297A43E5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8616A81-10CA-45A3-8FAD-A53E71F57E93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8616A81-10CA-45A3-8FAD-A53E71F57E93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8616A81-10CA-45A3-8FAD-A53E71F57E93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8616A81-10CA-45A3-8FAD-A53E71F57E93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77B31564-7464-40CD-B999-1C197FDBF8C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77B31564-7464-40CD-B999-1C197FDBF8C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77B31564-7464-40CD-B999-1C197FDBF8C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77B31564-7464-40CD-B999-1C197FDBF8C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{220C522D-47B1-4B7C-831E-F0C42A1772BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{220C522D-47B1-4B7C-831E-F0C42A1772BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{220C522D-47B1-4B7C-831E-F0C42A1772BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{220C522D-47B1-4B7C-831E-F0C42A1772BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEF0495B-38C9-463A-A417-369FDEB00C83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEF0495B-38C9-463A-A417-369FDEB00C83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEF0495B-38C9-463A-A417-369FDEB00C83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEF0495B-38C9-463A-A417-369FDEB00C83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49FB8346-8E21-4D16-98D4-D18D5DE318A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49FB8346-8E21-4D16-98D4-D18D5DE318A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49FB8346-8E21-4D16-98D4-D18D5DE318A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49FB8346-8E21-4D16-98D4-D18D5DE318A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94C49130-AA03-4975-A102-70E3299450CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94C49130-AA03-4975-A102-70E3299450CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94C49130-AA03-4975-A102-70E3299450CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94C49130-AA03-4975-A102-70E3299450CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14B2BE4A-D1D5-440A-9BBF-9A6AD01382CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14B2BE4A-D1D5-440A-9BBF-9A6AD01382CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14B2BE4A-D1D5-440A-9BBF-9A6AD01382CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14B2BE4A-D1D5-440A-9BBF-9A6AD01382CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2212531-A6A6-48CC-BEF6-14D407D515B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2212531-A6A6-48CC-BEF6-14D407D515B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2212531-A6A6-48CC-BEF6-14D407D515B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2212531-A6A6-48CC-BEF6-14D407D515B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B40CE098-99F6-4340-8EFC-90943B1474AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B40CE098-99F6-4340-8EFC-90943B1474AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B40CE098-99F6-4340-8EFC-90943B1474AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B40CE098-99F6-4340-8EFC-90943B1474AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73EF5874-3939-4088-A7F8-405A63ED3BF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73EF5874-3939-4088-A7F8-405A63ED3BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73EF5874-3939-4088-A7F8-405A63ED3BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73EF5874-3939-4088-A7F8-405A63ED3BF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD7EA1CC-B208-4673-9F16-775B809EA551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD7EA1CC-B208-4673-9F16-775B809EA551}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD7EA1CC-B208-4673-9F16-775B809EA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD7EA1CC-B208-4673-9F16-775B809EA551}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A996958B-B9C9-4074-ADF8-61CA99927D07}
+	EndGlobalSection
+EndGlobal

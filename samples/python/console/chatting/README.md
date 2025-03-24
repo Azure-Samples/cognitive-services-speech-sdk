@@ -16,8 +16,8 @@ pip install requests numpy soundfile
 
 Update the following strings before running the sample:
 
-* `YourSubscriptionKey`: replace with your subscription key.
-* `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
+  * `YourSubscriptionKey`: replace with your subscription key.
+  * `https://YourServiceRegion.api.cognitive.microsoft.com`: replace with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
 * `YourOaiResourceName`: replace with the name of your Azure OAI Resource.
 * `YourOaiDeploymentName`: replace with the name of your model deployment. You're required to first deploy a model before you can make calls.
 * `YourOaiApiVersion`: replace with the [API version](https://learn.microsoft.com/azure/ai-services/openai/reference#chat-completions) to use for this operation. For example, `2023-05-15`.

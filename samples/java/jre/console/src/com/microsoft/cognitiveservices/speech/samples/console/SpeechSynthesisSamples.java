@@ -11,6 +11,8 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.audio.*;
@@ -19,13 +21,13 @@ import com.microsoft.cognitiveservices.speech.audio.*;
 public class SpeechSynthesisSamples {
 
     // Speech synthesis to the default speaker.
-    public static void synthesisToSpeakerAsync() throws InterruptedException, ExecutionException
+    public static void synthesisToSpeakerAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer using the default speaker as audio output.
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(config);
@@ -66,12 +68,12 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis in the specified spoken language.
-    public static void synthesisWithLanguageAsync() throws InterruptedException, ExecutionException
+    public static void synthesisWithLanguageAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Sets the synthesis language.
         // The full list of supported language can be found here:
@@ -118,12 +120,12 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis in the specified voice.
-    public static void synthesisWithVoiceAsync() throws InterruptedException, ExecutionException
+    public static void synthesisWithVoiceAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Sets the voice name.
         // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
@@ -172,12 +174,12 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis using Custom Voice (https://aka.ms/customvoice).
-    public static void synthesisUsingCustomVoiceAsync() throws InterruptedException, ExecutionException
+    public static void synthesisUsingCustomVoiceAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
         // Replace with the endpoint id of your Custom Voice model.
         config.setEndpointId("YourEndpointId");
         // Replace with the voice name of your Custom Voice model.
@@ -222,13 +224,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis to wave file.
-    public static void synthesisToWaveFileAsync() throws InterruptedException, ExecutionException
+    public static void synthesisToWaveFileAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer using file as audio output.
         // Replace with your own audio file name.
@@ -275,13 +277,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis to MP3 file.
-    public static void synthesisToMp3FileAsync() throws InterruptedException, ExecutionException
+    public static void synthesisToMp3FileAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Sets the synthesis output format.
         // The full list of supported format can be found here:
@@ -333,13 +335,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis to pull audio output stream.
-    public static void synthesisToPullAudioOutputStreamAsync() throws InterruptedException, ExecutionException
+    public static void synthesisToPullAudioOutputStreamAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates an audio out stream.
         PullAudioOutputStream stream = AudioOutputStream.createPullStream();
@@ -399,13 +401,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis to push audio output stream.
-    public static void synthesisToPushAudioOutputStreamAsync() throws InterruptedException, ExecutionException
+    public static void synthesisToPushAudioOutputStreamAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates an instance of a customer class inherited from PushAudioOutputStreamCallback
         PushAudioOutputStreamSampleCallback callback = new PushAudioOutputStreamSampleCallback();
@@ -458,13 +460,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Gets synthesized audio data from result.
-    public static void synthesisToResultAsync() throws InterruptedException, ExecutionException
+    public static void synthesisToResultAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer with a null output stream.
         // This means the audio output data will not be written to any stream.
@@ -509,13 +511,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis to audio data stream.
-    public static void synthesisToAudioDataStreamAsync() throws InterruptedException, ExecutionException
+    public static void synthesisToAudioDataStreamAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer with a null output stream.
         // This means the audio output data will not be written to any stream.
@@ -579,13 +581,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis events.
-    public static void synthesisEventsAsync() throws InterruptedException, ExecutionException
+    public static void synthesisEventsAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer with a null output stream.
         // This means the audio output data will not be written to any stream.
@@ -643,13 +645,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis word boundary event.
-    public static void synthesisWordBoundaryEventAsync() throws InterruptedException, ExecutionException
+    public static void synthesisWordBoundaryEventAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer with a null output stream.
         // This means the audio output data will not be written to any stream.
@@ -701,12 +703,12 @@ public class SpeechSynthesisSamples {
     }
 
     // Synthesize and save audio and subtitle (in SubRip file format, SRT).
-    public static void synthesisWordBoundaryEventToSrtAsync() throws InterruptedException, ExecutionException, IOException {
+    public static void synthesisWordBoundaryEventToSrtAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
         config.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Audio24Khz96KBitRateMonoMp3);
         // Save to audio file
         AudioConfig audioConfig = AudioConfig.fromWavFileOutput("output.mp3");
@@ -782,13 +784,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis viseme event.
-    public static void synthesisVisemeEventAsync() throws InterruptedException, ExecutionException
+    public static void synthesisVisemeEventAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer with a null output stream.
         // This means the audio output data will not be written to any stream.
@@ -840,13 +842,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis bookmark event.
-    public static void synthesisBookmarkEventAsync() throws InterruptedException, ExecutionException
+    public static void synthesisBookmarkEventAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer with a null output stream.
         // This means the audio output data will not be written to any stream.
@@ -889,12 +891,13 @@ public class SpeechSynthesisSamples {
 
     // Speech synthesis with auto detection for source language.
     // Note: this is a preview feature, which might be updated in future versions.
-    public static void synthesisWithSourceLanguageAutoDetectionAsync() throws InterruptedException, ExecutionException
+    public static void synthesisWithSourceLanguageAutoDetectionAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        // The default language is "en-us".
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         AutoDetectSourceLanguageConfig autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.fromOpenRange();
 
@@ -941,12 +944,13 @@ public class SpeechSynthesisSamples {
     }
 
     // Speech synthesis get available voices
-    public static void synthesisGetAvailableVoicesAsync() throws InterruptedException, ExecutionException
+    public static void synthesisGetAvailableVoicesAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        // The default language is "en-us".
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech synthesizer
         SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null);

@@ -145,4 +145,22 @@
     [self waitForExpectationsWithTimeout:20 handler:nil];
 }
 
+- (void)testRecognizeFromWavFileWithLogging {
+    // sleep to make sure elements are there
+    [NSThread sleepForTimeInterval:1];
+    XCUIElement * reco_button = app.buttons[@"recognize_file_with_logging_button"];
+    XCTAssert(reco_button.exists);
+
+    XCUIElement * result_label = app.staticTexts[@"result_label"];
+    XCTAssert(result_label.exists);
+
+    NSPredicate *pred = [NSPredicate predicateWithFormat:@"label == %@", weatherText];
+
+    [self expectationForPredicate:pred evaluatedWithObject:result_label handler:nil];
+
+    [reco_button tap];
+
+    [self waitForExpectationsWithTimeout:20 handler:nil];
+}
+
 @end

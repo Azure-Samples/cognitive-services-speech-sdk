@@ -56,11 +56,11 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.82" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.42.0" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.42.0" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.42.0" />
-        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.42.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.43.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.43.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.43.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.43.0" />
+        <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.43.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
     </ItemGroup>
 

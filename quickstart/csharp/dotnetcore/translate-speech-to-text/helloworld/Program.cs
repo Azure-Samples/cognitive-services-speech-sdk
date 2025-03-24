@@ -15,9 +15,9 @@ namespace helloworld
     {
         public static async Task TranslationContinuousRecognitionAsync()
         {
-            // Creates an instance of a speech translation config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Creates an instance of a speech translation config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Sets source and target languages.
             string fromLanguage = "en-US";

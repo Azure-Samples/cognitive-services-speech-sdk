@@ -21,14 +21,14 @@ except ImportError:
 
 
 # Set up the subscription info for the Speech Service:
-# Replace with your own subscription key and service region (e.g., "westus").
-speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
+# Replace with your own subscription key and endpoint.
+speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
 
 
 def speech_synthesis_to_speaker() -> None:
     """performs speech synthesis to the default speaker"""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Creates a speech synthesizer using the default speaker as audio output.
     # The default spoken language is "en-us".
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
@@ -53,8 +53,8 @@ def speech_synthesis_to_speaker() -> None:
 
 def speech_synthesis_with_language():
     """performs speech synthesis to the default speaker with specified spoken language"""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Sets the synthesis language.
     # The full list of supported languages can be found here:
     # https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
@@ -84,8 +84,8 @@ def speech_synthesis_with_language():
 
 def speech_synthesis_with_voice():
     """performs speech synthesis to the default speaker with specified voice"""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Sets the synthesis voice name.
     # e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
     # The full list of supported voices can be found here:
@@ -119,8 +119,8 @@ def speech_synthesis_with_voice():
 def speech_synthesis_using_custom_voice():
     """performs speech synthesis to the default speaker using custom voice.
        see https://aka.ms/customvoice"""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Replace with the endpoint id of your Custom Voice model.
     speech_config.endpoint_id = "YourEndpointId"
     # Replace with the voice name of your Custom Voice model.
@@ -149,8 +149,8 @@ def speech_synthesis_using_custom_voice():
 
 def speech_synthesis_to_wave_file():
     """performs speech synthesis to a wave file"""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Creates a speech synthesizer using file as audio output.
     # Replace with your own audio file name.
     file_name = "outputaudio.wav"
@@ -177,8 +177,8 @@ def speech_synthesis_to_wave_file():
 
 def speech_synthesis_to_mp3_file():
     """performs speech synthesis to a mp3 file"""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Sets the synthesis output format.
     # The full list of supported format can be found here:
     # https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs
@@ -209,8 +209,8 @@ def speech_synthesis_to_mp3_file():
 
 def speech_synthesis_to_pull_audio_output_stream():
     """performs speech synthesis and pull audio output from a stream"""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Creates an audio output stream
     pull_stream = speechsdk.audio.PullAudioOutputStream()
     # Creates a speech synthesizer using pull stream as audio output.
@@ -285,8 +285,8 @@ def speech_synthesis_to_push_audio_output_stream():
         def get_audio_size(self) -> int:
             return len(self._audio_data)
 
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Creates customized instance of PushAudioOutputStreamCallback
     stream_callback = PushAudioOutputStreamSampleCallback()
     # Creates audio output stream from the callback
@@ -322,8 +322,8 @@ def speech_synthesis_to_push_audio_output_stream():
 
 def speech_synthesis_to_result():
     """performs speech synthesis and gets synthesized audio data from result."""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Creates a speech synthesizer with a null output stream.
     # This means the audio output data will not be written to any output channel.
     # You can just get the audio from the result.
@@ -351,8 +351,8 @@ def speech_synthesis_to_result():
 
 def speech_synthesis_to_audio_data_stream():
     """performs speech synthesis and gets the audio data from single request based stream."""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Creates a speech synthesizer with a null output stream.
     # This means the audio output data will not be written to any output channel.
     # You can just get the audio from the result.
@@ -398,8 +398,8 @@ def speech_synthesis_to_audio_data_stream():
 
 def speech_synthesis_events():
     """performs speech synthesis and shows the speech synthesis events."""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Creates a speech synthesizer with a null output stream.
     # This means the audio output data will not be written to any output channel.
     # You can just get the audio from the result.
@@ -433,8 +433,8 @@ def speech_synthesis_events():
 
 def speech_synthesis_word_boundary_event():
     """performs speech synthesis and shows the word boundary event."""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Creates a speech synthesizer with a null output stream.
     # This means the audio output data will not be written to any output channel.
@@ -468,8 +468,8 @@ def speech_synthesis_word_boundary_event():
 
 def speech_synthesis_viseme_event():
     """performs speech synthesis and shows the viseme event."""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Creates a speech synthesizer with a null output stream.
     # This means the audio output data will not be written to any output channel.
@@ -503,8 +503,8 @@ def speech_synthesis_viseme_event():
 
 def speech_synthesis_bookmark_event():
     """performs speech synthesis and shows the bookmark event."""
-    # Creates an instance of a speech config with specified subscription key and service region.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Creates a speech synthesizer with a null output stream.
     # This means the audio output data will not be written to any output channel.
@@ -540,7 +540,7 @@ def speech_synthesis_bookmark_event():
 def speech_synthesis_with_auto_language_detection_to_speaker():
     """performs speech synthesis to the default speaker with auto language detection
        Note: this is a preview feature, which might be updated in future versions."""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # create the auto-detection language configuration without specific languages
     auto_detect_source_language_config = \
@@ -573,7 +573,7 @@ def speech_synthesis_with_auto_language_detection_to_speaker():
 def speech_synthesis_get_available_voices():
     """gets the available voices list."""
 
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Creates a speech synthesizer.
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)

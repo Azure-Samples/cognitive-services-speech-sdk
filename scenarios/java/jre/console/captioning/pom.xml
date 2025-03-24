@@ -46,7 +46,7 @@ mvn clean dependency:copy-dependencies
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>1.42.0</version>
+      <version>1.43.0</version>
     </dependency>
   </dependencies>
 </project>

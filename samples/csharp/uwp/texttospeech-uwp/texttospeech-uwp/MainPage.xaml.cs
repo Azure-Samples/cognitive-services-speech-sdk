@@ -44,6 +44,12 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
         /// Gets or sets region name of the service
         /// </summary>
         public string Region { get; set; }
+
+        /// <summary>
+        /// Gets or sets synthesis endpoint
+        /// </summary>
+        public string Endpoint { get; set; }
+
         /// <summary>
         /// Gets or sets synthesis language
         /// </summary>
@@ -64,8 +70,8 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
                 NotifyUser("Subscription Key is missing!", NotifyType.ErrorMessage);
                 return;
             }
-            // Creates an instance of a speech config with specified subscription key and region.
-            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            // Creates an instance of a speech config with specified subscription key and endpoint.
+            var config = SpeechConfig.FromEndpoint(new Uri(this.Endpoint), this.SubscriptionKey);
             config.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm);
             config.SpeechSynthesisLanguage = this.SynthesisLanguage;
 
@@ -115,8 +121,9 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
             // User can also specify another under the ApplicationData.LocalFolder or Package.InstalledLocation
             var filePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "outputaudio.wav");
 
-            // Creates an instance of a speech config with specified and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            // Creates an instance of a speech config with specified subscription key and endpoint.
+            var config = SpeechConfig.FromEndpoint(new Uri(this.Endpoint), this.SubscriptionKey);
+
             config.SpeechSynthesisLanguage = this.SynthesisLanguage;
 
             // Creates a speech synthesizer using file as audio output.
@@ -174,8 +181,9 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechSynthesisSample
                 NotifyUser(" ", NotifyType.StatusMessage);
             }
 
-            // Creates an instance of a speech config with specified and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            // Creates an instance of a speech config with specified subscription key and endpoint.
+            var config = SpeechConfig.FromEndpoint(new Uri(this.Endpoint), this.SubscriptionKey);
+
             config.SpeechSynthesisLanguage = this.SynthesisLanguage;
 
             // Creates a speech synthesizer using the config.

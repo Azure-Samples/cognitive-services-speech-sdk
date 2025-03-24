@@ -28,6 +28,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -47,14 +48,14 @@ import com.microsoft.cognitiveservices.speech.audio.*;
 public class SpeechRecognitionSamples {
 
     // Speech recognition from microphone.
-    public static void recognitionWithMicrophoneAsync() throws InterruptedException, ExecutionException
+    public static void recognitionWithMicrophoneAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // <recognitionWithMicrophone>
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech recognizer using microphone as audio input.
         SpeechRecognizer recognizer = new SpeechRecognizer(config);
@@ -92,14 +93,14 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition from microphone, showing detailed recognition results including word-level timing
-    public static void recognitionWithMicrophoneAsyncAndDetailedRecognitionResults() throws InterruptedException, ExecutionException
+    public static void recognitionWithMicrophoneAsyncAndDetailedRecognitionResults() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // <recognitionWithMicrophoneAndDetailedRecognitionResults>
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
         // The default language is "en-us".
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Ask for detailed recognition result
         config.setOutputFormat(OutputFormat.Detailed);
@@ -185,12 +186,12 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition in the specified spoken language.
-    public static void recognitionWithLanguageAsync() throws InterruptedException, ExecutionException
+    public static void recognitionWithLanguageAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech recognizer for the specified language, using microphone as audio input.
         String lang = "de-de";
@@ -227,13 +228,13 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition using a customized model.
-    public static void recognitionUsingCustomizedModelAsync() throws InterruptedException, ExecutionException
+    public static void recognitionUsingCustomizedModelAsync() throws InterruptedException, ExecutionException, URISyntaxException
     {
         // <recognitionCustomized>
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
         // Replace with the custom endpoint id of your customized model.
         config.setEndpointId("YourEndpointId");
 
@@ -273,15 +274,15 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition with events from file
-    public static void continuousRecognitionWithFileAsync() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionWithFileAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
         // <recognitionContinuousWithFile>
         stopRecognitionSemaphore = new Semaphore(0);
 
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
@@ -342,14 +343,14 @@ public class SpeechRecognitionSamples {
     private static Semaphore stopRecognitionSemaphore;
 
     // Speech recognition with audio stream
-    public static void recognitionWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException
+    public static void recognitionWithAudioStreamAsync() throws InterruptedException, ExecutionException, FileNotFoundException, URISyntaxException
     {
         stopRecognitionSemaphore = new Semaphore(0);
 
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Create an object that parses the WAV file and implements PullAudioInputStreamCallback to read audio data from the file.
         // Replace with your own audio file name.
@@ -420,14 +421,14 @@ public class SpeechRecognitionSamples {
     // Speech recognition with events from a push stream
     // This sample takes and existing file and reads it by chunk into a local buffer and then pushes the
     // buffer into an PushAudioStream for speech recognition.
-    public static void continuousRecognitionWithPushStream() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionWithPushStream() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
         stopRecognitionSemaphore = new Semaphore(0);
 
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Replace with your own audio file name.
         // The input stream the sample will read from.
@@ -515,14 +516,14 @@ public class SpeechRecognitionSamples {
     }
 
     // Keyword-triggered speech recognition from microphone
-    public static void keywordTriggeredSpeechRecognitionWithMicrophone() throws InterruptedException, ExecutionException
+    public static void keywordTriggeredSpeechRecognitionWithMicrophone() throws InterruptedException, ExecutionException, URISyntaxException
     {
         stopRecognitionSemaphore = new Semaphore(0);
 
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech recognizer using microphone as audio input.
         SpeechRecognizer recognizer = new SpeechRecognizer(config);
@@ -590,14 +591,14 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition with events from file
-    public static void continuousRecognitionWithFileWithPhraseListAsync() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionWithFileWithPhraseListAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
         stopRecognitionSemaphore = new Semaphore(0);
 
         // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.
@@ -663,11 +664,12 @@ public class SpeechRecognitionSamples {
     // We assume the utterance is spoken in either English (US), Spanish (Mexico) or German.
     // Speech recognition will use the standard recognition model associated with the detected language.
     // <SpeechRecognizeOnceAndLanguageId>
-    public static void recognizeOnceFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException
+    public static void recognizeOnceFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
-        // Creates an instance of a speech config with specified subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Creates an instance of a speech config with specified
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Define a set of expected spoken languages in the audio. Update the below with your own languages.
         // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages.
@@ -677,7 +679,7 @@ public class SpeechRecognitionSamples {
         AudioConfig audioConfig = AudioConfig.fromWavFileInput("es-mx.wav");
 
         // Creates a speech recognizer using file as audio input and the AutoDetectSourceLanguageConfig
-        SpeechRecognizer speechRecognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
+        SpeechRecognizer speechRecognizer = new SpeechRecognizer(config, autoDetectSourceLanguageConfig, audioConfig);
 
         // Starts recognition. It returns when the first utterance has been recognized.
         System.out.println(" Recognizing from WAV file... please wait");
@@ -714,7 +716,7 @@ public class SpeechRecognitionSamples {
         // These objects must be closed in order to dispose underlying native resources
         result.close();
         speechRecognizer.close();
-        speechConfig.close();
+        config.close();
         audioConfig.close();
         autoDetectSourceLanguageConfig.close();
     }
@@ -723,11 +725,12 @@ public class SpeechRecognitionSamples {
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the standard recognition model associated with the detected language.
-    public static void continuousRecognitionFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionFromFileWithAtStartLanguageDetection() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
-        // Creates an instance of a speech config with specified subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Creates an instance of a speech config with specified
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Define a set of expected spoken languages in the audio. Update the below with your own languages.
         // Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support for all supported languages.
@@ -737,7 +740,7 @@ public class SpeechRecognitionSamples {
         AudioConfig audioConfig = AudioConfig.fromWavFileInput("es-mx.wav");
 
         // Creates a speech recognizer using file as audio input and the AutoDetectSourceLanguageConfig
-        SpeechRecognizer speechRecognizer = new SpeechRecognizer(speechConfig, autoDetectSourceLanguageConfig, audioConfig);
+        SpeechRecognizer speechRecognizer = new SpeechRecognizer(config, autoDetectSourceLanguageConfig, audioConfig);
 
         // Semaphore used to signal the call to stop continuous recognition (following either a session ended or a cancelled event)
         final Semaphore doneSemaphone = new Semaphore(0);
@@ -796,7 +799,7 @@ public class SpeechRecognitionSamples {
 
         // These objects must be closed in order to dispose underlying native resources
         speechRecognizer.close();
-        speechConfig.close();
+        config.close();
         audioConfig.close();
         autoDetectSourceLanguageConfig.close();
     }
@@ -804,11 +807,12 @@ public class SpeechRecognitionSamples {
     // Shows how to do continuous speech recognition from an audio file, with at-start language detection.
     // We assume the audio spoken is either English (US), Spanish (Mexico) or German. The language does not change.
     // Speech recognition will use the appropriate custom model specified, associated with the detected language.
-    public static void continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
-        // Creates an instance of a speech config with specified subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig speechConfig = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // Creates an instance of a speech config with specified
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Define a set of expected spoken languages in the audio, with an optional custom model endpoint ID associated with each.
         // Update the below with your own languages. Please see https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support
@@ -898,14 +902,12 @@ public class SpeechRecognitionSamples {
     // Shows how to do continuous speech recognition on a multilingual audio file with continuous language detection. Here, we assume the
     // spoken language in the file can alternate between English (US), Spanish (Mexico) and German.
     // If specified, speech recognition will use the custom model associated with the detected language.
-    public static void continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
-        // Continuous language detection with speech recognition requires the application to set a V2 endpoint URL.
-        // Replace the service (Azure) region with your own service region (e.g. "westus").
-        String v2EndpointUrl = "wss://" + "YourServiceRegion" + ".stt.speech.microsoft.com/speech/universal/v2";
-
-        // Creates an instance of a speech config with specified endpoint URL and subscription key. Replace with your own subscription key.
-        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(URI.create(v2EndpointUrl), "YourSubscriptionKey");
+        // Creates an instance of a speech config with specified
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Change the default from at-start language detection to continuous language detection, since the spoken language in the audio
         // may change.
@@ -1001,10 +1003,11 @@ public class SpeechRecognitionSamples {
 
     // Pronunciation assessment.
     // See more information at https://aka.ms/csspeech/pa
-    public static void pronunciationAssessmentWithMicrophoneAsync() throws ExecutionException, InterruptedException {
-        // Creates an instance of a speech config with specified subscription key and service region.
-        // Replace with your own subscription key and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    public static void pronunciationAssessmentWithMicrophoneAsync() throws ExecutionException, InterruptedException, URISyntaxException {
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
+
 
         // Replace the language with your language in BCP-47 format, e.g., en-US.
         String lang = "en-US";
@@ -1089,12 +1092,12 @@ public class SpeechRecognitionSamples {
     // This sample takes and existing file and reads it by chunk into a local buffer and then pushes the
     // buffer into an PushAudioStream for pronunciation assessment.
     // See more information at https://aka.ms/csspeech/pa
-    public static void pronunciationAssessmentWithPushStream() throws InterruptedException, IOException, ExecutionException
+    public static void pronunciationAssessmentWithPushStream() throws InterruptedException, IOException, ExecutionException, URISyntaxException
     {
-        // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
+
 
         // Replace the language with your language in BCP-47 format, e.g., en-US.
         String lang = "en-US";
@@ -1215,10 +1218,11 @@ public class SpeechRecognitionSamples {
 
     // Pronunciation assessment configured with json
     // See more information at https://aka.ms/csspeech/pa
-    public static void pronunciationAssessmentConfiguredWithJson() throws ExecutionException, InterruptedException {
-        // Creates an instance of a speech config with specified subscription key and service region.
-        // Replace with your own subscription key and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    public static void pronunciationAssessmentConfiguredWithJson() throws ExecutionException, InterruptedException, URISyntaxException {
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
+
         // Replace the language with your language in BCP-47 format, e.g., en-US.
         String lang = "en-US";
 
@@ -1428,10 +1432,11 @@ public class SpeechRecognitionSamples {
 
     // Pronunciation assessment continuous with file.
     // See more information at https://aka.ms/csspeech/pa
-    public static void pronunciationAssessmentContinuousWithFile() throws ExecutionException, InterruptedException {
-        // Creates an instance of a speech config with specified subscription key and service region.
-        // Replace with your own subscription key and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    public static void pronunciationAssessmentContinuousWithFile() throws ExecutionException, InterruptedException, URISyntaxException {
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
+
 
         // You can adjust the segmentation silence timeout based on your real scenario.
         config.setProperty(PropertyId.Speech_SegmentationSilenceTimeoutMs, "1500");
@@ -1713,10 +1718,10 @@ public class SpeechRecognitionSamples {
 
     // Pronunciation assessment with content score
     // See more information at https://aka.ms/csspeech/pa
-    public static void pronunciationAssessmentWithContentAssessment() throws ExecutionException, InterruptedException {
-        // Creates an instance of a speech config with specified subscription key and service region.
-        // Replace with your own subscription key and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    public static void pronunciationAssessmentWithContentAssessment() throws ExecutionException, InterruptedException, URISyntaxException {
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         String oaiResourceName = "YourAoaiResourceName";
         String oaiDeploymentName = "YourAoaiDeploymentName";
@@ -1816,12 +1821,12 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition from default microphone with Microsoft Audio Stack enabled.
-    public static void continuousRecognitionFromDefaultMicrophoneWithMASEnabled() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionFromDefaultMicrophoneWithMASEnabled() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
-        // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
+
 
         // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
         // All default enhancements from Microsoft Audio Stack are enabled.
@@ -1883,12 +1888,11 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition from a microphone with Microsoft Audio Stack enabled and pre-defined microphone array geometry specified.
-    public static void recognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified() throws InterruptedException, ExecutionException, IOException
+    public static void recognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
-        // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates an instance of audio config using a microphone as audio input and with audio processing options specified.
         // All default enhancements from Microsoft Audio Stack are enabled and preset microphone array geometry is specified
@@ -1934,14 +1938,13 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition from multi-channel file with Microsoft Audio Stack enabled and custom microphone array geometry specified.
-    public static void continuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
         stopRecognitionSemaphore = new Semaphore(0);
 
-        // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Approximate coordinates for a microphone array with one microphone in the center and six microphones evenly spaced
         // in a circle with radius approximately equal to 42.5 mm.
@@ -2015,12 +2018,11 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.
-    public static void recognitionFromPullStreamWithSelectMASEnhancementsEnabled() throws InterruptedException, ExecutionException, IOException
+    public static void recognitionFromPullStreamWithSelectMASEnhancementsEnabled() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
-        // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Creates a callback that will read audio data from a WAV file.
         // Microsoft Audio Stack supports sample rates that are integral multiples of 16 KHz. Additionally, the following
@@ -2070,14 +2072,13 @@ public class SpeechRecognitionSamples {
     }
 
     // Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.
-    public static void continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified() throws InterruptedException, ExecutionException, IOException
+    public static void continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified() throws InterruptedException, ExecutionException, IOException, URISyntaxException
     {
         stopRecognitionSemaphore = new Semaphore(0);
 
-        // Creates an instance of a speech config with specified
-        // subscription key and service region. Replace with your own subscription key
-        // and service region (e.g., "westus").
-        SpeechConfig config = SpeechConfig.fromSubscription("YourSubscriptionKey", "YourServiceRegion");
+        // subscription key and endpoint URL. Replace with your own subscription key
+        // and endpoint URL.
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
         // Create the push stream to push audio to.
         PushAudioInputStream pushStream = AudioInputStream.createPushStream(AudioStreamFormat.getWaveFormatPCM((long)16000, (short)16, (short)8));

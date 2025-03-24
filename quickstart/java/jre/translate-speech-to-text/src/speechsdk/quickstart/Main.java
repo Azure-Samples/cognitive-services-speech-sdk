@@ -14,16 +14,16 @@ import com.microsoft.cognitiveservices.speech.translation.*;
 
 public class Main {
 
-    public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException
+    public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException, java.net.URISyntaxException
     {
         // Replace with your own subscription key.
         String speechSubscriptionKey = "YourSubscriptionKey";
-        // Replace below with your own service region (e.g., "westus").
-        String speechServiceRegion = "YourServiceRegion";
+        // Replace below with your own endpoint URL (e.g., "https://westus.api.cognitive.microsoft.com")
+        String endpointUrl = "YourEndpointUrl";
         
         // Creates an instance of a translation recognizer using speech translation configuration with specified
-        // subscription key and service region and microphone as default audio input.
-        try (SpeechTranslationConfig config = SpeechTranslationConfig.fromSubscription(speechSubscriptionKey, speechServiceRegion)) {
+        // endpoint and subscription key and microphone as default audio input.
+        try (SpeechTranslationConfig config = SpeechTranslationConfig.fromEndpoint(new java.net.URI(endpointUrl), speechSubscriptionKey)) {
             
             // Sets source and target language(s).
             String fromLanguage = "en-US";

@@ -146,7 +146,7 @@ namespace Avatar.Controllers
                 }
                 else
                 {
-                    string endpointUrl = $"wss://{_clientSettings.SpeechRegion}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true";
+                    string endpointUrl = $"wss://{_clientSettings.SpeechRegion}.tts.speech.microsoft.com/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true";
                     speechConfig = SpeechConfig.FromEndpoint(new Uri(endpointUrl), _clientSettings.SpeechKey);
                 }
 

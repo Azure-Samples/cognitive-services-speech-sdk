@@ -21,9 +21,9 @@ namespace speechtotext_naudio
             // Set the recording format to float
             waveIn.WaveFormat = new WaveFormat(16000, 16, 1);
 
-            // Creates an instance of a speech config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").            
-            var config = SpeechConfig.FromSubscription("SubscriptionKey", "ServiceRegion");
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 

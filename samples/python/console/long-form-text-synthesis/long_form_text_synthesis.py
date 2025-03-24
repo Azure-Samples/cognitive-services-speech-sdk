@@ -27,18 +27,18 @@ logger = logging.getLogger(__name__)
 
 
 class LongTextSynthesizer:
-    def __init__(self, subscription: str, region: str, language: str = 'english',
+    def __init__(self, subscription: str, endpoint: str, language: str = 'english',
                  voice: str = 'en-US-JennyNeural', parallel_threads: int = 8) -> None:
         self.is_ssml = None
         self.subscription = subscription
-        self.region = region
+        self.endpoint = endpoint
         self.language = language
         self.voice = voice
         self.parallel_threads = parallel_threads
         self.synthesizer_pool = SynthesizerPool(self._create_synthesizer, self.parallel_threads)
 
     def _create_synthesizer(self) -> speechsdk.SpeechSynthesizer:
-        config = speechsdk.SpeechConfig(subscription=self.subscription, region=self.region)
+        config = speechsdk.SpeechConfig(subscription=self.subscription, endpoint=self.endpoint)
         config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3)
         config.set_property(
             speechsdk.PropertyId.SpeechServiceResponse_RequestSentenceBoundary, 'true')
@@ -146,7 +146,7 @@ class LongTextSynthesizer:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    s = LongTextSynthesizer(subscription="YourSubscriptionKey", region="YourServiceRegion")
+    s = LongTextSynthesizer(subscription="YourSubscriptionKey", endpoint="https://YourServiceRegion.api.cognitive.microsoft.com")
     with Path('./Gatsby-chapter1.txt').open('r', encoding='utf-8') as r:
         s.synthesize_text(r.read(), output_path=Path('./gatsby'))
     s.synthesize_text(ssml_path=Path('multi-role.xml'), output_path=Path('./multi-role'))
