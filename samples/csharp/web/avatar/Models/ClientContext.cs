@@ -40,7 +40,9 @@ namespace Avatar.Models
 
         public bool IsSpeaking { get; set; }
 
-        public Queue<string> SpokenTextQueue { get; set; } = new Queue<string>();
+        public string? SpeakingText { get; set; }
+
+        public LinkedList<string>? SpokenTextQueue { get; set; } = new LinkedList<string>();
 
         public Thread? SpeakingThread { get; set; }
 
