@@ -15,7 +15,6 @@ var chatRequestSentTime
 var chatResponseReceivedTime
 var lastSpeakTime
 var isFirstRecognizingEvent = true
-var sttLatencyRegex = new RegExp(/<STTL>(\d+)<\/STTL>/)
 var firstTokenLatencyRegex = new RegExp(/<FTL>(\d+)<\/FTL>/)
 var firstSentenceLatencyRegex = new RegExp(/<FSL>(\d+)<\/FSL>/)
 
@@ -505,7 +504,6 @@ window.clearChatHistory = () => {
 
 window.microphone = () => {
     if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
-
         // Stop microphone
         document.getElementById('microphone').disabled = true
         speechRecognizer.stopContinuousRecognitionAsync(
