@@ -5,6 +5,7 @@
 var speechRecognizer
 var avatarSynthesizer
 var peerConnection
+var peerConnectionDataChannel
 var messages = []
 var messageInitiated = false
 var dataSources = []
@@ -218,8 +219,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     
      // Listen to data channel, to get the event from the server
     peerConnection.addEventListener("datachannel", event => {
-        const dataChannel = event.channel
-        dataChannel.onmessage = e => {
+        peerConnectionDataChannel = event.channel
+        peerConnectionDataChannel.onmessage = e => {
             let subtitles = document.getElementById('subtitles')
             const webRTCEvent = JSON.parse(e.data)
             if (webRTCEvent.event.eventType === 'EVENT_TYPE_TURN_START' && document.getElementById('showSubtitles').checked) {
@@ -234,6 +235,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                             // Session disconnected unexpectedly, need reconnect
                             console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
                             isReconnecting = true
+
+                            // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                            peerConnectionDataChannel.onmessage = null
 
                             // Release the existing avatar connection
                             if (avatarSynthesizer !== undefined) {
@@ -648,6 +652,8 @@ function checkHung() {
                         if (new Date() - lastInteractionTime < 300000) {
                             console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
                             isReconnecting = true
+                            // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                            peerConnectionDataChannel.onmessage = null
                             // Release the existing avatar connection
                             if (avatarSynthesizer !== undefined) {
                                 avatarSynthesizer.close()

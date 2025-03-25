@@ -695,6 +695,7 @@ namespace Avatar.Controllers
                         while (spokenTextQueue?.Count > 0)
                         {
                             var currentText = spokenTextQueue?.First?.Value;
+                            clientContext.SpeakingText = currentText;
                             spokenTextQueue?.RemoveFirst();
                             if (ClientSettings.EnableDisplayTextAlignmentWithSpeech)
                             {
@@ -708,6 +709,7 @@ namespace Avatar.Controllers
                     finally
                     {
                         clientContext.IsSpeaking = false;
+                        clientContext.SpeakingText = null;
                     }
                 });
             }
