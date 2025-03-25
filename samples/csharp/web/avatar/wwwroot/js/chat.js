@@ -3,7 +3,6 @@
 
 // Global objects
 var clientId
-//var enableWebSockets
 var socket
 var audioContext
 var isFirstResponseChunk
