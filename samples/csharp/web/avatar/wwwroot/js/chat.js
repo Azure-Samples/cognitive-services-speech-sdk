@@ -6,8 +6,11 @@ var clientId
 var speechRecognizer
 var peerConnection
 var isSpeaking = false
+var isReconnecting = false
 var sessionActive = false
+var userClosedSession = false
 var recognitionStartedTime
+var chatRequestSentTime
 var chatResponseReceivedTime
 var lastSpeakTime
 var isFirstRecognizingEvent = true
@@ -130,6 +133,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.autoplay = true
             videoElement.playsInline = true
 
+            // Continue speaking if there are unfinished sentences while reconnecting
+            if (isReconnecting) {
+                fetch('/api/chat/continueSpeaking', {
+                    method: 'POST',
+                    headers: {
+                        'ClientId': clientId
+                    },
+                    body: ''
+                })
+            }
+
             videoElement.onplaying = () => {
                 // Clean up existing video element if there is any
                 remoteVideoDiv = document.getElementById('remoteVideo')
@@ -157,6 +171,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                     }
                 }
 
+                isReconnecting = false
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
         }
@@ -185,6 +200,14 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 isSpeaking = false
                 lastSpeakTime = new Date()
                 document.getElementById('stopSpeaking').disabled = true
+            } else if (e.data.includes("EVENT_TYPE_SESSION_END")) {
+                if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
+                    // Session disconnected unexpectedly, need reconnect
+                    console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
+                    isReconnecting = true
+                    connectAvatar()
+                    createSpeechRecognizer()
+                }
             }
         }
     })
@@ -237,6 +260,10 @@ function connectToAvatarService(peerConnection) {
         'IsCustomAvatar': document.getElementById('customizedAvatar').checked
     }
 
+    if (isReconnecting) {
+        headers['Reconnect'] = true
+    }
+
     if (document.getElementById('azureOpenAIDeploymentName').value !== '') {
         headers['AoaiDeploymentName'] = document.getElementById('azureOpenAIDeploymentName').value
     }
@@ -278,7 +305,8 @@ function connectToAvatarService(peerConnection) {
 
 // Handle user query. Send user query to the chat API and display the response.
 function handleUserQuery(userQuery) {
-    let chatRequestSentTime = new Date()
+    chatRequestSentTime = new Date()
+
     fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -380,6 +408,7 @@ function checkHung() {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
                         console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                        isReconnecting = true
                         connectAvatar()
                         createSpeechRecognizer()
                     }
@@ -397,6 +426,8 @@ window.onload = () => {
 }
 
 window.startSession = () => {
+    userClosedSession = false
+
     createSpeechRecognizer()
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('startSession').disabled = true
@@ -447,6 +478,7 @@ window.stopSession = () => {
         document.getElementById('localVideo').hidden = true
     }
 
+    userClosedSession = true // Indicating the session was closed by user on purpose, not due to network issue
     disconnectAvatar(true)
 }
 
