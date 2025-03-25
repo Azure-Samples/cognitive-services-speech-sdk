@@ -9,6 +9,7 @@ var audioContext
 var isFirstResponseChunk
 var speechRecognizer
 var peerConnection
+var peerConnectionDataChannel
 var isSpeaking = false
 var isReconnecting = false
 var sessionActive = false
@@ -231,8 +232,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
     // Listen to data channel, to get the event from the server
     peerConnection.addEventListener("datachannel", event => {
-        const dataChannel = event.channel
-        dataChannel.onmessage = e => {
+        peerConnectionDataChannel = event.channel
+        peerConnectionDataChannel.onmessage = e => {
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
 
             if (e.data.includes("EVENT_TYPE_SWITCH_TO_SPEAKING")) {
@@ -259,6 +260,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                         // Session disconnected unexpectedly, need reconnect
                         console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
                         isReconnecting = true
+                        // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                        peerConnectionDataChannel.onmessage = null
                         connectAvatar()
                         createSpeechRecognizer()
                     }
@@ -472,6 +475,8 @@ function checkHung() {
                         if (new Date() - lastInteractionTime < 300000) {
                             console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
                             isReconnecting = true
+                            // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                            peerConnectionDataChannel.onmessage = null
                             connectAvatar()
                             createSpeechRecognizer()
                         }
