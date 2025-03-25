@@ -3,7 +3,6 @@
 
 // Global objects
 var clientId
-var isFirstResponseChunk
 var speechRecognizer
 var peerConnection
 var isSpeaking = false
