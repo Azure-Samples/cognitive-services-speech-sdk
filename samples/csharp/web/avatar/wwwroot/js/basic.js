@@ -310,7 +310,7 @@ window.stopSession = () => {
 
 window.updataTransparentBackground = () => {
     if (document.getElementById('transparentBackground').checked) {
-        document.body.background = './static/image/background.png'
+        document.body.background = './image/background.png'
         document.getElementById('backgroundColor').value = '#00FF00FF'
         document.getElementById('backgroundColor').disabled = true
         document.getElementById('backgroundImageUrl').value = ''

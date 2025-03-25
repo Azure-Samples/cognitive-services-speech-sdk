@@ -3,7 +3,7 @@
 
 // Global objects
 var clientId
-var enableWebSockets
+//var enableWebSockets
 var socket
 var audioContext
 var isFirstResponseChunk
@@ -93,51 +93,6 @@ function disconnectAvatar(closeSpeechRecognizer = false) {
     }
 
     sessionActive = false
-}
-
-function setupWebSocket() {
-    socket = io.connect(`${window.location.origin}?clientId=${clientId}`)
-    socket.on('connect', function() {
-        console.log('WebSocket connected.')
-    })
-
-    socket.on('response', function(data) {
-        let path = data.path
-        if (path === 'api.chat') {
-            let chatHistoryTextArea = document.getElementById('chatHistory')
-            let chunkString = data.chatResponse
-            if (sttLatencyRegex.test(chunkString)) {
-                let sttLatency = parseInt(sttLatencyRegex.exec(chunkString)[0].replace('<STTL>', '').replace('</STTL>', ''))
-                console.log(`STT latency: ${sttLatency} ms`)
-                let latencyLogTextArea = document.getElementById('latencyLog')
-                latencyLogTextArea.innerHTML += `STT latency: ${sttLatency} ms\n`
-                chunkString = chunkString.replace(sttLatencyRegex, '')
-            }
-
-            if (firstTokenLatencyRegex.test(chunkString)) {
-                let aoaiFirstTokenLatency = parseInt(firstTokenLatencyRegex.exec(chunkString)[0].replace('<FTL>', '').replace('</FTL>', ''))
-                // console.log(`AOAI first token latency: ${aoaiFirstTokenLatency} ms`)
-                chunkString = chunkString.replace(firstTokenLatencyRegex, '')
-            }
-
-            if (firstSentenceLatencyRegex.test(chunkString)) {
-                let aoaiFirstSentenceLatency = parseInt(firstSentenceLatencyRegex.exec(chunkString)[0].replace('<FSL>', '').replace('</FSL>', ''))
-                chatResponseReceivedTime = new Date()
-                console.log(`AOAI latency: ${aoaiFirstSentenceLatency} ms`)
-                let latencyLogTextArea = document.getElementById('latencyLog')
-                latencyLogTextArea.innerHTML += `AOAI latency: ${aoaiFirstSentenceLatency} ms\n`
-                latencyLogTextArea.scrollTop = latencyLogTextArea.scrollHeight
-                chunkString = chunkString.replace(firstSentenceLatencyRegex, '')
-            }
-
-            chatHistoryTextArea.innerHTML += `${chunkString}`
-            if (chatHistoryTextArea.innerHTML.startsWith('\n\n')) {
-                chatHistoryTextArea.innerHTML = chatHistoryTextArea.innerHTML.substring(2)
-            }
-
-            chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
-        }
-    })
 }
 
 // Setup WebRTC
@@ -481,10 +436,6 @@ window.onload = () => {
 }
 
 window.startSession = () => {
-    if (enableWebSockets) {
-        setupWebSocket()
-    }
-
     userClosedSession = false
 
     createSpeechRecognizer()
