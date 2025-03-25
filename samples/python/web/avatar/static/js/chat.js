@@ -16,6 +16,7 @@ var userClosedSession = false
 var recognitionStartedTime
 var chatRequestSentTime
 var chatResponseReceivedTime
+var lastInteractionTime = new Date()
 var lastSpeakTime
 var isFirstRecognizingEvent = true
 var sttLatencyRegex = new RegExp(/<STTL>(\d+)<\/STTL>/)
@@ -104,6 +105,7 @@ function setupWebSocket() {
     socket.on('response', function(data) {
         let path = data.path
         if (path === 'api.chat') {
+            lastInteractionTime = new Date()
             let chatHistoryTextArea = document.getElementById('chatHistory')
             let chunkString = data.chatResponse
             if (sttLatencyRegex.test(chunkString)) {
@@ -252,11 +254,14 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 document.getElementById('stopSpeaking').disabled = true
             } else if (e.data.includes("EVENT_TYPE_SESSION_END")) {
                 if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
-                    // Session disconnected unexpectedly, need reconnect
-                    console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
-                    isReconnecting = true
-                    connectAvatar()
-                    createSpeechRecognizer()
+                    // No longer reconnect when there is no interaction for a while
+                    if (new Date() - lastInteractionTime < 300000) {
+                        // Session disconnected unexpectedly, need reconnect
+                        console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
+                        isReconnecting = true
+                        connectAvatar()
+                        createSpeechRecognizer()
+                    }
                 }
             }
         }
@@ -355,6 +360,7 @@ function connectToAvatarService(peerConnection) {
 
 // Handle user query. Send user query to the chat API and display the response.
 function handleUserQuery(userQuery) {
+    lastInteractionTime = new Date()
     chatRequestSentTime = new Date()
     if (socket !== undefined) {
         socket.emit('message', { clientId: clientId, path: 'api.chat', systemPrompt: document.getElementById('prompt').value, userQuery: userQuery })
@@ -462,10 +468,13 @@ function checkHung() {
                 if (sessionActive) {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
-                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
-                        isReconnecting = true
-                        connectAvatar()
-                        createSpeechRecognizer()
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                            isReconnecting = true
+                            connectAvatar()
+                            createSpeechRecognizer()
+                        }
                     }
                 }
             }
@@ -482,6 +491,7 @@ window.onload = () => {
 }
 
 window.startSession = () => {
+    lastInteractionTime = new Date()
     if (enableWebSockets) {
         setupWebSocket()
     }
@@ -506,6 +516,7 @@ window.startSession = () => {
 }
 
 window.stopSpeaking = () => {
+    lastInteractionTime = new Date()
     document.getElementById('stopSpeaking').disabled = true
 
     if (socket !== undefined) {
@@ -530,6 +541,7 @@ window.stopSpeaking = () => {
 }
 
 window.stopSession = () => {
+    lastInteractionTime = new Date()
     document.getElementById('startSession').disabled = false
     document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
@@ -548,6 +560,7 @@ window.stopSession = () => {
 }
 
 window.clearChatHistory = () => {
+    lastInteractionTime = new Date()
     fetch('/api/chat/clearHistory', {
         method: 'POST',
         headers: {
@@ -567,6 +580,7 @@ window.clearChatHistory = () => {
 }
 
 window.microphone = () => {
+    lastInteractionTime = new Date()
     if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
         // Stop microphone for websocket mode
         if (socket !== undefined) {
