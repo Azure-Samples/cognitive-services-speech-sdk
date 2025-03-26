@@ -13,6 +13,7 @@ var userClosedSession = false
 var recognitionStartedTime
 var chatRequestSentTime
 var chatResponseReceivedTime
+var lastInteractionTime = new Date()
 var lastSpeakTime
 var isFirstRecognizingEvent = true
 var firstTokenLatencyRegex = new RegExp(/<FTL>(\d+)<\/FTL>/)
@@ -203,13 +204,16 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 document.getElementById('stopSpeaking').disabled = true
             } else if (e.data.includes("EVENT_TYPE_SESSION_END")) {
                 if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
-                    // Session disconnected unexpectedly, need reconnect
-                    console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
-                    isReconnecting = true
-                    // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
-                    peerConnectionDataChannel.onmessage = null
-                    connectAvatar()
-                    createSpeechRecognizer()
+                    // No longer reconnect when there is no interaction for a while
+                    if (new Date() - lastInteractionTime < 300000) {
+                        // Session disconnected unexpectedly, need reconnect
+                        console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
+                        isReconnecting = true
+                        // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                        peerConnectionDataChannel.onmessage = null
+                        connectAvatar()
+                        createSpeechRecognizer()
+                    }
                 }
             }
         }
@@ -308,6 +312,7 @@ function connectToAvatarService(peerConnection) {
 
 // Handle user query. Send user query to the chat API and display the response.
 function handleUserQuery(userQuery) {
+    lastInteractionTime = new Date()
     chatRequestSentTime = new Date()
 
     fetch('/api/chat', {
@@ -410,12 +415,15 @@ function checkHung() {
                 if (sessionActive) {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
-                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
-                        isReconnecting = true
-                        // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
-                        peerConnectionDataChannel.onmessage = null
-                        connectAvatar()
-                        createSpeechRecognizer()
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                            isReconnecting = true
+                            // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                            peerConnectionDataChannel.onmessage = null
+                            connectAvatar()
+                            createSpeechRecognizer()
+                        }
                     }
                 }
             }
@@ -431,6 +439,7 @@ window.onload = () => {
 }
 
 window.startSession = () => {
+    lastInteractionTime = new Date()
     userClosedSession = false
 
     createSpeechRecognizer()
@@ -451,6 +460,7 @@ window.startSession = () => {
 }
 
 window.stopSpeaking = () => {
+    lastInteractionTime = new Date()
     document.getElementById('stopSpeaking').disabled = true
 
     fetch('/api/stopSpeaking', {
@@ -470,6 +480,7 @@ window.stopSpeaking = () => {
 }
 
 window.stopSession = () => {
+    lastInteractionTime = new Date()
     document.getElementById('startSession').disabled = false
     document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
@@ -488,6 +499,7 @@ window.stopSession = () => {
 }
 
 window.clearChatHistory = () => {
+    lastInteractionTime = new Date()
     fetch('/api/chat/clearHistory', {
         method: 'POST',
         headers: {
@@ -507,6 +519,7 @@ window.clearChatHistory = () => {
 }
 
 window.microphone = () => {
+    lastInteractionTime = new Date()
     if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
         // Stop microphone
         document.getElementById('microphone').disabled = true
