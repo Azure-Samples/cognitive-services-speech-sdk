@@ -209,6 +209,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                         // Session disconnected unexpectedly, need reconnect
                         console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
                         isReconnecting = true
+                        // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                        peerConnectionDataChannel.onmessage = null
                         connectAvatar()
                         createSpeechRecognizer()
                     }
@@ -417,6 +419,8 @@ function checkHung() {
                         if (new Date() - lastInteractionTime < 300000) {
                             console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
                             isReconnecting = true
+                            // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                            peerConnectionDataChannel.onmessage = null
                             connectAvatar()
                             createSpeechRecognizer()
                         }
