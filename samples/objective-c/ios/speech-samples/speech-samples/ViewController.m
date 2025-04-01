@@ -7,7 +7,6 @@
 #import "AudioRecorder.h"
 #import <AVFoundation/AVFoundation.h>
 #import <MicrosoftCognitiveServicesSpeech/SPXSpeechApi.h>
-#import <Foundation/Foundation.h>
 
 @interface ViewController () {
     NSString *speechKey;
@@ -15,12 +14,6 @@
     NSString *pronunciationAssessmentReferenceText;
     AudioRecorder *recorder;
 }
-
-NSString *GetChatCompletionWithResourceName(NSString *oaiResourceName,
-                                             NSString *oaiDeploymentName,
-                                             NSString *oaiApiVersion,
-                                             NSString *oaiApiKey,
-                                             NSString *sendText);
 
 @property (strong, nonatomic) IBOutlet UIButton *recognizeFromFileButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeFromMicButton;
@@ -31,7 +24,6 @@ NSString *GetChatCompletionWithResourceName(NSString *oaiResourceName,
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromMicButton;
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromFileButton;
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromStreamButton;
-@property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessWithContentAssessmentButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeKeywordFromFileButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeFromFileWithLoggingButton;
 
@@ -47,7 +39,6 @@ NSString *GetChatCompletionWithResourceName(NSString *oaiResourceName,
 - (IBAction)pronunciationAssessFromMicButtonTapped:(UIButton *)sender;
 - (IBAction)pronunciationAssessFromFileButtonTapped:(UIButton *)sender;
 - (IBAction)pronunciationAssessFromStreamButtonTapped:(UIButton *)sender;
-- (IBAction)pronunciationAssessWithContentAssessmentButtonTapped:(UIButton *)sender;
 - (IBAction)recognizeFromFileWithLoggingButtonTapped:(UIButton *)sender;
 @end
 
@@ -137,23 +128,14 @@ NSString *GetChatCompletionWithResourceName(NSString *oaiResourceName,
     self.pronunciationAssessFromStreamButton.accessibilityIdentifier = @"pronunciation_assessment_stream_button";
     [self.view addSubview:self.pronunciationAssessFromStreamButton];
     
-    self.pronunciationAssessWithContentAssessmentButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [self.pronunciationAssessWithContentAssessmentButton addTarget:self action:@selector(pronunciationAssessWithContentAssessmentButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [self.pronunciationAssessWithContentAssessmentButton setTitle:@"Start pronunciation assessment with content assessment." forState:UIControlStateNormal];
-    [self.pronunciationAssessWithContentAssessmentButton titleLabel].lineBreakMode = NSLineBreakByWordWrapping;
-    [self.pronunciationAssessWithContentAssessmentButton titleLabel].textAlignment = NSTextAlignmentCenter;
-    [self.pronunciationAssessWithContentAssessmentButton setFrame:CGRectMake(50.0, 470.0, 300.0, 40.0)];
-    self.pronunciationAssessWithContentAssessmentButton.accessibilityIdentifier = @"pronunciation_assessment_content_button";
-    [self.view addSubview:self.pronunciationAssessWithContentAssessmentButton];
-    
     self.recognizeFromFileWithLoggingButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.recognizeFromFileWithLoggingButton addTarget:self action:@selector(recognizeFromFileWithLoggingButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
     [self.recognizeFromFileWithLoggingButton setTitle:@"Start rec from file with logging" forState:UIControlStateNormal];
-    [self.recognizeFromFileWithLoggingButton setFrame:CGRectMake(50.0, 510.0, 300.0, 40.0)];
+    [self.recognizeFromFileWithLoggingButton setFrame:CGRectMake(50.0, 470.0, 300.0, 40.0)];
     self.recognizeFromFileWithLoggingButton.accessibilityIdentifier = @"recognize_file_with_logging_button";
     [self.view addSubview:self.recognizeFromFileWithLoggingButton];
 
-    self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 540.0, 300.0, 300.0)];
+    self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 510.0, 300.0, 300.0)];
     self.recognitionResultLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.recognitionResultLabel.numberOfLines = 0;
     self.recognitionResultLabel.accessibilityIdentifier = @"result_label";
@@ -228,12 +210,6 @@ NSString *GetChatCompletionWithResourceName(NSString *oaiResourceName,
 - (IBAction)pronunciationAssessFromStreamButtonTapped:(UIButton *)sender {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
         [self pronunciationAssessFromStream];
-    });
-}
-
-- (IBAction)pronunciationAssessWithContentAssessmentButtonTapped:(UIButton *)sender {
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
-        [self pronunciationAssessWithContentAssessment];
     });
 }
 
@@ -1075,217 +1051,6 @@ NSString *GetChatCompletionWithResourceName(NSString *oaiResourceName,
         dispatch_semaphore_signal(semaphore);
     }];
     dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-}
-
-NSString *GetChatCompletionWithResourceName(NSString *oaiResourceName,
-                                             NSString *oaiDeploymentName,
-                                             NSString *oaiApiVersion,
-                                             NSString *oaiApiKey,
-                                             NSString *sendText) {
-    // Set up the URL string
-    NSString *urlString = [NSString stringWithFormat:@"https://%@.openai.azure.com/openai/deployments/%@/chat/completions?api-version=%@", oaiResourceName, oaiDeploymentName, oaiApiVersion];
-    NSURL *url = [NSURL URLWithString:urlString];
-    
-    // Create a mutable request
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    
-    // Set the request header with the API key
-    [request setValue:oaiApiKey forHTTPHeaderField:@"api-key"];
-    
-    // Declare the sentences as variables
-    NSString *sampleSentence1 = @"OK the movie i like to talk about is the cove it is very say phenomenal sensational documentary about adopting hunting practices in japan i think the director is called well i think the name escapes me anyway but well let's talk about the movie basically it's about dolphin hunting practices in japan there's a small village where where villagers fisherman Q almost twenty thousand dolphins on a yearly basis which is brutal and just explain massacre this book has influenced me a lot i still remember the first time i saw this movie i think it was in middle school one of my teachers showed it to all the class or the class and i remember we were going through some really boring topics like animal protection at that time it was really boring to me but right before everyone was going to just sleep in the class the teacher decided to put the textbook down and show us a clear from this document documentary we were shocked speechless to see the has of the dolphins chopped off and left on the beach and the C turning bloody red with their blood which is i felt sick i couldn't need fish for a whole week and it was lasting impression if not scarring impression and i think this movie is still very meaningful and it despite me a lot especially on wildlife protection dolphins or search beautiful intelligent animals of the sea and why do villagers and fishermen in japan killed it i assume there was a great benefit to its skin or some scientific research but the ironic thing is that they only kill them for the meat because the meat taste great that sickens me for awhile and i think the book inspired me to do a lot of different to do a lot of things about well i protection i follow news like";
-    NSString *sampleSentence2 = @"yes i can speak how to this movie is it is worth young wolf young man this is this movie from korea it's a crime movies the movies on the movies speaker speaker or words of young man love hello a cow are you saying they end so i have to go to the go to the america or ha ha ha lots of years a go on the woman the woman is very old he talk to korea he carpool i want to go to the this way this whole home house this house is a is hey so what's your man and at the end the girl cause so there's a woman open open hum finally finds other wolf so what's your young man so the young man don't so yeah man the young man remember he said here's a woman also so am i it's very it's very very sad she is she is a crack credit thank you ";
-    NSString *sampleSentence3 = @"yes i want i want to talk about the TV series are enjoying watching a discount name is a friends and it's uh accommodate in the third decades decades an it come out the third decades and its main characters about a six friends live in the NYC but i watched it a long time ago i can't remember the name of them and the story is about what they are happening in their in their life and there are many things treating them and how the friendship are hard friendship and how the french how the strong strongly friendship they obtain them and they always have some funny things happen they only have happened something funny things and is a comedy so that was uh so many and i like this be cause of first adult cause it has a funding it has a farming serious and it can improve my english english words and on the other hand it can i can know about a lot of cultures about the united states and i i first hear about death TV series it's come out of a website and i took into and i watch it after my after my finish my studies and when i was a bad mood when i when i'm in a bad mood or i ";
-    
-    NSString *topic = @"the season of the fall";
-    
-    NSDictionary *message1 = @{
-        @"role": @"system",
-        @"content": @"You are an English teacher and please help to grade a student's essay from vocabulary and grammar and topic relevance on how well the essay aligns with the title, and output format as: {\"vocabulary\": *.*(0-100), \"grammar\": *.*(0-100), \"topic\": *.*(0-100)}."
-    };
-
-    NSDictionary *message2 = @{
-        @"role": @"user",
-        @"content": [NSString stringWithFormat:@"Example1: this essay: \"%@\" has vocabulary and grammar scores of 8 and 8, respectively. Example2: this essay: \"%@\" has vocabulary and grammar scores of 4 and 4.3, respectively. Example3: this essay: \"%@\" has vocabulary and grammar scores of 5 and 5, respectively. The essay for you to score is \"%@\", and the title is \"%@\". The script is from speech recognition so that please first add punctuations when needed, remove duplicates and unnecessary un uh from oral speech, then find all the misuse of words and grammar errors in this essay, find advanced words and grammar usages, and finally give scores based on this information. Please only response as this format {\"vocabulary\": *.*(0-100), \"grammar\": *.*(0-100)}, \"topic\": *.*(0-100)}.", sampleSentence1, sampleSentence2, sampleSentence3, sendText, topic]
-    };
-
-    NSArray *messages = @[message1, message2];
-    NSDictionary *jsonBody = @{
-        @"messages": messages,
-        @"temperature": @0,
-        @"top_p": @1
-    };
-    
-    // Serialize the body data to JSON
-    NSData *bodyData = [NSJSONSerialization dataWithJSONObject:jsonBody options:0 error:nil];
-    [request setHTTPBody:bodyData];
-    
-    // Initialize semaphore for synchronization (blocking behavior)
-    dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-    __block NSString *resultString = nil;
-    
-    // Perform the asynchronous request using NSURLSession
-    NSURLSessionDataTask *dataTask = [[NSURLSession sharedSession] dataTaskWithRequest:request
-                                                                    completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        if (error) {
-            // Log error if the request fails
-            NSLog(@"Request failed: %@", error.localizedDescription);
-            dispatch_semaphore_signal(semaphore); // Signal semaphore to unblock the main thread
-            return;
-        }
-        
-        // Parse the response data to JSON
-        NSError *jsonError = nil;
-        NSDictionary *jsonResponse = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
-        if (jsonError) {
-            // Log JSON parsing error
-            NSLog(@"JSON parsing failed: %@", jsonError.localizedDescription);
-            dispatch_semaphore_signal(semaphore); // Signal semaphore to unblock the main thread
-            return;
-        }
-        
-        // Extract the 'choices' array from the JSON response
-        NSArray *choices = jsonResponse[@"choices"];
-        if (choices.count > 0) {
-            NSDictionary *firstChoice = choices[0];
-            NSDictionary *message = firstChoice[@"message"];
-            resultString = message[@"content"];
-        }
-        
-        // Signal the semaphore indicating the request has finished
-        dispatch_semaphore_signal(semaphore);
-    }];
-    
-    // Start the network request
-    [dataTask resume];
-    
-    // Wait for the semaphore to be signaled (blocking the main thread until the request completes)
-    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-    
-    // Return the result
-    return resultString;
-}
-
-/*
- * Performs pronunciation assessment with content assessment.
- */
-- (void)pronunciationAssessWithContentAssessment {
-    NSString *oaiResourceName = @"YourAoaiResourceName";
-    NSString *oaiDeploymentName = @"YourAoaiDeploymentName";
-    NSString *oaiApiVersion = @"YourAoaiApiVersion";
-    NSString *oaiApiKey = @"YourAoaiApiKey";
-
-    NSBundle *mainBundle = [NSBundle mainBundle];
-    NSString *pronFile = [mainBundle pathForResource: @"pronunciation_assessment_fall" ofType:@"wav"];
-    NSLog(@"pronFile path: %@", pronFile);
-    if (!pronFile) {
-        NSLog(@"Cannot find audio file!");
-        [self updateRecognitionErrorText:(@"Cannot find audio file")];
-        return;
-    }
-
-    SPXAudioConfiguration* pronAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:pronFile];
-    if (!pronAudioSource) {
-        NSLog(@"Loading audio file failed!");
-        [self updateRecognitionErrorText:(@"Audio Error")];
-        return;
-    }
-
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
-    if (!speechConfig) {
-        NSLog(@"Could not load speech config");
-        [self updateRecognitionErrorText:(@"Speech Config Error")];
-        return;
-    }
-
-    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-US" audioConfiguration:pronAudioSource];
-    if (!speechRecognizer) {
-        NSLog(@"Could not create speech recognizer");
-        [self updateRecognitionResultText:(@"Speech Recognition Error")];
-        return;
-    }
-    
-    [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *sender, SPXSessionEventArgs *eventArgs) {
-        NSLog(@"SESSION ID: %@", eventArgs.sessionId);
-    }];
-
-    // Create pronunciation assessment config, set grading system, granularity
-    SPXPronunciationAssessmentConfiguration *pronunicationConfig =
-    [[SPXPronunciationAssessmentConfiguration alloc] init:@""
-                                            gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark
-                                              granularity:SPXPronunciationAssessmentGranularity_Phoneme
-                                             enableMiscue:false];
-    
-    [pronunicationConfig enableProsodyAssessment];
-    
-    [pronunicationConfig applyToRecognizer:speechRecognizer];
-    [self updateRecognitionStatusText:(@"Assessing...")];
-
-    // Connect callbacks
-    NSMutableArray *recognizedStrings = [NSMutableArray array];
-    __block bool end = false;
-
-    [speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
-        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
-        
-        if([eventArgs.result.text length] != 0 && ![eventArgs.result.text isEqualToString:@"."]){
-            [recognizedStrings addObject:eventArgs.result.text];
-        }
-    }];
-    
-    [speechRecognizer addCanceledEventHandler:^(SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionCanceledEventArgs *eventArgs) {
-        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:eventArgs.result];
-        NSLog(@"Pronunciation assessment was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
-        [self updateRecognitionErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails ])];
-        end = true;
-    }];
-
-    // Session stopped callback to recognize stream has ended
-    [speechRecognizer addSessionStoppedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
-        NSLog(@"Received session stopped event. SessionId: %@", eventArgs.sessionId);
-        end = true;
-    }];
-
-    // Start recognizing
-    [speechRecognizer startContinuousRecognition];
-
-    // Wait until a session stopped event has been received
-    while (end == false)
-        [NSThread sleepForTimeInterval:1.0f];
-    [speechRecognizer stopContinuousRecognition];
-
-    NSString *resultText = @"";
-    if ([recognizedStrings count] > 0) {
-        
-        // Un-comment out below codes if want to show the recognized text.
-        // For the phone screen, the text is a bit long.
-        // resultText = [resultText stringByAppendingString:@"Content Assessment for: "];
-        // NSString *recognizedText = [recognizedStrings componentsJoinedByString:@" "];
-        // resultText = [resultText stringByAppendingString:recognizedText];
-        NSString *connectedString = [recognizedStrings componentsJoinedByString:@" "];
-        NSString *result = GetChatCompletionWithResourceName(oaiResourceName, oaiDeploymentName, oaiApiVersion, oaiApiKey, connectedString);
-        
-        NSError *jsonError;
-        NSData *data = [result dataUsingEncoding:NSUTF8StringEncoding];
-        NSDictionary *jsonDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
-
-        if (jsonError) {
-            NSLog(@"JSON Parsing Error: %@", jsonError.localizedDescription);
-        } else {
-            NSNumber *vocabulary = jsonDict[@"vocabulary"];
-            NSNumber *grammar = jsonDict[@"grammar"];
-            NSNumber *topic = jsonDict[@"topic"];
-            
-            NSString *pronResult = [NSString stringWithFormat:@"Assessment Result: grammar score: %@, vocabulary  score: %@, topic score: %@.", grammar, vocabulary, topic];
-            resultText = [resultText stringByAppendingString:pronResult];
-        }
-    }
-    else {
-        resultText = [resultText stringByAppendingString:@"The recognized Text is empty"];
-    }
-    [self updateRecognitionResultText:resultText];
 }
 
 /*
