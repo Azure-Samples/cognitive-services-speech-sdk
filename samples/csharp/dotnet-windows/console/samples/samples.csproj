@@ -111,10 +111,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\..\sharedcontent\console\pronunciation_assessment_fall.wav">
-      <Link>pronunciation_assessment_fall.wav</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.wav">
       <Link>whatstheweatherlike.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
