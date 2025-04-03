@@ -81,9 +81,4 @@
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="pronunciation_assessment_fall.wav">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-  </ItemGroup>
 </Project>
