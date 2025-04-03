@@ -30,6 +30,8 @@ namespace Avatar.Models
 
         public object? SpeechSynthesizerConnection { get; set; }
 
+        public bool SpeechSynthesizerConnected { get; set; }
+
         public string? SpeechToken { get; set; }
 
         public string? IceToken { get; set; }

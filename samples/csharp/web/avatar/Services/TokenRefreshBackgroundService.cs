@@ -19,12 +19,11 @@ namespace Avatar.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // Refresh ICE token once at startup
-            await _iceTokenService.RefreshIceTokenAsync();
-
-            // Start the background task for refreshing the speech token
+            // Start the background task for refreshing the token
+            var refreshIceTokenTask = _iceTokenService.RefreshIceTokenAsync(stoppingToken);
             var refreshSpeechTokenTask = _speechTokenService.RefreshSpeechTokenAsync(stoppingToken);
-            await Task.WhenAny(refreshSpeechTokenTask, Task.Delay(-1, stoppingToken));
+
+            await Task.WhenAll(refreshIceTokenTask, refreshSpeechTokenTask);
         }
     }
 }

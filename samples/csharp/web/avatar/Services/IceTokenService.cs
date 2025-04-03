@@ -20,19 +20,25 @@ namespace Avatar.Services
             _clientSettings = clientSettings.Value;
         }
 
-        public async Task RefreshIceTokenAsync()
+        public async Task RefreshIceTokenAsync(CancellationToken stoppingToken)
         {
-            var url = !string.IsNullOrEmpty(_clientSettings.SpeechPrivateEndpoint)
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                var url = !string.IsNullOrEmpty(_clientSettings.SpeechPrivateEndpoint)
                 ? $"{_clientSettings.SpeechPrivateEndpoint}/tts/cognitiveservices/avatar/relay/token/v1"
                 : $"https://{_clientSettings.SpeechRegion}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1";
 
-            var request = new HttpRequestMessage(HttpMethod.Get, url);
-            request.Headers.Add("Ocp-Apim-Subscription-Key", _clientSettings.SpeechKey);
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("Ocp-Apim-Subscription-Key", _clientSettings.SpeechKey);
 
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+                var response = await _httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
 
-            GlobalVariables.IceToken = await response.Content.ReadAsStringAsync();
+                GlobalVariables.IceToken = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"Token generated: {GlobalVariables.IceToken}");
+                await Task.Delay(TimeSpan.FromHours(24), stoppingToken); // Refresh every 24 hours
+            }
         }
     }
 }

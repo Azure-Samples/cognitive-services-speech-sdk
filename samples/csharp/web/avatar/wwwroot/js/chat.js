@@ -6,6 +6,7 @@ var clientId
 var speechRecognizer
 var peerConnection
 var peerConnectionDataChannel
+var speechSynthesizerConnected = false
 var isSpeaking = false
 var isReconnecting = false
 var sessionActive = false
@@ -207,7 +208,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                     // No longer reconnect when there is no interaction for a while
                     if (new Date() - lastInteractionTime < 300000) {
                         // Session disconnected unexpectedly, need reconnect
-                        console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
+                        console.log(`[${(new Date()).toISOString()}] The session ended unexpectedly, need reconnect.`)
                         isReconnecting = true
                         // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
                         peerConnectionDataChannel.onmessage = null
@@ -395,11 +396,45 @@ function handleLocalVideo() {
     if (currentTime - lastSpeakTime > 15000) {
         if (document.getElementById('useLocalVideoForIdle').checked && sessionActive && !isSpeaking) {
             disconnectAvatar()
+            userClosedSession = true // Indicating the session was closed on purpose, not due to network issue
             document.getElementById('localVideo').hidden = false
             document.getElementById('remoteVideo').style.width = '0.1px'
             sessionActive = false
         }
     }
+}
+
+// Check server status
+function checkServerStatus() {
+    fetch('/api/getStatus', {
+        method: 'GET',
+        headers: {
+            'ClientId': clientId
+        }
+    })
+        .then(response => {
+            if (response.ok) {
+                response.text().then(text => {
+                    responseJson = JSON.parse(text)
+                    synthesizerConnection = responseJson.speechSynthesizerConnected
+                    if (speechSynthesizerConnected === true && synthesizerConnection === false) {
+                        console.log(`[${(new Date()).toISOString()}] The speech synthesizer connection is closed.`)
+                        if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
+                            // No longer reconnect when there is no interaction for a while
+                            if (new Date() - lastInteractionTime < 300000) {
+                                // Session disconnected unexpectedly, need reconnect
+                                console.log(`[${(new Date()).toISOString()}] The speech synthesizer got disconnected unexpectedly, need reconnect.`)
+                                isReconnecting = true
+                                connectAvatar()
+                                createSpeechRecognizer()
+                            }
+                        }
+                    }
+
+                    speechSynthesizerConnected = synthesizerConnection
+                })
+            }
+        })
 }
 
 // Check whether the avatar video stream is hung
