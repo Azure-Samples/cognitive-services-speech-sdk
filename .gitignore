@@ -332,3 +332,4 @@ samples/js/**/microsoft.cognitiveservices.speech.sdk.bundle*.js*
 
 # iOS framework
 samples/objective-c/ios/MicrosoftCognitiveServicesSpeech.framework/
+scenarios/python/web/transcription/.env

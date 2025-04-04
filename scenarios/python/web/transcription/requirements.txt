@@ -1,0 +1,6 @@
+Flask==3.1.0
+Flask-SocketIO
+azure-cognitiveservices-speech==1.42.0
+gevent
+gevent-websocket
+numpy
