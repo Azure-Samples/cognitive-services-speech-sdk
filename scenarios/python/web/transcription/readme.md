@@ -12,7 +12,6 @@ The architecture of the application consists of the following components:
 - **Azure Speech Service**: The service that performs the speech-to-text conversion.
 - **WebSocket**: Used for real-time communication between the client and server, allowing for continuous audio streaming and transcription.
 - **HTML/CSS/JavaScript**: The frontend of the application, providing a user interface for recording and displaying transcriptions.
-- **Gunicorn**: A Python WSGI HTTP server for UNIX, used to serve the Flask application in production.
 - **Gevent**: A coroutine-based Python networking library that provides a high-level synchronous API on top of the libev or libuv event loop.
 - **Gevent WebSocket**: A library that provides WebSocket support for gevent, allowing for real-time communication between the client and server.
 - **Azure App Service**: The hosting platform for the web application, providing a scalable and managed environment for running the app.
@@ -153,7 +152,3 @@ To run the app locally, create a virtual environment and use the following comma
     python app.py
     ```
 5. Open your browser and navigate to `http://localhost:5000` to access the app.
-
-
-
-
