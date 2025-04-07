@@ -38,7 +38,6 @@ speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.
 weatherfilename = "whatstheweatherlike.wav"
 weatherfilenamemp3 = "whatstheweatherlike.mp3"
 weatherfilenamemulaw = "whatstheweatherlike-mulaw.wav"
-seasonsfilename = "pronunciation_assessment_fall.wav"
 zhcnfilename = "zhcn_short_dummy_sample.wav"
 zhcnlongfilename = "zhcn_continuous_mode_sample.wav"
 zhcnlongtxtfilename = "zhcn_continuous_mode_sample.txt"
