@@ -1,0 +1,216 @@
+﻿@using samples.Hubs
+@{
+    ViewData["Title"] = "Speech to Text";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Speech to Text</h1>
+    <p>This sample demonstrates how you can use a web app and SignalR to convert voice recordings to text.</p>
+</div>
+
+<div class="card text-bg-light">
+    <div class="card-body">
+        <div class="mb-3">
+            <h4>Recognize Type</h4>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="RecognizeType" id="RecognizeOnce" value="RecognizeOnce" checked>
+                <label class="form-check-label" for="RecognizeOnce">
+                    Recognize Once
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="RecognizeType" id="ContinuousRecognition" value="ContinuousRecognition">
+                <label class="form-check-label" for="ContinuousRecognition">
+                    Continuous Recognition
+                </label>
+            </div>
+        </div>
+
+        <div class="mb-3 d-flex justify-content-start">
+            <div class="d-flex align-self-center">
+                <button type="button" class="btn btn-primary" id="Recording"><i class="fa-solid fa-microphone"></i> Start</button>
+            </div>
+            <div class="d-flex align-self-center ps-2">
+                <mark class="d-none" id="FeedbackMessage"></mark>
+            </div>
+        </div>
+
+        <div class="d-none mt-3" id="FeedbackContainer">
+            <ul class="list-group list-group-flush d-none" id="FeedbackList"></ul>
+        </div>
+    </div>
+</div>
+
+<script src="~/lib/microsoft-signalr/signalr.js"></script>
+<!-- load OpusMediaRecorder.umd.js. OpusMediaRecorder will be loaded. -->
+<script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OpusMediaRecorder.umd.js"></script>
+<!-- load encoderWorker.umd.js. This should be after OpusMediaRecorder. -->
+<!-- This script tag will create OpusMediaRecorder.encoderWorker. -->
+<script src="https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/encoderWorker.umd.js"></script>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+
+            if (!navigator.mediaDevices) {
+
+                alert('mediaDevices is not supported by your browser.');
+
+                return;
+            }
+
+            const startButton = document.getElementById('Recording');
+            const container = document.getElementById('FeedbackContainer');
+            const containerList = document.getElementById('FeedbackList');
+            const containerMessage = document.getElementById('FeedbackMessage');
+
+            const isContinuous = () => {
+                var recognizeType = document.querySelector('input[name="RecognizeType"]:checked').value;
+
+                return recognizeType == 'ContinuousRecognition';
+            }
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/speech-to-text")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.serverTimeoutInMilliseconds = 240000; // 240 seconds
+
+            const isUsingOpusMediaRecorder = !window.MediaRecorder || !window.MediaRecorder.isTypeSupported('audio/ogg;codecs=opus');
+            const workerOptions = {
+                OggOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OggOpusEncoder.wasm',
+                WebMOpusEncoderWasmPath: 'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/WebMOpusEncoder.wasm'
+            };
+
+            // For browsers that do not support audio/ogg;codecs=opus or do not support MediaRecorder, load OpusMediaRecorder.
+            if (isUsingOpusMediaRecorder) {
+                window.MediaRecorder = OpusMediaRecorder;
+            }
+
+            const audioContext = new AudioContext();
+            navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    channelCount: 2,
+                    sampleSize: 16,
+                    sampleRate: 16000
+                }, video: false
+            }).then(stream => {
+
+                const mediaRecorder = isUsingOpusMediaRecorder
+                    ? new MediaRecorder(stream, {
+                        mimeType: "audio/ogg;codecs=opus"
+                    }, workerOptions)
+                    : new MediaRecorder(stream, {
+                        mimeType: "audio/ogg;codecs=opus"
+                    });
+
+                const subject = new signalR.Subject();
+
+                mediaRecorder.addEventListener("dataavailable", async e => {
+                    // Convert blob to base64 to send to the SignalR as string
+                    const uint8Array = new Uint8Array(await e.data.arrayBuffer());
+
+                    const binaryString = uint8Array.reduce((str, byte) => str + String.fromCharCode(byte), '');
+
+                    var base64 = btoa(binaryString);
+                    subject.next(base64);
+                });
+
+                mediaRecorder.addEventListener("stop", () => {
+
+                    startButton.innerHTML = '<i class="fa-solid fa-microphone"></i> Start';
+                    startButton.setAttribute('disabled', true);
+
+                    setTimeout(() => {
+                        subject.complete();
+                        startButton.removeAttribute('disabled');
+                    }, 800);
+                });
+
+                mediaRecorder.addEventListener("start", () => {
+                    if (isContinuous()) {
+                        connection.send('@nameof(SpeechToTextHub.ContinuousRecognition)', subject);
+                    } else {
+                        connection.send('@nameof(SpeechToTextHub.RecognizeOnce)', subject);
+                    }
+                    startButton.innerHTML = '<i class="fa-solid fa-stop"></i> Stop';
+                });
+
+                // Start recording when the start button is clicked
+                startButton.addEventListener("click", () => {
+                    if (mediaRecorder.state == "recording") {
+                        mediaRecorder.stop();
+                    } else {
+                        container.classList.add('d-none');
+                        containerList.innerHTML = '';
+                        containerList.classList.add('d-none');
+                        containerMessage.innerText = '';
+                        containerMessage.classList.add('d-none');
+
+                        // Send every second
+                        mediaRecorder.start(1000);
+                    }
+                });
+
+            }).catch(err => {
+                // If the user denies permission to record audio, then display an error
+                console.log('Error: ' + err);
+                alert('You must allow Microphone access to use this feature.');
+            });
+
+            async function start() {
+                try {
+                    await connection.start();
+                } catch (err) {
+                    console.log(err);
+                    setTimeout(start, 3000);
+                }
+            };
+
+            connection.onclose(async () => {
+                await start();
+            });
+
+            connection.on('@nameof(ISpeechToTextHub.SessionStarted)', () => logMessage("Session Started!", false));
+
+            connection.on('@nameof(ISpeechToTextHub.SessionStopped)', () => {
+                logMessage("Session Stopped!", false);
+
+                containerMessage.innerText = '';
+                containerMessage.classList.add('d-none');
+            });
+
+            const logMessage = (message, isError) => {
+                console.log(message, isError);
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerText = message;
+
+                if (isError) {
+                    li.classList.add('text-danger');
+                }
+                containerList.appendChild(li);
+                containerList.classList.remove('d-none');
+                container.classList.remove('d-none');
+            }
+
+            connection.on('@nameof(ISpeechToTextHub.ReceiveMessage)', logMessage);
+
+            connection.on('@nameof(ISpeechToTextHub.ReceivePartialMessage)', message => {
+                containerMessage.innerText = message;
+                containerMessage.classList.remove('d-none');
+            });
+
+            // Start the connection
+            start();
+        });
+    </script>
+}
