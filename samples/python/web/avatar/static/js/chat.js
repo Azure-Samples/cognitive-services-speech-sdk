@@ -486,8 +486,8 @@ function checkServerStatus() {
         if (response.ok) {
             response.text().then(text => {
                 responseJson = JSON.parse(text)
-                synthesizerConnection = responseJson.speechSynthesizerConnected
-                if (speechSynthesizerConnected === true && synthesizerConnection === false) {
+                synthesizerConnected = responseJson.speechSynthesizerConnected
+                if (speechSynthesizerConnected === true && synthesizerConnected === false) {
                     console.log(`[${(new Date()).toISOString()}] The speech synthesizer connection is closed.`)
                     if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
                         // No longer reconnect when there is no interaction for a while
@@ -501,7 +501,7 @@ function checkServerStatus() {
                     }
                 }
 
-                speechSynthesizerConnected = synthesizerConnection
+                speechSynthesizerConnected = synthesizerConnected
             })
         }
     })

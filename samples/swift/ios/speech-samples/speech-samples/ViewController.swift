@@ -6,7 +6,6 @@
 import UIKit
 import MicrosoftCognitiveServicesSpeech
 import Differ
-import Foundation
 
 extension StringProtocol {
     var words: [SubSequence] {
@@ -26,7 +25,6 @@ class ViewController: UIViewController {
     var continuousPronunciationAssessmentButton: UIButton!
     var pronunciationAssessmentWithStreamButton: UIButton!
     var pronunciationAssessmentWithMicrophoneButton: UIButton!
-    var pronunciationAssessmentWithContentAssessmentButton: UIButton!
 
     var sub: String!
     var region: String!
@@ -52,12 +50,6 @@ class ViewController: UIViewController {
         pronunciationAssessmentWithMicrophoneButton.setTitle("Pron-Assessment With Microphone", for: .normal)
         pronunciationAssessmentWithMicrophoneButton.addTarget(self, action: #selector(self.pronunciationAssessmentWithMicrophoneButtonClicked), for: .touchUpInside)
         pronunciationAssessmentWithMicrophoneButton.setTitleColor(UIColor.black, for: .normal)
-        
-        pronunciationAssessmentWithContentAssessmentButton = UIButton(frame: CGRect(x: 30, y: 220, width: 300, height: 50))
-        pronunciationAssessmentWithContentAssessmentButton.setTitle("Pron-Assessment With Content", for: .normal)
-        pronunciationAssessmentWithContentAssessmentButton.addTarget(self, action: #selector(self.pronunciationAssessmentWithContentAssessmentButtonClicked), for: .touchUpInside)
-        pronunciationAssessmentWithContentAssessmentButton.setTitleColor(UIColor.black, for: .normal)
-
 
         label = UITextView(frame: CGRect(x: 30, y: 280, width: 300, height: 400))
         label.textColor = UIColor.black
@@ -68,7 +60,6 @@ class ViewController: UIViewController {
         self.view.addSubview(continuousPronunciationAssessmentButton)
         self.view.addSubview(pronunciationAssessmentWithStreamButton)
         self.view.addSubview(pronunciationAssessmentWithMicrophoneButton)
-        self.view.addSubview(pronunciationAssessmentWithContentAssessmentButton)
     }
 
     @objc func continuousPronunciationAssessmentButtonClicked() {
@@ -87,12 +78,6 @@ class ViewController: UIViewController {
     @objc func pronunciationAssessmentWithMicrophoneButtonClicked(){
         DispatchQueue.global(qos: .userInitiated).async {
             self.pronunciationAssessmentWithMicrophone()
-        }
-    }
-    
-    @objc func pronunciationAssessmentWithContentAssessmentButtonClicked(){
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.pronunciationAssessmentWithContentAssessment()
         }
     }
 
@@ -653,192 +638,6 @@ class ViewController: UIViewController {
             stopRecognitionSemaphore.signal()
         }
         stopRecognitionSemaphore.wait()
-    }
-    
-    func getChatCompletion(oaiResourceName: String, oaiDeploymentName: String, oaiApiVersion: String, oaiApiKey: String, sendText: String, completion: @escaping (Result<String, Error>) -> Void) {
-        let semaphore = DispatchSemaphore(value: 0)
-        
-        let urlString = "https://\(oaiResourceName).openai.azure.com/openai/deployments/\(oaiDeploymentName)/chat/completions?api-version=\(oaiApiVersion)"
-        guard let url = URL(string: urlString) else {
-            completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.addValue(oaiApiKey, forHTTPHeaderField: "api-key")
-        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        let systemMessage: [String: Any] = [
-            "role": "system",
-            "content": "You are an English teacher and please help to grade a student's essay from vocabulary and grammar and topic relevance on how well the essay aligns with the title, and output format as: {\"vocabulary\": *.*(0-100), \"grammar\": *.*(0-100), \"topic\": *.*(0-100)}."
-        ]
-        
-        let examples = [
-            "OK the movie i like to talk about is the cove it is very say phenomenal sensational documentary about adopting hunting practices in japan i think the director is called well i think the name escapes me anyway but well let's talk about the movie basically it's about dolphin hunting practices in japan there's a small village where where villagers fisherman Q almost twenty thousand dolphins on a yearly basis which is brutal and just explain massacre this book has influenced me a lot i still remember the first time i saw this movie i think it was in middle school one of my teachers showed it to all the class or the class and i remember we were going through some really boring topics like animal protection at that time it was really boring to me but right before everyone was going to just sleep in the class the teacher decided to put the textbook down and show us a clear from this document documentary we were shocked speechless to see the has of the dolphins chopped off and left on the beach and the C turning bloody red with their blood which is i felt sick i couldn't need fish for a whole week and it was lasting impression if not scarring impression and i think this movie is still very meaningful and it despite me a lot especially on wildlife protection dolphins or search beautiful intelligent animals of the sea and why do villagers and fishermen in japan killed it i assume there was a great benefit to its skin or some scientific research but the ironic thing is that they only kill them for the meat because the meat taste great that sickens me for awhile and i think the book inspired me to do a lot of different to do a lot of things about well i protection i follow news like",
-            "yes i can speak how to this movie is it is worth young wolf young man this is this movie from korea it's a crime movies the movies on the movies speaker speaker or words of young man love hello a cow are you saying they end so i have to go to the go to the america or ha ha ha lots of years a go on the woman the woman is very old he talk to korea he carpool i want to go to the this way this whole home house this house is a is hey so what's your man and at the end the girl cause so there's a woman open open hum finally finds other wolf so what's your young man so the young man don't so yeah man the young man remember he said here's a woman also so am i it's very it's very very sad she is she is a crack credit thank you ",
-            "yes i want i want to talk about the TV series are enjoying watching a discount name is a friends and it's uh accommodate in the third decades decades an it come out the third decades and its main characters about a six friends live in the NYC but i watched it a long time ago i can't remember the name of them and the story is about what they are happening in their in their life and there are many things treating them and how the friendship are hard friendship and how the french how the strong strongly friendship they obtain them and they always have some funny things happen they only have happened something funny things and is a comedy so that was uh so many and i like this be cause of first adult cause it has a funding it has a farming serious and it can improve my english english words and on the other hand it can i can know about a lot of cultures about the united states and i i first hear about death TV series it's come out of a website and i took into and i watch it after my after my finish my studies and when i was a bad mood when i when i'm in a bad mood or i "
-        ]
-        
-        let topic = "the season of the fall"
-        
-        let userMessage: [String: Any] = [
-            "role": "user",
-            "content": "Example1: this essay: \"\(examples[0])\" has vocabulary and grammar scores of 80 and 80, respectively. " +
-                "Example2: this essay: \"\(examples[1])\" has vocabulary and grammar scores of 40 and 43, respectively. " +
-                "Example3: this essay: \"\(examples[2])\" has vocabulary and grammar scores of 50 and 50, respectively. " +
-                "The essay for you to score is \"\(sendText)\", and the title is \"\(topic)\". " +
-                "The script is from speech recognition so that please first add punctuations when needed, remove duplicates and unnecessary un uh from oral speech, then find all the misuse of words and grammar errors in this essay, find advanced words and grammar usages, and finally give scores based on this information. Please only respond as this format {\"vocabulary\": *.*(0-100), \"grammar\": *.*(0-100), \"topic\": *.*(0-100)}."
-        ]
-        
-        let requestBody: [String: Any] = [
-            "messages": [systemMessage, userMessage],
-            "temperature": 0,
-            "top_p": 1
-        ]
-        
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-        } catch {
-            completion(.failure(error))
-            return
-        }
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let data = data else {
-                completion(.failure(NSError(domain: "No Data", code: 0, userInfo: nil)))
-                return
-            }
-            
-            do {
-                if let jsonResponse = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let choices = jsonResponse["choices"] as? [[String: Any]],
-                   let message = choices.first?["message"] as? [String: Any],
-                   let content = message["content"] as? String {
-                    completion(.success(content))
-                } else {
-                    completion(.failure(NSError(domain: "Invalid Response Format", code: 0, userInfo: nil)))
-                }
-            } catch {
-                completion(.failure(error))
-            }
-            
-            semaphore.signal()
-        }
-        
-        task.resume()
-        semaphore.wait()
-    }
-    
-    func pronunciationAssessmentWithContentAssessment() {
-        // Creates an instance of a speech config with specified subscription key and service region.
-        // Replace with your own subscription key and service region (e.g., "westus").
-        let speechConfig = try! SPXSpeechConfiguration(subscription: sub, region: region)
-        
-        let oaiResourceName = "YourAoaiResourceName"
-        let oaiDeploymentName = "YourAoaiDeploymentName"
-        let oaiApiVersion = "YourAoaiApiVersion"
-        let oaiApiKey = "YourAoaiApiKey"
-        
-        let bundle = Bundle.main
-        let path = bundle.path(forResource: "pronunciation_assessment_fall", ofType: "wav")
-        if (path == nil) {
-            print("Cannot find audio file!");
-            self.updateLabel(text: "Cannot find audio file", color: UIColor.red)
-            return;
-        }
-        print("pronunciation assessment audio file path: ", path!)
-        
-        // Replace the language with your language in BCP-47 format, e.g., en-US.
-        let language = "en-US"
-        
-        // Creates a speech recognizer using wav file.
-        guard let audioInput = SPXAudioConfiguration(wavFileInput: path!) else {
-            print("Error: audioInput is Nil")
-            return
-        }
-        
-        // Create a pronunciation assessment config
-        let pronAssessmentConfig = try! SPXPronunciationAssessmentConfiguration(
-            "",
-            gradingSystem: .hundredMark,
-            granularity: .phoneme,
-            enableMiscue: false
-        )
-        
-        let reco = try! SPXSpeechRecognizer(speechConfiguration: speechConfig, language: language, audioConfiguration: audioInput)
-        
-        pronAssessmentConfig.enableProsodyAssessment()
-        
-        try! pronAssessmentConfig.apply(to: reco)
-        
-        var recognizedTexts: [String] = []
-        var end = false
-        
-        reco.addSessionStartedEventHandler { (reco, evt) in
-            print("SESSION ID: \(evt.sessionId)")
-        }
-        
-        reco.addRecognizedEventHandler() {reco, evt in
-            let text: String = evt.result.text ?? ""
-            if (!text.isEmpty && text != ".") {
-                recognizedTexts.append(text)
-            }
-        }
-        
-        reco.addSessionStoppedEventHandler() {reco, evt in
-            end = true
-        }
-
-        updateLabel(text: "Assessing ...", color: .gray)
-        print("Assessing...")
-
-        try! reco.startContinuousRecognition()
-            
-        while !end {
-            Thread.sleep(forTimeInterval: 1.0)
-        }
-            
-        try! reco.stopContinuousRecognition()
-        
-        var finalResult = ""
-        let recognizedText = recognizedTexts.joined(separator: " ")
-        print(recognizedText)
-        finalResult.append("\(recognizedText)\n")
-        
-        getChatCompletion(oaiResourceName: oaiResourceName,
-                          oaiDeploymentName: oaiDeploymentName,
-                          oaiApiVersion: oaiApiVersion,
-                          oaiApiKey: oaiApiKey,
-                          sendText: recognizedText) { result in
-            switch result {
-            case .success(let response):
-                do {
-                    if let jsonData = response.data(using: .utf8) {
-                        if let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-                            
-                            let vocabularyScore = jsonObject["vocabulary"] as? Double ?? 0.0
-                            let grammarScore = jsonObject["grammar"] as? Double ?? 0.0
-                            let topicScore = jsonObject["topic"] as? Double ?? 0.0
-                            
-                            let resultText = "Assessment Result: Grammar score: \(grammarScore), vocabulary  score: \(vocabularyScore), topic score: \(topicScore)"
-                            finalResult.append(resultText)
-                        }
-                    }
-                } catch {
-                    print("JSON parse error: \(error.localizedDescription)")
-                }
-                
-            case .failure(let error):
-                print("Error: \(error.localizedDescription)")
-            }
-        }
-        updateLabel(text: finalResult, color: UIColor.black)
     }
 
     func updateLabel(text: String?, color: UIColor) {

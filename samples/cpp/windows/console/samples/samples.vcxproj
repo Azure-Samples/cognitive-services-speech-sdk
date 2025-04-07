@@ -59,7 +59,6 @@
     <Import Project="..\packages\Microsoft.CognitiveServices.Speech.1.43.0\build\native\Microsoft.CognitiveServices.Speech.targets" Condition="Exists('..\packages\Microsoft.CognitiveServices.Speech.1.43.0\build\native\Microsoft.CognitiveServices.Speech.targets')" />
     <Import Project="..\packages\Microsoft.CognitiveServices.Speech.Extension.MAS.1.43.0\build\native\Microsoft.CognitiveServices.Speech.Extension.MAS.targets" Condition="Exists('..\packages\Microsoft.CognitiveServices.Speech.Extension.MAS.1.43.0\build\native\Microsoft.CognitiveServices.Speech.Extension.MAS.targets')" />
     <Import Project="..\packages\nlohmann.json.3.10.4\build\native\nlohmann.json.targets" Condition="Exists('..\packages\nlohmann.json.3.10.4\build\native\nlohmann.json.targets')" />
-    <Import Project="..\packages\libcurl-v143-shared.8.4.0\build\native\libcurl-v143-shared.targets" Condition="Exists('..\packages\libcurl-v143-shared.8.4.0\build\native\libcurl-v143-shared.targets')" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -205,12 +204,6 @@
       <DeploymentContent>true</DeploymentContent>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="pronunciation_assessment_fall.wav">
-      <DeploymentContent>true</DeploymentContent>
-      <FileType>Document</FileType>
-    </CopyFileToFolders>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -219,6 +212,5 @@
     <Error Condition="!Exists('..\packages\Microsoft.CognitiveServices.Speech.1.43.0\build\native\Microsoft.CognitiveServices.Speech.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CognitiveServices.Speech.1.43.0\build\native\Microsoft.CognitiveServices.Speech.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.CognitiveServices.Speech.Extension.MAS.1.43.0\build\native\Microsoft.CognitiveServices.Speech.Extension.MAS.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CognitiveServices.Speech.Extension.MAS.1.43.0\build\native\Microsoft.CognitiveServices.Speech.Extension.MAS.targets'))" />
     <Error Condition="!Exists('..\packages\nlohmann.json.3.10.4\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\nlohmann.json.3.10.4\build\native\nlohmann.json.targets'))" />
-    <Error Condition="!Exists('..\packages\libcurl-v143-shared.8.4.0\build\native\libcurl-v143-shared.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libcurl-v143-shared.8.4.0\build\native\libcurl-v143-shared.targets'))" />
   </Target>
 </Project>
