@@ -412,29 +412,29 @@ function checkServerStatus() {
             'ClientId': clientId
         }
     })
-        .then(response => {
-            if (response.ok) {
-                response.text().then(text => {
-                    responseJson = JSON.parse(text)
-                    synthesizerConnection = responseJson.speechSynthesizerConnected
-                    if (speechSynthesizerConnected === true && synthesizerConnection === false) {
-                        console.log(`[${(new Date()).toISOString()}] The speech synthesizer connection is closed.`)
-                        if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
-                            // No longer reconnect when there is no interaction for a while
-                            if (new Date() - lastInteractionTime < 300000) {
-                                // Session disconnected unexpectedly, need reconnect
-                                console.log(`[${(new Date()).toISOString()}] The speech synthesizer got disconnected unexpectedly, need reconnect.`)
-                                isReconnecting = true
-                                connectAvatar()
-                                createSpeechRecognizer()
-                            }
+    .then(response => {
+        if (response.ok) {
+            response.text().then(text => {
+                responseJson = JSON.parse(text)
+                synthesizerConnected = responseJson.speechSynthesizerConnected
+                if (speechSynthesizerConnected === true && synthesizerConnected === false) {
+                    console.log(`[${(new Date()).toISOString()}] The speech synthesizer connection is closed.`)
+                    if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            // Session disconnected unexpectedly, need reconnect
+                            console.log(`[${(new Date()).toISOString()}] The speech synthesizer got disconnected unexpectedly, need reconnect.`)
+                            isReconnecting = true
+                            connectAvatar()
+                            createSpeechRecognizer()
                         }
                     }
+                }
 
-                    speechSynthesizerConnected = synthesizerConnection
-                })
-            }
-        })
+                speechSynthesizerConnected = synthesizerConnected
+            })
+        }
+    })
 }
 
 // Check whether the avatar video stream is hung
@@ -468,6 +468,11 @@ function checkHung() {
 
 window.onload = () => {
     clientId = document.getElementById('clientId').value
+
+    setInterval(() => {
+        checkServerStatus()
+    }, 2000) // Check server status every 2 seconds
+
     setInterval(() => {
         checkHung()
     }, 2000) // Check session activity every 2 seconds
