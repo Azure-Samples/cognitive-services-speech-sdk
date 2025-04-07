@@ -128,6 +128,28 @@ namespace Avatar.Controllers
             }
         }
 
+        [HttpGet("api/getStatus")]
+        public IActionResult GetStatus()
+        {
+            try
+            {
+                var clientId = new Guid(Request.Headers["ClientId"]!);
+                var clientContext = _clientService.GetClientContext(clientId);
+
+                var status = new
+                {
+                    speechSynthesizerConnected = clientContext.SpeechSynthesizerConnected
+                };
+
+                return Ok(JsonConvert.SerializeObject(status));
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("api/connectAvatar")]
         public async Task<IActionResult> ConnectAvatar()
         {
@@ -285,9 +307,11 @@ namespace Avatar.Controllers
                 {
                     Console.WriteLine("TTS Avatar service disconnected.");
                     clientContext.SpeechSynthesizerConnection = null;
+                    clientContext.SpeechSynthesizerConnected = false;
                 };
 
                 clientContext.SpeechSynthesizerConnection = connection;
+                clientContext.SpeechSynthesizerConnected = true;
 
                 var speechSynthesisResult = speechSynthesizer.SpeakTextAsync("").Result;
                 Console.WriteLine($"Result ID: {speechSynthesisResult.ResultId}");
