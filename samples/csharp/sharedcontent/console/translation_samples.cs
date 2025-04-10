@@ -6,6 +6,8 @@
 // <toplevel>
 using System;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.Translation;
@@ -30,9 +32,9 @@ namespace MicrosoftSpeechSDKSamples
             // Voice name of synthesis output.
             const string germanVoice = "de-DE-AmalaNeural";
 
-            // Creates an instance of a speech translation config with specified subscription key and service region.
+            // Creates an instance of a speech translation config with specified endpoint and key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://ServiceRegron.cognitiveservices.azure.com"), "YourSubscriptionKey");
 
             config.SpeechRecognitionLanguage = fromLanguage;
             config.VoiceName = germanVoice;
@@ -139,9 +141,9 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
 
-            // Creates an instance of a speech translation config with specified subscription key and service region.
+            // Creates an instance of a speech translation config with specified endpoint and key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://ServiceRegron.cognitiveservices.azure.com"), "YourSubscriptionKey");
             config.SpeechRecognitionLanguage = fromLanguage;
 
             // Translation target language(s).
@@ -242,9 +244,9 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
 
-            // Creates an instance of a speech translation config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
             config.SpeechRecognitionLanguage = fromLanguage;
 
             // Translation target language(s).
@@ -366,9 +368,9 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
 
-            // Creates an instance of a speech translation config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechTranslationConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
             config.SpeechRecognitionLanguage = fromLanguage;
 
             // Translation target language(s).
@@ -827,5 +829,126 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         #endregion
+
+        // Translation authenticated via AAD token crendential.
+        public static async Task TranslationWithAADTokenCredential()
+        {
+            // Translation source language.
+            // Replace with a language of your choice.
+            string fromLanguage = "en-US";
+
+            // Create a token credential using DefaultAzureCredential.
+            // This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+            // For more types of token credentials, refer to: 
+            // https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
+            TokenCredential credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions()
+            {
+                ManagedIdentityClientId = "{Your App Id}", // Specify the Managed Identity Client ID if using a user-assigned managed identity.
+            });
+
+            // Define the v2 endpoint for Azure Speech Service.
+            // This is required when using a private endpoint with a custom domain.
+            // For details on setting up a custom domain with private links, see: 
+            // https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
+            var v2Endpoint = string.Format("wss://{custom domain}/stt/speech/universal/v2");
+
+            // Create a SpeechTranslationConfig instance using the v2 endpoint and the token credential for authentication.
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri(v2Endpoint), credential);
+            config.SpeechRecognitionLanguage = fromLanguage;
+
+            // Translation target language(s).
+            // Replace with language(s) of your choice.
+            config.AddTargetLanguage("de");
+            config.AddTargetLanguage("fr");
+
+            var stopTranslation = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // Create an audio stream from a wav file.
+            // Replace with your own audio file name.
+            using (var audioInput = Helper.OpenWavFile(@"whatstheweatherlike.wav"))
+            {
+                // Creates a translation recognizer using audio stream as input.
+                using (var recognizer = new TranslationRecognizer(config, audioInput))
+                {
+                    // Subscribes to events.
+                    recognizer.Recognizing += (s, e) =>
+                    {
+                        Console.WriteLine($"RECOGNIZING in '{fromLanguage}': Text={e.Result.Text}");
+                        foreach (var element in e.Result.Translations)
+                        {
+                            Console.WriteLine($"    TRANSLATING into '{element.Key}': {element.Value}");
+                        }
+                    };
+
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.TranslatedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED in '{fromLanguage}': Text={e.Result.Text}");
+                            foreach (var element in e.Result.Translations)
+                            {
+                                Console.WriteLine($"    TRANSLATED into '{element.Key}': {element.Value}");
+                            }
+                        }
+                        else if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            Console.WriteLine($"    Speech not translated.");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        stopTranslation.TrySetResult(0);
+                    };
+
+                    recognizer.SpeechStartDetected += (s, e) =>
+                    {
+                        Console.WriteLine("\nSpeech start detected event.");
+                    };
+
+                    recognizer.SpeechEndDetected += (s, e) =>
+                    {
+                        Console.WriteLine("\nSpeech end detected event.");
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\nSession started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine($"\nSession stopped event.");
+                        Console.WriteLine($"\nStop translation.");
+                        stopTranslation.TrySetResult(0);
+                    };
+
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    Console.WriteLine("Start translation...");
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopTranslation.Task });
+
+                    // Stops translation.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+        }
     }
 }

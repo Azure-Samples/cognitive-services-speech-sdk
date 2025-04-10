@@ -24,11 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.42.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.42.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.42.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.42.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.43.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.SR" Version="1.43.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Embedded.TTS" Version="1.43.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.ONNX.Runtime" Version="1.43.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.Telemetry" Version="1.43.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 

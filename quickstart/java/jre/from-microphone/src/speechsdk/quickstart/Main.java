@@ -20,12 +20,12 @@ public class Main {
 
         // Replace below with your own subscription key
         String speechSubscriptionKey = "YourSubscriptionKey";
-        // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YourServiceRegion";
+        // Replace below with your own endpoint URL (e.g., "https://westus.api.cognitive.microsoft.com/n")
+        String endpointUrl = "YourEndpointUrl";
 
         // Creates an instance of a speech recognizer using speech configuration with specified
-        // subscription key and service region and microphone as default audio input.
-        try (SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
+        // endpoint and subscription key and microphone as default audio input.
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new java.net.URI(endpointUrl), speechSubscriptionKey);
              SpeechRecognizer reco = new SpeechRecognizer(config)) {
 
             assert(config != null);

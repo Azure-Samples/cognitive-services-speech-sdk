@@ -62,7 +62,7 @@ namespace MicrosoftSpeechSDKSamples
         // These are needed with hybrid (cloud & embedded) speech configuration.
         // The language must be specified in BCP-47 format, case-sensitive.
         private static readonly string CloudSpeechSubscriptionKey = "YourCloudSpeechSubscriptionKey"; // or set CLOUD_SPEECH_SUBSCRIPTION_KEY
-        private static readonly string CloudSpeechServiceRegion = "YourCloudSpeechServiceRegion"; // or set CLOUD_SPEECH_SERVICE_REGION
+        private static readonly string CloudSpeechServiceEndpoint = "YourCloudSpeechServiceEndpoint"; // or set CLOUD_SPEECH_SERVICE_ENDPOINT
         private static readonly string CloudSpeechRecognitionLanguage = "en-US"; // or set CLOUD_SPEECH_RECOGNITION_LANGUAGE
         private static readonly string CloudSpeechSynthesisLanguage = "en-US"; // or set CLOUD_SPEECH_SYNTHESIS_LANGUAGE
 
@@ -205,9 +205,9 @@ namespace MicrosoftSpeechSDKSamples
         // Creates an instance of a hybrid (cloud & embedded) speech config.
         public static HybridSpeechConfig CreateHybridSpeechConfig()
         {
-            var cloudSpeechConfig = SpeechConfig.FromSubscription(
-                GetSetting("CLOUD_SPEECH_SUBSCRIPTION_KEY", CloudSpeechSubscriptionKey),
-                GetSetting("CLOUD_SPEECH_SERVICE_REGION", CloudSpeechServiceRegion)
+            var cloudSpeechConfig = SpeechConfig.FromEndpoint(
+                new Uri(GetSetting("CLOUD_SPEECH_SERVICE_ENDPOINT", CloudSpeechServiceEndpoint)),
+                GetSetting("CLOUD_SPEECH_SUBSCRIPTION_KEY", CloudSpeechSubscriptionKey)
                 );
             // Optional language configuration for cloud speech services.
             // The internal default is en-US.

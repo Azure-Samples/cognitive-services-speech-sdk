@@ -12,7 +12,8 @@ with open('config.json', 'r') as config_file:
 
 speech_key = config.get("SubscriptionKey")
 service_region = config.get("ServiceRegion")
-speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+speech_endpoint = f"https://{service_region}.api.cognitive.microsoft.com"
+speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
 # Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
 speech_config.speech_synthesis_voice_name = "en-US-AriaNeural"

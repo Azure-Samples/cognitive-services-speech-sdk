@@ -17,9 +17,9 @@ namespace helloworld
 {
     class Program
     {
-        public static async Task TranscribeConversationsAsync(string subscriptionKey, string region)
+        public static async Task TranscribeConversationsAsync(string subscriptionKey, string endpoint)
         {
-            var config = SpeechConfig.FromSubscription(subscriptionKey, region);
+            var config = SpeechConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             // Create an audio stream from a wav file using 16-bit PCM audio format. Replace with your own audio file.
@@ -91,9 +91,9 @@ namespace helloworld
         static async Task Main()
         {
             var subscriptionKey = "YourSubscriptionKey";
-            var serviceRegion = "YourServiceRegion";
+            var endpoint = "https://YourServiceRegion.api.cognitive.microsoft.com";
 
-            await TranscribeConversationsAsync(subscriptionKey, serviceRegion);
+            await TranscribeConversationsAsync(subscriptionKey, endpoint);
             Console.WriteLine("Please press <Return> to continue.");
             Console.ReadLine();
         }

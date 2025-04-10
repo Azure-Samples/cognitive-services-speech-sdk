@@ -34,7 +34,8 @@ except ImportError:
 
 
 # Set up the subscription info for the Speech Service
-speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
+# Replace with your own subscription key and endpoint.
+speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
 
 # Set up the parameters for Azure OAI Services
 oai_resource_name = "YourOaiResourceName"
@@ -181,7 +182,7 @@ def chatting_from_file():
     def stt(filename):
         result_text = []
 
-        speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+        speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
         audio_config = speechsdk.audio.AudioConfig(filename=filename)
 
         speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
@@ -234,7 +235,7 @@ def chatting_from_file():
 
     def tts(text, output_path, tag=None):
         file_config = speechsdk.audio.AudioOutputConfig(filename=output_path)
-        speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+        speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
         speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=file_config)
 
         ssml_text = (
@@ -265,7 +266,7 @@ def chatting_from_file():
         stream = speechsdk.audio.PushAudioInputStream(format)
         audio_config = speechsdk.audio.AudioConfig(stream=stream)
 
-        speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+        speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
         # Must disable miscue for the chatting scenario.
         json_string = {

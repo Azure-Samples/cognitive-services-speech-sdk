@@ -5,6 +5,7 @@
 var speechRecognizer
 var avatarSynthesizer
 var peerConnection
+var peerConnectionDataChannel
 var messages = []
 var messageInitiated = false
 var dataSources = []
@@ -14,9 +15,13 @@ var enableQuickReply = false
 var quickReplies = [ 'Let me take a look.', 'Let me check.', 'One moment, please.' ]
 var byodDocRegex = new RegExp(/\[doc(\d+)\]/g)
 var isSpeaking = false
+var isReconnecting = false
 var speakingText = ""
 var spokenTextQueue = []
+var repeatSpeakingSentenceAfterReconnection = true
 var sessionActive = false
+var userClosedSession = false
+var lastInteractionTime = new Date()
 var lastSpeakTime
 var imgUrl = ""
 
@@ -169,6 +174,17 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.autoplay = true
             videoElement.playsInline = true
 
+            // Continue speaking if there are unfinished sentences
+            if (repeatSpeakingSentenceAfterReconnection) {
+                if (speakingText !== '') {
+                    speakNext(speakingText, 0, true)
+                }
+            } else {
+                if (spokenTextQueue.length > 0) {
+                    speakNext(spokenTextQueue.shift())
+                }
+            }
+
             videoElement.onplaying = () => {
                 // Clean up existing video element if there is any
                 remoteVideoDiv = document.getElementById('remoteVideo')
@@ -195,6 +211,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                     }
                 }
 
+                isReconnecting = false
                 setTimeout(() => { sessionActive = true }, 5000) // Set session active after 5 seconds
             }
         }
@@ -202,8 +219,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     
      // Listen to data channel, to get the event from the server
     peerConnection.addEventListener("datachannel", event => {
-        const dataChannel = event.channel
-        dataChannel.onmessage = e => {
+        peerConnectionDataChannel = event.channel
+        peerConnectionDataChannel.onmessage = e => {
             let subtitles = document.getElementById('subtitles')
             const webRTCEvent = JSON.parse(e.data)
             if (webRTCEvent.event.eventType === 'EVENT_TYPE_TURN_START' && document.getElementById('showSubtitles').checked) {
@@ -211,7 +228,29 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 subtitles.innerHTML = speakingText
             } else if (webRTCEvent.event.eventType === 'EVENT_TYPE_SESSION_END' || webRTCEvent.event.eventType === 'EVENT_TYPE_SWITCH_TO_IDLE') {
                 subtitles.hidden = true
+                if (webRTCEvent.event.eventType === 'EVENT_TYPE_SESSION_END') {
+                    if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            // Session disconnected unexpectedly, need reconnect
+                            console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
+                            isReconnecting = true
+
+                            // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                            peerConnectionDataChannel.onmessage = null
+
+                            // Release the existing avatar connection
+                            if (avatarSynthesizer !== undefined) {
+                                avatarSynthesizer.close()
+                            }
+
+                            // Setup a new avatar connection
+                            connectAvatar()
+                        }
+                    }
+                }
             }
+
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
         }
     })
@@ -324,7 +363,7 @@ function speak(text, endingSilenceMs = 0) {
     speakNext(text, endingSilenceMs)
 }
 
-function speakNext(text, endingSilenceMs = 0) {
+function speakNext(text, endingSilenceMs = 0, skipUpdatingChatHistory = false) {
     let ttsVoice = document.getElementById('ttsVoice').value
     let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
     let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</mstts:ttsembedding></voice></speak>`
@@ -332,7 +371,7 @@ function speakNext(text, endingSilenceMs = 0) {
         ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></mstts:ttsembedding></voice></speak>`
     }
 
-    if (enableDisplayTextAlignmentWithSpeech) {
+    if (enableDisplayTextAlignmentWithSpeech && !skipUpdatingChatHistory) {
         let chatHistoryTextArea = document.getElementById('chatHistory')
         chatHistoryTextArea.innerHTML += text.replace(/\n/g, '<br/>')
         chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
@@ -351,6 +390,8 @@ function speakNext(text, endingSilenceMs = 0) {
                 console.log(`Error occurred while speaking the SSML. Result ID: ${result.resultId}`)
             }
 
+            speakingText = ''
+
             if (spokenTextQueue.length > 0) {
                 speakNext(spokenTextQueue.shift())
             } else {
@@ -360,6 +401,8 @@ function speakNext(text, endingSilenceMs = 0) {
         }).catch(
             (error) => {
                 console.log(`Error occurred while speaking the SSML: [ ${error} ]`)
+
+                speakingText = ''
 
                 if (spokenTextQueue.length > 0) {
                     speakNext(spokenTextQueue.shift())
@@ -372,6 +415,7 @@ function speakNext(text, endingSilenceMs = 0) {
 }
 
 function stopSpeaking() {
+    lastInteractionTime = new Date()
     spokenTextQueue = []
     avatarSynthesizer.stopSpeakingAsync().then(
         () => {
@@ -387,6 +431,7 @@ function stopSpeaking() {
 }
 
 function handleUserQuery(userQuery, userQueryHTML, imgUrlPath) {
+    lastInteractionTime = new Date()
     let contentMessage = userQuery
     if (imgUrlPath.trim()) {
         contentMessage = [  
@@ -603,14 +648,20 @@ function checkHung() {
                 if (sessionActive) {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
-                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
-                        // Release the existing avatar connection
-                        if (avatarSynthesizer !== undefined) {
-                            avatarSynthesizer.close()
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                            isReconnecting = true
+                            // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                            peerConnectionDataChannel.onmessage = null
+                            // Release the existing avatar connection
+                            if (avatarSynthesizer !== undefined) {
+                                avatarSynthesizer.close()
+                            }
+    
+                            // Setup a new avatar connection
+                            connectAvatar()
                         }
-
-                        // Setup a new avatar connection
-                        connectAvatar()
                     }
                 }
             }
@@ -642,6 +693,7 @@ window.onload = () => {
 }
 
 window.startSession = () => {
+    lastInteractionTime = new Date()
     if (document.getElementById('useLocalVideoForIdle').checked) {
         document.getElementById('startSession').disabled = true
         document.getElementById('configuration').hidden = true
@@ -654,10 +706,12 @@ window.startSession = () => {
         return
     }
 
+    userClosedSession = false
     connectAvatar()
 }
 
 window.stopSession = () => {
+    lastInteractionTime = new Date()
     document.getElementById('startSession').disabled = false
     document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
@@ -671,15 +725,18 @@ window.stopSession = () => {
         document.getElementById('localVideo').hidden = true
     }
 
+    userClosedSession = true
     disconnectAvatar()
 }
 
 window.clearChatHistory = () => {
+    lastInteractionTime = new Date()
     document.getElementById('chatHistory').innerHTML = ''
     initMessages()
 }
 
 window.microphone = () => {
+    lastInteractionTime = new Date()
     if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
         // Stop microphone
         document.getElementById('microphone').disabled = true

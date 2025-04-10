@@ -31,7 +31,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
     * Replace the `your_actual_subscription_key` with your own subscription key.
     * Replace the `your_actual_service_region` with the service region of your subscription.
       For example, replace with `westus` if you are using the 30-day free trial subscription.
-* If you are using Microsoft Visual Studio 2017 on Windows, press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
+* If you are using Microsoft Visual Studio on Windows, press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 * If you are using the .NET Core CLI, run the following command from the directory that contains this sample:
 
   ```bash

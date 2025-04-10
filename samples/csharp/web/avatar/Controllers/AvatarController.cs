@@ -8,12 +8,14 @@ using Avatar.Services;
 using Azure;
 using Azure.AI.OpenAI;
 using Azure.AI.OpenAI.Chat;
+using Azure.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OpenAI.Chat;
+using System.ClientModel;
 using System.Text;
 using System.Web;
 
@@ -55,7 +57,8 @@ namespace Avatar.Controllers
                 {
                     AzureOpenAIClient aoaiClient = new AzureOpenAIClient(
                         new Uri(_clientSettings.AzureOpenAIEndpoint),
-                        new AzureKeyCredential(_clientSettings.AzureOpenAIAPIKey));
+                        new ApiKeyCredential(_clientSettings.AzureOpenAIAPIKey));
+
                     chatClient = aoaiClient.GetChatClient(_clientSettings.AzureOpenAIDeploymentName);
                 }
             }
@@ -66,26 +69,33 @@ namespace Avatar.Controllers
         [HttpGet("api/getSpeechToken")]
         public IActionResult GetSpeechToken()
         {
-            // Retrieve the speech token and other variables
-            var speechToken = GlobalVariables.SpeechToken;
-            var speechRegion = _clientSettings.SpeechRegion;
-            var speechPrivateEndpoint = _clientSettings.SpeechPrivateEndpoint;
-
-            // Create a ContentResult to allow setting response headers
-            var contentResult = new ContentResult
+            try
             {
-                Content = speechToken,
-                ContentType = "text/plain"
-            };
+                // Retrieve the speech token and other variables
+                var speechToken = GlobalVariables.SpeechToken;
+                var speechRegion = _clientSettings.SpeechRegion;
+                var speechPrivateEndpoint = _clientSettings.SpeechPrivateEndpoint;
 
-            // Set response headers
-            Response.Headers["SpeechRegion"] = speechRegion;
-            if (!string.IsNullOrEmpty(speechPrivateEndpoint))
-            {
-                Response.Headers["SpeechPrivateEndpoint"] = speechPrivateEndpoint;
+                // Create a ContentResult to allow setting response headers
+                var contentResult = new ContentResult
+                {
+                    Content = speechToken,
+                    ContentType = "text/plain"
+                };
+
+                // Set response headers
+                Response.Headers["SpeechRegion"] = speechRegion;
+                if (!string.IsNullOrEmpty(speechPrivateEndpoint))
+                {
+                    Response.Headers["SpeechPrivateEndpoint"] = speechPrivateEndpoint;
+                }
+
+                return contentResult;
             }
-
-            return contentResult;
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("api/getIceToken")]
@@ -125,9 +135,11 @@ namespace Avatar.Controllers
             {
                 var clientId = new Guid(Request.Headers["ClientId"]!);
                 var clientContext = _clientService.GetClientContext(clientId);
+                bool isReconnecting = Request.Headers.ContainsKey("Reconnect") &&
+                      string.Equals(Request.Headers["Reconnect"], "true", StringComparison.OrdinalIgnoreCase);
 
                 // disconnect avatar if already connected
-                await DisconnectAvatarInternal(clientId);
+                await DisconnectAvatarInternal(clientId, isReconnecting);
 
                 // Override default values with client provided values
                 clientContext.AzureOpenAIDeploymentName = Request.Headers["AoaiDeploymentName"].FirstOrDefault() ?? _clientSettings.AzureOpenAIDeploymentName;
@@ -142,11 +154,11 @@ namespace Avatar.Controllers
                 if (!string.IsNullOrEmpty(_clientSettings.SpeechPrivateEndpoint))
                 {
                     var speechPrivateEndpointWss = _clientSettings.SpeechPrivateEndpoint.Replace("https://", "wss://");
-                    speechConfig = SpeechConfig.FromSubscription($"{speechPrivateEndpointWss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true", _clientSettings.SpeechKey);
+                    speechConfig = SpeechConfig.FromEndpoint(new Uri($"{speechPrivateEndpointWss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true"), _clientSettings.SpeechKey);
                 }
                 else
                 {
-                    string endpointUrl = $"wss://{_clientSettings.SpeechRegion}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true";
+                    string endpointUrl = $"wss://{_clientSettings.SpeechRegion}.tts.speech.microsoft.com/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true";
                     speechConfig = SpeechConfig.FromEndpoint(new Uri(endpointUrl), _clientSettings.SpeechKey);
                 }
 
@@ -340,11 +352,7 @@ namespace Avatar.Controllers
                 }
 
                 var clientContext = _clientService.GetClientContext(clientId);
-                if (clientContext.IsSpeaking)
-                {
-                    // Call the internal method to stop speaking
-                    await StopSpeakingInternal(clientId);
-                }
+                await StopSpeakingInternal(clientId, false);
 
                 // Return a success message
                 return Ok("Speaking stopped.");
@@ -391,6 +399,47 @@ namespace Avatar.Controllers
             return new EmptyResult();
         }
 
+        // The API route to continue speaking the unfinished sentences
+        [HttpPost("api/chat/continueSpeaking")]
+        public IActionResult ContinueSpeaking()
+        {
+            try
+            {
+                // Extract the client ID from the request headers
+                var clientIdHeader = Request.Headers["ClientId"];
+                if (!Guid.TryParse(clientIdHeader, out Guid clientId))
+                {
+                    return BadRequest("Invalid ClientId");
+                }
+
+                // Retrieve the client context
+                var clientContext = _clientService.GetClientContext(clientId);
+                var spokenTextQueue = clientContext.SpokenTextQueue;
+                var speakingText = clientContext.SpeakingText;
+
+                if (spokenTextQueue == null)
+                {
+                    return StatusCode(500, "Internal error: spoken_text_queue is missing");
+                }
+
+                if (!string.IsNullOrEmpty(speakingText) && ClientSettings.RepeatSpeakingSentenceAfterReconnection)
+                {
+                    spokenTextQueue.AddFirst(speakingText);
+                }
+
+                if (spokenTextQueue.Count > 0)
+                {
+                    SpeakWithQueue(null, 0, clientId, null);
+                }
+
+                return Ok("Request sent.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error: {ex.Message}");
+            }
+        }
+
         [HttpPost("api/chat/clearHistory")]
         public IActionResult ClearChatHistory()
         {
@@ -429,7 +478,7 @@ namespace Avatar.Controllers
                     return BadRequest("Invalid ClientId");
                 }
 
-                await DisconnectAvatarInternal(clientId);
+                await DisconnectAvatarInternal(clientId, false);
                 return Ok("Disconnected avatar");
             }
             catch (Exception ex)
@@ -469,7 +518,7 @@ namespace Avatar.Controllers
 
             try
             {
-                await DisconnectAvatarInternal(clientId);
+                await DisconnectAvatarInternal(clientId, false);
                 await Task.Delay(2000); // Wait some time for the connection to close
                 _clientService.RemoveClient(clientId);
                 Console.WriteLine($"Client context released for client id {clientId}.");
@@ -630,7 +679,7 @@ namespace Avatar.Controllers
             var spokenTextQueue = clientContext.SpokenTextQueue;
             var isSpeaking = clientContext.IsSpeaking;
 
-            spokenTextQueue.Enqueue(text);
+            spokenTextQueue.AddLast(text);
 
             if (!isSpeaking)
             {
@@ -643,9 +692,11 @@ namespace Avatar.Controllers
                 {
                     try
                     {
-                        while (spokenTextQueue.Count > 0)
+                        while (spokenTextQueue?.Count > 0)
                         {
-                            var currentText = spokenTextQueue.Dequeue();
+                            var currentText = spokenTextQueue?.First?.Value;
+                            clientContext.SpeakingText = currentText;
+                            spokenTextQueue?.RemoveFirst();
                             if (ClientSettings.EnableDisplayTextAlignmentWithSpeech)
                             {
                                 httpResponse.WriteAsync(currentText);
@@ -658,6 +709,7 @@ namespace Avatar.Controllers
                     finally
                     {
                         clientContext.IsSpeaking = false;
+                        clientContext.SpeakingText = null;
                     }
                 });
             }
@@ -724,11 +776,15 @@ namespace Avatar.Controllers
             return speechSynthesisResult.ResultId;
         }
 
-        private async Task StopSpeakingInternal(Guid clientId)
+        private async Task StopSpeakingInternal(Guid clientId, bool skipClearingSpokenTextQueue)
         {
             var clientContext = _clientService.GetClientContext(clientId);
-            var spokenTextQueue = clientContext.SpokenTextQueue;
-            spokenTextQueue.Clear();
+            clientContext.IsSpeaking = false;
+            if (!skipClearingSpokenTextQueue)
+            {
+                var spokenTextQueue = clientContext.SpokenTextQueue;
+                spokenTextQueue.Clear();
+            }
 
             try
             {
@@ -745,7 +801,7 @@ namespace Avatar.Controllers
             }
         }
 
-        private async Task DisconnectAvatarInternal(Guid clientId)
+        private async Task DisconnectAvatarInternal(Guid clientId, bool isReconnecting)
         {
             // Retrieve the client context
             var clientContext = _clientService.GetClientContext(clientId);
@@ -755,7 +811,7 @@ namespace Avatar.Controllers
                 throw new Exception("Client context not found");
             }
 
-            await StopSpeakingInternal(clientId);
+            await StopSpeakingInternal(clientId, isReconnecting);
             await Task.Delay(2000); // Wait for the last speech to finish
 
             var connection = clientContext.SpeechSynthesizerConnection as Connection;

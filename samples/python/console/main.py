@@ -14,6 +14,7 @@ import speech_synthesis_sample
 import transcription_sample
 import meeting_transcription_sample
 import translation_sample
+import speech_diagnostics_logging_sample
 
 eofkey = 'Ctrl-Z' if "Windows" == platform.system() else 'Ctrl-D'
 
@@ -37,7 +38,6 @@ samples = OrderedDict([
         speech_sample.pronunciation_assessment_continuous_from_file,
         speech_sample.pronunciation_assessment_from_stream,
         speech_sample.pronunciation_assessment_configured_with_json,
-        speech_sample.pronunciation_assessment_with_content_assessment,
     ]), (intent_sample, [
         intent_sample.recognize_intent_once_from_mic,
         intent_sample.recognize_intent_once_async_from_mic,
@@ -75,7 +75,14 @@ samples = OrderedDict([
         speech_language_detection_sample.speech_language_detection_once_from_mic,
         speech_language_detection_sample.speech_language_detection_once_from_file,
         speech_language_detection_sample.speech_language_detection_once_from_continuous,
-    ])
+    ]), (speech_diagnostics_logging_sample, [
+        speech_diagnostics_logging_sample.speech_diagnostics_file_logger_without_filter,
+        speech_diagnostics_logging_sample.speech_diagnostics_file_logger_with_filter,
+        speech_diagnostics_logging_sample.speech_diagnostics_event_logger_without_filter,
+        speech_diagnostics_logging_sample.speech_diagnostics_event_logger_with_filter,
+        speech_diagnostics_logging_sample.speech_diagnostics_memory_logger_without_filter,
+        speech_diagnostics_logging_sample.speech_diagnostics_memory_logger_with_filter,
+        speech_diagnostics_logging_sample.speech_diagnostics_self_defined_spx_trace_logging,])
 ])
 
 

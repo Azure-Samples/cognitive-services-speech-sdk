@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+import "google/protobuf/duration.proto"; 
+
+option csharp_namespace = "SpeechSDKSamples.Remote.Service.GRPC";
+
+package speech;
+
+service SpeechSDKRemoteService {
+  rpc ProcessRemoteSpeechAudio (stream SpeechSDKRemoteRequest) returns (stream SpeechSDKRemoteResponse);
+}
+
+message header {
+    string name = 1;
+    string value = 2;
+}
+
+message audioFormat {
+    uint32 bitsPerSample = 1;
+    uint32 samplesPerSecond = 2;
+    uint32 channelCount = 3;
+}
+
+message SpeechSDKRemoteRequest {
+    oneof request {
+        bytes audioPayload = 3;
+        audioFormat audioFormat = 4;
+    }
+}
+
+message audioAckMessage {
+    google.protobuf.Duration acknowledgedAudio = 1;
+}
+
+enum recognitionStoppedReason {
+        StoppRequested = 0;
+        Error = 1;
+        EndOfStream = 2;
+        Unknown = 3;
+}
+
+enum recognitionType {
+    intermediate = 0;
+    final = 1;
+}
+
+message recognitionResult {
+    recognitionType type = 1;
+    string text = 2;
+}
+
+message recognitionStopped {
+    recognitionStoppedReason Reason = 1;
+    int64 errorCode = 2;
+    string errorMessage = 3;
+}
+
+// The response message containing the greetings.
+message SpeechSDKRemoteResponse {
+oneof response {
+    audioAckMessage AcknowledgedAudio = 1;
+    recognitionStopped RecognitionStopped = 2;
+    recognitionResult RecognitionResult = 3;
+}
+}

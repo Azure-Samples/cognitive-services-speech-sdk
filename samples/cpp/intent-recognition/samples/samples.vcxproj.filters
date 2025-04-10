@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;json;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="catch2\catch_amalgamated.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\en_integer_parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\es_integer_parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\fr_integer_parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\integer_entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\intent_match_result.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\intent_recognizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\intent_trigger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\ja_integer_parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\list_entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\locale_information.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\pattern_any_entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\pattern_matching_intent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\pattern_matching_model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\pattern_matching_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\string_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\substrings_matcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\utf8_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="intent_recognizer\zh_integer_parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="samples.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="test_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test_input/de-de_howistheweather.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/en-us_Open_Microsoft_word.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/en-us_Open_Microsoft_word_on_the_left.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/en-us_TurnOnTheLamp.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/es-es_howstheweather.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/fr-fr_howistheweather.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/fr-fr_select_599.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/ja-jp_id2_its_rain_today.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/ja-jp_select_up_to_the_5th_row.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/zh-cn_howstheweather.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/zh-hk_howstheweather.wav">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="test_input/coffeeMaker.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="catch2\catch_amalgamated.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_api\intentapi_cxx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_api\intentapi_cxx_enums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_api\intentapi_cxx_intent_recognition_result.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_api\intentapi_cxx_intent_recognizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_api\intentapi_cxx_language_understanding_model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_api\intentapi_cxx_pattern_matching_entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_api\intentapi_cxx_pattern_matching_intent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_api\intentapi_cxx_pattern_matching_model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\en_integer_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\es_integer_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\fr_integer_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\integer_entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\intent_interfaces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\intent_match_result.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\intent_recognizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\intent_trigger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\ja_integer_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\list_entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\locale_information.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\maybe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\pattern_any_entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\pattern_matching_intent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\pattern_matching_model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\pattern_matching_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\string_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\substrings_matcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\traits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\utf8_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\include\zh_integer_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="intent_recognizer\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\json_builder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\json_parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\json_reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\json_reader_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\json_string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\json_tests.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv\json_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json_parser\ajv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="samples.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="test_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

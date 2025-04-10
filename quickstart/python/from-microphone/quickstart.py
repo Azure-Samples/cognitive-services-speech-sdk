@@ -13,7 +13,10 @@ with open('config.json', 'r') as config_file:
 
 speech_key = config.get("SubscriptionKey")
 service_region = config.get("ServiceRegion")
-speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+speech_endpoint = f"https://{service_region}.api.cognitive.microsoft.com"
+# Creates an instance of a speech config with specified endpoint and subscription key.
+# Replace with your own endpoint and subscription key.
+speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
 # Creates a recognizer with the given settings
 speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)

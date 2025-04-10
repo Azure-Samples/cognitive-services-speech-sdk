@@ -8,86 +8,64 @@
     mc:Ignorable="d"
     FontSize="16" MinWidth="800"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-    <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="20,50,0,0" VerticalAlignment="Center" Width="800">
-            <TextBlock x:Name="textTitle" Text="Cognitive Services Speech To Text Samples"  TextWrapping="Wrap" Margin="0,10,0,0" Width="326"/>
-            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="800" Margin="0,100,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Settings:" Margin="0,10,0,0" Width="326" FontSize="20"/>
-                <ComboBox Margin="0,0,10,0" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" SelectedValuePath="Tag" SelectedIndex="0" Width="150"  Name="RegionComboBox" SelectionChanged="RegionCombox_SelectionChanged" >
-                    <!-- Get full list of speech-to-text supported regions from https://docs.microsoft.com/azure/cognitive-services/speech-service/regions#speech-to-text-text-to-speech-and-translation -->
-                    <ComboBoxItem Tag="centralus">centralus</ComboBoxItem>
-                    <ComboBoxItem Tag="eastus">eastus</ComboBoxItem>
-                    <ComboBoxItem Tag="eastus2">eastus2</ComboBoxItem>
-                    <ComboBoxItem Tag="northcentralus">northcentralus</ComboBoxItem>
-                    <ComboBoxItem Tag="southcentralus">southcentralus</ComboBoxItem>
-                    <ComboBoxItem Tag="westcentralus">westcentralus</ComboBoxItem>
-                    <ComboBoxItem Tag="westus" IsSelected="true">westus</ComboBoxItem>
-                    <ComboBoxItem Tag="westus2">westus2</ComboBoxItem>
-                    <ComboBoxItem Tag="canadacentral">canadacentral</ComboBoxItem>
-                    <ComboBoxItem Tag="brazilsouth">brazilsouth</ComboBoxItem>
-                    <ComboBoxItem Tag="eastasia">eastasia</ComboBoxItem>
-                    <ComboBoxItem Tag="southeastasia">southeastasia</ComboBoxItem>
-                    <ComboBoxItem Tag="australiaeast">australiaeast</ComboBoxItem>
-                    <ComboBoxItem Tag="centralindia">centralindia</ComboBoxItem>
-                    <ComboBoxItem Tag="japaneast">japaneast</ComboBoxItem>
-                    <ComboBoxItem Tag="japanwest">japanwest</ComboBoxItem>
-                    <ComboBoxItem Tag="koreacentral">koreacentral</ComboBoxItem>
-                    <ComboBoxItem Tag="northeurope">northeurope</ComboBoxItem>
-                    <ComboBoxItem Tag="westeurope">westeurope</ComboBoxItem>
-                    <ComboBoxItem Tag="francecentral">francecentral</ComboBoxItem>
-                    <ComboBoxItem Tag="switzerlandnorth">switzerlandnorth</ComboBoxItem>
-                    <ComboBoxItem Tag="uksouth">uksouth</ComboBoxItem>
-                </ComboBox>
-                <ComboBox Margin="0,0,10,0" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" SelectedValuePath="Tag" SelectedIndex="0" Width="150"  Name="LanguageComboBox" SelectionChanged="LanguageCombox_SelectionChanged" >
-                    <!-- Get full list of speech-to-text supported languages from https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#speech-to-text -->
-                    <ComboBoxItem Tag="en-US" IsSelected="true">English</ComboBoxItem>
-                    <ComboBoxItem Tag="ar-EG">Arabic</ComboBoxItem>
-                    <ComboBoxItem Tag="zh-CN">Chinese (Mandarin)</ComboBoxItem>
-                    <ComboBoxItem Tag="fr-FR">French</ComboBoxItem>
-                    <ComboBoxItem Tag="de-DE">German</ComboBoxItem>
-                    <ComboBoxItem Tag="It-IT">Italian</ComboBoxItem>
-                    <ComboBoxItem Tag="ja-JP">Japanese</ComboBoxItem>
-                    <ComboBoxItem Tag="pt-BR">Portuguese</ComboBoxItem>
-                    <ComboBoxItem Tag="ru-RU">Russian</ComboBoxItem>
-                    <ComboBoxItem Tag="es-ES">Spanish</ComboBoxItem>
-                </ComboBox>
-                <TextBlock Margin="0,10,10,0" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Text="Subscription Key:" />
-                <TextBox Margin="125,10,10.4,0.4" x:Name="subscriptionKeyTextBox"  Grid.Row="1" Padding="2"  TextChanged="SubscriptionKey_TextChanged" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-                <!--             DesiredAccuracyInMeters -->
-            </Grid>
-            <StackPanel Orientation="Horizontal" Margin="0,100,0,10">
-                <Button x:Name="EnableMicrophone" Content="Enable Microphone" Margin="0,0,10,0" Click="EnableMicrophone_ButtonClicked" Height="35"/>
-            </StackPanel>
-            <StackPanel x:Name="contentPanel" HorizontalAlignment="Left" VerticalAlignment="Center">
-                <Button x:Name="inputButton" Content="Speech recognition with microphone input" Click="SpeechRecognitionFromMicrophone_ButtonClicked" Height="35"/>
-                <TextBlock x:Name="recoResultTextBlock"/>
-            </StackPanel>
-            <Button Content="Speech Recognition with File Input" Click="{x:Bind SpeechRecognitionFromFile_ButtonClicked}" Margin="0,10,0,0"/>
-            <Button Content="Speech Recognition with Stream Input" Click="{x:Bind SpeechRecognitionFromStream_ButtonClicked}" Margin="0,10,0,0"/>
-            <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
-                <TextBlock x:Name="StatusLabel" Margin="10,0,0,10" TextWrapping="Wrap" Text="Status:" FontSize="20"/>
-                <Border x:Name="StatusBorder" Margin="0,0,0,0">
-                    <ScrollViewer VerticalScrollMode="Auto"  VerticalScrollBarVisibility="Auto" MaxHeight="200">
-                        <!-- Use LiveSetting to enable screen readers to announce the status update. -->
-                        <TextBlock x:Name="StatusBlock" FontWeight="Bold" AutomationProperties.LiveSetting="Assertive"
+  <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="20,50,0,0" VerticalAlignment="Center" Width="800">
+      <TextBlock x:Name="textTitle" Text="Cognitive Services Speech To Text Samples"  TextWrapping="Wrap" Margin="0,10,0,0" Width="326"/>
+      <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="800" Margin="0,100,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Settings:" Margin="0,10,0,0" Width="326" FontSize="20"/>
+
+        <TextBlock Margin="0,10,10,0" Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left" Text="Language:" />
+        <ComboBox Margin="125,0,0,0" Grid.Row="3" SelectedValuePath="Tag" SelectedIndex="0" Width="356"  Padding="2" Name="LanguageComboBox" SelectionChanged="LanguageCombox_SelectionChanged" Grid.ColumnSpan="5" VerticalAlignment="Center" >
+          <!-- Get full list of speech-to-text supported languages from https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#speech-to-text -->
+          <ComboBoxItem Tag="en-US" IsSelected="true">English</ComboBoxItem>
+          <ComboBoxItem Tag="ar-EG">Arabic</ComboBoxItem>
+          <ComboBoxItem Tag="zh-CN">Chinese (Mandarin)</ComboBoxItem>
+          <ComboBoxItem Tag="fr-FR">French</ComboBoxItem>
+          <ComboBoxItem Tag="de-DE">German</ComboBoxItem>
+          <ComboBoxItem Tag="It-IT">Italian</ComboBoxItem>
+          <ComboBoxItem Tag="ja-JP">Japanese</ComboBoxItem>
+          <ComboBoxItem Tag="pt-BR">Portuguese</ComboBoxItem>
+          <ComboBoxItem Tag="ru-RU">Russian</ComboBoxItem>
+          <ComboBoxItem Tag="es-ES">Spanish</ComboBoxItem>
+        </ComboBox>
+        <TextBlock Margin="0,10,10,0" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Text="Subscription Key:" />
+        <TextBox Margin="125,10,0,0" x:Name="subscriptionKeyTextBox"  Grid.Row="1" Padding="2"  TextChanged="SubscriptionKey_TextChanged" Grid.ColumnSpan="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <TextBlock Margin="0,10,10,0" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" Text="Endpoint:" />
+        <TextBox Margin="125,10,0,0" x:Name="endpointTextBox"  Grid.Row="2" Padding="2"  TextChanged="Endpoint_TextChanged" Grid.ColumnSpan="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+      </Grid>
+      <StackPanel Orientation="Horizontal" Margin="0,100,0,10">
+        <Button x:Name="EnableMicrophone" Content="Enable Microphone" Margin="0,0,10,0" Click="EnableMicrophone_ButtonClicked" Height="35"/>
+      </StackPanel>
+      <StackPanel x:Name="contentPanel" HorizontalAlignment="Left" VerticalAlignment="Center">
+        <Button x:Name="inputButton" Content="Speech recognition with microphone input" Click="SpeechRecognitionFromMicrophone_ButtonClicked" Height="35"/>
+        <TextBlock x:Name="recoResultTextBlock"/>
+      </StackPanel>
+      <Button Content="Speech Recognition with File Input" Click="{x:Bind SpeechRecognitionFromFile_ButtonClicked}" Margin="0,10,0,0"/>
+      <Button Content="Speech Recognition with Stream Input" Click="{x:Bind SpeechRecognitionFromStream_ButtonClicked}" Margin="0,10,0,0"/>
+      <StackPanel x:Name="StatusPanel" Orientation="Vertical" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignLeftWithPanel="True">
+        <TextBlock x:Name="StatusLabel" Margin="10,0,0,10" TextWrapping="Wrap" Text="Status:" FontSize="20"/>
+        <Border x:Name="StatusBorder" Margin="0,0,0,0">
+          <ScrollViewer VerticalScrollMode="Auto"  VerticalScrollBarVisibility="Auto" MaxHeight="200">
+            <!-- Use LiveSetting to enable screen readers to announce the status update. -->
+            <TextBlock x:Name="StatusBlock" FontWeight="Bold" AutomationProperties.LiveSetting="Assertive"
                                    MaxWidth="{Binding ElementName=Splitter, Path=ActualWidth}" Margin="10,10,10,20" TextWrapping="Wrap"  />
-                    </ScrollViewer>
-                </Border>
-            </StackPanel>
-        </StackPanel>
-    </Grid>
+          </ScrollViewer>
+        </Border>
+      </StackPanel>
+    </StackPanel>
+  </Grid>
 </Page>

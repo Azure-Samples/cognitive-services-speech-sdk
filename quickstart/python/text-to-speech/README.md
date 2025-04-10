@@ -32,7 +32,8 @@ Note: this tutorial will not work without changes for any version earlier than 1
 
 ## Run the sample
 
-Before you run the sample code, replace the dummy values `YourSubscriptionKey` and `YourServiceRegion` by your subscription information.
+Before you run the sample code, replace the value `YourSubscriptionKey` with your subscription key and
+replace the value `https://YourServiceRegion.api.cognitive.microsoft.com` with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
 You can either load the quickstart sample in your IDE and run it there or run it in a console by navigating to the directory you downloaded it to and running the command
 
 ```sh

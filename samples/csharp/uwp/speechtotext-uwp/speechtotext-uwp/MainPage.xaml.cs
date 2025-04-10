@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using Windows.Foundation;
@@ -45,10 +46,12 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 this.subscriptionKey = value?.Trim();
             }
         }
+
         /// <summary>
-        /// Gets or sets region name of the service
+        /// Gets or sets endpoint of the service
         /// </summary>
-        public string Region { get; set; }
+        public string Endpoint { get; set; }
+
         /// <summary>
         /// Gets or sets recognition language
         /// </summary>
@@ -59,7 +62,6 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
         public MainPage()
         {
             this.InitializeComponent();
-            this.Region = ((ComboBoxItem)RegionComboBox.SelectedItem).Tag.ToString();
             this.RecognitionLanguage = ((ComboBoxItem)LanguageComboBox.SelectedItem).Tag.ToString();
         }
         private async void SpeechRecognitionFromMicrophone_ButtonClicked(object sender, RoutedEventArgs e)
@@ -69,8 +71,8 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 NotifyUser("Subscription Key is missing!", NotifyType.ErrorMessage);
                 return;
             }
-            // Creates an instance of a speech config with specified subscription key and region.
-            var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+            // Creates an instance of a speech config with specified subscription key and endpoint.
+            var config = SpeechConfig.FromEndpoint(new Uri(this.Endpoint), this.SubscriptionKey);
             config.SpeechRecognitionLanguage = this.RecognitionLanguage;
 
             // Creates a speech recognizer using microphone as audio input.
@@ -116,7 +118,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
             if (file != null)
             {
                 // Creates an instance of a speech config with specified and service region (e.g., "westus").
-                var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+                var config = SpeechConfig.FromEndpoint(new Uri(this.Endpoint), this.SubscriptionKey);
                 config.SpeechRecognitionLanguage = this.RecognitionLanguage;
 
                 // Creates a speech recognizer using file as audio input.
@@ -215,8 +217,8 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 // Create an audio stream from a wav file.
                 audioInput = MicrosoftSpeechSDKSamples.Helper.OpenWavFile(reader);
 
-                // Creates an instance of a speech config with specified and service region (e.g., "westus").
-                var config = SpeechConfig.FromSubscription(this.SubscriptionKey, this.Region);
+                // Creates an instance of a speech config with specified subscription key and endpoint.
+                var config = SpeechConfig.FromEndpoint(new Uri(this.Endpoint), this.SubscriptionKey);
                 config.SpeechRecognitionLanguage = this.RecognitionLanguage;
 
                 // Creates a speech recognizer using file as audio input.
@@ -272,7 +274,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
             }
-            catch(System.FormatException ex)
+            catch (System.FormatException ex)
             {
                 NotifyUser(ex.ToString(), NotifyType.ErrorMessage);
             }
@@ -286,7 +288,7 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 {
                     audioInput.Dispose();
                 }
-                if(stream != null)
+                if (stream != null)
                 {
                     stream.Dispose();
                 }
@@ -317,9 +319,9 @@ namespace MicrosoftSpeechSDKSamples.UwpSpeechRecognitionSample
                 NotifyUser("Microphone was enabled", NotifyType.StatusMessage);
             }
         }
-        private void RegionCombox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Endpoint_TextChanged(object sender, TextChangedEventArgs e)
         {
-            this.Region = ((ComboBoxItem)RegionComboBox.SelectedItem).Tag.ToString();
+            this.Endpoint = endpointTextBox.Text;
         }
         private void LanguageCombox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

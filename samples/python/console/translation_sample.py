@@ -22,8 +22,8 @@ except ImportError:
     sys.exit(1)
 
 # Set up the subscription info for the Speech Service:
-# Replace with your own subscription key and service region (e.g., "westus").
-speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
+# Replace with your own subscription key and endpoint.
+speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
 
 # Specify the path to audio files containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
@@ -36,7 +36,7 @@ def translation_once_from_mic():
     # <TranslationOnceWithMic>
     # set up translation parameters: source language and target languages
     translation_config = speechsdk.translation.SpeechTranslationConfig(
-        subscription=speech_key, region=service_region,
+        subscription=speech_key, endpoint=speech_endpoint,
         speech_recognition_language='en-US',
         target_languages=('de', 'fr', 'zh-Hans'))
     audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
@@ -78,7 +78,7 @@ def translation_once_from_file():
     # <TranslationOnceWithFile>
     # set up translation parameters: source language and target languages
     translation_config = speechsdk.translation.SpeechTranslationConfig(
-        subscription=speech_key, region=service_region,
+        subscription=speech_key, endpoint=speech_endpoint,
         speech_recognition_language='en-US',
         target_languages=('de', 'fr'))
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
@@ -117,7 +117,7 @@ def translation_continuous():
     # <TranslationContinuous>
     # set up translation parameters: source language and target languages
     translation_config = speechsdk.translation.SpeechTranslationConfig(
-        subscription=speech_key, region=service_region,
+        subscription=speech_key, endpoint=speech_endpoint,
         speech_recognition_language='en-US',
         target_languages=('de', 'fr'), voice_name="de-DE-KatjaNeural")
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
@@ -181,14 +181,10 @@ def translation_once_with_lid_from_file():
     """performs a one-shot speech translation from an audio file, with at-start language identification"""
     # <TranslationOnceWithLID>
 
-    # When you use Language ID with speech translation, you must set a v2 endpoint.
-    # This will be fixed in a future version of Speech SDK.
-
     # Set up translation parameters, including the list of target (translated) languages.
-    endpoint_string = "wss://{}.stt.speech.microsoft.com/speech/universal/v2".format(service_region)
     translation_config = speechsdk.translation.SpeechTranslationConfig(
         subscription=speech_key,
-        endpoint=endpoint_string,
+        endpoint=speech_endpoint,
         target_languages=('de', 'fr'))
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
@@ -232,14 +228,10 @@ def translation_continuous_with_lid_from_multilingual_file():
     """performs continuous speech translation from a multi-lingual audio file, with continuous language identification"""
     # <TranslationContinuousWithLID>
 
-    # When you use Language ID with speech translation, you must set a v2 endpoint.
-    # This will be fixed in a future version of Speech SDK.
-
     # Set up translation parameters, including the list of target (translated) languages.
-    endpoint_string = "wss://{}.stt.speech.microsoft.com/speech/universal/v2".format(service_region)
     translation_config = speechsdk.translation.SpeechTranslationConfig(
         subscription=speech_key,
-        endpoint=endpoint_string,
+        endpoint=speech_endpoint,
         target_languages=('de', 'fr'))
     audio_config = speechsdk.audio.AudioConfig(filename=multilingual_wav_file)
 

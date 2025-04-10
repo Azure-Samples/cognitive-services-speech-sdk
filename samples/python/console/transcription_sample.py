@@ -24,10 +24,10 @@ except ImportError:
     sys.exit(1)
 
 # Set up the subscription info for the Speech Service:
-# Replace with your own subscription key and service region (e.g., "centralus").
+# Replace with your own subscription key and endpoint.
 # See the limitations in supported regions,
 # https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-conversation-transcription
-speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
+speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
 
 # This sample uses a wavfile which is captured using a supported Speech SDK devices (8 channel, 16kHz, 16-bit PCM)
 # See https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-devices-sdk-microphone
@@ -38,7 +38,7 @@ conversationfilename = "YourConversationWavFile"
 def conversation_transcription():
     """transcribes a conversation"""
     # Creates speech configuration with subscription information
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     channels = 1
     bits_per_sample = 16
@@ -84,7 +84,7 @@ def conversation_transcription():
 def conversation_transcription_from_microphone():
     """transcribes a conversation"""
     # Creates speech configuration with subscription information
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     transcriber = speechsdk.transcription.ConversationTranscriber(speech_config)
 
     done = False

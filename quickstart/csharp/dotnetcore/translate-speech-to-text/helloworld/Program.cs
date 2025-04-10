@@ -29,7 +29,10 @@ namespace helloworld
             string jsonString = await File.ReadAllTextAsync(configFilePath);
             ConfigSettings configSettings = JsonSerializer.Deserialize<ConfigSettings>(jsonString);
 
-            var config = SpeechTranslationConfig.FromSubscription(configSettings.SubscriptionKey, configSettings.ServiceRegion);
+            // Creates an instance of a speech translation config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var endpoint = new Uri($"https://{configSettings.ServiceRegion}.api.cognitive.microsoft.com/");
+            var config = SpeechTranslationConfig.FromEndpoint(endpoint, "YourSubscriptionKey");
 
             // Sets source and target languages.
             string fromLanguage = "en-US";

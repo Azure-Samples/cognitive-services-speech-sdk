@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity
             // Note: Since RecognizeOnceAsync() returns only a single utterance,
             // it is best suited for single-shot recognition, like a command or
             // short query. For long-running multi-utterance recognition, use
-            // StartContinuousRecognitionAsync() instead (see general C# samples).
+            // StartContinuousRecognitionAsync() instead (see general Java samples).
             Future<SpeechRecognitionResult> task = recognizer.recognizeOnceAsync();
 
             // Note that this will block the UI thread, so eventually you

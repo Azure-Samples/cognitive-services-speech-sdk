@@ -20,7 +20,7 @@
             "command": "pip",
             "args": [
                 "install",
-                "azure-cognitiveservices-speech"
+                "azure-cognitiveservices-speech>=1.43.0"
             ],
             "group": {
                 "kind": "build",

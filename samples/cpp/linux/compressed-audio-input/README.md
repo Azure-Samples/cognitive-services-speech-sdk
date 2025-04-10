@@ -43,6 +43,11 @@ for installing the required dependencies.
   * In the line `SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK` change the right-hand side to point to the location of your extract Speech SDK for Linux.
   * If you are running on Linux x86 (32-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=x86`.
   * If you are running on Linux ARM64 (64-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=arm64`.
+* Edit the `compressed-audio-input.cpp` source:
+  * Replace the variable `subscriptionKey` with your own subscription key.
+  * Replace the variable endpoint with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
+    For example, the endpoint might look like `https://westus.api.cognitive.microsoft.com` if your resource is in the West US region. Make sure the endpoint in your code matches the one in your Azure resource, otherwise you'll get a 401 unauthorized access error.
+* Run the command `make` to build the sample, the resulting executable will be called `compressed-audio-input`.
 
 ## Run the sample
 

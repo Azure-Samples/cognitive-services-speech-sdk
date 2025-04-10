@@ -22,9 +22,10 @@ const char* getEnvVar(const char* var) {
 void recognizeSpeech() {
     const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
     const char* serviceRegion = getEnvVar("SERVICE_REGION");
-
-    // Creates an instance of a speech config with specified subscription key and service region.
-    auto config = SpeechConfig::FromSubscription(subscriptionKey, serviceRegion);
+    const char* endpoint = "https://" + string(serviceRegion) + ".api.cognitive.microsoft.com";
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint and subscription key.
+    auto config = SpeechConfig::FromEndpoint(endpoint, subscriptionKey);
 
     // Creates a speech recognizer
     auto recognizer = SpeechRecognizer::FromConfig(config);
@@ -40,7 +41,7 @@ void recognizeSpeech() {
 
     // Checks result.
     if (result->Reason == ResultReason::RecognizedSpeech) {
-        cout << "We recognized: " << result->Text << std::endl;
+        cout << "We Recognized: " << result->Text << std::endl;
     }
     else if (result->Reason == ResultReason::NoMatch) {
         cout << "NOMATCH: Speech could not be recognized." << std::endl;
@@ -60,6 +61,9 @@ void recognizeSpeech() {
 int main(int argc, char **argv) {
     setlocale(LC_ALL, "");
     recognizeSpeech();
+    cout << "Please press <Return> to continue." << endl;
+    std::string text;
+    getline(cin, text);
     return 0;
 }
 // </code>
