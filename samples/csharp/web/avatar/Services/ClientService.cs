@@ -29,6 +29,7 @@ namespace Avatar.Services
             clientContext.CustomVoiceEndpointId = null;
             clientContext.PersonalVoiceSpeakerProfileId = null;
             clientContext.SpeechSynthesizer = null;
+            clientContext.SpeechSynthesizerConnected = false;
             clientContext.SpeechToken = null;
             clientContext.IceToken = null;
             clientContext.ChatInitiated = false;
