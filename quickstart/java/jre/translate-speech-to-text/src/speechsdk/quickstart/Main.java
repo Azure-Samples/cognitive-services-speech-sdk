@@ -5,7 +5,11 @@
 // <code>
 package speechsdk.quickstart;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
+import java.nio.file.Path;
+import org.json.JSONObject;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
@@ -16,10 +20,17 @@ public class Main {
 
     public static void translationWithMicrophoneAsync() throws InterruptedException, ExecutionException, IOException, java.net.URISyntaxException
     {
+        Path configPath = Paths.get(System.getProperty("user.dir"), "config.json");
+        String content = new String(Files.readAllBytes(configPath));
+        JSONObject jsonObject = new JSONObject(content);
+
         // Replace with your own subscription key.
-        String speechSubscriptionKey = "YourSubscriptionKey";
+        String speechSubscriptionKey = jsonObject.getString("SubscriptionKey");
+        // Replace below with your own service region (e.g., "westus").
+        String speechServiceRegion = jsonObject.getString("ServiceRegion");
+
         // Replace below with your own endpoint URL (e.g., "https://westus.api.cognitive.microsoft.com")
-        String endpointUrl = "YourEndpointUrl";
+        String endpointUrl = "https://" + speechServiceRegion + ".api.cognitive.microsoft.com/";
         
         // Creates an instance of a translation recognizer using speech translation configuration with specified
         // endpoint and subscription key and microphone as default audio input.
@@ -33,7 +44,7 @@ public class Main {
             // Sets voice name of synthesis output.
             String GermanVoice = "de-DE-AmalaNeural";
             config.setVoiceName(GermanVoice);
-            
+
             try (TranslationRecognizer recognizer = new TranslationRecognizer(config)) {
                 // Subscribes to events.
                 recognizer.recognizing.addEventListener((s, e) -> {

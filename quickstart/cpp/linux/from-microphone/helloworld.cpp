@@ -6,14 +6,26 @@
 // <code>
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
+#include <cstdlib>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
+const char* getEnvVar(const char* var) {
+    const char* val = getenv(var);
+    if (val == nullptr) {
+        throw logic_error("Environment variable not set: " + string(var));
+    }
+    return val;
+}
+
 void recognizeSpeech() {
+    const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
+    const char* serviceRegion = getEnvVar("SERVICE_REGION");
+    const char* endpoint = "https://" + string(serviceRegion) + ".api.cognitive.microsoft.com";
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint(endpoint, subscriptionKey);
 
     // Creates a speech recognizer
     auto recognizer = SpeechRecognizer::FromConfig(config);

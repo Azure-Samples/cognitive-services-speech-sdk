@@ -6,19 +6,15 @@
 namespace BatchClient
 {
     using System;
+    using System.IO;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
     public class Program
     {
-        // Replace with your subscription key
-        public const string SubscriptionKey = "YourSubscriptionKey";
-
-        // Update with your service region
-        public const string Region = "YourServiceRegion";
+        private static UserConfig _userConfig;
 
         // replace with your app service name (check publish on webhook receiver project)
         public const string WebHookAppServiceName = "YourAppServiceName";
@@ -26,10 +22,6 @@ namespace BatchClient
         // replace with a secure secret (used for hashing)
         public const string WebHookSecret = "somethingverysecretisbesthere";
 
-        // recordings and locale
-        private const string Locale = "en-US";
-        private static Uri RecordingsBlobUri = new Uri("<SAS URI pointing to an audio file stored in Azure Blob Storage>");
-        //private static Uri ContentAzureBlobContainer = new Uri("<SAS URI pointing to an container in Azure Blob Storage>");
         private static Uri WebHookCallbackUrl = new Uri($"https://{WebHookAppServiceName}.azurewebsites.net/api/callback");
 
         // For use of custom trained model:
@@ -41,13 +33,49 @@ namespace BatchClient
 
         static void Main(string[] args)
         {
-            RunAsync().Wait();
+            const string usage = @"USAGE: dotnet run -- [...]
+
+  HELP
+    --help                           Show this help and stop.
+
+  CONNECTION
+    --key KEY                        Your Azure Speech service resource key. Use the `--key` option.
+    --region REGION                  Your Azure Speech service region.Use the `--region` option.
+                                     Examples: westus, eastus
+
+  Locale
+
+  INPUT
+    --recordingsBlobUris             Input audios SAS URI (if input multiple, please separate them with commas) stored in Azure Blob Storage. Optional.
+                                     Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_1>?SAS_TOKEN_1,https://<storage_account_name>.blob.core.windows.net/<container_name>/<file_name_2>?SAS_TOKEN_2
+    --recordingsContainerUri         Input audios Azure Blob Storage Container SAS URI. Optional.
+                                     Examples: https://<storage_account_name>.blob.core.windows.net/<container_name>?SAS_TOKEN
+    --locale                         Specify locale. The locale of recordings.
+                                     Examples: en-US, ja-JP
+";
+
+            if (args.Contains("--help"))
+            {
+                Console.WriteLine(usage);
+            }
+            else
+            {
+                Program program = new Program();
+                program.Initialize(args, usage);
+
+                RunAsync().Wait();
+            }
+        }
+
+        private void Initialize(string[] args, string usage)
+        {
+            _userConfig = UserConfig.UserConfigFromArgs(args, usage);
         }
 
         private static async Task RunAsync()
         {
             // create the client object and authenticate
-            using (var client = BatchClient.CreateApiClient(SubscriptionKey, $"{Region}.api.cognitive.microsoft.com", "2024-11-15"))
+            using (var client = BatchClient.CreateApiClient(_userConfig.subscriptionKey, $"{_userConfig.region}.api.cognitive.microsoft.com", "2024-11-15"))
             {
                 // uncomment next line when using web hooks
                 // await SetupWebHookAsync(client).ConfigureAwait(false);
@@ -89,10 +117,10 @@ namespace BatchClient
             // <transcriptiondefinition>
             var newTranscription = new Transcription
             {
-                DisplayName = DisplayName, 
-                Locale = Locale, 
-                ContentUrls = new[] { RecordingsBlobUri },
-                //ContentContainerUrl = ContentAzureBlobContainer,
+                DisplayName = DisplayName,
+                Locale = _userConfig.locale,
+                ContentUrls = _userConfig.recordingsBlobUris,
+                // ContentContainerUrl = _userConfig.contentAzureBlobContainer,
                 Model = CustomModel,
                 Properties = new TranscriptionProperties
                 {
@@ -166,10 +194,43 @@ namespace BatchClient
                                 {
                                     var paginatedfiles = await client.GetTranscriptionFilesAsync(transcription.Links.Files).ConfigureAwait(false);
 
-                                    var resultFile = paginatedfiles.Values.FirstOrDefault(f => f.Kind == ArtifactKind.Transcription);
-                                    var result = await client.GetTranscriptionResultAsync(new Uri(resultFile.Links.ContentUrl)).ConfigureAwait(false);
-                                    Console.WriteLine("Transcription succeeded. Results: ");
-                                    Console.WriteLine(JsonConvert.SerializeObject(result, SpeechJsonContractResolver.WriterSettings));
+                                    var resultFiles = paginatedfiles.Values.Where(f => f.Kind == ArtifactKind.Transcription);
+
+                                    if (!resultFiles.Any())
+                                    {
+                                        Console.WriteLine("No transcription results found.");
+                                        return;
+                                    }
+
+                                    Console.WriteLine("Transcription succeeded. Found {0} result files.", resultFiles.Count());
+
+                                    string resultsDir = "results";
+                                    if (!Directory.Exists(resultsDir))
+                                    {
+                                        Directory.CreateDirectory(resultsDir);
+                                    }
+
+                                    foreach (var resultFile in resultFiles)
+                                    {
+                                        var result = await client.GetTranscriptionResultAsync(new Uri(resultFile.Links.ContentUrl)).ConfigureAwait(false);
+                                        string resultJsonStr = JsonConvert.SerializeObject(result, SpeechJsonContractResolver.WriterSettings);
+
+                                        // print the results to console
+                                        Console.WriteLine("Transcription of {0} succeeded. Results: ", resultFile.Name);
+                                        Console.WriteLine(resultJsonStr);
+
+                                        string sanitizedFileName = string.Concat(resultFile.Name.Split(Path.GetInvalidFileNameChars()));
+                                        if (!sanitizedFileName.EndsWith(".json"))
+                                        {
+                                            sanitizedFileName += ".json";
+                                        }
+
+                                        string filePath = Path.Combine(resultsDir, sanitizedFileName);
+
+                                        System.IO.File.WriteAllText(filePath, resultJsonStr);
+
+                                        Console.WriteLine($"Transcription of {resultFile.Name} results written to file: {filePath}");
+                                    }
                                 }
                                 else
                                 {
@@ -195,7 +256,9 @@ namespace BatchClient
 
                 // </transcriptionstatus>
                 // check again after 1 minute
-                await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                if (completed < 1) {
+                    await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                }
             }
 
             Console.WriteLine("Press any key...");

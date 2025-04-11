@@ -6,6 +6,14 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 > **Note:**
 > We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
 
+## Run the Sample within VS Code
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- Download this sample from sample gallery to local machine.
+- Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select a speech resource.
+- Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure and setup the sample. This command only needs to be run once.
+- Trigger `Azure AI Speech Toolkit: Build the Sample App` command from command palette to build the sample.
+- Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
+
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
@@ -31,38 +39,44 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   * If you are running on Linux x86 (32-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=x86`.
   * If you are running on Linux ARM64 (64-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=arm64`.
 * Edit the `helloworld.cpp` source:
-  * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the endpoint URL `https://YourServiceRegion.api.cognitive.microsoft.com` with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
+  * Replace the variable `subscriptionKey` with your own subscription key.
+  * Replace the variable `endpoint` with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
     For example, the endpoint might look like `https://westus.api.cognitive.microsoft.com` if your resource is in the West US region. Make sure the endpoint in your code matches the one in your Azure resource, otherwise you'll get a 401 unauthorized access error.
 * Run the command `make` to build the sample, the resulting executable will be called `helloworld`.
 
 ## Run the sample
 
-To run the sample, you'll need to configure the loader's library path to point to the Speech SDK library.
+1. To run the sample, you'll need to configure the loader's library path to point to the Speech SDK library.
 
-* On an x64 machine, run:
+  * On an x64 machine, run:
 
-  ```sh
-  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/x64"
-  ```
+    ```sh
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/x64"
+    ```
 
-* On an x86 machine, run:
+  * On an x86 machine, run:
 
-  ```sh
-  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/x86"
-  ```
+    ```sh
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/x86"
+    ```
 
-* On an ARM64 machine, run:
+  * On an ARM64 machine, run:
 
-  ```sh
-  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/arm64"
-  ```
+    ```sh
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/arm64"
+    ```
 
-Run the application:
+2. Export speech resource key and region as environment variables. For example, use `westus` as `SERVICE_REGION` if you are using the 30-day free trial subscription.
 
-```sh
-./quickstart-linux
-```
+    ```sh
+    export SPEECH_RESOURCE_KEY="{your_speech_service_key}"
+    export SERVICE_REGION="{your_speech_service_region}"
+    ```
+3. Run the application:
+
+    ```sh
+    ./helloworld
+    ```
 
 ## References
 
