@@ -14,6 +14,7 @@ using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public2024
 using Microsoft.SpeechServices.DataContracts;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
@@ -32,8 +33,8 @@ public class TranslationClient : HttpClientBase
     {
         ArgumentException.ThrowIfNullOrEmpty(translationId);
 
-        var url = BuildRequestBase()
-            .AppendPathSegment(translationId);
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
+        url = url.AppendPathSegment(translationId);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -64,7 +65,7 @@ public class TranslationClient : HttpClientBase
 
     public async Task<IFlurlResponse> GetTranslationResponseAsync(string translationId)
     {
-        var url = BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         url = url.AppendPathSegment(translationId.ToString());
 
@@ -91,7 +92,7 @@ public class TranslationClient : HttpClientBase
 
     public async Task<PaginatedResources<Translation>> GetTranslationsAsync()
     {
-        var url = BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -103,7 +104,7 @@ public class TranslationClient : HttpClientBase
 
     public async Task<PaginatedResources<Iteration>> GetIterationsAsync(string translationId)
     {
-        var url = BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -118,7 +119,7 @@ public class TranslationClient : HttpClientBase
 
     public async Task<Iteration> GetIterationAsync(string translationId, string iterationId)
     {
-        var url = BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -134,7 +135,8 @@ public class TranslationClient : HttpClientBase
 
     public async Task<(Translation translation, Iteration iteration)> CreateTranslationAndIterationAndWaitUntilTerminatedAsync(
         Translation translation,
-        Iteration iteration)
+        Iteration iteration,
+        IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
         var transaltionResponse = await CreateTranslationAndWaitUntilTerminatedAsync(
             translation: translation).ConfigureAwait(false);
@@ -150,7 +152,7 @@ public class TranslationClient : HttpClientBase
         var iterationResponse = await iterationClient.CreateIterationAndWaitUntilTerminatedAsync(
             translationId: transaltionResponse.Id,
             iteration: iteration,
-            additionalHeaders: null).ConfigureAwait(false);
+            additionalHeaders: additionalHeaders).ConfigureAwait(false);
 
         return (transaltionResponse, iterationResponse);
     }
@@ -216,8 +218,8 @@ public class TranslationClient : HttpClientBase
         ArgumentException.ThrowIfNullOrEmpty(translation.Id);
         ArgumentException.ThrowIfNullOrEmpty(operationId);
 
-        var url = BuildRequestBase()
-            .AppendPathSegment(translation.Id)
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
+        url = url.AppendPathSegment(translation.Id)
             .WithHeader(CommonPublicConst.Http.Headers.OperationId, operationId);
 
         return await RequestWithRetryAsync(async () =>

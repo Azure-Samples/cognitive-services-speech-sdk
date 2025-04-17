@@ -7,11 +7,15 @@ namespace Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 
 using CommandLine;
 using System;
+using System.Globalization;
 
 [Verb("createTranslationAndIterationAndWaitUntilTerminated", HelpText = "Create translation and create first iteration until terminated.")]
 public partial class CreateTranslationAndIterationAndWaitUntilTerminatedOptions : CreateTranslationAndIterationAndWaitUntilTerminatedBaseOptions
 {
-    [Option('v', "videoFileAzureBlobUrl", Required = true, HelpText = "Specify video file Azure blob URL.")]
+    [Option("sourceLocale", Required = true, HelpText = "Specify source locale of the video.")]
+    public CultureInfo SourceLocale { get; set; }
+
+    [Option("videoFileAzureBlobUrl", Required = true, HelpText = "Specify video file Azure blob URL.")]
     public Uri VideoFileAzureBlobUrl { get; set; }
 }
 

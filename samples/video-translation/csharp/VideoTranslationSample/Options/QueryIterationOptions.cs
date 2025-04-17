@@ -10,10 +10,10 @@ using CommandLine;
 [Verb("queryIteration", HelpText = "Query iteration by translation ID and iteration ID.")]
 public class QueryIterationOptions : BaseOptions
 {
-    [Option('t', "translationId", Required = true, HelpText = "Specify translation ID.")]
+    [Option("translationId", Required = true, HelpText = "Specify translation ID.")]
     public string TranslationId { get; set; }
 
-    [Option('i', "iterationId", Required = true, HelpText = "Specify iteration ID.")]
+    [Option("iterationId", Required = true, HelpText = "Specify iteration ID.")]
     public string IterationId { get; set; }
 }
 

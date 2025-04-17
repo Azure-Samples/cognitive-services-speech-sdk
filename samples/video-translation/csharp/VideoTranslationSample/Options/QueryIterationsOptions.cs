@@ -10,7 +10,7 @@ using CommandLine;
 [Verb("queryIterations", HelpText = "Query iterations.")]
 public class QueryIterationsOptions : BaseOptions
 {
-    [Option('t', "translationId", Required = true, HelpText = "Specify translation ID.")]
+    [Option("translationId", Required = true, HelpText = "Specify translation ID.")]
     public string TranslationId { get; set; }
 }
 

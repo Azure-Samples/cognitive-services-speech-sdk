@@ -7,14 +7,18 @@ namespace Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 
 using CommandLine;
 using System;
+using System.Globalization;
 
 [Verb("createTranslation", HelpText = "Create translation.")]
 public partial class CreateTranslationOptions : CreateTranslationBaseOptions
 {
-    [Option('t', "translationId", Required = true, HelpText = "Specify translation ID.")]
+    [Option("sourceLocale", Required = true, HelpText = "Specify source locale of the video.")]
+    public CultureInfo SourceLocale { get; set; }
+
+    [Option("translationId", Required = true, HelpText = "Specify translation ID.")]
     public string TranslationId { get; set; }
 
-    [Option('v', "videoFileAzureBlobUrl", Required = true, HelpText = "Specify video file Azure blob URL.")]
+    [Option("videoFileAzureBlobUrl", Required = true, HelpText = "Specify video file Azure blob URL.")]
     public Uri VideoFileAzureBlobUrl { get; set; }
 }
 
