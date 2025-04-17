@@ -24,16 +24,4 @@ public partial class TranslationInput
     public bool? ExportSubtitleInVideo { get; set; }
 
     public Uri VideoFileUrl { get; set; }
-
-    public string GetVideoFileName()
-    {
-        if (string.IsNullOrEmpty(this.VideoFileUrl?.OriginalString))
-        {
-            return string.Empty;
-        }
-
-        var videoFileName = this.VideoFileUrl.Segments.Last();
-        videoFileName = Uri.UnescapeDataString(videoFileName);
-        return videoFileName;
-    }
 }

@@ -5,18 +5,38 @@
 
 namespace Microsoft.SpeechServices.CommonLib.Util;
 
+using Azure.Core;
+using Azure.Identity;
 using Flurl;
-using Flurl.Http;
 using Microsoft.SpeechServices.CommonLib.Public.Interface;
 using System;
+using System.Threading.Tasks;
 
 public abstract class HttpClientConfigBase
 {
-    public HttpClientConfigBase(IRegionConfig regionConfig, string subKey)
+    private string oAuthToken;
+
+    public HttpClientConfigBase(
+        IRegionConfig regionConfig,
+        string subKey,
+        string customDomainName,
+        Guid? managedIdentityClientId)
     {
         ArgumentNullException.ThrowIfNull(regionConfig);
         this.RegionConfig = regionConfig;
         this.SubscriptionKey = subKey;
+        this.CustomDomainName = customDomainName;
+        this.ManagedIdentityClientId = managedIdentityClientId;
+    }
+
+    public Url RootAddress
+    {
+        get
+        {
+            return !string.IsNullOrEmpty(this.CustomDomainName) ?
+                new Url($"https://{this.CustomDomainName}.cognitiveservices.azure.com/") :
+                new Url(this.RegionConfig.EndpointUrl);
+        }
     }
 
     public virtual Uri RootUrl
@@ -24,8 +44,8 @@ public abstract class HttpClientConfigBase
         get
         {
             // Use APIM for public API.
-            var url = this.RegionConfig.EndpointUrl
-                .AppendPathSegment(RouteBase);
+            var url = this.RootAddress;
+            url = url.AppendPathSegment(RouteBase);
 
             if (this.IsApiVersionInUrlSegment)
             {
@@ -40,6 +60,27 @@ public abstract class HttpClientConfigBase
         }
     }
 
+    public async Task<string> AcquireOAuthTokenAsync()
+    {
+        if (string.IsNullOrEmpty(this.oAuthToken))
+        {
+            // The default access token lifetime for a managed identity is 8 hours.Some tenants have a managed identity token lifetime of 24 hours 1.
+            // Managed Identity access tokens expire in 24 hours.Tokens acquired via the App Authentication library are refreshed when less than 5 minutes remains until they expire 1.
+            // Use Azure Identity SDK to acquire token
+            var options = new DefaultAzureCredentialOptions();
+            if ((this.ManagedIdentityClientId ?? Guid.Empty) != Guid.Empty)
+            {
+                options.ManagedIdentityClientId = this.ManagedIdentityClientId.Value.ToString();
+            }
+
+            var credential = new DefaultAzureCredential(options);
+            var tokenRequestContext = new TokenRequestContext(new[] { "https://cognitiveservices.azure.com/.default" });
+            this.oAuthToken = (await credential.GetTokenAsync(tokenRequestContext)).Token;
+        }
+
+        return this.oAuthToken;
+    }
+
     public virtual bool IsApiVersionInUrlSegment => false;
 
     public virtual string ApiVersion { get; set; }
@@ -49,4 +90,8 @@ public abstract class HttpClientConfigBase
     public IRegionConfig RegionConfig { get; set; }
 
     public string SubscriptionKey { get; set; }
+
+    public string CustomDomainName { get; set; }
+
+    public Guid? ManagedIdentityClientId { get; set; }
 }

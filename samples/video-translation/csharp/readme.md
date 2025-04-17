@@ -28,6 +28,50 @@ Video translation client tool and API sample code
 # Solution:
    [VideoTranslationApiSampleCode.sln](VideoTranslationSample.sln)
 
+## Authentication
+There are 4 options for authentication: 1. speech resource key, 2. User account, 3. managed identity.
+### 1. Subscription key
+The endpoint (and key) could be got from the Keys and Endpoint page in the Speech service resource.
+
+Run the tool with argument:
+
+      --subscriptionKey [YourSpeechResourceKey]
+
+### 2. System-assigned managed identity
+   1. Assing [System-Assigned Managed Identity] or [Your Azure Resource Running The Tool] to the [speech resource] with role [Cognitive Services Speech Contributor].
+
+   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
+
+   3. Run the tool in [Your Azure Resoruce].
+
+   4. Run the tool with argument:
+
+      --customDomainName [YourCustomDomainName]
+
+### 3. User-assigned managed identity
+   1. Assing [User-Assigned Managed Identity] to the [speech resource] with role [Cognitive Services Speech Contributor].
+
+   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
+
+   3. Run the tool in [Your Azure Resoruce].
+
+   4. Run the tool with argument:
+
+      --customDomainName [YourCustomDomainName] --managedIdentityClientId [YourUserAssignedManagedIdentityClientId]
+
+### 4. User account
+For using user account(default credential) need below steps:
+
+   1. Assing [your account] to the [speech resource] with role [Cognitive Services Speech Contributor].
+
+   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
+
+   3. Run the tool with your account.
+
+   4. Run the tool with argument:
+   
+      --customDomainName [YourCustomDomainName]
+
 # API sample:
 
 ## Usage:
@@ -42,10 +86,6 @@ Video translation client tool and API sample code
 
 # For project CommonLib
    Do not upgrade Flurl to version 4.0 because it does not support NewtonJson for ReceiveJson.
-
-
-# Runn tool on Windows prerequisite:
-   [Install dotnet 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
 # Command Line Usage
    | Description | Command line arguments |
@@ -101,3 +141,29 @@ Video translation client tool and API sample code
 
 ## How to retry?
    If you initiate a command to create a translation or iteration job and subsequently restart Windows, the job will continue to run on the server side. To check the status of the translation/iteration job, you can use the query translation/iteration tool command or the API, providing the specific translation/iteration ID.
+
+# Trouble shooting:
+## Permission error
+1. If you got this response when you want to use [System-assigned Managed Identity]:
+
+      {"error":{"code":"PermissionDenied","message": "Principal does not have access to API/Operation."}}
+
+Please check you have granted [your resoruce] to the [Cognitive Services Speech Contributor] role of the [speech resource]
+
+2. If you got this response when you want to use [User-assigned Managed Identity]:
+
+```
+      Failed to run with exception: DefaultAzureCredential failed to retrieve a token from the included credentials. See the troubleshooting guide for more information. https://aka.ms/azsdk/net/identity/defaultazurecredential/troubleshoot
+      - EnvironmentCredential authentication unavailable. Environment variables are not fully configured. See the troubleshooting guide for more information. https://aka.ms/azsdk/net/identity/environmentcredential/troubleshoot
+      - WorkloadIdentityCredential authentication unavailable. The workload options are not fully configured. See the troubleshooting guide for more information. https://aka.ms/azsdk/net/identity/workloadidentitycredential/troubleshoot
+      - ManagedIdentityCredential authentication unavailable. The requested identity has not been assigned to this resource.
+      - VisualStudioCredential authentication failed: Visual Studio Token provider can't be accessed at C:\Users\poleli\AppData\Local\.IdentityService\AzureServiceAuth\tokenprovider.json
+      - AzureCliCredential authentication failed: Azure CLI not installed
+      - AzurePowerShellCredential authentication failed: Az.Accounts module >= 2.2.0 is not installed.
+      - AzureDeveloperCliCredential authentication failed: Azure Developer CLI could not be found.
+      Failure with exit code: -1
+```
+
+Please proivde user-assigned managed identity when run the command.
+
+   --managedIdentityClientId [YourUserAssignedManagedIdentityClientId]

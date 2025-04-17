@@ -5,6 +5,8 @@
 
 namespace Microsoft.SpeechServices.CommonLib.Util;
 
+using Azure.Core;
+using Azure.Identity;
 using Flurl;
 using Flurl.Http;
 using Flurl.Http.Configuration;
@@ -13,12 +15,15 @@ using Microsoft.SpeechServices.CommonLib.Public.Interface;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public;
 using Microsoft.SpeechServices.CustomVoice.TtsLib.TtsUtil;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Polly;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security.Principal;
 using System.Threading.Tasks;
 
 public abstract class HttpClientBase
@@ -36,11 +41,30 @@ public abstract class HttpClientBase
 
     public virtual bool IsVersionInSegment => false;
 
+    public async Task<IFlurlRequest> AuthenticateAsync(Flurl.Url reqeust)
+    {
+        if (!string.IsNullOrEmpty(this.Config.SubscriptionKey))
+        {
+            return reqeust.WithHeader(
+                CommonPublicConst.Http.Headers.SubscriptionKey,
+                this.Config.SubscriptionKey);
+        }
+        else if (!string.IsNullOrEmpty(this.Config.CustomDomainName))
+        {
+            var token = await this.Config.AcquireOAuthTokenAsync().ConfigureAwait(false);
+            return reqeust.WithOAuthBearerToken(token);
+        }
+        else
+        {
+            throw new NotSupportedException($"Please privde either key or custom domain name");
+        }
+    }
+
     public async Task<IFlurlResponse> DeleteByIdAsync(
         string id,
         IReadOnlyDictionary<string, string> queryParams = null)
     {
-        var url = this.BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         url = url.AppendPathSegment(id);
 
@@ -52,6 +76,7 @@ public abstract class HttpClientBase
             }
         }
 
+        Console.WriteLine(url.Url);
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
@@ -64,9 +89,11 @@ public abstract class HttpClientBase
         Guid id,
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
-        var url = this.BuildRequestBase(additionalHeaders: additionalHeaders)
-            .AppendPathSegment(id.ToString());
+        var url = await this.BuildRequestBaseAsync(
+            additionalHeaders: additionalHeaders).ConfigureAwait(false);
+        url = url.AppendPathSegment(id.ToString());
 
+        Console.WriteLine(url.Url);
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
@@ -80,9 +107,11 @@ public abstract class HttpClientBase
         Guid id,
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
-        var url = this.BuildRequestBase(additionalHeaders: additionalHeaders)
-            .AppendPathSegment(id.ToString());
+        var url = await this.BuildRequestBaseAsync(
+            additionalHeaders: additionalHeaders).ConfigureAwait(false);
+        url = url.AppendPathSegment(id.ToString());
 
+        Console.WriteLine(url.Url);
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
@@ -92,46 +121,46 @@ public abstract class HttpClientBase
         }).ConfigureAwait(false);
     }
 
-    protected IFlurlRequest BuildBackendPathVersionRequestBase(
+    protected async Task<IFlurlRequest> BuildBackendPathVersionRequestBaseAsync(
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
         var url = this.Config.RootUrl
-            .AppendPathSegment(this.ControllerName)
-            .WithHeader(CommonPublicConst.Http.Headers.SubscriptionKey, this.Config.SubscriptionKey);
+            .AppendPathSegment(this.ControllerName);
+        var request = await this.AuthenticateAsync(url).ConfigureAwait(false);
         if (additionalHeaders != null)
         {
             foreach (var additionalHeader in additionalHeaders)
             {
-                url.WithHeader(additionalHeader.Key, additionalHeader.Value);
+                request = request.WithHeader(additionalHeader.Key, additionalHeader.Value);
             }
         }
 
         // Default json serializer will serialize enum to number, which will cause API parse DTO failure:
         //  "Error converting value 0 to type 'Microsoft.SpeechServices.Common.Client.OneApiState'. Path 'Status', line 1, position 56."
-        url.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
+        request.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
 
-        return url;
+        return request;
     }
 
-    protected IFlurlRequest BuildRequestBase(
+    protected async Task<IFlurlRequest> BuildRequestBaseAsync(
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
         var url = this.Config.RootUrl
-            .AppendPathSegment(this.ControllerName)
-            .WithHeader(CommonPublicConst.Http.Headers.SubscriptionKey, this.Config.SubscriptionKey);
+            .AppendPathSegment(this.ControllerName);
+        var request = await this.AuthenticateAsync(url).ConfigureAwait(false);
         if (additionalHeaders != null)
         {
             foreach (var additionalHeader in additionalHeaders)
             {
-                url.WithHeader(additionalHeader.Key, additionalHeader.Value);
+                request = request.WithHeader(additionalHeader.Key, additionalHeader.Value);
             }
         }
 
         // Default json serializer will serialize enum to number, which will cause API parse DTO failure:
         //  "Error converting value 0 to type 'Microsoft.SpeechServices.Common.Client.OneApiState'. Path 'Status', line 1, position 56."
-        url.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
+        request.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
 
-        return url;
+        return request;
     }
 
     public async Task<T> QueryTaskByIdUntilTerminatedAsync<T>(

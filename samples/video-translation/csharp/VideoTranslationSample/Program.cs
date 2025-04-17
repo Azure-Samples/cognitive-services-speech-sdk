@@ -62,7 +62,9 @@ internal class Program
 
         var httpConfig = new VideoTranslationPublicPreviewHttpClientConfig(
             regionConfig: regionConfig,
-            subKey: baseOptions.SubscriptionKey)
+            subKey: baseOptions.SubscriptionKey,
+            customDomainName: baseOptions.customDomainName,
+            managedIdentityClientId: baseOptions.ManagedIdentityClientId == Guid.Empty ? null : baseOptions.ManagedIdentityClientId)
         {
             ApiVersion = string.IsNullOrEmpty(baseOptions.ApiVersion) ?
                 CommonPublicConst.ApiVersions.ApiVersion20240520Preview : baseOptions.ApiVersion,
@@ -95,10 +97,8 @@ internal class Program
                         },
                     };
 
-                    var operationId = Guid.NewGuid().ToString();
-                    (translation, var headers) = await translationClient.CreateTranslationAsync(
-                        translation: translation,
-                        operationId: operationId).ConfigureAwait(false);
+                    translation = await translationClient.CreateTranslationAndWaitUntilTerminatedAsync(
+                        translation: translation).ConfigureAwait(false);
 
                     Console.WriteLine();
                     Console.WriteLine("Created translation:");
@@ -150,11 +150,7 @@ internal class Program
                             SpeakerCount = options.SpeakerCount,
                             SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
                             ExportSubtitleInVideo = options.ExportSubtitleInVideo,
-                            WebvttFile = options.WebvttFileAzureBlobUrl == null ? null : new WebvttFile()
-                            {
-                                Kind = options.WebvttFileKind ?? WebvttFileKind.TargetLocaleSubtitle,
-                                Url = options.WebvttFileAzureBlobUrl,
-                            }
+                            WebvttFile = options.WebvttFile,
                         }
                     };
 
@@ -201,7 +197,9 @@ internal class Program
                             ExportSubtitleInVideo = options.ExportSubtitleInVideo,
                             WebvttFile = options.WebvttFileAzureBlobUrl == null ? null : new WebvttFile()
                             {
-                                Kind = options.WebvttFileKind ?? WebvttFileKind.TargetLocaleSubtitle,
+                                Kind = options.WebvttFileKind == WebvttFileKind.None ?
+                                    throw new ArgumentException($"Please specify {nameof(options.WebvttFileKind)}") :
+                                    options.WebvttFileKind,
                                 Url = options.WebvttFileAzureBlobUrl,
                             }
                         }
