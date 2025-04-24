@@ -4,21 +4,27 @@ This sample shows how to use the Speech Service through the Speech SDK for Pytho
 
 See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstarts/text-to-speech?tabs=dotnet%2Clinux%2Cjre%2Cwindowsinstall&pivots=programming-language-python) on the SDK documentation page for step-by-step instructions.
 
-## Run the Sample within VS Code
-- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
-- Download this sample from sample gallery to local machine.
-- Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select speech resource.
-- Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure and setup the sample. This command only needs to be run once.
-- Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
+## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
+This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
 
-## Prerequisites
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- In extension's panel, click `View Samples` and download this sample from sample gallery.
+- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select a speech resource (one-time setup).
+  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
+  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
+
+## Option 2: Manual Setup and Run (Advanced)
+Follow these steps if you prefer not to use VS Code.
+
+### Prerequisites
 
 Before you get started, here's a list of prerequisites:
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-python) for details on system requirements and setup.
 
-## Get the Speech SDK Python Package
+### Get the Speech SDK Python Package
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
@@ -30,7 +36,7 @@ pip install azure-cognitiveservices-speech
 
 Note: this tutorial will not work without changes for any version earlier than 1.7.0 of the SDK.
 
-## Run the sample
+### Run the sample
 
 Before you run the sample code, replace the value `YourSubscriptionKey` with your subscription key and
 replace the value `https://YourServiceRegion.api.cognitive.microsoft.com` with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.

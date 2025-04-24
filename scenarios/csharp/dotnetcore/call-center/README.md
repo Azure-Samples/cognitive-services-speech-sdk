@@ -1,13 +1,16 @@
 # Scenarios: Post-call transcription and analytics with C# for .NET Core on Windows
 
-This sample demonstrates how to use post-call transcription and analytics with C# .NET 6.0 on Windows.
+This sample demonstrates how to use post-call transcription and analytics with C# .NET 8.0 on Windows.
 
-## Run the Sample within VS Code
+## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
+This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
+
 - Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
-- Download this sample from sample gallery to local machine.
-- Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select an **Azure AI services** resource.
-- Trigger `Azure AI Speech Toolkit: Build the Sample App` command from command palette to build the sample.
-- Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
+- In extension's panel, click `View Samples` and download this sample from sample gallery.
+- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select a speech resource (one-time setup).
+  - `Azure AI Speech Toolkit: Build the Sample App` to compile the code.
+  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
 
 [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension will use the same selected Azure AI service for `speechKey` / `languageKey` / `speechRegion` / `languageEndpoint` arguments. If you prefer to run with separate Speech Services, you can open a terminal and execute commands like this:
 ```
@@ -15,7 +18,8 @@ dotnet run --languageKey YourResourceKey --languageEndpoint YourResourceEndpoint
 ```
 Check more argument usage in below section.
 
-## Run the Sample without VS Code
+## Option 2: Manual Setup and Run (Advanced)
+Follow these steps if you prefer not to use VS Code.
 
 Visit the [call center transcription quickstart](https://learn.microsoft.com/azure/cognitive-services/speech-service/call-center-quickstart) for a detailed guide on how to get started transcribing call recordings using the Speech and Language Services.
 

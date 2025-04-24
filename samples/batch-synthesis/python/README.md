@@ -12,15 +12,19 @@
 - Batch synthesis is only available for paid subscriptions, free subscriptions are not supported.
 - Please refer to [this page](https://learn.microsoft.com/azure/ai-services/speech-service/regions#rest-apis) for a complete list of region identifiers in the expected format.
 
-## Run the Sample within VS Code
-1. Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
-2. Download this sample from sample gallery to local machine.
-3. Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select a speech resource.
-4. Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure and setup the sample. This command only needs to be run once.
-5. Trigger `Azure AI Speech Toolkit: Build the Sample App` command from command palette to build the sample.
-6. Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
+## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
+This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
 
-## Run the Sample without VS Code
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- In extension's panel, click `View Samples` and download this sample from sample gallery.
+- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select a speech resource (one-time setup).
+  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
+  - `Azure AI Speech Toolkit: Build the Sample App` to compile the code.
+  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
+
+## Option 2: Manual Setup and Run (Advanced)
+Follow these steps if you prefer not to use VS Code.
 
 ### Install dependencies
 

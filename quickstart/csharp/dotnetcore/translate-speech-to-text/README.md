@@ -6,20 +6,26 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 > **Note:**
 > We currently only support [specific Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux).
 
-## Run the Sample within VS Code
-- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
-- Download this sample from sample gallery to local machine.
-- Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select a speech resource.
-- Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure and setup the sample. This command only needs to be run once.
-- Trigger `Azure AI Speech Toolkit: Build the Sample App` command from command palette to build the sample.
-- Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
+## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
+This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
 
-## Prerequisites
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- In extension's panel, click `View Samples` and download this sample from sample gallery.
+- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select a speech resource (one-time setup).
+  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
+  - `Azure AI Speech Toolkit: Build the Sample App` to compile the code.
+  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
+
+## Option 2: Manual Setup and Run (Advanced)
+Follow these steps if you prefer not to use VS Code.
+
+### Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A PC (Windows, Linux, Mac) with a working microphone. See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-csharp) for details on system requirements and setup.
 
-## Build the sample
+### Build the sample
 
 * **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
@@ -38,13 +44,13 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
   dotnet build helloworld/helloworld.csproj
   ```
 
-## Run the sample
+### Run the sample
 
-### Using Visual Studio
+#### Using Visual Studio
 
 To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging**. To run the app without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
 
-### Using the .NET Core CLI
+#### Using the .NET Core CLI
 
 Run the following command from the directory that contains this sample:
 
