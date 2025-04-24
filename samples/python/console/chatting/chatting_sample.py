@@ -384,7 +384,7 @@ def chatting_from_file():
             key=lambda x: x["PronunciationAssessment"]["AccuracyScore"],
         )[:3]
 
-        speaking_rate = len(json_words) // ((endOffset - startOffset) / reduced_unit) / 60
+        speaking_rate = len(json_words) // (((endOffset - startOffset) / reduced_unit) / 60)
 
         comment_result(
             {
