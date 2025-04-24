@@ -13,18 +13,18 @@ fi
 dotnetInstallPath="/usr/share/dotnet"
 export PATH=$PATH:$dotnetInstallPath
 
-install_dotnet6() {
-    echo "Installing .NET SDK 6.0..."
+install_dotnet8() {
+    echo "Installing .NET SDK 8.0..."
     wget https://dot.net/v1/dotnet-install.sh
     chmod +x dotnet-install.sh
-    sudo ./dotnet-install.sh --version 6.0.427 --install-dir $dotnetInstallPath
+    sudo ./dotnet-install.sh --version 8.0.408 --install-dir $dotnetInstallPath
 
     if [ $? -eq 0 ]; then
         echo 'export PATH=$PATH:/usr/share/dotnet' >> ~/.bashrc
         source ~/.bashrc
         sudo rm -f ./dotnet-install.sh
     else
-        echo "Installation of .NET SDK 6.0 failed, exiting..."
+        echo "Installation of .NET SDK 8.0 failed, exiting..."
         sudo rm -f ./dotnet-install.sh
         exit 1
     fi
@@ -35,11 +35,11 @@ if [ "$action" = "configure" ]; then
     sudo apt-get update
     sudo apt-get install -y libssl-dev libasound2
 
-    # Install .NET SDK if it's not already installed or version is less than 6.0
-    if ! command -v dotnet &> /dev/null || [[ "$(dotnet --version)" < "6.0" ]]; then
-        install_dotnet6
+    # Install .NET SDK if it's not already installed or version is less than 8.0
+    if ! command -v dotnet &> /dev/null || [[ "$(dotnet --version)" < "8.0" ]]; then
+        install_dotnet8
     else
-        echo ".NET SDK 6.0 is already installed"
+        echo ".NET SDK 8.0 is already installed"
     fi
 elif [ "$action" = "build" ]; then
     dotnet build helloworld/helloworld.csproj
@@ -48,7 +48,7 @@ elif [ "$action" = "build" ]; then
         exit 1
     fi
 elif [ "$action" = "run" ]; then
-    dotnet helloworld/bin/Debug/net6.0/helloworld.dll
+    dotnet helloworld/bin/Debug/net8.0/helloworld.dll
 else
     echo "Invalid action: $action"
     echo "Usage: $0 {build|run|configure}"

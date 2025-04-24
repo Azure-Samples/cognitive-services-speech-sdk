@@ -7,7 +7,7 @@ function Is-DotNetMeetRequirement {
         [string]$dotnetPath = "dotnet"   # Accept dotnet executable path as an argument. Default to "dotnet" if no value is provided
     )
 
-    $requiredVersion = "6.0"
+    $requiredVersion = "8.0"
 
     # Check if dotnet is found at the provided path and if the version is below the required version
     if (-not  (Get-Command $dotnetPath -ErrorAction SilentlyContinue)) {
@@ -32,8 +32,8 @@ if (-not (Is-DotNetMeetRequirement -dotnetPath $dotnetExe)) {
     $dotnetExe = $dotnetTempPath
 }
 
-function Install-DotNet6 {
-    Write-Host "Installing .NET SDK 6.0..."
+function Install-DotNet8 {
+    Write-Host "Installing .NET SDK 8.0..."
 
     Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
     if (-not $?) {
@@ -41,7 +41,7 @@ function Install-DotNet6 {
         exit 1
     }
 
-    & .\dotnet-install.ps1 -InstallDir $dotnetInstallationTempDirectory -Version 6.0.427
+    & .\dotnet-install.ps1 -InstallDir $dotnetInstallationTempDirectory -Version 8.0.405
     if (-not $?) {
         Write-Host "Failed to install .NET SDK, exiting..." -ForegroundColor Red
         exit 1
@@ -54,7 +54,7 @@ function Install-DotNet6 {
     $updatedPath = [Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
     Write-Host "Updated PATH: $updatedPath"
 
-    Write-Host ".NET 6.0 installed successfully." -ForegroundColor Green
+    Write-Host ".NET 8.0 installed successfully." -ForegroundColor Green
     Remove-Item -Force dotnet-install.ps1
 }
 
@@ -68,10 +68,10 @@ function Test-GStreamer {
 
 if ($action -eq "configure") {
     if (-not (Is-DotNetMeetRequirement -dotnetPath $dotnetExe)) {
-        Install-DotNet6
+        Install-DotNet8
     }
     else{
-        Write-Host "The machine already has .NET 6.0." -ForegroundColor Green
+        Write-Host "The machine already has .NET 8.0." -ForegroundColor Green
     }
     Test-GStreamer
 }
