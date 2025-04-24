@@ -7,28 +7,28 @@ $env:PATH = "$dotnetPath;$env:PATH"
 $dotnetInstallationTempDirectory = "$env:LOCALAPPDATA\dotnet"
 $dotnetTempPath = Join-Path $dotnetInstallationTempDirectory "dotnet.exe"
 
-function Install-DotNet6 {
+function Install-DotNet8 {
     Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
     if (-not $?) {
         Write-Host "Failed to download dotnet-install.ps1, exiting..." -ForegroundColor Red
         exit 1
     }
 
-    & .\dotnet-install.ps1 -InstallDir $dotnetInstallationTempDirectory -Version 6.0.427
+    & .\dotnet-install.ps1 -InstallDir $dotnetInstallationTempDirectory -Version 8.0.405
     if (-not $?) {
         Write-Host "Failed to install .NET SDK, exiting..." -ForegroundColor Red
         exit 1
     }
 
-    Write-Host ".NET 6 installed successfully." -ForegroundColor Green
+    Write-Host ".NET 8 installed successfully." -ForegroundColor Green
     Remove-Item -Force dotnet-install.ps1
 }
 
 if ($action -eq "build") {
-    if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -or ([version]$(dotnet --version) -lt [version]"6.0")) {
-        Write-Host "Installing .NET SDK 6.0..."
+    if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -or ([version]$(dotnet --version) -lt [version]"8.0")) {
+        Write-Host "Installing .NET SDK 8.0..."
 
-        Install-DotNet6
+        Install-DotNet8
 
         & $dotnetTempPath build .\call-center --configuration release
         if ($?) {
@@ -84,7 +84,7 @@ elseif ($action -eq "run") {
         & $dotnetTempPath run $commandLineArgs
     }
     else {
-        Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 6.0." -ForegroundColor Red
+        Write-Host ".NET SDK is not found. Please first run the script with build action to install .NET 8.0." -ForegroundColor Red
         exit 1
     }
 }

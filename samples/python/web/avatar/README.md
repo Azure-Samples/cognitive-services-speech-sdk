@@ -1,27 +1,33 @@
 # Instructions to run Microsoft Azure TTS Talking Avatar sample code
 This sample demonstrates the basic usage of Azure text-to-speech avatar real-time API.
 
-## Run the Sample within VS Code
-1. Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
-2. Download this sample from sample gallery to local machine.
-3. Trigger `Azure AI Speech Toolkit: Configure Azure Speech Resources` command from command palette to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations).
-- Trigger `Azure AI Speech Toolkit: Configure and Setup the Sample App` command from command palette to configure and setup the sample. This command only needs to be run once.
-5. Trigger `Azure AI Speech Toolkit: Run the Sample App` command from command palette to run the sample.
-
-    This command will start the avatar web server and open the browser for you. After the `http://127.0.0.1:5000/` link opens in default browser, type in "Spoken Text" and click "Start Session". Then click "Speak".
-
-# The Speech SDK for Python is compatible with Windows, Linux, and macOS.
+The Speech SDK for Python is compatible with Windows, Linux, and macOS.
 - On Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, 2019, and 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170&preserve-view=true) for your platform. Installing this package might require a restart.
 - On Linux, you must use the x64 target architecture.
 
-## Prerequisites
+## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
+This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
+
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- In extension's panel, click `View Samples` and download this sample from sample gallery.
+- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations) (one-time setup).
+  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
+  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
+
+     This command will start the avatar web server and open the browser for you. After the `http://127.0.0.1:5000/` link opens in default browser, type in "Spoken Text" and click "Start Session". Then click "Speak".
+
+## Option 2: Manual Setup and Run (Advanced)
+Follow these steps if you prefer not to use VS Code.
+
+### Prerequisites
 - Install a version of [Python from 3.7 or later](https://www.python.org/downloads/). 
 - For any requirements, see [Install the Speech SDK](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-python).
 
-## Available locations
+### Available locations
 The text to speech avatar feature is only available in the following service regions: Southeast Asia, North Europe, West Europe, Sweden Central, South Central US, East US 2, and West US 2.
 
-## Basic Sample
+### Basic Sample
 This sample demonstrates the basic usage of Azure text-to-speech avatar real-time API.
 
 * Step 1: Open a console and navigate to the folder containing this README.md document.
@@ -60,7 +66,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
 * Step 6: You can either continue to type text in the `Spoken Text` text box and let the avatar speak that text by clicking `Speak` button, or click `Stop Session` button to stop the video connection with Azure TTS Talking Avatar service. If you click `Stop Session` button, you can click `Start Session` button to start a new video connection with Azure TTS Talking Avatar service.
 
 
-## Chat Sample
+### Chat Sample
 This sample demonstrates the chat scenario, with integration of Azure speech-to-text, Azure OpenAI, and Azure text-to-speech avatar real-time API.
 
 * Step 1: Open a console and navigate to the folder containing this README.md document.
@@ -110,7 +116,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
 
 * Step 5: Click `Start Microphone` button to start microphone (make sure to allow the microphone access tip box popping up in the browser), and then you can start chatting with the avatar with speech. The chat history (the text of what you said, and the response text by the Azure OpenAI chat API) will be shown beside the avatar. The avatar will then speak out the response of the chat API.
 
-# Additional Tip(s)
+## Additional Tip(s)
 
 * If you want to enforce the avatar to stop speaking before the avatar finishes the utterance, you can click `Stop Speaking` button. This is useful when you want to interrupt the avatar speaking.
 
