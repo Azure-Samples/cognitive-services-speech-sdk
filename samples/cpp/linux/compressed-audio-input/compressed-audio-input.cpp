@@ -66,7 +66,6 @@ void recognizeSpeech(const std::string& compressedFileName)
     // Replace with your own endpoint and subscription key.
     const string endpoint = "https://" + string(serviceRegion) + ".api.cognitive.microsoft.com";
     auto config = SpeechConfig::FromEndpoint(endpoint, subscriptionKey);
-    auto config = SpeechConfig::FromSubscription(subscriptionKey, serviceRegion);
 
     AudioStreamContainerFormat inputFormat;
 
