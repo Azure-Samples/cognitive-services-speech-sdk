@@ -64,8 +64,6 @@
   <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-AvaMultilingualNeural"></input><br />
   <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
   <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
-  <label style="font-size: medium;" for="personalVoiceSpeakerProfileID">Personal Voice Speaker Profile ID:</label>
-  <input id="personalVoiceSpeakerProfileID" type="text" size="32" style="font-size: medium;" value=""></input><br />
   <div style="background-color: white; width: 300px;">
     <input type="checkbox" id="continuousConversation">Continuous Conversation</input><br />
   </div>
@@ -76,8 +74,9 @@
   <input id="talkingAvatarCharacter" type="text" size="16" style="font-size: medium;" value="lisa"></input><br />
   <label style="font-size: medium;" for="talkingAvatarStyle">Avatar Style:</label>
   <input id="talkingAvatarStyle" type="text" size="16" style="font-size: medium;" value="casual-sitting"></input><br />
-  <div style="background-color: white; width: 200px;">
-    <input type="checkbox" id="customizedAvatar">Custom Avatar</input><br />
+  <div style="background-color: white; width: 400px;">
+    <input type="checkbox" id="customizedAvatar" onchange="window.updateCustomAvatarBox()">Custom Avatar</input>
+    <input type="checkbox" id="useBuiltInVoice" style="width: 12px;" disabled>Use Built-In Voice</input><br />
   </div>
   <div style="background-color: white; width: 200px;">
     <input type="checkbox" id="autoReconnectAvatar">Auto Reconnect</input><br />
