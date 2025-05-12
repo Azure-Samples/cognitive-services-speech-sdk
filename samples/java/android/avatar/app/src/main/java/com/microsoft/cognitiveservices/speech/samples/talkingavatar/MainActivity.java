@@ -76,8 +76,8 @@ import static android.Manifest.permission.INTERNET;
 public class MainActivity extends AppCompatActivity {
     // Replace below with your own subscription key
     private static final String speechSubscriptionKey = "YourSubscriptionKey";
-    // Replace below with your own service region (e.g., "westus2").
-    private static final String serviceRegion = "YourServiceRegion";
+    // Replace below with your own endpoint URL (e.g., "https://westus2.api.cognitive.microsoft.com/").
+    private static final String endpointUrl = "YourEndpointUrl";
 
     // Update below values if you want to use a different avatar
     private static final String avatarCharacter = "lisa";
@@ -273,8 +273,7 @@ public class MainActivity extends AppCompatActivity {
                 if  (iceUrl == null) {
                     updateOutputMessage("Fetching ICE token ...", false, true);
                     try {
-                        String endpoint = "https://" + serviceRegion + ".tts.speech.microsoft.com";
-                        URL url = new URL(endpoint + "/cognitiveservices/avatar/relay/token/v1");
+                        URL url = new URL(endpointUrl + "/cognitiveservices/avatar/relay/token/v1");
                         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                         urlConnection.setRequestMethod("GET");
                         urlConnection.setRequestProperty("Ocp-Apim-Subscription-Key", speechSubscriptionKey);
@@ -450,44 +449,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void connectAvatar(String localSDP) {
-        String endpoint = "wss://" + serviceRegion + ".tts.speech.microsoft.com";
-        URI uri = URI.create(endpoint + "/cognitiveservices/websocket/v1?enableTalkingAvatar=true");
-        speechConfig = SpeechConfig.fromEndpoint(uri, speechSubscriptionKey);
-        speechConfig.setSpeechSynthesisVoiceName(ttsVoice);
-        if (ttsEndpointID != null && !ttsEndpointID.isEmpty()) {
-            speechConfig.setEndpointId(ttsEndpointID);
-        }
-
-        synthesizer = new SpeechSynthesizer(speechConfig, null);
-        connection = Connection.fromSpeechSynthesizer(synthesizer);
-        synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
-            String cancellationDetails =
-                    SpeechSynthesisCancellationDetails.fromResult(e.getResult()).toString();
-            updateOutputMessage(cancellationDetails, true, true);
-            Log.e("[Synthesizer]", cancellationDetails);
-            e.close();
-        });
-
-        String avatarConfig = buildAvatarConfig(localSDP);
+        URI uri;
         try {
-            JSONObject avatarConfigJsonObj = new JSONObject(avatarConfig);
-        } catch (org.json.JSONException e) {
+            uri = new URI(endpointUrl + "/cognitiveservices/websocket/v1?enableTalkingAvatar=true");
+            speechConfig = SpeechConfig.fromEndpoint(uri, speechSubscriptionKey);
+            speechConfig.setSpeechSynthesisVoiceName(ttsVoice);
+            if (ttsEndpointID != null && !ttsEndpointID.isEmpty()) {
+                speechConfig.setEndpointId(ttsEndpointID);
+            }
+
+            synthesizer = new SpeechSynthesizer(speechConfig, null);
+            connection = Connection.fromSpeechSynthesizer(synthesizer);
+            synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
+                String cancellationDetails =
+                        SpeechSynthesisCancellationDetails.fromResult(e.getResult()).toString();
+                updateOutputMessage(cancellationDetails, true, true);
+                Log.e("[Synthesizer]", cancellationDetails);
+                e.close();
+            });
+
+            String avatarConfig = buildAvatarConfig(localSDP);
+            try {
+                JSONObject avatarConfigJsonObj = new JSONObject(avatarConfig);
+            } catch (org.json.JSONException e) {
+                Log.e("[WebRTC]", e.toString());
+            }
+
+            connection.setMessageProperty("speech.config", "context", avatarConfig);
+            synthesizer.SpeakText("");
+            String turnStartMessage = synthesizer.getProperties().getProperty("SpeechSDKInternal-ExtraTurnStartMessage");
+            try {
+                JSONObject turnStartMessageJsonObj = new JSONObject(turnStartMessage);
+                String remoteSdpBase64 = turnStartMessageJsonObj.getJSONObject("webrtc").getString("connectionString");
+                String remoteSdpJsonStr = new String(Base64.decode(remoteSdpBase64, Base64.DEFAULT), StandardCharsets.UTF_8);
+                JSONObject remoteSdpJsonObj = new JSONObject(remoteSdpJsonStr);
+                String remoteSdp = remoteSdpJsonObj.getString("sdp");
+                Log.i("[WebRTC][Remote SDP]", "Remote SDP: " + remoteSdp);
+                peerConnection.setRemoteDescription(sdpObserver, new SessionDescription(SessionDescription.Type.ANSWER, remoteSdp));
+            } catch (JSONException e) {
+                Log.e("[WebRTC][Remote SDP]", e.toString());
+            }
+        } catch (URISyntaxException e) {
             Log.e("[WebRTC]", e.toString());
-        }
-
-        connection.setMessageProperty("speech.config", "context", avatarConfig);
-        synthesizer.SpeakText("");
-        String turnStartMessage = synthesizer.getProperties().getProperty("SpeechSDKInternal-ExtraTurnStartMessage");
-        try {
-            JSONObject turnStartMessageJsonObj = new JSONObject(turnStartMessage);
-            String remoteSdpBase64 = turnStartMessageJsonObj.getJSONObject("webrtc").getString("connectionString");
-            String remoteSdpJsonStr = new String(Base64.decode(remoteSdpBase64, Base64.DEFAULT), StandardCharsets.UTF_8);
-            JSONObject remoteSdpJsonObj = new JSONObject(remoteSdpJsonStr);
-            String remoteSdp = remoteSdpJsonObj.getString("sdp");
-            Log.i("[WebRTC][Remote SDP]", "Remote SDP: " + remoteSdp);
-            peerConnection.setRemoteDescription(sdpObserver, new SessionDescription(SessionDescription.Type.ANSWER, remoteSdp));
-        } catch (JSONException e) {
-            Log.e("[WebRTC][Remote SDP]", e.toString());
         }
     }
 

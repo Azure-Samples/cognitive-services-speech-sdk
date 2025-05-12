@@ -27,10 +27,14 @@ SPEECH_ENDPOINT = os.environ.get('SPEECH_ENDPOINT')
 PASSWORDLESS_AUTHENTICATION = True
 if not SPEECH_ENDPOINT:
     if PASSWORDLESS_AUTHENTICATION:
-        logger.error('SPEECH_ENDPOINT is required for passwordless authentication')
-        sys.exit(1)
-    SERVICE_REGION = os.environ.get('SPEECH_REGION')
-    SPEECH_ENDPOINT = f'https://{SERVICE_REGION}.api.cognitive.microsoft.com'
+        CUSTOM_DOMAIN = os.environ.get('CUSTOM_DOMAIN')
+        if not CUSTOM_DOMAIN:
+            logger.error('SPEECH_ENDPOINT is required for passwordless authentication')
+            sys.exit(1)
+        SPEECH_ENDPOINT = f'https://{CUSTOM_DOMAIN}.cognitiveservices.azure.com'
+    else:
+        SERVICE_REGION = os.environ.get('SPEECH_REGION')
+        SPEECH_ENDPOINT = f'https://{SERVICE_REGION}.api.cognitive.microsoft.com'
 if not PASSWORDLESS_AUTHENTICATION:
     SUBSCRIPTION_KEY = os.environ.get('SPEECH_KEY')
 
@@ -66,7 +70,7 @@ def submit_synthesis(job_id: str) -> bool:
     }
     header.update(_authenticate())
 
-    with open(Path(__file__).absolute().parent.parent / 'Gatsby-chapter1.txt', 'r') as f:
+    with open(Path(__file__).absolute().parent / 'Gatsby-chapter1.txt', 'r', encoding='utf-8') as f:
         text = f.read()
 
     payload = {

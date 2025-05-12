@@ -16,9 +16,9 @@ using namespace Microsoft::CognitiveServices::Speech::Translation;
 // Translation with microphone input.
 void TranslationWithMicrophone()
 {
-    // Creates an instance of a speech translation config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechTranslationConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint and subscription key.
+    auto config = SpeechTranslationConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
 
     // Sets source and target languages
     // Replace with the languages of your choice.

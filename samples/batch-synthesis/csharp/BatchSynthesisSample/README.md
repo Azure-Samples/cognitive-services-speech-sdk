@@ -1,13 +1,18 @@
 # C# Example to use the Speech Services Batch Synthesis API
 
-To successfully run this example you require
+To successfully run this example, you must use one of the following authentication methods:
 
-- a Speech Service subscription key,
-- the region information matching your subscription key,
+Option 1: Token-based authentication (Recommended)
 
-and optionally
+- Set the Speech endpoint (set `SPEECH_ENDPOINT`)
+  - Ensure your Microsoft Entra account is assigned the "Cognitive Services Speech Contributor" or "Cognitive Services User" role.
 
-- The relationship between custom voice names and deployment ID, if you want to use custom voices.
-- The URI of a writable Azure blob container, if you want to store the audio files in your own Azure storage.
+Option 2: Key-based authentication
 
-With this information, change the definitions of the appropriate constants in `program.cs`.
+- Set the Speech Service subscription key (set `SPEECH_KEY`)
+- Set the region matching your subscription key (set `SPEECH_REGION`)
+
+Optionally:
+
+- The relationship between custom voice names and deployment ID, if you want to use custom voices
+- The URI of a writable Azure blob container, if you want to store the audio files in your own Azure storage

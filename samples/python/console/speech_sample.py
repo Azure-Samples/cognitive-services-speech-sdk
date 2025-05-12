@@ -30,15 +30,14 @@ except ImportError:
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # Set up the subscription info for the Speech Service:
-# Replace with your own subscription key and service region (e.g., "westus").
-speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
+# Replace with your own subscription key and endpoint.
+speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
 
 # Specify the path to an audio file containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
 weatherfilename = "whatstheweatherlike.wav"
 weatherfilenamemp3 = "whatstheweatherlike.mp3"
 weatherfilenamemulaw = "whatstheweatherlike-mulaw.wav"
-seasonsfilename = "pronunciation_assessment_fall.wav"
 zhcnfilename = "zhcn_short_dummy_sample.wav"
 zhcnlongfilename = "zhcn_continuous_mode_sample.wav"
 zhcnlongtxtfilename = "zhcn_continuous_mode_sample.txt"
@@ -47,7 +46,7 @@ zhcnlongtxtfilename = "zhcn_continuous_mode_sample.txt"
 def speech_recognize_once_from_mic():
     """performs one-shot speech recognition from the default microphone"""
     # <SpeechRecognitionWithMicrophone>
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # Creates a speech recognizer using microphone as audio input.
     # The default language is "en-us".
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
@@ -76,7 +75,7 @@ def speech_recognize_once_from_mic():
 def speech_recognize_once_from_file():
     """performs one-shot speech recognition with input from an audio file"""
     # <SpeechRecognitionWithFile>
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
     # Creates a speech recognizer using a file as audio input, also specify the speech language
     speech_recognizer = speechsdk.SpeechRecognizer(
@@ -107,7 +106,7 @@ def speech_recognize_once_from_file_with_detailed_recognition_results():
     """performs one-shot speech recognition with input from an audio file, showing detailed recognition results
     including word-level timing """
     # <SpeechRecognitionFromFileWithDetailedRecognitionResults>
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Ask for detailed recognition result
     speech_config.output_format = speechsdk.OutputFormat.Detailed
@@ -201,7 +200,7 @@ def speech_recognize_once_compressed_input():
     callback = BinaryFileReaderCallback(filename=weatherfilenamemp3)
     stream = speechsdk.audio.PullAudioInputStream(stream_format=compressed_format, pull_stream_callback=callback)
 
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     audio_config = speechsdk.audio.AudioConfig(stream=stream)
 
     # Creates a speech recognizer using a file as audio input, also specify the speech language
@@ -232,7 +231,7 @@ def speech_recognize_once_from_file_with_customized_model():
     """performs one-shot speech recognition with input from an audio file, specifying a custom
     model"""
     # <SpeechRecognitionUsingCustomizedModel>
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Create source language configuration with the speech language and the endpoint ID of your customized model
     # Replace with your speech language and CRIS endpoint ID.
@@ -271,7 +270,7 @@ def speech_recognize_once_from_file_with_custom_endpoint_parameters():
     template = "wss://{}.stt.speech.microsoft.com/speech/recognition" \
         "/conversation/cognitiveservices/v1?initialSilenceTimeoutMs={:d}"
     speech_config = speechsdk.SpeechConfig(subscription=speech_key,
-                                           endpoint=template.format(service_region, int(initial_silence_timeout_ms)))
+                                           endpoint=template.format("YourServiceRegion", int(initial_silence_timeout_ms)))
     print("Using endpoint", speech_config.get_property(speechsdk.PropertyId.SpeechServiceConnection_Endpoint))
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
     # Creates a speech recognizer using a file as audio input.
@@ -300,7 +299,7 @@ def speech_recognize_once_from_file_with_custom_endpoint_parameters():
 
 def speech_recognize_async_from_file():
     """performs one-shot speech recognition asynchronously with input from an audio file"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
     # Creates a speech recognizer using a file as audio input.
     # The default language is "en-us".
@@ -333,7 +332,7 @@ def speech_recognize_async_from_file():
 def speech_recognize_continuous_from_file():
     """performs continuous speech recognition with input from an audio file"""
     # <SpeechContinuousRecognitionWithFile>
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
@@ -367,7 +366,7 @@ def speech_recognize_continuous_from_file():
 
 def speech_recognize_continuous_async_from_microphone():
     """performs continuous speech recognition asynchronously with input from microphone"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     # The default language is "en-us".
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
 
@@ -416,7 +415,7 @@ def speech_recognize_continuous_async_from_microphone():
 # <SpeechRecognitionUsingKeywordModel>
 def speech_recognize_keyword_from_microphone():
     """performs keyword-triggered speech recognition with input microphone"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Creates an instance of a keyword recognition model. Update this to
     # point to the location of your keyword recognition model.
@@ -501,7 +500,7 @@ def speech_recognition_with_pull_stream():
             """close callback function"""
             self._file_h.close()
 
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Specify the audio format
     wave_format = speechsdk.audio.AudioStreamFormat(samples_per_second=16000, bits_per_sample=16,
@@ -571,7 +570,7 @@ def push_stream_writer(stream):
 def speech_recognition_with_push_stream():
     """gives an example how to use a push audio stream to recognize speech from a custom audio
     source"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Setup the audio stream
     stream = speechsdk.audio.PushAudioInputStream()
@@ -611,7 +610,7 @@ def speech_recognition_with_push_stream():
 def speech_recognition_with_push_stream_mulaw():
     """gives an example how to use a push mulaw audio stream to recognize speech from a custom audio
     source"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Setup the audio stream
     audio_format = speechsdk.audio.AudioStreamFormat(samples_per_second=16000,
@@ -660,7 +659,7 @@ def speech_recognition_with_push_stream_mulaw():
 
 def speech_recognize_once_with_auto_language_detection_from_mic():
     """performs one-shot speech recognition from the default microphone with auto language detection"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Create the auto detection language configuration with the potential source language candidates
     auto_detect_source_language_config = \
@@ -684,7 +683,7 @@ def speech_recognize_once_with_auto_language_detection_from_mic():
 
 def speech_recognize_with_auto_language_detection_UsingCustomizedModel():
     """performs speech recognition from the audio file with auto language detection, using customized model"""
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
     # Replace the languages with your languages in BCP-47 format, e.g. fr-FR.
@@ -781,9 +780,8 @@ def pronunciation_assessment_from_microphone():
     """Performs one-shot pronunciation assessment asynchronously with input from microphone.
         See more information at https://aka.ms/csspeech/pa"""
 
-    # Creates an instance of a speech config with specified subscription key and service region.
-    # Replace with your own subscription key and service region (e.g., "westus").
-    config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    # Creates an instance of a speech config with specified subscription key and endpoint.
+    config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
     # as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
@@ -929,7 +927,7 @@ def convert_reference_words(reference_text, reference_words):
 
 def get_reference_words(wave_filename, reference_text, language):
     audio_config = speechsdk.audio.AudioConfig(filename=wave_filename)
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     speech_recognizer = speechsdk.SpeechRecognizer(
         speech_config=speech_config, language=language, audio_config=audio_config
     )
@@ -972,11 +970,16 @@ def pronunciation_assessment_continuous_from_file():
     import difflib
     import json
 
-    # Creates an instance of a speech config with specified subscription key and service region.
-    # Replace with your own subscription key and service region (e.g., "westus").
+    # Creates an instance of a speech config with specified subscription key and endpoint.
     # Note: The sample is for en-US language.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     audio_config = speechsdk.audio.AudioConfig(filename=zhcnlongfilename)
+
+    # You can adjust the segmentation silence timeout based on your real scenario.
+    speech_config.set_property(
+        speechsdk.PropertyId.Speech_SegmentationSilenceTimeoutMs,
+        "1500"
+    )
 
     with open(zhcnlongtxtfilename, "r", encoding="utf-8") as t:
         reference_text = t.readline()
@@ -1120,10 +1123,9 @@ def pronunciation_assessment_from_stream():
     """Performs pronunciation assessment asynchronously with input from an audio stream.
         See more information at https://aka.ms/csspeech/pa"""
 
-    # Creates an instance of a speech config with specified subscription key and service region.
-    # Replace with your own subscription key and service region (e.g., "westus").
+    # Creates an instance of a speech config with specified subscription key and endpoint.
     # Note: The sample is for en-US language.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
     # Setup the audio stream
     framerate, bits_per_sample, num_channels = read_wave_header(weatherfilename)
@@ -1180,10 +1182,9 @@ def pronunciation_assessment_configured_with_json():
     """Performs pronunciation assessment asynchronously with input from an audio file.
         See more information at https://aka.ms/csspeech/pa"""
 
-    # Creates an instance of a speech config with specified subscription key and service region.
-    # Replace with your own subscription key and service region (e.g., "westus").
+    # Creates an instance of a speech config with specified subscription key and endpoint.
     # Note: The sample is for en-US language.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
 
     reference_text = "What's the weather like?"
@@ -1223,74 +1224,3 @@ def pronunciation_assessment_configured_with_json():
         print("Speech Recognition canceled: {}".format(cancellation_details.reason))
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             print("Error details: {}".format(cancellation_details.error_details))
-
-
-def pronunciation_assessment_with_content_assessment():
-    """Performs content assessment asynchronously with input from an audio file.
-        See more information at https://aka.ms/csspeech/pa"""
-
-    # Create an instance of a speech config with specified subscription key and service region.
-    # Replace with your own subscription key and service region (e.g., "westus").
-    # Note: The sample is for en-US language.
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
-    # Generally, the waveform should longer than 20s and the content should be more than 3 sentences.
-    audio_config = speechsdk.audio.AudioConfig(filename=seasonsfilename)
-
-    # Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
-    topic = "the season of the fall"
-    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
-        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
-        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
-        enable_miscue=False)
-    pronunciation_config.enable_prosody_assessment()
-    pronunciation_config.enable_content_assessment_with_topic(topic)
-
-    # Create a speech recognizer using a file as audio input.
-    language = 'en-US'
-    speech_recognizer = speechsdk.SpeechRecognizer(
-        speech_config=speech_config, language=language, audio_config=audio_config)
-    # Apply pronunciation assessment config to speech recognizer
-    pronunciation_config.apply_to(speech_recognizer)
-
-    done = False
-    pron_results = []
-    recognized_text = ""
-
-    def stop_cb(evt):
-        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        print("CLOSING on {}".format(evt))
-        nonlocal done
-        done = True
-
-    def recognized(evt):
-        nonlocal pron_results, recognized_text
-        if (evt.result.reason == speechsdk.ResultReason.RecognizedSpeech or evt.result.reason == speechsdk.ResultReason.NoMatch):
-            pron_results.append(speechsdk.PronunciationAssessmentResult(evt.result))
-            if evt.result.text.strip().rstrip(".") != "":
-                print(f"Recognizing: {evt.result.text}")
-                recognized_text += " " + evt.result.text.strip()
-
-    # Connect callbacks to the events fired by the speech recognizer
-    speech_recognizer.recognized.connect(recognized)
-    # (Optional) get the session ID
-    speech_recognizer.session_started.connect(lambda evt: print(f"SESSION ID: {evt.session_id}"))
-    speech_recognizer.session_stopped.connect(lambda evt: print("SESSION STOPPED {}".format(evt)))
-    speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
-    # Stop continuous recognition on either session stopped or canceled events
-    speech_recognizer.session_stopped.connect(stop_cb)
-    speech_recognizer.canceled.connect(stop_cb)
-
-    # Start continuous pronunciation assessment
-    speech_recognizer.start_continuous_recognition()
-    while not done:
-        time.sleep(.5)
-    speech_recognizer.stop_continuous_recognition()
-
-    # Content assessment result is in the last pronunciation assessment block
-    assert pron_results[-1].content_assessment_result is not None
-    content_result = pron_results[-1].content_assessment_result
-    print(f"Content Assessment for: {recognized_text.strip()}")
-    print("Content Assessment results:\n"
-          f"\tGrammar score: {content_result.grammar_score:.1f}\n"
-          f"\tVocabulary score: {content_result.vocabulary_score:.1f}\n"
-          f"\tTopic score: {content_result.topic_score:.1f}")

@@ -5,6 +5,8 @@
 
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Net.Http.Headers;
 
 public class BatchSynthesisClient
 {
@@ -12,20 +14,25 @@ public class BatchSynthesisClient
 
     private readonly string hostName;
     private readonly string baseUri;
-    private readonly string subscriptionKey;
     private readonly string apiVersion;
 
     private readonly HttpClient client;
 
-    public BatchSynthesisClient(string hostName, string key, string apiVersion)
+    public BatchSynthesisClient(string hostName, string credential, string apiVersion, bool isToken = false)
     {
         this.hostName = hostName;
-        this.subscriptionKey = key;
         this.baseUri = $"{this.hostName}/texttospeech/batchsyntheses";
         this.apiVersion = apiVersion;
 
         this.client = new HttpClient();
-        client.DefaultRequestHeaders.Add(OcpApimSubscriptionKey, this.subscriptionKey);
+        if (isToken)
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", credential);
+        }
+        else
+        {
+            client.DefaultRequestHeaders.Add(OcpApimSubscriptionKey, credential);
+        }
     }
 
     public async Task<IEnumerable<BatchSynthesis>> GetAllSynthesesAsync()
@@ -94,7 +101,7 @@ public class BatchSynthesisClient
         };
 
         // Create JsonSerializer instance with configured options
-        string jsonString = JsonSerializer.Serialize(batchSynthesis, new JsonSerializerOptions { IgnoreNullValues = true });
+        string jsonString = JsonSerializer.Serialize(batchSynthesis, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
         var response = await this.client.PutAsync(uri, new StringContent(jsonString, Encoding.UTF8, "application/json")).ConfigureAwait(false);
         if (!response.IsSuccessStatusCode)
         {

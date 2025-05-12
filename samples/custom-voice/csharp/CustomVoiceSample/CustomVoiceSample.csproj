@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" version="6.0.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.43.0" />
     <PackageReference Include="Newtonsoft.Json" version="13.0.3" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>

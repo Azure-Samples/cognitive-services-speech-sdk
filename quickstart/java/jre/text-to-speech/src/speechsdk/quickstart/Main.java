@@ -21,13 +21,13 @@ public class Main {
 
         // Replace below with your own subscription key
         String speechSubscriptionKey = "YourSubscriptionKey";
-        // Replace below with your own service region (e.g., "westus").
-        String serviceRegion = "YourServiceRegion";
+        // Replace below with your own endpoint URL (e.g., "https://westus.api.cognitive.microsoft.com/")
+        String endpointUrl = "YourEndpointUrl";
 
         // Creates an instance of a speech synthesizer using speech configuration with
         // specified
-        // subscription key and service region and default speaker as audio output.
-        try (SpeechConfig config = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion)) {
+        // endpoint and subscription key and default speaker as audio output.
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new java.net.URI(endpointUrl), speechSubscriptionKey)) {
             // Set the voice name, refer to https://aka.ms/speech/voices/neural for full
             // list.
             config.setSpeechSynthesisVoiceName("en-US-AriaNeural");

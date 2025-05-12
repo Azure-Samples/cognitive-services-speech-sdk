@@ -24,8 +24,8 @@
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromMicButton;
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromFileButton;
 @property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessFromStreamButton;
-@property (strong, nonatomic) IBOutlet UIButton *pronunciationAssessWithContentAssessmentButton;
 @property (strong, nonatomic) IBOutlet UIButton *recognizeKeywordFromFileButton;
+@property (strong, nonatomic) IBOutlet UIButton *recognizeFromFileWithLoggingButton;
 
 @property (strong, nonatomic) IBOutlet UILabel *recognitionResultLabel;
 
@@ -39,7 +39,7 @@
 - (IBAction)pronunciationAssessFromMicButtonTapped:(UIButton *)sender;
 - (IBAction)pronunciationAssessFromFileButtonTapped:(UIButton *)sender;
 - (IBAction)pronunciationAssessFromStreamButtonTapped:(UIButton *)sender;
-- (IBAction)pronunciationAssessWithContentAssessmentButtonTapped:(UIButton *)sender;
+- (IBAction)recognizeFromFileWithLoggingButtonTapped:(UIButton *)sender;
 @end
 
 @implementation ViewController
@@ -128,16 +128,14 @@
     self.pronunciationAssessFromStreamButton.accessibilityIdentifier = @"pronunciation_assessment_stream_button";
     [self.view addSubview:self.pronunciationAssessFromStreamButton];
     
-    self.pronunciationAssessWithContentAssessmentButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [self.pronunciationAssessWithContentAssessmentButton addTarget:self action:@selector(pronunciationAssessWithContentAssessmentButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
-    [self.pronunciationAssessWithContentAssessmentButton setTitle:@"Start pronunciation assessment with content assessment." forState:UIControlStateNormal];
-    [self.pronunciationAssessWithContentAssessmentButton titleLabel].lineBreakMode = NSLineBreakByWordWrapping;
-    [self.pronunciationAssessWithContentAssessmentButton titleLabel].textAlignment = NSTextAlignmentCenter;
-    [self.pronunciationAssessWithContentAssessmentButton setFrame:CGRectMake(50.0, 470.0, 300.0, 40.0)];
-    self.pronunciationAssessWithContentAssessmentButton.accessibilityIdentifier = @"pronunciation_assessment_content_button";
-    [self.view addSubview:self.pronunciationAssessWithContentAssessmentButton];
-    
-    self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 500.0, 300.0, 300.0)];
+    self.recognizeFromFileWithLoggingButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.recognizeFromFileWithLoggingButton addTarget:self action:@selector(recognizeFromFileWithLoggingButtonTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [self.recognizeFromFileWithLoggingButton setTitle:@"Start rec from file with logging" forState:UIControlStateNormal];
+    [self.recognizeFromFileWithLoggingButton setFrame:CGRectMake(50.0, 470.0, 300.0, 40.0)];
+    self.recognizeFromFileWithLoggingButton.accessibilityIdentifier = @"recognize_file_with_logging_button";
+    [self.view addSubview:self.recognizeFromFileWithLoggingButton];
+
+    self.recognitionResultLabel = [[UILabel alloc] initWithFrame:CGRectMake(50.0, 510.0, 300.0, 300.0)];
     self.recognitionResultLabel.lineBreakMode = NSLineBreakByWordWrapping;
     self.recognitionResultLabel.numberOfLines = 0;
     self.recognitionResultLabel.accessibilityIdentifier = @"result_label";
@@ -215,9 +213,9 @@
     });
 }
 
-- (IBAction)pronunciationAssessWithContentAssessmentButtonTapped:(UIButton *)sender {
+- (IBAction)recognizeFromFileWithLoggingButtonTapped:(UIButton *)sender {
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
-        [self pronunciationAssessWithContentAssessment];
+        [self recognizeFromFileWithLogging];
     });
 }
 
@@ -1056,118 +1054,138 @@
 }
 
 /*
- * Performs pronunciation assessment with content assessment.
+ * Performs speech recognition from a RIFF wav file with logging.
  */
-- (void)pronunciationAssessWithContentAssessment {
-    NSBundle *mainBundle = [NSBundle mainBundle];
-    NSString *pronFile = [mainBundle pathForResource: @"pronunciation_assessment_fall" ofType:@"wav"];
-    NSLog(@"pronFile path: %@", pronFile);
-    if (!pronFile) {
-        NSLog(@"Cannot find audio file!");
-        [self updateRecognitionErrorText:(@"Cannot find audio file")];
-        return;
-    }
+- (void)recognizeFromFileWithLogging {
+    BOOL enableFilter = true;
+    [self recognizeFromFileWithFileLogging:enableFilter];
 
-    SPXAudioConfiguration* pronAudioSource = [[SPXAudioConfiguration alloc] initWithWavFileInput:pronFile];
-    if (!pronAudioSource) {
-        NSLog(@"Loading audio file failed!");
-        [self updateRecognitionErrorText:(@"Audio Error")];
-        return;
-    }
+    enableFilter = false;
+    [self recognizeFromFileWithMemoryLogging:enableFilter];
 
-    SPXSpeechConfiguration *speechConfig = [[SPXSpeechConfiguration alloc] initWithSubscription:speechKey region:serviceRegion];
-    if (!speechConfig) {
-        NSLog(@"Could not load speech config");
-        [self updateRecognitionErrorText:(@"Speech Config Error")];
-        return;
-    }
-
-    SPXSpeechRecognizer* speechRecognizer = [[SPXSpeechRecognizer alloc] initWithSpeechConfiguration:speechConfig language:@"en-US" audioConfiguration:pronAudioSource];
-    if (!speechRecognizer) {
-        NSLog(@"Could not create speech recognizer");
-        [self updateRecognitionResultText:(@"Speech Recognition Error")];
-        return;
-    }
-    
-    [speechRecognizer addSessionStartedEventHandler: ^ (SPXRecognizer *sender, SPXSessionEventArgs *eventArgs) {
-        NSLog(@"SESSION ID: %@", eventArgs.sessionId);
-    }];
-
-    // Create pronunciation assessment config, set grading system, granularity
-    SPXPronunciationAssessmentConfiguration *pronunicationConfig =
-    [[SPXPronunciationAssessmentConfiguration alloc] init:@""
-                                            gradingSystem:SPXPronunciationAssessmentGradingSystem_HundredMark
-                                              granularity:SPXPronunciationAssessmentGranularity_Phoneme
-                                             enableMiscue:false];
-    
-    NSString *theTopic = @"the season of the fall";
-    [pronunicationConfig enableProsodyAssessment];
-    [pronunicationConfig enableContentAssessmentWithTopic:theTopic];
-    
-    [pronunicationConfig applyToRecognizer:speechRecognizer];
-    [self updateRecognitionStatusText:(@"Assessing...")];
-
-    // Connect callbacks
-    NSMutableArray *recognizedStrings = [NSMutableArray array];
-    NSMutableArray *pronContents = [NSMutableArray array];
-    __block bool end = false;
-
-    [speechRecognizer addRecognizedEventHandler: ^ (SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionEventArgs *eventArgs) {
-        NSLog(@"Received final result event. SessionId: %@, recognition result:%@. Status %ld. offset %llu duration %llu resultid:%@", eventArgs.sessionId, eventArgs.result.text, (long)eventArgs.result.reason, eventArgs.result.offset, eventArgs.result.duration, eventArgs.result.resultId);
-        
-        if([eventArgs.result.text length] != 0 && ![eventArgs.result.text isEqualToString:@"."]){
-            [recognizedStrings addObject:eventArgs.result.text];
-        }
-        
-        SPXPronunciationAssessmentResult *pronunciationResult = [[SPXPronunciationAssessmentResult alloc]init:eventArgs.result];
-        [pronContents addObject:pronunciationResult.contentAssessmentResult];
-    }];
-
-    [speechRecognizer addCanceledEventHandler:^(SPXSpeechRecognizer *recognizer, SPXSpeechRecognitionCanceledEventArgs *eventArgs) {
-        SPXCancellationDetails *details = [[SPXCancellationDetails alloc] initFromCanceledRecognitionResult:eventArgs.result];
-        NSLog(@"Pronunciation assessment was canceled: %@. Did you pass the correct key/region combination?", details.errorDetails);
-        [self updateRecognitionErrorText:([NSString stringWithFormat:@"Canceled: %@", details.errorDetails ])];
-        end = true;
-    }];
-
-    // Session stopped callback to recognize stream has ended
-    [speechRecognizer addSessionStoppedEventHandler: ^ (SPXRecognizer *recognizer, SPXSessionEventArgs *eventArgs) {
-        NSLog(@"Received session stopped event. SessionId: %@", eventArgs.sessionId);
-        end = true;
-    }];
-
-    // Start recognizing
-    [speechRecognizer startContinuousRecognition];
-
-    // Wait until a session stopped event has been received
-    while (end == false)
-        [NSThread sleepForTimeInterval:1.0f];
-    [speechRecognizer stopContinuousRecognition];
-
-    NSString *resultText = @"";
-    if ([recognizedStrings count] > 0) {
-        
-        // Un-comment out below codes if want to show the recognized text.
-        // For the phone screen, the text is a bit long.
-        // resultText = [resultText stringByAppendingString:@"Content Assessment for: "];
-        // NSString *recognizedText = [recognizedStrings componentsJoinedByString:@" "];
-        // resultText = [resultText stringByAppendingString:recognizedText];
-        
-        if ([pronContents count] > 0) {
-            SPXContentAssessmentResult* pronContent = [pronContents lastObject];
-            NSString *pronResult = [NSString stringWithFormat:@"Assessment Result: grammar score: %.2f, vocabulary  score: %.2f, topic score: %.2f.", pronContent.grammarScore, pronContent.vocabularyScore, pronContent.topicScore];
-            resultText = [resultText stringByAppendingString:pronResult];
-        }
-        else {
-            resultText = [resultText stringByAppendingString:@"The content result is empty"];
-        }
-    }
-    else {
-        resultText = [resultText stringByAppendingString:@"The recognized Text is empty"];
-    }
-    [self updateRecognitionResultText:resultText];
+    enableFilter = true;
+    [self recognizeFromFileWithEventLogging:enableFilter];
 }
 
+/*
+ * Performs speech recognition from a RIFF wav file with file logging.
+ */
+- (void)recognizeFromFileWithFileLogging:(bool)enableFilter {
+    // Setup logging
+    NSString *logFileName = @"speech_sdk.log";
+    NSString *filteredLogFileName = @"speech_sdk_filtered.log";
+
+    if (enableFilter) {
+        NSArray *filters = @[@"SPX_DBG_TRACE_SCOPE_ENTER", @"SPX_DBG_TRACE_SCOPE_EXIT"];
+        [SPXFileLogger setFilters:filters];
+        logFileName = filteredLogFileName;
+    }
+
+    NSString *logFile = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject]
+                         stringByAppendingPathComponent:logFileName];
+    if (!logFile) {
+        NSLog(@"Get logfile path failed");
+        return;
+    }
+
+    // Start file logging
+    NSLog(@"Start logging to file %@", logFile);
+    [SPXFileLogger start:logFile];
+    
+    // Perform speech recognition
+    [self recognizeFromFile];
+
+    // Stop file logging
+    NSLog(@"Stop logging to file");
+    [SPXFileLogger stop];
+
+    // Clear filters
+    if (enableFilter) {
+        [SPXFileLogger setFilters:nil];
+    }
+}
+
+/*
+ * Performs speech recognition from a RIFF wav file with memory logging.
+ */
+- (void)recognizeFromFileWithMemoryLogging:(bool)enableFilter {
+    // Setup logging
+    NSString *logFileName = @"speech_sdk_memory.log";
+    NSString *filteredLogFileName = @"speech_sdk_memory_filtered.log";
+
+    if (enableFilter) {
+        NSArray *filters = @[@"audio_stream_session", @"recognizer"];
+        [SPXMemoryLogger setFilters:filters];
+        logFileName = filteredLogFileName;
+    }
+
+    NSString *logFile = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject]
+                         stringByAppendingPathComponent:logFileName];
+    if (!logFile) {
+        NSLog(@"Get logfile path failed");
+        return;
+    }
+
+    // Start memory logging
+    NSLog(@"Start memory logging");
+    [SPXMemoryLogger start];
+    
+    // Perform speech recognition
+    [self recognizeFromFile];
+
+    // Stop memory logging
+    NSLog(@"Stop memory logging");
+    [SPXMemoryLogger stop];
+
+    // Clear filters
+    if (enableFilter) {
+        [SPXMemoryLogger setFilters:nil];
+    }
+
+    // Dump memory log to a file
+    [SPXMemoryLogger dumpToFile:logFile];
+}
+
+/*
+ * Performs speech recognition from a RIFF wav file with event logging.
+ */
+- (void)recognizeFromFileWithEventLogging:(bool)enableFilter {
+    // Setup logging
+    if (enableFilter) {
+        NSArray *filters = @[@"usp_reco_engine_adapter", @"web_socket"];
+        [SPXEventLogger setFilters:filters];
+    }
+
+    // Start event logging
+    NSLog(@"Start event logging");
+    __block NSMutableArray *eventMsgs = [NSMutableArray array];
+    __block int eventCount = 0;
+
+    [SPXEventLogger setCallback:^(NSString *message) {
+        @synchronized(self) {
+            eventCount++;
+            [eventMsgs addObject:message];
+        }
+    }];
+    
+    // Perform speech recognition
+    [self recognizeFromFile];
+
+    // Stop event logging
+    NSLog(@"Stop event logging");
+    [SPXEventLogger setCallback:nil];
+
+    // Clear filters
+    if (enableFilter) {
+        [SPXEventLogger setFilters:nil];
+    }
+
+    // Dump event log
+    NSString *eventMsg = [eventMsgs componentsJoinedByString:@""];
+    NSLog(@"Event messages:");
+    NSLog(@"%@", eventMsg);
+    NSLog(@"Event message count: %d", eventCount);
+}
 
 - (void)updateRecognitionResultText:(NSString *) resultText {
     dispatch_async(dispatch_get_main_queue(), ^{

@@ -25,7 +25,6 @@ class ViewController: UIViewController {
     var continuousPronunciationAssessmentButton: UIButton!
     var pronunciationAssessmentWithStreamButton: UIButton!
     var pronunciationAssessmentWithMicrophoneButton: UIButton!
-    var pronunciationAssessmentWithContentAssessmentButton: UIButton!
 
     var sub: String!
     var region: String!
@@ -36,7 +35,7 @@ class ViewController: UIViewController {
         // load subscription information
         sub = "YourSubscriptionKey"
         region = "YourServiceRegion"
-        
+
         continuousPronunciationAssessmentButton = UIButton(frame: CGRect(x: 30, y: 100, width: 300, height: 50))
         continuousPronunciationAssessmentButton.setTitle("Continuous Pron-Assessment", for: .normal)
         continuousPronunciationAssessmentButton.addTarget(self, action:#selector(self.continuousPronunciationAssessmentButtonClicked), for: .touchUpInside)
@@ -51,12 +50,6 @@ class ViewController: UIViewController {
         pronunciationAssessmentWithMicrophoneButton.setTitle("Pron-Assessment With Microphone", for: .normal)
         pronunciationAssessmentWithMicrophoneButton.addTarget(self, action: #selector(self.pronunciationAssessmentWithMicrophoneButtonClicked), for: .touchUpInside)
         pronunciationAssessmentWithMicrophoneButton.setTitleColor(UIColor.black, for: .normal)
-        
-        pronunciationAssessmentWithContentAssessmentButton = UIButton(frame: CGRect(x: 30, y: 220, width: 300, height: 50))
-        pronunciationAssessmentWithContentAssessmentButton.setTitle("Pron-Assessment With Content", for: .normal)
-        pronunciationAssessmentWithContentAssessmentButton.addTarget(self, action: #selector(self.pronunciationAssessmentWithContentAssessmentButtonClicked), for: .touchUpInside)
-        pronunciationAssessmentWithContentAssessmentButton.setTitleColor(UIColor.black, for: .normal)
-
 
         label = UITextView(frame: CGRect(x: 30, y: 280, width: 300, height: 400))
         label.textColor = UIColor.black
@@ -67,7 +60,6 @@ class ViewController: UIViewController {
         self.view.addSubview(continuousPronunciationAssessmentButton)
         self.view.addSubview(pronunciationAssessmentWithStreamButton)
         self.view.addSubview(pronunciationAssessmentWithMicrophoneButton)
-        self.view.addSubview(pronunciationAssessmentWithContentAssessmentButton)
     }
 
     @objc func continuousPronunciationAssessmentButtonClicked() {
@@ -86,12 +78,6 @@ class ViewController: UIViewController {
     @objc func pronunciationAssessmentWithMicrophoneButtonClicked(){
         DispatchQueue.global(qos: .userInitiated).async {
             self.pronunciationAssessmentWithMicrophone()
-        }
-    }
-    
-    @objc func pronunciationAssessmentWithContentAssessmentButtonClicked(){
-        DispatchQueue.global(qos: .userInitiated).async {
-            self.pronunciationAssessmentWithContentAssessment()
         }
     }
 
@@ -162,9 +148,114 @@ class ViewController: UIViewController {
         }
 
         group.wait()
-        return referenceWords.isEmpty ? nil : referenceWords
+        return convertReferenceWords(referenceText: referenceText, referenceWords: referenceWords)
     }
-    
+
+    // Converts the reference text into segmented words using the provided reference words list.
+    func convertReferenceWords(referenceText: String, referenceWords: [String]) -> [String] {
+        let dictionary = Set(referenceWords)
+        let maxLength = dictionary.map { $0.count }.max() ?? 0
+        
+        let cleanedText = removePunctuation(text: referenceText)
+        return segmentWords(referenceText: cleanedText, dictionary: dictionary, maxLength: maxLength)
+    }
+
+    // Removes punctuation from the text, leaving only letters, digits, and whitespaces.
+    func removePunctuation(text: String) -> String {
+        var result = ""
+        for char in text {
+            if char.isLetter || char.isNumber || char.isWhitespace {
+                result.append(char)
+            }
+        }
+        return result
+    }
+
+    // Segments the reference text into words using the provided dictionary. It attempts both left-to-right and right-to-left segmentation and returns the best result.
+    func segmentWords(referenceText: String, dictionary: Set<String>, maxLength: Int) -> [String] {
+        let leftToRight = leftToRightSegmentation(referenceText: referenceText, dictionary: dictionary, maxLength: maxLength)
+        let rightToLeft = rightToLeftSegmentation(referenceText: referenceText, dictionary: dictionary, maxLength: maxLength)
+        
+        // If the left-to-right segmentation matches the original text, return that result
+        if leftToRight.joined() == referenceText {
+            return leftToRight
+        }
+        
+        // If the right-to-left segmentation matches the original text, return that result
+        if rightToLeft.joined() == referenceText {
+            return rightToLeft
+        }
+        
+        print("WW failed to segment the text with the dictionary")
+        
+        // If neither segmentation matches, return the one with fewer words
+        if leftToRight.count < rightToLeft.count {
+            return leftToRight
+        } else if leftToRight.count > rightToLeft.count {
+            return rightToLeft
+        }
+        
+        // If both segmentations are equal, return the one with fewer single-character words
+        let leftToRightSingle = leftToRight.filter { $0.count == 1 }.count
+        let rightToLeftSingle = rightToLeft.filter { $0.count == 1 }.count
+        
+        return leftToRightSingle < rightToLeftSingle ? leftToRight : rightToLeft
+    }
+
+    // Segments the reference text from left to right, using the longest possible matches from the dictionary.
+    func leftToRightSegmentation(referenceText: String, dictionary: Set<String>, maxLength: Int) -> [String] {
+        var result = [String]()
+        var text = referenceText
+        
+        while !text.isEmpty {
+            // If the length of the text is less than the maxLength, use the whole text as the substring
+            let subText = text.count < maxLength ? text : String(text.prefix(maxLength))
+            
+            var currentSubText = subText
+            while !currentSubText.isEmpty {
+                // If the substring is in the dictionary or is a single character, add it to the result
+                if dictionary.contains(currentSubText) || currentSubText.count == 1 {
+                    result.append(currentSubText)
+                    // Remove the substring from the text
+                    text = String(text.dropFirst(currentSubText.count))
+                    break
+                }
+                // If the substring is not in the dictionary, shorten it by removing the last character
+                currentSubText = String(currentSubText.dropLast())
+            }
+        }
+        
+        return result
+    }
+
+    // Segments the reference text from right to left, using the longest possible matches from the dictionary.
+    func rightToLeftSegmentation(referenceText: String, dictionary: Set<String>, maxLength: Int) -> [String] {
+        var result = [String]()
+        var text = referenceText
+        
+        while !text.isEmpty {
+            // If the length of the text is less than the maxLength, use the whole text as the substring
+            let subText = text.count < maxLength ? text : String(text.suffix(maxLength))
+            
+            var currentSubText = subText
+            while !currentSubText.isEmpty {
+                // If the substring is in the dictionary or is a single character, add it to the result
+                if dictionary.contains(currentSubText) || currentSubText.count == 1 {
+                    result.append(currentSubText)
+                    // Remove the substring from the text
+                    text = String(text.dropLast(currentSubText.count))
+                    break
+                }
+                // If the substring is not in the dictionary, shorten it by removing the first character
+                currentSubText = String(currentSubText.dropFirst())
+            }
+        }
+        
+        // Reverse the result to ensure the correct order
+        result.reverse()
+        return result
+    }
+
     /**
      * Continuous Pronunciation Assessment Sample.
      *
@@ -178,6 +269,9 @@ class ViewController: UIViewController {
             print("error \(error) happened")
             speechConfig = nil
         }
+        
+        // You can adjust the segmentation silence timeout based on your real scenario
+        speechConfig?.setPropertyTo("1500", by: SPXPropertyId.speechSegmentationSilenceTimeoutMs)
         
         let language = "zh-CN"
         
@@ -237,7 +331,7 @@ class ViewController: UIViewController {
 
             for word in pronunciationResult.words! {
                 pronWords.append(word)
-                recognizedWords.append(word.word!)
+                recognizedWords.append(word.word!.lowercased())
                 endOffset = word.offset + word.duration + 0.01
             }
         }
@@ -544,96 +638,6 @@ class ViewController: UIViewController {
             stopRecognitionSemaphore.signal()
         }
         stopRecognitionSemaphore.wait()
-    }
-    
-    func pronunciationAssessmentWithContentAssessment() {
-        // Creates an instance of a speech config with specified subscription key and service region.
-        // Replace with your own subscription key and service region (e.g., "westus").
-        let speechConfig = try! SPXSpeechConfiguration(subscription: sub, region: region)
-        
-        let bundle = Bundle.main
-        let path = bundle.path(forResource: "pronunciation_assessment_fall", ofType: "wav")
-        if (path == nil) {
-            print("Cannot find audio file!");
-            self.updateLabel(text: "Cannot find audio file", color: UIColor.red)
-            return;
-        }
-        print("pronunciation assessment audio file path: ", path!)
-        
-        // Replace the language with your language in BCP-47 format, e.g., en-US.
-        let language = "en-US"
-        
-        // Creates a speech recognizer using wav file.
-        guard let audioInput = SPXAudioConfiguration(wavFileInput: path!) else {
-            print("Error: audioInput is Nil")
-            return
-        }
-        
-        let theTopic = "the season of the fall"
-        
-        // Create a pronunciation assessment config
-        let pronAssessmentConfig = try! SPXPronunciationAssessmentConfiguration(
-            "",
-            gradingSystem: .hundredMark,
-            granularity: .phoneme,
-            enableMiscue: false
-        )
-        
-        let reco = try! SPXSpeechRecognizer(speechConfiguration: speechConfig, language: "en-US", audioConfiguration: audioInput)
-        
-        pronAssessmentConfig.enableProsodyAssessment()
-        pronAssessmentConfig.enableContentAssessment(withTopic: theTopic)
-        
-        try! pronAssessmentConfig.apply(to: reco)
-        
-        var recognizedTexts: [String] = []
-        var pronContents: [SPXContentAssessmentResult] = []
-        var end = false
-        
-        reco.addSessionStartedEventHandler { (reco, evt) in
-            print("SESSION ID: \(evt.sessionId)")
-        }
-        
-        reco.addRecognizedEventHandler() {reco, evt in
-            let text: String = evt.result.text ?? ""
-            if (!text.isEmpty && text != ".") {
-                recognizedTexts.append(text)
-            }
-            
-            if let pronResult = SPXPronunciationAssessmentResult(evt.result) {
-                if let contentAssessmentResult = pronResult.contentAssessmentResult {
-                    pronContents.append(contentAssessmentResult)
-                }
-            }
-        }
-        
-        reco.addSessionStoppedEventHandler() {reco, evt in
-            end = true
-        }
-
-        updateLabel(text: "Assessing ...", color: .gray)
-        print("Assessing...")
-
-        try! reco.startContinuousRecognition()
-            
-        while !end {
-            Thread.sleep(forTimeInterval: 1.0)
-        }
-            
-        try! reco.stopContinuousRecognition()
-        
-        var finalResult = ""
-        let recognizedText = recognizedTexts.joined(separator: " ")
-        print(recognizedText)
-        finalResult.append("\(recognizedText)\n")
-        
-        var contentResult = pronContents[pronContents.count - 1]
-        let resultText = "Assessment Result: Grammar score: \(contentResult.grammarScore), vocabulary  score: \(contentResult.vocabularyScore), topic score: \(contentResult.topicScore)"
-        print(resultText)
-        
-        finalResult.append(resultText)
-        
-        updateLabel(text: finalResult, color: UIColor.black)
     }
 
     func updateLabel(text: String?, color: UIColor) {

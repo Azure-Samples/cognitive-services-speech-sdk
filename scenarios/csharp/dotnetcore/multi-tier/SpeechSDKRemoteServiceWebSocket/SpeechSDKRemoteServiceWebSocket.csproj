@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>7abd9c18-1fd8-449f-902f-d7d957d3a848</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Messages\SpeechSDKRemoteShared.csproj" />
+    <ProjectReference Include="..\SpeechSDKRemoteServiceCore\SpeechSDKRemoteServiceCore.csproj" />
+    <ProjectReference Include="..\SpeechSDKRemoteSharedWebSocket\SpeechSDKRemoteSharedWebSocket.csproj" />
+  </ItemGroup>
+
+</Project>

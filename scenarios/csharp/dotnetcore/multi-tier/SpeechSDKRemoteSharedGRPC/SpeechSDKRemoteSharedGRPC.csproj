@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <Protobuf Include="speech.proto" GrpcServices="Both" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Update="speech.proto">
+        <GrpcServices>Server</GrpcServices>
+      </None>
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Google.Protobuf" Version="3.27.2" />
+        <PackageReference Include="Grpc.Net.Client" Version="2.62.0" />
+        <PackageReference Include="Grpc.Tools" Version="2.62.0">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>

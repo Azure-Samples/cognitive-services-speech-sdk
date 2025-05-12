@@ -99,7 +99,7 @@ jobs:
   - task: VSBuild@1
     inputs:
       maximumCpuCount: true
-      solution: '**\*.sln;-:**\embedded-speech\*.sln' # Build everything but embedded samples
+      solution: '**\*.sln;-:**\quickstart\csharp\dotnetcore\**\*.sln;-:**\samples\csharp\dotnetcore\**\*.sln;-:**\batch\**\*.sln;-:**\samples\**\embedded-speech\*.sln;-:**\samples\csharp\maui\**\*.sln;-:**\batch-synthesis\**\*.sln;-:**\samples\ingestion\**\*.sln;-:**\samples\cpp\intent-recognition\*.sln'
     displayName: 'Build samples (*.sln)'
     # Must set this to false, otherwise a build break will be treated as warning and the task will pass.
     # This however also means that we will stop building when we hit a build break. We will not continue building other VS projects.

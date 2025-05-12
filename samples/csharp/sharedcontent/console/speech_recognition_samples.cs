@@ -18,6 +18,8 @@ using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using System.Text.Json;
 using System.Text;
+using Azure.Core;
+using Azure.Identity;
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -31,7 +33,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
             // The default language is "en-us".
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = new SpeechRecognizer(config))
@@ -77,7 +79,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "de-DE";
@@ -96,7 +98,7 @@ namespace MicrosoftSpeechSDKSamples
             using (var recognizer = new SpeechRecognizer(config, language))
             {
                 // Starts recognizing.
-                Console.WriteLine($"Say something in {language} ...");
+                Console.WriteLine($"Say something in {language}...");
 
                 // Starts speech recognition, and returns after a single utterance is recognized. The end of a
                 // single utterance is determined by listening for silence at the end or until a maximum of about 30
@@ -109,7 +111,7 @@ namespace MicrosoftSpeechSDKSamples
                 // Checks result.
                 if (result.Reason == ResultReason.RecognizedSpeech)
                 {
-                    Console.WriteLine($"RECOGNIZED: Text = {result.Text}");
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
                     Console.WriteLine("  Detailed results:");
 
                     // The first item in detailedResults corresponds to the recognized text
@@ -153,7 +155,7 @@ namespace MicrosoftSpeechSDKSamples
             // <recognitionCustomized>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
             // Replace with the CRIS endpoint id of your customized model.
             var sourceLanguageConfig = SourceLanguageConfig.FromLanguage("en-US", "YourEndpointId");
 
@@ -201,7 +203,7 @@ namespace MicrosoftSpeechSDKSamples
             // <recognitionContinuousWithFile>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -274,7 +276,7 @@ namespace MicrosoftSpeechSDKSamples
             // <recognitionWithCompressedInputPullStreamAudio>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -351,7 +353,7 @@ namespace MicrosoftSpeechSDKSamples
             // <recognitionWithCompressedInputPushStreamAudio>
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -441,7 +443,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -513,7 +515,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -604,7 +606,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates an instance of a keyword recognition model. Update this to
             // point to the location of your keyword recognition model.
@@ -693,7 +695,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -769,7 +771,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
             // Currently this feature only supports 2 different language candidates
@@ -855,7 +857,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var sourceLanguageConfigs = new SourceLanguageConfig[]
             {
@@ -977,7 +979,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "en-US";
@@ -1066,7 +1068,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Read audio data from file. In real scenario this can be from memory or network
             var audioDataWithHeader = File.ReadAllBytes("whatstheweatherlike.wav");
@@ -1131,9 +1133,9 @@ namespace MicrosoftSpeechSDKSamples
         // See more information at https://aka.ms/csspeech/pa
         public static async Task PronunciationAssessmentConfiguredWithJson()
         {
-            // Creates an instance of a speech config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "en-US";
@@ -1199,8 +1201,96 @@ namespace MicrosoftSpeechSDKSamples
                 }
             }
         }
+        private static List<string> ConvertReferenceWords(string referenceText, List<string> referenceWords)
+        {
+            HashSet<string> dictionary = new HashSet<string>(referenceWords);
+            int maxLength = dictionary.Max(word => word.Length);
 
-        public static List<string> GetReferenceWords(string waveFilename, string referenceText, string language, SpeechConfig speechConfig)
+            referenceText = RemovePunctuation(referenceText);
+            return SegmentWord(referenceText, dictionary, maxLength);
+        }
+
+        private static string RemovePunctuation(string text)
+        {
+            // Remove punctuation from the reference text
+            return new string(text.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)).ToArray());
+        }
+
+        private static List<string> SegmentWord(string referenceText, HashSet<string> dictionary, int maxLength)
+        {
+            List<string> leftToRight = LeftToRightSegmentation(referenceText, dictionary, maxLength);
+            List<string> rightToLeft = RightToLeftSegmentation(referenceText, dictionary, maxLength);
+
+            if (string.Join("", leftToRight) == referenceText)
+                return leftToRight;
+            if (string.Join("", rightToLeft) == referenceText)
+                return rightToLeft;
+
+            Console.WriteLine("WW failed to segment the text with the dictionary");
+
+            if (leftToRight.Count < rightToLeft.Count)
+                return leftToRight;
+            if (leftToRight.Count > rightToLeft.Count)
+                return rightToLeft;
+
+            // If the word number is the same, then return the one with the smallest single word
+            int leftToRightSingle = leftToRight.Count(word => word.Length == 1);
+            int rightToLeftSingle = rightToLeft.Count(word => word.Length == 1);
+            return leftToRightSingle < rightToLeftSingle ? leftToRight : rightToLeft;
+        }
+
+        // From left to right to do the longest matching to get the word segmentation
+        private static List<string> LeftToRightSegmentation(string text, HashSet<string> dictionary, int maxLength)
+        {
+            List<string> result = new List<string>();
+            while (text.Length > 0)
+            {
+                // If the length of the text is less than the max_length, then the sub_text is the text itself
+                string subText = text.Length < maxLength ? text : text.Substring(0, maxLength);
+                while (subText.Length > 0)
+                {
+                    // If the sub_text is in the dictionary or the length of the sub_text is 1, then add it to the result
+                    if (dictionary.Contains(subText) || subText.Length == 1)
+                    {
+                        result.Add(subText);
+                        text = text.Substring(subText.Length);
+                        break;
+                    }
+                    // # If the sub_text is not in the dictionary, then remove the last character of the sub_text
+                    subText = subText.Substring(0, subText.Length - 1);
+                }
+            }
+            return result;
+        }
+
+        // From right to left to do the longest matching to get the word segmentation
+        private static List<string> RightToLeftSegmentation(string text, HashSet<string> dictionary, int maxLength)
+        {
+            List<string> result = new List<string>();
+            while (text.Length > 0)
+            {
+                // If the length of the text is less than the max_length, then the sub_text is the text itself
+                string subText = text.Length < maxLength ? text : text.Substring(text.Length - maxLength);
+                while (subText.Length > 0)
+                {
+                    // If the sub_text is in the dictionary or the length of the sub_text is 1, then add it to the result
+                    if (dictionary.Contains(subText) || subText.Length == 1)
+                    {
+                        result.Add(subText);
+                        text = text.Substring(0, text.Length - subText.Length);
+                        break;
+                    }
+
+                    // If the sub_text is not in the dictionary, then remove the first character of the sub_text
+                    subText = subText.Substring(1);
+                }
+            }
+
+            // Reverse the result to get the correct order
+            result.Reverse();
+            return result;
+        }
+        private static List<string> GetReferenceWords(string waveFilename, string referenceText, string language, SpeechConfig speechConfig)
         {
             var audioConfig = AudioConfig.FromWavFileInput(waveFilename);
             speechConfig.SpeechRecognitionLanguage = language;
@@ -1240,7 +1330,7 @@ namespace MicrosoftSpeechSDKSamples
                     }
                 }
 
-                return referenceWords;
+                return ConvertReferenceWords(referenceText, referenceWords);
             }
             else if (result.Reason == ResultReason.NoMatch)
             {
@@ -1267,10 +1357,14 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
             var waveFileName = @"zhcn_continuous_mode_sample.wav";
             var scriptFileName = @"zhcn_continuous_mode_sample.txt";
+
             var referenceText = File.ReadAllText(scriptFileName);
+
+            // You can adjust the segmentation silence timeout based on your real scenario.
+            config.SetProperty(PropertyId.Speech_SegmentationSilenceTimeoutMs, "1500");
 
             // Switch to other languages for example Spanish, change language "en-US" to "es-ES". Language name is not case sensitive.
             var language = "zh-CN";
@@ -1333,7 +1427,7 @@ namespace MicrosoftSpeechSDKSamples
                         foreach (var result in e.Result.Best())
                         {
                             durations.AddRange(result.Words.Select(item => item.Duration + 100000).ToList());
-                            recognizedWords.AddRange(result.Words.Select(item => item.Word).ToList());
+                            recognizedWords.AddRange(result.Words.Select(item => item.Word.ToLower()).ToList());
 
                             if (startOffset == 0) startOffset = result.Words.First().Offset;
 
@@ -1449,97 +1543,13 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        // Pronunciation assessment with content score
-        // See more information at https://aka.ms/csspeech/pa
-        public static async Task PronunciationAssessmentWithContentAssessment()
-        {
-            // Creates an instance of a speech config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-
-            // Creates a speech recognizer using file as audio input. 
-            using (var audioInput = AudioConfig.FromWavFileInput(@"pronunciation_assessment_fall.wav"))
-            {
-                // Switch to other languages for example Spanish, change language "en-US" to "es-ES". Language name is not case sensitive.
-                var language = "en-US";
-
-                using (var recognizer = new SpeechRecognizer(config, language, audioInput))
-                {
-                    var theTopic = "the season of the fall";
-
-                    bool enableMiscue = false;
-
-                    var pronConfig = new PronunciationAssessmentConfig("", GradingSystem.HundredMark, Granularity.Phoneme, enableMiscue);
-
-                    pronConfig.EnableProsodyAssessment();
-                    pronConfig.EnableContentAssessmentWithTopic(theTopic);
-
-                    recognizer.SessionStarted += (s, e) => {
-                        Console.WriteLine($"SESSION ID: {e.SessionId}");
-                    };
-
-                    pronConfig.ApplyTo(recognizer);
-
-                    var recognizedTexts = new List<string>();
-                    var contentResults = new List<ContentAssessmentResult>();
-                    var done = false;
-
-                    recognizer.SessionStopped += (s, e) => {
-                        Console.WriteLine("ClOSING on {0}", e);
-                        done = true;
-                    };
-
-                    recognizer.Canceled += (s, e) => {
-                        Console.WriteLine("ClOSING on {0}", e);
-                        done = true;
-                    };
-
-                    recognizer.Recognized += (s, e) => {
-                        if (!string.IsNullOrEmpty(e.Result.Text.TrimEnd('.')))
-                        {
-                            recognizedTexts.Add(e.Result.Text);
-                        }
-
-                        var contentResult = PronunciationAssessmentResult.FromResult(e.Result).ContentAssessmentResult;
-                        contentResults.Add(contentResult);
-                    };
-
-                    // Starts continuous recognition.
-                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-
-                    while (!done)
-                    {
-                        // Allow the program to run and process results continuously.
-                        await Task.Delay(1000); // Adjust the delay as needed.
-                    }
-
-                    // Waits for completion.
-                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-
-                    // Content assessment result is in the contentResults
-                    Console.WriteLine("Contet assessment for: {0}", string.Join(" ", recognizedTexts.Where(item => !string.IsNullOrEmpty(item))));
-
-                    if (contentResults.Count > 0)
-                    {
-                        var content = contentResults[contentResults.Count - 1];
-                        Console.WriteLine("Content Assessment results:\n\tGrammar score: {0}, Vocabulary score: {1}, Topic score: {2}", content.GrammarScore, content.VocabularyScore, content.TopicScore);
-                    }
-                    else
-                    {
-                        Console.WriteLine("The contentResult list is empty!");
-                    }
-
-                }
-            }
-        }
-
         // Pronunciation assessment with Microsoft Audio Stack (MAS) enabled
         // See more information at https://aka.ms/csspeech/pa
         public static async Task PronunciationAssessmentWithMas()
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "en-US";
@@ -1610,7 +1620,7 @@ namespace MicrosoftSpeechSDKSamples
         private static async Task<RecognitionResult> RecognizeOnceAsyncInternal(string key, string region)
         {
             RecognitionResult recognitionResult = null;
-            var config = SpeechConfig.FromSubscription(key, region);
+            var config = SpeechConfig.FromEndpoint(new Uri($"https://{region}.api.cognitive.microsoft.com"), key);
 
             // Creates a speech recognizer using file as audio input.
             using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
@@ -1648,7 +1658,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -1724,7 +1734,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates an instance of audio config using a microphone as audio input and with audio processing options specified.
             // All default enhancements from Microsoft Audio Stack are enabled and preset microphone array geometry is specified
@@ -1777,7 +1787,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -1869,7 +1879,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates an instance of audio config with pull stream as audio input and with audio processing options specified.
             // All default enhancements from Microsoft Audio Stack are enabled except acoustic echo cancellation and preset
@@ -1920,7 +1930,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified subscription key and service region.
             // Replace with your own subscription key and service region (e.g., "westus").
-            var config = SpeechConfig.FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -2028,6 +2038,163 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
+        // Speech continous recognition authenticated via aad token crendential.
+        public static async Task RecognitionContiniusAADTokenCredentialAsync()
+        {
+            // Create a token credential using DefaultAzureCredential.
+            // This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+            // For more types of token credentials, refer to: 
+            // https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
+            TokenCredential credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions());
+
+            // Define the v2 endpoint for Azure Speech Service.
+            // This is required when using a private endpoint with a custom domain.
+            // For details on setting up a custom domain with private links, see: 
+            // https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
+            var v2Endpoint = string.Format("wss://{custom domain}/stt/speech/universal/v2");
+
+            // Create a SpeechConfig instance using the v2 endpoint and the token credential for authentication.
+            var config = SpeechConfig.FromEndpoint(new Uri(v2Endpoint), credential);
+
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // Create a push stream
+            using (var pushStream = AudioInputStream.CreatePushStream())
+            {
+                using (var audioInput = AudioConfig.FromStreamInput(pushStream))
+                {
+                    // Creates a speech recognizer using audio stream input.
+                    using (var recognizer = new SpeechRecognizer(config, audioInput))
+                    {
+                        // Subscribes to events.
+                        recognizer.Recognizing += (s, e) =>
+                        {
+                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                        };
+
+                        recognizer.Recognized += (s, e) =>
+                        {
+                            if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                            {
+                                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            }
+                            else if (e.Result.Reason == ResultReason.NoMatch)
+                            {
+                                Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                            }
+                        };
+
+                        recognizer.Canceled += (s, e) =>
+                        {
+                            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                            if (e.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        recognizer.SessionStarted += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession started event.");
+                        };
+
+                        recognizer.SessionStopped += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession stopped event.");
+                            Console.WriteLine("\nStop recognition.");
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                        await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                        // open and read the wave file and push the buffers into the recognizer
+                        using (BinaryAudioStreamReader reader = Helper.CreateWavReader(@"whatstheweatherlike.wav"))
+                        {
+                            byte[] buffer = new byte[1000];
+                            while (true)
+                            {
+                                var readSamples = reader.Read(buffer, (uint)buffer.Length);
+                                if (readSamples == 0)
+                                {
+                                    break;
+                                }
+                                pushStream.Write(buffer, readSamples);
+                            }
+                        }
+                        pushStream.Close();
+
+                        // Waits for completion.
+                        // Use Task.WaitAny to keep the task rooted.
+                        Task.WaitAny(new[] { stopRecognition.Task });
+
+                        // Stops recognition.
+                        await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+        }
+
+        // Speech once recognition authenticated via aad token credential.
+        public static async Task RecognitionOnceAADTokenCredentialAsync()
+        {
+            // Create a token credential using DefaultAzureCredential.
+            // This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+            // For more types of token credentials, refer to: 
+            // https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
+            TokenCredential credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions());
+
+            // Define the v2 endpoint for Azure Speech Service.
+            // This is required when using a private endpoint with a custom domain.
+            // For details on setting up a custom domain with private links, see: 
+            // https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
+            var v2Endpoint = string.Format("wss://{custom domain}/stt/speech/universal/v2");
+
+            // Create a SpeechConfig instance using the v2 endpoint and the token credential for authentication.
+            var config = SpeechConfig.FromEndpoint(new Uri(v2Endpoint), credential);
+
+            // Creates a speech recognizer using microphone as audio input.
+            using (var recognizer = new SpeechRecognizer(config))
+            {
+                // Starts recognizing.
+                Console.WriteLine("Say something...");
+
+                // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+                // single utterance is determined by listening for silence at the end or until a maximum of about 30
+                // seconds of audio is processed.  The task returns the recognition text as result.
+                // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+                // shot recognition like command or query.
+                // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                // Checks result.
+                if (result.Reason == ResultReason.RecognizedSpeech)
+                {
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
+                }
+            }
+        }
     }
 
     public class Word

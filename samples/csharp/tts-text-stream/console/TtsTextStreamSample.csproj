@@ -9,7 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.13" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.42.0" />
+    <PackageReference Include="Azure.Core" Version="1.44.1" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.43.0" />
   </ItemGroup>
 
 </Project>

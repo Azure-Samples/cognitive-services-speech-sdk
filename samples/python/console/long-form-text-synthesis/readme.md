@@ -25,7 +25,7 @@ The basic steps to synthesize long-form text shown in this sample are
 Update the following strings before running the sample:
 
   * `YourSubscriptionKey`: replace with your subscription key.
-  * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
+  * `https://YourServiceRegion.api.cognitive.microsoft.com`: replace with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
 
 You may want to update other configuration such as `VoiceName` and `OutputFormat`.
 
