@@ -5,9 +5,19 @@
 
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
+#include <cstdlib>
 
+using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
+
+const char* getEnvVar(const char* var) {
+    const char* val = getenv(var);
+    if (val == nullptr) {
+        throw logic_error("Environment variable not set: " + string(var));
+    }
+    return val;
+}
 
 static void* OpenCompressedFile(const std::string& compressedFileName)
 {
@@ -50,9 +60,12 @@ void recognizeSpeech(const std::string& compressedFileName)
         return;
     }
 
+    const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
+    const char* serviceRegion = getEnvVar("SERVICE_REGION");
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    const string endpoint = "https://" + string(serviceRegion) + ".api.cognitive.microsoft.com";
+    auto config = SpeechConfig::FromEndpoint(endpoint, subscriptionKey);
 
     AudioStreamContainerFormat inputFormat;
 
@@ -94,9 +107,9 @@ void recognizeSpeech(const std::string& compressedFileName)
 
     // Starts speech recognition, and returns after a single utterance is recognized. The end of a
     // single utterance is determined by listening for silence at the end or until a maximum of about 30
-    // seconds of audio is processed.  The task returns the recognition text as result. 
+    // seconds of audio is processed.  The task returns the recognition text as result.
     // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-    // shot recognition like command or query. 
+    // shot recognition like command or query.
     // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeOnceAsync().get();
 

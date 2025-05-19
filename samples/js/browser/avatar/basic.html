@@ -37,8 +37,6 @@
   <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-AvaMultilingualNeural"></input><br />
   <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
   <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
-  <label style="font-size: medium;" for="personalVoiceSpeakerProfileID">Personal Voice Speaker Profile ID:</label>
-  <input id="personalVoiceSpeakerProfileID" type="text" size="32" style="font-size: medium;" value=""></input><br />
   <br />
 
   <h2 style="background-color: white; width: 300px;">Avatar Configuration</h2>
@@ -50,8 +48,9 @@
   <input id="backgroundColor" type="text" size="16" style="font-size: medium;" value="#FFFFFFFF"></input><br />
   <label style="font-size: medium;" for="backgroundImageUrl">Background Image (URL):</label>
   <input id="backgroundImageUrl" type="text" size="64" style="font-size: medium;" placeholder="https://www.example.com/1920-1080-image.jpg" value=""></input><br />
-  <div style="background-color: white; width: 200px;">
-    <input type="checkbox" id="customizedAvatar">Custom Avatar</input><br />
+  <div style="background-color: white; width: 400px;">
+    <input type="checkbox" id="customizedAvatar" onchange="window.updateCustomAvatarBox()">Custom Avatar</input>
+    <input type="checkbox" id="useBuiltInVoice" style="width: 12px;" disabled>Use Built-In Voice</input><br /> 
     <input type="checkbox" id="transparentBackground" onchange="window.updataTransparentBackground()">Transparent
     Background</input><br />
     <input type="checkbox" id="videoCrop">Video Crop</input><br />
