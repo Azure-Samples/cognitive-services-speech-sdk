@@ -298,6 +298,8 @@ def chatting_from_file():
         display_text = ""
         startOffset = 0
         endOffset = 0
+        # The speaking rate is the number of words per minute.
+        speaking_rate = 0
 
         def stop_cb(evt):
             """callback that signals to stop continuous recognition upon receiving an event `evt`"""
@@ -373,6 +375,17 @@ def chatting_from_file():
         print(f"Vocabulary score: {content_result['vocabulary']:.1f}")
         print(f"Grammar score: {content_result['grammar']:.1f}")
 
+        top_mispronunciation_words = sorted(
+            [
+                word for word in json_words
+                if word["PronunciationAssessment"]["ErrorType"] == "Mispronunciation"
+                or word["PronunciationAssessment"]["AccuracyScore"] < 60
+            ],
+            key=lambda x: x["PronunciationAssessment"]["AccuracyScore"],
+        )[:3]
+
+        speaking_rate = len(json_words) // (((endOffset - startOffset) / reduced_unit) / 60)
+
         comment_result(
             {
                 "accuracy score": accuracy_score,
@@ -382,13 +395,10 @@ def chatting_from_file():
                 "grammar score": content_result["grammar"],
             },
             set_punctuation(json_words, display_text),
-            [
-                word for word in json_words
-                if word["PronunciationAssessment"]["ErrorType"] == "Mispronunciation"
-                or word["PronunciationAssessment"]["AccuracyScore"] < 60
-            ],
+            top_mispronunciation_words,
             merged_audio_path,
-            display_text
+            display_text,
+            speaking_rate
         )
 
     def set_punctuation(json_words, display_text):
@@ -397,7 +407,7 @@ def chatting_from_file():
                 json_words[idx]["has_punctuation"] = True
         return json_words
 
-    def comment_result(scores_dict, json_words, mis_pronunciation_words, merged_audio_path, content):
+    def comment_result(scores_dict, json_words, mis_pronunciation_words, merged_audio_path, content, speaking_rate):
         message_dict = {
             "Excellent": [],
             "Good": [],
@@ -409,6 +419,11 @@ def chatting_from_file():
             "Missing break": [],
             "Unexpected break": [],
             "Monotone": [],
+        }
+        speed_of_speaking_rule = {
+            "a bit slowly": range(150 - 200),
+            "slowly": range(100 - 150),
+            "too slowly": range(0, 100)
         }
 
         def set_message_dict(score, score_name):
@@ -456,17 +471,17 @@ def chatting_from_file():
             message = ""
             for error_type in error_types:
                 if len(error_dict[error_type]) != 0:
-                    message += f"{error_type} count is {len(error_dict[error_type])}. near the word "
+                    message += f"{error_type} count is {len(error_dict[error_type])}. near the word: "
                     message += f"{', '.join([word['Word'].strip() for word in error_dict[error_type]])}. "
 
             return message
 
-        def get_report(json_words, mis_pronunciation_words, merged_audio_path, content):
-
+        def get_report(json_words, mis_pronunciation_words, merged_audio_path, content, speaking_rate):
             set_error_dict(json_words)
 
             report_audio_list = []
             report_path = "output/chat_report.wav"
+            text_to_write = ""
             if len(mis_pronunciation_words) != 0:
                 accuracy_report_audio_list = []
                 accuracy_report_path = "output/accuracy_report.wav"
@@ -480,6 +495,7 @@ def chatting_from_file():
                     origin_content += f' correct pronunciation is {mis_word["Word"]}, your pronunciation is'
 
                     tts(origin_content, report_clip_path)
+                    text_to_write += origin_content + f' {mis_word["Word"]}.'
                     get_mispronunciation_clip(
                         mis_word["Offset"],
                         mis_word["Duration"],
@@ -503,6 +519,7 @@ def chatting_from_file():
                 origin_content += get_error_message(["Missing break", "Unexpected break", "Monotone"])
 
                 tts(origin_content, fluency_prosody_report_path)
+                text_to_write += origin_content
                 report_audio_list.append(fluency_prosody_report_path)
 
             if content.strip() != "":
@@ -511,6 +528,17 @@ def chatting_from_file():
                 tts(call_gpt(content, "comment_on_vocabulary"), vocabulary_feedback_path, "vocabulary feedback")
                 tts(call_gpt(content, "comment_on_grammar"), grammar_feedback_path, "grammar feedback")
 
+            # Comments on speaking speed.
+            for k, r in speed_of_speaking_rule.items():
+                if speaking_rate in r:
+                    speed_of_speaking_report_path = "output/speed_of_speaking_report.wav"
+                    comments_on_speed_of_speaking = f"You're speaking {k}"
+                    tts(comments_on_speed_of_speaking, speed_of_speaking_report_path)
+                    text_to_write += comments_on_speed_of_speaking
+                    report_audio_list.append(speed_of_speaking_report_path)
+
+            with open("output/chat_report.txt", "w", encoding="utf-8") as f:
+                f.write(text_to_write)
             merge_wav(report_audio_list, report_path, "report")
 
         def get_score_comment(scores_dict):
@@ -526,7 +554,7 @@ def chatting_from_file():
             tts(messages, "output/chat_score_comment.wav", "score comment")
 
         get_score_comment(scores_dict)
-        get_report(json_words, mis_pronunciation_words, merged_audio_path, content)
+        get_report(json_words, mis_pronunciation_words, merged_audio_path, content, speaking_rate)
 
     if not os.path.exists("output"):
         os.makedirs("output")

@@ -31,7 +31,7 @@ else
     synthesisClient = new BatchSynthesisClient(host, speechKey, apiVersion);
 }
 
-var sampleScript = await File.ReadAllTextAsync("../../Gatsby-chapter1.txt").ConfigureAwait(false);
+var sampleScript = await File.ReadAllTextAsync("./Gatsby-chapter1.txt").ConfigureAwait(false);
 
 // Get all synthesis jobs.
 var synthesisJobs = await synthesisClient.GetAllSynthesesAsync().ConfigureAwait(false);

@@ -2,18 +2,40 @@
 
 Video translation client tool and API sample code
 
-# Supported OS
-## Windows prerequisite:
-   Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
-   
-   Run tool: VideoTranslationSample.exe [verb] [arguments]
+## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
+This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
 
-## Linux prerequisite:
-   Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- In extension's panel, click `View Samples` and download this sample from sample gallery.
+- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select an **eastus** regional speech resource. (Video translation currently only supports Azure Speech resources in the **eastus** region.) (one-time setup).
+  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
+  - `Azure AI Speech Toolkit: Build the Sample App` to compile the code.
+  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
 
-   Run tool: dotnet VideoTranslationSample.dll [verb] [arguments]
+      Upload an input video to Azure Blob Storage and copy the Blob SAS URL. Paste the Azure Blob URL when the run task terminal ask for it. Interactively enter other arguments in the run task terminal. The `Azure AI Speech Toolkit: Run the Sample App` command will run in mode `CreateTranslationAndIterationAndWaitUntilTerminated`:
 
-# Work Flow
+      ```
+      dotnet VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion 2024-05-20-preview -subscriptionKey <YourSubscriptionKey> -region <YourSubscriptionRegion> -videoFileAzureBlobUrl <YourVideoFileAzureBlobSASUrl> -sourceLocale <YourVideoLocale> -targetLocale <OutputVideoLocale> -voiceKind <TTSSynthesisVoiceKind> -translationId <YourTranslationIdString> -iterationId <YourIterationIdString>
+      ```
+      
+      Check more modes and arguments usage in [Command line sample](#Command-line-sample) and [Command line tool arguments](#Command-line-tool-arguments) sections. Try them out in new terminal.
+
+## Option 2: Manual Setup and Run (Advanced)
+Follow these steps if you prefer not to use VS Code.
+
+### Supported OS:
+- Windows: 
+   - Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+   - Run tool: `VideoTranslationSample.exe [verb] [arguments]`
+- Linux:
+   - Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+   - Run tool: `dotnet VideoTranslationSample.dll [verb] [arguments]`
+
+### Solution:
+   [VideoTranslationApiSampleCode.sln](VideoTranslationSample.sln)
+
+## Work Flow
 
    1. Upload video file to Azure storage blob, and then create translation and run first iteration with below command:
 
@@ -25,29 +47,25 @@ Video translation client tool and API sample code
    3. Upload modified metadata json webvtt file to Azure storage blob, and then create another iteration with below command:
    > VideoTranslationSample createIterationAndWaitUntilTerminated --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --translationId [TranslationId] -iterationId [IterationId]
 
-# Solution:
-   [VideoTranslationApiSampleCode.sln](VideoTranslationSample.sln)
 
-# API sample:
+## API sample:
 
-## Usage:
+### Usage:
    For RESTful API usage reference below API core library class.
 
-## RESTful API core library:
+### RESTful API core library:
    Translation API core library: [TranslationClient.cs](VideoTranslationLib.Public/VideoTranslationLib.ReferenceFiles/HttpClient/TranslationClient.cs)
 
    Iteration API core library: [IterationClient.cs](VideoTranslationLib.Public/VideoTranslationLib.ReferenceFiles/HttpClient/IterationClient.cs)
 
    Operation API core library: [OperationClient.cs](VideoTranslationLib.Public/VideoTranslationLib.ReferenceFiles/HttpClient/OperationClient.cs)
 
-# For project CommonLib
+## For project CommonLib
    Do not upgrade Flurl to version 4.0 because it does not support NewtonJson for ReceiveJson.
 
 
-# Runn tool on Windows prerequisite:
-   [Install dotnet 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
-# Command Line Usage
+## Command Line Usage
    | Description | Command line arguments |
    | ------------ | -------------- |
    | Upload the new video file for translation and run the first iteration of the translation. | createTranslationAndIterationAndWaitUntilTerminated --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --sourceLocale [SourceLocale] --targetLocales [TargetLocale] --voiceKind [PersonalVoice/PlatformVoice] --videoFileAzureBlobUrl [VideoFileAzureBlobUrl] |
@@ -59,7 +77,7 @@ Video translation client tool and API sample code
    | Query the iterations. | queryIterations --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --translationId [TranslationId] |
    | Query the iteration by ID. | queryIteration --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --translationId [TranslationId] --iterationId [IterationId] |
 
-# Command line tool arguments
+## Command line tool arguments
    | Argument | Is Required | Supported Values Sample | Description |
    | -------- | -------- | ---------------- | ----------- |
    | --region  | True | eastus | Provide the region of the API request. |
@@ -77,21 +95,21 @@ Video translation client tool and API sample code
    | --speakerCount | False | 1 | Please specify the speaker count of the video. |
    | --exportSubtitleInVideo | False | False | Please indicate whether to export subtitles in the video. |
 
-# Argument definitions
-## Supported regions
+## Argument definitions
+### Supported regions
    https://learn.microsoft.com/azure/ai-services/speech-service/regions
 
    Use region identifier for the region argument.
 
-## Supported API versions:
+### Supported API versions:
 * 2024-05-20-preview
 
-## Supported VoiceKind
+### Supported VoiceKind
 * PlatformVoice
 * PersonalVoice
 
-# Best practice
-## Escape char for URL arguments in Windows
+## Best practice
+### Escape char for URL arguments in Windows
    For arguments:  --videoFileAzureBlobUrl and --webvttFileAzureBlobUrl
    If you run a client sample tool in a Windows shell and there is an & in the URL arguments (for example, a SAS token in an Azure blob URL), the & needs to be converted to ^& to escape it.
 
@@ -99,5 +117,5 @@ Video translation client tool and API sample code
 
       --videoFileAzureBlobUrl "https://a/b?c^&d"
 
-## How to retry?
+### How to retry?
    If you initiate a command to create a translation or iteration job and subsequently restart Windows, the job will continue to run on the server side. To check the status of the translation/iteration job, you can use the query translation/iteration tool command or the API, providing the specific translation/iteration ID.

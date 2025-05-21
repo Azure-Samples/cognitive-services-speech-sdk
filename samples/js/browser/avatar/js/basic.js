@@ -226,6 +226,7 @@ window.startSession = () => {
     const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
     const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle, videoFormat)
     avatarConfig.customized = document.getElementById('customizedAvatar').checked
+    avatarConfig.useBuiltInVoice = document.getElementById('useBuiltInVoice').checked 
     avatarConfig.backgroundColor = document.getElementById('backgroundColor').value
     avatarConfig.backgroundImage = document.getElementById('backgroundImageUrl').value
 
@@ -273,8 +274,7 @@ window.speak = () => {
     document.getElementById('audio').muted = false
     let spokenText = document.getElementById('spokenText').value
     let ttsVoice = document.getElementById('ttsVoice').value
-    let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
-    let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(spokenText)}</mstts:ttsembedding></voice></speak>`
+    let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(spokenText)}</voice></speak>`
     console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
     avatarSynthesizer.speakSsmlAsync(spokenSsml).then(
         (result) => {
@@ -328,5 +328,14 @@ window.updatePrivateEndpoint = () => {
         document.getElementById('showPrivateEndpointCheckBox').hidden = false
     } else {
         document.getElementById('showPrivateEndpointCheckBox').hidden = true
+    }
+}
+
+window.updateCustomAvatarBox = () => {
+    if (document.getElementById('customizedAvatar').checked) {
+        document.getElementById('useBuiltInVoice').disabled = false
+    } else {
+        document.getElementById('useBuiltInVoice').disabled = true
+        document.getElementById('useBuiltInVoice').checked = false
     }
 }
