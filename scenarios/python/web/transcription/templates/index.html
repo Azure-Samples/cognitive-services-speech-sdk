@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        #result {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .interim {
+            color: gray;
+            font-style: italic;
+        }
+        .debug {
+            color: #999;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Speech to Text Transcription</h1>
+    <button id="transcribeButton" onclick="startTranscription()">Start Recording</button>
+    <button id="stopButton" onclick="stopTranscription()" disabled>Stop Recording</button>
+    <button id="testButton" onclick="testConnection()">Test Connection</button>
+    <div id="result"></div>
+
+    <script>
+        // Use WebSockets for real-time communication
+        const socket = io({
+            transports: ['websocket'],
+            upgrade: false
+        });
+
+        // Audio context and processor variables
+        let audioContext;
+        let microphone;
+        let processor;
+        let isRecording = false;
+
+        // WebSocket event handlers
+        socket.on('connect', () => {
+            console.log('Connected to server with ID:', socket.id);
+            document.getElementById('result').innerHTML += '<div class="debug">WebSocket connected ✓</div>';
+        });
+
+        socket.on('transcription', (data) => {
+            console.log('Received transcription:', data.text);
+            // Remove interim result element if it exists
+            const interimElement = document.getElementById('interim-result');
+            if (interimElement) interimElement.remove();
+            
+            // Add the new transcription
+            document.getElementById('result').innerHTML += 
+                `<div>${data.error ? `<span style="color:red">${data.text}</span>` : data.text}</div>`;
+        });
+
+        socket.on('interim_transcription', (data) => {
+            console.log('Received interim transcription:', data.text);
+            // Update or create interim result element
+            const interimElement = document.getElementById('interim-result');
+            if (interimElement) {
+                interimElement.textContent = data.text;
+            } else {
+                document.getElementById('result').innerHTML +=
+                    `<div id="interim-result" class="interim">${data.text}</div>`;
+            }
+        });
+
+        socket.on('debug', (data) => {
+            console.log('Debug:', data.message);
+            document.getElementById('result').innerHTML += `<div class="debug">${data.message}</div>`;
+        });
+
+        function testConnection() {
+            console.log('Testing connection');
+            document.getElementById('result').innerHTML += '<div class="debug">Testing connection...</div>';
+            fetch('/test-emit')
+                .then(response => response.text())
+                .then(data => console.log('Test response:', data))
+                .catch(error => console.error('Error:', error));
+        }
+
+        function startTranscription() {
+            if (isRecording) return;
+            
+            const transcribeButton = document.getElementById('transcribeButton');
+            const stopButton = document.getElementById('stopButton');
+            transcribeButton.disabled = true;
+            stopButton.disabled = false;
+            transcribeButton.textContent = 'Recording...';
+            
+            socket.emit('start_transcription');
+
+            // Get access to the microphone
+            navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false,
+                    sampleRate: 16000
+                }
+            })
+            .then(stream => {
+                console.log('Microphone access granted');
+                document.getElementById('result').innerHTML += '<div class="debug">Microphone access granted</div>';
+                
+                // Create audio context at 16kHz for Speech SDK compatibility
+                audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                    sampleRate: 16000
+                });
+                
+                // Create microphone input source
+                microphone = audioContext.createMediaStreamSource(stream);
+                
+                // Create script processor to get raw PCM data
+                const bufferSize = 4096;
+                processor = audioContext.createScriptProcessor(bufferSize, 1, 1);
+                
+                // When audio data is available
+                processor.onaudioprocess = function(e) {
+                    // Get raw PCM data from input channel
+                    const inputData = e.inputBuffer.getChannelData(0);
+                    
+                    // Convert to 16-bit PCM (since Float32Array needs to be converted to Int16Array)
+                    const pcmData = new Int16Array(inputData.length);
+                    for (let i = 0; i < inputData.length; i++) {
+                        // Convert float (-1.0 to 1.0) to int16 (-32768 to 32767)
+                        pcmData[i] = Math.min(1, Math.max(-1, inputData[i])) * 0x7FFF;
+                    }
+                    
+                    // Send the PCM data to the server
+                    const base64Data = arrayBufferToBase64(pcmData.buffer);
+                    socket.emit('audio_data', { audio: base64Data });
+                };
+                
+                // Connect the microphone to the processor and the processor to the destination
+                microphone.connect(processor);
+                processor.connect(audioContext.destination);
+                
+                isRecording = true;
+            })
+            .catch(err => {
+                console.error('Error accessing microphone:', err);
+                document.getElementById('result').innerHTML += 
+                    `<div class="debug" style="color:red">Microphone error: ${err.message}</div>`;
+                transcribeButton.disabled = false;
+                stopButton.disabled = true;
+                transcribeButton.textContent = 'Start Recording';
+            });
+        }
+
+        function stopTranscription() {
+            if (!isRecording) return;
+            
+            const transcribeButton = document.getElementById('transcribeButton');
+            const stopButton = document.getElementById('stopButton');
+            transcribeButton.disabled = false;
+            stopButton.disabled = true;
+            transcribeButton.textContent = 'Start Recording';
+
+            console.log('Stopping transcription');
+            
+            // Stop recording
+            if (processor && microphone) {
+                microphone.disconnect();
+                processor.disconnect();
+                
+                if (audioContext && audioContext.state !== 'closed') {
+                    audioContext.close().then(() => {
+                        console.log('Audio context closed');
+                    });
+                }
+            }
+            
+            isRecording = false;
+            socket.emit('stop_transcription');
+        }
+
+        // Helper function to convert ArrayBuffer to Base64
+        function arrayBufferToBase64(buffer) {
+            const binary = new Uint8Array(buffer);
+            const bytes = Array.from(binary).map(byte => String.fromCharCode(byte)).join('');
+            return btoa(bytes);
+        }
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            stopTranscription();
+        });
+    </script>
+</body>
+</html>

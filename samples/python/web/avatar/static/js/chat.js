@@ -9,6 +9,8 @@ var audioContext
 var isFirstResponseChunk
 var speechRecognizer
 var peerConnection
+var peerConnectionDataChannel
+var speechSynthesizerConnected = false
 var isSpeaking = false
 var isReconnecting = false
 var sessionActive = false
@@ -16,6 +18,7 @@ var userClosedSession = false
 var recognitionStartedTime
 var chatRequestSentTime
 var chatResponseReceivedTime
+var lastInteractionTime = new Date()
 var lastSpeakTime
 var isFirstRecognizingEvent = true
 var sttLatencyRegex = new RegExp(/<STTL>(\d+)<\/STTL>/)
@@ -104,6 +107,7 @@ function setupWebSocket() {
     socket.on('response', function(data) {
         let path = data.path
         if (path === 'api.chat') {
+            lastInteractionTime = new Date()
             let chatHistoryTextArea = document.getElementById('chatHistory')
             let chunkString = data.chatResponse
             if (sttLatencyRegex.test(chunkString)) {
@@ -136,6 +140,20 @@ function setupWebSocket() {
             }
 
             chatHistoryTextArea.scrollTop = chatHistoryTextArea.scrollHeight
+        } else if (path === 'api.event') {
+            console.log("[" + (new Date()).toISOString() + "] WebSocket event received: " + data.eventType)
+            if (data.eventType === 'SPEECH_SYNTHESIZER_DISCONNECTED') {
+                if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
+                    // No longer reconnect when there is no interaction for a while
+                    if (new Date() - lastInteractionTime < 300000) {
+                        // Session disconnected unexpectedly, need reconnect
+                        console.log(`[${(new Date()).toISOString()}] The speech synthesizer got disconnected unexpectedly, need reconnect.`)
+                        isReconnecting = true
+                        connectAvatar()
+                        createSpeechRecognizer()
+                    }
+                }
+            }
         }
     })
 }
@@ -229,8 +247,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
     // Listen to data channel, to get the event from the server
     peerConnection.addEventListener("datachannel", event => {
-        const dataChannel = event.channel
-        dataChannel.onmessage = e => {
+        peerConnectionDataChannel = event.channel
+        peerConnectionDataChannel.onmessage = e => {
             console.log("[" + (new Date()).toISOString() + "] WebRTC event received: " + e.data)
 
             if (e.data.includes("EVENT_TYPE_SWITCH_TO_SPEAKING")) {
@@ -252,11 +270,16 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 document.getElementById('stopSpeaking').disabled = true
             } else if (e.data.includes("EVENT_TYPE_SESSION_END")) {
                 if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
-                    // Session disconnected unexpectedly, need reconnect
-                    console.log(`[${(new Date()).toISOString()}] The WebSockets got disconnected, need reconnect.`)
-                    isReconnecting = true
-                    connectAvatar()
-                    createSpeechRecognizer()
+                    // No longer reconnect when there is no interaction for a while
+                    if (new Date() - lastInteractionTime < 300000) {
+                        // Session disconnected unexpectedly, need reconnect
+                        console.log(`[${(new Date()).toISOString()}] The session ended unexpectedly, need reconnect.`)
+                        isReconnecting = true
+                        // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                        peerConnectionDataChannel.onmessage = null
+                        connectAvatar()
+                        createSpeechRecognizer()
+                    }
                 }
             }
         }
@@ -355,6 +378,7 @@ function connectToAvatarService(peerConnection) {
 
 // Handle user query. Send user query to the chat API and display the response.
 function handleUserQuery(userQuery) {
+    lastInteractionTime = new Date()
     chatRequestSentTime = new Date()
     if (socket !== undefined) {
         socket.emit('message', { clientId: clientId, path: 'api.chat', systemPrompt: document.getElementById('prompt').value, userQuery: userQuery })
@@ -442,11 +466,45 @@ function handleLocalVideo() {
     if (currentTime - lastSpeakTime > 15000) {
         if (document.getElementById('useLocalVideoForIdle').checked && sessionActive && !isSpeaking) {
             disconnectAvatar()
+            userClosedSession = true // Indicating the session was closed on purpose, not due to network issue
             document.getElementById('localVideo').hidden = false
             document.getElementById('remoteVideo').style.width = '0.1px'
             sessionActive = false
         }
     }
+}
+
+// Check server status
+function checkServerStatus() {
+    fetch('/api/getStatus', {
+        method: 'GET',
+        headers: {
+            'ClientId': clientId
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            response.text().then(text => {
+                responseJson = JSON.parse(text)
+                synthesizerConnected = responseJson.speechSynthesizerConnected
+                if (speechSynthesizerConnected === true && synthesizerConnected === false) {
+                    console.log(`[${(new Date()).toISOString()}] The speech synthesizer connection is closed.`)
+                    if (document.getElementById('autoReconnectAvatar').checked && !userClosedSession && !isReconnecting) {
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            // Session disconnected unexpectedly, need reconnect
+                            console.log(`[${(new Date()).toISOString()}] The speech synthesizer got disconnected unexpectedly, need reconnect.`)
+                            isReconnecting = true
+                            connectAvatar()
+                            createSpeechRecognizer()
+                        }
+                    }
+                }
+
+                speechSynthesizerConnected = synthesizerConnected
+            })
+        }
+    })
 }
 
 // Check whether the avatar video stream is hung
@@ -462,10 +520,15 @@ function checkHung() {
                 if (sessionActive) {
                     sessionActive = false
                     if (document.getElementById('autoReconnectAvatar').checked) {
-                        console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
-                        isReconnecting = true
-                        connectAvatar()
-                        createSpeechRecognizer()
+                        // No longer reconnect when there is no interaction for a while
+                        if (new Date() - lastInteractionTime < 300000) {
+                            console.log(`[${(new Date()).toISOString()}] The video stream got disconnected, need reconnect.`)
+                            isReconnecting = true
+                            // Remove data channel onmessage callback to avoid duplicatedly triggering reconnect
+                            peerConnectionDataChannel.onmessage = null
+                            connectAvatar()
+                            createSpeechRecognizer()
+                        }
                     }
                 }
             }
@@ -476,12 +539,20 @@ function checkHung() {
 window.onload = () => {
     clientId = document.getElementById('clientId').value
     enableWebSockets = document.getElementById('enableWebSockets').value === 'True'
+
+    if (!enableWebSockets) {
+        setInterval(() => {
+            checkServerStatus()
+        }, 2000) // Check server status every 2 seconds
+    }
+
     setInterval(() => {
         checkHung()
     }, 2000) // Check session activity every 2 seconds
 }
 
 window.startSession = () => {
+    lastInteractionTime = new Date()
     if (enableWebSockets) {
         setupWebSocket()
     }
@@ -506,6 +577,7 @@ window.startSession = () => {
 }
 
 window.stopSpeaking = () => {
+    lastInteractionTime = new Date()
     document.getElementById('stopSpeaking').disabled = true
 
     if (socket !== undefined) {
@@ -530,6 +602,7 @@ window.stopSpeaking = () => {
 }
 
 window.stopSession = () => {
+    lastInteractionTime = new Date()
     document.getElementById('startSession').disabled = false
     document.getElementById('microphone').disabled = true
     document.getElementById('stopSession').disabled = true
@@ -548,6 +621,7 @@ window.stopSession = () => {
 }
 
 window.clearChatHistory = () => {
+    lastInteractionTime = new Date()
     fetch('/api/chat/clearHistory', {
         method: 'POST',
         headers: {
@@ -567,6 +641,7 @@ window.clearChatHistory = () => {
 }
 
 window.microphone = () => {
+    lastInteractionTime = new Date()
     if (document.getElementById('microphone').innerHTML === 'Stop Microphone') {
         // Stop microphone for websocket mode
         if (socket !== undefined) {

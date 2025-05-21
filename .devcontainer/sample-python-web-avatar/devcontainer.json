@@ -1,0 +1,22 @@
+{
+    "name": "sample-python-web-avatar",
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {}
+    },
+    "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+    "workspaceFolder": "/workspaces/cognitive-services-speech-sdk/samples/python/web/avatar/",
+    "hostRequirements": {
+        "memory": "8gb"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-azureaispeech.azure-ai-speech-toolkit"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": ".venv/bin/python" // Point to the Python interpreter in the .venv directory
+            }
+        }
+    },
+    "remoteUser": "vscode"
+}

@@ -58,18 +58,17 @@ public class Main {
         System.out.println("41. Pronunciation assessment with stream input.");
         System.out.println("42. Pronunciation assessment continuous with file.");
         System.out.println("43. Pronunciation assessment configured with JSON.");
-        System.out.println("44. Pronunciation assessment with content assessment.");
-        System.out.println("45. Speech synthesis to audio and SRT files.");
-        System.out.println("46. Recognize once from file, with at-start language detection.");
-        System.out.println("47. Continuous speech recognition from file, with at-start language detection.");
-        System.out.println("48. Continuous speech recognition from file, with at-start language detection with custom model.");
-        System.out.println("49. Continuous speech recognition from file, with continuous language detection with custom models.");
-        System.out.println("50. Diagnostics logging to file (without a filter).");
-        System.out.println("51. Diagnostics logging to file (with a filter).");
-        System.out.println("52. Diagnostics Subscribing to logging event (without a filter).");
-        System.out.println("53. Diagnostics Subscribing to logging event (with a filter).");
-        System.out.println("54. Diagnostics logging to memory buffer with logging level (with or without filter).");
-        System.out.println("55. Diagnostics logging to memory buffer with ingested self-defined SPX trace mark.");
+        System.out.println("44. Speech synthesis to audio and SRT files.");
+        System.out.println("45. Recognize once from file, with at-start language detection.");
+        System.out.println("46. Continuous speech recognition from file, with at-start language detection.");
+        System.out.println("47. Continuous speech recognition from file, with at-start language detection with custom model.");
+        System.out.println("48. Continuous speech recognition from file, with continuous language detection with custom models.");
+        System.out.println("49. Diagnostics logging to file (without a filter).");
+        System.out.println("50. Diagnostics logging to file (with a filter).");
+        System.out.println("51. Diagnostics Subscribing to logging event (without a filter).");
+        System.out.println("52. Diagnostics Subscribing to logging event (with a filter).");
+        System.out.println("53. Diagnostics logging to memory buffer with logging level (with or without filter).");
+        System.out.println("54. Diagnostics logging to memory buffer with ingested self-defined SPX trace mark.");
 
         System.out.print(prompt);
 
@@ -209,39 +208,36 @@ public class Main {
                     SpeechRecognitionSamples.pronunciationAssessmentConfiguredWithJson();
                     break;
                 case "44":
-                    SpeechRecognitionSamples.pronunciationAssessmentWithContentAssessment();
-                    break;
-                case "45":
                     SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
                     break;
-                case "46":
+                case "45":
                     SpeechRecognitionSamples.recognizeOnceFromFileWithAtStartLanguageDetection();
                     break;
-                case "47":
+                case "46":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetection();
                     break;
-                case "48":
+                case "47":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels();
                     break;
-                case "49":
+                case "48":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels();
                     break;
-                case "50":
+                case "49":
                     SpeechDiagnosticsLoggingSamples.fileLoggerWithoutFilter();
                     break;
-                case "51":
+                case "50":
                     SpeechDiagnosticsLoggingSamples.fileLoggerWithFilter();
                     break;
-                case "52":
+                case "51":
                     SpeechDiagnosticsLoggingSamples.eventLoggerWithoutFilter();
                     break;
-                case "53":
+                case "52":
                     SpeechDiagnosticsLoggingSamples.eventLoggerWithFilter();
                     break;
-                case "54":
+                case "53":
                     SpeechDiagnosticsLoggingSamples.memoryLoggerWithOrWithoutFilter();
                     break;
-                case "55":
+                case "54":
                     SpeechDiagnosticsLoggingSamples.selfDefinedSpxTraceLogging();
                     break;
                 case "0":

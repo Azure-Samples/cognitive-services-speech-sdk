@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.microsoft.cognitiveservices.speech.quickstart</groupId>
   <artifactId>translate-speech-to-text-quickstart</artifactId>
@@ -27,21 +28,26 @@
       <artifactId>azure-identity</artifactId>
       <version>1.13.1</version>
     </dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20210307</version>
+    </dependency>
   </dependencies>
   <repositories>
     <repository>
-        <id>central</id>
-        <name>Default Repository</name>
-        <layout>default</layout>
-        <url>https://repo1.maven.org/maven2</url>
-        <snapshots>
-          <enabled>false</enabled>
-        </snapshots>
+      <id>central</id>
+      <name>Default Repository</name>
+      <layout>default</layout>
+      <url>https://repo1.maven.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
     <repository>
-        <id>maven-cognitiveservices-local-path</id>
-        <name>Microsoft Cognitive Services Local Maven Repository</name>
-        <url>file:///localplaceholder//maven//</url>
+      <id>maven-cognitiveservices-local-path</id>
+      <name>Microsoft Cognitive Services Local Maven Repository</name>
+      <url>file:///localplaceholder//maven//</url>
     </repository>
   </repositories>
 </project>

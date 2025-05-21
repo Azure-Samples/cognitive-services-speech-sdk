@@ -29,12 +29,14 @@ namespace Avatar.Services
             clientContext.CustomVoiceEndpointId = null;
             clientContext.PersonalVoiceSpeakerProfileId = null;
             clientContext.SpeechSynthesizer = null;
+            clientContext.SpeechSynthesizerConnected = false;
             clientContext.SpeechToken = null;
             clientContext.IceToken = null;
             clientContext.ChatInitiated = false;
             clientContext.Messages = [];
             clientContext.IsSpeaking = false;
-            clientContext.SpokenTextQueue = new Queue<string>();
+            clientContext.SpeakingText = null;
+            clientContext.SpokenTextQueue = new LinkedList<string>();
             clientContext.SpeakingThread = null;
             clientContext.LastSpeakTime = null;
 

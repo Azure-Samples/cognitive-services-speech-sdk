@@ -51,7 +51,7 @@ ice_server_username = os.environ.get('ICE_SERVER_USERNAME') # The ICE username
 ice_server_password = os.environ.get('ICE_SERVER_PASSWORD') # The ICE password
 
 # Const variables
-enable_websockets = False # Enable websockets between client and server for real-time communication optimization
+enable_websockets = True # Enable websockets between client and server for real-time communication optimization
 enable_vad = False # Enable voice activity detection (VAD) for interrupting the avatar speaking
 enable_token_auth_for_speech = False # Enable token authentication for speech service
 default_tts_voice = 'en-US-JennyMultilingualV2Neural' # Default TTS voice
@@ -114,6 +114,17 @@ def getIceToken() -> Response:
         })
         return Response(custom_ice_token, status=200)
     return Response(ice_token, status=200)
+
+# The API route to get the status of server
+@app.route("/api/getStatus", methods=["GET"])
+def getStatus() -> Response:
+    global client_contexts
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    client_context = client_contexts[client_id]
+    status = {
+        'speechSynthesizerConnected': client_context['speech_synthesizer_connected']
+    }
+    return Response(json.dumps(status), status=200)
 
 # The API route to connect the TTS avatar
 @app.route("/api/connectAvatar", methods=["POST"])
@@ -222,9 +233,15 @@ def connectAvatar() -> Response:
         def tts_disconnected_cb(evt):
             print(f'TTS Avatar service disconnected.')
             client_context['speech_synthesizer_connection'] = None
+            client_context['speech_synthesizer_connected'] = False
+            if enable_websockets:
+                socketio.emit("response", { 'path': 'api.event', 'eventType': 'SPEECH_SYNTHESIZER_DISCONNECTED' }, room=client_id)
         connection.disconnected.connect(tts_disconnected_cb)
         connection.set_message_property('speech.config', 'context', json.dumps(avatar_config))
         client_context['speech_synthesizer_connection'] = connection
+        client_context['speech_synthesizer_connected'] = True
+        if enable_websockets:
+            socketio.emit("response", { 'path': 'api.event', 'eventType': 'SPEECH_SYNTHESIZER_CONNECTED' }, room=client_id)
 
         speech_sythesis_result = speech_synthesizer.speak_text_async('').get()
         print(f'Result id for avatar connection: {speech_sythesis_result.result_id}')
@@ -473,6 +490,7 @@ def initializeClient() -> uuid.UUID:
         'personal_voice_speaker_profile_id': None, # Speaker profile ID for personal voice
         'speech_synthesizer': None, # Speech synthesizer for avatar
         'speech_synthesizer_connection': None, # Speech synthesizer connection for avatar
+        'speech_synthesizer_connected': False, # Flag to indicate if the speech synthesizer is connected
         'speech_token': None, # Speech token for client side authentication with speech service
         'ice_token': None, # ICE token for ICE/TURN/Relay server connection
         'chat_initiated': False, # Flag to indicate if the chat context is initiated
@@ -486,28 +504,30 @@ def initializeClient() -> uuid.UUID:
     }
     return client_id
 
-# Refresh the ICE token which being called
+# Refresh the ICE token every 24 hours
 def refreshIceToken() -> None:
     global ice_token
-    ice_token_response = None
-    if speech_private_endpoint:
-        if enable_token_auth_for_speech:
-            while not speech_token:
-                time.sleep(0.2)
-            ice_token_response = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'})
+    while True:
+        ice_token_response = None
+        if speech_private_endpoint:
+            if enable_token_auth_for_speech:
+                while not speech_token:
+                    time.sleep(0.2)
+                ice_token_response = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'})
+            else:
+                ice_token_response = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key})
         else:
-            ice_token_response = requests.get(f'{speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key})
-    else:
-        if enable_token_auth_for_speech:
-            while not speech_token:
-                time.sleep(0.2)
-            ice_token_response = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'})
+            if enable_token_auth_for_speech:
+                while not speech_token:
+                    time.sleep(0.2)
+                ice_token_response = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Authorization': f'Bearer {speech_token}'})
+            else:
+                ice_token_response = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key})
+        if ice_token_response.status_code == 200:
+            ice_token = ice_token_response.text
         else:
-            ice_token_response = requests.get(f'https://{speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1', headers={'Ocp-Apim-Subscription-Key': speech_key})
-    if ice_token_response.status_code == 200:
-        ice_token = ice_token_response.text
-    else:
-        raise Exception(f"Failed to get ICE token. Status code: {ice_token_response.status_code}")
+            raise Exception(f"Failed to get ICE token. Status code: {ice_token_response.status_code}")
+        time.sleep(60 * 60 * 24) # Refresh the ICE token every 24 hours
 
 # Refresh the speech token every 9 minutes
 def refreshSpeechToken() -> None:
@@ -678,6 +698,7 @@ def speakWithQueue(text: str, ending_silence_ms: int, client_id: uuid.UUID) -> N
                     speakText(text, tts_voice, personal_voice_speaker_profile_id, ending_silence_ms, client_id)
                 except Exception as e:
                     print(f"Error in speaking text: {e}")
+                    break
                 client_context['last_speak_time'] = datetime.datetime.now(pytz.UTC)
             client_context['is_speaking'] = False
             client_context['speaking_text'] = None
@@ -762,5 +783,7 @@ speechTokenRefereshThread = threading.Thread(target=refreshSpeechToken)
 speechTokenRefereshThread.daemon = True
 speechTokenRefereshThread.start()
 
-# Fetch ICE token at startup
-refreshIceToken()
+# Start the ICE token refresh thread
+iceTokenRefreshThread = threading.Thread(target=refreshIceToken)
+iceTokenRefreshThread.daemon = True
+iceTokenRefreshThread.start()
