@@ -22,6 +22,11 @@
       <artifactId>client-sdk</artifactId>
       <version>1.43.0</version>
     </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-identity</artifactId>
+      <version>1.13.1</version>
+    </dependency>
   </dependencies>
   <repositories>
     <repository>

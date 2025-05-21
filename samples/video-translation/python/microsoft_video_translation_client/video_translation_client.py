@@ -305,7 +305,7 @@ class VideoTranslationClient:
             "Ocp-Apim-Subscription-Key": self.sub_key
         }
         
-    # https://learn.microsoft.com/en-us/rest/api/aiservices/videotranslation/operation-operations/get-operation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/operation-operations/get-operation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
     def request_get_operation(self,
                               operation_location: Url,
                               printUrl: bool) -> tuple[bool, str, OperationDefinition]:
@@ -331,7 +331,7 @@ class VideoTranslationClient:
 
         return False, response.reason, None
 
-    # https://learn.microsoft.com/en-us/rest/api/aiservices/videotranslation/translation-operations/get-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/get-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
     def request_get_translation(self,
                                 translation_id: str) -> tuple[bool, str, TranslationDefinition]:
         if translation_id is None:
@@ -356,7 +356,7 @@ class VideoTranslationClient:
 
         return False, response.reason, None
     
-    # https://learn.microsoft.com/en-us/rest/api/aiservices/videotranslation/iteration-operations/get-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/get-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
     def request_get_iteration(self,
                               translation_id: str,
                               iteration_id: str) -> tuple[bool, str, IterationDefinition]:
@@ -382,7 +382,7 @@ class VideoTranslationClient:
 
         return False, response.reason, None
 
-    # https://learn.microsoft.com/en-us/rest/api/aiservices/videotranslation/translation-operations/list-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/list-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
     def request_list_translations(self,
                                   top: int = None,
                                   skip: int = None,
@@ -414,7 +414,7 @@ class VideoTranslationClient:
             dataclass_type = PagedTranslationDefinition)
         return True, None, response_translations
 
-    # https://learn.microsoft.com/en-us/rest/api/aiservices/videotranslation/iteration-operations/list-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/list-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
     def request_list_iterations(self) -> tuple[bool, str, PagedIterationDefinition]:
         url = self.build_iterations_url()
         headers = self.build_request_header()
@@ -432,7 +432,7 @@ class VideoTranslationClient:
             dataclass_type = PagedIterationDefinition)
         return True, None, response_iterations
     
-    # https://learn.microsoft.com/en-us/rest/api/aiservices/videotranslation/translation-operations/delete-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/delete-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
     def request_delete_translation(self,
                                    translation_id: str) -> tuple[bool, str]:
         url = self.build_translation_url(translation_id)
@@ -447,7 +447,7 @@ class VideoTranslationClient:
             return False, error
         return True, None
         
-    # https://learn.microsoft.com/en-us/rest/api/aiservices/videotranslation/translation-operations/create-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/create-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
     def request_create_translation(
             self,
             translation_id: str,
@@ -503,7 +503,7 @@ class VideoTranslationClient:
         operation_location_url = urllib3.util.parse_url(operation_location)
         return True, None, response_translation, operation_location_url
     
-    # https://learn.microsoft.com/en-us/rest/api/aiservices/videotranslation/iteration-operations/create-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/create-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
     def request_create_iteration(
             self,
             translation_id: str,

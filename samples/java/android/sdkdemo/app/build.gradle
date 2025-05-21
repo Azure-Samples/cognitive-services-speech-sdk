@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdk 34
+    namespace "com.microsoft.cognitiveservices.speech.samples.sdkdemo"
     defaultConfig {
         applicationId "com.microsoft.cognitiveservices.speech.samples.sdkdemo"
         minSdkVersion 26
-        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
     }
@@ -20,6 +20,16 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/io.netty.versions.properties'
     }
 }
 

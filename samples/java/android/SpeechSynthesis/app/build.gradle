@@ -3,12 +3,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.microsoft.cognitiveservices.speech.samples.speechsynthesis"
-        minSdkVersion 23
-        targetSdkVersion 33
+        minSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -22,6 +21,16 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/io.netty.versions.properties'
     }
     namespace 'com.microsoft.cognitiveservices.speech.samples.speechsynthesis'
 }
