@@ -19,5 +19,5 @@ steps:
     architecture: x64
 - bash: |
     set -ex
-    python" -m flake8 --max-line-length 137 .
+    python -m flake8 --max-line-length 137 .
   displayName: Lint Python (samples)
