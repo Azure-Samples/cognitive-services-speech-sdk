@@ -95,7 +95,7 @@ jobs:
       jdkArchitectureOption: 'x64'
       jdkSourceOption: 'PreInstalled'
     displayName: Use Java 17
-  - bash:
+  - bash: |
       set -u -e -o pipefail
       curl -v -L https://aka.ms/intent-recognition-samples-data  --output samples/cpp/intent-recognition/samples/test_input/audio.zip
       unzip -o samples/cpp/intent-recognition/samples/test_input/audio.zip -d samples/cpp/intent-recognition/samples/test_input
