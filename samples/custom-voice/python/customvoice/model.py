@@ -5,14 +5,10 @@
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 from enum import Enum
-import json
 import requests
-import logging
-from typing import NamedTuple
 
-from .helper import *
+from .helper import raise_exception_when_reqeust_failed
 from .config import Config
-from .customvoice_object import CustomVoiceObject
 from .status_object import StatusObject
 
 
@@ -58,7 +54,6 @@ class Model(StatusObject):
             if 'failureReason' in properties:
                 self.failure_reason = properties['failureReason']
 
-
     # get all models in project
     # when project_id is None, get all models in current speech account
     @staticmethod
@@ -68,11 +63,11 @@ class Model(StatusObject):
         api_url = config.url_prefix + 'models' + '?' + config.api_version
         if project_id is not None and len(project_id) > 0:
             api_url += "&filter=projectId eq '%s'" % project_id
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         while api_url is not None and len(api_url) > 0:
             response = requests.get(api_url, headers=headers)
             raise_exception_when_reqeust_failed('GET', api_url, response, config.logger)
-            response_dict= response.json()
+            response_dict = response.json()
             for json_dict in response_dict['value']:
                 model = Model(json_dict)
                 models.append(model)
@@ -82,14 +77,13 @@ class Model(StatusObject):
                 api_url = None
         return models
 
-
     @staticmethod
     def get(config: Config, model_id: str):
         config.logger.debug('Model.get model_id = %s' % model_id)
         if model_id is None or len(model_id) == 0:
             raise ValueError("'model_id' is None or empty")
         api_url = config.url_prefix + 'models/' + model_id + '?' + config.api_version
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         response = requests.get(api_url, headers=headers)
         raise_exception_when_reqeust_failed('GET', api_url, response, config.logger)
         model = Model(response.json())
@@ -98,7 +92,7 @@ class Model(StatusObject):
     # Use locale parameter to specific voice model target locale for CrossLingual voice.
     # Use properties parameter to specific styles for MultiStyle voice.
     @staticmethod
-    def create(config: Config, project_id: str, model_id: str, voice_name:str, recipe_kind: str, consent_id: str, training_set_id: str,
+    def create(config: Config, project_id: str, model_id: str, voice_name: str, recipe_kind: str, consent_id: str, training_set_id: str,
                description: str = None, locale: str = None, properties: dict = None):
         config.logger.debug('Model.create model_id = %s' % model_id)
         if project_id is None or len(project_id) == 0:
@@ -123,7 +117,7 @@ class Model(StatusObject):
             raise ValueError("Need 'properties' parameter to specify style for MultiStyle recipe.")
 
         api_url = config.url_prefix + 'models/' + model_id + '?' + config.api_version
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         request_dict = {
             'voiceName': voice_name,
             'description': description,
@@ -141,13 +135,12 @@ class Model(StatusObject):
         model = Model(response.json())
         return model
 
-
     @staticmethod
     def delete(config: Config, model_id: str):
         config.logger.debug('Model.delete model_id = %s' % model_id)
         if model_id is None or len(model_id) == 0:
             raise ValueError("'model_id' is None or empty")
         api_url = config.url_prefix + 'models/' + model_id + '?' + config.api_version
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         response = requests.delete(api_url, headers=headers)
         raise_exception_when_reqeust_failed('DELETE', api_url, response, config.logger)

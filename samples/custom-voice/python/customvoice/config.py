@@ -6,9 +6,10 @@
 
 import logging
 
+
 class Config:
     api_version = 'api-version=2024-02-01-preview'
-    
+
     def __init__(self, key: str, region: str, logger: logging.Logger = None):
         self.key = key
         self.region = region

@@ -16,8 +16,6 @@ import utils
 import sys
 import io
 
-from azure.identity import DefaultAzureCredential
-
 try:
     import azure.cognitiveservices.speech as speechsdk
 except ImportError:
@@ -1023,7 +1021,7 @@ def pronunciation_assessment_continuous_from_file():
             pronunciation_result.accuracy_score, pronunciation_result.prosody_score, pronunciation_result.pronunciation_score,
             pronunciation_result.completeness_score, pronunciation_result.fluency_score
         ))
-        nonlocal recognized_words, prosody_scores, fluency_scores, durations, startOffset, endOffset
+        nonlocal recognized_words, prosody_scores, fluency_scores, durations, startOffset, endOffset  # noqa: F824
         recognized_words += pronunciation_result.words
         fluency_scores.append(pronunciation_result.fluency_score)
         if pronunciation_result.prosody_score is not None:

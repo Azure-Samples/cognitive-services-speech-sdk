@@ -4,15 +4,13 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-import json
+import os
 import requests
-import logging
 from time import sleep
 
-from .helper import *
+from .helper import raise_exception_when_reqeust_failed
 from .config import Config
-from .customvoice_object import CustomVoiceObject
-from .status_object import *
+from .status_object import StatusObject, Status
 
 
 class PersonalVoice(StatusObject):
@@ -28,7 +26,6 @@ class PersonalVoice(StatusObject):
             raise ValueError("could not find 'speakerProfileId' in json_dict")
         self.speaker_profile_id = json_dict['speakerProfileId']
 
-
     # get all personal voice in project
     # when project_id is None, get all personal voices in current speech account
     @staticmethod
@@ -38,11 +35,11 @@ class PersonalVoice(StatusObject):
         api_url = config.url_prefix + 'personalvoices' + '?' + config.api_version
         if project_id is not None and len(project_id) > 0:
             api_url += "&filter=projectId eq '%s'" % project_id
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         while api_url is not None and len(api_url) > 0:
             response = requests.get(api_url, headers=headers)
             raise_exception_when_reqeust_failed('GET', api_url, response, config.logger)
-            response_dict= response.json()
+            response_dict = response.json()
             for json_dict in response_dict['value']:
                 speaker_profile = PersonalVoice(json_dict)
                 personal_voice_list.append(speaker_profile)
@@ -52,22 +49,20 @@ class PersonalVoice(StatusObject):
                 api_url = None
         return personal_voice_list
 
-
     @staticmethod
     def get(config: Config, personal_voice_id: str):
         config.logger.debug('PersonalVoice.get personal_voice_id = %s' % personal_voice_id)
         if personal_voice_id is None or len(personal_voice_id) == 0:
             raise ValueError("'personal_voice_id' is None or empty")
         api_url = config.url_prefix + 'personalvoices/' + personal_voice_id + '?' + config.api_version
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         response = requests.get(api_url, headers=headers)
         raise_exception_when_reqeust_failed('GET', api_url, response, config.logger)
         personal_voice = PersonalVoice(response.json())
         return personal_voice
 
-
     @staticmethod
-    def create(config: Config, project_id: str, personal_voice_id: str, consent_id: str, audio_folder: str, description = None):
+    def create(config: Config, project_id: str, personal_voice_id: str, consent_id: str, audio_folder: str, description=None):
         config.logger.debug('PersonalVoice.create personal_voice_id = %s' % personal_voice_id)
         if project_id is None or len(project_id) == 0:
             raise ValueError("'project_id' is None or empty")
@@ -90,10 +85,10 @@ class PersonalVoice(StatusObject):
         files = []
         for file_name in os.listdir(audio_folder):
             file_path = os.path.join(audio_folder, file_name)
-            file=('audiodata', (file_name, open(file_path, 'rb'), 'audio/wav'))
+            file = ('audiodata', (file_name, open(file_path, 'rb'), 'audio/wav'))
             files.append(file)
 
-        headers = { 'Ocp-Apim-Subscription-Key': config.key }
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         response = requests.post(api_url, data=request_dict, headers=headers, files=files)
         raise_exception_when_reqeust_failed('POST', api_url, response, config.logger)
         personal_voice = PersonalVoice(response.json())
@@ -108,13 +103,12 @@ class PersonalVoice(StatusObject):
             config.logger.debug('PersonalVoice.create failed personal_voice_id = %s' % personal_voice_id)
         return personal_voice
 
-
     @staticmethod
     def delete(config: Config, personal_voice_id: str):
         config.logger.debug('PersonalVoice.delete personal_voice_id = %s' % personal_voice_id)
         if personal_voice_id is None or len(personal_voice_id) == 0:
             raise ValueError("'speaker_profile_id' is None or empty")
         api_url = config.url_prefix + 'personalvoices/' + personal_voice_id + '?' + config.api_version
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         response = requests.delete(api_url, headers=headers)
         raise_exception_when_reqeust_failed('DELETE', api_url, response, config.logger)

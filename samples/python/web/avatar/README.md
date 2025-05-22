@@ -2,7 +2,7 @@
 This sample demonstrates the basic usage of Azure text-to-speech avatar real-time API.
 
 The Speech SDK for Python is compatible with Windows, Linux, and macOS.
-- On Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, 2019, and 2022](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170&preserve-view=true) for your platform. Installing this package might require a restart.
+- On Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, 2019, and 2022](https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist?view=msvc-170&preserve-view=true) for your platform. Installing this package might require a restart.
 - On Linux, you must use the x64 target architecture.
 
 ## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
@@ -11,7 +11,7 @@ This is the easiest way to get started. The Azure AI Speech Toolkit extension au
 - Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
 - In extension's panel, click `View Samples` and download this sample from sample gallery.
 - From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
-  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations) (one-time setup).
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations) (one-time setup).
   - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
   - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
 
@@ -22,7 +22,7 @@ Follow these steps if you prefer not to use VS Code.
 
 ### Prerequisites
 - Install a version of [Python from 3.7 or later](https://www.python.org/downloads/). 
-- For any requirements, see [Install the Speech SDK](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-python).
+- For any requirements, see [Install the Speech SDK](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-python).
 
 ### Available locations
 The text to speech avatar feature is only available in the following service regions: Southeast Asia, North Europe, West Europe, Sweden Central, South Central US, East US 2, and West US 2.

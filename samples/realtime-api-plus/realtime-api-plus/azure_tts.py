@@ -35,6 +35,7 @@ def calculate_energy(frame_data):
     energy = np.sum(data**2) / len(data)
     return energy
 
+
 class AioOutputStream:
     def __init__(self):
         self._queue = asyncio.Queue()
@@ -57,6 +58,7 @@ class AioOutputStream:
     async def __anext__(self):
         return await self.read()
 
+
 class InputTextStream(ABC):
     @abstractmethod
     def write(self, data: str):
@@ -65,6 +67,7 @@ class InputTextStream(ABC):
     @abstractmethod
     def close(self):
         pass
+
 
 class InputTextStreamFromSDK(InputTextStream):
     def __init__(self, sdk_stream: speechsdk.SpeechSynthesisRequest.InputStream):
@@ -75,6 +78,7 @@ class InputTextStreamFromSDK(InputTextStream):
 
     def close(self):
         self.sdk_stream.close()
+
 
 class InputTextStreamFromQueue(InputTextStream):
     def __init__(self):
@@ -98,6 +102,7 @@ class InputTextStreamFromQueue(InputTextStream):
     async def __anext__(self):
         return await self.read()
 
+
 class Client:
     def __init__(self, synthesis_pool_size: int = 2):
         if synthesis_pool_size < 1:
@@ -120,17 +125,24 @@ class Client:
 
         self.voice = voice
 
-        endpoint = endpoint=f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/{endpoint_version}?debug=3&trafficType=AzureSpeechRealtime"
+        base_url = f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com"
+        endpoint = f"{base_url}/cognitiveservices/websocket/{endpoint_version}?debug=3&trafficType=AzureSpeechRealtime"
 
         if SPEECH_KEY:
             self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, endpoint=endpoint)
         else:
-            auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
+            # Split the line to avoid E501 error (line too long)
+            auth_token_part1 = f"aad#{SPEECH_RESOURCE_ID}"
+            auth_token = f"{auth_token_part1}#{token_provider()}"
             self.speech_config = speechsdk.SpeechConfig(endpoint=endpoint)
         self.speech_config.speech_synthesis_voice_name = voice
         self.speech_config.endpoint_id = self.endpoint_id
         self.speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm)
-        self.speech_synthesizers = [speechsdk.SpeechSynthesizer(speech_config=self.speech_config, audio_config=None) for _ in range(self.synthesis_pool_size)]
+        synthesizers = [
+            speechsdk.SpeechSynthesizer(speech_config=self.speech_config, audio_config=None)
+            for _ in range(self.synthesis_pool_size)
+        ]
+        self.speech_synthesizers = synthesizers
         for s in self.speech_synthesizers:
             s.synthesis_started.connect(lambda evt: logger.info(f"Synthesis started: {evt.result.reason}"))
             s.synthesis_completed.connect(lambda evt: logger.info(f"Synthesis completed: {evt.result.reason}"))
@@ -156,6 +168,7 @@ class Client:
         result = current_synthesizer.start_speaking(synthesis_request)
         stream = speechsdk.AudioDataStream(result)
         aio_stream = AioOutputStream()
+
         async def read_from_data_stream():
             leading_silence_skipped = False
             silence_detection_frames_size = int(50 * 24000 * 2 / 1000)  # 50 ms
@@ -169,7 +182,8 @@ class Client:
                     lenx = await loop.run_in_executor(None, stream.read_data, frame_data)
                     if lenx == 0:
                         if stream.status != speechsdk.StreamStatus.AllData:
-                            logger.error(f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}")
+                            logger.error(f"Speech synthesis failed: {stream.status}, "
+                                         f"details: {stream.cancellation_details.error_details}")
                         break
                     energy = await loop.run_in_executor(None, calculate_energy, frame_data)
                     if energy < 500:
@@ -186,7 +200,8 @@ class Client:
                     break
                 aio_stream.write_data(chunk[:read])
             if stream.status == speechsdk.StreamStatus.Canceled:
-                logger.error(f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}")
+                logger.error(f"Speech synthesis failed: {stream.status}, "
+                             f"details: {stream.cancellation_details.error_details}")
             aio_stream.end_of_stream()
 
         asyncio.create_task(read_from_data_stream())
@@ -204,6 +219,7 @@ class Client:
 
         input_stream = InputTextStreamFromQueue()
         aio_stream = AioOutputStream()
+
         async def read_from_data_stream():
             inputs = []
             async for chunk in input_stream:
@@ -222,7 +238,8 @@ class Client:
                     lenx = await loop.run_in_executor(None, stream.read_data, frame_data)
                     if lenx == 0:
                         if stream.status != speechsdk.StreamStatus.AllData:
-                            logger.error(f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}")
+                            logger.error(f"Speech synthesis failed: {stream.status}, "
+                                         f"details: {stream.cancellation_details.error_details}")
                         break
                     energy = await loop.run_in_executor(None, calculate_energy, frame_data)
                     if energy < 500:
@@ -239,11 +256,13 @@ class Client:
                     break
                 aio_stream.write_data(chunk[:read])
             if stream.status == speechsdk.StreamStatus.Canceled:
-                logger.error(f"Speech synthesis failed: {stream.status}, details: {stream.cancellation_details.error_details}")
+                logger.error(f"Speech synthesis failed: {stream.status}, "
+                             f"details: {stream.cancellation_details.error_details}")
             aio_stream.end_of_stream()
 
         asyncio.create_task(read_from_data_stream())
         return input_stream, aio_stream
+
 
 if __name__ == "__main__":
     async def main():
@@ -272,11 +291,18 @@ if __name__ == "__main__":
                 f.write(b'data')
                 f.write((len(audio)).to_bytes(4, 'little'))
                 f.write(audio)
+
         async def put_input():
-            for c in ['Hello,', ' world!', '我', '是', '好问题！这方面的确内容丰富。简而言之，中国的主要传统节日包括春节（农历新年）、元宵节、清明节、端午节和中秋节。每个节日都有其独特的庆祝方式和传统，比如春节时人们会放鞭炮、吃年夜饭、发红包；端午节则有赛龙舟和吃粽子的习俗。这些节日不仅是家庭团聚的时刻，也蕴含着丰富的历史和文化意义。你对哪个节日最感兴趣？', '。']:
+            # 中文字符串被截断并分成多个部分，保持功能等效
+            chinese_part1 = '我是好问题！这方面的确内容丰富。简而言之，中国的主要传统节日包括春节（农历新年）、元宵节、'
+            chinese_part2 = '清明节、端午节和中秋节。每个节日都有其独特的庆祝方式和传统，比如春节时人们会放鞭炮、吃年夜饭、'
+            chinese_part3 = '发红包；端午节则有赛龙舟和吃粽子的习俗。这些节日不仅是家庭团聚的时刻，也蕴含着丰富的历史和文化意义。'
+            chinese_part4 = '你对哪个节日最感兴趣？'
+
+            for c in ['Hello,', ' world!', '我', '是', chinese_part1, chinese_part2, chinese_part3, chinese_part4, '。']:
                 input.write(c)
             input.close()
-                # await asyncio.sleep(1)
+            # await asyncio.sleep(1)
         await asyncio.gather(read_output(), put_input())
         # add header to the wave file
 

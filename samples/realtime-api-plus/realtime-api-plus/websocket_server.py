@@ -68,7 +68,11 @@ class WebSocketServer:
         # get query params from request
         params = request.query
         logger.info(f"Received request with query params: {params}")
-        session = RealtimeAudioSession(deployment=params.get("deployment"), gpt4o_endpoint=params.get("gpt4o_endpoint"), aoai_api_key=params.get("aoai_api_key"))
+        session = RealtimeAudioSession(
+            deployment=params.get("deployment"),
+            gpt4o_endpoint=params.get("gpt4o_endpoint"),
+            aoai_api_key=params.get("aoai_api_key")
+        )
         try:
             await session.connect()
         except rtclient.low_level_client.ConnectionError as e:
@@ -85,9 +89,10 @@ class WebSocketServer:
         logger.info(f"Received config: {config}")
         session_config = custom_models.SessionUpdateParams.model_validate(config.get("session"))
         configure_response = await session.configure(session_config)
+        event_id = "event_AIsUqs9MsJYCeO1U0rGEY"
         configure_response_message = custom_models.SessionUpdatedMessage(
             session=configure_response,
-            event_id="event_AIsUqs9MsJYCeO1U0rGEY"
+            event_id=event_id
         )
         await ws.send_str(configure_response_message.model_dump_json(exclude_none=True))
         asyncio.gather(session.receive_messages())
@@ -115,6 +120,7 @@ class WebSocketServer:
                         await session.clear_audio()
                     case "extension.avatar.connect":
                         client_description = payload.get("client_description")
+
                         async def connect_avatar():
                             remote_sdp = await session.connect_avatar(client_description)
                             await ws.send_str(custom_models.AvatarConnectingMessage(
