@@ -14,7 +14,7 @@ namespace BatchClient
 
     public class Program
     {
-        private static UserConfig _userConfig;
+        public static UserConfig UserConfig { get; private set; }
 
         // replace with your app service name (check publish on webhook receiver project)
         public const string WebHookAppServiceName = "YourAppServiceName";
@@ -40,8 +40,7 @@ namespace BatchClient
 
   CONNECTION
     --key KEY                        Your Azure Speech service resource key. Use the `--key` option.
-    --region REGION                  Your Azure Speech service region.Use the `--region` option.
-                                     Examples: westus, eastus
+    --endpoint ENDPOINT              Your Azure Speech service endpoint. Use the `--endpoint` option.
 
   Locale
 
@@ -69,13 +68,13 @@ namespace BatchClient
 
         private void Initialize(string[] args, string usage)
         {
-            _userConfig = UserConfig.UserConfigFromArgs(args, usage);
+            UserConfig = UserConfig.UserConfigFromArgs(args, usage);
         }
 
         private static async Task RunAsync()
         {
             // create the client object and authenticate
-            using (var client = BatchClient.CreateApiClient(_userConfig.subscriptionKey, $"{_userConfig.region}.api.cognitive.microsoft.com", "2024-11-15"))
+            using (var client = BatchClient.CreateApiClient(UserConfig.subscriptionKey, UserConfig.endpoint, "2024-11-15"))
             {
                 // uncomment next line when using web hooks
                 // await SetupWebHookAsync(client).ConfigureAwait(false);
@@ -118,9 +117,9 @@ namespace BatchClient
             var newTranscription = new Transcription
             {
                 DisplayName = DisplayName,
-                Locale = _userConfig.locale,
-                ContentUrls = _userConfig.recordingsBlobUris,
-                // ContentContainerUrl = _userConfig.contentAzureBlobContainer,
+                Locale = UserConfig.locale,
+                ContentUrls = UserConfig.recordingsBlobUris,
+                // ContentContainerUrl = UserConfig.contentAzureBlobContainer,
                 Model = CustomModel,
                 Properties = new TranscriptionProperties
                 {
@@ -256,7 +255,8 @@ namespace BatchClient
 
                 // </transcriptionstatus>
                 // check again after 1 minute
-                if (completed < 1) {
+                if (completed < 1)
+                {
                     await Task.Delay(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 }
             }

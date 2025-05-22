@@ -92,7 +92,7 @@ namespace WebHookReceiver
             // invocationId can be used for deduplication, it's unique per notification event
             logger.LogInformation($"Processing notification {webHookNotification.InvocationId}.");
 
-            using (var client = BatchClient.CreateApiClient(Program.SubscriptionKey, $"{Program.Region}.api.cognitive.microsoft.com", "2024-11-15"))
+            using (var client = BatchClient.CreateApiClient(Program.UserConfig.subscriptionKey, Program.UserConfig.endpoint, "2024-11-15"))
             {
                 if (eventKind == WebHookEventKind.TranscriptionCompletion)
                 {

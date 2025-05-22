@@ -95,6 +95,14 @@ jobs:
       jdkArchitectureOption: 'x64'
       jdkSourceOption: 'PreInstalled'
     displayName: Use Java 17
+  - task: bash@1
+    inputs:
+      targetType: 'inline'
+      script: |
+        set -u -e -o pipefail
+        curl -v -L https://aka.ms/intent-recognition-samples-data  --output samples/cpp/intent-recognition/samples/test_input/audio.zip
+        unzip -o samples/cpp/intent-recognition/samples/test_input/audio.zip -d samples/cpp/intent-recognition/samples/test_input
+    displayName: Install intent recognition samples data
   # Note: for now building any platform. In the future, should build all available.
   - task: VSBuild@1
     inputs:
