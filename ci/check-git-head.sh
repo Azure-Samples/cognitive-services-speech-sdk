@@ -78,6 +78,10 @@ checkEmptyStdout \
   "git grep -I -l $'\r$' $gitTree | cut -d: -f2" \
   "CR LF detected in the (in-repo) version of text file(s), please change to just LF"
 
+checkEmptyStdout \
+  "git grep -l -i -I -E '(azure|docs|learn|msdn|www)\.microsoft\.com/en-us/' $gitTree | cut -d: -f2-" \
+  "Remove /en-us/ from (azure|docs|learn|msdn|www).microsoft.com links as we shouldn't be overriding user (browser) language preference"
+
 if [ $errorCount -ne 0 ]
 then
   echo "=============================================================================="
