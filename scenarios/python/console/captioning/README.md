@@ -17,7 +17,7 @@ This is the easiest way to get started. The Azure AI Speech Toolkit extension au
 ## Option 2: Manual Setup and Run (Advanced)
 Follow these steps if you prefer not to use VS Code.
 
-In other IDEs, please refer to [captioning-quickstart](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/captioning-quickstart?tabs=windows%2Cterminal&pivots=programming-language-python) for a detailed guide.
+In other IDEs, please refer to [captioning-quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/captioning-quickstart?tabs=windows%2Cterminal&pivots=programming-language-python) for a detailed guide.
 
 ### Prerequisites
 - Python 3.0
