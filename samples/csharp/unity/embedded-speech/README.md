@@ -46,10 +46,10 @@ Requirements specific to this embedded speech sample are as follows.
      * **Note:** If you have installed Unity only for a specific platform (e.g. Unity CloudBuild for Android),
        you may need to remove other platform (iOS, Mac, WSA) binaries from the Speech SDK Plugins folder
        to avoid possible conflicts with the same library names.
-   * If you use the Speech SDK **1.43.0** or newer release, the Unity Editor Console will show errors ending with: "*Unable to resolve reference 'Azure.Core'.*"
+   * If you use the Speech SDK **1.44.0** or newer release, the Unity Editor Console will show errors ending with: "*Unable to resolve reference 'Azure.Core'.*"
      See the next step for how to resolve this.
 1. Install dependencies.
-   * Starting with the Speech SDK **1.43.0** release, the C# bindings depend on the [Azure.Core](https://www.nuget.org/packages/Azure.Core) NuGet package.
+   * Starting with the Speech SDK **1.44.0** release, the C# bindings depend on the [Azure.Core](https://www.nuget.org/packages/Azure.Core) NuGet package.
      The following is a suggested method for easy installation:
      * Download the latest **NuGetForUnity** `.unitypackage` from https://github.com/GlitchEnzo/NuGetForUnity.
      * In the Unity Editor, open menu **Assets** > **Import Package** > **Custom Package...**.

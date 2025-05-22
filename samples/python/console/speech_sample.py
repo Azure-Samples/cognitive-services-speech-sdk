@@ -16,6 +16,8 @@ import utils
 import sys
 import io
 
+from azure.identity import DefaultAzureCredential
+
 try:
     import azure.cognitiveservices.speech as speechsdk
 except ImportError:
@@ -1109,9 +1111,12 @@ def pronunciation_assessment_continuous_from_file():
     sorted_scores = sorted([accuracy_score, prosody_score, completeness_score, fluency_score])
     pronunciation_score = sorted_scores[0] * 0.4 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2 + sorted_scores[3] * 0.2
 
-    print('    Paragraph pronunciation score: {:.2f}, accuracy score: {:.2f}, prosody score: {:.2f}, completeness score: {:.2f}, fluency score: {:.2f}'.format(
-        pronunciation_score, accuracy_score, prosody_score, completeness_score, fluency_score
-    ))
+    print('    Paragraph pronunciation score: {:.2f}, '
+          'accuracy score: {:.2f}, '
+          'prosody score: {:.2f}, '
+          'completeness score: {:.2f}, '
+          'fluency score: {:.2f}'.format(pronunciation_score, accuracy_score, prosody_score, completeness_score, fluency_score)
+          )
 
     for idx, word in enumerate(final_words):
         print('    {}: word: {}\taccuracy score: {}\terror type: {};'.format(

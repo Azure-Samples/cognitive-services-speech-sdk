@@ -517,25 +517,53 @@ Maybe<std::shared_ptr<CSpxIntentMatchResult>> CSpxPatternMatchingModel::CheckPat
             break;
         }
 
-        // Check if we are matching. If so, move both pointers.
-        // We need to check in this order, because only input or pattern location could be null, but not both.
-        if ((*inputLocation == *patternLocation) && *inputLocation != '\0')
+        // Check if either pointer is at the end
+        if (*inputLocation == '\0' || *patternLocation == '\0')
         {
-            inputLocation++;
-            patternLocation++;
-            bytesMatched++;
+            break;
+        }
+
+        // Extract and compare the next character from each pointer
+        auto inputChar = Utils::GrabNextNonWhitespaceWord(inputLocation);
+        auto patternChar = Utils::GrabNextNonWhitespaceWord(patternLocation);
+
+        if (inputChar != patternChar)
+        {
+            break;
+        }
+
+        // Now we need to move 1 character, not 1 byte forward.
+        // This is important because if we move 1 byte, we can wind up in
+        // a state where the next set of bytes are mis-identified as whitespace
+        // for multi-byte char sets.
+
+        auto inputCount = Utils::GetBytesToNextCharacter(inputLocation);
+        auto patternCount = Utils::GetBytesToNextCharacter(patternLocation);
+
+        // Ensure both representations have the same byte count
+        // (handles edge cases with different Unicode representations)
+        if (inputCount == patternCount)
+        {
+            auto advanceCount = static_cast<unsigned int>(inputCount);
+            inputLocation += advanceCount;
+            patternLocation += advanceCount;
+            bytesMatched += advanceCount;
             continue;
         }
         else
         {
-            // We don't match and so this pattern does not match.
+            // Characters matched as strings but have different byte representations
             break;
         }
     }
 
+    // Extract and compare the next character from each pointer
+    auto inputChar = Utils::GrabNextNonWhitespaceWord(inputLocation);
+    auto patternChar = Utils::GrabNextNonWhitespaceWord(patternLocation);
+
     // If we are still matching good! Then this is a match!
     if ((inputLocation != nullptr && patternLocation != nullptr) &&
-        (*inputLocation == *patternLocation) && requiredEntityPresent)
+        (inputChar == patternChar) && requiredEntityPresent)
     {
         auto intentMatchResult = std::make_shared<CSpxIntentMatchResult>();
 

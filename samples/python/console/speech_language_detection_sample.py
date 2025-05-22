@@ -10,6 +10,8 @@ Speech Language Detection samples for the Microsoft Cognitive Services Speech SD
 import time
 import json
 
+from azure.identity import DefaultAzureCredential
+
 try:
     import azure.cognitiveservices.speech as speechsdk
 except ImportError:
@@ -26,6 +28,11 @@ except ImportError:
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and endpoint.
 speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+
+# Set up endpoint with custom domain. This is required when using aad token credential to authenticate.
+# For details on setting up a custom domain with private links, see:
+# https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
+speech_endpoint_with_custom_domain = "https://YourCustomDomain.cognitiveservices.azure.com/"
 
 # Specify the path to audio files containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
@@ -115,7 +122,7 @@ def speech_language_detection_once_from_file():
     # </SpeechLanguageDetectionWithFile>
 
 
-def speech_language_detection_once_from_continuous():
+def speech_language_detection_once_from_file_continuous():
     """performs continuous speech language detection with input from an audio file"""
     # <SpeechContinuousLanguageDetectionWithFile>
     # Creates an AutoDetectSourceLanguageConfig, which defines a number of possible spoken languages
@@ -187,3 +194,127 @@ def speech_language_detection_once_from_continuous():
 
     source_language_recognizer.stop_continuous_recognition()
     # </SpeechContinuousLanguageDetectionWithFile>
+
+
+def speech_language_detection_once_from_file_with_aad_token_credential():
+    """performs one-shot speech language detection authenticated via aad token credential"""
+    # Creates an AutoDetectSourceLanguageConfig, which defines a number of possible spoken languages
+    auto_detect_source_language_config = \
+        speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["de-DE", "en-US"])
+
+    # Create a token credential using DefaultAzureCredential.
+    # This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+    # Choose the authentication method that best fits your scenario. For more types of token credentials, refer to:
+    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
+    credential = DefaultAzureCredential(
+        managed_identity_client_id="your app id",
+    )
+    speech_config = speechsdk.SpeechConfig(token_credential=credential, endpoint=speech_endpoint_with_custom_domain)
+
+    # Creates an AudioConfig from a given WAV file
+    audio_config = speechsdk.audio.AudioConfig(filename=single_language_wav_file)
+
+    # Creates a source language recognizer using a file as audio input, also specify the speech language
+    source_language_recognizer = speechsdk.SourceLanguageRecognizer(
+        speech_config=speech_config,
+        auto_detect_source_language_config=auto_detect_source_language_config,
+        audio_config=audio_config)
+
+    # Starts speech language detection, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
+    # seconds of audio is processed. It returns the detection text as result.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot detection like command or query.
+    # For long-running multi-utterance detection, use start_continuous_recognition() instead.
+    result = source_language_recognizer.recognize_once()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        detected_src_lang = result.properties[
+            speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult]
+        print("Detected Language: {}".format(detected_src_lang))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(result.no_match_details))
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        cancellation_details = result.cancellation_details
+        print("Speech Language Detection canceled: {}".format(cancellation_details.reason))
+        if cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(cancellation_details.error_details))
+
+
+def speech_language_detection_once_from_file_continuous_with_token_credential():
+    """performs continuous speech language detection continuously authenticated via aad token credential"""
+    # Creates an AutoDetectSourceLanguageConfig, which defines a number of possible spoken languages
+    auto_detect_source_language_config = \
+        speechsdk.languageconfig.AutoDetectSourceLanguageConfig(languages=["zh-CN", "en-US"])
+
+    # Create a token credential using DefaultAzureCredential.
+    # This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+    # Choose the authentication method that best fits your scenario. For more types of token credentials, refer to:
+    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
+    credential = DefaultAzureCredential(
+        managed_identity_client_id="your app id",
+    )
+    speech_config = speechsdk.SpeechConfig(token_credential=credential, endpoint=speech_endpoint_with_custom_domain)
+
+    # Set continuous language detection (override the default of "AtStart")
+    speech_config.set_property(
+        property_id=speechsdk.PropertyId.SpeechServiceConnection_LanguageIdMode, value='Continuous')
+
+    audio_config = speechsdk.audio.AudioConfig(filename=multilingual_wav_file)
+
+    source_language_recognizer = speechsdk.SourceLanguageRecognizer(
+        speech_config=speech_config,
+        auto_detect_source_language_config=auto_detect_source_language_config,
+        audio_config=audio_config)
+
+    done = False
+
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
+    def audio_recognized(evt: speechsdk.SpeechRecognitionEventArgs):
+        """
+        callback that catches the recognized result of audio from an event 'evt'.
+        :param evt: event listened to catch recognition result.
+        :return:
+        """
+        if evt.result.reason == speechsdk.ResultReason.RecognizedSpeech:
+            if evt.result.properties.get(
+                    speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult) is None:
+                print("Unable to detect any language")
+            else:
+                detected_src_lang = evt.result.properties[
+                    speechsdk.PropertyId.SpeechServiceConnection_AutoDetectSourceLanguageResult]
+                json_result = evt.result.properties[speechsdk.PropertyId.SpeechServiceResponse_JsonResult]
+                detail_result = json.loads(json_result)
+                start_offset = detail_result['Offset']
+                duration = detail_result['Duration']
+                if duration >= 0:
+                    end_offset = duration + start_offset
+                else:
+                    end_offset = 0
+                print("Detected language = " + detected_src_lang)
+                print(f"Start offset = {start_offset}, End offset = {end_offset}, "
+                      f"Duration = {duration} (in units of hundreds of nanoseconds (HNS))")
+                global language_detected
+                language_detected = True
+
+    # Connect callbacks to the events fired by the speech recognizer
+    source_language_recognizer.recognized.connect(audio_recognized)
+    source_language_recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    source_language_recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+    source_language_recognizer.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+    # stop continuous recognition on either session stopped or canceled events
+    source_language_recognizer.session_stopped.connect(stop_cb)
+    source_language_recognizer.canceled.connect(stop_cb)
+
+    # Start continuous speech recognition
+    source_language_recognizer.start_continuous_recognition()
+    while not done:
+        time.sleep(.5)
+
+    source_language_recognizer.stop_continuous_recognition()
