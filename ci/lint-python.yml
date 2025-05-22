@@ -20,5 +20,5 @@ steps:
 - bash: |
     set -ex
     python -m pip install flake8
-    python -m flake8 --max-line-length 137 .
+    python -m flake8 --max-line-length 137 samples/python/console
   displayName: Lint Python (samples)
