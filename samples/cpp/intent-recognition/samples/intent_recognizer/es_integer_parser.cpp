@@ -171,6 +171,7 @@ std::vector<std::vector<Token>> CSpxESIntegerParser::Segment(std::vector<Token> 
         // We verify that there is a connector token afterwards
         else if (token.DigitMask == 0b10
             && token.Type != Tag::Connector
+            && !acc.empty()
             && acc.front().Type == Tag::Connector)
         {
             acc.push_front(token);
@@ -179,6 +180,7 @@ std::vector<std::vector<Token>> CSpxESIntegerParser::Segment(std::vector<Token> 
         // Numbers with masks higher than 0b10 don't use a connector
         else if (token.Type != Tag::Connector
             && token.DigitMask > 0b10
+            && !acc.empty()
             && (acc.front().Type != Tag::Connector)
             && (token.DigitMask & acc.front().DigitMask) == 0
             && (token.Value > acc.front().Value))
@@ -187,6 +189,7 @@ std::vector<std::vector<Token>> CSpxESIntegerParser::Segment(std::vector<Token> 
         }
         // We only add connector tokens if they come after numbers with a mask that allows it e.g. [1 - 9]
         else if (token.Type == Tag::Connector
+            && !acc.empty()
             && acc.front().Value != 0
             && acc.front().DigitMask == 0b1)
         {

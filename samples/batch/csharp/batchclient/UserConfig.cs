@@ -13,12 +13,12 @@ namespace BatchClient
         readonly public string locale;
         /// The resource key for your Speech service subscription.
         readonly public string subscriptionKey;
-        /// The region for your Speech service subscription.
-        readonly public string region;
+        /// The endpoint for your Speech service subscription.
+        readonly public string endpoint;
 
         public UserConfig(
             string subscriptionKey,
-            string region,
+            string endpoint,
             string locale,
             string recordingsBlobUris = null,
             string contentAzureBlobContainer = null
@@ -31,7 +31,7 @@ namespace BatchClient
                 .ToList();
             this.locale = locale;
             this.subscriptionKey = subscriptionKey;
-            this.region = region;
+            this.endpoint = endpoint;
             this.contentAzureBlobContainer = string.IsNullOrEmpty(contentAzureBlobContainer) ? null : new Uri(contentAzureBlobContainer.Trim());
          }
 
@@ -61,14 +61,14 @@ namespace BatchClient
                 throw new ArgumentException($"Please provide a Speech resource key with the --key option.{Environment.NewLine}Usage: {usage}");
             }
 
-            string region;
-            if (GetCmdOption(args, "--region") is string regionOptionValue)
+            string endpoint;
+            if (GetCmdOption(args, "--endpoint") is string endpointOptionValue)
             {
-                region = regionOptionValue;
+                endpoint = endpointOptionValue;
             }
             else
             {
-                throw new ArgumentException($"Please provide a Speech region with the --region option.{Environment.NewLine}Usage: {usage}");
+                throw new ArgumentException($"Please provide a Speech endpoint with the --endpoint option.{Environment.NewLine}Usage: {usage}");
             }
 
             string recordingsBlobUris;
@@ -103,7 +103,7 @@ namespace BatchClient
 
             return new UserConfig(
                 key,
-                region,
+                endpoint,
                 locale,
                 recordingsBlobUris,
                 recordingsContainerUri
