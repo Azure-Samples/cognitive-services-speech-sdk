@@ -10,6 +10,7 @@ Conversation transcription samples for the Microsoft Cognitive Services Speech S
 import time
 
 from scipy.io import wavfile
+from azure.identity import DefaultAzureCredential
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -28,6 +29,11 @@ except ImportError:
 # See the limitations in supported regions,
 # https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-conversation-transcription
 speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+
+# Set up endpoint with custom domain. This is required when using aad token credential to authenticate.
+# For details on setting up a custom domain with private links, see:
+# https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
+speech_endpoint_with_custom_domain = "https://YourCustomDomain.cognitiveservices.azure.com/"
 
 # This sample uses a wavfile which is captured using a supported Speech SDK devices (8 channel, 16kHz, 16-bit PCM)
 # See https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-devices-sdk-microphone
@@ -115,3 +121,55 @@ def conversation_transcription_from_microphone():
             print('Stopping async recognition.')
             transcriber.stop_transcribing_async()
             break
+
+
+# This sample demonstrates how to use conversation transcription authenticated via aad token credential.
+def conversation_transcription_with_aad_token_credential():
+    """transcribes a conversation"""
+    # Create a token credential using DefaultAzureCredential.
+    # This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+    # Choose the authentication method that best fits your scenario. For more types of token credentials, refer to:
+    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
+    credential = DefaultAzureCredential(
+        managed_identity_client_id="your app id",
+    )
+    speech_config = speechsdk.SpeechConfig(token_credential=credential, endpoint=speech_endpoint_with_custom_domain)
+
+    channels = 1
+    bits_per_sample = 16
+    samples_per_second = 16000
+
+    # Create audio configuration using the push stream
+    wave_format = speechsdk.audio.AudioStreamFormat(samples_per_second, bits_per_sample, channels)
+    stream = speechsdk.audio.PushAudioInputStream(stream_format=wave_format)
+    audio_config = speechsdk.audio.AudioConfig(stream=stream)
+
+    transcriber = speechsdk.transcription.ConversationTranscriber(speech_config, audio_config)
+
+    done = False
+
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous transcription upon receiving an event `evt`"""
+        print('CLOSING {}'.format(evt))
+        nonlocal done
+        done = True
+
+    # Subscribe to the events fired by the conversation transcriber
+    transcriber.transcribed.connect(lambda evt: print('TRANSCRIBED: {}'.format(evt)))
+    transcriber.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    transcriber.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+    transcriber.canceled.connect(lambda evt: print('CANCELED {}'.format(evt)))
+    # stop continuous transcription on either session stopped or canceled events
+    transcriber.session_stopped.connect(stop_cb)
+    transcriber.canceled.connect(stop_cb)
+
+    transcriber.start_transcribing_async()
+
+    # Read the whole wave files at once and stream it to sdk
+    _, wav_data = wavfile.read(conversationfilename)
+    stream.write(wav_data.tobytes())
+    stream.close()
+    while not done:
+        time.sleep(.5)
+
+    transcriber.stop_transcribing_async()

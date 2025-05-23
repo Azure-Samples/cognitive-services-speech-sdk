@@ -32,6 +32,13 @@ namespace Utils {
     void SkipInputPunctuationAndWhitespace(const char*& inputLocation, const OrthographyInformation& orthography);
 
     /// <summary>
+    /// Get number of bytes to advance to the next character
+    /// </summary>
+    /// <param name="input">The null terminated UTF8 char buffer.</param>
+    /// <returns>Number of bytes to advance to the next character</returns>
+    size_t GetBytesToNextCharacter(const char* input);
+
+    /// <summary>
     /// This function checks the punctuation in the paramater and skips any UTF8 characters in it.
     /// It moves the pointer for startLocation past the characters.
     /// </summary>
@@ -55,6 +62,13 @@ namespace Utils {
     /// <returns>The next word or, if there is no whitespace in the orthography, the next token.
     /// Empty string if there is no word.</returns>
     std::string GrabNextNonWhitespaceWord(const char** input);
+
+    /// <summary>
+    /// This function returns the next full UTF8 token.
+    /// </summary>
+    /// <param name="input">The null terminated UTF8 char buffer.</param>
+    /// <returns>The next word or token. Empty string if there is no word.</returns>
+    std::string GrabNextNonWhitespaceWord(const char* input);
 
     /// <summary>
     /// Finds the next word or, if there is no whitespace in the orthography, the next token and returns it

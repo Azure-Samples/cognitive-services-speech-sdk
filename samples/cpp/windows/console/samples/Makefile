@@ -39,7 +39,7 @@ LIBPATH:=$(SPEECHSDK_ROOT)/lib/$(TARGET_PLATFORM)
 
 INCPATH:=$(SPEECHSDK_ROOT)/include/cxx_api $(SPEECHSDK_ROOT)/include/c_api
 
-LIBS:=-lMicrosoft.CognitiveServices.Speech.core -lpthread -l:libasound.so.2
+LIBS:=-lMicrosoft.CognitiveServices.Speech.core -lpthread -l:libasound.so.2 -lcurl
 
 all: sample
 
