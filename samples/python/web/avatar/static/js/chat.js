@@ -200,6 +200,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.srcObject = event.streams[0]
             videoElement.autoplay = true
             videoElement.playsInline = true
+            videoElement.style.width = '0.5px'
+            document.getElementById('remoteVideo').appendChild(videoElement)
 
             // Continue speaking if there are unfinished sentences while reconnecting
             if (isReconnecting) {
@@ -222,6 +224,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 }
 
                 // Append the new video element
+                videoElement.style.width = '960px'
                 document.getElementById('remoteVideo').appendChild(videoElement)
 
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
@@ -319,7 +322,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 iceGatheringDone = true
                 connectToAvatarService(peerConnection)
             }
-        }, 2000) })
+        }, 5000) })
     })
 }
 
