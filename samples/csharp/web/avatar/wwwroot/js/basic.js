@@ -124,7 +124,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 iceGatheringDone = true
                 connectToAvatarService(peerConnection)
             }
-        }, ICE_GATHERING_TIMEOUT_MS) })
+        }, 5000) })
     })
 }
 

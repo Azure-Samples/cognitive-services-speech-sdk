@@ -136,6 +136,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.autoplay = true
             videoElement.playsInline = true
             videoElement.style.width = '0.5px'
+            document.getElementById('remoteVideo').appendChild(videoElement)
 
             // Continue speaking if there are unfinished sentences while reconnecting
             if (isReconnecting) {
@@ -256,7 +257,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 iceGatheringDone = true
                 connectToAvatarService(peerConnection)
             }
-        }, ICE_GATHERING_TIMEOUT_MS) })
+        }, 5000) })
     })
 }
 
