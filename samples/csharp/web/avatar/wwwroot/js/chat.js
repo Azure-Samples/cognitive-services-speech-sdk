@@ -136,7 +136,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.autoplay = true
             videoElement.playsInline = true
             videoElement.style.width = '0.5px'
-            document.getElementById('remoteVideo').appendChild(videoElement)
 
             // Continue speaking if there are unfinished sentences while reconnecting
             if (isReconnecting) {
