@@ -285,7 +285,7 @@ def pronunciation_assessment_continuous_from_file():
             f"Completeness score : {pronunciation_result.completeness_score}, "
             f"Pronunciation score: {pronunciation_result.pronunciation_score}\n"
         )
-        nonlocal recognized_words, prosody_scores, fluency_scores, durations, startOffset, endOffset
+        nonlocal recognized_words, startOffset, endOffset
         recognized_words += pronunciation_result.words
         fluency_scores.append(pronunciation_result.fluency_score)
         if pronunciation_result.prosody_score is not None:
