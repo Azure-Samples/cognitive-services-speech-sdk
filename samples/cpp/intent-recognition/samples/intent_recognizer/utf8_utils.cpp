@@ -46,7 +46,7 @@ size_t ExtractLastUtf8Character(std::string& input, std::array<char, 4>& utf8Cha
 
 size_t ExtractUtf8Character(const char* input, std::array<char, 4>& utf8CharacterArray)
 {
-    if (*input == '\0')
+    if (nullptr == input || *input == '\0')
     {
         return 0;
     }
