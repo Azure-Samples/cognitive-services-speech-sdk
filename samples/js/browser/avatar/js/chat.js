@@ -179,6 +179,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.srcObject = event.streams[0]
             videoElement.autoplay = true
             videoElement.playsInline = true
+            // Set an initial minimal width for the video element as a workaround for iOS Safari.
+            // This ensures proper rendering and playback behavior on iOS devices.
             videoElement.style.width = '0.5px'
             document.getElementById('remoteVideo').appendChild(videoElement)
 
