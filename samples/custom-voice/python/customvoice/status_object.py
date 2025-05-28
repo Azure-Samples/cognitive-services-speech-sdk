@@ -7,6 +7,7 @@
 from enum import Enum
 from .customvoice_object import CustomVoiceObject
 
+
 class Status(Enum):
     NotStarted = 1
     Running = 2
@@ -14,6 +15,7 @@ class Status(Enum):
     Failed = 4
     Disabling = 5
     Disabled = 6
+
 
 class StatusObject(CustomVoiceObject):
     def __init__(self, json_dict: dict):

@@ -14,7 +14,7 @@ import swagger_client
 import re
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
-        format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
+                    format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
 
 API_VERSION = "2024-11-15"
 
@@ -137,8 +137,8 @@ def _paginate(api, paginated_object):
     auth_settings = ["api_key"]
     while paginated_object.next_link:
         link = paginated_object.next_link[len(api.api_client.configuration.host):]
-        paginated_object, status, headers = api.api_client.call_api(link, "GET",
-            response_type=typename, auth_settings=auth_settings)
+        paginated_object, status, headers = api.api_client.call_api(
+            link, "GET", response_type=typename, auth_settings=auth_settings)
 
         if status == 200:
             yield from paginated_object.values
@@ -181,20 +181,23 @@ def transcribe():
     api = swagger_client.CustomSpeechTranscriptionsApi(api_client=client)
 
     # Specify transcription properties by passing a dict to the properties parameter. See
-    # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options
+    # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options # noqa: E501
     # for supported parameters.
     properties = swagger_client.TranscriptionProperties(time_to_live_hours=6)
     # properties.word_level_timestamps_enabled = True
     # properties.display_form_word_level_timestamps_enabled = True
     # properties.punctuation_mode = "DictatedAndAutomatic"
     # properties.profanity_filter_mode = "Masked"
-    # properties.destination_container_url = "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>"
+    # properties.destination_container_url = "<SAS Uri with at least write (w) permissions>"
+    # # The container where results should be written to
 
     # uncomment the following block to enable and configure speaker separation
     # properties.diarization = swagger_client.DiarizationProperties(max_speakers=5, enabled=True)
 
-    # uncomment the following block to enable and configure language identification prior to transcription. Available modes are "single" and "continuous".
-    # properties.language_identification = swagger_client.LanguageIdentificationProperties(mode="single", candidate_locales=["en-US", "ja-JP"])
+    # uncomment the following block to enable and configure language identification prior to transcription.
+    # Available modes are "single" and "continuous".
+    # properties.language_identification = swagger_client.LanguageIdentificationProperties(
+    #     mode="single", candidate_locales=["en-US", "ja-JP"])
 
     # Use base models for transcription. Comment this block if you are using a custom model.
     transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URIS, properties)
@@ -202,11 +205,11 @@ def transcribe():
     # Uncomment this block to use custom models for transcription.
     # transcription_definition = transcribe_with_custom_model(client, RECORDINGS_BLOB_URIS, properties)
 
-    # uncomment the following block to enable and configure language identification prior to transcription
     # Uncomment this block to transcribe all files from a container.
     # transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
 
-    created_transcription, status, headers = api.transcriptions_submit_with_http_info(transcription=transcription_definition, api_version=API_VERSION)
+    created_transcription, status, headers = api.transcriptions_submit_with_http_info(
+        transcription=transcription_definition, api_version=API_VERSION)
 
     # get the transcription Id from the location URI
     transcription_id = headers["location"].split("/")[-1].split("?")[0]
@@ -259,4 +262,3 @@ def transcribe():
 
 if __name__ == "__main__":
     transcribe()
-

@@ -37,5 +37,5 @@ If you have a problem or are missing a feature, please have a look at our [suppo
 
 ## References
 
-* [QuickStart article on the SDK documentation site](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-pronunciation-assessment?pivots=programming-language-python)
+* [QuickStart article on the SDK documentation site](https://learn.microsoft.com/azure/ai-services/speech-service/how-to-pronunciation-assessment?pivots=programming-language-python)
 * [Speech SDK API reference for Python](https://aka.ms/csspeech/pythonref)`

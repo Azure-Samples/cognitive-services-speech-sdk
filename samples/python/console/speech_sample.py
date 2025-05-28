@@ -15,8 +15,6 @@ import utils
 import sys
 import io
 
-from azure.identity import DefaultAzureCredential
-
 try:
     import azure.cognitiveservices.speech as speechsdk
 except ImportError:

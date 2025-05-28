@@ -47,7 +47,10 @@ class Client:
             endpoint_prefix = "voice"
 
         self.voice = voice
-        endpoint = f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/v1?trafficType=RealtimePlus&enableTalkingAvatar=true"
+        endpoint = (
+            f"wss://{SPEECH_REGION}.{endpoint_prefix}.speech.microsoft.com/cognitiveservices/websocket/v1"
+            f"?trafficType=RealtimePlus&enableTalkingAvatar=true"
+        )
 
         if SPEECH_KEY:
             self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, endpoint=endpoint)

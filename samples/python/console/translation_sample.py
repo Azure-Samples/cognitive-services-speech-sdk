@@ -314,9 +314,10 @@ def translation_continuous_with_lid_from_multilingual_file():
 def translation_once_from_file_with_aad_token_credential():
     """performs one-shot speech translation authenticated via aad token credential"""
     # Create a token credential using DefaultAzureCredential.
-    # This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+    # This credential supports multiple authentication methods, including Managed Identity,
+    # environment variables, and Azure CLI login.
     # Choose the authentication method that best fits your scenario. For more types of token credentials, refer to:
-    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
+    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet  # noqa: E501
     credential = DefaultAzureCredential(
         managed_identity_client_id="your app id",
     )
@@ -359,9 +360,10 @@ def translation_once_from_file_with_aad_token_credential():
 def translation_continuous_with_aad_token_credential():
     """performs continuous speech translation authenticated via aad token credential"""
     # Create a token credential using DefaultAzureCredential.
-    # This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+    # This credential supports multiple authentication methods, including Managed Identity,
+    # environment variables, and Azure CLI login.
     # Choose the authentication method that best fits your scenario. For more types of token credentials, refer to:
-    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
+    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet  # noqa: E501
     credential = DefaultAzureCredential(
         managed_identity_client_id="your app id",
     )

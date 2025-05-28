@@ -18,6 +18,7 @@ if not (SPEECH_KEY or SPEECH_RESOURCE_ID):
 
 token_provider = get_bearer_token_provider(DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default")
 
+
 def calculate_energy(frame_data):
     # Convert the byte data to a numpy array for easier processing (assuming 16-bit PCM)
     data = np.frombuffer(frame_data, dtype=np.int16)
@@ -34,9 +35,13 @@ class Client:
             self.speech_config = speechsdk.SpeechConfig(subscription=SPEECH_KEY, region=SPEECH_REGION)
         else:
             auth_token = f"aad#{SPEECH_RESOURCE_ID}#{token_provider()}"
-            self.speech_config = speechsdk.SpeechConfig(endpoint=f"wss://{SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/websocket/v1")
+            endpoint_url = f"wss://{SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/websocket/v1"
+            self.speech_config = speechsdk.SpeechConfig(endpoint=endpoint_url)
         self.speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm)
-        self.speech_synthesizers = [speechsdk.SpeechSynthesizer(speech_config=self.speech_config, audio_config=None) for _ in range(synthesis_pool_size)]
+        self.speech_synthesizers = [
+            speechsdk.SpeechSynthesizer(speech_config=self.speech_config, audio_config=None)
+            for _ in range(synthesis_pool_size)
+        ]
         if not SPEECH_KEY:
             for synthesizer in self.speech_synthesizers:
                 synthesizer.authorization_token = auth_token
@@ -46,10 +51,10 @@ class Client:
         self._counter = (self._counter + 1) % len(self.speech_synthesizers)
         current_synthesizer = self.speech_synthesizers[self._counter]
         current_synthesizer.properties.set_property(speechsdk.PropertyId.SpeechServiceConnection_SynthVoice, voice)
-        ssml = f"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='{voice}'><prosody rate='{speed}'>{text}</prosody></voice></speak>"
+        ssml = (f"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'>"
+                f"<voice name='{voice}'><prosody rate='{speed}'>{text}</prosody></voice></speak>")
         result = current_synthesizer.start_speaking_ssml(ssml)
         stream = speechsdk.AudioDataStream(result)
-        first = True
         leading_silence_skipped = False
         silence_detection_frames_size = int(50 * 24000 * 2 / 1000)  # 50 ms
         while True:
