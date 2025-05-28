@@ -64,7 +64,12 @@ function connectAvatar() {
         console.log("Event received: " + e.description + offsetMessage)
     }
 
-    const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${cogSvcRegion}.stt.speech.microsoft.com/speech/universal/v2`), cogSvcSubKey)
+    let speechRecognitionConfig
+    if (privateEndpointEnabled) {
+        speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/stt/speech/universal/v2`), cogSvcSubKey) 
+    } else {
+        speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${cogSvcRegion}.stt.speech.microsoft.com/speech/universal/v2`), cogSvcSubKey)
+    }
     speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
     var sttLocales = document.getElementById('sttLocales').value.split(',')
     var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
@@ -174,6 +179,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.srcObject = event.streams[0]
             videoElement.autoplay = true
             videoElement.playsInline = true
+            videoElement.style.width = '0.5px'
+            document.getElementById('remoteVideo').appendChild(videoElement)
 
             // Continue speaking if there are unfinished sentences
             if (repeatSpeakingSentenceAfterReconnection) {
@@ -196,6 +203,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 }
 
                 // Append the new video element
+                videoElement.style.width = '960px'
                 document.getElementById('remoteVideo').appendChild(videoElement)
 
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
