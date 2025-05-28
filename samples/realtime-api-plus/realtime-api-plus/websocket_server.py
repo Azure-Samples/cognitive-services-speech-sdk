@@ -106,30 +106,30 @@ class WebSocketServer:
         async for msg in ws:
             if msg.type == WSMsgType.TEXT:
                 payload = msg.json()
-                match payload.get("type"):
-                    case "input_audio_buffer.append":
-                        audio_message = rt_models.InputAudioBufferAppendMessage.model_validate(payload)
-                        await session.send_audio(audio_message)
-                    case "conversation.item.create":
-                        item_create_message = rt_models.ItemCreateMessage.model_validate(payload)
-                        response = await session.send_item(item_create_message.item, item_create_message.previous_item_id)
-                        await session.on_conversation_item_created(previous_id=item_create_message.previous_item_id, item=response)
-                    case "response.create":
-                        await session.generate_response()
-                    case "input_audio_buffer.clear":
-                        await session.clear_audio()
-                    case "extension.avatar.connect":
-                        client_description = payload.get("client_description")
+                message_type = payload.get("type")
+                if message_type == "input_audio_buffer.append":
+                    audio_message = rt_models.InputAudioBufferAppendMessage.model_validate(payload)
+                    await session.send_audio(audio_message)
+                elif message_type == "conversation.item.create":
+                    item_create_message = rt_models.ItemCreateMessage.model_validate(payload)
+                    response = await session.send_item(item_create_message.item, item_create_message.previous_item_id)
+                    await session.on_conversation_item_created(previous_id=item_create_message.previous_item_id, item=response)
+                elif message_type == "response.create":
+                    await session.generate_response()
+                elif message_type == "input_audio_buffer.clear":
+                    await session.clear_audio()
+                elif message_type == "extension.avatar.connect":
+                    client_description = payload.get("client_description")
 
-                        async def connect_avatar():
-                            remote_sdp = await session.connect_avatar(client_description)
-                            await ws.send_str(custom_models.AvatarConnectingMessage(
-                                server_description=remote_sdp,
-                                event_id="event_AIsUqs9MsJYCeO1U0rGEY"
-                            ).model_dump_json(exclude_none=True))
-                        asyncio.create_task(connect_avatar())
-                    case _:
-                        logger.warning(f"Unknown message type: {payload.get('type')}")
+                    async def connect_avatar():
+                        remote_sdp = await session.connect_avatar(client_description)
+                        await ws.send_str(custom_models.AvatarConnectingMessage(
+                            server_description=remote_sdp,
+                            event_id="event_AIsUqs9MsJYCeO1U0rGEY"
+                        ).model_dump_json(exclude_none=True))
+                    asyncio.create_task(connect_avatar())
+                else:
+                    logger.warning(f"Unknown message type: {payload.get('type')}")
             elif msg.type == WSMsgType.ERROR:
                 break
         await session.close()
