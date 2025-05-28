@@ -228,7 +228,7 @@ window.onload = () => {
 
 window.startSession = () => {
     document.getElementById('startSession').disabled = true
-    
+
     fetch('/api/getIceToken', {
         method: 'GET',
     })
@@ -308,7 +308,7 @@ window.stopSession = () => {
     })
 }
 
-window.updataTransparentBackground = () => {
+window.updateTransparentBackground = () => {
     if (document.getElementById('transparentBackground').checked) {
         document.body.background = './static/image/background.png'
         document.getElementById('backgroundColor').value = '#00FF00FF'
