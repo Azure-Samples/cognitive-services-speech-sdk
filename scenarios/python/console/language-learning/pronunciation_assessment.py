@@ -398,7 +398,7 @@ def pronunciation_assessment_continuous_from_file():
 
 def pronunciation_assessment_with_rest_api():
     """Performs pronunciation assessment asynchronously with REST API for a short audio file.
-    See more information at https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-speech-to-text-short
+    See more information at https://learn.microsoft.com/azure/ai-services/speech-service/rest-speech-to-text-short
     """
 
     # A generator which reads audio data chunk by chunk.
@@ -432,7 +432,7 @@ def pronunciation_assessment_with_rest_api():
     pron_assessment_params_base64 = base64.b64encode(bytes(pron_assessment_params_json, "utf-8"))
     pron_assessment_params = str(pron_assessment_params_base64, "utf-8")
 
-    # https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-get-speech-session-id#provide-session-id-using-rest-api-for-short-audio
+    # https://learn.microsoft.com/azure/ai-services/speech-service/how-to-get-speech-session-id#provide-session-id-using-rest-api-for-short-audio
     session_id = uuid.uuid4().hex
 
     # Build request
