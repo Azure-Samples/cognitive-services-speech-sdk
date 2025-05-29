@@ -16,13 +16,15 @@ import uuid
 
 import azure.cognitiveservices.speech as speechsdk
 import requests
+import json
 
 from utils import read_wave_header, push_stream_writer, get_reference_words, WaveHeader16K16BitMono
 
+with open('config.json', 'r') as config_file:
+    config = json.load(config_file)
 
-# Set up the subscription info for the Speech Service:
-# Replace with your own subscription key and endpoint.
-speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
+speech_key = config.get("SubscriptionKey")
+service_region = config.get("ServiceRegion")
 speech_endpoint = f"https://{service_region}.api.cognitive.microsoft.com"
 
 
