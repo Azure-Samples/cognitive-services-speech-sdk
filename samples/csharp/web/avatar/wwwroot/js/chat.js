@@ -514,10 +514,6 @@ window.onload = () => {
 
 window.startSession = () => {
     lastInteractionTime = new Date()
-    if (enableWebSockets) {
-        setupWebSocket()
-    }
-
     userClosedSession = false
 
     createSpeechRecognizer()
