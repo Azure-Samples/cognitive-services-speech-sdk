@@ -15,8 +15,12 @@ from pathlib import Path
 from azure.identity import DefaultAzureCredential
 import requests
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO,  # set to logging.DEBUG for verbose output
-        format="[%(asctime)s] %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,  # set to logging.DEBUG for verbose output
+    format="[%(asctime)s] %(message)s",
+    datefmt="%m/%d/%Y %I:%M:%S %p %Z"
+)
 logger = logging.getLogger(__name__)
 
 # The endpoint (and key) could be gotten from the Keys and Endpoint page in the Speech service resource.
@@ -40,6 +44,7 @@ if not PASSWORDLESS_AUTHENTICATION:
 
 
 API_VERSION = "2024-04-01"
+
 
 def _create_job_id():
     # the job ID must be unique in current speech resource
@@ -74,7 +79,7 @@ def submit_synthesis(job_id: str) -> bool:
         text = f.read()
 
     payload = {
-        "inputKind": "PlainText", # or SSML
+        "inputKind": "PlainText",  # or SSML
         'synthesisConfig': {
             "voice": "en-US-AvaMultilingualNeural",
         },

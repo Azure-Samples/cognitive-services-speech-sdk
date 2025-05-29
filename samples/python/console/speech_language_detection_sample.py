@@ -12,6 +12,9 @@ import json
 
 from azure.identity import DefaultAzureCredential
 
+# Global variable for tracking language detection
+language_detected = False
+
 try:
     import azure.cognitiveservices.speech as speechsdk
 except ImportError:

@@ -127,8 +127,10 @@ def conversation_transcription_from_microphone():
 def conversation_transcription_with_aad_token_credential():
     """transcribes a conversation"""
     # Create a token credential using DefaultAzureCredential.
-    # This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
-    # Choose the authentication method that best fits your scenario. For more types of token credentials, refer to:
+    # This credential supports multiple authentication methods, including Managed Identity,
+    # environment variables, and Azure CLI login.
+    # Choose the authentication method that best fits your scenario.
+    # For more types of token credentials, refer to:
     # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
     credential = DefaultAzureCredential(
         managed_identity_client_id="your app id",

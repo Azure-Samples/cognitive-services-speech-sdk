@@ -40,4 +40,3 @@ elif result.reason == speechsdk.ResultReason.Canceled:
             print("Error details: {}".format(cancellation_details.error_details))
     print("Did you update the subscription info?")
 # </code>
-
