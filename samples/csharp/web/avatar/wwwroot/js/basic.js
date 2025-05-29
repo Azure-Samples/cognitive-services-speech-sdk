@@ -3,7 +3,10 @@
 
 // Global objects
 var clientId
-var peerConnection
+var iceServerUrl
+var iceServerUsername
+var iceServerCredential
+var peerConnectionQueue = []
 var previousAnimationFrameTimestamp = 0;
 
 // Logger
@@ -11,10 +14,29 @@ const log = msg => {
     document.getElementById('logging').innerHTML += msg + '<br>'
 }
 
-// Setup WebRTC
-function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
+// Fetch ICE token from the server
+function fetchIceToken() {
+    fetch('/api/getIceToken', {
+        method: 'GET',
+    }).then(response => {
+        if (response.ok) {
+            response.json().then(data => {
+                iceServerUrl = data.Urls[0]
+                iceServerUsername = data.Username
+                iceServerCredential = data.Password
+                console.log(`[${new Date().toISOString()}] ICE token fetched.`)
+                preparePeerConnection()
+            })
+        } else {
+            console.error(`Failed fetching ICE token: ${response.status} ${response.statusText}`)
+        }
+    })
+}
+
+// Prepare peer connection for WebRTC
+function preparePeerConnection() {
     // Create WebRTC peer connection
-    peerConnection = new RTCPeerConnection({
+    let peerConnection = new RTCPeerConnection({
         iceServers: [{
             urls: [ iceServerUrl ],
             username: iceServerUsername,
@@ -114,7 +136,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     peerConnection.onicecandidate = e => {
         if (!e.candidate && !iceGatheringDone) {
             iceGatheringDone = true
-            connectToAvatarService(peerConnection)
+            peerConnectionQueue.push(peerConnection)
+            console.log("[" + (new Date()).toISOString() + "] ICE gathering done, new peer connection prepared.")
+            if (peerConnectionQueue.length > 1) {
+                peerConnectionQueue.shift()
+            }
         }
     }
 
@@ -122,10 +148,28 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         peerConnection.setLocalDescription(sdp).then(() => { setTimeout(() => {
             if (!iceGatheringDone) {
                 iceGatheringDone = true
-                connectToAvatarService(peerConnection)
+                peerConnectionQueue.push(peerConnection)
+                console.log("[" + (new Date()).toISOString() + "] ICE gathering done, new peer connection prepared.")
+                if (peerConnectionQueue.length > 1) {
+                    peerConnectionQueue.shift()
+                }
             }
-        }, 5000) })
+        }, 10000) })
     })
+}
+
+function waitForPeerConnectionAndStartSession() {
+    if (peerConnectionQueue.length > 0) {
+        let peerConnection = peerConnectionQueue.shift()
+        connectToAvatarService(peerConnection)
+        if (peerConnectionQueue.length === 0) {
+            preparePeerConnection()
+        }
+    }
+    else {
+        console.log("Waiting for peer connection to be ready...")
+        setTimeout(waitForPeerConnectionAndStartSession, 1000)
+    }
 }
 
 // Connect to TTS Avatar Service
@@ -224,26 +268,13 @@ function htmlEncode(text) {
 
 window.onload = () => {
     clientId = document.getElementById('clientId').value
+    fetchIceToken() // Fetch ICE token and prepare peer connection on page load
+    setInterval(fetchIceToken, 60 * 1000) // Fetch ICE token and prepare peer connection every 1 minute
 }
 
 window.startSession = () => {
     document.getElementById('startSession').disabled = true
-    
-    fetch('/api/getIceToken', {
-        method: 'GET',
-    })
-    .then(response => {
-        if (response.ok) {
-            response.json().then(data => {
-                const iceServerUrl = data.Urls[0]
-                const iceServerUsername = data.Username
-                const iceServerCredential = data.Password
-                setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
-            })
-        } else {
-            throw new Error(`Failed fetching ICE token: ${response.status} ${response.statusText}`)
-        }
-    })
+    waitForPeerConnectionAndStartSession()
 }
 
 window.speak = () => {
