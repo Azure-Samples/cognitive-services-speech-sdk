@@ -9,6 +9,8 @@ Translation recognition samples for the Microsoft Cognitive Services Speech SDK
 
 import time
 
+from azure.identity import DefaultAzureCredential
+
 try:
     import azure.cognitiveservices.speech as speechsdk
 except ImportError:
@@ -24,6 +26,11 @@ except ImportError:
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and endpoint.
 speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+
+# Set up endpoint with custom domain. This is required when using aad token credential to authenticate.
+# For details on setting up a custom domain with private links, see:
+# https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
+speech_endpoint_with_custom_domain = "https://YourCustomDomain.cognitiveservices.azure.com/"
 
 # Specify the path to audio files containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
@@ -302,3 +309,121 @@ def translation_continuous_with_lid_from_multilingual_file():
 
     recognizer.stop_continuous_recognition()
     # </TranslationContinuousWithLID>
+
+
+def translation_once_from_file_with_aad_token_credential():
+    """performs one-shot speech translation authenticated via aad token credential"""
+    # Create a token credential using DefaultAzureCredential.
+    # This credential supports multiple authentication methods, including Managed Identity,
+    # environment variables, and Azure CLI login.
+    # Choose the authentication method that best fits your scenario. For more types of token credentials, refer to:
+    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet  # noqa: E501
+    credential = DefaultAzureCredential(
+        managed_identity_client_id="your app id",
+    )
+    translation_config = speechsdk.translation.SpeechTranslationConfig(
+        token_credential=credential,
+        endpoint=speech_endpoint_with_custom_domain,
+        speech_recognition_language='en-US',
+        target_languages=('de', 'fr'))
+
+    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+    # Creates a translation recognizer using and audio file as input.
+    recognizer = speechsdk.translation.TranslationRecognizer(
+        translation_config=translation_config, audio_config=audio_config)
+
+    # Starts translation, and returns after a single utterance is recognized. The end of a
+    # single utterance is determined by listening for silence at the end or until a maximum of about 30
+    # seconds of audio is processed. The task returns the recognition text as result.
+    # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
+    # shot recognition like command or query.
+    # For long-running multi-utterance recognition, use start_continuous_recognition() instead.
+    result = recognizer.recognize_once()
+
+    # Check the result
+    if result.reason == speechsdk.ResultReason.TranslatedSpeech:
+        print("""Recognized: {}
+        German translation: {}
+        French translation: {}""".format(
+            result.text, result.translations['de'], result.translations['fr']))
+    elif result.reason == speechsdk.ResultReason.RecognizedSpeech:
+        print("Recognized: {}".format(result.text))
+    elif result.reason == speechsdk.ResultReason.NoMatch:
+        print("No speech could be recognized: {}".format(result.no_match_details))
+    elif result.reason == speechsdk.ResultReason.Canceled:
+        print("Translation canceled: {}".format(result.cancellation_details.reason))
+        if result.cancellation_details.reason == speechsdk.CancellationReason.Error:
+            print("Error details: {}".format(result.cancellation_details.error_details))
+
+
+def translation_continuous_with_aad_token_credential():
+    """performs continuous speech translation authenticated via aad token credential"""
+    # Create a token credential using DefaultAzureCredential.
+    # This credential supports multiple authentication methods, including Managed Identity,
+    # environment variables, and Azure CLI login.
+    # Choose the authentication method that best fits your scenario. For more types of token credentials, refer to:
+    # https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet  # noqa: E501
+    credential = DefaultAzureCredential(
+        managed_identity_client_id="your app id",
+    )
+    translation_config = speechsdk.translation.SpeechTranslationConfig(
+        token_credential=credential,
+        endpoint=speech_endpoint_with_custom_domain,
+        speech_recognition_language='en-US',
+        target_languages=('de', 'fr'))
+
+    audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+    # Creates a translation recognizer using and audio file as input.
+    recognizer = speechsdk.translation.TranslationRecognizer(
+        translation_config=translation_config, audio_config=audio_config)
+
+    def result_callback(event_type: str, evt: speechsdk.translation.TranslationRecognitionEventArgs):
+        """callback to display a translation result"""
+        print("{}:\n {}\n\tTranslations: {}\n\tResult Json: {}\n".format(
+            event_type, evt, evt.result.translations.items(), evt.result.json))
+
+    done = False
+
+    def stop_cb(evt: speechsdk.SessionEventArgs):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        print('CLOSING on {}'.format(evt))
+        nonlocal done
+        done = True
+
+    def canceled_cb(evt: speechsdk.translation.TranslationRecognitionCanceledEventArgs):
+        print('CANCELED:\n\tReason:{}\n'.format(evt.result.reason))
+        print('\tDetails: {} ({})'.format(evt, evt.result.cancellation_details.error_details))
+
+    # connect callback functions to the events fired by the recognizer
+    recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
+    recognizer.session_stopped.connect(lambda evt: print('SESSION STOPPED {}'.format(evt)))
+    # event for intermediate results
+    recognizer.recognizing.connect(lambda evt: result_callback('RECOGNIZING', evt))
+    # event for final result
+    recognizer.recognized.connect(lambda evt: result_callback('RECOGNIZED', evt))
+    # cancellation event
+    recognizer.canceled.connect(canceled_cb)
+
+    # stop continuous recognition on either session stopped or canceled events
+    recognizer.session_stopped.connect(stop_cb)
+    recognizer.canceled.connect(stop_cb)
+
+    def synthesis_callback(evt: speechsdk.translation.TranslationRecognitionEventArgs):
+        """
+        callback for the synthesis event
+        """
+        print('SYNTHESIZING {}\n\treceived {} bytes of audio. Reason: {}'.format(
+            evt, len(evt.result.audio), evt.result.reason))
+
+    # connect callback to the synthesis event
+    recognizer.synthesizing.connect(synthesis_callback)
+
+    # start translation
+    recognizer.start_continuous_recognition()
+
+    while not done:
+        time.sleep(.5)
+
+    recognizer.stop_continuous_recognition()

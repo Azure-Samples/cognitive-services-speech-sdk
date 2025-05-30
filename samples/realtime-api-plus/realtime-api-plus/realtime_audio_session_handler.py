@@ -5,6 +5,7 @@ import asyncio
 import base64
 from rtclient import models as rt_models
 
+
 class RealtimeAudioSessionHandler:
     def __init__(self) -> None:
         pass
@@ -42,27 +43,34 @@ class RealtimeAudioSessionHandler:
     async def on_transcript_chunk(self, response_id: str, item_id: str, content_index: str, transcript_chunk: str):
         raise NotImplementedError
 
-    async def on_response_content_part_added(self, response_id: str, item_id: str, content_index: int, content: rt_models.ResponseItemContentPart):
+    async def on_response_content_part_added(self, response_id: str, item_id: str, content_index: int,
+                                             content: rt_models.ResponseItemContentPart):
         raise NotImplementedError
 
-    async def on_response_content_part_done(self, response_id: str, item_id: str, content_index: int, content: rt_models.ResponseItemContentPart):
+    async def on_response_content_part_done(self, response_id: str, item_id: str, content_index: int,
+                                            content: rt_models.ResponseItemContentPart):
         raise NotImplementedError
 
-    ## input audio
+    # input audio
     async def on_input_audio_buffer_speech_started(self, item_id: str, audio_start_ms: int):
         raise NotImplementedError
+
     async def on_input_audio_buffer_speech_stopped(self, item_id: str, audio_end_ms: int):
         raise NotImplementedError
+
     async def on_input_audio_buffer_committed(self, item_id: str, previous_item_id: str):
         raise NotImplementedError
+
     async def on_conversation_item_input_audio_transcript_completed(self, item_id: str, transcript: str):
         raise NotImplementedError
 
-    ## function call
+    # function call
     async def on_response_function_call_arguments_delta(self, response_id: str, item_id: str, call_id: str, delta: str):
         raise NotImplementedError
+
     async def on_response_function_call_arguments_done(self, response_id: str, item_id: str, call_id: str, name: str, arguments: str):
         raise NotImplementedError
+
 
 class AsyncMsgQueue:
     def __init__(self):
@@ -136,7 +144,8 @@ class RealtimeAudioSessionHandlerImpl(RealtimeAudioSessionHandler):
         )
         await self.output_queue.put(conversation_item_created.model_dump_json(exclude_none=True))
 
-    async def on_response_content_part_added(self, response_id: str, item_id: str, content_index: int, content: rt_models.ResponseItemContentPart):
+    async def on_response_content_part_added(self, response_id: str, item_id: str, content_index: int,
+                                             content: rt_models.ResponseItemContentPart):
         response_content_part_added = rt_models.ResponseContentPartAddedMessage(
             event_id=self.generate_event_id(),
             response_id=response_id,
@@ -147,7 +156,8 @@ class RealtimeAudioSessionHandlerImpl(RealtimeAudioSessionHandler):
         )
         await self.output_queue.put(response_content_part_added.model_dump_json(exclude_none=True))
 
-    async def on_response_content_part_done(self, response_id: str, item_id: str, content_index: int, content: rt_models.ResponseItemContentPart):
+    async def on_response_content_part_done(self, response_id: str, item_id: str, content_index: int,
+                                            content: rt_models.ResponseItemContentPart):
         response_content_part_done = rt_models.ResponseContentPartDoneMessage(
             event_id=self.generate_event_id(),
             response_id=response_id,
@@ -190,7 +200,7 @@ class RealtimeAudioSessionHandlerImpl(RealtimeAudioSessionHandler):
         )
         await self.output_queue.put(response_transcript_delta.model_dump_json(exclude_none=True))
 
-    ## input audio
+    # input audio
     async def on_input_audio_buffer_speech_started(self, item_id: str, audio_start_ms: int):
         input_audio_buffer_speech_started = rt_models.InputAudioBufferSpeechStartedMessage(
             event_id=self.generate_event_id(),
@@ -224,8 +234,8 @@ class RealtimeAudioSessionHandlerImpl(RealtimeAudioSessionHandler):
         )
         await self.output_queue.put(conversation_item_input_audio_transcript_completed.model_dump_json(exclude_none=True))
 
-    ## function call
-    async def on_response_function_call_arguments_delta(self, response_id: str, item_id: str, call_id:str, delta: str):
+    # function call
+    async def on_response_function_call_arguments_delta(self, response_id: str, item_id: str, call_id: str, delta: str):
         response_function_call_arguments_delta = rt_models.ResponseFunctionCallArgumentsDeltaMessage(
             event_id=self.generate_event_id(),
             response_id=response_id,

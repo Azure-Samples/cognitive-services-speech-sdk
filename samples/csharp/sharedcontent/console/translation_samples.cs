@@ -32,8 +32,8 @@ namespace MicrosoftSpeechSDKSamples
             // Voice name of synthesis output.
             const string germanVoice = "de-DE-AmalaNeural";
 
-            // Creates an instance of a speech translation config with specified endpoint and key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
             var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://ServiceRegron.cognitiveservices.azure.com"), "YourSubscriptionKey");
 
             config.SpeechRecognitionLanguage = fromLanguage;
@@ -141,8 +141,8 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with a language of your choice.
             string fromLanguage = "en-US";
 
-            // Creates an instance of a speech translation config with specified endpoint and key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
             var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://ServiceRegron.cognitiveservices.azure.com"), "YourSubscriptionKey");
             config.SpeechRecognitionLanguage = fromLanguage;
 

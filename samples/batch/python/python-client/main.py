@@ -4,54 +4,92 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
+import os
+import argparse
 import logging
 import sys
 import requests
 import time
 import swagger_client
+import re
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG,
-        format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
+                    format="%(asctime)s %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
 
 API_VERSION = "2024-11-15"
 
-# Your subscription key and region for the speech service
-SUBSCRIPTION_KEY = "YourSubscriptionKey"
-SERVICE_REGION = "YourServiceRegion"
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description="Run app.py with custom parameters.")
+parser.add_argument(
+    "--service_key",
+    type=str,
+    required=True,
+    help="The subscription key if the speech service."
+)
+parser.add_argument(
+    "--service_region",
+    type=str,
+    required=True,
+    help="The region for the speech service."
+)
+parser.add_argument(
+    "--recordings_blob_uris",
+    type=str,
+    required=False,
+    help="SAS URI pointing to audio files stored in Azure Blob Storage."
+)
+parser.add_argument(
+    "--recordings_container_uri",
+    type=str,
+    required=False,
+    help="SAS URI pointing to a container in Azure Blob Storage."
+)
+parser.add_argument(
+    "--locale",
+    type=str,
+    required=True,
+    help="The locale of the input audio file."
+)
+args = parser.parse_args()
+
+# Initialize speech recognition engine
+SUBSCRIPTION_KEY = args.service_key
+SERVICE_REGION = args.service_region
+
+# Use user-provided or default recordings_blob_uri
+RECORDINGS_BLOB_URIS = args.recordings_blob_uris
+LOCALE = args.locale
 
 NAME = "Simple transcription"
 DESCRIPTION = "Simple transcription description"
 
-LOCALE = "en-US"
-RECORDINGS_BLOB_URI = "<Your SAS Uri to the recording>"
-
 # Provide the uri of a container with audio files for transcribing all of them
 # with a single request. At least 'read' and 'list' (rl) permissions are required.
-RECORDINGS_CONTAINER_URI = "<Your SAS Uri to a container of audio files>"
+RECORDINGS_CONTAINER_URI = args.recordings_container_uri
 
 # Set model information when doing transcription with custom models
 MODEL_REFERENCE = None  # guid of a custom model
 
 
-def transcribe_from_single_blob(uri, properties):
+def transcribe_from_single_blob(uris, properties):
     """
-    Transcribe a single audio file located at `uri` using the settings specified in `properties`
+    Transcribe batch audio files located at `uris` using the settings specified in `properties`
     using the base model for the specified locale.
     """
     transcription_definition = swagger_client.Transcription(
         display_name=NAME,
         description=DESCRIPTION,
         locale=LOCALE,
-        content_urls=[uri],
+        content_urls=[uri.strip() for uri in uris.split(",")],
         properties=properties
     )
 
     return transcription_definition
 
 
-def transcribe_with_custom_model(client, uri, properties):
+def transcribe_with_custom_model(client, uris, properties):
     """
-    Transcribe a single audio file located at `uri` using the settings specified in `properties`
+    Transcribe batch audio files located at `uris` using the settings specified in `properties`
     using the base model for the specified locale.
     """
     # Model information (ADAPTED_ACOUSTIC_ID and ADAPTED_LANGUAGE_ID) must be set above.
@@ -65,7 +103,7 @@ def transcribe_with_custom_model(client, uri, properties):
         display_name=NAME,
         description=DESCRIPTION,
         locale=LOCALE,
-        content_urls=[uri],
+        content_urls=[uri.strip() for uri in uris.split(",")],
         model=model,
         properties=properties
     )
@@ -99,8 +137,8 @@ def _paginate(api, paginated_object):
     auth_settings = ["api_key"]
     while paginated_object.next_link:
         link = paginated_object.next_link[len(api.api_client.configuration.host):]
-        paginated_object, status, headers = api.api_client.call_api(link, "GET",
-            response_type=typename, auth_settings=auth_settings)
+        paginated_object, status, headers = api.api_client.call_api(
+            link, "GET", response_type=typename, auth_settings=auth_settings)
 
         if status == 200:
             yield from paginated_object.values
@@ -143,32 +181,35 @@ def transcribe():
     api = swagger_client.CustomSpeechTranscriptionsApi(api_client=client)
 
     # Specify transcription properties by passing a dict to the properties parameter. See
-    # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options
+    # https://learn.microsoft.com/azure/cognitive-services/speech-service/batch-transcription-create?pivots=rest-api#request-configuration-options # noqa: E501
     # for supported parameters.
     properties = swagger_client.TranscriptionProperties(time_to_live_hours=6)
     # properties.word_level_timestamps_enabled = True
     # properties.display_form_word_level_timestamps_enabled = True
     # properties.punctuation_mode = "DictatedAndAutomatic"
     # properties.profanity_filter_mode = "Masked"
-    # properties.destination_container_url = "<SAS Uri with at least write (w) permissions for an Azure Storage blob container that results should be written to>"
+    # properties.destination_container_url = "<SAS Uri with at least write (w) permissions>"
+    # # The container where results should be written to
 
     # uncomment the following block to enable and configure speaker separation
     # properties.diarization = swagger_client.DiarizationProperties(max_speakers=5, enabled=True)
 
-    # uncomment the following block to enable and configure language identification prior to transcription. Available modes are "single" and "continuous".
-    # properties.language_identification = swagger_client.LanguageIdentificationProperties(mode="single", candidate_locales=["en-US", "ja-JP"])
+    # uncomment the following block to enable and configure language identification prior to transcription.
+    # Available modes are "single" and "continuous".
+    # properties.language_identification = swagger_client.LanguageIdentificationProperties(
+    #     mode="single", candidate_locales=["en-US", "ja-JP"])
 
     # Use base models for transcription. Comment this block if you are using a custom model.
-    transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URI, properties)
+    transcription_definition = transcribe_from_single_blob(RECORDINGS_BLOB_URIS, properties)
 
     # Uncomment this block to use custom models for transcription.
-    # transcription_definition = transcribe_with_custom_model(client, RECORDINGS_BLOB_URI, properties)
+    # transcription_definition = transcribe_with_custom_model(client, RECORDINGS_BLOB_URIS, properties)
 
-    # uncomment the following block to enable and configure language identification prior to transcription
     # Uncomment this block to transcribe all files from a container.
     # transcription_definition = transcribe_from_container(RECORDINGS_CONTAINER_URI, properties)
 
-    created_transcription, status, headers = api.transcriptions_submit_with_http_info(transcription=transcription_definition, api_version=API_VERSION)
+    created_transcription, status, headers = api.transcriptions_submit_with_http_info(
+        transcription=transcription_definition, api_version=API_VERSION)
 
     # get the transcription Id from the location URI
     transcription_id = headers["location"].split("/")[-1].split("?")[0]
@@ -196,6 +237,9 @@ def transcribe():
                 logging.info("Transcription succeeded. Results are located in your Azure Blob Storage.")
                 break
 
+            # download results
+            os.makedirs('results', exist_ok=True)
+
             pag_files = api.transcriptions_list_files(transcription_id, api_version=API_VERSION)
             for file_data in _paginate(api, pag_files):
                 if file_data.kind != "Transcription":
@@ -204,11 +248,17 @@ def transcribe():
                 audiofilename = file_data.name
                 results_url = file_data.links.content_url
                 results = requests.get(results_url)
-                logging.info(f"Results for {audiofilename}:\n{results.content.decode('utf-8')}")
+                result_text = results.content.decode('utf-8')
+
+                # save results to file
+                safe_audiofilename = re.sub(r'[<>:"/\\|?*\x00-\x1F]', '_', audiofilename)
+                result_file_path = os.path.join('results', safe_audiofilename)
+                with open(result_file_path, 'w', encoding='utf-8') as f:
+                    f.write(result_text)
+                    logging.info(f"Results saved to {result_file_path}")
         elif transcription.status == "Failed":
             logging.info(f"Transcription failed: {transcription.properties.error.message}")
 
 
 if __name__ == "__main__":
     transcribe()
-

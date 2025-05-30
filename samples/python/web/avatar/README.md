@@ -1,25 +1,47 @@
 # Instructions to run Microsoft Azure TTS Talking Avatar sample code
+This sample demonstrates the basic usage of Azure text-to-speech avatar real-time API.
 
-## Pre-requisites
+The Speech SDK for Python is compatible with Windows, Linux, and macOS.
+- On Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, 2019, and 2022](https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist?view=msvc-170&preserve-view=true) for your platform. Installing this package might require a restart.
+- On Linux, you must use the x64 target architecture.
 
-* Follow [Text to speech quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/get-started-text-to-speech?pivots=programming-language-python#set-up-the-environment) to set up the environment for running Speech SDK in python.
+## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
+This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
 
-## Basic Sample
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- In extension's panel, click `View Samples` and download this sample from sample gallery.
+- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations) (one-time setup).
+  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
+  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
 
+     This command will start the avatar web server and open the browser for you. After the `http://127.0.0.1:5000/` link opens in default browser, type in "Spoken Text" and click "Start Session". Then click "Speak".
+
+## Option 2: Manual Setup and Run (Advanced)
+Follow these steps if you prefer not to use VS Code.
+
+### Prerequisites
+- Install a version of [Python from 3.7 or later](https://www.python.org/downloads/). 
+- For any requirements, see [Install the Speech SDK](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-python).
+
+### Available locations
+The text to speech avatar feature is only available in the following service regions: Southeast Asia, North Europe, West Europe, Sweden Central, South Central US, East US 2, and West US 2.
+
+### Basic Sample
 This sample demonstrates the basic usage of Azure text-to-speech avatar real-time API.
 
 * Step 1: Open a console and navigate to the folder containing this README.md document.
-    * Run `pip install -r requirements.txt` to install the required packages.
+    * Run `pip install -r requirements.txt` to install the required packages. (Azure AI Speech Toolkit: Build the Sample App will be installed automatically, or you can install it manually.)
     * Set below environment virables:
-        * `SPEECH_REGION` - the region of your Azure speech resource, e.g. westus2.
-        * `SPEECH_KEY` - the API key of your Azure speech resource.
-        * `SPEECH_PRIVATE_ENDPOINT` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint.
+        * `SPEECH_REGION` - the region of your Azure AI Service resource, e.g. westus2. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
+        * `SPEECH_KEY` - the key of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
+        * `SPEECH_PRIVATE_ENDPOINT` - (Optional) the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint.
     * Set below environment virables if you want to use customized ICE server:
-        * `ICE_SERVER_URL` - the URL of your customized ICE server.
-        * `ICE_SERVER_URL_REMOTE` - the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
-        * `ICE_SERVER_USERNAME` - the username of your customized ICE server.
-        * `ICE_SERVER_PASSWORD` - the password of your customized ICE server.
-    * Run `python -m flask run -h 0.0.0.0 -p 5000` to start this sample.
+        * `ICE_SERVER_URL` - (Optional) the URL of your customized ICE server.
+        * `ICE_SERVER_URL_REMOTE` - (Optional) the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
+        * `ICE_SERVER_USERNAME` - (Optional) the username of your customized ICE server.
+        * `ICE_SERVER_PASSWORD` - (Optional) the password of your customized ICE server.
+    * Run `python -m flask run -h 0.0.0.0 -p 5000` to start this sample. (Azure AI Speech Toolkit: Run the Sample App will run automatically, or you can run it manually.)
 
 * Step 2: Open a browser and navigate to `http://localhost:5000/basic` to view the web UI of this sample.
 
@@ -43,31 +65,31 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
 
 * Step 6: You can either continue to type text in the `Spoken Text` text box and let the avatar speak that text by clicking `Speak` button, or click `Stop Session` button to stop the video connection with Azure TTS Talking Avatar service. If you click `Stop Session` button, you can click `Start Session` button to start a new video connection with Azure TTS Talking Avatar service.
 
-## Chat Sample
 
+### Chat Sample
 This sample demonstrates the chat scenario, with integration of Azure speech-to-text, Azure OpenAI, and Azure text-to-speech avatar real-time API.
 
 * Step 1: Open a console and navigate to the folder containing this README.md document.
-    * Run `pip install -r requirements.txt` to install the required packages.
+    * Run `pip install -r requirements.txt` to install the required packages. (Azure AI Speech Toolkit: Build the Sample App will be installed automatically, or you can install it manually.)
     * Set below environment virables:
-        * `SPEECH_REGION` - the region of your Azure speech resource, e.g. westus2.
-        * `SPEECH_KEY` - the API key of your Azure speech resource.
-        * `SPEECH_PRIVATE_ENDPOINT` - the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint. For more information about private endpoint, please refer to [Enable private endpoint](https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link).
-        * `SPEECH_RESOURCE_URL` - the URL of your Azure speech resource, e.g. /subscriptions/6e83d8b7-00dd-4b0a-9e98-dab9f060418b/resourceGroups/my-resource-group/providers/Microsoft.CognitiveServices/accounts/my-speech-resource. To fetch the speech resource URL, go to your speech resource overview page on Azure portal, click `JSON View` link, and then copy the `Resource ID` value on the popped up page. This is optional, which is only needed when you want to use private endpoint to access Azure speech service.
-        * `USER_ASSIGNED_MANAGED_IDENTITY_CLIENT_ID` - the client ID of your user-assigned managed identity. This is optional, which is only needed when you want to use private endpoint with user-assigned managed identity to access Azure speech service. For more information about user-assigned managed identity, please refer to [Use a user-assigned managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token?tabs=azure-cli).
-        * `AZURE_OPENAI_ENDPOINT` - the endpoint of your Azure OpenAI resource, e.g. https://my-aoai.openai.azure.com/, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
-        * `AZURE_OPENAI_API_KEY` - the API key of your Azure OpenAI resource, which can be found in the `Keys and Endpoint` section of your Azure OpenAI resource in Azure portal.
-        * `AZURE_OPENAI_DEPLOYMENT_NAME` - the name of your Azure OpenAI model deployment, which can be found in the `Model deployments` section of your Azure OpenAI resource in Azure portal.
+        * `SPEECH_REGION` - the region of your Azure AI Service resource, e.g. westus2. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
+        * `SPEECH_KEY` - the API key of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
+        * `SPEECH_PRIVATE_ENDPOINT` - (Optional) the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint. For more information about private endpoint, please refer to [Enable private endpoint](https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link).
+        * `SPEECH_RESOURCE_URL` - (Optional) the URL of your Azure speech resource, e.g. /subscriptions/6e83d8b7-00dd-4b0a-9e98-dab9f060418b/resourceGroups/my-resource-group/providers/Microsoft.CognitiveServices/accounts/my-speech-resource. To fetch the speech resource URL, go to your speech resource overview page on Azure portal, click `JSON View` link, and then copy the `Resource ID` value on the popped up page. This is optional, which is only needed when you want to use private endpoint to access Azure speech service.
+        * `USER_ASSIGNED_MANAGED_IDENTITY_CLIENT_ID` - (Optional) the client ID of your user-assigned managed identity. This is optional, which is only needed when you want to use private endpoint with user-assigned managed identity to access Azure speech service. For more information about user-assigned managed identity, please refer to [Use a user-assigned managed identity](https://learn.microsoft.com/azure/active-directory/managed-identities-azure-resources/how-to-use-vm-token?tabs=azure-cli).
+        * `AZURE_OPENAI_ENDPOINT` - the endpoint of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
+        * `AZURE_OPENAI_API_KEY` - the API key of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
+        * `AZURE_OPENAI_DEPLOYMENT_NAME` - (Optional) the name of your Azure OpenAI model deployment, which can be found in the `Model deployments` section of your Azure OpenAI resource in Azure portal.
     * Set below environment virables if you want to use your own data to constrain the chat:
-        * `COGNITIVE_SEARCH_ENDPOINT` - the endpoint of your Azure Cognitive Search resource, e.g. https://my-cognitive-search.search.windows.net/, which can be found in the `Overview` section of your Azure Cognitive Search resource in Azure portal, appearing at `Essentials -> Url` field.
-        * `COGNITIVE_SEARCH_API_KEY` - the API key of your Azure Cognitive Search resource, which can be found in the `Keys` section of your Azure Cognitive Search resource in Azure portal. Please make sure to use the `Admin Key` instead of `Query Key`.
-        * `COGNITIVE_SEARCH_INDEX_NAME` - the name of your Azure Cognitive Search index, which can be found in the `Indexes` section of your Azure Cognitive Search resource in Azure portal.
+        * `COGNITIVE_SEARCH_ENDPOINT` - (Optional) the endpoint of your Azure Cognitive Search resource, e.g. https://my-cognitive-search.search.windows.net/, which can be found in the `Overview` section of your Azure Cognitive Search resource in Azure portal, appearing at `Essentials -> Url` field.
+        * `COGNITIVE_SEARCH_API_KEY` -  (Optional) the API key of your Azure Cognitive Search resource, which can be found in the `Keys` section of your Azure Cognitive Search resource in Azure portal. Please make sure to use the `Admin Key` instead of `Query Key`.
+        * `COGNITIVE_SEARCH_INDEX_NAME` - (Optional) the name of your Azure Cognitive Search index, which can be found in the `Indexes` section of your Azure Cognitive Search resource in Azure portal.
     * Set below environment virables if you want to use customized ICE server:
-        * `ICE_SERVER_URL` - the URL of your customized ICE server.
-        * `ICE_SERVER_URL_REMOTE` - the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
-        * `ICE_SERVER_USERNAME` - the username of your customized ICE server.
-        * `ICE_SERVER_PASSWORD` - the password of your customized ICE server.
-    * Run `python -m flask run -h 0.0.0.0 -p 5000` to start this sample.
+        * `ICE_SERVER_URL` - (Optional) the URL of your customized ICE server.
+        * `ICE_SERVER_URL_REMOTE` - (Optional) the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
+        * `ICE_SERVER_USERNAME` - (Optional) the username of your customized ICE server.
+        * `ICE_SERVER_PASSWORD` - (Optional) the password of your customized ICE server.
+    * Run `python -m flask run -h 0.0.0.0 -p 5000` to start this sample. (Azure AI Speech Toolkit: Run the Sample App will run automatically, or you can run it manually.)
 
 * Step 2: Open a browser and navigate to `http://localhost:5000/chat` to view the web UI of this sample.
 
@@ -94,7 +116,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
 
 * Step 5: Click `Start Microphone` button to start microphone (make sure to allow the microphone access tip box popping up in the browser), and then you can start chatting with the avatar with speech. The chat history (the text of what you said, and the response text by the Azure OpenAI chat API) will be shown beside the avatar. The avatar will then speak out the response of the chat API.
 
-# Additional Tip(s)
+## Additional Tip(s)
 
 * If you want to enforce the avatar to stop speaking before the avatar finishes the utterance, you can click `Stop Speaking` button. This is useful when you want to interrupt the avatar speaking.
 
