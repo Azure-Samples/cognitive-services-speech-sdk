@@ -5,7 +5,7 @@ plugins {
 android {
     defaultConfig {
         applicationId "com.microsoft.cognitiveservices.speech.samples.talkingavatar"
-        minSdkVersion 23
+        minSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -20,13 +20,23 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/io.netty.versions.properties'
+    }
     namespace 'com.microsoft.cognitiveservices.speech.samples.talkingavatar'
     compileSdk 34
 }
 
 dependencies {
     // Speech SDK
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.43.0'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.44.0'
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.google.android.material:material:1.12.0'

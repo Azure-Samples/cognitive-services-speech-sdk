@@ -1,20 +1,19 @@
 from gevent import monkey
 monkey.patch_all()
 
-from flask import Flask, render_template, request
-import azure.cognitiveservices.speech as speechsdk
-import os
-from flask_socketio import SocketIO
-import logging
-import base64
-import numpy as np
+from flask import Flask, render_template  # noqa: E402
+import azure.cognitiveservices.speech as speechsdk  # noqa: E402
+import os  # noqa: E402
+from flask_socketio import SocketIO  # noqa: E402
+import logging  # noqa: E402
+import base64  # noqa: E402
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
 # Using gevent as our async mode
-socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*", 
+socketio = SocketIO(app, async_mode='gevent', cors_allowed_origins="*",
                     logger=True, engineio_logger=True)
 
 # Azure Speech Service configuration
@@ -25,6 +24,7 @@ service_region = os.getenv("AZURE_SERVICE_REGION")
 recognizer = None
 push_stream = None
 
+
 def setup_speech_recognizer():
     global push_stream
 
@@ -34,20 +34,20 @@ def setup_speech_recognizer():
         logging.error(error_msg)
         socketio.emit('transcription', {'text': error_msg, 'error': True})
         return None
-        
+
     logging.info(f"Setting up speech recognizer for region: {service_region}")
-    
+
     # Configure the Azure Speech SDK with your credentials
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
     speech_config.speech_recognition_language = "en-US"
-    
+
     # Create push stream with EXPLICIT format (PCM 16kHz, 16-bit, mono)
     format = speechsdk.audio.AudioStreamFormat(samples_per_second=16000,
-                                              bits_per_sample=16,
-                                              channels=1)
+                                               bits_per_sample=16,
+                                               channels=1)
     push_stream = speechsdk.audio.PushAudioInputStream(stream_format=format)
     audio_config = speechsdk.audio.AudioConfig(stream=push_stream)
-    
+
     # Create the recognizer using the push stream as the audio input
     speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
 
@@ -56,7 +56,7 @@ def setup_speech_recognizer():
         text = evt.result.text
         logging.info(f"Recognizing: {text}")
         socketio.emit('interim_transcription', {'text': text})
-    
+
     # Handler for final recognized results
     def handle_final_result(evt):
         if evt.result.reason == speechsdk.ResultReason.RecognizedSpeech:
@@ -76,11 +76,11 @@ def setup_speech_recognizer():
     def session_started(evt):
         logging.info(f"Session started: {evt}")
         socketio.emit('debug', {'message': 'Speech session started'})
-        
+
     def session_stopped(evt):
         logging.info(f"Session stopped: {evt}")
         socketio.emit('debug', {'message': 'Speech session stopped'})
-        
+
     def canceled(evt):
         error_msg = f"Recognition canceled: {evt.cancellation_details.reason}. Error details: {evt.cancellation_details.error_details}"
         logging.error(error_msg)
@@ -104,20 +104,24 @@ def setup_speech_recognizer():
 
     return speech_recognizer
 
+
 @app.route('/')
 def index():
     logging.info("Rendering index.html")
     return render_template('index.html')
 
+
 @socketio.on('connect')
 def handle_connect():
     logging.info('Client connected')
+
 
 @socketio.on('disconnect')
 def handle_disconnect():
     logging.info('Client disconnected')
     # Clean up resources on disconnect to avoid orphaned connections
     handle_stop_transcription()
+
 
 @socketio.on('start_transcription')
 def handle_start_transcription():
@@ -130,38 +134,39 @@ def handle_start_transcription():
         except Exception as e:
             logging.error(f"Error stopping existing recognizer: {str(e)}")
         recognizer = None
-        
+
     if push_stream:
         try:
             push_stream.close()
         except Exception as e:
             logging.error(f"Error closing existing push stream: {str(e)}")
         push_stream = None
-        
+
     recognizer = setup_speech_recognizer()
     socketio.emit('transcription', {'text': 'Transcription started. Speak now...'})
 
+
 @socketio.on('audio_data')
 def handle_audio_data(data):
-    global push_stream, recognizer
+    # Using global variables for reading only, so no need to redeclare them as global
     if not push_stream:
         logging.error("Push stream is not initialized")
         return
-    
+
     if not recognizer:
         logging.error("Recognizer is not initialized")
         return
-        
+
     try:
         # Get PCM audio data from client
         audio_data = data.get('audio')
         if not audio_data:
             logging.error("No audio data found in the payload")
             return
-        
+
         # Convert base64 to binary
         audio_binary = base64.b64decode(audio_data)
-        
+
         # We expect this to be raw PCM data (16-bit, 16kHz, mono)
         # Write directly to the push stream
         try:
@@ -170,10 +175,11 @@ def handle_audio_data(data):
         except Exception as stream_error:
             logging.error(f"Stream write error: {str(stream_error)}")
             socketio.emit('transcription', {'text': f'Audio stream error: {str(stream_error)}', 'error': True})
-            
+
     except Exception as e:
         logging.error(f"Error processing audio data: {str(e)}")
         logging.exception("Full stack trace:")
+
 
 @socketio.on('stop_transcription')
 def handle_stop_transcription():
@@ -188,7 +194,7 @@ def handle_stop_transcription():
                 logging.error(f"Error stopping recognition: {str(recog_error)}")
             finally:
                 recognizer = None
-                
+
         if push_stream:
             try:
                 push_stream.close()
@@ -197,12 +203,13 @@ def handle_stop_transcription():
                 logging.error(f"Error closing push stream: {str(stream_error)}")
             finally:
                 push_stream = None
-                
+
         socketio.emit('transcription', {'text': 'Transcription stopped.'})
-        
+
     except Exception as e:
         logging.error(f"Error in stop_transcription: {str(e)}")
         logging.exception("Full stack trace:")
+
 
 @app.route('/test-emit')
 def test_emit():
@@ -210,16 +217,17 @@ def test_emit():
     socketio.emit('transcription', {'text': 'Server test message'})
     return 'Test message sent to all clients'
 
+
 @app.route('/test-speech')
 def test_speech():
     """Simple endpoint to test speech recognition without streaming"""
     try:
         speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
         speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config)
-        
+
         # This does a one-shot recognition from the default microphone
         result = speech_recognizer.recognize_once()
-        
+
         if result.reason == speechsdk.ResultReason.RecognizedSpeech:
             return f"Recognition successful: {result.text}"
         elif result.reason == speechsdk.ResultReason.NoMatch:
@@ -230,8 +238,10 @@ def test_speech():
     except Exception as e:
         return f"Error: {str(e)}"
 
+
 # For Azure App Service, expose the application as "application"
 application = app
+
 
 if __name__ == '__main__':
     # This code only runs when executing the script directly (not on App Service)

@@ -8,7 +8,10 @@ var socket
 var audioContext
 var isFirstResponseChunk
 var speechRecognizer
-var peerConnection
+var iceServerUrl
+var iceServerUsername
+var iceServerCredential
+var peerConnectionQueue = []
 var peerConnectionDataChannel
 var speechSynthesizerConnected = false
 var isSpeaking = false
@@ -25,26 +28,29 @@ var sttLatencyRegex = new RegExp(/<STTL>(\d+)<\/STTL>/)
 var firstTokenLatencyRegex = new RegExp(/<FTL>(\d+)<\/FTL>/)
 var firstSentenceLatencyRegex = new RegExp(/<FSL>(\d+)<\/FSL>/)
 
+// Fetch ICE token from the server
+function fetchIceToken() {
+    fetch('/api/getIceToken', {
+        method: 'GET',
+    }).then(response => {
+        if (response.ok) {
+            response.json().then(data => {
+                iceServerUrl = data.Urls[0]
+                iceServerUsername = data.Username
+                iceServerCredential = data.Password
+                console.log(`[${new Date().toISOString()}] ICE token fetched.`)
+                preparePeerConnection()
+            })
+        } else {
+            console.error(`Failed fetching ICE token: ${response.status} ${response.statusText}`)
+        }
+    })
+}
+
 // Connect to avatar service
 function connectAvatar() {
     document.getElementById('startSession').disabled = true
-
-    fetch('/api/getIceToken', {
-        method: 'GET',
-    })
-    .then(response => {
-        if (response.ok) {
-            response.json().then(data => {
-                const iceServerUrl = data.Urls[0]
-                const iceServerUsername = data.Username
-                const iceServerCredential = data.Password
-                setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential)
-            })
-        } else {
-            throw new Error(`Failed fetching ICE token: ${response.status} ${response.statusText}`)
-        }
-    })
-
+    waitForPeerConnectionAndStartSession()
     document.getElementById('configuration').hidden = true
 }
 
@@ -60,8 +66,8 @@ function createSpeechRecognizer() {
             response.text().then(text => {
                 const speechToken = text
                 const speechRecognitionConfig = speechPrivateEndpoint ?
-                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechPrivateEndpoint.replace('https://', '')}/stt/speech/universal/v2`), '') :
-                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`), '')
+                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechPrivateEndpoint.replace('https://', '')}/stt/speech/universal/v2`)) :
+                    SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${speechRegion}.stt.speech.microsoft.com/speech/universal/v2`))
                 speechRecognitionConfig.authorizationToken = speechToken
                 speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
                 speechRecognitionConfig.setProperty("SpeechContext-PhraseDetection.TrailingSilenceTimeout", "3000")
@@ -76,6 +82,20 @@ function createSpeechRecognizer() {
             throw new Error(`Failed fetching speech token: ${response.status} ${response.statusText}`)
         }
     })
+}
+
+function waitForPeerConnectionAndStartSession() {
+    if (peerConnectionQueue.length > 0) {
+        let peerConnection = peerConnectionQueue.shift()
+        connectToAvatarService(peerConnection)
+        if (peerConnectionQueue.length === 0) {
+            preparePeerConnection()
+        }
+    }
+    else {
+        console.log("Waiting for peer connection to be ready...")
+        setTimeout(waitForPeerConnectionAndStartSession, 1000)
+    }
 }
 
 // Disconnect from avatar service
@@ -158,10 +178,10 @@ function setupWebSocket() {
     })
 }
 
-// Setup WebRTC
-function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
+// Prepare peer connection for WebRTC
+function preparePeerConnection() {
     // Create WebRTC peer connection
-    peerConnection = new RTCPeerConnection({
+    let peerConnection = new RTCPeerConnection({
         iceServers: [{
             urls: [ iceServerUrl ],
             username: iceServerUsername,
@@ -200,6 +220,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.srcObject = event.streams[0]
             videoElement.autoplay = true
             videoElement.playsInline = true
+            videoElement.style.width = '0.5px'
+            document.getElementById('remoteVideo').appendChild(videoElement)
 
             // Continue speaking if there are unfinished sentences while reconnecting
             if (isReconnecting) {
@@ -222,6 +244,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 }
 
                 // Append the new video element
+                videoElement.style.width = '960px'
                 document.getElementById('remoteVideo').appendChild(videoElement)
 
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
@@ -309,7 +332,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     peerConnection.onicecandidate = e => {
         if (!e.candidate && !iceGatheringDone) {
             iceGatheringDone = true
-            connectToAvatarService(peerConnection)
+            peerConnectionQueue.push(peerConnection)
+            console.log("[" + (new Date()).toISOString() + "] ICE gathering done, new peer connection prepared.")
+            if (peerConnectionQueue.length > 1) {
+                peerConnectionQueue.shift()
+            }
         }
     }
 
@@ -317,9 +344,13 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         peerConnection.setLocalDescription(sdp).then(() => { setTimeout(() => {
             if (!iceGatheringDone) {
                 iceGatheringDone = true
-                connectToAvatarService(peerConnection)
+                peerConnectionQueue.push(peerConnection)
+                console.log("[" + (new Date()).toISOString() + "] ICE gathering done, new peer connection prepared.")
+                if (peerConnectionQueue.length > 1) {
+                    peerConnectionQueue.shift()
+                }
             }
-        }, 2000) })
+        }, 10000) })
     })
 }
 
@@ -538,8 +569,11 @@ function checkHung() {
 
 window.onload = () => {
     clientId = document.getElementById('clientId').value
-    enableWebSockets = document.getElementById('enableWebSockets').value === 'True'
 
+    fetchIceToken() // Fetch ICE token and prepare peer connection on page load
+    setInterval(fetchIceToken, 60 * 1000) // Fetch ICE token and prepare peer connection every 1 minute
+
+    enableWebSockets = document.getElementById('enableWebSockets').value === 'True'
     if (!enableWebSockets) {
         setInterval(() => {
             checkServerStatus()

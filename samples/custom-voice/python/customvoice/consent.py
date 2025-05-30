@@ -4,15 +4,13 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-import json
+import os
 import requests
-import logging
 from time import sleep
 
-from .helper import *
+from .helper import raise_exception_when_reqeust_failed
 from .config import Config
-from .customvoice_object import CustomVoiceObject
-from .status_object import *
+from .status_object import Status, StatusObject
 
 
 class Consent(StatusObject):
@@ -40,11 +38,11 @@ class Consent(StatusObject):
         api_url = config.url_prefix + 'consents' + '?' + config.api_version
         if project_id is not None and len(project_id) > 0:
             api_url += "&filter=projectId eq '%s'" % project_id
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         while api_url is not None and len(api_url) > 0:
             response = requests.get(api_url, headers=headers)
             raise_exception_when_reqeust_failed('GET', api_url, response, config.logger)
-            response_dict= response.json()
+            response_dict = response.json()
             for json_dict in response_dict['value']:
                 consent = Consent(json_dict)
                 consents.append(consent)
@@ -60,7 +58,7 @@ class Consent(StatusObject):
         if consent_id is None or len(consent_id) == 0:
             raise ValueError("'consent_id' is None or empty")
         api_url = config.url_prefix + 'consents/' + consent_id + '?' + config.api_version
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         response = requests.get(api_url, headers=headers)
         raise_exception_when_reqeust_failed('GET', api_url, response, config.logger)
         consent = Consent(response.json())
@@ -86,7 +84,7 @@ class Consent(StatusObject):
             raise ValueError("can't find file 'audio_file_path' = %s" % audio_file_path)
         audio_file_name = os.path.basename(audio_file_path)
 
-        headers = { 'Ocp-Apim-Subscription-Key': config.key }
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         api_url = config.url_prefix + 'consents/' + consent_id + '?' + config.api_version
         request_dict = {
             'projectId': project_id,
@@ -95,7 +93,7 @@ class Consent(StatusObject):
             'locale': locale,
             'description': description
         }
-        file=('audiodata', (audio_file_name, open(audio_file_path, 'rb'), 'audio/wav'))
+        file = ('audiodata', (audio_file_name, open(audio_file_path, 'rb'), 'audio/wav'))
         response = requests.post(api_url, data=request_dict, headers=headers, files=[file])
         raise_exception_when_reqeust_failed('POST', api_url, response, config.logger)
         consent = Consent(response.json())
@@ -117,6 +115,7 @@ class Consent(StatusObject):
         if consent_id is None or len(consent_id) == 0:
             raise ValueError("'consent_id' is None or empty")
         api_url = config.url_prefix + 'consents/' + consent_id + '?' + config.api_version
-        headers =  {'Ocp-Apim-Subscription-Key':config.key}
+        headers = {'Ocp-Apim-Subscription-Key': config.key}
         response = requests.delete(api_url, headers=headers)
+
         raise_exception_when_reqeust_failed('DELETE', api_url, response, config.logger)

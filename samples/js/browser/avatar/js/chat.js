@@ -53,6 +53,7 @@ function connectAvatar() {
     const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
     const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle)
     avatarConfig.customized = document.getElementById('customizedAvatar').checked
+    avatarConfig.useBuiltInVoice = document.getElementById('useBuiltInVoice').checked
     avatarSynthesizer = new SpeechSDK.AvatarSynthesizer(speechSynthesisConfig, avatarConfig)
     avatarSynthesizer.avatarEventReceived = function (s, e) {
         var offsetMessage = ", offset from session start: " + e.offset / 10000 + "ms."
@@ -63,7 +64,12 @@ function connectAvatar() {
         console.log("Event received: " + e.description + offsetMessage)
     }
 
-    const speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${cogSvcRegion}.stt.speech.microsoft.com/speech/universal/v2`), cogSvcSubKey)
+    let speechRecognitionConfig
+    if (privateEndpointEnabled) {
+        speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/stt/speech/universal/v2`), cogSvcSubKey) 
+    } else {
+        speechRecognitionConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${cogSvcRegion}.stt.speech.microsoft.com/speech/universal/v2`), cogSvcSubKey)
+    }
     speechRecognitionConfig.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous")
     var sttLocales = document.getElementById('sttLocales').value.split(',')
     var autoDetectSourceLanguageConfig = SpeechSDK.AutoDetectSourceLanguageConfig.fromLanguages(sttLocales)
@@ -173,6 +179,8 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             videoElement.srcObject = event.streams[0]
             videoElement.autoplay = true
             videoElement.playsInline = true
+            videoElement.style.width = '0.5px'
+            document.getElementById('remoteVideo').appendChild(videoElement)
 
             // Continue speaking if there are unfinished sentences
             if (repeatSpeakingSentenceAfterReconnection) {
@@ -195,6 +203,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 }
 
                 // Append the new video element
+                videoElement.style.width = '960px'
                 document.getElementById('remoteVideo').appendChild(videoElement)
 
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
@@ -365,10 +374,9 @@ function speak(text, endingSilenceMs = 0) {
 
 function speakNext(text, endingSilenceMs = 0, skipUpdatingChatHistory = false) {
     let ttsVoice = document.getElementById('ttsVoice').value
-    let personalVoiceSpeakerProfileID = document.getElementById('personalVoiceSpeakerProfileID').value
-    let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</mstts:ttsembedding></voice></speak>`
+     let ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
     if (endingSilenceMs > 0) {
-        ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:ttsembedding speakerProfileId='${personalVoiceSpeakerProfileID}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></mstts:ttsembedding></voice></speak>`
+        ssml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='${ttsVoice}'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}<break time='${endingSilenceMs}ms' /></voice></speak>`
     }
 
     if (enableDisplayTextAlignmentWithSpeech && !skipUpdatingChatHistory) {
@@ -860,5 +868,14 @@ window.updatePrivateEndpoint = () => {
         document.getElementById('showPrivateEndpointCheckBox').hidden = false
     } else {
         document.getElementById('showPrivateEndpointCheckBox').hidden = true
+    }
+}
+
+window.updateCustomAvatarBox = () => {
+    if (document.getElementById('customizedAvatar').checked) {
+        document.getElementById('useBuiltInVoice').disabled = false
+    } else {
+        document.getElementById('useBuiltInVoice').disabled = true
+        document.getElementById('useBuiltInVoice').checked = false
     }
 }

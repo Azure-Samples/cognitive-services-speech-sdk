@@ -11,23 +11,24 @@ speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, lang
 
 # Initialize Azure OpenAI client
 client = AzureOpenAI(
-    azure_endpoint=os.environ.get('AZURE_OPENAI_ENDPOINT'), 
-    api_key=os.environ.get('AZURE_OPENAI_API_KEY'), 
+    azure_endpoint=os.environ.get('AZURE_OPENAI_ENDPOINT'),
+    api_key=os.environ.get('AZURE_OPENAI_API_KEY'),
     api_version="2024-10-21"
 )
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description="Run app.py with custom parameters.")
 parser.add_argument(
-    "--relevant_phrases", 
-    type=str, 
-    default="Azure Cognitive Services, non-profit organization, speech recognition, OpenAI API", 
+    "--relevant_phrases",
+    type=str,
+    default="Azure Cognitive Services, non-profit organization, speech recognition, OpenAI API",
     help="Comma-separated relevant phrases for text rewriting."
 )
 args = parser.parse_args()
 
 # Use user-provided or default relevant_phrases
 relevant_phrases = args.relevant_phrases
+
 
 def rewrite_content(input_reco):
     """
@@ -44,10 +45,10 @@ def rewrite_content(input_reco):
     # A list of phrases relevant to the context, used to ensure their correct spelling and formatting.
     # Users can customize these phrases based on their specific use case or domain.
     relevant_phrases = args.relevant_phrases
-    
+
     my_messages = [
         {
-            "role": "system", 
+            "role": "system",
             "content": (
                 "You are a helpful assistant to help the user rewrite sentences. "
                 "Please fix the grammar errors in the user-provided sentence and make it more readable. "
@@ -63,12 +64,16 @@ def rewrite_content(input_reco):
         {"role": "user", "content": input_reco}
     ]
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=my_messages
-    )
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=my_messages
+        )
+    except Exception as e:
+        print("Error occurred:", e)
 
     return response.choices[0].message.content
+
 
 def recognized_cb(evt: speechsdk.SpeechRecognitionEventArgs):
     """
@@ -83,6 +88,7 @@ def recognized_cb(evt: speechsdk.SpeechRecognitionEventArgs):
 
     print("RAW RECO:", current_sentence)
     print("REWRITE:", rewrite_content(current_sentence))
+
 
 # Connect the speech recognizer to the callback
 speech_recognizer.recognized.connect(recognized_cb)
