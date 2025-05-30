@@ -2,40 +2,18 @@
 
 Video translation client tool and API sample code
 
-## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
-This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
+# Supported OS
+## Windows prerequisite:
+   Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
+   
+   Run tool: VideoTranslationSample.exe [verb] [arguments]
 
-- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
-- In extension's panel, click `View Samples` and download this sample from sample gallery.
-- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
-  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select an **eastus** regional speech resource. (Video translation currently only supports Azure Speech resources in the **eastus** region.) (one-time setup).
-  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
-  - `Azure AI Speech Toolkit: Build the Sample App` to compile the code.
-  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
+## Linux prerequisite:
+   Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-      Upload an input video to Azure Blob Storage and copy the Blob SAS URL. Paste the Azure Blob URL when the run task terminal ask for it. Interactively enter other arguments in the run task terminal. The `Azure AI Speech Toolkit: Run the Sample App` command will run in mode `CreateTranslationAndIterationAndWaitUntilTerminated`:
+   Run tool: dotnet VideoTranslationSample.dll [verb] [arguments]
 
-      ```
-      dotnet VideoTranslationSample/VideoTranslationSample/bin/Debug/net7.0/Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview.dll -mode CreateTranslationAndIterationAndWaitUntilTerminated -apiVersion 2024-05-20-preview -subscriptionKey <YourSubscriptionKey> -region <YourSubscriptionRegion> -videoFileAzureBlobUrl <YourVideoFileAzureBlobSASUrl> -sourceLocale <YourVideoLocale> -targetLocale <OutputVideoLocale> -voiceKind <TTSSynthesisVoiceKind> -translationId <YourTranslationIdString> -iterationId <YourIterationIdString>
-      ```
-      
-      Check more modes and arguments usage in [Command line sample](#Command-line-sample) and [Command line tool arguments](#Command-line-tool-arguments) sections. Try them out in new terminal.
-
-## Option 2: Manual Setup and Run (Advanced)
-Follow these steps if you prefer not to use VS Code.
-
-### Supported OS:
-- Windows: 
-   - Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
-   - Run tool: `VideoTranslationSample.exe [verb] [arguments]`
-- Linux:
-   - Install [dotnet 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
-   - Run tool: `dotnet VideoTranslationSample.dll [verb] [arguments]`
-
-### Solution:
-   [VideoTranslationApiSampleCode.sln](VideoTranslationSample.sln)
-
-## Work Flow
+# Work Flow
 
    1. Upload video file to Azure storage blob, and then create translation and run first iteration with below command:
 
@@ -47,6 +25,8 @@ Follow these steps if you prefer not to use VS Code.
    3. Upload modified metadata json webvtt file to Azure storage blob, and then create another iteration with below command:
    > VideoTranslationSample createIterationAndWaitUntilTerminated --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --translationId [TranslationId] -iterationId [IterationId]
 
+# Solution:
+   [VideoTranslationApiSampleCode.sln](VideoTranslationSample.sln)
 
 ## Authentication
 There are 4 options for authentication: 1. speech resource key, 2. User account, 3. managed identity.
@@ -60,7 +40,7 @@ Run the tool with argument:
 ### 2. System-assigned managed identity
    1. Assing [System-Assigned Managed Identity] or [Your Azure Resource Running The Tool] to the [speech resource] with role [Cognitive Services Speech Contributor].
 
-   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
+   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
 
    3. Run the tool in [Your Azure Resoruce].
 
@@ -71,7 +51,7 @@ Run the tool with argument:
 ### 3. User-assigned managed identity
    1. Assing [User-Assigned Managed Identity] to the [speech resource] with role [Cognitive Services Speech Contributor].
 
-   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
+   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
 
    3. Run the tool in [Your Azure Resoruce].
 
@@ -84,7 +64,7 @@ For using user account(default credential) need below steps:
 
    1. Assing [your account] to the [speech resource] with role [Cognitive Services Speech Contributor].
 
-   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
+   2. [Enable custom domain for the speech resource](https://learn.microsoft.com/azure/ai-services/speech-service/how-to-configure-azure-ad-auth?tabs=portal&pivots=programming-language-csharp#create-a-custom-domain-name), then you will get custom domain url like this: https://[YourCustomDomainName].cognitiveservices.azure.com/
 
    3. Run the tool with your account.
 
@@ -92,24 +72,20 @@ For using user account(default credential) need below steps:
    
       --customDomainName [YourCustomDomainName]
 
-## API sample:
+# API sample:
 
-### Usage:
+## Usage:
    For RESTful API usage reference below API core library class.
 
-### RESTful API core library:
+## RESTful API core library:
    Translation API core library: [TranslationClient.cs](VideoTranslationLib.Public/VideoTranslationLib.ReferenceFiles/HttpClient/TranslationClient.cs)
 
    Iteration API core library: [IterationClient.cs](VideoTranslationLib.Public/VideoTranslationLib.ReferenceFiles/HttpClient/IterationClient.cs)
 
    Operation API core library: [OperationClient.cs](VideoTranslationLib.Public/VideoTranslationLib.ReferenceFiles/HttpClient/OperationClient.cs)
 
-## For project CommonLib
+# For project CommonLib
    Do not upgrade Flurl to version 4.0 because it does not support NewtonJson for ReceiveJson.
-
-
-
-## Command Line Usage
 
 # Command Line Usage
    | Description | Command line arguments |
@@ -123,7 +99,7 @@ For using user account(default credential) need below steps:
    | Query the iterations. | queryIterations --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --translationId [TranslationId] |
    | Query the iteration by ID. | queryIteration --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --translationId [TranslationId] --iterationId [IterationId] |
 
-## Command line tool arguments
+# Command line tool arguments
    | Argument | Is Required | Supported Values Sample | Description |
    | -------- | -------- | ---------------- | ----------- |
    | --region  | True | eastus | Provide the region of the API request. |
@@ -141,27 +117,43 @@ For using user account(default credential) need below steps:
    | --speakerCount | False | 1 | Please specify the speaker count of the video. |
    | --exportSubtitleInVideo | False | False | Please indicate whether to export subtitles in the video. |
 
-## Argument definitions
-### Supported regions
+## Below arguments are only available after API version: 2025-05-20
+| Argument | Description |
+| --- | --- |
+| --source_locale | Support optional for auto detect |
+| --audio_file_blob_url | Support translate audio file |  
+| --tts_custom_lexicon_file_url | Translate with TTS custom lexicon for TTS synthesis, provide the custom lexicon file with URL, ttsCustomLexiconFileUrl and ttsCustomLexiconFileIdInAudioContentCreation are conflict, only one of them are required. |
+|  --tts_custom_lexicon_file_id_in_audio_content_creation | Translate with TTS custom lexicon for TTS synthesis, provide the custom lexicon file with file ID in Audio Content Creation, ttsCustomLexiconFileUrl and ttsCustomLexiconFileIdInAudioContentCreation are conflict, only one of them are required. |
+| --enable_video_speed_adjustment | This parameter allows for the adjustment of video playback speed to ensure better alignment with translated audio. When enabled, the API can slow down or speed up the video to match the timing of the translated audio, providing a more synchronized and seamless viewing experience. |
+| --enable_ocr_correction_from_subtitle | Indicate whether allow the API to correct the speech recognition (SR) results using the subtitles from the original video file. By leveraging the existing subtitles, the API can enhance the accuracy of the transcribed text, ensuring that the final output is more precise and reliable. |
+| --export_target_locale_advanced_subtitle_file | This parameter, when enabled, allows the API to export subtitles in the Advanced SubStation Alpha format. The subtitle file can specify font styles and colors, which helps in addressing character display issues in certain target locales such as Arabic (Ar), Japanese (Ja), Korean (Ko), and Chinese (Ch). By using this parameter, you can ensure that the subtitles are visually appealing and correctly rendered across different languages and regions. |
+| --subtitle_primary_color | This parameter specifies the primary color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal. |
+| --subtitle_outline_color | This parameter specifies the outline color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal. |
+| --subtitle_font_size | This parameter specifies the font size of subtitles in the video translation output. |
+
+# Argument definitions
+## Supported regions
    https://learn.microsoft.com/azure/ai-services/speech-service/regions
 
    Use region identifier for the region argument.
 
-### Supported API versions:
+## Supported API versions:
 * 2024-05-20-preview
 
-### Supported VoiceKind
+## Supported VoiceKind
 * PlatformVoice
 * PersonalVoice
 
-## Best practice
-### Escape char for URL arguments in Windows
+# Best practice
+## Escape char for URL arguments in Windows
    For arguments:  --videoFileAzureBlobUrl and --webvttFileAzureBlobUrl
    If you run a client sample tool in a Windows shell and there is an & in the URL arguments (for example, a SAS token in an Azure blob URL), the & needs to be converted to ^& to escape it.
 
    For example, if the actual URL for the argument videoFileAzureBlobUrl is https://a/b?c&d, then when you run the command in the Windows shell, you need to run the command like this:
 
-### How to retry?
+      --videoFileAzureBlobUrl "https://a/b?c^&d"
+
+## How to retry?
    If you initiate a command to create a translation or iteration job and subsequently restart Windows, the job will continue to run on the server side. To check the status of the translation/iteration job, you can use the query translation/iteration tool command or the API, providing the specific translation/iteration ID.
 
 # Trouble shooting:
@@ -188,5 +180,4 @@ Please check you have granted [your resoruce] to the [Cognitive Services Speech 
 
 Please proivde user-assigned managed identity when run the command.
 
-   --managedIdentityClientId [YourUserAssignedManagedIdentityClientId]## How to retry?
-   If you initiate a command to create a translation or iteration job and subsequently restart Windows, the job will continue to run on the server side. To check the status of the translation/iteration job, you can use the query translation/iteration tool command or the API, providing the specific translation/iteration ID.
+   --managedIdentityClientId [YourUserAssignedManagedIdentityClientId]

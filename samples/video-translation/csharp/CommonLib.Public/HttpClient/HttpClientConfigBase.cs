@@ -18,26 +18,16 @@ public abstract class HttpClientConfigBase
 
     public HttpClientConfigBase(
         IRegionConfig regionConfig,
-        string subKey,
-        string customDomainName,
         Guid? managedIdentityClientId)
     {
         ArgumentNullException.ThrowIfNull(regionConfig);
         this.RegionConfig = regionConfig;
-        this.SubscriptionKey = subKey;
-        this.CustomDomainName = customDomainName;
         this.ManagedIdentityClientId = managedIdentityClientId;
     }
 
-    public Url RootAddress
-    {
-        get
-        {
-            return !string.IsNullOrEmpty(this.CustomDomainName) ?
-                new Url($"https://{this.CustomDomainName}.cognitiveservices.azure.com/") :
-                new Url(this.RegionConfig.EndpointUrl);
-        }
-    }
+    public virtual Url RootAddress => new Url(this.RegionConfig.EndpointUrl);
+
+    public virtual bool UseOAuth => true;
 
     public virtual Uri RootUrl
     {
@@ -60,7 +50,7 @@ public abstract class HttpClientConfigBase
         }
     }
 
-    public async Task<string> AcquireOAuthTokenAsync()
+    public virtual async Task<string> AcquireOAuthTokenAsync()
     {
         if (string.IsNullOrEmpty(this.oAuthToken))
         {
@@ -88,10 +78,6 @@ public abstract class HttpClientConfigBase
     public abstract string RouteBase { get; }
 
     public IRegionConfig RegionConfig { get; set; }
-
-    public string SubscriptionKey { get; set; }
-
-    public string CustomDomainName { get; set; }
 
     public Guid? ManagedIdentityClientId { get; set; }
 }

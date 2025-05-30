@@ -9,7 +9,7 @@ using Flurl;
 using Flurl.Http;
 using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Util;
-using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 using System;
 using System.Linq;
 using System.Net;
@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 public class OperationClient : HttpClientBase
 {
-    public OperationClient(HttpClientConfigBase config)
+    public OperationClient(HttpSpeechClientConfigBase config)
         : base(config)
     {
     }
@@ -69,7 +69,7 @@ public class OperationClient : HttpClientBase
     public async Task<IFlurlResponse> GetOperationWithResponseAsync(Uri operationLocation)
     {
         var url = operationLocation
-            .SetQueryParam(CommonPublicConst.Http.ParameterNames.ApiVersion, this.Config.ApiVersion);
+            .SetQueryParam(CommonPublicConst.Http.ParameterNames.ApiVersion, this.SpeechConfig.ApiVersion);
         var request = await this.AuthenticateAsync(url).ConfigureAwait(false);
 
         return await RequestWithRetryAsync(async () =>

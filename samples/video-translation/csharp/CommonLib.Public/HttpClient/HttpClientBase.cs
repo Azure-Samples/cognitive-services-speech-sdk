@@ -4,9 +4,6 @@
 //
 
 namespace Microsoft.SpeechServices.CommonLib.Util;
-
-using Azure.Core;
-using Azure.Identity;
 using Flurl;
 using Flurl.Http;
 using Flurl.Http.Configuration;
@@ -15,25 +12,35 @@ using Microsoft.SpeechServices.CommonLib.Public.Interface;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public;
 using Microsoft.SpeechServices.CustomVoice.TtsLib.TtsUtil;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Polly;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Principal;
 using System.Threading.Tasks;
 
 public abstract class HttpClientBase
 {
     public HttpClientBase(HttpClientConfigBase config)
     {
-        this.Config = config;
+        this.BaseConfig = config;
     }
 
-    protected HttpClientConfigBase Config { get; set; }
+    protected HttpClientConfigBase BaseConfig { get; set; }
+
+    protected HttpSpeechClientConfigBase SpeechConfig
+    {
+        get
+        {
+            if (this.BaseConfig is HttpSpeechClientConfigBase speechConfig)
+            {
+                return speechConfig;
+            }
+
+            return null;
+        }
+    }
 
     public abstract string ControllerName { get; }
 
@@ -43,20 +50,30 @@ public abstract class HttpClientBase
 
     public async Task<IFlurlRequest> AuthenticateAsync(Flurl.Url reqeust)
     {
-        if (!string.IsNullOrEmpty(this.Config.SubscriptionKey))
+        var speechConfig = this.SpeechConfig;
+        if (speechConfig != null)
         {
-            return reqeust.WithHeader(
-                CommonPublicConst.Http.Headers.SubscriptionKey,
-                this.Config.SubscriptionKey);
+            if (!string.IsNullOrEmpty(speechConfig.SubscriptionKey))
+            {
+                return reqeust.WithHeader(
+                    CommonPublicConst.Http.Headers.SubscriptionKey,
+                    speechConfig.SubscriptionKey);
+            }
+            else if (string.IsNullOrEmpty(speechConfig.CustomDomainName))
+            {
+                // OAuth only avaible when custom domain enabled.
+                throw new NotSupportedException($"Please privde either key or custom domain name");
+            }
         }
-        else if (!string.IsNullOrEmpty(this.Config.CustomDomainName))
+
+        if (this.BaseConfig.UseOAuth)
         {
-            var token = await this.Config.AcquireOAuthTokenAsync().ConfigureAwait(false);
+            var token = await this.BaseConfig.AcquireOAuthTokenAsync().ConfigureAwait(false);
             return reqeust.WithOAuthBearerToken(token);
         }
         else
         {
-            throw new NotSupportedException($"Please privde either key or custom domain name");
+            throw new NotSupportedException("Not supported auth");
         }
     }
 
@@ -124,7 +141,7 @@ public abstract class HttpClientBase
     protected async Task<IFlurlRequest> BuildBackendPathVersionRequestBaseAsync(
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
-        var url = this.Config.RootUrl
+        var url = this.BaseConfig.RootUrl
             .AppendPathSegment(this.ControllerName);
         var request = await this.AuthenticateAsync(url).ConfigureAwait(false);
         if (additionalHeaders != null)
@@ -145,7 +162,7 @@ public abstract class HttpClientBase
     protected async Task<IFlurlRequest> BuildRequestBaseAsync(
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
-        var url = this.Config.RootUrl
+        var url = this.BaseConfig.RootUrl
             .AppendPathSegment(this.ControllerName);
         var request = await this.AuthenticateAsync(url).ConfigureAwait(false);
         if (additionalHeaders != null)

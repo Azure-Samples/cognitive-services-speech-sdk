@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 public class IterationClient : HttpClientBase
 {
-    public IterationClient(HttpClientConfigBase config)
+    public IterationClient(HttpSpeechClientConfigBase config)
         : base(config)
     {
     }
@@ -132,7 +132,7 @@ public class IterationClient : HttpClientBase
             throw new InvalidDataException($"Missing header {CommonPublicConst.Http.Headers.OperationLocation} in headers");
         }
 
-        var operationClient = new OperationClient(this.Config);
+        var operationClient = new OperationClient(this.SpeechConfig);
 
         await operationClient.QueryOperationUntilTerminateAsync(new Uri(operationLocation)).ConfigureAwait(false);
 
