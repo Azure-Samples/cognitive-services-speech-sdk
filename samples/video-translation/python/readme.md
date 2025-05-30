@@ -43,6 +43,11 @@
 ## Usage
 Run main.py with command in below pattern:
     python main.py --api-version 2024-05-20-preview --region eastus --sub_key [YourSpeechresourceKey] [SubCommands] [args...]
+## Supported API version
+| API version | Description |
+| --- | --- |
+| 2024-05-20-preview | Released public preview version |
+| 2025-05-20 | This is public GA version which will be available after 2025-06-15 |
 
 ## Global parameters
 | Argument name | Description | 
@@ -105,3 +110,18 @@ Video translation client is defined as class VideoTranslationClient in file [vid
 Reference function handleCreateTranslationAndIterationAndWaitUntilTerminated in [main.py](main.py)
 
 
+# Arguments usage
+
+Below arguments are only available after API version: 2025-05-20
+| Argument | Description |
+| --- | --- |
+| --source_locale | Support optional for auto detect |
+| --audio_file_blob_url | Support translate audio file |  
+| --tts_custom_lexicon_file_url | Translate with TTS custom lexicon for TTS synthesis, provide the custom lexicon file with URL, ttsCustomLexiconFileUrl and ttsCustomLexiconFileIdInAudioContentCreation are conflict, only one of them are required. |
+|  --tts_custom_lexicon_file_id_in_audio_content_creation | Translate with TTS custom lexicon for TTS synthesis, provide the custom lexicon file with file ID in Audio Content Creation, ttsCustomLexiconFileUrl and ttsCustomLexiconFileIdInAudioContentCreation are conflict, only one of them are required. |
+| --enable_video_speed_adjustment | This parameter allows for the adjustment of video playback speed to ensure better alignment with translated audio. When enabled, the API can slow down or speed up the video to match the timing of the translated audio, providing a more synchronized and seamless viewing experience. |
+| --enable_ocr_correction_from_subtitle | Indicate whether allow the API to correct the speech recognition (SR) results using the subtitles from the original video file. By leveraging the existing subtitles, the API can enhance the accuracy of the transcribed text, ensuring that the final output is more precise and reliable. |
+| --export_target_locale_advanced_subtitle_file | This parameter, when enabled, allows the API to export subtitles in the Advanced SubStation Alpha format. The subtitle file can specify font styles and colors, which helps in addressing character display issues in certain target locales such as Arabic (Ar), Japanese (Ja), Korean (Ko), and Chinese (Ch). By using this parameter, you can ensure that the subtitles are visually appealing and correctly rendered across different languages and regions. |
+| --subtitle_primary_color | This parameter specifies the primary color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal. |
+| --subtitle_outline_color | This parameter specifies the outline color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal. |
+| --subtitle_font_size | This parameter specifies the font size of subtitles in the video translation output. |

@@ -12,4 +12,15 @@ public interface IRegionConfig
     public string RegionIdentifier { get; }
 
     public Uri EndpointUrl { get; }
+
+    public bool IsLocal
+    {
+        get
+        {
+            return string.Equals(
+                "local",
+                this.RegionIdentifier,
+                StringComparison.OrdinalIgnoreCase);
+        }
+    }
 }

@@ -6,9 +6,10 @@
 namespace Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview;
 
 using CommandLine;
+using Microsoft.SpeechServices.Common.Client.Enums.VideoTranslation;
 using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Public.Interface;
-using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 using Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 using Newtonsoft.Json;
 using System;
@@ -62,7 +63,9 @@ internal class Program
 
         var httpConfig = new VideoTranslationPublicPreviewHttpClientConfig(
             regionConfig: regionConfig,
-            subKey: baseOptions.SubscriptionKey)
+            subKey: baseOptions.SubscriptionKey,
+            customDomainName: baseOptions.customDomainName,
+            managedIdentityClientId: baseOptions.ManagedIdentityClientId == Guid.Empty ? null : baseOptions.ManagedIdentityClientId)
         {
             ApiVersion = string.IsNullOrEmpty(baseOptions.ApiVersion) ?
                 CommonPublicConst.ApiVersions.ApiVersion20240520Preview : baseOptions.ApiVersion,
@@ -95,10 +98,8 @@ internal class Program
                         },
                     };
 
-                    var operationId = Guid.NewGuid().ToString();
-                    (translation, var headers) = await translationClient.CreateTranslationAsync(
-                        translation: translation,
-                        operationId: operationId).ConfigureAwait(false);
+                    translation = await translationClient.CreateTranslationAndWaitUntilTerminatedAsync(
+                        translation: translation).ConfigureAwait(false);
 
                     Console.WriteLine();
                     Console.WriteLine("Created translation:");
@@ -150,11 +151,18 @@ internal class Program
                             SpeakerCount = options.SpeakerCount,
                             SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
                             ExportSubtitleInVideo = options.ExportSubtitleInVideo,
-                            WebvttFile = options.WebvttFileAzureBlobUrl == null ? null : new WebvttFile()
-                            {
-                                Kind = options.WebvttFileKind ?? WebvttFileKind.TargetLocaleSubtitle,
-                                Url = options.WebvttFileAzureBlobUrl,
-                            }
+                            WebvttFile = options.WebvttFile,
+                            TtsCustomLexiconFileIdInAudioContentCreation = options.TtsCustomLexiconFileIdInAudioContentCreation == Guid.Empty ?
+                                null : options.TtsCustomLexiconFileIdInAudioContentCreation,
+                            TtsCustomLexiconFileUrl = options.TtsCustomLexiconFileUrl,
+                            EnableVideoSpeedAdjustment = options.EnableVideoSpeedAdjustment ? true : null,
+                            EnableOcrCorrectionFromSubtitle = options.EnableOcrCorrectionFromSubtitle ? true : null,
+                            ExportTargetLocaleAdvancedSubtitleFile = options.ExportTargetLocaleAdvancedSubtitleFile ? true : null,
+                            SubtitlePrimaryColor = options.SubtitlePrimaryRgbaColor,
+                            SubtitleOutlineColor = options.SubtitleOutlineRgbaColor,
+                            EnableEmotionalPlatformVoice = options.EnableEmotionalPlatformVoice ==
+                                EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
+                            SubtitleFontSize = options.SubtitleFontSize == 0 ? null : options.SubtitleFontSize,
                         }
                     };
 
@@ -201,9 +209,22 @@ internal class Program
                             ExportSubtitleInVideo = options.ExportSubtitleInVideo,
                             WebvttFile = options.WebvttFileAzureBlobUrl == null ? null : new WebvttFile()
                             {
-                                Kind = options.WebvttFileKind ?? WebvttFileKind.TargetLocaleSubtitle,
+                                Kind = options.WebvttFileKind == WebvttFileKind.None ?
+                                    throw new ArgumentException($"Please specify {nameof(options.WebvttFileKind)}") :
+                                    options.WebvttFileKind,
                                 Url = options.WebvttFileAzureBlobUrl,
-                            }
+                            },
+                            TtsCustomLexiconFileUrl = options.TtsCustomLexiconFileUrl,
+                            TtsCustomLexiconFileIdInAudioContentCreation = options.TtsCustomLexiconFileIdInAudioContentCreation == Guid.Empty ?
+                                null : options.TtsCustomLexiconFileIdInAudioContentCreation,
+                            EnableVideoSpeedAdjustment = options.EnableVideoSpeedAdjustment ? true : null,
+                            EnableOcrCorrectionFromSubtitle = options.EnableOcrCorrectionFromSubtitle ? true : null,
+                            ExportTargetLocaleAdvancedSubtitleFile = options.ExportTargetLocaleAdvancedSubtitleFile ? true : null,
+                            SubtitlePrimaryColor = options.SubtitlePrimaryRgbaColor,
+                            SubtitleOutlineColor = options.SubtitleOutlineRgbaColor,
+                            SubtitleFontSize = options.SubtitleFontSize,
+                            EnableEmotionalPlatformVoice = options.EnableEmotionalPlatformVoice ==
+                                EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
                         }
                     };
 

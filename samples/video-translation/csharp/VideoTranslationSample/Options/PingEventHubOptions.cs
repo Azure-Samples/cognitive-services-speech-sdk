@@ -7,10 +7,8 @@ namespace Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 
 using CommandLine;
 
-[Verb("queryIterations", HelpText = "Query iterations.")]
-public class QueryIterationsOptions : BaseOptions
+[Verb("pingEventHub", HelpText = "Ping EventHub with a predefined simple event.")]
+public class PingEventHubOptions : BaseOptions
 {
-    [Option("translationId", Required = true, HelpText = "Specify translation ID.")]
-    public string TranslationId { get; set; }
 }
 
