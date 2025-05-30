@@ -6,9 +6,10 @@
 namespace Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview;
 
 using CommandLine;
+using Microsoft.SpeechServices.Common.Client.Enums.VideoTranslation;
 using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Public.Interface;
-using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 using Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 using Newtonsoft.Json;
 using System;
@@ -151,6 +152,17 @@ internal class Program
                             SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
                             ExportSubtitleInVideo = options.ExportSubtitleInVideo,
                             WebvttFile = options.WebvttFile,
+                            TtsCustomLexiconFileIdInAudioContentCreation = options.TtsCustomLexiconFileIdInAudioContentCreation == Guid.Empty ?
+                                null : options.TtsCustomLexiconFileIdInAudioContentCreation,
+                            TtsCustomLexiconFileUrl = options.TtsCustomLexiconFileUrl,
+                            EnableVideoSpeedAdjustment = options.EnableVideoSpeedAdjustment ? true : null,
+                            EnableOcrCorrectionFromSubtitle = options.EnableOcrCorrectionFromSubtitle ? true : null,
+                            ExportTargetLocaleAdvancedSubtitleFile = options.ExportTargetLocaleAdvancedSubtitleFile ? true : null,
+                            SubtitlePrimaryColor = options.SubtitlePrimaryRgbaColor,
+                            SubtitleOutlineColor = options.SubtitleOutlineRgbaColor,
+                            EnableEmotionalPlatformVoice = options.EnableEmotionalPlatformVoice ==
+                                EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
+                            SubtitleFontSize = options.SubtitleFontSize == 0 ? null : options.SubtitleFontSize,
                         }
                     };
 
@@ -201,7 +213,18 @@ internal class Program
                                     throw new ArgumentException($"Please specify {nameof(options.WebvttFileKind)}") :
                                     options.WebvttFileKind,
                                 Url = options.WebvttFileAzureBlobUrl,
-                            }
+                            },
+                            TtsCustomLexiconFileUrl = options.TtsCustomLexiconFileUrl,
+                            TtsCustomLexiconFileIdInAudioContentCreation = options.TtsCustomLexiconFileIdInAudioContentCreation == Guid.Empty ?
+                                null : options.TtsCustomLexiconFileIdInAudioContentCreation,
+                            EnableVideoSpeedAdjustment = options.EnableVideoSpeedAdjustment ? true : null,
+                            EnableOcrCorrectionFromSubtitle = options.EnableOcrCorrectionFromSubtitle ? true : null,
+                            ExportTargetLocaleAdvancedSubtitleFile = options.ExportTargetLocaleAdvancedSubtitleFile ? true : null,
+                            SubtitlePrimaryColor = options.SubtitlePrimaryRgbaColor,
+                            SubtitleOutlineColor = options.SubtitleOutlineRgbaColor,
+                            SubtitleFontSize = options.SubtitleFontSize,
+                            EnableEmotionalPlatformVoice = options.EnableEmotionalPlatformVoice ==
+                                EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
                         }
                     };
 

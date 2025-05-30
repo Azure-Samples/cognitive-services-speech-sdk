@@ -6,11 +6,9 @@
 namespace Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 
 using CommandLine;
-using System;
-using System.Globalization;
 
-[Verb("createTranslation", HelpText = "Create translation.")]
-public partial class CreateTranslationOptions : CreateTranslationBaseOptions
+[Verb("pingEventHub", HelpText = "Ping EventHub with a predefined simple event.")]
+public class PingEventHubOptions : BaseOptions
 {
 }
 

@@ -10,7 +10,7 @@ using Microsoft.SpeechServices.CommonLib.Util;
 using System;
 
 public class VideoTranslationPublicPreviewHttpClientConfig :
-    HttpClientConfigBase
+    HttpSpeechClientConfigBase
 {
     public VideoTranslationPublicPreviewHttpClientConfig(
         IRegionConfig regionConfig,

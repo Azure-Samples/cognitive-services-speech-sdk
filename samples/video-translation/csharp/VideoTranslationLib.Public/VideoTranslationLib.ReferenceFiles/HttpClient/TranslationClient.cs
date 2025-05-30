@@ -10,7 +10,7 @@ using Flurl.Http;
 using Flurl.Util;
 using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Util;
-using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 using Microsoft.SpeechServices.DataContracts;
 using Newtonsoft.Json;
 using System;
@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 public class TranslationClient : HttpClientBase
 {
-    public TranslationClient(HttpClientConfigBase config)
+    public TranslationClient(HttpSpeechClientConfigBase config)
         : base(config)
     {
     }
@@ -148,7 +148,7 @@ public class TranslationClient : HttpClientBase
             Formatting.Indented,
             CommonPublicConst.Json.WriterSettings));
 
-        var iterationClient = new IterationClient(this.Config);
+        var iterationClient = new IterationClient(this.SpeechConfig);
         var iterationResponse = await iterationClient.CreateIterationAndWaitUntilTerminatedAsync(
             translationId: transaltionResponse.Id,
             iteration: iteration,
@@ -174,7 +174,7 @@ public class TranslationClient : HttpClientBase
             throw new InvalidDataException($"Missing header {CommonPublicConst.Http.Headers.OperationLocation} in headers");
         }
 
-        var operationClient = new OperationClient(this.Config);
+        var operationClient = new OperationClient(this.SpeechConfig);
 
         await operationClient.QueryOperationUntilTerminateAsync(new Uri(operationLocation)).ConfigureAwait(false);
 
