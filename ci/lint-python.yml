@@ -14,9 +14,10 @@ steps:
     onlyAddExtraIndex: false
 - task: UsePythonVersion@0
   inputs:
-    versionSpec: 3.8
+    versionSpec: 3.10
     addToPath: true
     architecture: x64
+  displayName: Use Python 3.10
 - bash: |
     set -ex
     python -m pip install flake8
