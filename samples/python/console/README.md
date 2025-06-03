@@ -19,6 +19,10 @@ This sample demonstrates various forms of speech recognition, intent recognition
   ```sh
   pip install scipy
   ```
+* To authenticate using an AAD token credential, install the azure-identity package in your Python interpreter by executing the command
+  ```sh
+  pip install azure-identity
+  ```
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * To tailor the sample to your configuration, use search and replace across the whole sample directory to update the following strings:
 

@@ -7,6 +7,7 @@ from azuretts import Client as AzureTTSClient
 
 chat_client = ChatClient()
 
+
 class BotResponse:
     def __init__(
         self, human_turn, context, inf_url, inf_key, eleven_key, interrupted=False

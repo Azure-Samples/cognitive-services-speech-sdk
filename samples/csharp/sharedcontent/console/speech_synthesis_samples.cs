@@ -16,7 +16,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisToSpeakerAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
@@ -61,7 +61,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisWithLanguageAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Sets the synthesis language.
@@ -111,7 +111,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisWithVoiceAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Sets the voice name.
@@ -163,7 +163,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisUsingCustomVoiceAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
             // Replace with the endpoint id of your Custom Voice model.
             config.EndpointId = "YourEndpointId";
@@ -211,7 +211,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisToWaveFileAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
@@ -259,7 +259,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisToMp3FileAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
@@ -313,7 +313,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisFileToMp3FileAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
@@ -373,7 +373,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisToPullAudioOutputStreamAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates an audio out stream.
@@ -435,7 +435,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisToPushAudioOutputStreamAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates an instance of a customer class inherited from PushAudioOutputStreamCallback
@@ -489,7 +489,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisToResultAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
@@ -537,7 +537,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisToAudioDataStreamAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
@@ -607,7 +607,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisEventsAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
@@ -671,7 +671,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisWordBoundaryEventAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
@@ -727,7 +727,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisVisemeEventAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
@@ -783,7 +783,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisBookmarkEventAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
@@ -832,7 +832,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisWithAutoDetectSourceLanguageAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
@@ -883,7 +883,7 @@ namespace MicrosoftSpeechSDKSamples
         public static async Task SynthesisGetAvailableVoicesAsync()
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 

@@ -15,9 +15,11 @@ AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 if not AZURE_OPENAI_ENDPOINT:
     raise ValueError("AZURE_OPENAI_ENDPOINT must be set")
 
+
 class ResponseWithSpeed(BaseModel):
     read_speed: str
     content: str
+
 
 class ChatClient:
     def __init__(self):
@@ -38,7 +40,14 @@ class ChatClient:
 
     def chat(self, human_input: str) -> str:
         system_prompt = [
-            "You are a speech chat assistant. Your personality is: The AI is engaging, informative, and empathetic. The AI is curious and is always interested in learning more about the human. The AI is calm and polite. You are great at asking questions and is a sensitive listener. You are relentlessly curious, but always polite and never probes too much. You are pretty smart but humble, and tries to keep things informal. Overall, You are pretty Zen. Though Pi might be opinionated and disagree with you, it almost never gets riled up. You are also: Relaxed, informal, chatty. Fun, and sometimes funny. Occasionally cheeky, and light-hearted. Do not use markdown format, plain text is preferred.",
+            "You are a speech chat assistant. Your personality is: The AI is engaging, informative, "
+            "and empathetic. The AI is curious and is always interested in learning more about the human. "
+            "The AI is calm and polite. You are great at asking questions and is a sensitive listener. "
+            "You are relentlessly curious, but always polite and never probes too much. You are pretty smart "
+            "but humble, and tries to keep things informal. Overall, You are pretty Zen. Though Pi might be "
+            "opinionated and disagree with you, it almost never gets riled up. You are also: Relaxed, informal, "
+            "chatty. Fun, and sometimes funny. Occasionally cheeky, and light-hearted. Do not use markdown format, "
+            "plain text is preferred.",
         ]
 
         human_message = ChatCompletionUserMessageParam(content=human_input, role="user", name="Rob")
@@ -64,8 +73,17 @@ class ChatClient:
 
     def chat_with_speed(self, human_input: str) -> ResponseWithSpeed:
         system_prompt = [
-            "You are a speech chat assistant. Your personality is: The AI is engaging, informative, and empathetic. The AI is curious and is always interested in learning more about the human. The AI is calm and polite. You are great at asking questions and is a sensitive listener. You are relentlessly curious, but always polite and never probes too much. You are pretty smart but humble, and tries to keep things informal. Overall, You are pretty Zen. Though Pi might be opinionated and disagree with you, it almost never gets riled up. You are also: Relaxed, informal, chatty. Fun, and sometimes funny. Occasionally cheeky, and light-hearted. Do not use markdown format, plain text is preferred.",
-            "You need to output the reading speed based on the user request and history, in JSON format. The read speed can be: x-slow, slow, medium, fast or x-fast. Example: {\"read_speed\": \"medium\", content: \"The capital of France is Paris.\"}",
+            "You are a speech chat assistant. Your personality is: The AI is engaging, informative, "
+            "and empathetic. The AI is curious and is always interested in learning more about the human. "
+            "The AI is calm and polite. You are great at asking questions and is a sensitive listener. "
+            "You are relentlessly curious, but always polite and never probes too much. You are pretty smart "
+            "but humble, and tries to keep things informal. Overall, You are pretty Zen. Though Pi might be "
+            "opinionated and disagree with you, it almost never gets riled up. You are also: Relaxed, informal, "
+            "chatty. Fun, and sometimes funny. Occasionally cheeky, and light-hearted. Do not use markdown format, "
+            "plain text is preferred.",
+            "You need to output the reading speed based on the user request and history, in JSON format. "
+            "The read speed can be: x-slow, slow, medium, fast or x-fast. "
+            "Example: {\"read_speed\": \"medium\", content: \"The capital of France is Paris.\"}",
         ]
 
         human_message = ChatCompletionUserMessageParam(content=human_input, role="user", name="Rob")
@@ -83,7 +101,7 @@ class ChatClient:
             frequency_penalty=0,
             presence_penalty=0,
             stop=None,
-            response_format={ "type": "json_object" },
+            response_format={"type": "json_object"},
         )
 
         self.historical_messages.append(completion.choices[0].message)

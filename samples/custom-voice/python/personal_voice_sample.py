@@ -4,15 +4,12 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-import json
-import requests
-from time import sleep
-import os
 import logging
 try:
     import customvoice
 except ImportError:
-    print('Pleae copy folder https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/custom-voice/python/customvoice and keep the same folder structure as github.' )
+    print('Pleae copy folder https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/'
+          'custom-voice/python/customvoice and keep the same folder structure as github.')
     quit()
 import azure.cognitiveservices.speech as speechsdk
 
@@ -38,7 +35,8 @@ def create_personal_voice(project_id: str,
         print('Create personal voice failed. personal voice id: %s' % personal_voice.id)
         raise Exception
     elif personal_voice.status == customvoice.Status.Succeeded:
-        print('Create personal voice succeeded. personal voice id: %s, speaker profile id: %s' % (personal_voice.id, personal_voice.speaker_profile_id))
+        print('Create personal voice succeeded. personal voice id: %s, speaker profile id: %s' %
+              (personal_voice.id, personal_voice.speaker_profile_id))
     return personal_voice.speaker_profile_id
 
 
@@ -48,7 +46,6 @@ def speech_synthesis_to_wave_file(text: str, output_file_path: str, speaker_prof
     speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm)
     file_config = speechsdk.audio.AudioOutputConfig(filename=output_file_path)
     speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=file_config)
-
 
     # use PhoenixLatestNeural if you want word boundary event.  We will support events on DragonLatestNeural in the future.
     ssml = "<speak version='1.0' xml:lang='en-US' xmlns='http://www.w3.org/2001/10/synthesis' " \
@@ -61,7 +58,9 @@ def speech_synthesis_to_wave_file(text: str, output_file_path: str, speaker_prof
            "</voice></speak> " % (speaker_profile_id, text)
 
     def word_boundary(evt):
-        print(f"Word Boundary: Text='{evt.text}', Audio offset={evt.audio_offset / 10000}ms, Duration={evt.duration / 10000}ms, text={evt.text}")
+        word_info = f"Word Boundary: Text='{evt.text}', Audio offset={evt.audio_offset / 10000}ms"
+        duration_info = f"Duration={evt.duration / 10000}ms, text={evt.text}"
+        print(f"{word_info}, {duration_info}")
 
     speech_synthesizer.synthesis_word_boundary.connect(word_boundary)
     result = speech_synthesizer.speak_ssml_async(ssml).get()
@@ -84,7 +83,7 @@ def clean_up(project_id: str, consent_id: str, personal_voice_id: str):
     customvoice.Project.delete(config, project_id)
 
 
-region = 'eastus' # eastus, westeurope, southeastasia, westus2, eastasia
+region = 'eastus'  # eastus, westeurope, southeastasia, westus2, eastasia
 key = 'your speech key here'
 
 
@@ -99,26 +98,25 @@ config = customvoice.Config(key, region, logger)
 
 project_id = 'personal-voice-project-1'
 consent_id = 'personal-voice-consent-1'
-personal_voice_id  = 'personal-voice-1'
+personal_voice_id = 'personal-voice-1'
 
 try:
     # step 1: create personal voice
     # Need consent file and audio file to create personal vocie.
     # This is consent file template.
-    # I [voice talent name] am aware that recordings of my voice will be used by [company name] to create and use a synthetic version of my voice.
-    # You can find sample consent file here
-    # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/VoiceTalentVerbalStatement.wav
+    # I [voice talent name] am aware that recordings of my voice will be used by [company name] to create and use a
+    # synthetic version of my voice.
+    # You can find sample consent file here in the GitHub repository
     consent_file_path = r'TestData\\VoiceTalentVerbalStatement.wav'
     voice_talent_name = 'Sample Voice Actor'
     company_name = 'Contoso'
 
     # Need 5 - 90 seconds audio file.
-    # You can find sample audio file here.
-    # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/SampleAudios.zip
+    # You can find sample audio file here in the GitHub repository
     audio_folder = r'TestData\\voice\\'
-    speaker_profile_id = create_personal_voice(project_id, 
-                                            consent_id, consent_file_path, voice_talent_name, company_name,
-                                            personal_voice_id, audio_folder)
+    speaker_profile_id = create_personal_voice(project_id,
+                                               consent_id, consent_file_path, voice_talent_name, company_name,
+                                               personal_voice_id, audio_folder)
 
     # step 2: synthesis wave
     text = 'This is zero shot voice. Test 2.'
@@ -129,4 +127,3 @@ except Exception as e:
 finally:
     # Optional step 3: clean up, if you don't need this voice to synthesis more content.
     clean_up(project_id, consent_id, personal_voice_id)
-

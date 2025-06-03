@@ -3,6 +3,8 @@
 // Licensed under the MIT license. See https://aka.ms/csspeech/license for the full license information.
 //
 
+#include "stdafx.h"
+
 #include <array>
 #include <string>
 
@@ -105,6 +107,25 @@ size_t CountNumCharacters(const std::array<char, 4>& inputArray)
     return result;
 }
 
+size_t GetBytesToNextCharacter(const char* input)
+{
+    if (input == nullptr || *input == '\0')
+    {
+        return 0;
+    }
+    else if ((unsigned char)*input > 127)
+    {
+        std::array<char, 4> multiByteCharacterArray = { 0,0,0,0 };
+        auto byteCount = Utils::ExtractMultibyteUtf8Character(input, multiByteCharacterArray);
+
+        return byteCount;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
 size_t RemoveLastToken(std::string& input, const OrthographyInformation& orthography)
 {
     size_t charactersRemoved = 0;
@@ -113,18 +134,18 @@ size_t RemoveLastToken(std::string& input, const OrthographyInformation& orthogr
     {
         // Find out how many bytes in the last UTF8 character and remove that many.
         auto done = false;
-        while (!done)
+        while (!done && !input.empty())
         {
             // Check if this is ascii or the first byte of a multi-byte character.
             if ((unsigned char)input.back() < 128 ||
-                (unsigned char)input.back() > 192)
+                (unsigned char)input.back() >= 192)  // FIXED: Was > 192 which missed 192 exactly
             {
                 input.pop_back();
                 charactersRemoved++;
                 done = true;
             }
             // Check if this is part of a multi-byte character.
-            else if ((unsigned char)input.back() >= 128 && (unsigned char)input.back() <= 192)
+            else if ((unsigned char)input.back() >= 128 && (unsigned char)input.back() < 192)  // FIXED: Was <= 192
             {
                 input.pop_back();
                 charactersRemoved++;
@@ -135,8 +156,15 @@ size_t RemoveLastToken(std::string& input, const OrthographyInformation& orthogr
     {
         // npos is passed as the second parameter to say "search the whole string".
         auto lastOf = input.rfind(orthography.WordBoundary.data(), std::string::npos, CountNumCharacters(orthography.WordBoundary));
-        charactersRemoved = input.length() - lastOf;
-        input.erase(lastOf, charactersRemoved);
+        if (lastOf != std::string::npos) {
+            charactersRemoved = input.length() - lastOf;
+            input.erase(lastOf, charactersRemoved);
+        }
+        // Handle case when WordBoundary is not found
+        else if (!input.empty()) {
+            charactersRemoved = input.length();
+            input.clear();
+        }
     }
 
     return charactersRemoved;
@@ -195,6 +223,10 @@ std::string GrabNextWhitespaceWord(const char** input, const OrthographyInformat
 {
     std::string nextWord = "";
 
+    if (input == nullptr || *input == nullptr || **input == '\0') {
+        return "";
+    }
+
     std::array<char, 4> utf8Character = { 0,0,0,0 };
     auto bytes = Utils::ExtractUtf8Character(*input, utf8Character);
     if (bytes == 0 || utf8Character[0] == '\0')
@@ -214,7 +246,9 @@ std::string GrabNextWhitespaceWord(const char** input, const OrthographyInformat
         bytes = Utils::ExtractUtf8Character(*input, utf8Character);
         if (bytes == 0)
         {
-            return "";
+            // If we encounter an invalid UTF-8 sequence, stop processing
+            SPX_TRACE_ERROR("Invalid UTF-8 sequence encountered in GrabNextWhitespaceWord");
+            break;
         }
     }
     return nextWord;
@@ -222,6 +256,11 @@ std::string GrabNextWhitespaceWord(const char** input, const OrthographyInformat
 
 std::string GrabNextNonWhitespaceWord(const char** input)
 {
+    if (input == nullptr || *input == nullptr || **input == '\0')
+    {
+        return "";
+    }
+
     std::array<char, 4> utf8Character = { 0,0,0,0 };
     auto bytes = Utils::ExtractUtf8Character(*input, utf8Character);
     if (bytes == 0)
@@ -231,6 +270,26 @@ std::string GrabNextNonWhitespaceWord(const char** input)
     if (utf8Character[0] != '\0')
     {
         *input += bytes;
+        return std::string(utf8Character.data(), bytes);
+    }
+    return "";
+}
+
+std::string GrabNextNonWhitespaceWord(const char* input)
+{
+    if (input == nullptr || *input == '\0')
+    {
+        return "";
+    }
+
+    std::array<char, 4> utf8Character = { 0,0,0,0 };
+    auto bytes = Utils::ExtractUtf8Character(input, utf8Character);
+    if (bytes == 0)
+    {
+        return "";
+    }
+    if (utf8Character[0] != '\0')
+    {
         return std::string(utf8Character.data(), bytes);
     }
     return "";
