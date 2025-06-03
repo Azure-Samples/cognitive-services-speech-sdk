@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommandLineParser.NS20" Version="2.3.1" />
+    <PackageReference Include="CommandLineParser.NS20" />
   </ItemGroup>
 
   <ItemGroup>

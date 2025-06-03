@@ -1,0 +1,86 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" />
+    <PackageVersion Include="Azure.Identity" Version="1.13.2" />
+    <PackageVersion Include="Azure.Messaging.EventHubs.Processor" Version="5.11.6" />
+    <PackageVersion Include="Azure.Storage.Blobs" Version="12.23.0" />
+    <PackageVersion Include="Bond.Core.CSharp" Version="4.2.1" />
+    <PackageVersion Include="Bond.CSharp" Version="4.2.1" />
+    <PackageVersion Include="Bond.Runtime.CSharp" Version="4.2.1" />
+    <PackageVersion Include="CommandLineParser.NS20" Version="2.3.1" />
+    <PackageVersion Include="coverlet.collector" Version="3.1.2" />
+    <PackageVersion Include="EntityFramework" Version="6.1.3" />
+    <PackageVersion Include="EO.WebBrowser" Version="23.2.34" />
+    <PackageVersion Include="Flurl" Version="3.0.7" />
+    <PackageVersion Include="Flurl.Http" Version="3.2.4" />
+    <PackageVersion Include="Google.Protobuf" Version="4.0.0-rc2" />
+    <PackageVersion Include="Grpc.Core" Version="1.12.0" />
+    <PackageVersion Include="Grpc.Tools" Version="1.12.0" />
+    <PackageVersion Include="HtmlAgilityPack" Version="1.11.61" />
+    <PackageVersion Include="Hyak.Common" Version="1.2.2" />
+    <PackageVersion Include="Json.Net" Version="1.0.33" />
+    <PackageVersion Include="LibGit2Sharp" Version="0.30.0" />
+    <PackageVersion Include="libse" Version="3.6.13" />
+    <PackageVersion Include="Microsoft.Azure.Common" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Azure.Common.Dependencies" Version="1.0.0" />
+    <PackageVersion Include="Microsoft.Azure.KeyVault" Version="1.0.0" />
+    <PackageVersion Include="Microsoft.Azure.KeyVault.Core" Version="1.0.0" />
+    <PackageVersion Include="microsoft.azure.storage.blob" Version="11.2.3" />
+    <PackageVersion Include="Microsoft.Cloud.InstrumentationFramework" Version="3.0.6.79" />
+    <PackageVersion Include="Microsoft.CognitiveServices.Speech" Version="1.40.0" />
+    <PackageVersion Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.29.0" />
+    <PackageVersion Include="Microsoft.Data.Edm" Version="5.8.2" />
+    <PackageVersion Include="Microsoft.Data.OData" Version="5.8.2" />
+    <PackageVersion Include="Microsoft.Data.Services.Client" Version="5.8.2" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="3.19.3" />
+    <PackageVersion Include="Microsoft.Net.Http" Version="2.2.29" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageVersion Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
+    <PackageVersion Include="Microsoft.Rest.ClientRuntime" Version="2.3.13" />
+    <PackageVersion Include="Microsoft.Rest.ClientRuntime.Azure" Version="3.3.10" />
+    <PackageVersion Include="Microsoft.TeamFoundationServer.Client" Version="19.225.1" />
+    <PackageVersion Include="Microsoft.Win32.Primitives" Version="4.3.0" />
+    <PackageVersion Include="Microsoft.WindowsAzure.Management.Compute" Version="13.0.0" />
+    <PackageVersion Include="MicrosoftOfficeCore" Version="15.0.0" />
+    <PackageVersion Include="MS.TTS.NeuralTTS.SsmlParser" Version="8968090.0.0" />
+    <PackageVersion Include="MSTest.TestAdapter" Version="2.2.8" />
+    <PackageVersion Include="MSTest.TestFramework" Version="2.2.8" />
+    <PackageVersion Include="NAudio" Version="2.2.1" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="NWaves" Version="0.9.6" />
+    <PackageVersion Include="Polly" Version="8.2.1" />
+    <PackageVersion Include="Polly.Extensions.Http" Version="3.0.0" />
+    <PackageVersion Include="Selenium.WebDriver" Version="4.10.0" />
+    <PackageVersion Include="Selenium.WebDriver.MicrosoftDriver" Version="17.17134.0" />
+    <PackageVersion Include="SendGrid" Version="9.24.1" />
+    <PackageVersion Include="SubtitlesParser" Version="1.5.1" />
+    <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="4.3.0" />
+    <PackageVersion Include="System.Net.Http" Version="4.3.4" />
+    <PackageVersion Include="System.Private.ServiceModel" Version="4.10.3" />
+    <PackageVersion Include="System.Reactive" Version="4.1.2" />
+    <PackageVersion Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
+    <PackageVersion Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
+    <PackageVersion Include="System.Security.Cryptography.Encoding" Version="4.3.0" />
+    <PackageVersion Include="System.Security.Cryptography.Primitives" Version="4.3.0" />
+    <PackageVersion Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" />
+    <PackageVersion Include="System.Spatial" Version="5.8.2" />
+    <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
+    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.3.0" />
+    <PackageVersion Include="System.ValueTuple" Version="4.4.0" />
+    <PackageVersion Include="VisioForge.DotNet.Core.TRIAL" Version="15.1.12" />
+    <PackageVersion Include="WindowsAzure.ServiceBus" Version="3.4.6" />
+    <PackageVersion Include="WindowsAzure.Storage" Version="8.7.0" />
+    <PackageVersion Include="Xabe.FFmpeg" Version="5.2.6" />
+    <PackageVersion Include="YamlDotNet" Version="15.1.6" />
+  </ItemGroup>
+</Project>
