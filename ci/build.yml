@@ -35,6 +35,7 @@ jobs:
   steps:
   - bash: ./ci/check-git-head.sh
     displayName: Repository checks
+  - template: ./lint-python.yml
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: Component Detection
     condition: >

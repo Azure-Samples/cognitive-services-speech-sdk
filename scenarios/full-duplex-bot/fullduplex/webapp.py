@@ -24,14 +24,13 @@ preview_regions = ["eastus", "southeastasia", "westeurope", "westus2"]
 with open('voices.csv', 'r') as f:
     f.readline()
     reader = csv.reader(f)
-    voice_list ={
+    voice_list = {
         "voices": {
             k: v.strip() for k, v, p in reader if not p or region in preview_regions
         }
     }
 
 print(voice_list)
-
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -41,6 +40,7 @@ async def read_item(request: Request):
     return templates.TemplateResponse(
         name="index.html", context={"ws_url": WEBSOCKET_URL, "request": request}
     )
+
 
 @app.get("/voices", response_class=JSONResponse)
 async def voices(request: Request):

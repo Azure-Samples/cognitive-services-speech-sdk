@@ -345,7 +345,7 @@ def chatting_from_file():
 
         def recognized(evt):
             pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
-            nonlocal recognized_words, prosody_scores, fluency_scores, durations, json_words, display_text, startOffset, endOffset
+            nonlocal recognized_words, json_words, display_text, startOffset, endOffset
             recognized_words += pronunciation_result.words
             fluency_scores.append(pronunciation_result.fluency_score)
             json_result = evt.result.properties.get(speechsdk.PropertyId.SpeechServiceResponse_JsonResult)
@@ -458,8 +458,8 @@ def chatting_from_file():
             "Monotone": [],
         }
         speed_of_speaking_rule = {
-            "a bit slowly": range(150 - 200),
-            "slowly": range(100 - 150),
+            "a bit slowly": range(150 - 200),  # noqa: E226
+            "slowly": range(100 - 150),  # noqa: E226
             "too slowly": range(0, 100)
         }
 
@@ -524,8 +524,8 @@ def chatting_from_file():
                 accuracy_report_path = "output/accuracy_report.wav"
                 for idx, mis_word in enumerate(mis_pronunciation_words):
                     origin_content = ""
-                    report_clip_path = f"output/accuracy_report_clip_{idx+1}.wav"
-                    mis_word_clip_path = f"output/mis_word_clip_{idx+1}.wav"
+                    report_clip_path = f"output/accuracy_report_clip_{idx + 1}.wav"
+                    mis_word_clip_path = f"output/mis_word_clip_{idx + 1}.wav"
                     if idx == 0:
                         origin_content += "Accuracy report:"
                     origin_content += f' word {mis_word["Word"]}'
@@ -596,7 +596,7 @@ def chatting_from_file():
     if not os.path.exists("output"):
         os.makedirs("output")
     for idx, file in enumerate(input_files):
-        tts(call_gpt(stt(file), "chat"), f"output/gpt_output_{idx+1}.wav", "GPT output")
+        tts(call_gpt(stt(file), "chat"), f"output/gpt_output_{idx + 1}.wav", "GPT output")
     print("Generate the final report ......")
     pronunciation_assessment()
 

@@ -68,9 +68,11 @@ class GPT4oAzureVoiceClient:
         async for m in message:
             if type(m) is rtclient.RTAudioContent:
                 await self._realtime_handler.on_response_content_part_added(response_id, item_id, m.content_index, m._part)
+
                 async def on_audio_chunk(chunks):
                     async for a in chunks:
                         await self._realtime_handler.on_audio_chunk(response_id, item_id, m.content_index, a)
+
                 async def on_transcript_chunk(chunks):
                     async for t in chunks:
                         await self._realtime_handler.on_transcript_chunk(response_id, item_id, m.content_index, t)
@@ -81,10 +83,12 @@ class GPT4oAzureVoiceClient:
                 )
                 tts_input, tts_output = self._tts_client.text_to_speech(voice=self._voice)
                 await self._realtime_handler.on_response_content_part_added(response_id, item_id, m.content_index, audio_content_part)
+
                 async def receive_tts_output():
                     async for a in tts_output:
                         await self._realtime_handler.on_audio_chunk(response_id, item_id, m.content_index, a)
                     await self._realtime_handler.on_audio_done(response_id, item_id, m.content_index)
+
                 async def receive_text_chunks(chunks):
                     async for t in chunks:
                         # todo: hack: replace double \n with single \n
