@@ -9,6 +9,7 @@ using Flurl.Http;
 using Flurl.Http.Configuration;
 using Microsoft.SpeechServices.CommonLib.Public.Enums;
 using Microsoft.SpeechServices.CommonLib.Public.Interface;
+using Microsoft.SpeechServices.CommonLib.TtsUtil;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public;
 using Microsoft.SpeechServices.CustomVoice.TtsLib.TtsUtil;
 using Newtonsoft.Json;
@@ -25,6 +26,7 @@ public abstract class HttpClientBase
     public HttpClientBase(HttpClientConfigBase config)
     {
         this.BaseConfig = config;
+        this.Logger = new PublicAppLogger();
     }
 
     protected HttpClientConfigBase BaseConfig { get; set; }
@@ -44,32 +46,32 @@ public abstract class HttpClientBase
 
     public abstract string ControllerName { get; }
 
-    public IAppLogger Logger { get; set; }
+    public IAppLogger Logger { get; private set; }
 
     public virtual bool IsVersionInSegment => false;
 
-    public async Task<IFlurlRequest> AuthenticateAsync(Flurl.Url reqeust)
+    public async Task<IFlurlRequest> AuthenticateAsync(Flurl.Url request)
     {
         var speechConfig = this.SpeechConfig;
         if (speechConfig != null)
         {
             if (!string.IsNullOrEmpty(speechConfig.SubscriptionKey))
             {
-                return reqeust.WithHeader(
+                return request.WithHeader(
                     CommonPublicConst.Http.Headers.SubscriptionKey,
                     speechConfig.SubscriptionKey);
             }
             else if (string.IsNullOrEmpty(speechConfig.CustomDomainName))
             {
                 // OAuth only avaible when custom domain enabled.
-                throw new NotSupportedException($"Please privde either key or custom domain name");
+                throw new NotSupportedException($"Please provide either key or custom domain name");
             }
         }
 
         if (this.BaseConfig.UseOAuth)
         {
             var token = await this.BaseConfig.AcquireOAuthTokenAsync().ConfigureAwait(false);
-            return reqeust.WithOAuthBearerToken(token);
+            return request.WithOAuthBearerToken(token);
         }
         else
         {
@@ -93,7 +95,7 @@ public abstract class HttpClientBase
             }
         }
 
-        Console.WriteLine(url.Url);
+        this.Logger?.LogDebug(url.Url.ToString());
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
@@ -110,7 +112,7 @@ public abstract class HttpClientBase
             additionalHeaders: additionalHeaders).ConfigureAwait(false);
         url = url.AppendPathSegment(id.ToString());
 
-        Console.WriteLine(url.Url);
+        this.Logger?.LogDebug(url.Url.ToString());
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
@@ -128,7 +130,7 @@ public abstract class HttpClientBase
             additionalHeaders: additionalHeaders).ConfigureAwait(false);
         url = url.AppendPathSegment(id.ToString());
 
-        Console.WriteLine(url.Url);
+        this.Logger?.LogDebug(url.Url.ToString());
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
