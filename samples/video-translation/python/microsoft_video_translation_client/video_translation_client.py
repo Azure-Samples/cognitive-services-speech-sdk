@@ -62,7 +62,8 @@ class VideoTranslationClient:
         self.http = urllib3.PoolManager(timeout=timeout, retries=retries)
 
     # For most common scenario, customer not need provide webvtt first iteration.
-    # Even, it is supported to provide webvtt for the first iteration, customer can customize the client code if they want to run first iteration with webvtt.
+    # Even, it is supported to provide webvtt for the first iteration, customer can
+    # customize the client code if they want to run first iteration with webvtt.
     def create_translate_and_run_first_iteration_until_terminated(
         self,
         video_file_url: Url,
@@ -555,7 +556,7 @@ class VideoTranslationClient:
             subtitleMaxCharCountPerSegment = subtitle_max_char_count_per_segment,
             exportSubtitleInVideo = export_subtitle_in_video,
         )
-        
+
         translation_create_body = TranslationDefinition(
             input = translation_create_input_body,
             displayName = translation_display_name,
@@ -649,16 +650,16 @@ class VideoTranslationClient:
 
         if webvtt_file_kind is not None and webvtt_file_url is not None:
             iteration_create_input_body.webvttFile = WebvttFileDefinition(
-                kind = webvtt_file_kind,
-                url = webvtt_file_url,
+                kind=webvtt_file_kind,
+                url=webvtt_file_url,
             )
         
         if enable_emotional_platform_voice is not None:
             iteration_create_input_body.enableEmotionalPlatformVoice = enable_emotional_platform_voice
 
         iteration_create_body = IterationDefinition(
-            input = iteration_create_input_body,
-            description = iteration_description,
+            input=iteration_create_input_body,
+            description=iteration_description,
         )
         
         encoded_iteration_create_body = orjson.dumps(dataclasses.asdict(iteration_create_body))
@@ -669,17 +670,17 @@ class VideoTranslationClient:
         headers["Operation-Id"] = operation_id
         
         print(f"Requesting http PUT: {url}")
-        response = self.http.request("PUT", url.url, headers = headers, body=encoded_iteration_create_body)
+        response = self.http.request("PUT", url.url, headers=headers, body=encoded_iteration_create_body)
 
         #   OK = 200,
         #   Created = 201,
-        if not response.status in [200, 201]:
+        if response.status not in [200, 201]:
             error = response.data.decode('utf-8')
             return False, error, None, None
         response_iteration_json = response.json()
         response_iteration = dict_to_dataclass(
-            data = response_iteration_json,
-            dataclass_type = IterationDefinition)
+            data=response_iteration_json,
+            dataclass_type=IterationDefinition)
         operation_location = response.headers[HTTP_HEADERS_OPERATION_LOCATION]
         operation_location_url = urllib3.util.parse_url(operation_location)
         return True, None, response_iteration, operation_location_url

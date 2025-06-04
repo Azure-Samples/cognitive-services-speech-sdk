@@ -7,6 +7,7 @@ from urllib3.util import Url
 from urllib.parse import urlencode
 import urllib3
 
+
 def dict_to_dataclass(data: dict, dataclass_type: Type[Any]) -> Any:
     if not is_dataclass(dataclass_type):
         raise ValueError(f"{dataclass_type} is not a dataclass")
