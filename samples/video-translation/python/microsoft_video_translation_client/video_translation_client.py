@@ -5,28 +5,34 @@ import urllib3
 import orjson
 import uuid
 import requests
-import datetime
 import locale
 import json
 import dataclasses
 from termcolor import colored
-from enum import Enum
 from datetime import datetime
-from typing import List
 from urllib3.util import Url
-from microsoft_video_translation_client.video_translation_const import *
-from microsoft_video_translation_client.video_translation_enum import *
-from microsoft_video_translation_client.video_translation_dataclass import *
-from microsoft_video_translation_client.video_translation_util import *
-from urllib.parse import urlencode
-from pydantic import BaseModel
+from microsoft_video_translation_client.video_translation_const import (
+    HTTP_HEADERS_OPERATION_LOCATION
+)
+from microsoft_video_translation_client.video_translation_enum import (
+    VoiceKind, OperationStatus, WebvttFileKind, EnableEmotionalPlatformVoice
+)
+from microsoft_video_translation_client.video_translation_dataclass import (
+    OperationDefinition, WebvttFileDefinition, TranslationInputDefinition,
+    IterationInputDefinition, IterationDefinition, TranslationDefinition,
+    PagedTranslationDefinition, PagedIterationDefinition
+)
+from microsoft_video_translation_client.video_translation_util import (
+    dict_to_dataclass, append_url_args
+)
 import time
+
 
 class VideoTranslationClient:
     URL_SEGMENT_NAME_TRANSLATIONS = "translations"
     URL_SEGMENT_NAME_ITERATIONS = "iterations"
     URL_PATH_ROOT = "videotranslation"
-    
+
     region = ""
     sub_key = ""
     api_version = ""
@@ -37,17 +43,20 @@ class VideoTranslationClient:
         self.region = region
         self.sub_key = sub_key
         self.api_version = api_version
-        
+
         # not retry for below response code:
         #   OK = 200,
         #   Created = 201,
         #   NoContent = 204,
-        #   BadRequest = 400
-        #   Unauthorized = 401
-        #   Forbidden = 403
-        #   NotFound = 404
+        #   BadRequest = 400,
+        #   Unauthorized = 401,
+        #   Forbidden = 403,
+        #   NotFound = 404,
         #   Conflict = 409
-        status_forcelist = tuple(set(x for x in requests.status_codes._codes) - set(x for x in [200, 201, 204, 400, 401, 403, 404, 409]))
+        status_forcelist = tuple(
+            set(x for x in requests.status_codes._codes)
+            - set(x for x in [200, 201, 204, 400, 401, 403, 404, 409])
+        )
         retries = urllib3.Retry(total=5, status_forcelist=status_forcelist)
         timeout = urllib3.util.Timeout(10)
         self.http = urllib3.PoolManager(timeout=timeout, retries=retries)
@@ -674,4 +683,3 @@ class VideoTranslationClient:
         operation_location = response.headers[HTTP_HEADERS_OPERATION_LOCATION]
         operation_location_url = urllib3.util.parse_url(operation_location)
         return True, None, response_iteration, operation_location_url
-    

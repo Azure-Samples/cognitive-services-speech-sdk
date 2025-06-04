@@ -2,6 +2,26 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "help",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+            ]
+        },
+        {
+            "name": "help-translate",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "create_translation_and_iteration_and_wait_until_terminated",
+                "--help"
+            ]
+        },
+        {
             "name": "eus-translate",
             "type": "debugpy",
             "request": "launch",
