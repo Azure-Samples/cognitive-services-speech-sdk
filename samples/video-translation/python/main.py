@@ -380,23 +380,31 @@ translate_parser = sub_parsers.add_parser(
 translate_parser.add_argument('--translation_id', required=True, type=str, help='Translation ID.')
 translate_parser.add_argument('--webvtt_file_kind', required=True, type=str, help=ARGUMENT_HELP_WEBVTT_FILE_KIND)
 translate_parser.add_argument('--webvtt_file_blob_url', required=True, type=str, help=ARGUMENT_HELP_WEBVTT_FILE_BLOB_URL)
-translate_parser.add_argument('--enable_emotional_platform_voice', required=False, type=str,
-                               help=ARGUMENT_HELP_ENABLE_EMOTIONAL_PLATFORM_VOICE)
+translate_parser.add_argument(
+    '--enable_emotional_platform_voice', required=False, type=str,
+    help=ARGUMENT_HELP_ENABLE_EMOTIONAL_PLATFORM_VOICE)
 translate_parser.add_argument('--speaker_count', required=False, type=int, help=ARGUMENT_HELP_SPEAKER_COUNT)
-translate_parser.add_argument('--subtitle_max_char_count_per_segment', required=False, type=int,
-                               help=ARGUMENT_HELP_SUBTITLE_MAX_CHAR_COUNT_PER_SEGMENT)
-translate_parser.add_argument('--export_subtitle_in_video', required=False, type=bool,
-                               help=ARGUMENT_HELP_EXPORT_SUBTITLE_IN_VIDEO)
-translate_parser.add_argument('--tts_custom_lexicon_file_url', required=False, type=str,
-                               help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_URL)
-translate_parser.add_argument('--tts_custom_lexicon_file_id_in_audio_content_creation', required=False, type=str, 
-                              help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_ID_IN_AUDIO_CONTENT_CREATION)
-translate_parser.add_argument('--enable_video_speed_adjustment', required=False, type=bool, 
-                              help=ARGUMENT_HELP_ENABLE_VIDEO_SPEED_ADJUSTMENT)
-translate_parser.add_argument('--enable_ocr_correction_from_subtitle', required=False, type=bool,
-                               help=ARGUMENT_HELP_ENABLE_OCR_CORRECTION_FROM_SUBTITLE)
-translate_parser.add_argument('--export_target_locale_advanced_subtitle_file', required=False, type=bool,
-                              help=ARGUMENT_HELP_EXPORT_TARGET_LOCALE_ADVANCED_SUBTITLE_FILE)
+translate_parser.add_argument(
+    '--subtitle_max_char_count_per_segment', required=False, type=int,
+    help=ARGUMENT_HELP_SUBTITLE_MAX_CHAR_COUNT_PER_SEGMENT)
+translate_parser.add_argument(
+    '--export_subtitle_in_video', required=False, type=bool,
+    help=ARGUMENT_HELP_EXPORT_SUBTITLE_IN_VIDEO)
+translate_parser.add_argument(
+    '--tts_custom_lexicon_file_url', required=False, type=str,
+    help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_URL)
+translate_parser.add_argument(
+    '--tts_custom_lexicon_file_id_in_audio_content_creation', required=False, type=str, 
+    help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_ID_IN_AUDIO_CONTENT_CREATION)
+translate_parser.add_argument(
+    '--enable_video_speed_adjustment', required=False, type=bool, 
+    help=ARGUMENT_HELP_ENABLE_VIDEO_SPEED_ADJUSTMENT)
+translate_parser.add_argument(
+    '--enable_ocr_correction_from_subtitle', required=False, type=bool,
+    help=ARGUMENT_HELP_ENABLE_OCR_CORRECTION_FROM_SUBTITLE)
+translate_parser.add_argument(
+    '--export_target_locale_advanced_subtitle_file', required=False, type=bool,
+    help=ARGUMENT_HELP_EXPORT_TARGET_LOCALE_ADVANCED_SUBTITLE_FILE)
 translate_parser.add_argument('--subtitle_primary_color', required=False, type=str, help=ARGUMENT_HELP_SUBTITLE_PRIMARY_COLOR)
 translate_parser.add_argument('--subtitle_outline_color', required=False, type=str, help=ARGUMENT_HELP_SUBTITLE_OUTLINE_COLOR)
 translate_parser.add_argument('--subtitle_font_size', required=False, type=int, help=ARGUMENT_HELP_SUBTITLE_FONT_SIZE)
@@ -411,8 +419,9 @@ translate_parser.add_argument('--target_locale', required=True, type=str, help=A
 translate_parser.add_argument('--voice_kind', required=True, type=str, help=ARGUMENT_HELP_VOICE_KIND)
 translate_parser.add_argument('--enable_lip_sync', required=False, type=str, help=ARGUMENT_HELP_ENABLE_LIP_SYNC)
 translate_parser.add_argument('--speaker_count', required=False, type=int, help=ARGUMENT_HELP_SPEAKER_COUNT)
-translate_parser.add_argument('--subtitle_max_char_count_per_segment', required=False, type=int,
-                               help=ARGUMENT_HELP_SUBTITLE_MAX_CHAR_COUNT_PER_SEGMENT)
+translate_parser.add_argument(
+    '--subtitle_max_char_count_per_segment', required=False, type=int,
+    help=ARGUMENT_HELP_SUBTITLE_MAX_CHAR_COUNT_PER_SEGMENT)
 translate_parser.add_argument('--export_subtitle_in_wideo', required=False, type=bool, help=ARGUMENT_HELP_EXPORT_SUBTITLE_IN_VIDEO)
 translate_parser.add_argument('--translation_display_name', required=False, type=str, help='Translation display name.')
 translate_parser.add_argument('--translation_description', required=False, type=str, help='Translation description.')
@@ -442,8 +451,9 @@ translate_parser.add_argument('--operation_id', required=False, type=str, help='
 translate_parser.add_argument('--webvtt_file_blob_url', required=False, type=str, help=ARGUMENT_HELP_WEBVTT_FILE_BLOB_URL)
 translate_parser.add_argument('--webvtt_file_kind', required=False, type=str, help=ARGUMENT_HELP_WEBVTT_FILE_KIND)
 translate_parser.add_argument('--speaker_count', required=False, type=int, help=ARGUMENT_HELP_SPEAKER_COUNT)
-translate_parser.add_argument('--subtitle_max_char_count_per_segment', required=False, type=int,
-                               help=ARGUMENT_HELP_SUBTITLE_MAX_CHAR_COUNT_PER_SEGMENT)
+translate_parser.add_argument(
+    '--subtitle_max_char_count_per_segment', required=False, type=int,
+    help=ARGUMENT_HELP_SUBTITLE_MAX_CHAR_COUNT_PER_SEGMENT)
 translate_parser.add_argument('--export_subtitle_in_video', required=False, type=bool,
                                help=ARGUMENT_HELP_EXPORT_SUBTITLE_IN_VIDEO)
 translate_parser.add_argument('--tts_custom_lexicon_file_url', required=False, type=str,
