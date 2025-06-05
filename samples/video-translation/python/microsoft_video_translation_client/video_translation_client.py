@@ -237,19 +237,21 @@ class VideoTranslationClient:
 
         return True, None, response_translation
 
-    def request_operation_until_terminated(
-        self,
-        operation_location: Url):
+    def request_operation_until_terminated(self, operation_location: Url):
         success, error, response_operation = self.request_get_operation(operation_location=operation_location, printUrl=True)
         if not success or response_operation is None:
-            print(colored(f"Failed to query operation for translation creation operation from location {operation_location} with error: {error}", 'red'))
+            print(colored(
+                f"Failed to query operation for translation creation from location {operation_location} with error: {error}",
+                'red'))
             return
 
         lastStatus = None
         while response_operation.status in [OperationStatus.Running, OperationStatus.NotStarted]:
             success, error, response_operation = self.request_get_operation(operation_location=operation_location, printUrl=False)
             if not success or response_operation is None:
-                print(colored(f"Failed to query operation for translation creation operation from location {operation_location} with error: {error}", 'red'))
+                print(colored(
+                    f"Failed to query operation for translation creation from location {operation_location} with error: {error}",
+                    'red'))
                 return
             if lastStatus != response_operation.status:
                 print(response_operation.status)
@@ -301,7 +303,8 @@ class VideoTranslationClient:
             subtitle_outline_color=subtitle_outline_color,
             subtitle_font_size=subtitle_font_size)
         if not success:
-            print(colored(f"Failed to create iteration with ID {iteration_id} for translation {translation_id} with error: {error}", 'red'))
+            print(colored(f"Failed to create iteration with ID {iteration_id} for translation {translation_id} with error: {error}",
+                          'red'))
             return False, error, None
 
         self.request_operation_until_terminated(operation_location)
@@ -483,7 +486,7 @@ class VideoTranslationClient:
         response = self.http.request("GET", url.url, headers=headers)
 
         #   OK = 200,
-        if not response.status in [200]:
+        if response.status not in [200]:
             error = response.data.decode('utf-8')
             return False, error, None
         response_translations_json = response.json()
@@ -501,7 +504,7 @@ class VideoTranslationClient:
         response = self.http.request("GET", url.url, headers=headers)
 
         #   OK = 200,
-        if not response.status in [200]:
+        if response.status not in [200]:
             error = response.data.decode('utf-8')
             return False, error, None
         response_iterations_json = response.json()
@@ -520,7 +523,7 @@ class VideoTranslationClient:
         response = self.http.request("DELETE", url.url, headers=headers)
 
         #   NoContent = 204,
-        if not response.status in [204]:
+        if response.status not in [204]:
             error = response.data.decode('utf-8')
             return False, error
         return True, None
@@ -541,7 +544,7 @@ class VideoTranslationClient:
             translation_display_name: str = None,
             translation_description: str = None,
             operation_id: str = None,
-        ) -> tuple[bool, str, TranslationDefinition, Url]:
+            ) -> tuple[bool, str, TranslationDefinition, Url]:
         if translation_id is None or (video_file_url is None and audio_file_url is None) or target_locale is None or voice_kind is None:
             raise ValueError
 
@@ -557,7 +560,7 @@ class VideoTranslationClient:
             exportSubtitleInVideo=export_subtitle_in_video,
         )
 
-        translation_create_body=TranslationDefinition(
+        translation_create_body = TranslationDefinition(
             input=translation_create_input_body,
             displayName=translation_display_name,
             description=translation_description,
@@ -574,7 +577,7 @@ class VideoTranslationClient:
 
         #   OK = 200,
         #   Created = 201,
-        if not response.status in [200, 201]:
+        if response.status not in [200, 201]:
             error = response.data.decode('utf-8')
             return False, error, None, None
         response_translation_json = response.json()
@@ -606,59 +609,59 @@ class VideoTranslationClient:
             subtitle_primary_color: str = None,
             subtitle_outline_color: str = None,
             subtitle_font_size: int = None
-        ) -> tuple[bool, str, IterationDefinition, Url]:
+            ) -> tuple[bool, str, IterationDefinition, Url]:
         if translation_id is None or iteration_id is None:
             raise ValueError
 
-        iteration_create_input_body = IterationInputDefinition()
+        iteration_create_input = IterationInputDefinition()
 
         if speaker_count is not None:
-            iteration_create_input_body.speakerCount = speaker_count
+            iteration_create_input.speakerCount = speaker_count
 
         if subtitle_max_char_count_per_segment is not None:
-            iteration_create_input_body.subtitleMaxCharCountPerSegment = subtitle_max_char_count_per_segment
+            iteration_create_input.subtitleMaxCharCountPerSegment = subtitle_max_char_count_per_segment
 
         if export_subtitle_in_video is not None:
-            iteration_create_input_body.exportSubtitleInVideo = export_subtitle_in_video
+            iteration_create_input.exportSubtitleInVideo = export_subtitle_in_video
 
         if tts_custom_lexicon_file_url is not None:
-            iteration_create_input_body.ttsCustomLexiconFileUrl = tts_custom_lexicon_file_url
+            iteration_create_input.ttsCustomLexiconFileUrl = tts_custom_lexicon_file_url
 
         if tts_custom_lexicon_file_id_in_audio_content_creation is not None:
-            iteration_create_input_body.ttsCustomLexiconFileIdInAudioContentCreation = tts_custom_lexicon_file_id_in_audio_content_creation
+            iteration_create_input.ttsCustomLexiconFileIdInAudioContentCreation = tts_custom_lexicon_file_id_in_audio_content_creation
 
         if enable_video_speed_adjustment is not None:
-            iteration_create_input_body.enableVideoSpeedAdjustment = enable_video_speed_adjustment
+            iteration_create_input.enableVideoSpeedAdjustment = enable_video_speed_adjustment
 
         if enable_ocr_correction_from_subtitle is not None:
-            iteration_create_input_body.enableOcrCorrectionFromSubtitle = enable_ocr_correction_from_subtitle
+            iteration_create_input.enableOcrCorrectionFromSubtitle = enable_ocr_correction_from_subtitle
 
         if export_target_locale_advanced_subtitle_file is not None:
-            iteration_create_input_body.exportTargetLocaleAdvancedSubtitleFile = export_target_locale_advanced_subtitle_file
+            iteration_create_input.exportTargetLocaleAdvancedSubtitleFile = export_target_locale_advanced_subtitle_file
 
         if export_target_locale_advanced_subtitle_file is not None:
-            iteration_create_input_body.exportTargetLocaleAdvancedSubtitleFile = export_target_locale_advanced_subtitle_file
+            iteration_create_input.exportTargetLocaleAdvancedSubtitleFile = export_target_locale_advanced_subtitle_file
 
         if subtitle_primary_color is not None:
-            iteration_create_input_body.subtitlePrimaryColor = subtitle_primary_color
+            iteration_create_input.subtitlePrimaryColor = subtitle_primary_color
 
         if subtitle_outline_color is not None:
-            iteration_create_input_body.subtitleOutlineColor = subtitle_outline_color
+            iteration_create_input.subtitleOutlineColor = subtitle_outline_color
 
         if subtitle_font_size is not None:
-            iteration_create_input_body.subtitleFontSize = subtitle_font_size
+            iteration_create_input.subtitleFontSize = subtitle_font_size
 
         if webvtt_file_kind is not None and webvtt_file_url is not None:
-            iteration_create_input_body.webvttFile = WebvttFileDefinition(
+            iteration_create_input.webvttFile = WebvttFileDefinition(
                 kind=webvtt_file_kind,
                 url=webvtt_file_url,
             )
 
         if enable_emotional_platform_voice is not None:
-            iteration_create_input_body.enableEmotionalPlatformVoice = enable_emotional_platform_voice
+            iteration_create_input.enableEmotionalPlatformVoice = enable_emotional_platform_voice
 
         iteration_create_body = IterationDefinition(
-            input=iteration_create_input_body,
+            input=iteration_create_input,
             description=iteration_description,
         )
 

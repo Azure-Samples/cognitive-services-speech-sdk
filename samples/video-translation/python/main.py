@@ -462,7 +462,7 @@ translate_parser.add_argument(
     help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_URL)
 translate_parser.add_argument(
     '--tts_custom_lexicon_file_id_in_audio_content_creation', required=False, type=str,
-                               help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_ID_IN_AUDIO_CONTENT_CREATION)
+    help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_ID_IN_AUDIO_CONTENT_CREATION)
 translate_parser.add_argument(
     '--enable_video_speed_adjustment', required=False, type=bool,
     help=ARGUMENT_HELP_ENABLE_VIDEO_SPEED_ADJUSTMENT)
