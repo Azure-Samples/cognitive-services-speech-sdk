@@ -116,6 +116,25 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
 
 * Step 5: Click `Start Microphone` button to start microphone (make sure to allow the microphone access tip box popping up in the browser), and then you can start chatting with the avatar with speech. The chat history (the text of what you said, and the response text by the Azure OpenAI chat API) will be shown beside the avatar. The avatar will then speak out the response of the chat API.
 
+## Deployment
+
+This sample can be deployed to cloud for global access. The recommended hosting platform is [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview), which can well support WebSockets. WebSockets is important for this sample to keep session stickiness between browser and backend. Here are the steps to deploy this sample to `Azure Container Apps`:
+
+* Step 1: Build this sample into a Docker image. You can use the `Dockerfile` in this folder to build the image. Run the following command in the folder containing this README.md document:
+  ```bash
+  docker build -t avatar-sample .
+  ```
+
+* Step 2: Push the Docker image to a container registry, such as [Azure Container Registry](https://learn.microsoft.com/azure/container-registry/). You can use the following command to push the image to Azure Container Registry:
+  ```bash
+    docker tag avatar-sample <your-registry-name>.azurecr.io/avatar-sample:latest
+    docker push <your-registry-name>.azurecr.io/avatar-sample:latest
+  ```
+
+* Step 3: Create an `Azure Container App` and deploy the Docker image built from above steps, following [Deploy from an existing container image](https://learn.microsoft.com/azure/container-apps/quickstart-portal). Make sure to set the environment variables as described in the previous sections, such as `SPEECH_REGION`, `SPEECH_KEY`, etc.
+
+* Step 4: Once the `Azure Container App` is created, you can access the sample by navigating to the URL of the `Azure Container App` in your browser. The URL should be in the format `https://<your-container-app-name>.azurecontainerapps.io/basic` for basic sample or `https://<your-container-app-name>.azurecontainerapps.io/chat` for chat sample.
+
 ## Additional Tip(s)
 
 * If you want to enforce the avatar to stop speaking before the avatar finishes the utterance, you can click `Stop Speaking` button. This is useful when you want to interrupt the avatar speaking.
