@@ -92,46 +92,46 @@ class VideoTranslationClient:
         nowString = now.strftime("%m%d%Y%H%M%S")
         translation_id = f"{nowString}_{source_locale}_{target_locale}_{voice_kind}"
         success, error, translation = self.create_translation_until_terminated(
-            translation_id = translation_id,
-            video_file_url = video_file_url,
-            audio_file_url = audio_file_url,
-            source_locale = source_locale,
-            target_locale = target_locale,
-            voice_kind = voice_kind,
-            enable_lip_sync = enable_lip_sync,
-            speaker_count = speaker_count,
-            subtitle_max_char_count_per_segment = subtitle_max_char_count_per_segment,
-            export_subtitle_in_video = export_subtitle_in_video
+            translation_id=translation_id,
+            video_file_url=video_file_url,
+            audio_file_url=audio_file_url,
+            source_locale=source_locale,
+            target_locale=target_locale,
+            voice_kind=voice_kind,
+            enable_lip_sync=enable_lip_sync,
+            speaker_count=speaker_count,
+            subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
+            export_subtitle_in_video=export_subtitle_in_video
         )
         if not success:
             return False, error, None, None
 
         print(colored("succesfully created translation:", 'green'))
-        json_formatted_str = json.dumps(dataclasses.asdict(translation), indent = 2)
+        json_formatted_str = json.dumps(dataclasses.asdict(translation), indent=2)
         print(json_formatted_str)
 
         iteration_id = f"{nowString}_default"
         success, error, iteration = self.create_iteration_until_terminated(
-            translation_id = translation_id,
-            iteration_id = iteration_id,
-            speaker_count = speaker_count,
-            enable_emotional_platform_voice = enable_emotional_platform_voice,
-            subtitle_max_char_count_per_segment = subtitle_max_char_count_per_segment,
-            export_subtitle_in_video = export_subtitle_in_video,
-            tts_custom_lexicon_file_url = tts_custom_lexicon_file_url,
-            tts_custom_lexicon_file_id_in_audio_content_creation = tts_custom_lexicon_file_id_in_audio_content_creation,
-            enable_video_speed_adjustment = enable_video_speed_adjustment,
-            enable_ocr_correction_from_subtitle = enable_ocr_correction_from_subtitle,
-            export_target_locale_advanced_subtitle_file = export_target_locale_advanced_subtitle_file,
-            subtitle_primary_color = subtitle_primary_color,
-            subtitle_outline_color = subtitle_outline_color,
-            subtitle_font_size = subtitle_font_size,
+            translation_id=translation_id,
+            iteration_id=iteration_id,
+            speaker_count=speaker_count,
+            enable_emotional_platform_voice=enable_emotional_platform_voice,
+            subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
+            export_subtitle_in_video=export_subtitle_in_video,
+            tts_custom_lexicon_file_url=tts_custom_lexicon_file_url,
+            tts_custom_lexicon_file_id_in_audio_content_creation=tts_custom_lexicon_file_id_in_audio_content_creation,
+            enable_video_speed_adjustment=enable_video_speed_adjustment,
+            enable_ocr_correction_from_subtitle=enable_ocr_correction_from_subtitle,
+            export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
+            subtitle_primary_color=subtitle_primary_color,
+            subtitle_outline_color=subtitle_outline_color,
+            subtitle_font_size=subtitle_font_size,
         )
         if not success:
             return False, error, None, None
 
         print(colored("succesfully created iteration:", 'green'))
-        json_formatted_str = json.dumps(dataclasses.asdict(iteration), indent = 2)
+        json_formatted_str = json.dumps(dataclasses.asdict(iteration), indent=2)
         print(json_formatted_str)
 
         return True, None, translation, iteration
@@ -159,7 +159,7 @@ class VideoTranslationClient:
             raise ValueError
 
         success, error, translation = self.request_get_translation(
-            translation_id = translation_id,
+            translation_id=translation_id,
         )
         if not success:
             return False, error, None, None
@@ -170,22 +170,22 @@ class VideoTranslationClient:
         iteration_id = now.strftime("%m%d%Y%H%M%S")
 
         success, error, iteration = self.create_iteration_until_terminated(
-            translation_id = translation_id,
-            iteration_id = iteration_id,
-            webvtt_file_kind = webvtt_file_kind,
-            webvtt_file_url = webvtt_file_url,
-            speaker_count = speaker_count,
-            enable_emotional_platform_voice = enable_emotional_platform_voice,
-            subtitle_max_char_count_per_segment = subtitle_max_char_count_per_segment,
-            export_subtitle_in_video = export_subtitle_in_video,
-            tts_custom_lexicon_file_url = tts_custom_lexicon_file_url,
-            tts_custom_lexicon_file_id_in_audio_content_creation = tts_custom_lexicon_file_id_in_audio_content_creation,
-            enable_video_speed_adjustment = enable_video_speed_adjustment,
-            enable_ocr_correction_from_subtitle = enable_ocr_correction_from_subtitle,
-            export_target_locale_advanced_subtitle_file = export_target_locale_advanced_subtitle_file,
-            subtitle_primary_color = subtitle_primary_color,
-            subtitle_outline_color = subtitle_outline_color,
-            subtitle_font_size = subtitle_font_size
+            translation_id=translation_id,
+            iteration_id=iteration_id,
+            webvtt_file_kind=webvtt_file_kind,
+            webvtt_file_url=webvtt_file_url,
+            speaker_count=speaker_count,
+            enable_emotional_platform_voice=enable_emotional_platform_voice,
+            subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
+            export_subtitle_in_video=export_subtitle_in_video,
+            tts_custom_lexicon_file_url=tts_custom_lexicon_file_url,
+            tts_custom_lexicon_file_id_in_audio_content_creation=tts_custom_lexicon_file_id_in_audio_content_creation,
+            enable_video_speed_adjustment=enable_video_speed_adjustment,
+            enable_ocr_correction_from_subtitle=enable_ocr_correction_from_subtitle,
+            export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
+            subtitle_primary_color=subtitle_primary_color,
+            subtitle_outline_color=subtitle_outline_color,
+            subtitle_font_size=subtitle_font_size
         )
         if not success:
             return False, error, None, None
@@ -207,19 +207,19 @@ class VideoTranslationClient:
     ) -> tuple[bool, str, TranslationDefinition]:
         operation_id = str(uuid.uuid4())
         success, error, response_translation, operation_location = self.request_create_translation(
-            translation_id = translation_id,
-            video_file_url = video_file_url,
-            audio_file_url = audio_file_url,
-            source_locale = source_locale,
-            target_locale = target_locale,
-            voice_kind = voice_kind,
-            enable_lip_sync= enable_lip_sync,
-            speaker_count = speaker_count,
-            subtitle_max_char_count_per_segment = subtitle_max_char_count_per_segment,
-            export_subtitle_in_video = export_subtitle_in_video,
-            translation_display_name = None,
-            translation_description = None,
-            operation_id = operation_id)
+            translation_id=translation_id,
+            video_file_url=video_file_url,
+            audio_file_url=audio_file_url,
+            source_locale=source_locale,
+            target_locale=target_locale,
+            voice_kind=voice_kind,
+            enable_lip_sync=enable_lip_sync,
+            speaker_count=speaker_count,
+            subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
+            export_subtitle_in_video=export_subtitle_in_video,
+            translation_display_name=None,
+            translation_description=None,
+            operation_id=operation_id)
         if not success or operation_location is None:
             print(colored(f"Failed to create translation with ID {translation_id} with error: {error}", 'red'))
             return False, error, None
@@ -232,7 +232,7 @@ class VideoTranslationClient:
             return False, error, None
         if response_translation.status != OperationStatus.Succeeded:
             print(colored(f"Translation creation failed with error: {error}", 'red'))
-            print(json.dumps(dataclasses.asdict(response_translation), indent = 2))
+            print(json.dumps(dataclasses.asdict(response_translation), indent=2))
             return False, response_translation.translationFailureReason, None
 
         return True, None, response_translation
@@ -240,14 +240,14 @@ class VideoTranslationClient:
     def request_operation_until_terminated(
         self,
         operation_location: Url):
-        success, error, response_operation = self.request_get_operation(operation_location = operation_location, printUrl = True)
+        success, error, response_operation = self.request_get_operation(operation_location=operation_location, printUrl=True)
         if not success or response_operation is None:
             print(colored(f"Failed to query operation for translation creation operation from location {operation_location} with error: {error}", 'red'))
             return
 
         lastStatus = None
         while response_operation.status in [OperationStatus.Running, OperationStatus.NotStarted]:
-            success, error, response_operation = self.request_get_operation(operation_location = operation_location, printUrl = False)
+            success, error, response_operation = self.request_get_operation(operation_location=operation_location, printUrl=False)
             if not success or response_operation is None:
                 print(colored(f"Failed to query operation for translation creation operation from location {operation_location} with error: {error}", 'red'))
                 return
@@ -282,24 +282,24 @@ class VideoTranslationClient:
         if translation_id is None or iteration_id is None:
             raise ValueError
         success, error, response_iteration, operation_location = self.request_create_iteration(
-            translation_id = translation_id,
-            iteration_id = iteration_id,
-            webvtt_file_kind = webvtt_file_kind,
-            webvtt_file_url = webvtt_file_url,
-            speaker_count = speaker_count,
-            enable_emotional_platform_voice = enable_emotional_platform_voice,
-            subtitle_max_char_count_per_segment = subtitle_max_char_count_per_segment,
-            export_subtitle_in_video = export_subtitle_in_video,
-            iteration_description = None,
-            operation_id = None,
-            tts_custom_lexicon_file_url = tts_custom_lexicon_file_url,
-            tts_custom_lexicon_file_id_in_audio_content_creation = tts_custom_lexicon_file_id_in_audio_content_creation,
-            enable_video_speed_adjustment = enable_video_speed_adjustment,
-            enable_ocr_correction_from_subtitle = enable_ocr_correction_from_subtitle,
-            export_target_locale_advanced_subtitle_file = export_target_locale_advanced_subtitle_file,
-            subtitle_primary_color = subtitle_primary_color,
-            subtitle_outline_color = subtitle_outline_color,
-            subtitle_font_size = subtitle_font_size)
+            translation_id=translation_id,
+            iteration_id=iteration_id,
+            webvtt_file_kind=webvtt_file_kind,
+            webvtt_file_url=webvtt_file_url,
+            speaker_count=speaker_count,
+            enable_emotional_platform_voice=enable_emotional_platform_voice,
+            subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
+            export_subtitle_in_video=export_subtitle_in_video,
+            iteration_description=None,
+            operation_id=None,
+            tts_custom_lexicon_file_url=tts_custom_lexicon_file_url,
+            tts_custom_lexicon_file_id_in_audio_content_creation=tts_custom_lexicon_file_id_in_audio_content_creation,
+            enable_video_speed_adjustment=enable_video_speed_adjustment,
+            enable_ocr_correction_from_subtitle=enable_ocr_correction_from_subtitle,
+            export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
+            subtitle_primary_color=subtitle_primary_color,
+            subtitle_outline_color=subtitle_outline_color,
+            subtitle_font_size=subtitle_font_size)
         if not success:
             print(colored(f"Failed to create iteration with ID {iteration_id} for translation {translation_id} with error: {error}", 'red'))
             return False, error, None
@@ -312,7 +312,7 @@ class VideoTranslationClient:
             return False, error, None
         if response_iteration.status != OperationStatus.Succeeded:
             print(colored(f"Iteration creation failed with error: {error}", 'red'))
-            print(json.dumps(dataclasses.asdict(operation_location), indent = 2))
+            print(json.dumps(dataclasses.asdict(operation_location), indent=2))
             return False, response_iteration.translationFailureReason, None
 
         return True, None, response_iteration
@@ -394,15 +394,15 @@ class VideoTranslationClient:
 
         if printUrl:
             print(f"Requesting http GET: {operation_location}")
-        response = self.http.request("GET", operation_location.url, headers = headers)
+        response = self.http.request("GET", operation_location.url, headers=headers)
 
         #   OK = 200,
         #   NotFound = 404,
         if response.status == 200:
             response_json = response.json()
             response = dict_to_dataclass(
-                data = response_json,
-                dataclass_type = OperationDefinition)
+                data=response_json,
+                dataclass_type=OperationDefinition)
             return True, None, response
         elif response.status == 404:
             return True, None, None
@@ -419,15 +419,15 @@ class VideoTranslationClient:
         headers = self.build_request_header()
 
         print(f"Requesting http GET: {url}")
-        response = self.http.request("GET", url.url, headers = headers)
+        response = self.http.request("GET", url.url, headers=headers)
 
         #   OK = 200,
         #   NotFound = 404,
         if response.status == 200:
             response_translation_json = response.json()
             response_translation = dict_to_dataclass(
-                data = response_translation_json,
-                dataclass_type = TranslationDefinition)
+                data=response_translation_json,
+                dataclass_type=TranslationDefinition)
             return True, None, response_translation
         elif response.status == 404:
             return True, None, None
@@ -445,15 +445,15 @@ class VideoTranslationClient:
         headers = self.build_request_header()
 
         print(f"Requesting http GET: {url}")
-        response = self.http.request("GET", url.url, headers = headers)
+        response = self.http.request("GET", url.url, headers=headers)
 
         #   OK = 200,
         #   NotFound = 404,
         if response.status == 200:
             response_iteration_json = response.json()
             response_iteration = dict_to_dataclass(
-                data = response_iteration_json,
-                dataclass_type = IterationDefinition)
+                data=response_iteration_json,
+                dataclass_type=IterationDefinition)
             return True, None, response_iteration
         elif response.status == 404:
             return True, None, None
@@ -480,7 +480,7 @@ class VideoTranslationClient:
         headers = self.build_request_header()
 
         print(f"Requesting http GET: {url}")
-        response = self.http.request("GET", url.url, headers = headers)
+        response = self.http.request("GET", url.url, headers=headers)
 
         #   OK = 200,
         if not response.status in [200]:
@@ -488,8 +488,8 @@ class VideoTranslationClient:
             return False, error, None
         response_translations_json = response.json()
         response_translations = dict_to_dataclass(
-            data = response_translations_json,
-            dataclass_type = PagedTranslationDefinition)
+            data=response_translations_json,
+            dataclass_type=PagedTranslationDefinition)
         return True, None, response_translations
 
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/list-iteration
@@ -498,7 +498,7 @@ class VideoTranslationClient:
         headers = self.build_request_header()
 
         print(f"Requesting http GET: {url}")
-        response = self.http.request("GET", url.url, headers = headers)
+        response = self.http.request("GET", url.url, headers=headers)
 
         #   OK = 200,
         if not response.status in [200]:
@@ -506,8 +506,8 @@ class VideoTranslationClient:
             return False, error, None
         response_iterations_json = response.json()
         response_iterations = dict_to_dataclass(
-            data = response_iterations_json,
-            dataclass_type = PagedIterationDefinition)
+            data=response_iterations_json,
+            dataclass_type=PagedIterationDefinition)
         return True, None, response_iterations
 
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/delete-translation
@@ -517,7 +517,7 @@ class VideoTranslationClient:
         headers = self.build_request_header()
 
         print(f"Requesting http DELETE: {url}")
-        response = self.http.request("DELETE", url.url, headers = headers)
+        response = self.http.request("DELETE", url.url, headers=headers)
 
         #   NoContent = 204,
         if not response.status in [204]:
@@ -546,21 +546,21 @@ class VideoTranslationClient:
             raise ValueError
 
         translation_create_input_body = TranslationInputDefinition(
-            sourceLocale = source_locale,
-            targetLocale = target_locale,
-            voiceKind = voice_kind,
-            enableLipSync = enable_lip_sync,
+            sourceLocale=source_locale,
+            targetLocale=target_locale,
+            voiceKind=voice_kind,
+            enableLipSync=enable_lip_sync,
             videoFileUrl=video_file_url,
             audioFileUrl=audio_file_url,
-            speakerCount =speaker_count,
-            subtitleMaxCharCountPerSegment = subtitle_max_char_count_per_segment,
-            exportSubtitleInVideo = export_subtitle_in_video,
+            speakerCount=speaker_count,
+            subtitleMaxCharCountPerSegment=subtitle_max_char_count_per_segment,
+            exportSubtitleInVideo=export_subtitle_in_video,
         )
 
-        translation_create_body = TranslationDefinition(
-            input = translation_create_input_body,
-            displayName = translation_display_name,
-            description = translation_description,
+        translation_create_body=TranslationDefinition(
+            input=translation_create_input_body,
+            displayName=translation_display_name,
+            description=translation_description,
         )
 
         encoded_translation_create_body = orjson.dumps(dataclasses.asdict(translation_create_body))
@@ -570,7 +570,7 @@ class VideoTranslationClient:
         headers["Operation-Id"] = operation_id
 
         print(f"Requesting http PUT: {url}")
-        response = self.http.request("PUT", url.url, headers = headers, body=encoded_translation_create_body)
+        response = self.http.request("PUT", url.url, headers=headers, body=encoded_translation_create_body)
 
         #   OK = 200,
         #   Created = 201,
@@ -579,8 +579,8 @@ class VideoTranslationClient:
             return False, error, None, None
         response_translation_json = response.json()
         response_translation = dict_to_dataclass(
-            data = response_translation_json,
-            dataclass_type = TranslationDefinition)
+            data=response_translation_json,
+            dataclass_type=TranslationDefinition)
         operation_location = response.headers[HTTP_HEADERS_OPERATION_LOCATION]
         operation_location_url = urllib3.util.parse_url(operation_location)
         return True, None, response_translation, operation_location_url
