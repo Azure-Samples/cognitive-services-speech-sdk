@@ -394,10 +394,10 @@ translate_parser.add_argument(
     '--tts_custom_lexicon_file_url', required=False, type=str,
     help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_URL)
 translate_parser.add_argument(
-    '--tts_custom_lexicon_file_id_in_audio_content_creation', required=False, type=str, 
+    '--tts_custom_lexicon_file_id_in_audio_content_creation', required=False, type=str,
     help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_ID_IN_AUDIO_CONTENT_CREATION)
 translate_parser.add_argument(
-    '--enable_video_speed_adjustment', required=False, type=bool, 
+    '--enable_video_speed_adjustment', required=False, type=bool,
     help=ARGUMENT_HELP_ENABLE_VIDEO_SPEED_ADJUSTMENT)
 translate_parser.add_argument(
     '--enable_ocr_correction_from_subtitle', required=False, type=bool,
@@ -454,23 +454,32 @@ translate_parser.add_argument('--speaker_count', required=False, type=int, help=
 translate_parser.add_argument(
     '--subtitle_max_char_count_per_segment', required=False, type=int,
     help=ARGUMENT_HELP_SUBTITLE_MAX_CHAR_COUNT_PER_SEGMENT)
-translate_parser.add_argument('--export_subtitle_in_video', required=False, type=bool,
-                               help=ARGUMENT_HELP_EXPORT_SUBTITLE_IN_VIDEO)
-translate_parser.add_argument('--tts_custom_lexicon_file_url', required=False, type=str,
-                               help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_URL)
-translate_parser.add_argument('--tts_custom_lexicon_file_id_in_audio_content_creation', required=False, type=str,
+translate_parser.add_argument(
+    '--export_subtitle_in_video', required=False, type=bool,
+    help=ARGUMENT_HELP_EXPORT_SUBTITLE_IN_VIDEO)
+translate_parser.add_argument(
+    '--tts_custom_lexicon_file_url', required=False, type=str,
+    help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_URL)
+translate_parser.add_argument(
+    '--tts_custom_lexicon_file_id_in_audio_content_creation', required=False, type=str,
                                help=ARGUMENT_HELP_TTS_CUSTOM_LEXICON_FILE_ID_IN_AUDIO_CONTENT_CREATION)
-translate_parser.add_argument('--enable_video_speed_adjustment', required=False, type=bool,
-                               help=ARGUMENT_HELP_ENABLE_VIDEO_SPEED_ADJUSTMENT)
-translate_parser.add_argument('--enable_ocr_correction_from_subtitle', required=False, type=bool,
-                               help=ARGUMENT_HELP_ENABLE_OCR_CORRECTION_FROM_SUBTITLE)
-translate_parser.add_argument('--export_target_locale_advanced_subtitle_file', required=False, type=bool,
-                               help=ARGUMENT_HELP_EXPORT_TARGET_LOCALE_ADVANCED_SUBTITLE_FILE)
-translate_parser.add_argument('--subtitle_primary_color', required=False, type=str,
-                               help=ARGUMENT_HELP_SUBTITLE_PRIMARY_COLOR)
-translate_parser.add_argument('--subtitle_outline_color', required=False, type=str,
-                               help=ARGUMENT_HELP_SUBTITLE_OUTLINE_COLOR)
-translate_parser.add_argument('--subtitle_font_size', required=False, type=int, help=ARGUMENT_HELP_SUBTITLE_FONT_SIZE)
+translate_parser.add_argument(
+    '--enable_video_speed_adjustment', required=False, type=bool,
+    help=ARGUMENT_HELP_ENABLE_VIDEO_SPEED_ADJUSTMENT)
+translate_parser.add_argument(
+    '--enable_ocr_correction_from_subtitle', required=False, type=bool,
+    help=ARGUMENT_HELP_ENABLE_OCR_CORRECTION_FROM_SUBTITLE)
+translate_parser.add_argument(
+    '--export_target_locale_advanced_subtitle_file', required=False, type=bool,
+    help=ARGUMENT_HELP_EXPORT_TARGET_LOCALE_ADVANCED_SUBTITLE_FILE)
+translate_parser.add_argument(
+    '--subtitle_primary_color', required=False, type=str,
+    help=ARGUMENT_HELP_SUBTITLE_PRIMARY_COLOR)
+translate_parser.add_argument(
+    '--subtitle_outline_color', required=False, type=str,
+    help=ARGUMENT_HELP_SUBTITLE_OUTLINE_COLOR)
+translate_parser.add_argument(
+    '--subtitle_font_size', required=False, type=int, help=ARGUMENT_HELP_SUBTITLE_FONT_SIZE)
 translate_parser.set_defaults(func=handle_request_create_iteration_api)
 
 translate_parser = sub_parsers.add_parser('request_get_iteration_api', help='Request get iteration API.')

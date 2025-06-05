@@ -87,7 +87,7 @@ class VideoTranslationClient:
     ) -> tuple[bool, str, TranslationDefinition, IterationDefinition]:
         if (video_file_url is None and audio_file_url is None) or target_locale is None or voice_kind is None:
             raise ValueError
-        
+
         now = datetime.now()
         nowString = now.strftime("%m%d%Y%H%M%S")
         translation_id = f"{nowString}_{source_locale}_{target_locale}_{voice_kind}"
@@ -105,7 +105,7 @@ class VideoTranslationClient:
         )
         if not success:
             return False, error, None, None
-        
+
         print(colored("succesfully created translation:", 'green'))
         json_formatted_str = json.dumps(dataclasses.asdict(translation), indent = 2)
         print(json_formatted_str)
@@ -129,13 +129,13 @@ class VideoTranslationClient:
         )
         if not success:
             return False, error, None, None
-        
+
         print(colored("succesfully created iteration:", 'green'))
         json_formatted_str = json.dumps(dataclasses.asdict(iteration), indent = 2)
         print(json_formatted_str)
 
         return True, None, translation, iteration
-    
+
     # For iteration from secondary, webvtt file is required.
     def run_iteration_with_webvtt_until_terminated(
         self,
@@ -157,7 +157,7 @@ class VideoTranslationClient:
     ) -> tuple[bool, str, TranslationDefinition, IterationDefinition]:
         if webvtt_file_kind is None or webvtt_file_url is None:
             raise ValueError
-        
+
         success, error, translation = self.request_get_translation(
             translation_id = translation_id,
         )
@@ -165,7 +165,7 @@ class VideoTranslationClient:
             return False, error, None, None
         elif translation is None:
             return False, f"Not found translation ID: {translation_id}", None, None
-        
+
         now = datetime.now()
         iteration_id = now.strftime("%m%d%Y%H%M%S")
 
@@ -189,9 +189,9 @@ class VideoTranslationClient:
         )
         if not success:
             return False, error, None, None
-        
+
         return True, None, translation, iteration
-    
+
     def create_translation_until_terminated(
         self,
         translation_id: str,
@@ -225,7 +225,7 @@ class VideoTranslationClient:
             return False, error, None
 
         self.request_operation_until_terminated(operation_location)
-        
+
         success, error, response_translation = self.request_get_translation(translation_id)
         if not success:
             print(colored(f"Failed to query translation {translation_id} with error: {error}", 'red'))
@@ -234,7 +234,7 @@ class VideoTranslationClient:
             print(colored(f"Translation creation failed with error: {error}", 'red'))
             print(json.dumps(dataclasses.asdict(response_translation), indent = 2))
             return False, response_translation.translationFailureReason, None
-        
+
         return True, None, response_translation
 
     def request_operation_until_terminated(
@@ -244,7 +244,7 @@ class VideoTranslationClient:
         if not success or response_operation is None:
             print(colored(f"Failed to query operation for translation creation operation from location {operation_location} with error: {error}", 'red'))
             return
-        
+
         lastStatus = None
         while response_operation.status in [OperationStatus.Running, OperationStatus.NotStarted]:
             success, error, response_operation = self.request_get_operation(operation_location = operation_location, printUrl = False)
@@ -259,7 +259,7 @@ class VideoTranslationClient:
             time.sleep(5)
 
         return response_operation.status
-    
+
     def create_iteration_until_terminated(
         self,
         translation_id: str,
@@ -303,9 +303,9 @@ class VideoTranslationClient:
         if not success:
             print(colored(f"Failed to create iteration with ID {iteration_id} for translation {translation_id} with error: {error}", 'red'))
             return False, error, None
-        
+
         self.request_operation_until_terminated(operation_location)
-        
+
         success, error, response_iteration = self.request_get_iteration(translation_id, iteration_id)
         if not success:
             print(colored(f"Failed to query iteration {iteration_id} for translation {translation_id} with error: {error}", 'red'))
@@ -314,12 +314,12 @@ class VideoTranslationClient:
             print(colored(f"Iteration creation failed with error: {error}", 'red'))
             print(json.dumps(dataclasses.asdict(operation_location), indent = 2))
             return False, response_iteration.translationFailureReason, None
-        
+
         return True, None, response_iteration
-    
+
     def build_translations_path(self) -> str:
         return f"{self.URL_PATH_ROOT}/{self.URL_SEGMENT_NAME_TRANSLATIONS}"
-    
+
     def build_translation_path(self,
                                translation_id: str) -> str:
         if translation_id is None:
@@ -341,7 +341,7 @@ class VideoTranslationClient:
             raise ValueError
         iterations_path = self.build_iterations_path(translation_id)
         return f"{iterations_path}/{iteration_id}"
-    
+
     def build_host(self) -> str:
         return f"{self.region}.api.cognitive.microsoft.com"
 
@@ -355,7 +355,7 @@ class VideoTranslationClient:
     def build_translations_url(self) -> Url:
         path = self.build_translations_path()
         return self.build_url(path)
-    
+
     def build_translation_url(self,
                               translation_id: str) -> Url:
         if translation_id is None:
@@ -369,7 +369,7 @@ class VideoTranslationClient:
             raise ValueError
         path = self.build_iterations_path()
         return self.build_url(path)
-    
+
     def build_iteration_url(self,
                             translation_id: str,
                             iteration_id: str) -> Url:
@@ -377,12 +377,12 @@ class VideoTranslationClient:
             raise ValueError
         path = self.build_iteration_path(translation_id, iteration_id)
         return self.build_url(path)
-    
+
     def build_request_header(self) -> dict:
         return {
             "Ocp-Apim-Subscription-Key": self.sub_key
         }
-        
+
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/operation-operations/get-operation
     def request_get_operation(self,
                               operation_location: Url,
@@ -391,11 +391,11 @@ class VideoTranslationClient:
             raise ValueError
 
         headers = self.build_request_header()
-        
+
         if printUrl:
             print(f"Requesting http GET: {operation_location}")
         response = self.http.request("GET", operation_location.url, headers = headers)
-        
+
         #   OK = 200,
         #   NotFound = 404,
         if response.status == 200:
@@ -417,10 +417,10 @@ class VideoTranslationClient:
 
         url = self.build_translation_url(translation_id)
         headers = self.build_request_header()
-        
+
         print(f"Requesting http GET: {url}")
         response = self.http.request("GET", url.url, headers = headers)
-        
+
         #   OK = 200,
         #   NotFound = 404,
         if response.status == 200:
@@ -433,7 +433,7 @@ class VideoTranslationClient:
             return True, None, None
 
         return False, response.reason, None
-    
+
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/get-iteration
     def request_get_iteration(self,
                               translation_id: str,
@@ -443,10 +443,10 @@ class VideoTranslationClient:
 
         url = self.build_iteration_url(translation_id, iteration_id)
         headers = self.build_request_header()
-        
+
         print(f"Requesting http GET: {url}")
         response = self.http.request("GET", url.url, headers = headers)
-        
+
         #   OK = 200,
         #   NotFound = 404,
         if response.status == 200:
@@ -465,7 +465,7 @@ class VideoTranslationClient:
                                   top: int = None,
                                   skip: int = None,
                                   maxPageSize: int = None) -> tuple[bool, str, PagedTranslationDefinition]:
-        
+
         url = self.build_translations_url()
         args = {}
         if top is not None:
@@ -474,14 +474,14 @@ class VideoTranslationClient:
             args["skip"] = skip
         if maxPageSize is not None:
             args["maxPageSize"] = maxPageSize
-        
+
         url = append_url_args(url, args)
-        
+
         headers = self.build_request_header()
-        
+
         print(f"Requesting http GET: {url}")
         response = self.http.request("GET", url.url, headers = headers)
-        
+
         #   OK = 200,
         if not response.status in [200]:
             error = response.data.decode('utf-8')
@@ -496,10 +496,10 @@ class VideoTranslationClient:
     def request_list_iterations(self) -> tuple[bool, str, PagedIterationDefinition]:
         url = self.build_iterations_url()
         headers = self.build_request_header()
-        
+
         print(f"Requesting http GET: {url}")
         response = self.http.request("GET", url.url, headers = headers)
-        
+
         #   OK = 200,
         if not response.status in [200]:
             error = response.data.decode('utf-8')
@@ -509,22 +509,22 @@ class VideoTranslationClient:
             data = response_iterations_json,
             dataclass_type = PagedIterationDefinition)
         return True, None, response_iterations
-    
+
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/delete-translation
     def request_delete_translation(self,
                                    translation_id: str) -> tuple[bool, str]:
         url = self.build_translation_url(translation_id)
         headers = self.build_request_header()
-        
+
         print(f"Requesting http DELETE: {url}")
         response = self.http.request("DELETE", url.url, headers = headers)
-        
+
         #   NoContent = 204,
         if not response.status in [204]:
             error = response.data.decode('utf-8')
             return False, error
         return True, None
-        
+
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/create-translation
     def request_create_translation(
             self,
@@ -562,16 +562,16 @@ class VideoTranslationClient:
             displayName = translation_display_name,
             description = translation_description,
         )
-        
+
         encoded_translation_create_body = orjson.dumps(dataclasses.asdict(translation_create_body))
-        
+
         url = self.build_translation_url(translation_id)
         headers = self.build_request_header()
         headers["Operation-Id"] = operation_id
-        
+
         print(f"Requesting http PUT: {url}")
         response = self.http.request("PUT", url.url, headers = headers, body=encoded_translation_create_body)
-        
+
         #   OK = 200,
         #   Created = 201,
         if not response.status in [200, 201]:
@@ -584,7 +584,7 @@ class VideoTranslationClient:
         operation_location = response.headers[HTTP_HEADERS_OPERATION_LOCATION]
         operation_location_url = urllib3.util.parse_url(operation_location)
         return True, None, response_translation, operation_location_url
-    
+
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/create-iteration
     def request_create_iteration(
             self,
@@ -653,7 +653,7 @@ class VideoTranslationClient:
                 kind=webvtt_file_kind,
                 url=webvtt_file_url,
             )
-        
+
         if enable_emotional_platform_voice is not None:
             iteration_create_input_body.enableEmotionalPlatformVoice = enable_emotional_platform_voice
 
@@ -661,14 +661,14 @@ class VideoTranslationClient:
             input=iteration_create_input_body,
             description=iteration_description,
         )
-        
+
         encoded_iteration_create_body = orjson.dumps(dataclasses.asdict(iteration_create_body))
         url = self.build_iteration_url(translation_id, iteration_id)
         if operation_id is None:
             operation_id = str(uuid.uuid4())
         headers = self.build_request_header()
         headers["Operation-Id"] = operation_id
-        
+
         print(f"Requesting http PUT: {url}")
         response = self.http.request("PUT", url.url, headers=headers, body=encoded_iteration_create_body)
 
