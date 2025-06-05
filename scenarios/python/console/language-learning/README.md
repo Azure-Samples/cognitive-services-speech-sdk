@@ -34,8 +34,8 @@ pip install azure-cognitiveservices-speech
 
 ### Run the sample
 
-Before you run the sample code, replace the value `YourSubscriptionKey` with your subscription key and
-replace the value `YourServiceRegion` for your Speech resource. You can find these values in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
+Before you run the sample code, in `config.json` file, replace the value `your_subscription_key` with your subscription key and
+replace the value `your_service_region` for your Speech resource. You can find these values in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
 You can either load the sample in your IDE and run it there or run it in a console by navigating to the directory you downloaded it to and running the command
 
 ```sh
