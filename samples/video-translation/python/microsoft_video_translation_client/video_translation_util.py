@@ -28,13 +28,11 @@ def dict_to_dataclass(data: dict, dataclass_type: Type[Any]) -> Any:
 
 
 def append_url_args(url: Url, args: dict) -> Url:
-    encoded_args = ""
-    if len(args) == 0:
+    if not args:
         return url
+    encoded_args = urlencode(args)
+    if "?" in url.url:
+        url_str = f"{url.url}&{encoded_args}"
     else:
-        encoded_args += urlencode(args)
-        if "?" in url.url:
-            url = f"{url}&{encoded_args}"
-        else:
-            url = f"{url}?{encoded_args}"
-        return urllib3.util.parse_url(url)
+        url_str = f"{url.url}?{encoded_args}"
+    return urllib3.util.parse_url(url_str)

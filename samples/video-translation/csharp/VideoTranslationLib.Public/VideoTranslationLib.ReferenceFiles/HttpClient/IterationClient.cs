@@ -21,7 +21,7 @@ using System.Threading.Tasks;
 
 public class IterationClient : HttpClientBase
 {
-    public IterationClient(HttpClientConfigBase config)
+    public IterationClient(HttpSpeechClientConfigBase config)
         : base(config)
     {
     }
@@ -64,8 +64,9 @@ public class IterationClient : HttpClientBase
         ArgumentException.ThrowIfNullOrEmpty(translationId);
         ArgumentException.ThrowIfNullOrEmpty(iterationId);
 
-        var url = BuildRequestBase(additionalHeaders: additionalHeaders)
-            .AppendPathSegment(translationId)
+        var url = await this.BuildRequestBaseAsync(
+            additionalHeaders: additionalHeaders).ConfigureAwait(false);
+        url = url.AppendPathSegment(translationId)
             .AppendPathSegment("iterations")
             .AppendPathSegment(iterationId);
 
@@ -92,8 +93,8 @@ public class IterationClient : HttpClientBase
 
     public async Task<PaginatedResources<TIteration>> QueryIterationsAsync<TIteration>(string translationId)
     {
-        var url = BuildRequestBase()
-            .AppendPathSegment(translationId);
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
+        url = url.AppendPathSegment(translationId);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -131,7 +132,7 @@ public class IterationClient : HttpClientBase
             throw new InvalidDataException($"Missing header {CommonPublicConst.Http.Headers.OperationLocation} in headers");
         }
 
-        var operationClient = new OperationClient(this.Config);
+        var operationClient = new OperationClient(this.SpeechConfig);
 
         await operationClient.QueryOperationUntilTerminateAsync(new Uri(operationLocation)).ConfigureAwait(false);
 
@@ -201,12 +202,14 @@ public class IterationClient : HttpClientBase
         ArgumentException.ThrowIfNullOrEmpty(iteration.Id);
         ArgumentException.ThrowIfNullOrEmpty(operationId);
 
-        var url = BuildRequestBase(additionalHeaders: additionalHeaders)
-            .AppendPathSegment(translationId)
+        var url = await this.BuildRequestBaseAsync(
+            additionalHeaders: additionalHeaders).ConfigureAwait(false);
+        url = url.AppendPathSegment(translationId)
             .AppendPathSegment("iterations")
             .AppendPathSegment(iteration.Id)
             .WithHeader(CommonPublicConst.Http.Headers.OperationId, operationId);
 
+        Console.WriteLine(url.Url);
         return await RequestWithRetryAsync(async () =>
         {
             return await url

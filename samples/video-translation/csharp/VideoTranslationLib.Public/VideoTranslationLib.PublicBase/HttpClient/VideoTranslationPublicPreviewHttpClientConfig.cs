@@ -5,17 +5,19 @@
 
 namespace Microsoft.SpeechServices.VideoTranslation;
 
-using Flurl;
-using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Public.Interface;
 using Microsoft.SpeechServices.CommonLib.Util;
 using System;
 
 public class VideoTranslationPublicPreviewHttpClientConfig :
-    HttpClientConfigBase
+    HttpSpeechClientConfigBase
 {
-    public VideoTranslationPublicPreviewHttpClientConfig(IRegionConfig regionConfig, string subKey)
-        : base(regionConfig, subKey)
+    public VideoTranslationPublicPreviewHttpClientConfig(
+        IRegionConfig regionConfig,
+        string subKey,
+        string customDomainName,
+        Guid? managedIdentityClientId)
+        : base(regionConfig, subKey, customDomainName, managedIdentityClientId)
     {
     }
 

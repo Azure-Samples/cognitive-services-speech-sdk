@@ -32,3 +32,15 @@ class WebvttFileKind(str, Enum):
     SourceLocaleSubtitle = 'SourceLocaleSubtitle'
     TargetLocaleSubtitle = 'TargetLocaleSubtitle'
     MetadataJson = 'MetadataJson'
+
+
+class EventHubVideoTranslationEventKind(str, Enum):
+    Ping = 'Ping'
+    TranslationCompletion = 'TranslationCompletion'
+    IterationCompletion = 'IterationCompletion'
+
+
+class EnableEmotionalPlatformVoice(str, Enum):
+    Auto = 'Auto'
+    Enable = 'Enable'
+    Disable = 'Disable'

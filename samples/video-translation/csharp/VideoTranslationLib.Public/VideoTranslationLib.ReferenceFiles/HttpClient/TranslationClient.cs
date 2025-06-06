@@ -10,17 +10,18 @@ using Flurl.Http;
 using Flurl.Util;
 using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Util;
-using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 using Microsoft.SpeechServices.DataContracts;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
 public class TranslationClient : HttpClientBase
 {
-    public TranslationClient(HttpClientConfigBase config)
+    public TranslationClient(HttpSpeechClientConfigBase config)
         : base(config)
     {
     }
@@ -32,8 +33,8 @@ public class TranslationClient : HttpClientBase
     {
         ArgumentException.ThrowIfNullOrEmpty(translationId);
 
-        var url = BuildRequestBase()
-            .AppendPathSegment(translationId);
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
+        url = url.AppendPathSegment(translationId);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -64,7 +65,7 @@ public class TranslationClient : HttpClientBase
 
     public async Task<IFlurlResponse> GetTranslationResponseAsync(string translationId)
     {
-        var url = BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         url = url.AppendPathSegment(translationId.ToString());
 
@@ -91,7 +92,7 @@ public class TranslationClient : HttpClientBase
 
     public async Task<PaginatedResources<Translation>> GetTranslationsAsync()
     {
-        var url = BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -103,7 +104,7 @@ public class TranslationClient : HttpClientBase
 
     public async Task<PaginatedResources<Iteration>> GetIterationsAsync(string translationId)
     {
-        var url = BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -118,7 +119,7 @@ public class TranslationClient : HttpClientBase
 
     public async Task<Iteration> GetIterationAsync(string translationId, string iterationId)
     {
-        var url = BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         return await RequestWithRetryAsync(async () =>
         {
@@ -134,7 +135,8 @@ public class TranslationClient : HttpClientBase
 
     public async Task<(Translation translation, Iteration iteration)> CreateTranslationAndIterationAndWaitUntilTerminatedAsync(
         Translation translation,
-        Iteration iteration)
+        Iteration iteration,
+        IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
         var transaltionResponse = await CreateTranslationAndWaitUntilTerminatedAsync(
             translation: translation).ConfigureAwait(false);
@@ -146,11 +148,11 @@ public class TranslationClient : HttpClientBase
             Formatting.Indented,
             CommonPublicConst.Json.WriterSettings));
 
-        var iterationClient = new IterationClient(this.Config);
+        var iterationClient = new IterationClient(this.SpeechConfig);
         var iterationResponse = await iterationClient.CreateIterationAndWaitUntilTerminatedAsync(
             translationId: transaltionResponse.Id,
             iteration: iteration,
-            additionalHeaders: null).ConfigureAwait(false);
+            additionalHeaders: additionalHeaders).ConfigureAwait(false);
 
         return (transaltionResponse, iterationResponse);
     }
@@ -172,7 +174,7 @@ public class TranslationClient : HttpClientBase
             throw new InvalidDataException($"Missing header {CommonPublicConst.Http.Headers.OperationLocation} in headers");
         }
 
-        var operationClient = new OperationClient(this.Config);
+        var operationClient = new OperationClient(this.SpeechConfig);
 
         await operationClient.QueryOperationUntilTerminateAsync(new Uri(operationLocation)).ConfigureAwait(false);
 
@@ -216,8 +218,8 @@ public class TranslationClient : HttpClientBase
         ArgumentException.ThrowIfNullOrEmpty(translation.Id);
         ArgumentException.ThrowIfNullOrEmpty(operationId);
 
-        var url = BuildRequestBase()
-            .AppendPathSegment(translation.Id)
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
+        url = url.AppendPathSegment(translation.Id)
             .WithHeader(CommonPublicConst.Http.Headers.OperationId, operationId);
 
         return await RequestWithRetryAsync(async () =>
