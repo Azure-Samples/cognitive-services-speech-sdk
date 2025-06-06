@@ -7,23 +7,29 @@ from dataclasses import dataclass
 from urllib3.util import Url
 from typing import Optional
 
-from microsoft_video_translation_client.video_translation_enum import *
+from microsoft_video_translation_client.video_translation_enum import (
+    OperationStatus, WebvttFileKind, VoiceKind, OneApiState, EnableEmotionalPlatformVoice
+)
+
 
 @dataclass(kw_only=True)
-class OperationDefinition():
+class OperationDefinition:
     id: str
     status: OperationStatus
 
+
 @dataclass(kw_only=True)
-class TranslationInputBaseDefinition():
+class TranslationInputBaseDefinition:
     speakerCount: Optional[int] = None
     exportSubtitleInVideo: Optional[bool] = None
     subtitleMaxCharCountPerSegment: Optional[int] = None
 
+
 @dataclass(kw_only=True)
-class WebvttFileDefinition():
+class WebvttFileDefinition:
     url: Url
     kind: WebvttFileKind
+
 
 @dataclass(kw_only=True)
 class TranslationInputDefinition(TranslationInputBaseDefinition):
@@ -35,17 +41,20 @@ class TranslationInputDefinition(TranslationInputBaseDefinition):
     voiceKind: VoiceKind
     enableLipSync: Optional[bool] = None
 
+
 @dataclass(kw_only=True)
-class StatelessResourceBaseDefinition():
+class StatelessResourceBaseDefinition:
     id: Optional[str] = None
     displayName: Optional[str] = None
     description: Optional[str] = None
     createdDateTime: Optional[datetime] = None
 
+
 @dataclass(kw_only=True)
 class StatefulResourceBaseDefinition(StatelessResourceBaseDefinition):
     status: Optional[OneApiState] = None
     lastActionDateTime: Optional[datetime] = None
+
 
 @dataclass(kw_only=True)
 class IterationInputDefinition(TranslationInputBaseDefinition):
@@ -60,12 +69,14 @@ class IterationInputDefinition(TranslationInputBaseDefinition):
     subtitleOutlineColor: Optional[str] = None
     subtitleFontSize: Optional[int] = None
 
+
 @dataclass(kw_only=True)
-class IterationResultDefinition():
+class IterationResultDefinition:
     translatedVideoFileUrl: Optional[Url] = None
     sourceLocaleSubtitleWebvttFileUrl: Optional[Url] = None
     targetLocaleSubtitleWebvttFileUrl: Optional[Url] = None
     metadataJsonWebvttFileUrl: Optional[Url] = None
+
 
 @dataclass(kw_only=True)
 class IterationDefinition(StatefulResourceBaseDefinition):
@@ -73,19 +84,22 @@ class IterationDefinition(StatefulResourceBaseDefinition):
     result: Optional[IterationResultDefinition] = None
     iterationFailureReason: Optional[str] = None
 
+
 @dataclass(kw_only=True)
 class TranslationDefinition(StatefulResourceBaseDefinition):
     input: TranslationInputDefinition
     latestIteration: Optional[IterationDefinition] = None
     latestSucceededIteration: Optional[IterationDefinition] = None
     translationFailureReason: Optional[str] = None
-    
+
+
 @dataclass(kw_only=True)
-class PagedTranslationDefinition():
+class PagedTranslationDefinition:
     value: list[TranslationDefinition]
     nextLink: Optional[Url] = None
 
+
 @dataclass(kw_only=True)
-class PagedIterationDefinition():
+class PagedIterationDefinition:
     value: list[IterationDefinition]
     nextLink: Optional[Url] = None

@@ -6,46 +6,47 @@
 namespace Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 
 using CommandLine;
+using Microsoft.SpeechServices.CommonLib;
 using System;
 using System.Globalization;
 using VoiceKind = Cris.Http.DTOs.Public.VideoTranslation.Public20250520.VoiceKind;
 
 public partial class CreateTranslationBaseOptions : BaseOptions
 {
-    [Option("translationId", Required = true, HelpText = "Specify translation ID.")]
+    [Option("translationId", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.TranslationId)]
     public string TranslationId { get; set; }
 
-    [Option("videoFileAzureBlobUrl", Required = false, HelpText = "Specify video file Azure blob URL.")]
+    [Option("videoFileAzureBlobUrl", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.VideoFileAzureBlobUrl)]
     public Uri VideoFileAzureBlobUrl { get; set; }
 
-    [Option("audioFileAzureBlobUrl", Required = false, HelpText = "Specify audio file Azure blob URL.")]
+    [Option("audioFileAzureBlobUrl", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.AudioFileAzureBlobUrl)]
     public Uri AudioFileAzureBlobUrl { get; set; }
 
-    [Option("sourceLocale", Required = false, HelpText = "Specify source locale of the video.")]
+    [Option("sourceLocale", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.SourceLocale)]
     public CultureInfo SourceLocale { get; set; }
 
-    [Option("targetLocale", Required = true, HelpText = "Specify target locale of the video.")]
+    [Option("targetLocale", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.TargetLocale)]
     public CultureInfo TargetLocale { get; set; }
 
-    [Option("voiceKind", Required = true, HelpText = "Specify voice kind: PlatformVoice or PersonalVoice.")]
+    [Option("voiceKind", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.VoiceKind)]
     public VoiceKind VoiceKind { get; set; }
 
-    [Option("speakerCount", Required = false, HelpText = "Specify speaker count.")]
+    [Option("speakerCount", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.SpeakerCount)]
     public int? SpeakerCount { get; set; }
 
-    [Option("enableLipSync", Required = false, HelpText = "Specify whether enable lip sync.")]
+    [Option("enableLipSync", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.EnableLipSync)]
     public bool EnableLipSync { get; set; }
 
-    [Option("subtitleMaxCharCountPerSegment", Required = false, HelpText = "Specify subtitle max visiable char count per segment.")]
+    [Option("subtitleMaxCharCountPerSegment", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.SubtitleMaxCharCountPerSegment)]
     public int? SubtitleMaxCharCountPerSegment { get; set; }
 
-    [Option("exportSubtitleInVideo", Required = false, HelpText = "Specify speaker count.")]
+    [Option("exportSubtitleInVideo", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.ExportSubtitleInVideo)]
     public bool ExportSubtitleInVideo { get; set; }
 
-    [Option("translationName", Required = false, HelpText = "Specify translation name.")]
+    [Option("translationName", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.TranslationName)]
     public string TranslationName { get; set; }
 
-    [Option("translationDescription", Required = false, HelpText = "Specify translation description.")]
+    [Option("translationDescription", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.TranslationDescription)]
     public string TranslationDescription { get; set; }
 }
 
