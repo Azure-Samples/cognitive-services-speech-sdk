@@ -6,11 +6,12 @@
 namespace Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 
 using CommandLine;
+using Microsoft.SpeechServices.CommonLib;
 
 [Verb("queryIterations", HelpText = "Query iterations.")]
 public class QueryIterationsOptions : BaseOptions
 {
-    [Option('t', "translationId", Required = true, HelpText = "Specify translation ID.")]
+    [Option("translationId", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.TranslationId)]
     public string TranslationId { get; set; }
 }
 

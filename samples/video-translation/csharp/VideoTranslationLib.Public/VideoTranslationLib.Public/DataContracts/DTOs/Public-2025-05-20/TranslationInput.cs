@@ -3,7 +3,7 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 
 using System;
 using System.Globalization;
@@ -24,16 +24,4 @@ public partial class TranslationInput
     public bool? ExportSubtitleInVideo { get; set; }
 
     public Uri VideoFileUrl { get; set; }
-
-    public string GetVideoFileName()
-    {
-        if (string.IsNullOrEmpty(this.VideoFileUrl?.OriginalString))
-        {
-            return string.Empty;
-        }
-
-        var videoFileName = this.VideoFileUrl.Segments.Last();
-        videoFileName = Uri.UnescapeDataString(videoFileName);
-        return videoFileName;
-    }
 }

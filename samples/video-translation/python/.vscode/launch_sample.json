@@ -2,6 +2,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "help",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--help"
+            ]
+        },
+        {
+            "name": "help-translate",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "create_translation_and_iteration_and_wait_until_terminated",
+                "--help"
+            ]
+        },
+        {
             "name": "eus-translate",
             "type": "debugpy",
             "request": "launch",
@@ -9,8 +30,8 @@
             "console": "integratedTerminal",
             "args": [
                 "--region", "eastus",
-                "--sub_key", "xx",
-                "--api_version", "2024-05-20-preview",
+                "--sub_key", "[sub_key]",
+                "--api_version", "[api_version]",
                 "create_translation_and_iteration_and_wait_until_terminated",
                 "--source_locale", "zh-CN",
                 "--target_locale", "en-US",
@@ -18,7 +39,46 @@
                 "--speaker_count", "1",
                 "--subtitle_max_char_count_per_segment", "20",
                 "--export_subtitle_in_video", "true",
-                "--video_file_blob_url", "https://xx.blob.core.windows.net/xx.mp4?sv=xx"
+                // audio_file_blob_url and video_file_blob_url are conflict.
+                // "--audio_file_blob_url", "https://xx.blob.core.windows.net/xx.mp3?sv=xx",
+                "--video_file_blob_url", "https://xx.blob.core.windows.net/xx.mp4?sv=xx",
+                // tts_custom_lexicon_file_url and tts_custom_lexicon_file_id_in_audio_content_creation are conflict.
+                // "--tts_custom_lexicon_file_url", "https://xx.blob.core.windows.net/xx.xml?sv=xx",
+                "--tts_custom_lexicon_file_id_in_audio_content_creation", "0aafbbd7-7c41-4d1b-bcf8-3e8621e5442e",
+                "--enable_video_speed_adjustment", "true",
+                "--enable_ocr_correction_from_subtitle", "true",
+                "--export_target_locale_advanced_subtitle_file", "true",
+                "--subtitle_primary_color", "FFFF54",
+                "--subtitle_outline_color", "FFFF5499",
+                "--subtitle_font_size", "10"
+            ]
+        },
+        {
+            "name": "eus-iterate-webvtt",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--region", "eastus",
+                "--sub_key", "[sub_key]",
+                "--api_version", "[api_version]",
+                "create_iteration_with_webvtt_and_wait_until_terminated",
+                "--translation_id", "[translation_id]",
+                "--webvtt_file_kind", "MetadataJson",
+                "--webvtt_file_blob_url", "https://xx.blob.core.windows.net/xx.vtt?sv=xx",
+                "--speaker_count", "1",
+                "--subtitle_max_char_count_per_segment", "20",
+                "--export_subtitle_in_video", "true",
+                // tts_custom_lexicon_file_url and tts_custom_lexicon_file_id_in_audio_content_creation are conflict.
+                // "--tts_custom_lexicon_file_url", "https://xx.blob.core.windows.net/xx.xml?sv=xx",
+                "--tts_custom_lexicon_file_id_in_audio_content_creation", "0aafbbd7-7c41-4d1b-bcf8-3e8621e5442e",
+                "--enable_video_speed_adjustment", "true",
+                "--enable_ocr_correction_from_subtitle", "true",
+                "--export_target_locale_advanced_subtitle_file", "true",
+                "--subtitle_primary_color", "FFFF54",
+                "--subtitle_outline_color", "FFFF5499",
+                "--subtitle_font_size", "10"
             ]
         },
         {
@@ -29,20 +89,31 @@
             "console": "integratedTerminal",
             "args": [
                 "--region", "eastus",
-                "--subKey", "xx",
-                "--api_version", "2024-05-20-preview",
+                "--subKey", "[sub_key]",
+                "--api_version", "[api_version]",
                 "request_create_translation_api",
-                "--translation_id", "xx",
-                "--operation_id", "xx",
-                "--translation_display_name", "xx",
-                "--translation_description", "xx",
+                "--translation_id", "[translation_id]",
+                "--operation_id", "[operation_id]",
+                "--translation_display_name", "[translation_display_name]",
+                "--translation_description", "[translation_description]",
                 "--source_locale", "zh-CN",
                 "--target_locale", "en-US",
                 "--voice_kind", "PlatformVoice",
                 "--speaker_count", "1",
                 "--subtitle_max_char_count_per_segment", "20",
                 "--export_subtitle_in_video", "true",
-                "--video_file_blob_url", "https://xx.blob.core.windows.net/xx.mp4?sv=xx"
+                // audio_file_blob_url and video_file_blob_url are conflict.
+                // "--audio_file_blob_url", "https://xx.blob.core.windows.net/xx.mp3?sv=xx",
+                "--video_file_blob_url", "https://xx.blob.core.windows.net/xx.mp4?sv=xx",
+                // tts_custom_lexicon_file_url and tts_custom_lexicon_file_id_in_audio_content_creation are conflict.
+                // "--tts_custom_lexicon_file_url", "https://xx.blob.core.windows.net/xx.xml?sv=xx",
+                "--tts_custom_lexicon_file_id_in_audio_content_creation", "0aafbbd7-7c41-4d1b-bcf8-3e8621e5442e",
+                "--enable_video_speed_adjustment", "true",
+                "--enable_ocr_correction_from_subtitle", "true",
+                "--export_target_locale_advanced_subtitle_file", "true",
+                "--subtitle_primary_color", "FFFF54",
+                "--subtitle_outline_color", "FFFF5499",
+                "--subtitle_font_size", "10"
             ]
         },
         {
@@ -53,18 +124,28 @@
             "console": "integratedTerminal",
             "args": [
                 "--region", "eastus",
-                "--sub_key", "xx",
-                "--api_version", "2024-05-20-preview",
+                "--sub_key", "[sub_key]",
+                "--api_version", "[api_version]",
                 "request_create_iteration_api",
-                "--translation_id", "xx",
-                "--iteration_id", "xx",
-                "--operation_id", "xx",
-                "--iteration_description", "xx",
+                "--translation_id", "[translation_id]",
+                "--iteration_id", "[iteration_id]",
+                "--operation_id", "[operation_id]",
+                "--iteration_description", "[iteration_description]",
                 "--speaker_count", "1",
                 "--subtitle_max_char_count_per_segment", "20",
                 "--export_subtitle_in_video", "true",
                 "--webvtt_file_kind", "MetadataJson",
-                "--webvtt_file_blob_url", "https://xx.blob.core.windows.net/xx.vtt?sv=xx"
+                "--webvtt_file_blob_url", "https://xx.blob.core.windows.net/xx.vtt?sv=xx",
+                "--tts_custom_lexicon_file_url", "https://xx.blob.core.windows.net/xx.xml?sv=xx",
+                // tts_custom_lexicon_file_url and tts_custom_lexicon_file_id_in_audio_content_creation are conflict.
+                // "--tts_custom_lexicon_file_url", "https://xx.blob.core.windows.net/xx.xml?sv=xx",
+                "--tts_custom_lexicon_file_id_in_audio_content_creation", "0aafbbd7-7c41-4d1b-bcf8-3e8621e5442e",
+                "--enable_video_speed_adjustment", "true",
+                "--enable_ocr_correction_from_subtitle", "true",
+                "--export_target_locale_advanced_subtitle_file", "true",
+                "--subtitle_primary_color", "FFFF54",
+                "--subtitle_outline_color", "FFFF5499",
+                "--subtitle_font_size", "10"
             ]
         },
         {
@@ -75,10 +156,10 @@
             "console": "integratedTerminal",
             "args": [
                 "--region", "eastus",
-                "--sub_key", "xx",
-                "--api_version", "2024-05-20-preview",
+                "--sub_key", "[sub_key]",
+                "--api_version", "[api_version]",
                 "request_get_operation_api",
-                "--operation_location", "https://xx.api.cognitive.microsoft.com/videotranslation/operations/xx?api-version=2024-05-20-preview"
+                "--operation_location", "https://xx.api.cognitive.microsoft.com/videotranslation/operations/xx?api-version=[api_version]"
             ]
         },
         {
@@ -89,10 +170,10 @@
             "console": "integratedTerminal",
             "args": [
                 "--region", "eastus",
-                "--sub_key", "xx",
-                "--api_version", "2024-05-20-preview",
+                "--sub_key", "[sub_key]",
+                "--api_version", "[api_version]",
                 "request_get_translation_api",
-                "--translation_id", "xx"
+                "--translation_id", "[translation_id]"
             ]
         },
         {
@@ -103,11 +184,11 @@
             "console": "integratedTerminal",
             "args": [
                 "--region", "eastus",
-                "--sub_key", "xx",
-                "--api_version", "2024-05-20-preview",
+                "--sub_key", "[sub_key]",
+                "--api_version", "[api_version]",
                 "request_get_iteration_api",
-                "--translation_id", "xx",
-                "--iteration_id", "xx"
+                "--translation_id", "[translation_id]",
+                "--iteration_id", "[iteration_id]"
             ]
         },
         {
@@ -118,8 +199,8 @@
             "console": "integratedTerminal",
             "args": [
                 "--region", "eastus",
-                "--sub_key", "xx",
-                "--api_version", "2024-05-20-preview",
+                "--sub_key", "[sub_key]",
+                "--api_version", "[api_version]",
                 "request_list_translations_api"
             ]
         },
@@ -131,10 +212,10 @@
             "console": "integratedTerminal",
             "args": [
                 "--region", "eastus",
-                "--sub_key", "xx",
-                "--api_version", "2024-05-20-preview",
+                "--sub_key", "[sub_key]",
+                "--api_version", "[api_version]",
                 "request_delete_translation_api",
-                "--translation_id", "xx"
+                "--translation_id", "[translation_id]"
             ]
         }
     ]

@@ -11,16 +11,20 @@ import dataclasses
 from termcolor import colored
 from datetime import datetime
 from urllib3.util import Url
-from microsoft_video_translation_client.video_translation_const import HTTP_HEADERS_OPERATION_LOCATION
+from microsoft_video_translation_client.video_translation_const import (
+    HTTP_HEADERS_OPERATION_LOCATION
+)
 from microsoft_video_translation_client.video_translation_enum import (
-    VoiceKind, OperationStatus, WebvttFileKind
+    VoiceKind, OperationStatus, WebvttFileKind, EnableEmotionalPlatformVoice
 )
 from microsoft_video_translation_client.video_translation_dataclass import (
-    OperationDefinition, TranslationDefinition, IterationDefinition,
-    TranslationInputDefinition, IterationInputDefinition, WebvttFileDefinition,
+    OperationDefinition, WebvttFileDefinition, TranslationInputDefinition,
+    IterationInputDefinition, IterationDefinition, TranslationDefinition,
     PagedTranslationDefinition, PagedIterationDefinition
 )
-from microsoft_video_translation_client.video_translation_util import dict_to_dataclass, append_url_args
+from microsoft_video_translation_client.video_translation_util import (
+    dict_to_dataclass, append_url_args
+)
 import time
 
 
@@ -44,30 +48,44 @@ class VideoTranslationClient:
         #   OK = 200,
         #   Created = 201,
         #   NoContent = 204,
-        #   BadRequest = 400
-        #   Unauthorized = 401
-        #   Forbidden = 403
-        #   NotFound = 404
+        #   BadRequest = 400,
+        #   Unauthorized = 401,
+        #   Forbidden = 403,
+        #   NotFound = 404,
         #   Conflict = 409
-        status_forcelist = tuple(set(x for x in requests.status_codes._codes) - set(x for x in [200, 201, 204, 400, 401, 403, 404, 409]))
+        status_forcelist = tuple(
+            set(x for x in requests.status_codes._codes)
+            - set(x for x in [200, 201, 204, 400, 401, 403, 404, 409])
+        )
         retries = urllib3.Retry(total=5, status_forcelist=status_forcelist)
         timeout = urllib3.util.Timeout(10)
         self.http = urllib3.PoolManager(timeout=timeout, retries=retries)
 
     # For most common scenario, customer not need provide webvtt first iteration.
-    # Even, it is supported to provide webvtt for the first iteration, customer can customize the client code if they want
-    # to run first iteration with webvtt.
+    # Even, it is supported to provide webvtt for the first iteration, customer can
+    # customize the client code if they want to run first iteration with webvtt.
     def create_translate_and_run_first_iteration_until_terminated(
         self,
         video_file_url: Url,
+        audio_file_url: Url,
         source_locale: locale,
         target_locale: locale,
         voice_kind: VoiceKind,
+        enable_emotional_platform_voice: EnableEmotionalPlatformVoice = None,
+        enable_lip_sync: bool = None,
         speaker_count: int = None,
         subtitle_max_char_count_per_segment: int = None,
-        export_subtitle_in_video: bool = None
+        export_subtitle_in_video: bool = None,
+        tts_custom_lexicon_file_url: Url = None,
+        tts_custom_lexicon_file_id_in_audio_content_creation: str = None,
+        enable_video_speed_adjustment: bool = None,
+        enable_ocr_correction_from_subtitle: bool = None,
+        export_target_locale_advanced_subtitle_file: bool = None,
+        subtitle_primary_color: str = None,
+        subtitle_outline_color: str = None,
+        subtitle_font_size: int = None
     ) -> tuple[bool, str, TranslationDefinition, IterationDefinition]:
-        if video_file_url is None or source_locale is None or target_locale is None or voice_kind is None or voice_kind is None:
+        if (video_file_url is None and audio_file_url is None) or target_locale is None or voice_kind is None:
             raise ValueError
 
         now = datetime.now()
@@ -76,9 +94,14 @@ class VideoTranslationClient:
         success, error, translation = self.create_translation_until_terminated(
             translation_id=translation_id,
             video_file_url=video_file_url,
+            audio_file_url=audio_file_url,
             source_locale=source_locale,
             target_locale=target_locale,
             voice_kind=voice_kind,
+            enable_lip_sync=enable_lip_sync,
+            speaker_count=speaker_count,
+            subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
+            export_subtitle_in_video=export_subtitle_in_video
         )
         if not success:
             return False, error, None, None
@@ -92,8 +115,17 @@ class VideoTranslationClient:
             translation_id=translation_id,
             iteration_id=iteration_id,
             speaker_count=speaker_count,
+            enable_emotional_platform_voice=enable_emotional_platform_voice,
             subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
             export_subtitle_in_video=export_subtitle_in_video,
+            tts_custom_lexicon_file_url=tts_custom_lexicon_file_url,
+            tts_custom_lexicon_file_id_in_audio_content_creation=tts_custom_lexicon_file_id_in_audio_content_creation,
+            enable_video_speed_adjustment=enable_video_speed_adjustment,
+            enable_ocr_correction_from_subtitle=enable_ocr_correction_from_subtitle,
+            export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
+            subtitle_primary_color=subtitle_primary_color,
+            subtitle_outline_color=subtitle_outline_color,
+            subtitle_font_size=subtitle_font_size,
         )
         if not success:
             return False, error, None, None
@@ -111,8 +143,17 @@ class VideoTranslationClient:
         webvtt_file_kind: WebvttFileKind,
         webvtt_file_url: Url,
         speaker_count: int = None,
+        enable_emotional_platform_voice: EnableEmotionalPlatformVoice = None,
         subtitle_max_char_count_per_segment: int = None,
-        export_subtitle_in_video: bool = None
+        export_subtitle_in_video: bool = None,
+        tts_custom_lexicon_file_url: Url = None,
+        tts_custom_lexicon_file_id_in_audio_content_creation: str = None,
+        enable_video_speed_adjustment: bool = None,
+        enable_ocr_correction_from_subtitle: bool = None,
+        export_target_locale_advanced_subtitle_file: bool = None,
+        subtitle_primary_color: str = None,
+        subtitle_outline_color: str = None,
+        subtitle_font_size: int = None
     ) -> tuple[bool, str, TranslationDefinition, IterationDefinition]:
         if webvtt_file_kind is None or webvtt_file_url is None:
             raise ValueError
@@ -121,9 +162,9 @@ class VideoTranslationClient:
             translation_id=translation_id,
         )
         if not success:
-            return False, error, None
+            return False, error, None, None
         elif translation is None:
-            return False, f"Not found translation ID: {translation_id}", None
+            return False, f"Not found translation ID: {translation_id}", None, None
 
         now = datetime.now()
         iteration_id = now.strftime("%m%d%Y%H%M%S")
@@ -134,11 +175,20 @@ class VideoTranslationClient:
             webvtt_file_kind=webvtt_file_kind,
             webvtt_file_url=webvtt_file_url,
             speaker_count=speaker_count,
+            enable_emotional_platform_voice=enable_emotional_platform_voice,
             subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
             export_subtitle_in_video=export_subtitle_in_video,
+            tts_custom_lexicon_file_url=tts_custom_lexicon_file_url,
+            tts_custom_lexicon_file_id_in_audio_content_creation=tts_custom_lexicon_file_id_in_audio_content_creation,
+            enable_video_speed_adjustment=enable_video_speed_adjustment,
+            enable_ocr_correction_from_subtitle=enable_ocr_correction_from_subtitle,
+            export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
+            subtitle_primary_color=subtitle_primary_color,
+            subtitle_outline_color=subtitle_outline_color,
+            subtitle_font_size=subtitle_font_size
         )
         if not success:
-            return False, error, None
+            return False, error, None, None
 
         return True, None, translation, iteration
 
@@ -146,20 +196,27 @@ class VideoTranslationClient:
         self,
         translation_id: str,
         video_file_url: Url,
+        audio_file_url: Url,
         source_locale: locale,
         target_locale: locale,
         voice_kind: VoiceKind,
+        enable_lip_sync: bool,
+        speaker_count: int = None,
+        subtitle_max_char_count_per_segment: int = None,
+        export_subtitle_in_video: bool = None,
     ) -> tuple[bool, str, TranslationDefinition]:
         operation_id = str(uuid.uuid4())
         success, error, response_translation, operation_location = self.request_create_translation(
             translation_id=translation_id,
             video_file_url=video_file_url,
+            audio_file_url=audio_file_url,
             source_locale=source_locale,
             target_locale=target_locale,
             voice_kind=voice_kind,
-            speaker_count=None,
-            subtitle_max_char_count_per_segment=None,
-            export_subtitle_in_video=None,
+            enable_lip_sync=enable_lip_sync,
+            speaker_count=speaker_count,
+            subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
+            export_subtitle_in_video=export_subtitle_in_video,
             translation_display_name=None,
             translation_description=None,
             operation_id=operation_id)
@@ -180,25 +237,21 @@ class VideoTranslationClient:
 
         return True, None, response_translation
 
-    def request_operation_until_terminated(
-            self,
-            operation_location: Url):
-        success, error, response_operation = self.request_get_operation(
-                operation_location=operation_location, printUrl=True)
+    def request_operation_until_terminated(self, operation_location: Url):
+        success, error, response_operation = self.request_get_operation(operation_location=operation_location, printUrl=True)
         if not success or response_operation is None:
             print(colored(
-                f"Failed to query operation for translation creation operation from location "
-                f"{operation_location} with error: {error}", 'red'))
+                f"Failed to query operation for translation creation from location {operation_location} with error: {error}",
+                'red'))
             return
 
         lastStatus = None
         while response_operation.status in [OperationStatus.Running, OperationStatus.NotStarted]:
-            success, error, response_operation = self.request_get_operation(
-                    operation_location=operation_location, printUrl=False)
+            success, error, response_operation = self.request_get_operation(operation_location=operation_location, printUrl=False)
             if not success or response_operation is None:
                 print(colored(
-                    f"Failed to query operation for translation creation operation from location "
-                    f"{operation_location} with error: {error}", 'red'))
+                    f"Failed to query operation for translation creation from location {operation_location} with error: {error}",
+                    'red'))
                 return
             if lastStatus != response_operation.status:
                 print(response_operation.status)
@@ -216,8 +269,17 @@ class VideoTranslationClient:
         webvtt_file_kind: WebvttFileKind = None,
         webvtt_file_url: Url = None,
         speaker_count: int = None,
+        enable_emotional_platform_voice: EnableEmotionalPlatformVoice = None,
         subtitle_max_char_count_per_segment: int = None,
         export_subtitle_in_video: bool = None,
+        tts_custom_lexicon_file_url: Url = None,
+        tts_custom_lexicon_file_id_in_audio_content_creation: str = None,
+        enable_video_speed_adjustment: bool = None,
+        enable_ocr_correction_from_subtitle: bool = None,
+        export_target_locale_advanced_subtitle_file: bool = None,
+        subtitle_primary_color: str = None,
+        subtitle_outline_color: str = None,
+        subtitle_font_size: int = None
     ) -> tuple[bool, str, IterationDefinition]:
         if translation_id is None or iteration_id is None:
             raise ValueError
@@ -227,23 +289,29 @@ class VideoTranslationClient:
             webvtt_file_kind=webvtt_file_kind,
             webvtt_file_url=webvtt_file_url,
             speaker_count=speaker_count,
+            enable_emotional_platform_voice=enable_emotional_platform_voice,
             subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
             export_subtitle_in_video=export_subtitle_in_video,
             iteration_description=None,
-            operation_id=None)
+            operation_id=None,
+            tts_custom_lexicon_file_url=tts_custom_lexicon_file_url,
+            tts_custom_lexicon_file_id_in_audio_content_creation=tts_custom_lexicon_file_id_in_audio_content_creation,
+            enable_video_speed_adjustment=enable_video_speed_adjustment,
+            enable_ocr_correction_from_subtitle=enable_ocr_correction_from_subtitle,
+            export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
+            subtitle_primary_color=subtitle_primary_color,
+            subtitle_outline_color=subtitle_outline_color,
+            subtitle_font_size=subtitle_font_size)
         if not success:
-            print(colored(
-                f"Failed to create iteration with ID {iteration_id} for translation {translation_id} "
-                f"with error: {error}", 'red'))
+            print(colored(f"Failed to create iteration with ID {iteration_id} for translation {translation_id} with error: {error}",
+                          'red'))
             return False, error, None
 
         self.request_operation_until_terminated(operation_location)
 
         success, error, response_iteration = self.request_get_iteration(translation_id, iteration_id)
         if not success:
-            print(colored(
-                f"Failed to query iteration {iteration_id} for translation {translation_id} "
-                f"with error: {error}", 'red'))
+            print(colored(f"Failed to query iteration {iteration_id} for translation {translation_id} with error: {error}", 'red'))
             return False, error, None
         if response_iteration.status != OperationStatus.Succeeded:
             print(colored(f"Iteration creation failed with error: {error}", 'red'))
@@ -318,7 +386,7 @@ class VideoTranslationClient:
             "Ocp-Apim-Subscription-Key": self.sub_key
         }
 
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/operation-operations/get-operation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/operation-operations/get-operation
     def request_get_operation(self,
                               operation_location: Url,
                               printUrl: bool) -> tuple[bool, str, OperationDefinition]:
@@ -344,7 +412,7 @@ class VideoTranslationClient:
 
         return False, response.reason, None
 
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/get-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/get-translation
     def request_get_translation(self,
                                 translation_id: str) -> tuple[bool, str, TranslationDefinition]:
         if translation_id is None:
@@ -369,7 +437,7 @@ class VideoTranslationClient:
 
         return False, response.reason, None
 
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/get-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/get-iteration
     def request_get_iteration(self,
                               translation_id: str,
                               iteration_id: str) -> tuple[bool, str, IterationDefinition]:
@@ -395,7 +463,7 @@ class VideoTranslationClient:
 
         return False, response.reason, None
 
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/list-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/list-translation
     def request_list_translations(self,
                                   top: int = None,
                                   skip: int = None,
@@ -427,7 +495,7 @@ class VideoTranslationClient:
             dataclass_type=PagedTranslationDefinition)
         return True, None, response_translations
 
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/list-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/list-iteration
     def request_list_iterations(self) -> tuple[bool, str, PagedIterationDefinition]:
         url = self.build_iterations_url()
         headers = self.build_request_header()
@@ -445,7 +513,7 @@ class VideoTranslationClient:
             dataclass_type=PagedIterationDefinition)
         return True, None, response_iterations
 
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/delete-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/delete-translation
     def request_delete_translation(self,
                                    translation_id: str) -> tuple[bool, str]:
         url = self.build_translation_url(translation_id)
@@ -460,29 +528,33 @@ class VideoTranslationClient:
             return False, error
         return True, None
 
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/create-translation?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/create-translation
     def request_create_translation(
             self,
             translation_id: str,
             video_file_url: str,
+            audio_file_url: str,
             source_locale: locale,
             target_locale: locale,
             voice_kind: VoiceKind,
+            enable_lip_sync: bool = None,
             speaker_count: int = None,
             subtitle_max_char_count_per_segment: int = None,
             export_subtitle_in_video: bool = None,
             translation_display_name: str = None,
             translation_description: str = None,
             operation_id: str = None,
-    ) -> tuple[bool, str, TranslationDefinition, Url]:
-        if translation_id is None or video_file_url is None or source_locale is None or target_locale is None or voice_kind is None:
+            ) -> tuple[bool, str, TranslationDefinition, Url]:
+        if translation_id is None or (video_file_url is None and audio_file_url is None) or target_locale is None or voice_kind is None:
             raise ValueError
 
         translation_create_input_body = TranslationInputDefinition(
             sourceLocale=source_locale,
             targetLocale=target_locale,
             voiceKind=voice_kind,
+            enableLipSync=enable_lip_sync,
             videoFileUrl=video_file_url,
+            audioFileUrl=audio_file_url,
             speakerCount=speaker_count,
             subtitleMaxCharCountPerSegment=subtitle_max_char_count_per_segment,
             exportSubtitleInVideo=export_subtitle_in_video,
@@ -516,7 +588,7 @@ class VideoTranslationClient:
         operation_location_url = urllib3.util.parse_url(operation_location)
         return True, None, response_translation, operation_location_url
 
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/create-iteration?view=rest-aiservices-videotranslation-2024-05-20-preview&tabs=HTTP
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/create-iteration
     def request_create_iteration(
             self,
             translation_id: str,
@@ -524,28 +596,72 @@ class VideoTranslationClient:
             webvtt_file_kind: WebvttFileKind = None,
             webvtt_file_url: Url = None,
             speaker_count: int = None,
+            enable_emotional_platform_voice: EnableEmotionalPlatformVoice = None,
             subtitle_max_char_count_per_segment: int = None,
             export_subtitle_in_video: bool = None,
             iteration_description: str = None,
             operation_id: str = None,
-    ) -> tuple[bool, str, IterationDefinition, Url]:
+            tts_custom_lexicon_file_url: Url = None,
+            tts_custom_lexicon_file_id_in_audio_content_creation: str = None,
+            enable_video_speed_adjustment: bool = None,
+            enable_ocr_correction_from_subtitle: bool = None,
+            export_target_locale_advanced_subtitle_file: bool = None,
+            subtitle_primary_color: str = None,
+            subtitle_outline_color: str = None,
+            subtitle_font_size: int = None
+            ) -> tuple[bool, str, IterationDefinition, Url]:
         if translation_id is None or iteration_id is None:
             raise ValueError
 
-        translation_create_input_body = IterationInputDefinition(
-            speakerCount=speaker_count,
-            exportSubtitleInVideo=export_subtitle_in_video,
-            subtitleMaxCharCountPerSegment=subtitle_max_char_count_per_segment,
-        )
+        iteration_create_input = IterationInputDefinition()
 
-        if webvtt_file_kind is not None and webvtt_file_kind is not None:
-            translation_create_input_body.webvttFile = WebvttFileDefinition(
+        if speaker_count is not None:
+            iteration_create_input.speakerCount = speaker_count
+
+        if subtitle_max_char_count_per_segment is not None:
+            iteration_create_input.subtitleMaxCharCountPerSegment = subtitle_max_char_count_per_segment
+
+        if export_subtitle_in_video is not None:
+            iteration_create_input.exportSubtitleInVideo = export_subtitle_in_video
+
+        if tts_custom_lexicon_file_url is not None:
+            iteration_create_input.ttsCustomLexiconFileUrl = tts_custom_lexicon_file_url
+
+        if tts_custom_lexicon_file_id_in_audio_content_creation is not None:
+            iteration_create_input.ttsCustomLexiconFileIdInAudioContentCreation = tts_custom_lexicon_file_id_in_audio_content_creation
+
+        if enable_video_speed_adjustment is not None:
+            iteration_create_input.enableVideoSpeedAdjustment = enable_video_speed_adjustment
+
+        if enable_ocr_correction_from_subtitle is not None:
+            iteration_create_input.enableOcrCorrectionFromSubtitle = enable_ocr_correction_from_subtitle
+
+        if export_target_locale_advanced_subtitle_file is not None:
+            iteration_create_input.exportTargetLocaleAdvancedSubtitleFile = export_target_locale_advanced_subtitle_file
+
+        if export_target_locale_advanced_subtitle_file is not None:
+            iteration_create_input.exportTargetLocaleAdvancedSubtitleFile = export_target_locale_advanced_subtitle_file
+
+        if subtitle_primary_color is not None:
+            iteration_create_input.subtitlePrimaryColor = subtitle_primary_color
+
+        if subtitle_outline_color is not None:
+            iteration_create_input.subtitleOutlineColor = subtitle_outline_color
+
+        if subtitle_font_size is not None:
+            iteration_create_input.subtitleFontSize = subtitle_font_size
+
+        if webvtt_file_kind is not None and webvtt_file_url is not None:
+            iteration_create_input.webvttFile = WebvttFileDefinition(
                 kind=webvtt_file_kind,
                 url=webvtt_file_url,
             )
 
+        if enable_emotional_platform_voice is not None:
+            iteration_create_input.enableEmotionalPlatformVoice = enable_emotional_platform_voice
+
         iteration_create_body = IterationDefinition(
-            input=translation_create_input_body,
+            input=iteration_create_input,
             description=iteration_description,
         )
 

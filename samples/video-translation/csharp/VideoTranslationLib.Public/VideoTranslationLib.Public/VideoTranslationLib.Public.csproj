@@ -13,11 +13,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Enums\" />
     <Folder Include="HttpClient\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>

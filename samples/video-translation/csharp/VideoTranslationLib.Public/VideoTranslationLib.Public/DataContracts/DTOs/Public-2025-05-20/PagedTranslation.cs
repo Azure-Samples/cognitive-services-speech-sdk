@@ -5,7 +5,7 @@
 
 using Microsoft.SpeechServices.DataContracts;
 
-namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20240520Preview;
+namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 
 public class PagedTranslation : PaginatedResources<Translation>
 {
