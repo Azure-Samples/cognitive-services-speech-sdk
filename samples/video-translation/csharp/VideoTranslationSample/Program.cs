@@ -222,7 +222,7 @@ internal class Program
                             ExportTargetLocaleAdvancedSubtitleFile = options.ExportTargetLocaleAdvancedSubtitleFile ? true : null,
                             SubtitlePrimaryColor = options.SubtitlePrimaryRgbaColor,
                             SubtitleOutlineColor = options.SubtitleOutlineRgbaColor,
-                            SubtitleFontSize = options.SubtitleFontSize,
+                            SubtitleFontSize = options.SubtitleFontSize == 0 ? null : options.SubtitleFontSize,
                             EnableEmotionalPlatformVoice = options.EnableEmotionalPlatformVoice ==
                                 EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
                         }
