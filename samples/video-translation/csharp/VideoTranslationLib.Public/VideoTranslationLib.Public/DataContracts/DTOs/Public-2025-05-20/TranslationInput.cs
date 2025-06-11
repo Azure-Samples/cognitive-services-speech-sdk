@@ -24,7 +24,6 @@ public partial class TranslationInput
 
     public Uri VideoFileUrl { get; set; }
 
-    // Below are advanced input
     public Uri AudioFileUrl { get; set; }
 
     public bool? EnableLipSync { get; set; }
