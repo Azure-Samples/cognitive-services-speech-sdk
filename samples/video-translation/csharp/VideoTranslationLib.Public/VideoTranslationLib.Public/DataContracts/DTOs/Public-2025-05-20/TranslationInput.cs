@@ -7,7 +7,6 @@ namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public
 
 using System;
 using System.Globalization;
-using System.Linq;
 
 public partial class TranslationInput
 {
@@ -24,4 +23,9 @@ public partial class TranslationInput
     public bool? ExportSubtitleInVideo { get; set; }
 
     public Uri VideoFileUrl { get; set; }
+
+    // Below are advanced input
+    public Uri AudioFileUrl { get; set; }
+
+    public bool? EnableLipSync { get; set; }
 }
