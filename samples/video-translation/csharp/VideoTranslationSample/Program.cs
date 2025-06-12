@@ -95,6 +95,8 @@ internal class Program
                             SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
                             ExportSubtitleInVideo = options.ExportSubtitleInVideo,
                             VideoFileUrl = options.VideoFileAzureBlobUrl,
+                            AudioFileUrl = options.AudioFileAzureBlobUrl,
+                            EnableLipSync = options.EnableLipSync ? true : null,
                         },
                     };
 
@@ -242,6 +244,8 @@ internal class Program
                             SubtitleMaxCharCountPerSegment = iteration.Input?.SubtitleMaxCharCountPerSegment,
                             ExportSubtitleInVideo = iteration.Input?.ExportSubtitleInVideo,
                             VideoFileUrl = options.VideoFileAzureBlobUrl,
+                            AudioFileUrl = options.AudioFileAzureBlobUrl,
+                            EnableLipSync = options.EnableLipSync ? true : null,
                         }
                     };
 
