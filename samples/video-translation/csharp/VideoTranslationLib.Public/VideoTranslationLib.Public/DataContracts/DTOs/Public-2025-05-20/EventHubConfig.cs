@@ -1,4 +1,4 @@
-﻿// <copyright file="EventHubConfig.cs" company="Microsoft Corporation">
+// <copyright file="EventHubConfig.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // </copyright>
 
