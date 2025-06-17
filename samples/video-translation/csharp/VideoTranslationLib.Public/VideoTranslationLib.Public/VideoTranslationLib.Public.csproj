@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\ConfigurationClient.cs" Link="HttpClient\ConfigurationClient.cs" />
     <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\IterationClient.cs" Link="HttpClient\IterationClient.cs" />
     <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\OperationClient.cs" Link="HttpClient\OperationClient.cs" />
     <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\TranslationClient.cs" Link="HttpClient\TranslationClient.cs" />

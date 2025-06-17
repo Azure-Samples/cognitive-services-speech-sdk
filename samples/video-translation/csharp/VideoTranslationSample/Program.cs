@@ -10,6 +10,7 @@ using Microsoft.SpeechServices.Common.Client.Enums.VideoTranslation;
 using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Public.Interface;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
+using Microsoft.SpeechServices.VideoTranslationSample.Advanced.HttpClient;
 using Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 using Newtonsoft.Json;
 using System;
@@ -77,8 +78,48 @@ internal class Program
 
         var operationClient = new OperationClient(httpConfig);
 
+        var configClient = new ConfigurationClient(httpConfig);
+
         switch (baseOptions)
         {
+            case CreateOrUpdateEventHubConfigOptions options:
+                {
+                    var config = await configClient.CreateOrUpdateEventHubConfigAsync(
+                        new EventHubConfig()
+                        {
+                            IsEnabled = options.IsEnabled,
+                            EventHubNamespaceHostName = options.EventHubNamespaceHostName,
+                            EventHubName = options.EventHubName,
+                            ManagedIdentityClientId = (options.ManagedIdentityClientId == Guid.Empty) ?
+                                null : options.ManagedIdentityClientId,
+                            EnabledEvents = options.EnabledEvents,
+                        }).ConfigureAwait(false);
+                    Console.WriteLine("EventHub configuration created or updated:");
+                    Console.WriteLine(JsonConvert.SerializeObject(
+                        config,
+                        Formatting.Indented,
+                        CommonPublicConst.Json.WriterSettings));
+                    break;
+                }
+
+            case QueryEventHubConfigOptions options:
+                {
+                    var config = await configClient.GetEventHubConfigAsync().ConfigureAwait(false);
+                    Console.WriteLine("EventHub configuration:");
+                    Console.WriteLine(JsonConvert.SerializeObject(
+                        config,
+                        Formatting.Indented,
+                        CommonPublicConst.Json.WriterSettings));
+                    break;
+                }
+
+            case PingEventHubOptions options:
+                {
+                    await configClient.PingEventHubAsync().ConfigureAwait(false);
+                    Console.WriteLine("Requested send ping event.");
+                    break;
+                }
+
             case CreateTranslationOptions options:
                 {
                     var translation = new Translation()
