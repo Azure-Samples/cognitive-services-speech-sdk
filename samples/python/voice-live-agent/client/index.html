@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Interaction</title>
+</head>
+<body>
+    <h1>Voice Interaction with Azure Communication Services</h1>
+    <button id="startBtn">Start Conversation</button>
+    <button id="stopBtn" disabled>Stop Conversation</button>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        let ws;
+        let audioContext;
+        let analyser;
+        let microphone;
+        let javascriptNode;
+
+        startBtn.addEventListener('click', () => {
+            ws = new WebSocket('wss://your-server-url/voice-agent/realtime'); // Replace with your server's WebSocket URL
+
+            ws.onopen = () => {
+                console.log('Connected to server');
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                sendMessage({ type: 'session.create' });
+
+                // Initialize audio capture
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        analyser = audioContext.createAnalyser();
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                        microphone.connect(analyser);
+                        analyser.connect(javascriptNode);
+                        javascriptNode.connect(audioContext.destination);
+
+                        javascriptNode.onaudioprocess = (e) => {
+                            const inputBuffer = e.inputBuffer;
+                            const inputData = inputBuffer.getChannelData(0);
+                            // Process audio data here and send to server
+                            sendAudioData(inputData);
+                        };
+                    })
+                    .catch(error => console.error('Error accessing microphone:', error));
+            };
+
+            ws.onmessage = (event) => {
+                const message = JSON.parse(event.data);
+                console.log('Received:', message);
+                // Handle incoming messages as needed
+            };
+
+            ws.onclose = () => {
+                console.log('Disconnected from server');
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket Error:', error);
+            };
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                sendMessage({ type: 'session.end' });
+                ws.close();
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+        });
+
+        function sendMessage(message) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(message));
+            } else {
+                console.error('WebSocket is not open');
+            }
+        }
+
+        function sendAudioData(inputData) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                // Convert audio data to appropriate format and send
+                const audioMessage = {
+                    type: 'audio',
+                    data: inputData
+                };
+                ws.send(JSON.stringify(audioMessage));
+            } else {
+                console.error('WebSocket is not open');
+            }
+        }
+    </script>
+</body>
+</html>
