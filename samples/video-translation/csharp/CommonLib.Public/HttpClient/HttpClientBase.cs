@@ -4,12 +4,12 @@
 //
 
 namespace Microsoft.SpeechServices.CommonLib.Util;
-
 using Flurl;
 using Flurl.Http;
 using Flurl.Http.Configuration;
 using Microsoft.SpeechServices.CommonLib.Public.Enums;
 using Microsoft.SpeechServices.CommonLib.Public.Interface;
+using Microsoft.SpeechServices.CommonLib.TtsUtil;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public;
 using Microsoft.SpeechServices.CustomVoice.TtsLib.TtsUtil;
 using Newtonsoft.Json;
@@ -25,22 +25,65 @@ public abstract class HttpClientBase
 {
     public HttpClientBase(HttpClientConfigBase config)
     {
-        this.Config = config;
+        this.BaseConfig = config;
+        this.Logger = new PublicAppLogger();
     }
 
-    protected HttpClientConfigBase Config { get; set; }
+    protected HttpClientConfigBase BaseConfig { get; set; }
+
+    protected HttpSpeechClientConfigBase SpeechConfig
+    {
+        get
+        {
+            if (this.BaseConfig is HttpSpeechClientConfigBase speechConfig)
+            {
+                return speechConfig;
+            }
+
+            return null;
+        }
+    }
 
     public abstract string ControllerName { get; }
 
-    public IAppLogger Logger { get; set; }
+    public IAppLogger Logger { get; private set; }
 
     public virtual bool IsVersionInSegment => false;
+
+    public async Task<IFlurlRequest> AuthenticateAsync(Flurl.Url request)
+    {
+        var speechConfig = this.SpeechConfig;
+        if (speechConfig != null)
+        {
+            if (!string.IsNullOrEmpty(speechConfig.SubscriptionKey))
+            {
+                return request.WithHeader(
+                    CommonPublicConst.Http.Headers.SubscriptionKey,
+                    speechConfig.SubscriptionKey);
+            }
+            else if (string.IsNullOrEmpty(speechConfig.CustomDomainName))
+            {
+                // OAuth only avaible when custom domain enabled.
+                throw new NotSupportedException($"Please provide either key or custom domain name");
+            }
+        }
+
+        if (this.BaseConfig.UseOAuth)
+        {
+            var token = await this.BaseConfig.AcquireOAuthTokenAsync().ConfigureAwait(false);
+            return request.WithOAuthBearerToken(token);
+        }
+        else
+        {
+            throw new NotSupportedException("Not supported auth");
+        }
+    }
 
     public async Task<IFlurlResponse> DeleteByIdAsync(
         string id,
         IReadOnlyDictionary<string, string> queryParams = null)
     {
-        var url = this.BuildRequestBase();
+        var url = await this.BuildRequestBaseAsync().ConfigureAwait(false);
 
         url = url.AppendPathSegment(id);
 
@@ -52,6 +95,7 @@ public abstract class HttpClientBase
             }
         }
 
+        this.Logger?.LogDebug(url.Url.ToString());
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
@@ -64,9 +108,11 @@ public abstract class HttpClientBase
         Guid id,
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
-        var url = this.BuildRequestBase(additionalHeaders: additionalHeaders)
-            .AppendPathSegment(id.ToString());
+        var url = await this.BuildRequestBaseAsync(
+            additionalHeaders: additionalHeaders).ConfigureAwait(false);
+        url = url.AppendPathSegment(id.ToString());
 
+        this.Logger?.LogDebug(url.Url.ToString());
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
@@ -80,9 +126,11 @@ public abstract class HttpClientBase
         Guid id,
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
-        var url = this.BuildRequestBase(additionalHeaders: additionalHeaders)
-            .AppendPathSegment(id.ToString());
+        var url = await this.BuildRequestBaseAsync(
+            additionalHeaders: additionalHeaders).ConfigureAwait(false);
+        url = url.AppendPathSegment(id.ToString());
 
+        this.Logger?.LogDebug(url.Url.ToString());
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
@@ -92,46 +140,46 @@ public abstract class HttpClientBase
         }).ConfigureAwait(false);
     }
 
-    protected IFlurlRequest BuildBackendPathVersionRequestBase(
+    protected async Task<IFlurlRequest> BuildBackendPathVersionRequestBaseAsync(
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
-        var url = this.Config.RootUrl
-            .AppendPathSegment(this.ControllerName)
-            .WithHeader(CommonPublicConst.Http.Headers.SubscriptionKey, this.Config.SubscriptionKey);
+        var url = this.BaseConfig.RootUrl
+            .AppendPathSegment(this.ControllerName);
+        var request = await this.AuthenticateAsync(url).ConfigureAwait(false);
         if (additionalHeaders != null)
         {
             foreach (var additionalHeader in additionalHeaders)
             {
-                url.WithHeader(additionalHeader.Key, additionalHeader.Value);
+                request = request.WithHeader(additionalHeader.Key, additionalHeader.Value);
             }
         }
 
         // Default json serializer will serialize enum to number, which will cause API parse DTO failure:
         //  "Error converting value 0 to type 'Microsoft.SpeechServices.Common.Client.OneApiState'. Path 'Status', line 1, position 56."
-        url.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
+        request.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
 
-        return url;
+        return request;
     }
 
-    protected IFlurlRequest BuildRequestBase(
+    protected async Task<IFlurlRequest> BuildRequestBaseAsync(
         IReadOnlyDictionary<string, string> additionalHeaders = null)
     {
-        var url = this.Config.RootUrl
-            .AppendPathSegment(this.ControllerName)
-            .WithHeader(CommonPublicConst.Http.Headers.SubscriptionKey, this.Config.SubscriptionKey);
+        var url = this.BaseConfig.RootUrl
+            .AppendPathSegment(this.ControllerName);
+        var request = await this.AuthenticateAsync(url).ConfigureAwait(false);
         if (additionalHeaders != null)
         {
             foreach (var additionalHeader in additionalHeaders)
             {
-                url.WithHeader(additionalHeader.Key, additionalHeader.Value);
+                request = request.WithHeader(additionalHeader.Key, additionalHeader.Value);
             }
         }
 
         // Default json serializer will serialize enum to number, which will cause API parse DTO failure:
         //  "Error converting value 0 to type 'Microsoft.SpeechServices.Common.Client.OneApiState'. Path 'Status', line 1, position 56."
-        url.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
+        request.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
 
-        return url;
+        return request;
     }
 
     public async Task<T> QueryTaskByIdUntilTerminatedAsync<T>(

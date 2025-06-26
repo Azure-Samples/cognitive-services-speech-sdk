@@ -2,6 +2,7 @@ import copy
 import torch
 import numpy as np
 
+
 class VADIterator:
     def __init__(
         self,
@@ -20,7 +21,8 @@ class VADIterator:
         model: preloaded .jit/.onnx silero VAD model
 
         threshold: float (default - 0.5)
-            Speech threshold. Silero VAD outputs speech probabilities for each audio chunk, probabilities ABOVE this value are considered as SPEECH.
+            Speech threshold. Silero VAD outputs speech probabilities for each audio chunk,
+            probabilities ABOVE this value are considered as SPEECH.
             It is better to tune this parameter for each dataset separately, but "lazy" 0.5 is pretty good for most datasets.
 
         sampling_rate: int (default - 16000)
@@ -39,7 +41,6 @@ class VADIterator:
         self.is_speaking = False
         self.buffer = []
         self.start_pad_buffer = []
-
 
         if sampling_rate not in [8000, 16000]:
             raise ValueError(
@@ -93,7 +94,7 @@ class VADIterator:
             if self.current_sample - self.temp_end >= self.min_silence_samples:
                 # if self.current_sample - self.temp_end > self.speech_pad_samples:
                 #     return None
-            # else:
+                # else:
                 # end of speak
                 self.temp_end = 0
                 self.triggered = False
@@ -109,6 +110,7 @@ class VADIterator:
 
         return None
 
+
 def int2float(sound):
     """
     Taken from https://github.com/snakers4/silero-vad
@@ -117,6 +119,7 @@ def int2float(sound):
     sound *= 1 / 32768
     # sound = sound.squeeze()  # depends on the use case
     return sound
+
 
 def float2int(sound):
     """

@@ -15,7 +15,7 @@ from azure.identity import DefaultAzureCredential
 import requests
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO,  # set to logging.DEBUG for verbose output
-        format="[%(asctime)s] %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
+                    format="[%(asctime)s] %(message)s", datefmt="%m/%d/%Y %I:%M:%S %p %Z")
 logger = logging.getLogger(__name__)
 
 
@@ -75,14 +75,16 @@ def submit_synthesis(job_id: str):
             },
         ],
         "avatarConfig": {
-            "customized": False, # set to True if you want to use customized avatar
+            "customized": False,  # set to True if you want to use customized avatar
             "talkingAvatarCharacter": "lisa",  # talking avatar character
             "talkingAvatarStyle": "graceful-sitting",  # talking avatar style, required for prebuilt avatar, optional for custom avatar
             "videoFormat": "mp4",  # mp4 or webm, webm is required for transparent background
             "videoCodec": "h264",  # hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
             "subtitleType": "soft_embedded",
-            "backgroundColor": "#FFFFFFFF", # background color in RGBA format, default is white; can be set to 'transparent' for transparent background
-            # "backgroundImage": "https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg", # background image URL, only support https, either backgroundImage or backgroundColor can be set
+            "backgroundColor": "#FFFFFFFF",  # background color in RGBA format, default is white;
+                                             # can be set to 'transparent' for transparent background
+            # "backgroundImage": "https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg",
+            # background image URL, only support https, either backgroundImage or backgroundColor can be set
         }
     }
 

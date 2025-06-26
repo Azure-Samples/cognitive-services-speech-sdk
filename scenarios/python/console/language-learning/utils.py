@@ -62,7 +62,7 @@ def convert_reference_words(reference_text, reference_words):
                 if (sub_text in dictionary) or (len(sub_text) == 1):
                     result.append(sub_text)
                     # Remove the sub_text from the text
-                    text = text[len(sub_text) :]
+                    text = text[len(sub_text):]
                     break
                 else:
                     # If the sub_text is not in the dictionary, then remove the last character of the sub_text

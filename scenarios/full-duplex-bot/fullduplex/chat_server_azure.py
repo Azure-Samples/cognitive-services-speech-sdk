@@ -32,6 +32,7 @@ if not SPEECH_REGION and not SPEECH_RESOURCE_ID:
 
 loop = asyncio.new_event_loop()
 
+
 class AzureChatServer:
     def __init__(self, in_queue, out_queue, language: str = "en-US", provider=None):
         self.in_queue = in_queue
@@ -70,12 +71,29 @@ class AzureChatServer:
         # Set all TimeoutSettings
         speech_config.speech_recognition_language = language
         speech_config.set_property(speechsdk.PropertyId.Speech_SegmentationSilenceTimeoutMs, "200")
-        # speech_config.set_service_property("trafficType", "voice-chat-demo", speechsdk.ServicePropertyChannel.UriQueryParameter)
-        # speech_config.set_service_property("SpeechContext-phraseDetection.TrailingSilenceTimeout", "3000", speechsdk.ServicePropertyChannel.UriQueryParameter)
-        # speech_config.set_service_property("SpeechContext-PhraseDetection.InitialSilenceTimeout", "10000", speechsdk.ServicePropertyChannel.UriQueryParameter)
-        # speech_config.set_service_property("SpeechContext-PhraseDetection.Dictation.Segmentation.Mode", "Custom", speechsdk.ServicePropertyChannel.UriQueryParameter)
-        # speech_config.set_service_property("SpeechContext-PhraseDetection.Dictation.Segmentation.SegmentationSilenceTimeoutMs", "200", speechsdk.ServicePropertyChannel.UriQueryParameter)
-        # speech_config.set_service_property("SpeechContext-phraseOutput.interimResults.resultType", "Hypothesis", speechsdk.ServicePropertyChannel.UriQueryParameter)
+        # speech_config.set_service_property(
+        #     "trafficType", "voice-chat-demo", speechsdk.ServicePropertyChannel.UriQueryParameter
+        # )
+        # speech_config.set_service_property(
+        #     "SpeechContext-phraseDetection.TrailingSilenceTimeout", "3000",
+        #     speechsdk.ServicePropertyChannel.UriQueryParameter
+        # )
+        # speech_config.set_service_property(
+        #     "SpeechContext-PhraseDetection.InitialSilenceTimeout", "10000",
+        #     speechsdk.ServicePropertyChannel.UriQueryParameter
+        # )
+        # speech_config.set_service_property(
+        #     "SpeechContext-PhraseDetection.Dictation.Segmentation.Mode", "Custom",
+        #     speechsdk.ServicePropertyChannel.UriQueryParameter
+        # )
+        # speech_config.set_service_property(
+        #     "SpeechContext-PhraseDetection.Dictation.Segmentation.SegmentationSilenceTimeoutMs", "200",
+        #     speechsdk.ServicePropertyChannel.UriQueryParameter
+        # )
+        # speech_config.set_service_property(
+        #     "SpeechContext-phraseOutput.interimResults.resultType", "Hypothesis",
+        #     speechsdk.ServicePropertyChannel.UriQueryParameter
+        # )
 
         # https://aka.ms/csspeech/timeouts.
         self.speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
@@ -111,11 +129,13 @@ class AzureChatServer:
                         self._total_audio_bytes += len(chunk)
                     await asyncio.sleep(0)
                 if self.recognized_text:
-                    await self.out_queue.put(json.dumps(
-                        {"type": "recognized", "text": self.recognized_text,
+                    msg = {
+                        "type": "recognized",
+                        "text": self.recognized_text,
                         "time": datetime.utcnow().strftime('%F %T.%f')[:-3],
                         "latency": int(self.last_latency)
-                          }))
+                    }
+                    await self.out_queue.put(json.dumps(msg))
                     logger.info(f"Recognized text x: {self.recognized_text}")
                     asyncio.ensure_future(self.recognized_handler(self.recognized_text, self.out_queue))
                     self.recognized_text = ""
@@ -140,13 +160,18 @@ class AzureChatServer:
     def on_cancelled(self, args: speechsdk.SpeechRecognitionCanceledEventArgs):
         logger.info(f"Cancelled: {args}")
         cancellation_reason = args.cancellation_details
-        logger.info(f"Cancellation reason: %s, error details: %s", cancellation_reason.reason, cancellation_reason.error_details)
+        logger.info("Cancellation reason: %s, error details: %s", cancellation_reason.reason, cancellation_reason.error_details)
 
     def on_recognizing(self, args):
         logger.info(f"Recognizing: {args.result.text}")
         if not self.interrupted:
             self.interrupted = True
-            self.out_queue.queue.put_nowait(json.dumps({"type": "interrupted", "reason": "intermediate text detected", "time": datetime.utcnow().strftime('%F %T.%f')[:-3]}))
+            interrupt_time = datetime.utcnow().strftime('%F %T.%f')[:-3]
+            self.out_queue.queue.put_nowait(json.dumps({
+                "type": "interrupted",
+                "reason": "intermediate text detected",
+                "time": interrupt_time
+            }))
 
     async def recognized_handler(self, text: str, out_queue):
         sentence = text
@@ -210,7 +235,6 @@ class AzureChatServer:
                 "latency": int((llm_finish_time - llm_start_time).total_seconds() * 1000)}
             await out_queue.put(json.dumps(msg))
 
-
             logger.info(f"Sending audio chunks for {self.pis_response.human_turn}")
             # Send control message to start
             # await out_queue.put('{ "type": "stream_start" }')
@@ -226,24 +250,37 @@ class AzureChatServer:
                 for chunk in self.pis_response.out_audio_stream:
                     if first:
                         tts_first_chunk_time = datetime.utcnow()
-                        await out_queue.put(json.dumps({
-                            "type": "stream_start", "reason": "TTS started",
-                            "time": tts_first_chunk_time.strftime('%F %T.%f')[:-3], "latency": int((tts_first_chunk_time - llm_finish_time).total_seconds() * 1000)}))
+                        latency = int((tts_first_chunk_time - llm_finish_time).total_seconds() * 1000)
+                        time_str = tts_first_chunk_time.strftime('%F %T.%f')[:-3]
+                        stream_msg = {
+                            "type": "stream_start",
+                            "reason": "TTS started",
+                            "time": time_str,
+                            "latency": latency
+                        }
+                        await out_queue.put(json.dumps(stream_msg))
                         await out_queue.put(chunk)
                         first = False
                         last_update = time.time()
                     else:
                         # logger.info(f"Sending chunk of audio")
                         for i in range(0, len(chunk), 1200):
-                            if self.pis_response.streaming and self.pis_response.turn_id == turn_id and not self.interrupted:
+                            if (self.pis_response.streaming and
+                                    self.pis_response.turn_id == turn_id and
+                                    not self.interrupted):
                                 # Ensure we're still streaming this response
-                                await out_queue.put(chunk[i : i + 1200])
+                                await out_queue.put(chunk[i:i + 1200])
                                 current_time = time.time()
                                 if current_time - last_update < 0.024:
-                                    await asyncio.sleep(last_update + 0.024 - current_time)
+                                    sleep_time = last_update + 0.024 - current_time
+                                    await asyncio.sleep(sleep_time)
                                 else:
-                                    logging.warning(f"We got unexpected delay: {current_time - last_update - 0.024}")
-                                    # await out_queue.put(json.dumps({"type": "service underrun", "time": current_time - last_update - 0.024}))
+                                    delay = current_time - last_update - 0.024
+                                    logging.warning(f"We got unexpected delay: {delay}")
+                                    # await out_queue.put(json.dumps({
+                                    #     "type": "service underrun",
+                                    #     "time": current_time - last_update - 0.024
+                                    # }))
                                 last_update = time.time()
                             else:
                                 interrupted = True
@@ -252,7 +289,7 @@ class AzureChatServer:
                                 )
                                 return
                     await asyncio.sleep(0)
-            except TypeError as e:
+            except TypeError:
                 interrupted = True
                 logger.info(
                     "Stream has stopped and response gone. No longer writing to outqueue"

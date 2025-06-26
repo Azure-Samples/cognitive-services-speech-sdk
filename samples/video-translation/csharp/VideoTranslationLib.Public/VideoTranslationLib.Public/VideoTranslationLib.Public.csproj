@@ -7,17 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\ConfigurationClient.cs" Link="HttpClient\ConfigurationClient.cs" />
     <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\IterationClient.cs" Link="HttpClient\IterationClient.cs" />
     <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\OperationClient.cs" Link="HttpClient\OperationClient.cs" />
     <Compile Include="..\VideoTranslationLib.ReferenceFiles\HttpClient\TranslationClient.cs" Link="HttpClient\TranslationClient.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Enums\" />
     <Folder Include="HttpClient\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 
   <ItemGroup>

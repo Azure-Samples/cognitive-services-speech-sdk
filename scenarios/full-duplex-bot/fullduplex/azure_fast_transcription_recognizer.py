@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 AzureADTokenProvider = Callable[[], str]
 
+
 class VADHandler(threading.Thread):
     def __init__(self, model, threshold, sampling_rate, min_silence_duration_ms, speech_pad_ms, stop_event, input_queue, output_queue):
         super().__init__()
@@ -29,7 +30,6 @@ class VADHandler(threading.Thread):
             min_silence_duration_ms=min_silence_duration_ms,
             speech_pad_ms=speech_pad_ms
         )
-
 
     def run(self) -> None:
         logger.info("VAD handler started")
@@ -97,6 +97,7 @@ class AzureFastTranscriptionClient(threading.Thread):
                 print(response.text)
             if self.callback is not None:
                 self.callback(response.json())
+
 
 class AzureFastTranscriptionRecognizer:
     def __init__(self, endpoint: str, token_provider: AzureADTokenProvider = None, key: str = None):
@@ -171,6 +172,7 @@ class AzureFastTranscriptionRecognizer:
     def on_recognized(self, callback: Callable[[str], None]):
         self._on_recognized = callback
 
+
 if __name__ == '__main__':
     import os
     from azure.identity import DefaultAzureCredential, get_bearer_token_provider
@@ -187,5 +189,6 @@ if __name__ == '__main__':
             if not chunk:
                 break
             recognizer(chunk)
+
             # time.sleep(0.05)
     recognizer.stop()

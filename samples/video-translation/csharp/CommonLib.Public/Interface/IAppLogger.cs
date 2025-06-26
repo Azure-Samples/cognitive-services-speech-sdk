@@ -12,4 +12,6 @@ public interface IAppLogger
     public void LogLine(string message);
 
     public void Log(string message);
+
+    public void LogDebug(string message);
 }

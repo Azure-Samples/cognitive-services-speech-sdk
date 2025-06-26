@@ -24,4 +24,9 @@ public class PublicAppLogger : IAppLogger
     {
         Console.WriteLine();
     }
+
+    void IAppLogger.LogDebug(string message)
+    {
+        Console.WriteLine(message);
+    }
 }
