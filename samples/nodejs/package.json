@@ -1,0 +1,24 @@
+{
+  "name": "realtime-sample-nodejs",
+  "version": "1.0.0",
+  "main": "./server/server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@azure/core-auth": "^1.9.0",
+    "@azure/openai": "^2.0.0",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.44.1",
+    "openai": "^5.5.1",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.1.0"
+  }
+}
