@@ -346,8 +346,7 @@ window.addEventListener('DOMContentLoaded', () => {
               "chatbot_focus": "Non-Public Education",
               "conversation_id": "3bb0ef50-e649-4904-975f-dee0d40d014c",
               "search_source": "cosmos://ncdoa",
-              "genai_model": "https://ditaichat.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2025-01-01-preview",
-              "genai_key": ""
+              "genai_model": "https://ditaichat.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2025-01-01-preview"
             });
 
             const requestOptions = {
@@ -357,7 +356,7 @@ window.addEventListener('DOMContentLoaded', () => {
               redirect: "follow"
             };
 
-            fetch("https://zammo-azure.azurewebsites.net/api/aiForChat?code=", requestOptions)
+            fetch("", requestOptions)
               .then((response) => response.text())
               .then((result) => {
                 console.log(result);
