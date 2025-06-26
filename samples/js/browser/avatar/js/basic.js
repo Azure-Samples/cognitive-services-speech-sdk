@@ -357,7 +357,7 @@ window.addEventListener('DOMContentLoaded', () => {
               redirect: "follow"
             };
 
-            fetch("https://zammo-azure.azurewebsites.net/api/aiForChat?code=Ce6g5y2u2lsUcwNp4SEZevq5nNKH6EkWNEy3n-zOS8yGAzFuU13YWg==", requestOptions)
+            fetch("https://zammo-azure.azurewebsites.net/api/aiForChat?code=", requestOptions)
               .then((response) => response.text())
               .then((result) => {
                 console.log(result);
