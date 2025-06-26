@@ -185,7 +185,7 @@ function htmlEncode(text) {
 
 window.startSession = () => {
     const cogSvcRegion = "eastus2"
-    const cogSvcSubKey = "5W8uUL2UFEjbAzO2N9xUZCdjH7nRSfpYEAhDnBpGIBAknNgS4NqGJQQJ99BFACHYHv6XJ3w3AAAYACOGBr3N"
+    const cogSvcSubKey = ""
     if (cogSvcSubKey === '') {
         alert('Please fill in the API key of your speech resource.')
         return
