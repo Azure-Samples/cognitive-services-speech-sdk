@@ -347,7 +347,7 @@ window.addEventListener('DOMContentLoaded', () => {
               "conversation_id": "3bb0ef50-e649-4904-975f-dee0d40d014c",
               "search_source": "cosmos://ncdoa",
               "genai_model": "https://ditaichat.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2025-01-01-preview",
-              "genai_key": "D5Au6zhagzXDrW7k92uAx4AQiQbDUK3QD6D1477QFaxVP6TljErlJQQJ99AKACYeBjFXJ3w3AAABACOGGSuc"
+              "genai_key": ""
             });
 
             const requestOptions = {
