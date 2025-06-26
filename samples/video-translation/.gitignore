@@ -1,2 +1,0 @@
-# to avoid check in launch.json due to it contains sub keys.
-launch.json

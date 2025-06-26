@@ -126,49 +126,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     );
 }
 
-// // Make video background transparent by matting
-// function makeBackgroundTransparent(timestamp) {
-//     // Throttle the frame rate to 30 FPS to reduce CPU usage
-//     if (timestamp - previousAnimationFrameTimestamp > 30) {
-//         video = document.getElementById('video')
-//         tmpCanvas = document.getElementById('tmpCanvas')
-//         tmpCanvasContext = tmpCanvas.getContext('2d', { willReadFrequently: true })
-//         tmpCanvasContext.drawImage(video, 0, 0, video.videoWidth, video.videoHeight)
-//         if (video.videoWidth > 0) {
-//             let frame = tmpCanvasContext.getImageData(0, 0, video.videoWidth, video.videoHeight)
-//             for (let i = 0; i < frame.data.length / 4; i++) {
-//                 let r = frame.data[i * 4 + 0]
-//                 let g = frame.data[i * 4 + 1]
-//                 let b = frame.data[i * 4 + 2]
-//                 if (g - 150 > r + b) {
-//                     // Set alpha to 0 for pixels that are close to green
-//                     frame.data[i * 4 + 3] = 0
-//                 } else if (g + g > r + b) {
-//                     // Reduce green part of the green pixels to avoid green edge issue
-//                     adjustment = (g - (r + b) / 2) / 3
-//                     r += adjustment
-//                     g -= adjustment * 2
-//                     b += adjustment
-//                     frame.data[i * 4 + 0] = r
-//                     frame.data[i * 4 + 1] = g
-//                     frame.data[i * 4 + 2] = b
-//                     // Reduce alpha part for green pixels to make the edge smoother
-//                     a = Math.max(0, 255 - adjustment * 4)
-//                     frame.data[i * 4 + 3] = a
-//                 }
-//             }
-
-//             canvas = document.getElementById('canvas')
-//             canvasContext = canvas.getContext('2d')
-//             canvasContext.putImageData(frame, 0, 0);
-//         }
-
-//         previousAnimationFrameTimestamp = timestamp
-//     }
-
-//     window.requestAnimationFrame(makeBackgroundTransparent)
-// }
-
 // Do HTML encoding on given text
 function htmlEncode(text) {
     const entityMap = {
