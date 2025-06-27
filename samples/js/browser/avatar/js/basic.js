@@ -140,13 +140,9 @@ function htmlEncode(text) {
     return String(text).replace(/[&<>"'\/]/g, (match) => entityMap[match])
 }
 
-window.startSession = () => {
+function startSession() {
     const cogSvcRegion = "eastus2"
-    const cogSvcSubKey = "5W8uUL2UFEjbAzO2N9xUZCdjH7nRSfpYEAhDnBpGIBAknNgS4NqGJQQJ99BFACHYHv6XJ3w3AAAYACOGBr3N"
-    if (cogSvcSubKey === '') {
-        alert('Please fill in the API key of your speech resource.')
-        return
-    }
+    const cogSvcSubKey = "2YB4sSIpGnzwcXKFh9kUlQtCP7GTQs2oj3ZlxMXokzrhRaaXOSRkJQQJ99BFACHYHv6XJ3w3AAAYACOGSJ1L"
 
     let speechSynthesisConfig
     speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
@@ -331,4 +327,7 @@ window.addEventListener('DOMContentLoaded', () => {
         micBtn.textContent = '🎤 Not supported'
         log('SpeechRecognition API not supported in this browser.')
     }
+
+    // Automatically start the session when the DOM is loaded
+    startSession();
 })
