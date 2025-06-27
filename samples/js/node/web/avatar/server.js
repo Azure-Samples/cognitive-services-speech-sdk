@@ -27,9 +27,9 @@ const io = new Server(server)
 app.use(express.json())
 app.use(bodyParser.text({ type: '*/*' }))
 
-app.use('/static', express.static(path.join(__dirname, '../static')))
+app.use('/static', express.static(path.join(__dirname, './static/')))
 app.set('view engine', 'ejs')
-app.set('views', path.join(__dirname, '../web'))
+app.set('views', path.join(__dirname, './'))
 
 // Environment variables
 // Speech resource (required)
@@ -43,6 +43,7 @@ const azure_openai_deployment_name = process.env.AZURE_OPENAI_DEPLOYMENT_NAME //
 const openai_api_version = "2024-06-01"
 // Customized ICE server (optional, only required for customized ICE server)
 const ice_server_url = process.env.ICE_SERVER_URL // The ICE URL, e.g. turn:x.x.x.x:3478
+const ice_server_url_remote = process.env.ICE_SERVER_URL_REMOTE // The ICE URL for remote side, e.g. turn:x.x.x.x:3478. This is only required when the ICE address for remote side is different from local side.  # noqa: E501
 const ice_server_username = process.env.ICE_SERVER_USERNAME // The ICE username
 const ice_server_password = process.env.ICE_SERVER_PASSWORD // The ICE password
 // Cognitive search resource (optional, only required for 'on your data' scenario)
@@ -77,6 +78,12 @@ if (azure_openai_endpoint && azure_openai_api_key) {
 app.get('/', (req, res) => {
     const client_id = initializeClient()
     res.render('chat', { client_id: client_id, enable_websockets: enable_websockets })
+})
+
+// The basic route, which shows the basic web page
+app.get('/basic', (req, res) => {
+    const client_id = initializeClient()
+    res.render('basic', { client_id: client_id})
 })
 
 // The chat route, which shows the chat web page
@@ -185,7 +192,7 @@ app.post('/api/connectAvatar', async (req, res) => {
         // Apply customized ICE server if provided
         if (ice_server_url && ice_server_username && ice_server_password) {
             ice_token_obj = {
-                Urls: [ice_server_url],
+                Urls: ice_server_url_remote ? [ice_server_url_remote] : [ice_server_url],
                 Username: ice_server_username,
                 Password: ice_server_password
             }
@@ -405,6 +412,18 @@ app.post('/api/disconnectSTT', (req, res) => {
         res.status(200).send('STT Disconnected.')
     } catch (e) {
         res.status(400).send(`STT disconnection failed. Error message: ${e}`)
+    }
+})
+
+// The API route to speak a given SSML
+app.post('/api/speak', async (req, res) => {
+    const client_id = req.headers['clientid']
+    try {
+        const ssml = req.body.toString('utf-8')
+        const result_id = await speakSsml(ssml, client_id)
+        res.status(200).send(result_id)
+    } catch (e) {
+        res.status(400).send(`Speak failed. Error message: ${e}`)
     }
 })
 
@@ -784,27 +803,21 @@ async function speakText(text, voice, speaker_profile_id, ending_silence_ms, cli
                      </voice>
                    </speak>`
     }
-    await speakSsml(ssml, client_id, false)
+    await speakSsml(ssml, client_id)
 }
 
 // Speak the given ssml with speech sdk
-async function speakSsml(ssml, client_id, asynchronized) {
+async function speakSsml(ssml, client_id) {
     const speech_synthesizer = client_contexts[client_id].speech_synthesizer
 
     return new Promise((resolve, reject) => {
-        if (asynchronized) {
-            speech_synthesizer.startSpeakingSsmlAsync(
-                ssml,
-                result => resolve(result),
-                error => reject(error))
-        } else {
             speech_synthesizer.speakSsmlAsync(
                 ssml,
                 result => {
                     if (result.reason === speechsdk.ResultReason.SynthesizingAudioCompleted) {
                         console.log('The current text playback is complete.')
                         client_contexts[client_id].can_speak_next = true
-                        resolve()
+                        resolve(result.resultId)
                     } else if (result.reason === speechsdk.ResultReason.Canceled) {
                         const cancellation_details = speechsdk.CancellationDetails.fromResult(result)
                         console.log(`Speech synthesis canceled: ${cancellation_details.reason}`)
@@ -815,7 +828,6 @@ async function speakSsml(ssml, client_id, asynchronized) {
                 },
                 error => reject(error)
             )
-        }
     })
 }
 

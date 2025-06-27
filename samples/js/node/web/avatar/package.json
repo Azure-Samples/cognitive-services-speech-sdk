@@ -1,7 +1,7 @@
 {
   "name": "realtime-sample-nodejs",
   "version": "1.0.0",
-  "main": "./server/server.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
