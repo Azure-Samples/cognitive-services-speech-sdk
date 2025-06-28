@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Voice Live Test Client</title>
+</head>
+<body>
+  <h1>Azure Voice Live Web Client</h1>
+  <button id="startBtn">Start Streaming</button>
+  <button id="stopBtn" disabled>Stop Streaming</button>
+  <audio id="playback" controls></audio>
+
+<script>
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const playback = document.getElementById('playback');
+
+  let ws;
+  let mediaRecorder;
+  let audioContext;
+  let sourceNode;
+  let audioQueue = [];
+  let audioPlaying = false;
+
+  startBtn.onclick = async () => {
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+      alert('Your browser does not support MediaRecorder API');
+      return;
+    }
+
+    // Connect to server WebSocket
+    ws = new WebSocket('ws://localhost:8000/web/ws/');
+
+    ws.onopen = () => {
+      console.log('WebSocket opened');
+      startRecording();
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    };
+
+    ws.onmessage = event => {
+      // Server sends audio base64 JSON
+      const data = JSON.parse(event.data);
+      if (data.type === 'audio' && data.audio) {
+        playAudioFromBase64(data.audio);
+      } else if (data.type === 'stop_audio') {
+        console.log('Received stop_audio from server');
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('WebSocket closed');
+      stopBtn.disabled = true;
+      startBtn.disabled = false;
+    };
+
+    ws.onerror = err => {
+      console.error('WebSocket error:', err);
+    };
+  };
+
+  stopBtn.onclick = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.close();
+    }
+  };
+
+  function startRecording() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+      mediaRecorder.ondataavailable = e => {
+        // e.data is Blob
+        const reader = new FileReader();
+        reader.onload = () => {
+          // Convert audio data to ArrayBuffer
+          const arrayBuffer = reader.result;
+          // Here you might convert webm/ogg Opus to PCM 16k mono
+          // For simplicity, we send raw webm blob base64 (your server must decode accordingly)
+          const base64data = arrayBufferToBase64(arrayBuffer);
+          const message = JSON.stringify({
+            type: 'audio',
+            audio: base64data,
+          });
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(message);
+          }
+        };
+        reader.readAsArrayBuffer(e.data);
+      };
+
+      mediaRecorder.start(250); // send audio data every 250ms
+    });
+  }
+
+  function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  }
+
+  // Playback functions
+  function playAudioFromBase64(base64Audio) {
+    const audioData = base64ToArrayBuffer(base64Audio);
+    if (!audioContext) {
+      audioContext = new AudioContext();
+    }
+    audioContext.decodeAudioData(audioData, buffer => {
+      const source = audioContext.createBufferSource();
+      source.buffer = buffer;
+      source.connect(audioContext.destination);
+      source.start();
+    }, error => {
+      console.error('Error decoding audio data', error);
+    });
+  }
+
+  function base64ToArrayBuffer(base64) {
+    const binary_string = window.atob(base64);
+    const len = binary_string.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
+</script>
+</body>
+</html>
