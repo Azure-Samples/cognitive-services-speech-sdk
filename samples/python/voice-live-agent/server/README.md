@@ -25,6 +25,7 @@ voice-live-agent/
 │ └── helper.py             # Utility functions for JSON parsing and data extraction
 ├── client/
 │ ├── index.html # Mic capture UI
+│ └── main.js # ACS Web Calling SDK client
 └── .env # ACS & Voice Live credentials
 
 ## Quick Start

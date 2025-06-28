@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Voice Live Client</title>
+</head>
+<body>
+  <h1>Voice Live Client</h1>
+  <button id="startBtn" onclick="startStreaming()">Start</button>
+  <button id="stopBtn" onclick="stopStreaming()" disabled>Stop</button>
+
+  <script>
+    let mediaStream;
+    let processor;
+    let socket;
+
+    const audioContext = new AudioContext({ sampleRate: 24000 });
+
+    function float32ToInt16(float32Array) {
+        const int16Array = new Int16Array(float32Array.length);
+        for (let i = 0; i < float32Array.length; i++) {
+            const s = Math.max(-1, Math.min(1, float32Array[i]));
+            int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        }
+        return int16Array;
+    }
+
+    async function startMicrophone() {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+            }
+        });
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        processor = audioContext.createScriptProcessor(8192, 1, 1);
+
+        processor.onaudioprocess = (event) => {
+        console.log("Audio frame processed", event.inputBuffer.length);
+        const input = event.inputBuffer.getChannelData(0);
+        const pcm = float32ToInt16(input);
+        if (socket?.readyState === WebSocket.OPEN) {
+        socket.send(pcm.buffer);
+        }
+      };
+
+      const gain = audioContext.createGain();
+      gain.gain.value = 0;
+
+      source.connect(processor);
+      processor.connect(gain);
+      gain.connect(audioContext.destination);
+    }
+
+    function playPcm(arrayBuffer) {
+        const int16Array = new Int16Array(arrayBuffer);
+        const float32Array = new Float32Array(int16Array.length);
+
+        // Convert Int16 to Float32 (required by Web Audio API)
+        for (let i = 0; i < int16Array.length; i++) {
+            float32Array[i] = int16Array[i] / 32768;
+        }
+
+        const audioBuffer = audioContext.createBuffer(1, float32Array.length, audioContext.sampleRate);
+        audioBuffer.copyToChannel(float32Array, 0);
+
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        source.start();
+    }
+
+    function stopMicrophone() {
+        if (processor) processor.disconnect();
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+        }
+    }
+
+    function stopStreaming() {
+        if (socket) socket.close();
+    }
+
+    function startStreaming() {
+        socket = new WebSocket("ws://127.0.0.1:8000/web/ws");
+        socket.binaryType = "arraybuffer";
+
+        socket.onopen = () => {
+            console.log("WebSocket opened");
+            audioContext.resume();
+            startMicrophone();
+            document.getElementById("startBtn").disabled = true;
+            document.getElementById("stopBtn").disabled = false;
+        };
+
+        socket.onmessage = (event) => {
+            if (event.data instanceof Blob) {
+                event.data.arrayBuffer().then((buffer) => {
+                    playPcm(buffer);
+                });
+            } else if (event.data instanceof ArrayBuffer) {
+                playPcm(event.data);
+            } else {
+                console.log("Text or JSON message:", event.data);
+            }
+        };
+
+        socket.onclose = () => {
+            console.log("WebSocket closed");
+            stopMicrophone();
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("stopBtn").disabled = true;
+        };
+
+        socket.onerror = (err) => console.error("WebSocket error", err);
+    }
+  </script>
+</body>
+</html>
