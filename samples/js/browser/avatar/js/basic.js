@@ -333,4 +333,5 @@ window.addEventListener('DOMContentLoaded', () => {
         micBtn.textContent = '🎤 Not supported'
         log('SpeechRecognition API not supported in this browser.')
     }
+    startSession();
 })
