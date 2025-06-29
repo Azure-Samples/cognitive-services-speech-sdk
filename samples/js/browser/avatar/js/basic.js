@@ -140,9 +140,14 @@ function htmlEncode(text) {
     return String(text).replace(/[&<>"'\/]/g, (match) => entityMap[match])
 }
 
-function startSession() {
-    const cogSvcRegion = "eastus2"
-    const cogSvcSubKey = "2YB4sSIpGnzwcXKFh9kUlQtCP7GTQs2oj3ZlxMXokzrhRaaXOSRkJQQJ99BFACHYHv6XJ3w3AAAYACOGSJ1L"
+window.startSession = () => {
+    // Load secrets from environment variables (to be injected at build/runtime)
+    const cogSvcRegion = process.env.COG_SVC_REGION
+    const cogSvcSubKey = process.env.COG_SVC_SUB_KEY
+    if (!cogSvcSubKey) {
+        alert('Please fill in the API key of your speech resource.')
+        return
+    }
 
     let speechSynthesisConfig
     speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
@@ -270,12 +275,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
             const raw = JSON.stringify({
               "messages": capturedSpeechHistory,
-              "agency_name": "NC Department of Administration",
-              "chatbot_focus": "Non-Public Education",
-              "conversation_id": "3bb0ef50-e649-4904-975f-dee0d40d014c",
-              "search_source": "cosmos://ncdoa",
-              "genai_model": "https://ditaichat.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2025-01-01-preview",
-              "genai_key": "D5Au6zhagzXDrW7k92uAx4AQiQbDUK3QD6D1477QFaxVP6TljErlJQQJ99AKACYeBjFXJ3w3AAABACOGGSuc"
+              "agency_name": process.env.AGENCY_NAME,
+              "chatbot_focus": process.env.CHATBOT_FOCUS,
+              "conversation_id": process.env.CONVERSATION_ID,
+              "search_source": process.env.SEARCH_SOURCE,
+              "genai_model": process.env.GENAI_MODEL,
+              "genai_key": process.env.GENAI_KEY
             });
 
             const requestOptions = {
@@ -285,7 +290,8 @@ window.addEventListener('DOMContentLoaded', () => {
               redirect: "follow"
             };
 
-            fetch("https://zammo-azure.azurewebsites.net/api/aiForChat?code=Ce6g5y2u2lsUcwNp4SEZevq5nNKH6EkWNEy3n-zOS8yGAzFuU13YWg==", requestOptions)
+            fetch(`https://zammo-azure.azurewebsites.net/api/aiForChat?code=${process.env.AZURE_FUNC_API_KEY}`,
+                requestOptions)
               .then((response) => response.text())
               .then((result) => {
                 console.log(result);
@@ -327,7 +333,4 @@ window.addEventListener('DOMContentLoaded', () => {
         micBtn.textContent = '🎤 Not supported'
         log('SpeechRecognition API not supported in this browser.')
     }
-
-    // Automatically start the session when the DOM is loaded
-    startSession();
 })
