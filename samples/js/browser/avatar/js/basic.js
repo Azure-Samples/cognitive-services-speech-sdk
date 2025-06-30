@@ -296,6 +296,8 @@ function createMicButton() {
     // Speech recognition setup
     let recognition
     let recognizing = false
+    let stopSpeakingShown = false; // <-- already in correct scope
+    let startSessionHidden = false;
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
         recognition = new SpeechRecognition()
@@ -365,6 +367,18 @@ function createMicButton() {
                 recognition.start()
                 recognizing = true
                 micBtn.textContent = '🛑 Stop'
+                // Show stopSpeaking button only after first mic press
+                if (!stopSpeakingShown) {
+                    const stopSpeakingBtn = document.getElementById('stopSpeaking');
+                    if (stopSpeakingBtn) stopSpeakingBtn.style.display = '';
+                    stopSpeakingShown = true;
+                }
+                // Hide startSession button only after first mic press
+                if (!startSessionHidden) {
+                    const startSessionBtn = document.getElementById('startSession');
+                    if (startSessionBtn) startSessionBtn.style.display = 'none';
+                    startSessionHidden = true;
+                }
             } else {
                 recognition.stop()
                 recognizing = false
@@ -414,6 +428,14 @@ window.addEventListener('DOMContentLoaded', () => {
     transcriptDiv.style.height = '100%';
     // Initial render
     renderTranscriptHistory();
+
+    // Show startSession button on page load
+    const startSessionBtn = document.getElementById('startSession');
+    if (startSessionBtn) startSessionBtn.style.display = '';
+
+    // Hide stopSpeaking button on page load
+    const stopSpeakingBtn = document.getElementById('stopSpeaking');
+    if (stopSpeakingBtn) stopSpeakingBtn.style.display = 'none';
 });
 
 // In renderTranscriptHistory, remove the logic that moves transcriptDiv, just update its content
