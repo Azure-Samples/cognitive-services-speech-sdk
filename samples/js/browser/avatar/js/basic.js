@@ -56,6 +56,10 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
             mediaPlayer.addEventListener('play', () => {
                 remoteVideoDiv.style.width = mediaPlayer.videoWidth / 2 + 'px'
+                // Create the mic button after the video is rendered
+                if (!document.getElementById('micBtnContainer')) {
+                    createMicButton();
+                }
             })
         }
         else
@@ -84,14 +88,12 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
         if (peerConnection.iceConnectionState === 'connected') {
             document.getElementById('stopSession').disabled = false
-            document.getElementById('speak').disabled = false
             if (document.getElementById('configuration')) {
                 document.getElementById('configuration').hidden = true
             }
         }
 
         if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
-            document.getElementById('speak').disabled = true
             document.getElementById('stopSpeaking').disabled = true
             document.getElementById('stopSession').disabled = true
             document.getElementById('startSession').disabled = false
@@ -144,7 +146,8 @@ function htmlEncode(text) {
     return String(text).replace(/[&<>"'\/]/g, (match) => entityMap[match])
 }
 
-function startSession(){
+// function startSession() {
+window.startSession = () =>{
     // Use window.env from config.js for browser-based secrets
     if (!window.env) {
         alert('Environment variables are not loaded. Please ensure config.js is loaded before basic.js.');
@@ -208,7 +211,6 @@ function startSession(){
 
 
 function getAvatar(text) {
-    document.getElementById('speak').disabled = true;
     document.getElementById('stopSpeaking').disabled = false
     document.getElementById('audio').muted = false
     // let spokenText = document.getElementById('spokenText').value
@@ -217,7 +219,6 @@ function getAvatar(text) {
     console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
     avatarSynthesizer.speakSsmlAsync(spokenSsml).then(
         (result) => {
-            document.getElementById('speak').disabled = false
             document.getElementById('stopSpeaking').disabled = true
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
                 console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + spokenText + " ]. Result ID: " + result.resultId)
@@ -243,7 +244,6 @@ window.stopSpeaking = () => {
 }
 
 window.stopSession = () => {
-    document.getElementById('speak').disabled = true
     document.getElementById('stopSession').disabled = true
     document.getElementById('stopSpeaking').disabled = true
     avatarSynthesizer.close()
@@ -251,23 +251,47 @@ window.stopSession = () => {
 }
 
 // --- Microphone Speech Recognition ---
-window.addEventListener('DOMContentLoaded', () => {
+function createMicButton() {
+    // Create a container for the mic button and style it for center-bottom placement
+    let micBtnContainer = document.createElement('div');
+    micBtnContainer.id = 'micBtnContainer';
+    micBtnContainer.style.position = 'absolute';
+    micBtnContainer.style.left = '50%';
+    micBtnContainer.style.bottom = '32px';
+    micBtnContainer.style.transform = 'translateX(-50%)';
+    micBtnContainer.style.zIndex = '1000';
+    micBtnContainer.style.display = 'flex';
+    micBtnContainer.style.justifyContent = 'center';
+    micBtnContainer.style.width = '100%';
+
     // Create microphone button
     const micBtn = document.createElement('button')
     micBtn.id = 'micBtn'
     micBtn.textContent = 'Ask Jeff a question!'
-    micBtn.style.marginLeft = '8px'
-    const spokenTextInput = document.getElementById('spokenText')
-    if (spokenTextInput && spokenTextInput.parentNode) {
-        spokenTextInput.parentNode.insertBefore(micBtn, spokenTextInput.nextSibling)
+    micBtn.style.fontSize = '1.2rem';
+    micBtn.style.padding = '12px 32px';
+    micBtn.style.borderRadius = '32px';
+    micBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    micBtn.style.background = '#0078d4';
+    micBtn.style.color = '#fff';
+    micBtn.style.border = 'none';
+    micBtn.style.cursor = 'pointer';
+    micBtn.style.transition = 'background 0.2s';
+    micBtn.onmouseover = () => micBtn.style.background = '#005fa3';
+    micBtn.onmouseout = () => micBtn.style.background = '#0078d4';
+
+    micBtnContainer.appendChild(micBtn);
+
+    // Append the container to the video area
+    const remoteVideoDiv = document.getElementById('remoteVideo');
+    if (remoteVideoDiv && remoteVideoDiv.parentNode) {
+        remoteVideoDiv.parentNode.appendChild(micBtnContainer);
+    } else {
+        document.body.appendChild(micBtnContainer);
     }
 
-    // Remove Speak and Stop Speaking buttons if present
-    // const speakBtn = document.getElementById('speak');
-    // if (speakBtn) speakBtn.remove();
-    // const stopSpeakingBtn = document.getElementById('stopSpeaking');
-    // if (stopSpeakingBtn) stopSpeakingBtn.remove();
-
+    const spokenTextInput = document.getElementById('spokenText')
+    // Speech recognition setup
     let recognition
     let recognizing = false
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -280,7 +304,6 @@ window.addEventListener('DOMContentLoaded', () => {
         recognition.onresult = function(event) {
             const transcript = event.results[0][0].transcript
             spokenTextInput.value = transcript
-            // Add to global array and log
             capturedSpeechHistory.push({ "role": "user", "content": transcript })
             console.log("capturedSpeechHistory:", capturedSpeechHistory)
 
@@ -350,5 +373,6 @@ window.addEventListener('DOMContentLoaded', () => {
         micBtn.textContent = '🎤 Not supported'
         log('SpeechRecognition API not supported in this browser.')
     }
-    startSession();
-})
+}
+
+// --- END Microphone Speech Recognition ---
