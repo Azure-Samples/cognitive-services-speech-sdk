@@ -13,11 +13,6 @@ var capturedSpeechHistory = [{
       "content": "# [North Carolina Department of Administration](https://www.doa.nc.gov/about)\n\nThe North Carolina Department of Administration (DOA) acts as the business manager for the state government. Established in 1957, the department oversees various government operations, including:\n\n- Building construction\n- Purchasing and contracting for goods and services\n- Maintaining facilities\n- Managing state vehicles\n- Acquiring and disposing of real property\n- Operating auxiliary services such as courier mail delivery and the sale of state and federal surplus property.\n\nAdditionally, the DOA manages numerous advocacy programs that provide assistance and services to traditionally underserved segments of the state's population.\n\n## Mission\nEnhance the lives of North Carolinians by providing foundational support to state government through asset management, advocacy, and operations.\n\n## Vision\nProvide high-quality customer service effectively, efficiently, and economically for the people, agencies, and communities of our state."
     }];
 
-// Logger
-const log = msg => {
-    document.getElementById('logging').innerHTML += msg + '<br>'
-}
-
 // Setup WebRTC
 function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // Create WebRTC peer connection
@@ -57,6 +52,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             mediaPlayer.addEventListener('play', () => {
                 remoteVideoDiv.style.width = mediaPlayer.videoWidth / 2 + 'px'
             })
+
+            // Create the mic button after the video is rendered
+            if (!document.getElementById('micBtnContainer')) {
+                createMicButton();
+            }
         }
         else
         {
@@ -80,20 +80,16 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {
-        log("WebRTC status: " + peerConnection.iceConnectionState)
+        console.log("WebRTC status: " + peerConnection.iceConnectionState)
 
         if (peerConnection.iceConnectionState === 'connected') {
-            document.getElementById('stopSession').disabled = false
-            document.getElementById('speak').disabled = false
             if (document.getElementById('configuration')) {
                 document.getElementById('configuration').hidden = true
             }
         }
 
         if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
-            document.getElementById('speak').disabled = true
             document.getElementById('stopSpeaking').disabled = true
-            document.getElementById('stopSession').disabled = true
             document.getElementById('startSession').disabled = false
             if (document.getElementById('configuration')) {
                 document.getElementById('configuration').hidden = false
@@ -116,7 +112,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
                     console.log(cancellationDetails.errorDetails)
                 };
-                log("Unable to start avatar: " + cancellationDetails.errorDetails);
+                console.log("Unable to start avatar: " + cancellationDetails.errorDetails);
             }
             document.getElementById('startSession').disabled = false;
             // document.getElementById('configuration').hidden = false;
@@ -144,7 +140,7 @@ function htmlEncode(text) {
     return String(text).replace(/[&<>"'\/]/g, (match) => entityMap[match])
 }
 
-function startSession(){
+window.startSession = () =>{
     // Use window.env from config.js for browser-based secrets
     if (!window.env) {
         alert('Environment variables are not loaded. Please ensure config.js is loaded before basic.js.');
@@ -172,7 +168,7 @@ function startSession(){
     const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle, videoFormat)
     avatarConfig.backgroundImage = "https://www.tclf.org/sites/default/files/styles/full_width/public/thumbnails/image/NCStateLegislativeBldg_15_CharlesBirnbaum_2007.jpg?itok=K-AERRj0"
 
-    document.getElementById('startSession').disabled = true
+    // document.getElementById('startSession').disabled = true
     
     const xhr = new XMLHttpRequest()
     xhr.open("GET", `https://${cogSvcRegion}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`)
@@ -203,24 +199,20 @@ function startSession(){
         }
     })
     xhr.send()
-    
+    document.getElementById('startSession').disabled = true
 }
 
 
 function getAvatar(text) {
-    document.getElementById('speak').disabled = true;
     document.getElementById('stopSpeaking').disabled = false
     document.getElementById('audio').muted = false
-    // let spokenText = document.getElementById('spokenText').value
-    // let ttsVoice = document.getElementById('ttsVoice').value
     let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='en-US-AndrewMultilingualNeural'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
     console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
     avatarSynthesizer.speakSsmlAsync(spokenSsml).then(
         (result) => {
-            document.getElementById('speak').disabled = false
             document.getElementById('stopSpeaking').disabled = true
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-                console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + spokenText + " ]. Result ID: " + result.resultId)
+                console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + text + " ]. Result ID: " + result.resultId)
             } else {
                 console.log("[" + (new Date()).toISOString() + "] Unable to speak text. Result ID: " + result.resultId)
                 if (result.reason === SpeechSDK.ResultReason.Canceled) {
@@ -231,43 +223,77 @@ function getAvatar(text) {
                     }
                 }
             }
-        }).catch(log);
+        }).catch((error) => { console.log(error); });
 }
 
 window.stopSpeaking = () => {
     document.getElementById('stopSpeaking').disabled = true
 
     avatarSynthesizer.stopSpeakingAsync().then(
-        log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
-    ).catch(log);
-}
-
-window.stopSession = () => {
-    document.getElementById('speak').disabled = true
-    document.getElementById('stopSession').disabled = true
-    document.getElementById('stopSpeaking').disabled = true
-    avatarSynthesizer.close()
-    capturedSpeechHistory = [];
+        console.log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
+    ).catch((error) => { console.log(error); });
 }
 
 // --- Microphone Speech Recognition ---
-window.addEventListener('DOMContentLoaded', () => {
+function createMicButton() {
+    // Create a container for the mic button and style it for center-bottom placement
+    let micBtnContainer = document.createElement('div');
+    micBtnContainer.id = 'micBtnContainer';
+    micBtnContainer.style.position = 'absolute';
+    micBtnContainer.style.left = '50%';
+    micBtnContainer.style.bottom = '32px';
+    micBtnContainer.style.transform = 'translateX(-50%)';
+    micBtnContainer.style.zIndex = '1000';
+    micBtnContainer.style.display = 'flex';
+    micBtnContainer.style.justifyContent = 'center';
+    micBtnContainer.style.width = 'auto';
+
     // Create microphone button
     const micBtn = document.createElement('button')
     micBtn.id = 'micBtn'
     micBtn.textContent = 'Ask Jeff a question!'
-    micBtn.style.marginLeft = '8px'
-    const spokenTextInput = document.getElementById('spokenText')
-    if (spokenTextInput && spokenTextInput.parentNode) {
-        spokenTextInput.parentNode.insertBefore(micBtn, spokenTextInput.nextSibling)
+    micBtn.style.fontSize = '1.2rem';
+    micBtn.style.padding = '12px 32px';
+    micBtn.style.borderRadius = '32px';
+    micBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    micBtn.style.background = '#0078d4';
+    micBtn.style.color = '#fff';
+    micBtn.style.border = 'none';
+    micBtn.style.cursor = 'pointer';
+    micBtn.style.transition = 'background 0.2s';
+    micBtn.onmouseover = () => micBtn.style.background = '#005fa3';
+    micBtn.onmouseout = () => micBtn.style.background = '#0078d4';
+
+    micBtnContainer.appendChild(micBtn);
+
+    // Append the container to the video element itself
+    const remoteVideoDiv = document.getElementById('remoteVideo');
+    const videoEl = remoteVideoDiv.querySelector('video');
+    if (videoEl) {
+        // Ensure video is relatively positioned
+        videoEl.style.position = 'relative';
+        // Create a wrapper for positioning if not already present
+        let videoWrapper = videoEl.parentElement;
+        if (!videoWrapper.classList.contains('video-mic-wrapper')) {
+            // Create a wrapper div
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.style.display = 'inline-block';
+            wrapper.className = 'video-mic-wrapper';
+            videoEl.parentNode.insertBefore(wrapper, videoEl);
+            wrapper.appendChild(videoEl);
+            videoWrapper = wrapper;
+        }
+        // Remove any existing micBtnContainer from wrapper
+        const oldBtn = videoWrapper.querySelector('#micBtnContainer');
+        if (oldBtn) oldBtn.remove();
+        videoWrapper.appendChild(micBtnContainer);
+    } else {
+        // fallback: append to remoteVideoDiv
+        remoteVideoDiv.appendChild(micBtnContainer);
     }
 
-    // Remove Speak and Stop Speaking buttons if present
-    // const speakBtn = document.getElementById('speak');
-    // if (speakBtn) speakBtn.remove();
-    // const stopSpeakingBtn = document.getElementById('stopSpeaking');
-    // if (stopSpeakingBtn) stopSpeakingBtn.remove();
-
+    // Speech recognition setup
     let recognition
     let recognizing = false
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -279,10 +305,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
         recognition.onresult = function(event) {
             const transcript = event.results[0][0].transcript
-            spokenTextInput.value = transcript
-            // Add to global array and log
             capturedSpeechHistory.push({ "role": "user", "content": transcript })
             console.log("capturedSpeechHistory:", capturedSpeechHistory)
+            renderTranscriptHistory();
 
             // --- Send POST request with capturedSpeechHistory ---
             const myHeaders = new Headers();
@@ -318,6 +343,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     getAvatar(parsed.content);
                     capturedSpeechHistory.push({ role: "assistant", content: parsed.content });
                     console.log("capturedSpeechHistory (after assistant):", capturedSpeechHistory);
+                    renderTranscriptHistory();
                   }
                 } catch (e) {
                   console.error("Failed to parse response as JSON or missing content field.", e);
@@ -327,7 +353,7 @@ window.addEventListener('DOMContentLoaded', () => {
             // --- END POST request ---
         }
         recognition.onerror = function(event) {
-            log('Microphone error: ' + event.error)
+            console.log('Microphone error: ' + event.error)
         }
         recognition.onend = function() {
             recognizing = false
@@ -348,7 +374,72 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
         micBtn.disabled = true
         micBtn.textContent = '🎤 Not supported'
-        log('SpeechRecognition API not supported in this browser.')
+        console.log('SpeechRecognition API not supported in this browser.')
     }
-    startSession();
-})
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Overlay chat on top of video, inside videoContainer
+    const videoContainer = document.getElementById('videoContainer');
+    const remoteVideoDiv = document.getElementById('remoteVideo');
+    let transcriptDiv = document.getElementById('transcriptHistory');
+    if (!transcriptDiv) {
+        transcriptDiv = document.createElement('div');
+        transcriptDiv.id = 'transcriptHistory';
+        transcriptDiv.style.position = 'absolute';
+        transcriptDiv.style.top = '0';
+        transcriptDiv.style.right = '0';
+        transcriptDiv.style.width = '380px';
+        transcriptDiv.style.height = '100%';
+        transcriptDiv.style.background = 'rgba(244,244,244,0.92)';
+        transcriptDiv.style.borderRadius = '0 8px 8px 0';
+        transcriptDiv.style.fontFamily = 'sans-serif';
+        transcriptDiv.style.fontSize = '1rem';
+        transcriptDiv.style.boxSizing = 'border-box';
+        transcriptDiv.style.padding = '20px 16px 20px 24px';
+        transcriptDiv.style.overflowY = 'auto';
+        transcriptDiv.style.zIndex = '1001';
+        transcriptDiv.style.pointerEvents = 'auto';
+    }
+    // Ensure transcriptDiv is a child of videoContainer
+    if (videoContainer && !videoContainer.contains(transcriptDiv)) {
+        videoContainer.appendChild(transcriptDiv);
+    }
+    // Remove fixed portrait/tall sizing, let video dictate width/height
+    videoContainer.style.width = '';
+    videoContainer.style.height = '';
+    remoteVideoDiv.style.width = '';
+    remoteVideoDiv.style.height = '';
+    remoteVideoDiv.style.overflow = '';
+    transcriptDiv.style.height = '100%';
+    // Initial render
+    renderTranscriptHistory();
+});
+
+// In renderTranscriptHistory, remove the logic that moves transcriptDiv, just update its content
+function renderTranscriptHistory() {
+    let transcriptDiv = document.getElementById('transcriptHistory');
+    if (!transcriptDiv) return;
+    transcriptDiv.innerHTML = '';
+    // Skip the 0th index (system/intro message)
+    capturedSpeechHistory.slice(1).forEach(msg => {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.marginBottom = '12px';
+        msgDiv.style.padding = '8px 12px';
+        msgDiv.style.borderRadius = '16px';
+        msgDiv.style.maxWidth = '90%';
+        if (msg.role === 'user') {
+            msgDiv.style.background = '#d0e7ff';
+            msgDiv.style.alignSelf = 'flex-end';
+            msgDiv.style.textAlign = 'right';
+            msgDiv.innerHTML = `<strong>You:</strong> ${msg.content}`;
+        } else if (msg.role === 'assistant') {
+            msgDiv.style.background = '#e6e6e6';
+            msgDiv.style.alignSelf = 'flex-start';
+            msgDiv.style.textAlign = 'left';
+            msgDiv.innerHTML = `<strong>Assistant:</strong> ${msg.content}`;
+        }
+        transcriptDiv.appendChild(msgDiv);
+    });
+}
+// --- END Microphone Speech Recognition ---

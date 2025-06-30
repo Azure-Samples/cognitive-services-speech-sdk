@@ -7,24 +7,39 @@
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
     <script src="config.js"></script>
     <script src="./js/basic.js"></script>
+    <style>
+      .styled-btn {
+        font-size: 1rem;
+        padding: 8px 20px;
+        border-radius: 28px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        background: #0078d4;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-right: 12px;
+      }
+      .styled-btn:disabled {
+        background: #b0b0b0;
+        cursor: not-allowed;
+      }
+      .styled-btn:hover:not(:disabled) {
+        background: #005fa3;
+      }
+    </style>
 </head>
 <body>
 <h1>Talking Avatar Service Demo</h1>
-
-<h2 style="background-color: white; width: 300px;">Interaction History</h2>
-<label style="font-size: medium;" for="spokenText">Question</label><br/>
-<textarea id="spokenText" style="height:40px">Hello world!</textarea><br/>
-<button id="startSession" onclick="window.startSession()">Start Session</button>
-<button id="speak" onclick="window.speak()" disabled="disabled">Speak</button>
-<button id="stopSpeaking" onclick="window.stopSpeaking()" disabled="disabled">Stop Speaking</button>
-<button id="stopSession" onclick="window.stopSession()" disabled="disabled">Stop Session</button>
+<button id="startSession" class="styled-btn" onclick="window.startSession()">Start Session</button>
+<button id="stopSpeaking" class="styled-btn" onclick="window.stopSpeaking()" disabled="disabled">Stop Speaking</button>
 <br/>
 
 <h2 id="videoLabel" style="background-color: white; width: 300px;">Avatar Video</h2>
 <div id="videoContainer" style="position: relative; width: 960px;">
   <div id="overlayArea" style="position: absolute;" hidden="hidden">
     <!-- Add your text or image controls here -->
-    <p id="overlayText" style="font-size: large;">Live Video</p>
+    <!-- <p id="overlayText" style="font-size: large;">Live Video</p> -->
     <!-- <img id="overlayImage" src="your-image-source.png" alt="Overlay Image"> -->
   </div>
   <div id="remoteVideo"></div>
@@ -39,10 +54,10 @@
         z-index: 999;" hidden></div>
   <canvas id="canvas" width="1920" height="1080" style="background-color: transparent;" hidden="hidden"></canvas>
   <canvas id="tmpCanvas" width="1920" height="1080" hidden="hidden"></canvas>
+  <!-- Chat overlay -->
+  <div id="transcriptHistory" style="position: absolute; top: 0; right: 0; width: 380px; height: 100%; background: rgba(244,244,244,0.92); border-radius: 0 8px 8px 0; font-family: sans-serif; font-size: 1rem; box-sizing: border-box; padding: 20px 16px 20px 24px; overflow-y: auto; z-index: 1001; pointer-events: auto;"></div>
 </div>
 <br/>
 
-<h2 style="background-color: white; width: 300px;">Logs</h2>
-<div id="logging" style="background-color: white;"></div>
 </body>
 </html>
