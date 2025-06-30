@@ -85,7 +85,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         if (peerConnection.iceConnectionState === 'connected') {
             document.getElementById('stopSession').disabled = false
             document.getElementById('speak').disabled = false
-            document.getElementById('configuration').hidden = true
+            if (document.getElementById('configuration')) {
+                document.getElementById('configuration').hidden = true
+            }
         }
 
         if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
@@ -93,7 +95,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             document.getElementById('stopSpeaking').disabled = true
             document.getElementById('stopSession').disabled = true
             document.getElementById('startSession').disabled = false
-            document.getElementById('configuration').hidden = false
+            if (document.getElementById('configuration')) {
+                document.getElementById('configuration').hidden = false
+            }
         }
     }
 
@@ -141,16 +145,21 @@ function htmlEncode(text) {
 }
 
 window.startSession = () => {
-    // Load secrets from environment variables (to be injected at build/runtime)
-    const cogSvcRegion = process.env.COG_SVC_REGION
-    const cogSvcSubKey = process.env.COG_SVC_SUB_KEY
-    if (!cogSvcSubKey) {
-        alert('Please fill in the API key of your speech resource.')
-        return
+    // Use window.env from config.js for browser-based secrets
+    if (!window.env) {
+        alert('Environment variables are not loaded. Please ensure config.js is loaded before basic.js.');
+        console.warn('window.env is undefined. Check your script order and config.js file.');
+        return;
+    }
+    const cogSvcRegion = window.env.COG_SVC_REGION;
+    const cogSvcSubKey = window.env.COG_SVC_SUB_KEY;
+    if (!cogSvcSubKey || !cogSvcRegion) {
+        alert('Please fill in the API key and region of your speech resource in config.js.');
+        return;
     }
 
-    let speechSynthesisConfig
-    speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
+    let speechSynthesisConfig;
+    speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion);
     speechSynthesisConfig.endpointId = ""
 
     const videoFormat = new SpeechSDK.AvatarVideoFormat()
@@ -253,6 +262,12 @@ window.addEventListener('DOMContentLoaded', () => {
         spokenTextInput.parentNode.insertBefore(micBtn, spokenTextInput.nextSibling)
     }
 
+    // Remove Speak and Stop Speaking buttons if present
+    // const speakBtn = document.getElementById('speak');
+    // if (speakBtn) speakBtn.remove();
+    // const stopSpeakingBtn = document.getElementById('stopSpeaking');
+    // if (stopSpeakingBtn) stopSpeakingBtn.remove();
+
     let recognition
     let recognizing = false
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -275,12 +290,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
             const raw = JSON.stringify({
               "messages": capturedSpeechHistory,
-              "agency_name": process.env.AGENCY_NAME,
-              "chatbot_focus": process.env.CHATBOT_FOCUS,
-              "conversation_id": process.env.CONVERSATION_ID,
-              "search_source": process.env.SEARCH_SOURCE,
-              "genai_model": process.env.GENAI_MODEL,
-              "genai_key": process.env.GENAI_KEY
+              "agency_name": window.env.AGENCY_NAME,
+              "chatbot_focus": window.env.CHATBOT_FOCUS,
+              "conversation_id": window.env.CONVERSATION_ID,
+              "search_source": window.env.SEARCH_SOURCE,
+              "genai_model": window.env.GENAI_MODEL,
+              "genai_key": window.env.GENAI_KEY
             });
 
             const requestOptions = {
@@ -290,7 +305,7 @@ window.addEventListener('DOMContentLoaded', () => {
               redirect: "follow"
             };
 
-            fetch(`https://zammo-azure.azurewebsites.net/api/aiForChat?code=${process.env.AZURE_FUNC_API_KEY}`,
+            fetch(`https://zammo-azure.azurewebsites.net/api/aiForChat?code=${window.env.AZURE_FUNC_API_KEY}`,
                 requestOptions)
               .then((response) => response.text())
               .then((result) => {
@@ -298,6 +313,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 try {
                   const parsed = JSON.parse(result);
                   if (parsed && parsed.content) {
+                    // Jeff automatically responds with the AI answer
+                    console.log("Got Avatar with", parsed.content);
                     getAvatar(parsed.content);
                     capturedSpeechHistory.push({ role: "assistant", content: parsed.content });
                     console.log("capturedSpeechHistory (after assistant):", capturedSpeechHistory);
