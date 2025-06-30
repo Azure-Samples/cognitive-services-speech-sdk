@@ -13,10 +13,10 @@ var capturedSpeechHistory = [{
       "content": "# [North Carolina Department of Administration](https://www.doa.nc.gov/about)\n\nThe North Carolina Department of Administration (DOA) acts as the business manager for the state government. Established in 1957, the department oversees various government operations, including:\n\n- Building construction\n- Purchasing and contracting for goods and services\n- Maintaining facilities\n- Managing state vehicles\n- Acquiring and disposing of real property\n- Operating auxiliary services such as courier mail delivery and the sale of state and federal surplus property.\n\nAdditionally, the DOA manages numerous advocacy programs that provide assistance and services to traditionally underserved segments of the state's population.\n\n## Mission\nEnhance the lives of North Carolinians by providing foundational support to state government through asset management, advocacy, and operations.\n\n## Vision\nProvide high-quality customer service effectively, efficiently, and economically for the people, agencies, and communities of our state."
     }];
 
-// Logger
-const log = msg => {
-    document.getElementById('logging').innerHTML += msg + '<br>'
-}
+// // Logger
+// const log = msg => {
+//     document.getElementById('logging').innerHTML += msg + '<br>'
+// }
 
 // Setup WebRTC
 function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
@@ -84,10 +84,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
     // Make necessary update to the web page when the connection state changes
     peerConnection.oniceconnectionstatechange = e => {
-        log("WebRTC status: " + peerConnection.iceConnectionState)
+        console.log("WebRTC status: " + peerConnection.iceConnectionState)
 
         if (peerConnection.iceConnectionState === 'connected') {
-            document.getElementById('stopSession').disabled = false
             if (document.getElementById('configuration')) {
                 document.getElementById('configuration').hidden = true
             }
@@ -95,7 +94,6 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
         if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
             document.getElementById('stopSpeaking').disabled = true
-            document.getElementById('stopSession').disabled = true
             document.getElementById('startSession').disabled = false
             if (document.getElementById('configuration')) {
                 document.getElementById('configuration').hidden = false
@@ -118,7 +116,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 if (cancellationDetails.reason === SpeechSDK.CancellationReason.Error) {
                     console.log(cancellationDetails.errorDetails)
                 };
-                log("Unable to start avatar: " + cancellationDetails.errorDetails);
+                console.log("Unable to start avatar: " + cancellationDetails.errorDetails);
             }
             document.getElementById('startSession').disabled = false;
             // document.getElementById('configuration').hidden = false;
@@ -146,7 +144,6 @@ function htmlEncode(text) {
     return String(text).replace(/[&<>"'\/]/g, (match) => entityMap[match])
 }
 
-// function startSession() {
 window.startSession = () =>{
     // Use window.env from config.js for browser-based secrets
     if (!window.env) {
@@ -175,7 +172,7 @@ window.startSession = () =>{
     const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle, videoFormat)
     avatarConfig.backgroundImage = "https://www.tclf.org/sites/default/files/styles/full_width/public/thumbnails/image/NCStateLegislativeBldg_15_CharlesBirnbaum_2007.jpg?itok=K-AERRj0"
 
-    document.getElementById('startSession').disabled = true
+    // document.getElementById('startSession').disabled = true
     
     const xhr = new XMLHttpRequest()
     xhr.open("GET", `https://${cogSvcRegion}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`)
@@ -206,15 +203,13 @@ window.startSession = () =>{
         }
     })
     xhr.send()
-    
+    document.getElementById('startSession').disabled = true
 }
 
 
 function getAvatar(text) {
     document.getElementById('stopSpeaking').disabled = false
     document.getElementById('audio').muted = false
-    // let spokenText = document.getElementById('spokenText').value
-    // let ttsVoice = document.getElementById('ttsVoice').value
     let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='en-US-AndrewMultilingualNeural'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
     console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
     avatarSynthesizer.speakSsmlAsync(spokenSsml).then(
@@ -232,22 +227,15 @@ function getAvatar(text) {
                     }
                 }
             }
-        }).catch(log);
+        }).catch((error) => { console.log(error); });
 }
 
 window.stopSpeaking = () => {
     document.getElementById('stopSpeaking').disabled = true
 
     avatarSynthesizer.stopSpeakingAsync().then(
-        log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
-    ).catch(log);
-}
-
-window.stopSession = () => {
-    document.getElementById('stopSession').disabled = true
-    document.getElementById('stopSpeaking').disabled = true
-    avatarSynthesizer.close()
-    capturedSpeechHistory = [];
+        console.log("[" + (new Date()).toISOString() + "] Stop speaking request sent.")
+    ).catch((error) => { console.log(error); });
 }
 
 // --- Microphone Speech Recognition ---
@@ -304,6 +292,7 @@ function createMicButton() {
         recognition.onresult = function(event) {
             const transcript = event.results[0][0].transcript
             spokenTextInput.value = transcript
+            // Add to global array and log
             capturedSpeechHistory.push({ "role": "user", "content": transcript })
             console.log("capturedSpeechHistory:", capturedSpeechHistory)
 
@@ -350,7 +339,7 @@ function createMicButton() {
             // --- END POST request ---
         }
         recognition.onerror = function(event) {
-            log('Microphone error: ' + event.error)
+            console.log('Microphone error: ' + event.error)
         }
         recognition.onend = function() {
             recognizing = false
@@ -371,7 +360,7 @@ function createMicButton() {
     } else {
         micBtn.disabled = true
         micBtn.textContent = '🎤 Not supported'
-        log('SpeechRecognition API not supported in this browser.')
+        console.log('SpeechRecognition API not supported in this browser.')
     }
 }
 

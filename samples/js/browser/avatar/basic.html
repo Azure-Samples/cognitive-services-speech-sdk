@@ -11,12 +11,8 @@
 <body>
 <h1>Talking Avatar Service Demo</h1>
 
-<h2 style="background-color: white; width: 300px;">Interaction History</h2>
-<label style="font-size: medium;" for="spokenText">Question</label><br/>
-<textarea id="spokenText" style="height:40px">Hello world!</textarea><br/>
 <button id="startSession" onclick="window.startSession()">Start Session</button>
 <button id="stopSpeaking" onclick="window.stopSpeaking()" disabled="disabled">Stop Speaking</button>
-<button id="stopSession" onclick="window.stopSession()" disabled="disabled">Stop Session</button>
 <br/>
 
 <h2 id="videoLabel" style="background-color: white; width: 300px;">Avatar Video</h2>
@@ -41,7 +37,9 @@
 </div>
 <br/>
 
-<h2 style="background-color: white; width: 300px;">Logs</h2>
-<div id="logging" style="background-color: white;"></div>
+<h2 style="background-color: white; width: 300px;">Transcript History</h2>
+<label style="font-size: medium;" for="spokenText">Question</label><br/>
+<textarea id="spokenText" style="height:40px">Hello world!</textarea><br/>
+
 </body>
 </html>
