@@ -3,6 +3,7 @@ import { AzureOpenAI } from 'openai'
 import { createRequire } from 'module'
 import { fileURLToPath } from 'url'
 import { dirname } from 'path'
+import axios from 'axios'
 const require = createRequire(import.meta.url)
 const http = require('http')
 const express = require('express')
@@ -11,9 +12,7 @@ const { v4: uuidv4, validate: uuidValidate } = require('uuid')
 const speechsdk = require('microsoft-cognitiveservices-speech-sdk')
 const bodyParser = require('body-parser')
 const { Server } = require('socket.io')
-
-
-
+const {DefaultAzureCredential} = require('@azure/identity')
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -36,11 +35,13 @@ app.set('views', path.join(__dirname, './'))
 const speech_region = process.env.SPEECH_REGION // e.g. westus2
 const speech_key = process.env.SPEECH_KEY
 const speech_private_endpoint = process.env.SPEECH_PRIVATE_ENDPOINT // e.g. https://my-speech-service.cognitiveservices.azure.com/ (optional)
+const speech_resource_url = process.env.SPEECH_RESOURCE_URL // e.g. /subscriptions/6e83d8b7-00dd-4b0a-9e98-dab9f060418b/resourceGroups/my-rg/providers/Microsoft.CognitiveServices/accounts/my-speech (optional, only used for private endpoint)  # noqa: E501
+const user_assigned_managed_identity_client_id = process.env.USER_ASSIGNED_MANAGED_IDENTITY_CLIENT_ID // e.g. the client id of user assigned managed identity associated to your app service (optional, only used for private endpoint and user assigned managed identity)  # noqa: E501
 // OpenAI resource (required for chat scenario)
 const azure_openai_endpoint = process.env.AZURE_OPENAI_ENDPOINT // e.g. https://my-aoai.openai.azure.com/
 const azure_openai_api_key = process.env.AZURE_OPENAI_API_KEY
 const azure_openai_deployment_name = process.env.AZURE_OPENAI_DEPLOYMENT_NAME // e.g. my-gpt-35-turbo-deployment
-const openai_api_version = "2024-06-01"
+const openai_api_version = process.env.OPENAI_API_VERSION // OpenAI API version being used: 2024-06-01
 // Customized ICE server (optional, only required for customized ICE server)
 const ice_server_url = process.env.ICE_SERVER_URL // The ICE URL, e.g. turn:x.x.x.x:3478
 const ice_server_url_remote = process.env.ICE_SERVER_URL_REMOTE // The ICE URL for remote side, e.g. turn:x.x.x.x:3478. This is only required when the ICE address for remote side is different from local side.  # noqa: E501
@@ -62,8 +63,8 @@ const repeat_speaking_sentence_after_reconnection = true // Repeat the speaking 
 
 // Global variables
 const client_contexts = {}
-const ice_token = null
-const speech_token = null
+let ice_token = null
+let speech_token = null
 let azure_openai
 
 if (azure_openai_endpoint && azure_openai_api_key) {
@@ -74,10 +75,10 @@ if (azure_openai_endpoint && azure_openai_api_key) {
     })
 }
 
-// The default route, which shows the default web page (chat.ejs)
+// The default route, which shows the default web page (basic.ejs)
 app.get('/', (req, res) => {
     const client_id = initializeClient()
-    res.render('chat', { client_id: client_id, enable_websockets: enable_websockets })
+    res.render('basic', { client_id: client_id})
 })
 
 // The basic route, which shows the basic web page
@@ -113,11 +114,8 @@ app.get('/api/getIceToken', (req, res) => {
         return res.status(200).send(custom_ice_token)
     }
 
-    return res.status(200).send({
-        Urls: [],
-        Username: "",
-        Password: ""
-    })
+    return res.status(200).send(ice_token)
+
 })
 
 // The API route to get the speech token
@@ -188,7 +186,7 @@ app.post('/api/connectAvatar', async (req, res) => {
         client_context.speech_synthesizer = new speechsdk.SpeechSynthesizer(speech_config, null)
         const speech_synthesizer = client_context.speech_synthesizer
 
-        let ice_token_obj = ice_token ? JSON.parse(ice_token) : {}
+        let ice_token_obj = ice_token
         // Apply customized ICE server if provided
         if (ice_server_url && ice_server_username && ice_server_password) {
             ice_token_obj = {
@@ -582,6 +580,52 @@ function initializeClient() {
     return client_id
 }
 
+// Refresh the ICE token every 24 hours
+async function refreshIceToken() {
+        while (true) {
+            let ice_token_response = null
+            if (speech_private_endpoint) {
+                if (enable_token_auth_for_speech) {
+                    while (!speech_token) {
+                        await new Promise(resolve => setTimeout(resolve, 2000))
+                    }
+                    ice_token_response = await axios.get(`${speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1`, {headers: {Authorization: `Bearer ${speech_token}`}})
+                } else {
+                    ice_token_response = await axios.get(`${speech_private_endpoint}/tts/cognitiveservices/avatar/relay/token/v1`, {headers: {'Ocp-Apim-Subscription-Key': speech_key}})
+                }
+            } else {
+                if (enable_token_auth_for_speech) {
+                    while (!speech_token) {
+                        await new Promise(resolve => setTimeout(resolve, 2000))
+                    }
+                    ice_token_response = await axios.get(`https://${speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`, {headers: {Authorization: `Bearer ${speech_token}`}})
+                } else {
+                    ice_token_response = await axios.get(`https://${speech_region}.tts.speech.microsoft.com/cognitiveservices/avatar/relay/token/v1`, {headers: {'Ocp-Apim-Subscription-Key': speech_key}})
+                }
+            }
+    
+            if (ice_token_response.status === 200) {
+                ice_token = ice_token_response.data
+            } else {
+                throw new Error(`Failed to get ICE token. Status code: ${response.status}`)
+            }
+        }
+}
+
+// Refresh the speech token every 9 minutes
+async function refreshSpeechToken() {
+        while (true) {
+            if  (speech_private_endpoint) {
+                const credential = new DefaultAzureCredential({managedIdentityClientId: user_assigned_managed_identity_client_id})
+                const token = await credential.getToken('https://cognitiveservices.azure.com/.default')
+                speech_token = `add#${speech_resource_url}#${token.token}`
+            } else {
+                const response = await axios.post(`https://${speech_region}.api.cognitive.microsoft.com/sts/v1.0/issueToken`, null, {headers: {'Ocp-Apim-Subscription-Key': speech_key}})
+                speech_token = response.data
+            }
+        }
+}
+
 // Initialize the chat context, e.g. chat history (messages), data sources, etc. For chat scenario.
 function initializeChatContext(system_prompt, client_id) {
     const client_context = client_contexts[client_id]
@@ -888,10 +932,14 @@ function disconnectSttInternal(client_id) {
     }
 }
 
+setInterval(refreshIceToken, 1000 * 60 * 60 * 24)
+refreshIceToken()
 
+setInterval(refreshSpeechToken, 1000 * 60 * 9)
+refreshSpeechToken()
 
-const PORT = 3001
+const PORT = 5000
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`)
-});
+})
 

@@ -12,7 +12,9 @@
   "description": "",
   "dependencies": {
     "@azure/core-auth": "^1.9.0",
+    "@azure/identity": "^4.10.1",
     "@azure/openai": "^2.0.0",
+    "axios": "^1.10.0",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
