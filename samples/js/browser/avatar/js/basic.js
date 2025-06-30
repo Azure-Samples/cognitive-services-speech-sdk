@@ -13,11 +13,6 @@ var capturedSpeechHistory = [{
       "content": "# [North Carolina Department of Administration](https://www.doa.nc.gov/about)\n\nThe North Carolina Department of Administration (DOA) acts as the business manager for the state government. Established in 1957, the department oversees various government operations, including:\n\n- Building construction\n- Purchasing and contracting for goods and services\n- Maintaining facilities\n- Managing state vehicles\n- Acquiring and disposing of real property\n- Operating auxiliary services such as courier mail delivery and the sale of state and federal surplus property.\n\nAdditionally, the DOA manages numerous advocacy programs that provide assistance and services to traditionally underserved segments of the state's population.\n\n## Mission\nEnhance the lives of North Carolinians by providing foundational support to state government through asset management, advocacy, and operations.\n\n## Vision\nProvide high-quality customer service effectively, efficiently, and economically for the people, agencies, and communities of our state."
     }];
 
-// // Logger
-// const log = msg => {
-//     document.getElementById('logging').innerHTML += msg + '<br>'
-// }
-
 // Setup WebRTC
 function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
     // Create WebRTC peer connection
@@ -56,11 +51,12 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
             mediaPlayer.addEventListener('play', () => {
                 remoteVideoDiv.style.width = mediaPlayer.videoWidth / 2 + 'px'
-                // Create the mic button after the video is rendered
-                if (!document.getElementById('micBtnContainer')) {
-                    createMicButton();
-                }
             })
+
+            // Create the mic button after the video is rendered
+            if (!document.getElementById('micBtnContainer')) {
+                createMicButton();
+            }
         }
         else
         {
@@ -216,7 +212,7 @@ function getAvatar(text) {
         (result) => {
             document.getElementById('stopSpeaking').disabled = true
             if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-                console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + spokenText + " ]. Result ID: " + result.resultId)
+                console.log("[" + (new Date()).toISOString() + "] Speech synthesized to speaker for text [ " + text + " ]. Result ID: " + result.resultId)
             } else {
                 console.log("[" + (new Date()).toISOString() + "] Unable to speak text. Result ID: " + result.resultId)
                 if (result.reason === SpeechSDK.ResultReason.Canceled) {
@@ -250,7 +246,7 @@ function createMicButton() {
     micBtnContainer.style.zIndex = '1000';
     micBtnContainer.style.display = 'flex';
     micBtnContainer.style.justifyContent = 'center';
-    micBtnContainer.style.width = '100%';
+    micBtnContainer.style.width = 'auto';
 
     // Create microphone button
     const micBtn = document.createElement('button')
@@ -270,15 +266,33 @@ function createMicButton() {
 
     micBtnContainer.appendChild(micBtn);
 
-    // Append the container to the video area
+    // Append the container to the video element itself
     const remoteVideoDiv = document.getElementById('remoteVideo');
-    if (remoteVideoDiv && remoteVideoDiv.parentNode) {
-        remoteVideoDiv.parentNode.appendChild(micBtnContainer);
+    const videoEl = remoteVideoDiv.querySelector('video');
+    if (videoEl) {
+        // Ensure video is relatively positioned
+        videoEl.style.position = 'relative';
+        // Create a wrapper for positioning if not already present
+        let videoWrapper = videoEl.parentElement;
+        if (!videoWrapper.classList.contains('video-mic-wrapper')) {
+            // Create a wrapper div
+            const wrapper = document.createElement('div');
+            wrapper.style.position = 'relative';
+            wrapper.style.display = 'inline-block';
+            wrapper.className = 'video-mic-wrapper';
+            videoEl.parentNode.insertBefore(wrapper, videoEl);
+            wrapper.appendChild(videoEl);
+            videoWrapper = wrapper;
+        }
+        // Remove any existing micBtnContainer from wrapper
+        const oldBtn = videoWrapper.querySelector('#micBtnContainer');
+        if (oldBtn) oldBtn.remove();
+        videoWrapper.appendChild(micBtnContainer);
     } else {
-        document.body.appendChild(micBtnContainer);
+        // fallback: append to remoteVideoDiv
+        remoteVideoDiv.appendChild(micBtnContainer);
     }
 
-    const spokenTextInput = document.getElementById('spokenText')
     // Speech recognition setup
     let recognition
     let recognizing = false
@@ -291,10 +305,9 @@ function createMicButton() {
 
         recognition.onresult = function(event) {
             const transcript = event.results[0][0].transcript
-            spokenTextInput.value = transcript
-            // Add to global array and log
             capturedSpeechHistory.push({ "role": "user", "content": transcript })
             console.log("capturedSpeechHistory:", capturedSpeechHistory)
+            renderTranscriptHistory();
 
             // --- Send POST request with capturedSpeechHistory ---
             const myHeaders = new Headers();
@@ -330,6 +343,7 @@ function createMicButton() {
                     getAvatar(parsed.content);
                     capturedSpeechHistory.push({ role: "assistant", content: parsed.content });
                     console.log("capturedSpeechHistory (after assistant):", capturedSpeechHistory);
+                    renderTranscriptHistory();
                   }
                 } catch (e) {
                   console.error("Failed to parse response as JSON or missing content field.", e);
@@ -364,4 +378,68 @@ function createMicButton() {
     }
 }
 
+window.addEventListener('DOMContentLoaded', () => {
+    // Overlay chat on top of video, inside videoContainer
+    const videoContainer = document.getElementById('videoContainer');
+    const remoteVideoDiv = document.getElementById('remoteVideo');
+    let transcriptDiv = document.getElementById('transcriptHistory');
+    if (!transcriptDiv) {
+        transcriptDiv = document.createElement('div');
+        transcriptDiv.id = 'transcriptHistory';
+        transcriptDiv.style.position = 'absolute';
+        transcriptDiv.style.top = '0';
+        transcriptDiv.style.right = '0';
+        transcriptDiv.style.width = '380px';
+        transcriptDiv.style.height = '100%';
+        transcriptDiv.style.background = 'rgba(244,244,244,0.92)';
+        transcriptDiv.style.borderRadius = '0 8px 8px 0';
+        transcriptDiv.style.fontFamily = 'sans-serif';
+        transcriptDiv.style.fontSize = '1rem';
+        transcriptDiv.style.boxSizing = 'border-box';
+        transcriptDiv.style.padding = '20px 16px 20px 24px';
+        transcriptDiv.style.overflowY = 'auto';
+        transcriptDiv.style.zIndex = '1001';
+        transcriptDiv.style.pointerEvents = 'auto';
+    }
+    // Ensure transcriptDiv is a child of videoContainer
+    if (videoContainer && !videoContainer.contains(transcriptDiv)) {
+        videoContainer.appendChild(transcriptDiv);
+    }
+    // Remove fixed portrait/tall sizing, let video dictate width/height
+    videoContainer.style.width = '';
+    videoContainer.style.height = '';
+    remoteVideoDiv.style.width = '';
+    remoteVideoDiv.style.height = '';
+    remoteVideoDiv.style.overflow = '';
+    transcriptDiv.style.height = '100%';
+    // Initial render
+    renderTranscriptHistory();
+});
+
+// In renderTranscriptHistory, remove the logic that moves transcriptDiv, just update its content
+function renderTranscriptHistory() {
+    let transcriptDiv = document.getElementById('transcriptHistory');
+    if (!transcriptDiv) return;
+    transcriptDiv.innerHTML = '';
+    // Skip the 0th index (system/intro message)
+    capturedSpeechHistory.slice(1).forEach(msg => {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.marginBottom = '12px';
+        msgDiv.style.padding = '8px 12px';
+        msgDiv.style.borderRadius = '16px';
+        msgDiv.style.maxWidth = '90%';
+        if (msg.role === 'user') {
+            msgDiv.style.background = '#d0e7ff';
+            msgDiv.style.alignSelf = 'flex-end';
+            msgDiv.style.textAlign = 'right';
+            msgDiv.innerHTML = `<strong>You:</strong> ${msg.content}`;
+        } else if (msg.role === 'assistant') {
+            msgDiv.style.background = '#e6e6e6';
+            msgDiv.style.alignSelf = 'flex-start';
+            msgDiv.style.textAlign = 'left';
+            msgDiv.innerHTML = `<strong>Assistant:</strong> ${msg.content}`;
+        }
+        transcriptDiv.appendChild(msgDiv);
+    });
+}
 // --- END Microphone Speech Recognition ---
