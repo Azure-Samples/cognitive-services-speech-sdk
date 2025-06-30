@@ -144,7 +144,7 @@ function htmlEncode(text) {
     return String(text).replace(/[&<>"'\/]/g, (match) => entityMap[match])
 }
 
-window.startSession = () => {
+function startSession(){
     // Use window.env from config.js for browser-based secrets
     if (!window.env) {
         alert('Environment variables are not loaded. Please ensure config.js is loaded before basic.js.');
