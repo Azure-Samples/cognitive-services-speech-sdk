@@ -41,7 +41,6 @@ const user_assigned_managed_identity_client_id = process.env.USER_ASSIGNED_MANAG
 const azure_openai_endpoint = process.env.AZURE_OPENAI_ENDPOINT // e.g. https://my-aoai.openai.azure.com/
 const azure_openai_api_key = process.env.AZURE_OPENAI_API_KEY
 const azure_openai_deployment_name = process.env.AZURE_OPENAI_DEPLOYMENT_NAME // e.g. my-gpt-35-turbo-deployment
-const openai_api_version = process.env.OPENAI_API_VERSION // OpenAI API version being used: 2024-06-01
 // Customized ICE server (optional, only required for customized ICE server)
 const ice_server_url = process.env.ICE_SERVER_URL // The ICE URL, e.g. turn:x.x.x.x:3478
 const ice_server_url_remote = process.env.ICE_SERVER_URL_REMOTE // The ICE URL for remote side, e.g. turn:x.x.x.x:3478. This is only required when the ICE address for remote side is different from local side.  # noqa: E501
@@ -69,9 +68,9 @@ let azure_openai
 
 if (azure_openai_endpoint && azure_openai_api_key) {
     azure_openai = new AzureOpenAI({
-        azure_endpoint: azure_openai_endpoint,
-        api_version: openai_api_version,
-        azure_key: azure_openai_api_key,
+        azureEndpoint: azure_openai_endpoint,
+        apiVersion: '2024-06-01',
+        apiKey: azure_openai_api_key,
     })
 }
 
@@ -337,7 +336,7 @@ app.post('/api/connectSTT', async (req, res) => {
         console.log('STT session stopped')
     }
 
-    const speech_recognition_start_time = Date.now()
+    const speech_recognition_start_time = new Date()
 
     speech_recognizer.recognized = async (s, e) => {
         if (e.result.reason === speechsdk.ResultReason.RecognizedSpeech) {
@@ -350,9 +349,9 @@ app.post('/api/connectSTT', async (req, res) => {
                     chatResponse: `\n\nUser: ${user_query}\n\n`
                 })
 
-                const recognition_result_received_time = Date.now()
+                const recognition_result_received_time = new Date()
                 const speech_finished_offset = (e.result.offset + e.result.duration) / 10000
-                const stt_latency = Math.round(recognition_result_received_time - speech_recognition_start_time - speech_finished_offset)
+                const stt_latency = Math.round(recognition_result_received_time.getTime() - speech_recognition_start_time.getTime() - speech_finished_offset)
                 console.log(`STT latency: ${stt_latency}ms`)
 
                 io.to(client_id).emit("response", {
@@ -530,20 +529,24 @@ io.on("connection", (socket) => {
                 }
             } else if (path === 'api.chat') {
                 if (!client_context.chat_initiated) {
-                    initializeChatContext(message.system_prompt, clientId)
+                    initializeChatContext(message.system_prompt, client_id)
                     client_context.chat_initiated = true
                 }
                 const user_query = message.userQuery
-                const iterator = await handleUserQuery(user_query, client_id)
-                let result
-                try {
-                    while (!(result = await iterator.next().done)) {
+                let first_response_chunk = true
+                for await (const chat_response of handleUserQuery(user_query, client_id)) {
+                    if (first_response_chunk) {
                         io.to(client_id).emit('response', {
                             path: 'api.chat',
-                            chatResponse: result.value
+                            chatResponse: 'Assistant:'
                         })
+                        first_response_chunk = false
                     }
-                } catch (e) { console.log('Error while handling chat response:', e) }
+                    io.to(client_id).emit('response', {
+                        path: 'api.chat',
+                        chatResponse: chat_response
+                    })
+                }
             } else if (path === 'api.stopSpeaking') {
                 await stopSpeakingInternal(client_id, false)
             }
@@ -713,9 +716,9 @@ async function* handleUserQuery(user_query, client_id) {
             if (response_token) {
                 // Log response_token here if need debug
                 if (is_first_chunk) {
-                    const first_token_latency_ms = new Date() - aoai_start_time
+                    const first_token_latency_ms = new Date().getTime() - aoai_start_time.getTime()
                     console.log(`AOAI first token latency: ${first_token_latency_ms}ms`)
-                    yield (`<FSL>${first_token_latency_ms}</FSL>`);
+                    yield (`<FTL>${first_token_latency_ms}</FTL>`);
                     is_first_chunk = false
                 }
                 if (oyd_doc_regex.test(response_token)) {
@@ -726,7 +729,7 @@ async function* handleUserQuery(user_query, client_id) {
 
                 if (response_token === '\n' || response_token == '\n\n') {
                     if (is_first_sentence) {
-                        const first_sentence_latency_ms = new Date() - aoai_start_time
+                        const first_sentence_latency_ms = new Date().getTime() - aoai_start_time.getTime()
                         console.log(`AIAO first sentence latency: ${first_sentence_latency_ms}ms`)
                         yield (`<FSL>${first_sentence_latency_ms}</FSL>`)
                         is_first_sentence = false
@@ -741,7 +744,7 @@ async function* handleUserQuery(user_query, client_id) {
                         for (const punctuation of sentence_level_punctuations) {
                             if (response_token.startsWith(punctuation)) {
                                 if (is_first_sentence) {
-                                    const first_sentence_latency_ms = new Date() - aoai_start_time
+                                    const first_sentence_latency_ms = new Date().getTime() - aoai_start_time.getTime()
                                     console.log(`AOAI first sentence latency: ${first_sentence_latency_ms}ms`)
                                     yield (`<FSL>${first_sentence_latency_ms}</FSL>`);
                                     is_first_sentence = false
@@ -759,6 +762,7 @@ async function* handleUserQuery(user_query, client_id) {
 
     if (spoken_sentence !== '') {
         speakWithQueue(spoken_sentence.trim(), 0, client_id)
+        spoken_sentence = ''
     }
 
     if (data_sources.length > 0) {

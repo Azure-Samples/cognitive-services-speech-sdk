@@ -497,7 +497,11 @@ def handleWsMessage(message):
             initializeChatContext(message.get('systemPrompt'), client_id)
             client_context['chat_initiated'] = True
         user_query = message.get('userQuery')
+        first_response_chunk = True                
         for chat_response in handleUserQuery(user_query, client_id):
+            if first_response_chunk:
+                socketio.emit("response", {'path': 'api.chat', 'chatResponse': 'Assistant: '}, room=client_id)
+                first_response_chunk = False
             socketio.emit("response", {'path': 'api.chat', 'chatResponse': chat_response}, room=client_id)
     elif path == 'api.stopSpeaking':
         stopSpeakingInternal(client_id, False)
