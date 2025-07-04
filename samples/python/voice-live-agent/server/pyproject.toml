@@ -1,0 +1,14 @@
+[project]
+name = "voice-live-agent"
+version = "0.1.0"
+description = "Real-time voice agent with Azure Voice Live and ACS/Web streaming clients"
+dependencies = [
+    "quart",
+    "websockets",
+    "httpx",
+    "python-dotenv",
+    "quart-cors",
+    "sounddevice",
+    "numpy",
+]
+requires-python = ">=3.9"
