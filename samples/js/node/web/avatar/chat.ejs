@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talking Avatar Chat Demo</title>
+    <link rel="stylesheet" href="./static/css/styles.css">
+    <link rel="icon" href="./static/image/favicon.ico">
+    <script src="./static/js/chat.js"></script>
+    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
+</head>
+<body>
+<h1>Talking Avatar Chat Demo</h1>
+
+<input type="hidden" id="clientId" name="clientId" value="<%= client_id %>">
+<input type="hidden" id="enableWebSockets" value="<%= enable_websockets %>">
+
+<div id="configuration">
+  <h2 style="background-color: white; width: 300px;">Chat Configuration</h2>
+  <label style="font-size: medium;" for="azureOpenAIDeploymentName">Azure OpenAI Deployment Name:</label>
+  <input id="azureOpenAIDeploymentName" type="text" size="32" style="font-size: medium;" /><br />
+  <label style="font-size: medium;"  for="prompt">System Prompt:</label><br/>
+  <textarea id="prompt" style="width: 640px;">You are an AI assistant that helps people find information.</textarea>
+  <div style="background-color: white; width: 300px;">
+    <input type="checkbox" id="enableOyd" onchange="window.updataEnableOyd()">Enable On Your Data</input><br />
+  </div>
+  <br />
+
+  <div id="cogSearchConfig" hidden="hidden">
+    <label style="font-size: medium;" for="azureCogSearchIndexName">Azure Cognitive Search Index Name:</label>
+    <input id="azureCogSearchIndexName" type="text" size="32" style="font-size: medium;" /><br />
+    <br />
+  </div>
+
+  <h2 style="background-color: white; width: 300px;">Speech Configuration</h2>
+  <label style="font-size: medium;" for="sttLocale">STT Locale(s):</label>
+  <input id="sttLocales" type="text" size="64" style="font-size: medium;" value="en-US"></input><br />
+  <label style="font-size: medium;" for="ttsVoice">TTS Voice:</label>
+  <input id="ttsVoice" type="text" size="32" style="font-size: medium;" value="en-US-JennyNeural"></input><br />
+  <label style="font-size: medium;" for="customVoiceEndpointId">Custom Voice Deployment ID (Endpoint ID):</label>
+  <input id="customVoiceEndpointId" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <label style="font-size: medium;" for="personalVoiceSpeakerProfileID">Personal Voice Speaker Profile ID:</label>
+  <input id="personalVoiceSpeakerProfileID" type="text" size="32" style="font-size: medium;" value=""></input><br />
+  <div style="background-color: white; width: 300px;">
+    <input type="checkbox" id="continuousConversation" checked>Continuous Conversation</input><br />
+  </div>
+  <br />
+
+  <h2 style="background-color: white; width: 300px;">Avatar Configuration</h2>
+  <label style="font-size: medium;" for="talkingAvatarCharacter">Avatar Character:</label>
+  <input id="talkingAvatarCharacter" type="text" size="16" style="font-size: medium;" value="lisa"></input><br />
+  <label style="font-size: medium;" for="talkingAvatarStyle">Avatar Style:</label>
+  <input id="talkingAvatarStyle" type="text" size="16" style="font-size: medium;" value="casual-sitting"></input><br />
+  <div style="background-color: white; width: 200px;">
+    <input type="checkbox" id="customizedAvatar">Custom Avatar</input><br />
+  </div>
+  <div style="background-color: white; width: 200px;">
+    <input type="checkbox" id="autoReconnectAvatar">Auto Reconnect</input><br />
+  </div>
+  <div style="background-color: white; width: 200px;">
+    <input type="checkbox" id="useLocalVideoForIdle" onchange="window.updateLocalVideoForIdle()">Use Local Video for Idle</input><br />
+  </div>
+  <br />
+</div>
+
+<button id="startSession" onclick="window.startSession()">Open Avatar Session</button>
+<button id="microphone" onclick="window.microphone()" disabled>Start Microphone</button>
+<button id="stopSpeaking" onclick="stopSpeaking()" disabled>Stop Speaking</button>
+<button id="clearChatHistory" onclick="window.clearChatHistory()">Clear Chat History</button>
+<button id="stopSession" onclick="window.stopSession()" disabled>Close Avatar Session</button>
+
+<div id="videoContainer" style="position: relative; width: 960px;">
+  <div id="overlayArea" style="position: absolute;">
+    <textarea id="chatHistory" style="
+        width: 360px;
+        height: 500px;
+        font-size: medium;
+        border: none;
+        resize: none;
+        background-color: transparent;
+        overflow: hidden;" hidden></textarea>
+  </div>
+  <div id="overlayArea" style="position: absolute; left: 720px">
+    <textarea id="latencyLog" style="
+        width: 360px;
+        height: 500px;
+        font-size: medium;
+        border: none;
+        resize: none;
+        background-color: transparent;
+        overflow: hidden;" hidden></textarea>
+  </div>
+  <div id="localVideo" hidden>
+    <video src="video/lisa-casual-sitting-idle.mp4" autoplay loop muted></video>
+  </div>
+  <div id="remoteVideo"></div>
+</div>
+
+<div id="showTypeMessageCheckbox">
+  <input type="checkbox" id="showTypeMessage" onchange="window.updateTypeMessageBox()" disabled>Type Message</input><br />
+</div>
+<textarea id="userMessageBox" style="width: 960px; height: 40px" hidden></textarea><br/>
+</body>
+</html>
