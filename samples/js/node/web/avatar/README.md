@@ -1,47 +1,20 @@
 # Instructions to run Microsoft Azure TTS Talking Avatar sample code
-This sample demonstrates the basic usage of Azure text-to-speech avatar real-time API.
-
-The Speech SDK for Python is compatible with Windows, Linux, and macOS.
-- On Windows, install the [Microsoft Visual C++ Redistributable for Visual Studio 2015, 2017, 2019, and 2022](https://learn.microsoft.com/cpp/windows/latest-supported-vc-redist?view=msvc-170&preserve-view=true) for your platform. Installing this package might require a restart.
-- On Linux, you must use the x64 target architecture.
-
-## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
-This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration, build, and run.
-
-- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
-- In extension's panel, click `View Samples` and download this sample from sample gallery.
-- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
-  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select an **Azure AI Service** resource from [available locations](https://learn.microsoft.com/azure/ai-services/speech-service/text-to-speech-avatar/what-is-text-to-speech-avatar#available-locations) (one-time setup).
-  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
-  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
-
-     This command will start the avatar web server and open the browser for you. After the `http://127.0.0.1:5000/` link opens in default browser, type in "Spoken Text" and click "Start Session". Then click "Speak".
-
-## Option 2: Manual Setup and Run (Advanced)
-Follow these steps if you prefer not to use VS Code.
-
-### Prerequisites
-- Install a version of [Python from 3.7 or later](https://www.python.org/downloads/). 
-- For any requirements, see [Install the Speech SDK](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-python).
-
-### Available locations
-The text to speech avatar feature is only available in the following service regions: Southeast Asia, North Europe, West Europe, Sweden Central, South Central US, East US 2, and West US 2.
 
 ### Basic Sample
 This sample demonstrates the basic usage of Azure text-to-speech avatar real-time API.
 
 * Step 1: Open a console and navigate to the folder containing this README.md document.
-    * Run `pip install -r requirements.txt` to install the required packages. (Azure AI Speech Toolkit: Build the Sample App will be installed automatically, or you can install it manually.)
     * Set below environment variables:
         * `SPEECH_REGION` - the region of your Azure AI Service resource, e.g. westus2. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
-        * `SPEECH_KEY` - the key of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
+        * `SPEECH_KEY` - the key of your Azure AI Service resource.
         * `SPEECH_PRIVATE_ENDPOINT` - (Optional) the private endpoint of your Azure speech resource. e.g. https://my-speech-service.cognitiveservices.azure.com. This is optional, and only needed when you want to use private endpoint to access Azure speech service. This is optional, which is only needed when you are using custom endpoint.
     * Set below environment variables if you want to use customized ICE server:
         * `ICE_SERVER_URL` - (Optional) the URL of your customized ICE server.
-        * `ICE_SERVER_URL_REMOTE` - (Optional) the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
+        * `ICE_SERVER_URL_REMOTE` - (Option) the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
         * `ICE_SERVER_USERNAME` - (Optional) the username of your customized ICE server.
         * `ICE_SERVER_PASSWORD` - (Optional) the password of your customized ICE server.
-    * Run `python -m flask run -h 0.0.0.0 -p 5000` to start this sample. (Azure AI Speech Toolkit: Run the Sample App will run automatically, or you can run it manually.)
+    * Run `npm install` to install any required dependency on your computer.
+    * Run `node server.js` to start this sample.
 
 * Step 2: Open a browser and navigate to `http://localhost:5000/basic` to view the web UI of this sample.
 
@@ -54,7 +27,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
         * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
         * Background Color - The color of the avatar background.
-        * Background Image (URL) - The URL of the background image. If you want to have a background image for the avatar, please fill this field. You need first upload your image to a publicly accessbile place, with a public URL. e.g. https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg
+        * Background Image (URL) - The URL of the background image. If you want to have a background image for the avatar, please fill this field. You need first upload your image to a publicly accessible place, with a public URL. e.g. https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg
         * Custom Avatar - Check this if you are using a custom avatar.
         * Transparent Background - Check this if you want to use transparent background for the avatar. When this is checked, the background color of the video stream from server side is automatically set to green(#00FF00FF), and the js code on client side (check the `makeBackgroundTransparent` function in main.js) will do the real-time matting by replacing the green color with transparent color.
         * Video Crop - By checking this, you can crop the video stream from server side to a smaller size. This is useful when you want to put the avatar video into a customized rectangle area.
@@ -70,7 +43,6 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
 This sample demonstrates the chat scenario, with integration of Azure speech-to-text, Azure OpenAI, and Azure text-to-speech avatar real-time API.
 
 * Step 1: Open a console and navigate to the folder containing this README.md document.
-    * Run `pip install -r requirements.txt` to install the required packages. (Azure AI Speech Toolkit: Build the Sample App will be installed automatically, or you can install it manually.)
     * Set below environment variables:
         * `SPEECH_REGION` - the region of your Azure AI Service resource, e.g. westus2. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
         * `SPEECH_KEY` - the API key of your Azure AI Service resource. (Azure AI Speech Toolkit: Run the Sample App will set environment variable automatically, or you can set it manually.)
@@ -89,7 +61,8 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * `ICE_SERVER_URL_REMOTE` - (Optional) the URL of your customized ICE server for remote side. This is only required when the ICE address for remote side is different from local side.
         * `ICE_SERVER_USERNAME` - (Optional) the username of your customized ICE server.
         * `ICE_SERVER_PASSWORD` - (Optional) the password of your customized ICE server.
-    * Run `python -m flask run -h 0.0.0.0 -p 5000` to start this sample. (Azure AI Speech Toolkit: Run the Sample App will run automatically, or you can run it manually.)
+    * Run `npm install` to install any required dependency on your computer.
+    * Run `node server.js` to start this sample.
 
 * Step 2: Open a browser and navigate to `http://localhost:5000/chat` to view the web UI of this sample.
 
@@ -110,30 +83,11 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
         * Custom Avatar - Check this if you are using a custom avatar.
         * Auto Reconnect - Check this if you want to enable auto reconnect. If this is checked, the avatar video stream is automatically reconnected once the connection is lost.
-        * Use Local Video for Idle - Check this if you want to use local video for idle part. If this is checked, the avatar video stream is replaced by local video when the avatar is idle. To use this feature, you need to prepare a local video file. Usually, you can record a video of the avatar doing idle action. [Here](https://ttspublic.blob.core.windows.net/sampledata/video/avatar/lisa-casual-sitting-idle.mp4) is a sample video for lisa-casual-sitting avatar idle status. You can download it and put it to `video/lisa-casual-sitting-idle.mp4` under the same folder of `chat.html`.
+        * Use Local Video for Idle - Check this if you want to use local video for idle part. If this is checked, the avatar video stream is replaced by local video when the avatar is idle. To use this feature, you need to prepare a local video file. Usually, you can record a video of the avatar doing idle action. [Here](https://ttspublic.blob.core.windows.net/sampledata/video/avatar/lisa-casual-sitting-idle.mp4) is a sample video for lisa-casual-sitting avatar idle status. You can download it and put it to `video/lisa-casual-sitting-idle.mp4` under the same folder of `chat.ejs`.
 
 * Step 4: Click `Open Avatar Session` button to setup video connection with Azure TTS Talking Avatar service. If everything goes well, you should see a live video with an avatar being shown on the web page.
 
 * Step 5: Click `Start Microphone` button to start microphone (make sure to allow the microphone access tip box popping up in the browser), and then you can start chatting with the avatar with speech. The chat history (the text of what you said, and the response text by the Azure OpenAI chat API) will be shown beside the avatar. The avatar will then speak out the response of the chat API.
-
-## Deployment
-
-This sample can be deployed to cloud for global access. The recommended hosting platform is [Azure Container Apps](https://learn.microsoft.com/azure/container-apps/overview), which can well support WebSockets. WebSockets is important for this sample to keep session stickiness between browser and backend. Here are the steps to deploy this sample to `Azure Container Apps`:
-
-* Step 1: Build this sample into a Docker image. You can use the `Dockerfile` in this folder to build the image. Run the following command in the folder containing this README.md document:
-  ```bash
-  docker build -t avatar-sample .
-  ```
-
-* Step 2: Push the Docker image to a container registry, such as [Azure Container Registry](https://learn.microsoft.com/azure/container-registry/). You can use the following command to push the image to Azure Container Registry:
-  ```bash
-    docker tag avatar-sample <your-registry-name>.azurecr.io/avatar-sample:latest
-    docker push <your-registry-name>.azurecr.io/avatar-sample:latest
-  ```
-
-* Step 3: Create an `Azure Container App` and deploy the Docker image built from above steps, following [Deploy from an existing container image](https://learn.microsoft.com/azure/container-apps/quickstart-portal). Make sure to set the environment variables as described in the previous sections, such as `SPEECH_REGION`, `SPEECH_KEY`, etc.
-
-* Step 4: Once the `Azure Container App` is created, you can access the sample by navigating to the URL of the `Azure Container App` in your browser. The URL should be in the format `https://<your-container-app-name>.azurecontainerapps.io/basic` for basic sample or `https://<your-container-app-name>.azurecontainerapps.io/chat` for chat sample.
 
 ## Additional Tip(s)
 
