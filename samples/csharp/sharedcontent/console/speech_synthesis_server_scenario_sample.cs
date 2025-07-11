@@ -104,9 +104,9 @@ namespace MicrosoftSpeechSDKSamples
 
         public SynthesisServer(string subscription, string region, string voiceName, SpeechSynthesisOutputFormat outputFormat, int concurrency)
         {
-            // Creates an instance of a speech config with specified endpoint and subscription key.
+            // Creates an instance of a speech config with specified region and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            speechConfig = SpeechConfig.FromSubscription(subscription, region);
 
             // set your voice name
             speechConfig.SpeechSynthesisVoiceName = voiceName;
