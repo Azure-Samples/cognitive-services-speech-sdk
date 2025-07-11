@@ -69,6 +69,9 @@ public class Main {
         System.out.println("52. Diagnostics Subscribing to logging event (with a filter).");
         System.out.println("53. Diagnostics logging to memory buffer with logging level (with or without filter).");
         System.out.println("54. Diagnostics logging to memory buffer with ingested self-defined SPX trace mark.");
+        System.out.println("55. Authenticate with an AAD token credential for speech recognition.");
+        System.out.println("56. Authenticate with an AAD token credential for continuous speech recognition.");
+        System.out.println("57. Authenticate with an AAD token credential for translation.");
 
         System.out.print(prompt);
 
@@ -239,6 +242,15 @@ public class Main {
                     break;
                 case "54":
                     SpeechDiagnosticsLoggingSamples.selfDefinedSpxTraceLogging();
+                    break;
+                case "55" :
+                    SpeechRecognitionSamples.recognitionWithAADTokenCredentialAsync();
+                    break;
+                case "56" :
+                    SpeechRecognitionSamples.continuousRecognitionWithAADTokenCredentialAsync();
+                    break;
+                case "57" :
+                    TranslationSamples.translationWithAADTokenCredentialAsync();
                     break;
                 case "0":
                     System.out.println("Exiting...");
