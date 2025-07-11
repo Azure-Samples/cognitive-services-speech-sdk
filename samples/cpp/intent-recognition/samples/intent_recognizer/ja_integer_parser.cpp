@@ -13,6 +13,7 @@
 
 #include "es_integer_parser.h" // needed for the Token struct
 #include "ja_integer_parser.h"
+#include "string_utils.h"
 
 namespace Microsoft {
 namespace SpeechSDK {
@@ -138,9 +139,8 @@ Maybe<std::vector<Token>> CSpxJPIntegerParser::FromString(const std::string& inp
 {
     std::vector<Token> output;
 
-    // Convert the input string to a wide string using a codecvt facet
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-    std::wstring winput = converter.from_bytes(input);
+    // Convert the input string to a wide string
+    std::wstring winput = PAL::ToWString(input);
 
     std::vector<wchar_t> accumulator = {};
 
@@ -151,7 +151,7 @@ Maybe<std::vector<Token>> CSpxJPIntegerParser::FromString(const std::string& inp
         // Print each wide character as a UTF-8 encoded string
         accumulator.push_back(*it);
         std::wstring w_accumulated(accumulator.begin(), accumulator.end());
-        std::string accumulated = converter.to_bytes(w_accumulated);
+        std::string accumulated = PAL::ToString(w_accumulated);
 
         auto token = GetNumericValue(accumulated);
         if (token)
