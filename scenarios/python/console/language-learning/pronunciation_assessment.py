@@ -16,7 +16,6 @@ import uuid
 
 import azure.cognitiveservices.speech as speechsdk
 import requests
-import json
 
 from utils import read_wave_header, push_stream_writer, get_reference_words, WaveHeader16K16BitMono
 
