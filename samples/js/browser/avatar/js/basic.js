@@ -51,6 +51,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
 
             mediaPlayer.addEventListener('play', () => {
                 remoteVideoDiv.style.width = mediaPlayer.videoWidth / 2 + 'px'
+                // Speak greeting after video is ready
+                const caroIntro = "Hi, I'm Caro. I am North Carolina's virtual assistant here to help with all of your Department of Administration questions. I was trained on publicly available data from the DOA website using AI. Your privacy is very important to us so we will not store any personally identifiable information from our conversation.";
+                getAvatar(caroIntro);
+                // Display intro in chat without adding to capturedSpeechHistory
+                renderTranscriptHistory(caroIntro);
             })
 
             // Create the mic button after the video is rendered
@@ -207,7 +212,7 @@ window.startSession = () =>{
     if (videoContainer && !document.getElementById('aiDisclaimer')) {
         const disclaimer = document.createElement('div');
         disclaimer.id = 'aiDisclaimer';
-        disclaimer.innerHTML = "<b>Disclaimer:</b> All answers are AI-generated using OpenAI's ChatGPT 4.1 Nano";
+        disclaimer.innerHTML = "<b>DISCLAIMER:</b> All answers are AI-generated using OpenAI's ChatGPT 4.1 Nano";
         disclaimer.style.width = '67%';
         disclaimer.style.background = 'rgba(173, 216, 230, 0.7)'; // light blue, semi-transparent
         disclaimer.style.color = '#000';
@@ -469,10 +474,22 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // In renderTranscriptHistory, remove the logic that moves transcriptDiv, just update its content
-function renderTranscriptHistory() {
+function renderTranscriptHistory(introMessage) {
     let transcriptDiv = document.getElementById('transcriptHistory');
     if (!transcriptDiv) return;
     transcriptDiv.innerHTML = '';
+    // Optionally render an intro message at the top
+    if (introMessage) {
+        const introDiv = document.createElement('div');
+        introDiv.style.marginBottom = '16px';
+        introDiv.style.padding = '10px 14px';
+        introDiv.style.borderRadius = '16px';
+        introDiv.style.maxWidth = '95%';
+        introDiv.style.background = '#e6e6e6';
+        introDiv.style.textAlign = 'left';
+        introDiv.innerHTML = `<strong>Assistant:</strong> ${introMessage}`;
+        transcriptDiv.appendChild(introDiv);
+    }
     // Skip the 0th index (system/intro message)
     capturedSpeechHistory.slice(1).forEach(msg => {
         const msgDiv = document.createElement('div');
