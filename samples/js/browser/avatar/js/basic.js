@@ -52,7 +52,7 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             mediaPlayer.addEventListener('play', () => {
                 remoteVideoDiv.style.width = mediaPlayer.videoWidth / 2 + 'px'
                 // Speak greeting after video is ready
-                const caroIntro = "Hi, I'm Caro. I am North Carolina's virtual assistant here to help with all of your Department of Administration questions. I was trained on publicly available data from the DOA website using AI. Your privacy is very important to us so we will not store any personally identifiable information from our conversation.";
+                const caroIntro = "Hi, I'm Caro! I am North Carolina's virtual assistant here to help with all of your Department of Administration questions. I was trained on publicly available data from the DOA website using AI. Your privacy is very important to us so we will not store any personally identifiable information from our conversation.";
                 getAvatar(caroIntro);
                 // Display intro in chat without adding to capturedSpeechHistory
                 renderTranscriptHistory(caroIntro);
