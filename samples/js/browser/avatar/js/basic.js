@@ -200,6 +200,36 @@ window.startSession = () =>{
     })
     xhr.send()
     document.getElementById('startSession').disabled = true
+
+    // Add disclaimer as a full-width rectangle below the video
+    const videoContainer = document.getElementById('videoContainer');
+    const remoteVideoDiv = document.getElementById('remoteVideo');
+    if (videoContainer && !document.getElementById('aiDisclaimer')) {
+        const disclaimer = document.createElement('div');
+        disclaimer.id = 'aiDisclaimer';
+        disclaimer.innerHTML = "<b>Disclaimer:</b> All answers are AI-generated using OpenAI's ChatGPT 4.1 Nano";
+        disclaimer.style.width = '67%';
+        disclaimer.style.background = 'rgba(173, 216, 230, 0.7)'; // light blue, semi-transparent
+        disclaimer.style.color = '#000';
+        disclaimer.style.fontSize = '1rem';
+        disclaimer.style.padding = '10px 0';
+        disclaimer.style.textAlign = 'center';
+        disclaimer.style.position = 'relative';
+        disclaimer.style.marginTop = '8px';
+        disclaimer.style.borderRadius = '0 0 12px 12px';
+        disclaimer.style.zIndex = '1002';
+        disclaimer.style.pointerEvents = 'none';
+        // Always insert after the remoteVideoDiv if possible, otherwise append to videoContainer
+        if (remoteVideoDiv && remoteVideoDiv.parentNode === videoContainer) {
+            if (remoteVideoDiv.nextSibling) {
+                videoContainer.insertBefore(disclaimer, remoteVideoDiv.nextSibling);
+            } else {
+                videoContainer.appendChild(disclaimer);
+            }
+        } else {
+            videoContainer.appendChild(disclaimer);
+        }
+    }
 }
 
 
