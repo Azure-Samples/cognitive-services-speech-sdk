@@ -163,10 +163,10 @@ window.startSession = () =>{
     let videoCropBottomRightX = 1920
     videoFormat.setCropRange(new SpeechSDK.Coordinate(videoCropTopLeftX, 0), new SpeechSDK.Coordinate(videoCropBottomRightX, 1080));
 
-    const talkingAvatarCharacter = "jeff"
-    const talkingAvatarStyle = "business"
+    const talkingAvatarCharacter = "lisa"
+    const talkingAvatarStyle = "casual-sitting"
     const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle, videoFormat)
-    avatarConfig.backgroundImage = "https://www.tclf.org/sites/default/files/styles/full_width/public/thumbnails/image/NCStateLegislativeBldg_15_CharlesBirnbaum_2007.jpg?itok=K-AERRj0"
+    avatarConfig.backgroundImage = "https://www.tclf.org/sites/default/files/styles/full_width/public/thumbnails/image/SarahPDukeGardens_MarkHough_feature.jpg?itok=1cCpEkHv"
 
     // document.getElementById('startSession').disabled = true
     
@@ -206,7 +206,7 @@ window.startSession = () =>{
 function getAvatar(text) {
     document.getElementById('stopSpeaking').disabled = false
     document.getElementById('audio').muted = false
-    let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='en-US-AndrewMultilingualNeural'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
+    let spokenSsml = `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-US'><voice name='en-US-AvaMultilingualNeural'><mstts:leadingsilence-exact value='0'/>${htmlEncode(text)}</voice></speak>`
     console.log("[" + (new Date()).toISOString() + "] Speak request sent.")
     avatarSynthesizer.speakSsmlAsync(spokenSsml).then(
         (result) => {
@@ -251,7 +251,7 @@ function createMicButton() {
     // Create microphone button
     const micBtn = document.createElement('button')
     micBtn.id = 'micBtn'
-    micBtn.textContent = 'Ask Jeff a question!'
+    micBtn.textContent = 'Ask Caro a question!'
     micBtn.style.fontSize = '1.2rem';
     micBtn.style.padding = '12px 32px';
     micBtn.style.borderRadius = '32px';
@@ -340,7 +340,7 @@ function createMicButton() {
                 try {
                   const parsed = JSON.parse(result);
                   if (parsed && parsed.content) {
-                    // Jeff automatically responds with the AI answer
+                    // Caro automatically responds with the AI answer
                     console.log("Got Avatar with", parsed.content);
                     getAvatar(parsed.content);
                     capturedSpeechHistory.push({ role: "assistant", content: parsed.content });
@@ -359,7 +359,7 @@ function createMicButton() {
         }
         recognition.onend = function() {
             recognizing = false
-            micBtn.textContent = 'Ask Jeff a question!'
+            micBtn.textContent = 'Ask Caro a question!'
         }
 
         micBtn.onclick = function() {
