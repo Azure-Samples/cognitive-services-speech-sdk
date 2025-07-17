@@ -346,6 +346,8 @@ function createMicButton() {
             console.log("capturedSpeechHistory:", capturedSpeechHistory)
             renderTranscriptHistory();
 
+            getAvatar("One second, let me find an answer for you.");
+
             // --- Send POST request with capturedSpeechHistory ---
             const myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
