@@ -1,0 +1,11 @@
+name: voice-live-agent
+metadata:
+  template: voice-live-agent@0.0.1
+services:
+    app:
+        project: server
+        host: containerapp
+        language: python
+        docker:
+          path: Dockerfile
+          remoteBuild: true
