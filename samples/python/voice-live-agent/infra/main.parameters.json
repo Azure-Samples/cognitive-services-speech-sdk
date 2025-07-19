@@ -7,6 +7,12 @@
       },
       "location": {
         "value": "${AZURE_LOCATION}"
+      },
+      "principalId": {
+        "value": "${AZURE_PRINCIPAL_ID}"
+      },
+      "appExists": {
+        "value": "${SERVICE_APP_RESOURCE_EXISTS=false}"
       }
     }
   }

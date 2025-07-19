@@ -1,5 +1,6 @@
 param environmentName string
 param uniqueSuffix string
+param identityId string
 param tags object
 
 // Voice live api only supported on two regions now 
@@ -15,7 +16,8 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: aiServicesName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: { '${identityId}': {} }
   }
   sku: {
     name: sku
@@ -27,7 +29,7 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
     networkAcls: {
       defaultAction: 'Deny'
     }
-    disableLocalAuth: true
+    disableLocalAuth: false
   }
 }
 

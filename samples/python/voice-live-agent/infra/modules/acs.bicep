@@ -1,4 +1,3 @@
-param location string
 param environmentName string
 param uniqueSuffix string
 param tags object = {}

@@ -1,13 +1,11 @@
 param location string
-param environmentName string
-param uniqueSuffix string
+param keyVaultName string
 param tags object
 @secure()
 param aiServicesKey string
 @secure()
 param acsConnectionString string
 
-var keyVaultName = toLower(replace('kv-${environmentName}-${uniqueSuffix}', '_', '-'))
 var sanitizedKeyVaultName = take(toLower(replace(replace(replace(replace(keyVaultName, '--', '-'), '_', '-'), '[^a-zA-Z0-9-]', ''), '-$', '')), 24)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {

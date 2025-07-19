@@ -3,33 +3,28 @@ param environmentName string
 param uniqueSuffix string
 param tags object
 param exists bool
+param identityId string
+param clientId string
+param containerRegistryName string
 param aiServicesEndpoint string
 param modelDeploymentName string
 param aiServicesKeySecretUri string
 param acsConnectionStringSecretUri string
+param logAnalyticsWorkspaceName string
 
 // Helper to sanitize environmentName for valid container app name
 var sanitizedEnvName = toLower(replace(replace(replace(replace(environmentName, ' ', '-'), '--', '-'), '[^a-zA-Z0-9-]', ''), '_', '-'))
 var containerAppName = take('ca-${sanitizedEnvName}-${uniqueSuffix}', 32)
 var containerEnvName = take('cae-${sanitizedEnvName}-${uniqueSuffix}', 32)
-var logAnalyticsName = take('log-${sanitizedEnvName}-${uniqueSuffix}', 63)
 
-resource existingApp 'Microsoft.App/containerApps@2022-03-01' existing = if (exists) {
-  name: containerAppName
-}
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = { name: logAnalyticsWorkspaceName }
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: logAnalyticsName
-  location: location
-  tags: tags
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: 30
-    features: {
-      enableLogAccessUsingOnlyResourcePermissions: true
-    }
+
+module fetchLatestImage './fetch-container-image.bicep' = {
+  name: '${containerAppName}-fetch-image'
+  params: {
+    exists: exists
+    name: containerAppName
   }
 }
 
@@ -41,8 +36,8 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
     appLogsConfiguration: {
       destination: 'log-analytics'
       logAnalyticsConfiguration: {
-        customerId: logAnalytics.properties.customerId
-        sharedKey: logAnalytics.listKeys().primarySharedKey
+        customerId: logAnalyticsWorkspace.properties.customerId
+        sharedKey: logAnalyticsWorkspace.listKeys().primarySharedKey
       }
     }
   }
@@ -53,7 +48,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
   location: location
   tags: union(tags, { 'azd-service-name': 'app' })
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: { '${identityId}': {} }
   }
   properties: {
     managedEnvironmentId: containerAppEnv.id
@@ -62,25 +58,32 @@ resource containerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
       ingress: {
         external: true
         targetPort: 8000
+        transport: 'auto'
       }
+      registries: [
+        {
+          server: '${containerRegistryName}.azurecr.io'
+          identity: identityId
+        }
+      ]
       secrets: [
         {
           name: 'azure-ai-services-key'
           keyVaultUrl: aiServicesKeySecretUri
-          identity: 'system'
+          identity: identityId
         }
         {
           name: 'acs-connection-string'
           keyVaultUrl: acsConnectionStringSecretUri
-          identity: 'system'
+          identity: identityId
         }
       ]
     }
     template: {
       containers: [
         {
-          name: containerAppName
-          image: exists ? existingApp.properties.template.containers[0].image : 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          name: 'main'
+          image: fetchLatestImage.outputs.?containers[?0].?image ??'${containerRegistryName}.azurecr.io/voice-live-agent/app-voiceagent:latest'
           env: [
             {
               name: 'AZURE_VOICE_LIVE_API_KEY'
@@ -90,6 +93,11 @@ resource containerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
               name: 'AZURE_VOICE_LIVE_ENDPOINT'
               value: aiServicesEndpoint
             }
+            // TODO: Enable after adding custom domain and User Identity auth on ai service
+            // {
+            //   name: 'AZURE_USER_ASSIGNED_IDENTITY_CLIENT_ID'
+            //   value: clientId              
+            // }
             {
               name: 'VOICE_LIVE_MODEL'
               value: modelDeploymentName
@@ -129,4 +137,4 @@ resource containerApp 'Microsoft.App/containerApps@2024-10-02-preview' = {
 }
 
 output containerAppFqdn string = containerApp.properties.configuration.ingress.fqdn
-output containerAppPrincipalId string = containerApp.identity.principalId
+output containerAppId string = containerApp.id
