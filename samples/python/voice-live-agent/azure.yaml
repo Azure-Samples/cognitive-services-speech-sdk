@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: voice-live-agent
+metadata:
+  template: azd-init@1.4.2
+services:
+  app:
+    project: ./server
+    language: python
+    host: containerapp
+    docker:
+      path: Dockerfile

@@ -7,113 +7,132 @@
   <h1>Voice Live Client</h1>
   <button id="startBtn" onclick="startStreaming()">Start</button>
   <button id="stopBtn" onclick="stopStreaming()" disabled>Stop</button>
+  <audio id="ttsPlayer" autoplay></audio>
 
   <script>
-    let mediaStream;
-    let processor;
-    let socket;
+    let mediaStream, source, processor, socket;
+    let audioContext = new AudioContext({ sampleRate: 24000 });
+    let workletNode;
 
-    const audioContext = new AudioContext({ sampleRate: 24000 });
+    // Load the AudioWorkletProcessor
+    async function loadAudioProcessor() {
+      await audioContext.audioWorklet.addModule('/static/audio-processor.js');
+      workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
+      workletNode.connect(audioContext.destination);
+    }
+
+    async function playAudio(arrayBuffer) {
+      if (audioContext.state === 'suspended') await audioContext.resume();
+      const int16 = new Int16Array(arrayBuffer);
+      const float32 = new Float32Array(int16.length);
+      for (let i = 0; i < int16.length; i++) {
+        float32[i] = int16[i] / (int16[i] < 0 ? 0x8000 : 0x7FFF);
+      }
+      workletNode.port.postMessage({ pcm: float32 });
+    }
+
+    function stopPlayback() {
+      if (workletNode) workletNode.port.postMessage({ clear: true });
+    }
 
     function float32ToInt16(float32Array) {
-        const int16Array = new Int16Array(float32Array.length);
-        for (let i = 0; i < float32Array.length; i++) {
-            const s = Math.max(-1, Math.min(1, float32Array[i]));
-            int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
-        }
-        return int16Array;
+      const int16 = new Int16Array(float32Array.length);
+      for (let i = 0; i < float32Array.length; i++) {
+        const s = Math.max(-1, Math.min(1, float32Array[i]));
+        int16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+      }
+      return int16;
     }
 
     async function startMicrophone() {
       mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true
-            }
-        });
-        const source = audioContext.createMediaStreamSource(mediaStream);
-        processor = audioContext.createScriptProcessor(8192, 1, 1);
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      source = audioContext.createMediaStreamSource(mediaStream);
+      processor = audioContext.createScriptProcessor(4096, 1, 1);
 
-        processor.onaudioprocess = (event) => {
-        console.log("Audio frame processed", event.inputBuffer.length);
+      processor.onaudioprocess = (event) => {
         const input = event.inputBuffer.getChannelData(0);
         const pcm = float32ToInt16(input);
         if (socket?.readyState === WebSocket.OPEN) {
-        socket.send(pcm.buffer);
+          socket.send(pcm.buffer);
         }
       };
 
-      const gain = audioContext.createGain();
-      gain.gain.value = 0;
-
+      // ONLY route mic input into the processor
       source.connect(processor);
-      processor.connect(gain);
-      gain.connect(audioContext.destination);
-    }
-
-    function playPcm(arrayBuffer) {
-        const int16Array = new Int16Array(arrayBuffer);
-        const float32Array = new Float32Array(int16Array.length);
-
-        // Convert Int16 to Float32 (required by Web Audio API)
-        for (let i = 0; i < int16Array.length; i++) {
-            float32Array[i] = int16Array[i] / 32768;
-        }
-
-        const audioBuffer = audioContext.createBuffer(1, float32Array.length, audioContext.sampleRate);
-        audioBuffer.copyToChannel(float32Array, 0);
-
-        const source = audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioContext.destination);
-        source.start();
+      processor.connect(audioContext.destination); // destination is silent when context's output not used
     }
 
     function stopMicrophone() {
-        if (processor) processor.disconnect();
-        if (mediaStream) {
-            mediaStream.getTracks().forEach(track => track.stop());
-        }
+      if (processor && typeof processor.disconnect === "function") {
+        processor.disconnect();
+        processor = null;
+      }
+      if (mediaStream && mediaStream.getTracks) {
+        mediaStream.getTracks().forEach(t => t.stop());
+        mediaStream = null;
+      }
     }
 
     function stopStreaming() {
-        if (socket) socket.close();
+      socket.close();
     }
 
     function startStreaming() {
-        socket = new WebSocket("ws://127.0.0.1:8000/web/ws");
-        socket.binaryType = "arraybuffer";
+      let wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+      let wsHost = window.location.host; 
+      socket = new WebSocket(`${wsProtocol}://${wsHost}/web/ws`);
+      socket.binaryType = "arraybuffer";
 
-        socket.onopen = () => {
-            console.log("WebSocket opened");
-            audioContext.resume();
-            startMicrophone();
-            document.getElementById("startBtn").disabled = true;
-            document.getElementById("stopBtn").disabled = false;
-        };
+      socket.onopen = async () => {
+        console.log("WebSocket opened");
+        await audioContext.resume();
+        await startMicrophone();
+        document.getElementById("startBtn").disabled = true;
+        document.getElementById("stopBtn").disabled = false;
+      };
 
-        socket.onmessage = (event) => {
-            if (event.data instanceof Blob) {
-                event.data.arrayBuffer().then((buffer) => {
-                    playPcm(buffer);
-                });
-            } else if (event.data instanceof ArrayBuffer) {
-                playPcm(event.data);
-            } else {
-                console.log("Text or JSON message:", event.data);
+      socket.onmessage = async (event) => {
+        if (typeof event.data === "string") {
+          const msg = JSON.parse(event.data);
+          if (msg.Kind === "StopAudio") {
+            console.log("Audio stopped")
+            stopPlayback();
+          }
+          if (msg.Kind === "Transcription") {
+            console.log("Transcript:", msg.Text);
+          }
+         }
+        else if (event.data instanceof ArrayBuffer) {
+            try {
+              playAudio(event.data);
+            } catch (e) {
+              console.error("Failed to decode audio:", e);
             }
-        };
+        }
+        else
+        {
+          console.log("unknown message", event.data);
+        }
+      }
 
-        socket.onclose = () => {
-            console.log("WebSocket closed");
-            stopMicrophone();
-            document.getElementById("startBtn").disabled = false;
-            document.getElementById("stopBtn").disabled = true;
-        };
+      socket.onclose = () => {
+        console.log("WebSocket closed");
+        stopMicrophone();
+        document.getElementById("startBtn").disabled = false;
+        document.getElementById("stopBtn").disabled = true;
+      };
 
-        socket.onerror = (err) => console.error("WebSocket error", err);
+      socket.onerror = (err) => console.error("WebSocket error", err);
     }
+
+    // Initialize the audio processor
+    loadAudioProcessor();
   </script>
 </body>
 </html>

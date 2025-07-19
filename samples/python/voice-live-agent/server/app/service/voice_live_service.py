@@ -3,8 +3,36 @@ import json
 import websockets
 import base64
 import uuid
-from app.service.audio_player import AudioPlayerAsync
+from websockets.asyncio.client import connect as ws_connect
+from websockets.typing import Data
 
+
+def session_config():
+    return {
+        "type": "session.update",
+        "session": {
+            "instructions": "You are a helpful AI assistant responding in natural, engaging language.",
+            "turn_detection": {
+                "type": "azure_semantic_vad",
+                "threshold": 0.3,
+                "prefix_padding_ms": 200,
+                "silence_duration_ms": 200,
+                "remove_filler_words": False,
+                "end_of_utterance_detection": {
+                    "model": "semantic_detection_v1",
+                    "threshold": 0.01,
+                    "timeout": 2,
+                },
+            },
+            "input_audio_noise_reduction": {"type": "azure_deep_noise_suppression"},
+            "input_audio_echo_cancellation": {"type": "server_echo_cancellation"},
+            "voice": {
+                "name": "en-US-Aria:DragonHDLatestNeural",
+                "type": "azure-standard",
+                "temperature": 0.8
+            }
+        }
+    }
 
 class VoiceLiveService:
     def __init__(self, config):

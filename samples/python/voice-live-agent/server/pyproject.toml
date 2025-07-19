@@ -10,5 +10,12 @@ dependencies = [
     "quart-cors",
     "sounddevice",
     "numpy",
+    "azure-core",
+    "azure-communication-identity",
+    "aiohttp",
+    "azure-eventgrid",
+    "azure-identity",
+    "azure-communication-callautomation",
+    "openai[realtime]"
 ]
 requires-python = ">=3.9"
