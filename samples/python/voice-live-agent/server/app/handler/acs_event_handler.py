@@ -20,9 +20,8 @@ logger = logging.getLogger(__name__)
 class AcsEventHandler:
     def __init__(self, config):
         self.acs_client = CallAutomationClient.from_connection_string(config["ACS_CONNECTION_STRING"])
-        self.acs_base_url = config["ACS_DEV_TUNNEL"].rstrip('/')
 
-    async def process_incoming_call(self, events: list, config):
+    async def process_incoming_call(self, events: list, host_url, config):
         logger.info("incoming event data")
         for event_dict in events:
             event = EventGridEvent.from_dict(event_dict)
@@ -44,7 +43,12 @@ class AcsEventHandler:
                 incoming_call_context=event.data['incomingCallContext']
                 guid =uuid.uuid4()
                 query_parameters = urlencode({"callerId": caller_id})
-                callback_events_uri = f"{config["ACS_DEV_TUNNEL"]}/acs/callbacks"
+
+                callback_events_uri = (
+                    f"{config["ACS_DEV_TUNNEL"]}/acs/callbacks"
+                    if config["ACS_DEV_TUNNEL"]
+                    else f"{host_url}/acs/callbacks"
+                )
                 callback_uri = f"{callback_events_uri}/{guid}?{query_parameters}"
                 
                 parsed_url = urlparse(callback_events_uri)

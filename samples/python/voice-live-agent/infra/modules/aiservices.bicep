@@ -25,11 +25,12 @@ resource aiServices 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   kind: 'AIServices'
   tags: tags
   properties: {
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
     networkAcls: {
-      defaultAction: 'Deny'
+      defaultAction: 'Allow'
     }
     disableLocalAuth: false
+    customSubDomainName: 'domain-${environmentName}-${uniqueSuffix}' 
   }
 }
 

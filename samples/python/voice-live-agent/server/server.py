@@ -25,7 +25,8 @@ acs_handler = AcsEventHandler(app.config)
 @app.route("/acs/incomingcall", methods=["POST"])
 async def incoming_call_handler():
     events = await request.get_json()
-    return await acs_handler.process_incoming_call(events, app.config)
+    host_url = request.host_url.replace("http://", "https://", 1).rstrip("/")
+    return await acs_handler.process_incoming_call(events, host_url, app.config)
 
 @app.route('/acs/callbacks/<contextId>', methods=['POST'])
 async def acs_event_callbacks(contextId):

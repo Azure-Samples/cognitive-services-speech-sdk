@@ -4,7 +4,6 @@ param uniqueSuffix string
 param tags object
 param exists bool
 param identityId string
-param clientId string
 param containerRegistryName string
 param aiServicesEndpoint string
 param modelDeploymentName string

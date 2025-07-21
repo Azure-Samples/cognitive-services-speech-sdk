@@ -67,12 +67,16 @@ class ACSMediaHandler:
             )
             token = await credential.get_token(scopes)
             headers["Authorization"] = f"Bearer {token.token}"
-            print(token)
-            print(self.endpoint)
-            print(url)
-            print(headers)
+            # print(token)
+            # print(self.endpoint)
+            # print(url)
+            # print(headers)
         else:
             headers["api-key"] = self.api_key
+            # print(f"key: {self.api_key}")
+            # print(self.endpoint)
+            # print(url)
+            # print(headers)
 
         self.ws = await ws_connect(url, additional_headers=headers)
         print("[VoiceLiveACSHandler] Connected to Voice Live API")
