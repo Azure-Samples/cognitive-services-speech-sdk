@@ -1,63 +1,89 @@
-# Voice Live Agent Template (Python + ACS)
+# Overview
+This project is managed using `pyproject.toml` and the [`uv`](https://github.com/astral-sh/uv) package manager for fast Python dependency management.
 
-Lightweight template to test real-time voice calls using **Azure Communication Services (ACS)** Call Automation + **Azure Voice Live API** — no PSTN number needed. Start locally with `uv run`, deploy later to Azure Web App.
+## 1. Test with Web Client
 
----
+### Set Up Environment Variables
+Based on .env-sample.txt, create and construct your .env file to allow your local app to access your Azure resource.
 
-## Quick Overview
+### Run the App Locally
+1. Run the local server:
 
-- **Framework**: Python 3.9+, FastAPI for HTTP & WebSocket  
-- **ACS Integration**: Incoming call → media streaming → `/ws` → handled by Python  
-- **Voice Live API**: Real-time AI via WebSocket bridge  
-- **Client**: Browser using ACS Web Calling SDK  
-- **Local Testing**: `uv run uvicorn server.main:app --reload`  
-- **Production Deployment**: Same code can be deployed to Azure Web App or Docker
+    ```shell
+    py server.py
+    ```
 
----
+3. Once the app is running, open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser (or click the printed URL in the terminal).
 
-## Project Structure
-voice-live-agent/
-├── server/
-│ ├── main.py               # Entrypoint – handles triggers from clients
-│ ├── voice_live_service.py # Azure Voice Live API logic (session, messaging)
-│ ├── media_handler.py      # Router between streaming clients and AI service
-│ ├── acs_media_streaming_handler.py  # Handles ACS WebSocket streaming
-│ └── helper.py             # Utility functions for JSON parsing and data extraction
-├── client/
-│ ├── index.html # Mic capture UI
-│ └── main.js # ACS Web Calling SDK client
-└── .env # ACS & Voice Live credentials
+4. On the page, click **Start** to begin speaking with the agent using your browser’s microphone and speaker.
 
-## Quick Start
+### Run with Docker (Alternative)
 
-### 1. Initialize env & dependencies:
+If you prefer Docker or are running in GitHub Codespaces:
+
+1. Build the image:
+
+    ```
+    docker build -t voiceagent .
+    ```
+
+2. Run the image with local environment variables:
+
+    ```
+    docker run --env-file .env -p 8000:8000 -it voiceagent
+    ```
+3. Open [http://127.0.0.1:8000](http://127.0.0.1:8000) and click **Start** to interact with the agent.
+
+## 2. Test with ACS Client (Phone Call)
+
+To test Azure Communication Services (ACS) locally, we’ll expose the local server using **Azure DevTunnels**.
+
+> DevTunnels allow public HTTP/S access to your local environment — ideal for webhook testing.
+
+1. [Install Azure Dev CLI](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/overview) if not already installed.
+
+2. Log in and create a tunnel:
 
     ```bash
-    uv init --app
-    uv add fastapi[standard] azure-communication-callautomation azure-identity websockets python-dotenv
+    devtunnel login
+    devtunnel create --allow-anonymous
+    devtunnel port create -p 8000
+    devtunnel host
     ```
 
-### 2. Create `.env`:
+3. The final command will output a URL like:
 
-    ```ini
-    ACS_CONNECTION_STRING=...
-    AZURE_VOICE_LIVE_API_KEY=...
-    AZURE_VOICE_LIVE_ENDPOINT=...
-    VOICE_LIVE_MODEL=...
-    CALLBACK_HOST=http://localhost:8000
+    ```
+    https://<your-tunnel>.devtunnels.ms:8000
     ```
 
-### 3. Run locally:
+4. Add this URL to your `.env` file under:
 
-    ```bash
-    uv run uvicorn server.main:app --reload
+    ```
+    ACS_DEV_TUNNEL=https://<your-tunnel>.devtunnels.ms:8000
     ```
 
-### 4. Test in browser: 
-   Open `client/index.html` and click **Start Call**.
+### Set Up Incoming Call Event
 
----
+1. Go to your **Communication Services** resource in the Azure Portal.
+2. In the left menu, click **Events** → **+ Event Subscription**.
+3. Use the following settings:
+   - **Event type**: `IncomingCall`
+   - **Endpoint type**: `Web Hook`
+   - **Endpoint URL**:  
+     ```
+     https://<your-tunnel>.devtunnels.ms:8000/acs/incomingcall
+     ```
 
-## Deployment
+> Ensure both your local Python server and DevTunnel are running before creating the subscription.
 
-- Azure Web App : TBD
+### Call the Agent
+
+1. [Get a phone number](https://learn.microsoft.com/en-us/azure/communication-services/quickstarts/telephony/get-phone-number?tabs=windows&pivots=platform-azp-new) for your ACS resource if not already provisioned.
+2. Call the number. Your call will route to your local agent.
+
+## Recap
+
+- Use the **web client** for fast local testing.
+- Use **DevTunnel + ACS** to simulate phone calls and test telephony integration.
+- Customize the `.env` file, system prompts, and runtime behavior to fit your use case.

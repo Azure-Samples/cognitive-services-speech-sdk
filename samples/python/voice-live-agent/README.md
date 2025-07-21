@@ -1,86 +1,99 @@
-# Voice Live Agent Template (Python + ACS)
+# Voice Live Agent Template with Web and ACS Clients
 
 Lightweight template to test real-time voice calls using **Azure Communication Services (ACS)** Call Automation + **Azure Voice Live API** — no PSTN number needed. Start locally with `uv run`, deploy later to Azure Web App.
 
----
+This sample demonstrates how to build a real-time voice assistant using the [Azure Speech Voice Live API](https://learn.microsoft.com/azure/ai-services/speech-service/voice-live), now in public preview.
 
-## Prerequisites
+The solution includes:
+- A backend service that connects to the **Voice Live API** for real-time ASR, LLM and TTS
+- Two client options: **Web browser** (microphone/speaker) and **Azure Communication Services (ACS)** phone calls
+- Flexible configuration to customize prompts, ASR, TTS, and behavior
+- Easy extension to other client types such as [Audiohook](https://learn.microsoft.com/azure/ai-services/speech-service/how-to-use-audiohook)
 
-- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-- [Bicep CLI](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/install)
-- [azd CLI (Azure Developer CLI)](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd)
+> You can also try the Voice Live API via [Azure AI Foundry](https://ai.azure.com/foundry) for quick experimentation before deploying this template to your own Azure subscription.
 
----
+## Architecture
+![Architecture Diagram](./docs/images/architecture_v0.0.1.png)
 
-## Project Structure
-voice-live-agent/
-├── server/
-│ ├── server.py               # Entrypoint – handles triggers from clients
-│ ├── voice_live_service.py # Azure Voice Live API logic (session, messaging)
-│ ├── media_handler.py      # Router between streaming clients and AI service
-│ ├── acs_media_streaming_handler.py  # Handles ACS WebSocket streaming
-│ └── helper.py             # Utility functions for JSON parsing and data extraction
-├── client/
-│ ├── index.html # Mic capture UI
-└── .env # local test
 
-## Deployment
+## Get Started
 
-Deploy this accelerator using the provided infrastructure-as-code (Bicep) templates.  
-The **Azure Developer CLI (`azd`)** is the recommended method, offering simple authentication, environment setup, and resource provisioning.
+### Prerequisites
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/what-is-azure-cli): `az`
+- [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/overview): `azd`
+- [Python](https://www.python.org/about/gettingstarted/): `python`
+- [UV](https://docs.astral.sh/uv/getting-started/installation/): `uv`
+- Optionally [Docker](https://www.docker.com/get-started/): `docker`
 
----
+### Deployment and setup
+1. Sign up for a [free Azure account](https://azure.microsoft.com/free/) and create an Azure Subscription.
 
-### Step 1: Authenticate
+2. Login to Azure:
 
-```bash
-azd auth login
-```
-
-### Step 2: Create a New Environment
-
-```bash
-azd auth new
-```
-You’ll be prompted to choose:
-
-- Azure Subscription
-- Azure Region (use swedencentral for best compatibility)
-- Environment Name (e.g. dev, test, prod)
-
-###  Step 3: Customize Your Deployment (Optional)
-```bash
-    azd env set SPEECH_PROVIDER <option>
-    azd env set AZURE_SPEECH_LANG <locale(s)>
-```
-
-| Parameter           | Default              | Options / Description                                                                                                                                                                                                                 |
-|---------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `SPEECH_PROVIDER`   | `azure-ai-speech`    | Choose the speech-to-text provider:`azure-ai-speech` or `azure-openai-gpt4o-transcribe`.   |
-| `AZURE_SPEECH_LANG` | `en-US`              | Specify one or more supported locales (comma-separated, e.g. `en-US,nl-NL`). See the [full list of supported languages](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=stt). When multiple locales are set, automatic language identification is enabled. |
-
-###  Step 4: Deploy resources with:
-
-    ```bash
-    azd up
+    ```shell
+    azd auth login
     ```
 
-During deployment, you’ll be prompted for:
+3. Provision and deploy all the resources:
 
-    | Parameter           | Description                                                                  |
-    |---------------------|------------------------------------------------------------------------------|
-    | Azure Subscription  | The Azure subscription for resource deployment.                              |
-    | Azure Location      | The Azure region for resources                                               |
-    | Environment Name    | A unique environment name (used as a prefix for resource names).             |
+    ```shell
+    azd up
+    ```
+    It will prompt you to provide an `azd` environment name (like "flask-app"), select a subscription from your Azure account, and select a location (like "eastus"). Then it will provision the resources in your account and deploy the latest code. If you get an error with deployment, changing the location can help, as there may be availability constraints for some of the resources.
 
-    For best compatibility, use `swedencentral` as your Azure region. Other regions may not be fully supported or tested.
+4. When `azd` has finished deploying, you'll see an endpoint URI in the command output. Visit that URI, and you should see the API output! 🎉
 
-After deployment, the CLI will display a link to your web service. Open it in your browser, you should see `{"status": "healthy"}` to confirm the service is running.
+5. When you've made any changes to the app code, you can just run:
 
-## Notes
+    ```shell
+    azd deploy
+    ```
+
+>[!NOTE]
+>AZD will also setup the local Python environment for you, using `venv` and installing the required packages.
+
+
+>[!NOTE]
 - Region: swedencentral is strongly recommended due to AI Foundry availability.
 
-- Post-Deployment: You can separately deploy ACS Event Grid subscription or configure additional integrations.
+- Post-Deployment: You can also setup ACS Event Grid subscription and PSTN to use the ACS client.
+
+## Test the Agent
+
+Once deployment is complete, you can test the agent through either the web client or ACS phone call.
+
+🌐 Web Client
+Go to the Azure Portal and navigate to the resource group created by the deployment.
+
+Find the **Container App** resource.
+
+Click into the container app, and in the Overview page, locate the Application URL.
+
+Click the URL — a demo webpage should open.
+
+On the webpage, click Start to begin speaking with the agent via your browser's microphone and speaker.
+
+📞 ACS Client (Optional)
+Find the **Communication Services** resource in the same resource group.
+
+In the left-hand menu, click **Events**.
+
+Click **+ Event Subscription**:
+   - Set the **Event Type** to `IncomingCall`.
+   - Set the **Endpoint Type** to `Web Hook`.
+   - For **Endpoint Address**, use:  
+     ```
+     https://<your-container-app-url>/acs/incomingcall
+     ```
+     Replace `<your-container-app-url>` with the Application URLfrom your **Container App** resource's overview page.
+Refer to the screenshot below for guidance:
+
+   ![Event Subscription screenshot](./docs/images/acs_eventsubscription_v0.0.1.png)
+
+Get a phone number for your ACS resource:  
+   👉 [How to get a phone number (Microsoft Docs)](https://learn.microsoft.com/en-us/azure/communication-services/quickstarts/telephony/get-phone-number?tabs=windows&pivots=platform-azp-new)
+
+Once everything is configured, call the number — your call will connect to the real-time agent.
 
 ## Clean up resources
 
@@ -91,3 +104,17 @@ azd down
 ```
 
 If you want to redeploy to a different region, delete the `.azure` directory before running `azd up` again. In a more advanced scenario, you could selectively edit files within the `.azure` directory to change the region.
+
+## Local execution
+
+Once the environment has been deployed with `azd up` you can also run the application locally.
+
+Please follow the instructions in [the instructions in `service`](./service/README.md)
+
+## Contributing
+
+This project welcomes contributions and suggestions. Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.
