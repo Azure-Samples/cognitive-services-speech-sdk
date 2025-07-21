@@ -40,7 +40,7 @@ To test Azure Communication Services (ACS) locally, we’ll expose the local ser
 
 > DevTunnels allow public HTTP/S access to your local environment — ideal for webhook testing.
 
-1. [Install Azure Dev CLI](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/overview) if not already installed.
+1. [Install Azure Dev CLI](https://learn.microsoft.com/azure/developer/dev-tunnels/overview) if not already installed.
 
 2. Log in and create a tunnel:
 
@@ -79,7 +79,7 @@ To test Azure Communication Services (ACS) locally, we’ll expose the local ser
 
 ### Call the Agent
 
-1. [Get a phone number](https://learn.microsoft.com/en-us/azure/communication-services/quickstarts/telephony/get-phone-number?tabs=windows&pivots=platform-azp-new) for your ACS resource if not already provisioned.
+1. [Get a phone number](https://learn.microsoft.com/azure/communication-services/quickstarts/telephony/get-phone-number?tabs=windows&pivots=platform-azp-new) for your ACS resource if not already provisioned.
 2. Call the number. Your call will route to your local agent.
 
 ## Recap
