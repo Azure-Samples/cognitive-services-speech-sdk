@@ -475,6 +475,7 @@ def speech_recognize_keyword_from_microphone():
         time.sleep(0.5)
 
     speech_recognizer.stop_keyword_recognition()
+# </SpeechRecognitionUsingKeywordModel>
 
 
 def speech_recognition_with_pull_stream():
