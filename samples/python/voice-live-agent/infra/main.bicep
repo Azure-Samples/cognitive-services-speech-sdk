@@ -1,24 +1,25 @@
 targetScope = 'subscription'
 
 @minLength(1)
+@maxLength(64)
+@description('Name of the the environment which is used to generate a short unique hash used in all resources.')
+param environmentName string
+
+@minLength(1)
 @description('Primary location for all resources (filtered on available regions for Azure Open AI Service).')
 @allowed([
-  'swedencentral'
   'eastus2'
+  'swedencentral'
 ])
 param location string
 
-// @description('Environment name')
-// param environmentName string
-var environmentName = 'voiceagenttemp'
-
-// var uniqueSuffix = substring(uniqueString(subscription().id, environmentName), 0, 5)
-var uniqueSuffix = 'test'
+var uniqueSuffix = substring(uniqueString(subscription().id, environmentName), 0, 5)
 
 param appExists bool
 
 var tags = {'azd-env-name': environmentName }
 var rgName = 'rg-${environmentName}-${uniqueSuffix}'
+// TODO: Allow user to select in runtime
 var modelName = 'gpt-4o-mini'
 
 resource rg 'Microsoft.Resources/resourceGroups@2023-07-01' = {
