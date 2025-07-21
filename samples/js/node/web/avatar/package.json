@@ -1,0 +1,25 @@
+{
+  "name": "realtime-avatar-sample-nodejs",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Microsoft",
+  "license": "MIT",
+  "description": "Samples for real-time avatar on Node.js",
+  "dependencies": {
+    "@azure/core-auth": "^1.9.0",
+    "@azure/identity": "^4.10.1",
+    "@azure/openai": "^2.0.0",
+    "axios": "^1.10.0",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.45.0",
+    "openai": "^5.5.1",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.1.0"
+  }
+}
