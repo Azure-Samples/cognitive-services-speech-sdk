@@ -19,8 +19,8 @@ The solution includes:
 ## Get Started
 
 ### Prerequisites
-- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/what-is-azure-cli): `az`
-- [Azure Developer CLI](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/overview): `azd`
+- [Azure CLI](https://learn.microsoft.com/cli/azure/what-is-azure-cli): `az`
+- [Azure Developer CLI](https://learn.microsoft.com/azure/developer/azure-developer-cli/overview): `azd`
 - [Python](https://www.python.org/about/gettingstarted/): `python`
 - [UV](https://docs.astral.sh/uv/getting-started/installation/): `uv`
 - Optionally [Docker](https://www.docker.com/get-started/): `docker`
@@ -91,7 +91,7 @@ Refer to the screenshot below for guidance:
    ![Event Subscription screenshot](./docs/images/acs_eventsubscription_v0.0.1.png)
 
 Get a phone number for your ACS resource:  
-   👉 [How to get a phone number (Microsoft Docs)](https://learn.microsoft.com/en-us/azure/communication-services/quickstarts/telephony/get-phone-number?tabs=windows&pivots=platform-azp-new)
+   👉 [How to get a phone number (Microsoft Docs)](https://learn.microsoft.com/azure/communication-services/quickstarts/telephony/get-phone-number?tabs=windows&pivots=platform-azp-new)
 
 Once everything is configured, call the number — your call will connect to the real-time agent.
 
