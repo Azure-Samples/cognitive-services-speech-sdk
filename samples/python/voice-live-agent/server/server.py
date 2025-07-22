@@ -28,34 +28,40 @@ acs_handler = AcsEventHandler(app.config)
 
 @app.route("/acs/incomingcall", methods=["POST"])
 async def incoming_call_handler():
+    """Handles initial incoming call event from EventGrid."""
     events = await request.get_json()
     host_url = request.host_url.replace("http://", "https://", 1).rstrip("/")
     return await acs_handler.process_incoming_call(events, host_url, app.config)
 
 
-@app.route("/acs/callbacks/<contextId>", methods=["POST"])
-async def acs_event_callbacks(contextId):
+@app.route("/acs/callbacks/<context_id>", methods=["POST"])
+async def acs_event_callbacks(context_id):
+    """Handles ACS event callbacks for call connection and streaming events."""
     raw_events = await request.get_json()
-    return await acs_handler.process_callback_events(contextId, raw_events, app.config)
+    return await acs_handler.process_callback_events(context_id, raw_events, app.config)
 
 
 @app.websocket("/acs/ws")
 async def acs_ws():
-    print("Incoming ACS WebSocket connection")
+    """WebSocket endpoint for ACS to send audio to Voice Live."""
+    logger = logging.getLogger("acs_ws")
+    logger.info("Incoming ACS WebSocket connection")
     handler = ACSMediaHandler(app.config)
     await handler.init_incoming_websocket(websocket, is_raw_audio=False)
-    asyncio.create_task(handler.connect())  # async but non-blocking
+    asyncio.create_task(handler.connect())
     try:
         while True:
             msg = await websocket.receive()
             await handler.acs_to_voicelive(msg)
-    except Exception as e:
-        print(f"[ACS WS] closed: {e}")
+    except Exception:
+        logger.exception("ACS WebSocket connection closed")
 
 
 @app.websocket("/web/ws")
 async def web_ws():
-    print("Incoming Web WebSocket connection")
+    """WebSocket endpoint for web clients to send audio to Voice Live."""
+    logger = logging.getLogger("web_ws")
+    logger.info("Incoming Web WebSocket connection")
     handler = ACSMediaHandler(app.config)
     await handler.init_incoming_websocket(websocket, is_raw_audio=True)
     asyncio.create_task(handler.connect())
@@ -63,12 +69,13 @@ async def web_ws():
         while True:
             msg = await websocket.receive()
             await handler.web_to_voicelive(msg)
-    except Exception as e:
-        print(f"[Web WS] closed: {e}")
+    except Exception:
+        logger.exception("Web WebSocket connection closed")
 
 
 @app.route("/")
 async def index():
+    """Serves the static index page."""
     return await app.send_static_file("index.html")
 
 

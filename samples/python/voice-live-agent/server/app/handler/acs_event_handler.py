@@ -1,15 +1,15 @@
+"""Handler for processing ACS (Azure Communication Services) call and callback events."""
+
 import json
 import logging
 import uuid
 from urllib.parse import urlencode, urlparse, urlunparse
 
-from azure.communication.callautomation import (
-    AudioFormat,
-    MediaStreamingAudioChannelType,
-    MediaStreamingContentType,
-    MediaStreamingOptions,
-    StreamingTransportType,
-)
+from azure.communication.callautomation import (AudioFormat,
+                                                MediaStreamingAudioChannelType,
+                                                MediaStreamingContentType,
+                                                MediaStreamingOptions,
+                                                StreamingTransportType)
 from azure.communication.callautomation.aio import CallAutomationClient
 from azure.eventgrid import EventGridEvent, SystemEventNames
 from quart import Response
@@ -18,37 +18,49 @@ logger = logging.getLogger(__name__)
 
 
 class AcsEventHandler:
+    """Handles ACS event processing and call answering logic."""
+
     def __init__(self, config):
         self.acs_client = CallAutomationClient.from_connection_string(
             config["ACS_CONNECTION_STRING"]
         )
 
     async def process_incoming_call(self, events: list, host_url, config):
+        """Processes incoming call events and answers calls with media streaming."""
         logger.info("incoming event data")
+
         for event_dict in events:
             event = EventGridEvent.from_dict(event_dict)
             logger.info("incoming event data --> %s", event.data)
+
             if (
                 event.event_type
                 == SystemEventNames.EventGridSubscriptionValidationEventName
             ):
                 logger.info("Validating subscription")
                 validation_code = event.data["validationCode"]
-                validation_response = {"validationResponse": validation_code}
-                return Response(response=json.dumps(validation_response), status=200)
-            elif event.event_type == "Microsoft.Communication.IncomingCall":
+                return Response(
+                    response=json.dumps({"validationResponse": validation_code}),
+                    status=200,
+                )
+
+            if event.event_type == "Microsoft.Communication.IncomingCall":
                 logger.info("Incoming call received: data=%s", event.data)
-                if event.data["from"]["kind"] == "phoneNumber":
-                    caller_id = event.data["from"]["phoneNumber"]["value"]
-                else:
-                    caller_id = event.data["from"]["rawId"]
+
+                caller_info = event.data["from"]
+                caller_id = (
+                    caller_info["phoneNumber"]["value"]
+                    if caller_info["kind"] == "phoneNumber"
+                    else caller_info["rawId"]
+                )
+
                 logger.info("incoming call handler caller id: %s", caller_id)
                 incoming_call_context = event.data["incomingCallContext"]
-                guid = uuid.uuid4()
                 query_parameters = urlencode({"callerId": caller_id})
+                guid = uuid.uuid4()
 
                 callback_events_uri = (
-                    f"{config["ACS_DEV_TUNNEL"]}/acs/callbacks"
+                    f"{config['ACS_DEV_TUNNEL']}/acs/callbacks"
                     if config["ACS_DEV_TUNNEL"]
                     else f"{host_url}/acs/callbacks"
                 )
@@ -72,66 +84,87 @@ class AcsEventHandler:
                     audio_format=AudioFormat.PCM24_K_MONO,
                 )
 
-                answer_call_result = await self.acs_client.answer_call(
+                result = await self.acs_client.answer_call(
                     incoming_call_context=incoming_call_context,
                     operation_context="incomingCall",
                     callback_url=callback_uri,
                     media_streaming=media_streaming_options,
                 )
+
                 logger.info(
-                    "Answered call for connection id: %s",
-                    answer_call_result.call_connection_id,
+                    "Answered call for connection id: %s", result.call_connection_id
                 )
-            return Response(status=200)
+                return Response(status=200)
+
+        return Response(status=400)
 
     async def process_callback_events(self, context_id: str, raw_events: list, config):
+        """Processes ACS callback events such as call connected, media started, etc."""
         for event in raw_events:
-            global call_connection_id
             event_data = event["data"]
             call_connection_id = event_data["callConnectionId"]
+
             logger.info(
-                f"Received Event:-> {event['type']}, Correlation Id:-> {event_data['correlationId']}, CallConnectionId:-> {call_connection_id}"
+                "Received Event:-> %s, Correlation Id:-> %s, CallConnectionId:-> %s",
+                event["type"],
+                event_data["correlationId"],
+                call_connection_id,
             )
+
             if event["type"] == "Microsoft.Communication.CallConnected":
-                call_connection_properties = await self.acs_client.get_call_connection(
+                properties = await self.acs_client.get_call_connection(
                     call_connection_id
                 ).get_call_properties()
-                media_streaming_subscription = (
-                    call_connection_properties.media_streaming_subscription
+
+                logger.info(
+                    "MediaStreamingSubscription:--> %s",
+                    properties.media_streaming_subscription,
                 )
                 logger.info(
-                    f"MediaStreamingSubscription:--> {media_streaming_subscription}"
-                )
-                logger.info(
-                    f"Received CallConnected event for connection id: {call_connection_id}"
+                    "Received CallConnected event for connection id: %s",
+                    call_connection_id,
                 )
                 logger.info("CORRELATION ID:--> %s", event_data["correlationId"])
-                logger.info("CALL CONNECTION ID:--> %s", event_data["callConnectionId"])
+                logger.info("CALL CONNECTION ID:--> %s", call_connection_id)
+
             elif event["type"] == "Microsoft.Communication.MediaStreamingStarted":
+                update = event_data["mediaStreamingUpdate"]
                 logger.info(
-                    f"Media streaming content type:--> {event_data['mediaStreamingUpdate']['contentType']}"
+                    "Media streaming content type:--> %s", update["contentType"]
                 )
                 logger.info(
-                    f"Media streaming status:--> {event_data['mediaStreamingUpdate']['mediaStreamingStatus']}"
+                    "Media streaming status:--> %s", update["mediaStreamingStatus"]
                 )
                 logger.info(
-                    f"Media streaming status details:--> {event_data['mediaStreamingUpdate']['mediaStreamingStatusDetails']}"
+                    "Media streaming status details:--> %s",
+                    update["mediaStreamingStatusDetails"],
                 )
+
             elif event["type"] == "Microsoft.Communication.MediaStreamingStopped":
+                update = event_data["mediaStreamingUpdate"]
                 logger.info(
-                    f"Media streaming content type:--> {event_data['mediaStreamingUpdate']['contentType']}"
+                    "Media streaming content type:--> %s", update["contentType"]
                 )
                 logger.info(
-                    f"Media streaming status:--> {event_data['mediaStreamingUpdate']['mediaStreamingStatus']}"
+                    "Media streaming status:--> %s", update["mediaStreamingStatus"]
                 )
                 logger.info(
-                    f"Media streaming status details:--> {event_data['mediaStreamingUpdate']['mediaStreamingStatusDetails']}"
+                    "Media streaming status details:--> %s",
+                    update["mediaStreamingStatusDetails"],
                 )
+
             elif event["type"] == "Microsoft.Communication.MediaStreamingFailed":
+                result_info = event_data["resultInformation"]
                 logger.info(
-                    f"Code:->{event_data['resultInformation']['code']}, Subcode:-> {event_data['resultInformation']['subCode']}"
+                    "Code:-> %s, Subcode:-> %s",
+                    result_info["code"],
+                    result_info["subCode"],
                 )
-                logger.info(f"Message:->{event_data['resultInformation']['message']}")
+                logger.info("Message:-> %s", result_info["message"])
+
             elif event["type"] == "Microsoft.Communication.CallDisconnected":
-                pass
+                logger.info(
+                    "CallDisconnected event received for: %s", call_connection_id
+                )
+
         return Response(status=200)

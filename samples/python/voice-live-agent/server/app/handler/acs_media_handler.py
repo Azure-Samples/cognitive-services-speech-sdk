@@ -1,14 +1,20 @@
+"""Handles media streaming to Azure Voice Live API via WebSocket."""
+
 import asyncio
 import base64
 import json
+import logging
 import uuid
 
 from azure.identity.aio import ManagedIdentityCredential
 from websockets.asyncio.client import connect as ws_connect
 from websockets.typing import Data
 
+logger = logging.getLogger(__name__)
+
 
 def session_config():
+    """Returns the default session configuration for Voice Live."""
     return {
         "type": "session.update",
         "session": {
@@ -37,11 +43,7 @@ def session_config():
 
 
 class ACSMediaHandler:
-    incoming_websocket = None
-    ws = None
-    send_queue = None
-    send_task = None
-    is_raw_audio = True
+    """Manages audio streaming between client and Azure Voice Live API."""
 
     def __init__(self, config):
         self.endpoint = config["AZURE_VOICE_LIVE_ENDPOINT"]
@@ -49,72 +51,69 @@ class ACSMediaHandler:
         self.api_key = config["AZURE_VOICE_LIVE_API_KEY"]
         self.client_id = config["AZURE_USER_ASSIGNED_IDENTITY_CLIENT_ID"]
         self.send_queue = asyncio.Queue()
+        self.ws = None
+        self.send_task = None
+        self.incoming_websocket = None
+        self.is_raw_audio = True
 
     def _generate_guid(self):
         return str(uuid.uuid4())
 
-    # API for now, Use Voice Live SDK once that is ready
     async def connect(self):
+        """Connects to Azure Voice Live API via WebSocket."""
         url = f"{self.endpoint}/voice-live/realtime?api-version=2025-05-01-preview&model={self.model}"
         url = url.replace("https://", "wss://")
 
-        headers = {
-            "x-ms-client-request-id": self._generate_guid(),
-        }
+        headers = {"x-ms-client-request-id": self._generate_guid()}
 
         if self.client_id:
-            scopes = "https://cognitiveservices.azure.com/.default"
-            # Use the user-assigned managed identity
             credential = ManagedIdentityCredential(
                 managed_identity_client_id=self.client_id
             )
-            token = await credential.get_token(scopes)
+            token = await credential.get_token(
+                "https://cognitiveservices.azure.com/.default"
+            )
             headers["Authorization"] = f"Bearer {token.token}"
-            # print(token)
-            # print(self.endpoint)
-            # print(url)
-            # print(headers)
         else:
             headers["api-key"] = self.api_key
-            # print(f"key: {self.api_key}")
-            # print(self.endpoint)
-            # print(url)
-            # print(headers)
 
         self.ws = await ws_connect(url, additional_headers=headers)
-        print("[VoiceLiveACSHandler] Connected to Voice Live API")
+        logger.info("[VoiceLiveACSHandler] Connected to Voice Live API")
 
-        # Send session config
         await self._send_json(session_config())
         await self._send_json({"type": "response.create"})
 
-        # Start receiver and sender loops
         asyncio.create_task(self._receiver_loop())
         self.send_task = asyncio.create_task(self._sender_loop())
 
     async def init_incoming_websocket(self, socket, is_raw_audio=True):
+        """Sets up incoming ACS WebSocket."""
         self.incoming_websocket = socket
         self.is_raw_audio = is_raw_audio
 
     async def audio_to_voicelive(self, audio_b64: str):
+        """Queues audio data to be sent to Voice Live API."""
         await self.send_queue.put(
             json.dumps({"type": "input_audio_buffer.append", "audio": audio_b64})
         )
 
     async def _send_json(self, obj):
+        """Sends a JSON object over WebSocket."""
         if self.ws:
             await self.ws.send(json.dumps(obj))
 
     async def _sender_loop(self):
+        """Continuously sends messages from the queue to the Voice Live WebSocket."""
         try:
             while True:
                 msg = await self.send_queue.get()
                 if self.ws:
                     await self.ws.send(msg)
-        except Exception as e:
-            print(f"[VoiceLiveACSHandler] Sender loop error: {e}")
+        except Exception:
+            logger.exception("[VoiceLiveACSHandler] Sender loop error")
 
     async def _receiver_loop(self):
+        """Handles incoming events from the Voice Live WebSocket."""
         try:
             async for message in self.ws:
                 event = json.loads(message)
@@ -123,70 +122,72 @@ class ACSMediaHandler:
                 match event_type:
                     case "session.created":
                         session_id = event.get("session", {}).get("id")
-                        print(f"[VoiceLiveACSHandler] Session ID: {session_id}")
+                        logger.info("[VoiceLiveACSHandler] Session ID: %s", session_id)
 
                     case "input_audio_buffer.cleared":
-                        print("Input Audio Buffer Cleared Message")
+                        logger.info("Input Audio Buffer Cleared Message")
 
                     case "input_audio_buffer.speech_started":
-                        audio_start_ms = event.get("audio_start_ms")
-                        print(
-                            f"Voice activity detection started at {audio_start_ms} [ms]"
+                        logger.info(
+                            "Voice activity detection started at %s ms",
+                            event.get("audio_start_ms"),
                         )
                         await self.stop_audio()
 
                     case "input_audio_buffer.speech_stopped":
-                        print("Speech stopped")
+                        logger.info("Speech stopped")
 
                     case "conversation.item.input_audio_transcription.completed":
                         transcript = event.get("transcript")
-                        print(f" User:-- {transcript}")
+                        logger.info("User: %s", transcript)
 
                     case "conversation.item.input_audio_transcription.failed":
                         error_msg = event.get("error")
-                        print(f"  Error: {error_msg}")
+                        logger.warning("Transcription Error: %s", error_msg)
 
                     case "response.done":
-                        print("Response Done Message")
                         response = event.get("response", {})
-                        print(f"  Response Id: {response.get('id')}")
+                        logger.info("Response Done: Id=%s", response.get("id"))
                         if response.get("status_details"):
-                            print(
-                                f"  Status Details: {json.dumps(response.get('status_details'), indent=2)}"
+                            logger.info(
+                                "Status Details: %s",
+                                json.dumps(response["status_details"], indent=2),
                             )
 
                     case "response.audio_transcript.done":
                         transcript = event.get("transcript")
-                        print(f" AI:-- {transcript}")
-                        # Just for debug
+                        logger.info("AI: %s", transcript)
                         await self.send_message(
                             json.dumps({"Kind": "Transcription", "Text": transcript})
                         )
 
                     case "response.audio.delta":
+                        delta = event.get("delta")
                         if self.is_raw_audio:
-                            delta = event.get("delta")
                             audio_bytes = base64.b64decode(delta)
                             await self.send_message(audio_bytes)
                         else:
-                            await self.voicelive_to_acs(event.get("delta"))
+                            await self.voicelive_to_acs(delta)
 
                     case "error":
-                        print(f"Voice Live Error: {event}")
+                        logger.error("Voice Live Error: %s", event)
 
                     case _:
-                        print(f"[VoiceLiveACSHandler] Other: {event_type}")
-        except Exception as e:
-            print(f"[VoiceLiveACSHandler] Receiver error: {e}")
+                        logger.debug(
+                            "[VoiceLiveACSHandler] Other event: %s", event_type
+                        )
+        except Exception:
+            logger.exception("[VoiceLiveACSHandler] Receiver loop error")
 
     async def send_message(self, message: Data):
+        """Sends data back to client WebSocket."""
         try:
-            # print(f"Sending to client: {type(message), message[:30]}")
             await self.incoming_websocket.send(message)
-        except Exception as e:
-            print(f"[VoiceLiveACSHandler] Failed to send message: {e}")
+        except Exception:
+            logger.exception("[VoiceLiveACSHandler] Failed to send message")
 
     async def voicelive_to_acs(self, base64_data):
+        """Converts Voice Live audio delta to ACS audio message."""
         try:
             data = {
                 "Kind": "AudioData",
@@ -194,25 +195,26 @@ class ACSMediaHandler:
                 "StopAudio": None,
             }
             await self.send_message(json.dumps(data))
-        except Exception as e:
-            print(f"[VoiceLiveACSHandler] Error in voicelive_to_acs: {e}")
+        except Exception:
+            logger.exception("[VoiceLiveACSHandler] Error in voicelive_to_acs")
 
     async def stop_audio(self):
+        """Sends a StopAudio signal to ACS."""
         stop_audio_data = {"Kind": "StopAudio", "AudioData": None, "StopAudio": {}}
         await self.send_message(json.dumps(stop_audio_data))
 
     async def acs_to_voicelive(self, stream_data):
+        """Processes audio from ACS and forwards to Voice Live if not silent."""
         try:
             data = json.loads(stream_data)
-            kind = data["kind"]
-            if kind == "AudioData":
-                audio_data_section = data.get("audioData", {})
-                if not audio_data_section.get("silent", True):
-                    audio_data = audio_data_section.get("data")
-                    await self.audio_to_voicelive(audio_data)
-        except Exception as e:
-            print(f"[VoiceLiveACSHandler] Error processing WebSocket message: {e}")
+            if data.get("kind") == "AudioData":
+                audio_data = data.get("audioData", {})
+                if not audio_data.get("silent", True):
+                    await self.audio_to_voicelive(audio_data.get("data"))
+        except Exception:
+            logger.exception("[VoiceLiveACSHandler] Error processing ACS audio")
 
     async def web_to_voicelive(self, audio_bytes):
+        """Encodes raw audio bytes and sends to Voice Live API."""
         audio_b64 = base64.b64encode(audio_bytes).decode("ascii")
         await self.audio_to_voicelive(audio_b64)
