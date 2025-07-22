@@ -1,8 +1,9 @@
 import asyncio
-import json
-import websockets
 import base64
+import json
 import uuid
+
+import websockets
 from websockets.asyncio.client import connect as ws_connect
 from websockets.typing import Data
 
@@ -29,10 +30,11 @@ def session_config():
             "voice": {
                 "name": "en-US-Aria:DragonHDLatestNeural",
                 "type": "azure-standard",
-                "temperature": 0.8
-            }
-        }
+                "temperature": 0.8,
+            },
+        },
     }
+
 
 class VoiceLiveService:
     def __init__(self, config):
@@ -47,8 +49,8 @@ class VoiceLiveService:
 
     async def connect(self):
         ws_url = (
-            self.endpoint.replace("https", "wss") +
-            f"/voice-agent/realtime?api-version=2025-05-01-preview"
+            self.endpoint.replace("https", "wss")
+            + f"/voice-agent/realtime?api-version=2025-05-01-preview"
             f"&x-ms-client-request-id={self._generate_guid()}&model={self.model}&api-key={self.api_key}"
         )
         print(f"[VoiceLiveService] Connecting to {ws_url} ...")
@@ -84,9 +86,9 @@ class VoiceLiveService:
                 "voice": {
                     "name": "en-US-Aria:DragonHDLatestNeural",
                     "type": "azure-standard",
-                    "temperature": 0.8
-                }
-            }
+                    "temperature": 0.8,
+                },
+            },
         }
         await self._send_json(msg)
         print("[VoiceLiveService] Sent session update")
@@ -102,10 +104,7 @@ class VoiceLiveService:
 
     async def send_audio(self, audio_bytes: bytes):
         audio_b64 = base64.b64encode(audio_bytes).decode("ascii")
-        msg = {
-            "type": "input_audio_buffer.append",
-            "audio": audio_b64
-        }
+        msg = {"type": "input_audio_buffer.append", "audio": audio_b64}
         await self.send_queue.put(json.dumps(msg))
 
     async def _sender_loop(self):
@@ -117,7 +116,7 @@ class VoiceLiveService:
                     await self.ws.send(msg)
         except Exception as e:
             print(f"[VoiceLiveService] Sender loop error: {e}")
-    
+
     async def _receiver_loop(self):
         try:
             async for message in self.ws:
@@ -127,7 +126,7 @@ class VoiceLiveService:
                     if delta:
                         audio_bytes = base64.b64decode(delta)
                         self.player.add_data(audio_bytes)
-                else: 
+                else:
                     print(f"[VoiceLiveService] Received: {message}")
                     # if obj.get("type") == "response.output_item.done":
                     #     await self._send_json({"type": "input_audio_buffer.commit"})

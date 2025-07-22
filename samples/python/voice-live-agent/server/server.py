@@ -1,12 +1,11 @@
 import asyncio
-from dotenv import load_dotenv
-import os
 import logging
-
-from quart import Quart, request, websocket
+import os
 
 from app.handler.acs_event_handler import AcsEventHandler
 from app.handler.acs_media_handler import ACSMediaHandler
+from dotenv import load_dotenv
+from quart import Quart, request, websocket
 
 load_dotenv()
 
@@ -16,11 +15,16 @@ app.config["AZURE_VOICE_LIVE_ENDPOINT"] = os.getenv("AZURE_VOICE_LIVE_ENDPOINT")
 app.config["VOICE_LIVE_MODEL"] = os.getenv("VOICE_LIVE_MODEL", "gpt-4o-mini")
 app.config["ACS_CONNECTION_STRING"] = os.getenv("ACS_CONNECTION_STRING")
 app.config["ACS_DEV_TUNNEL"] = os.getenv("ACS_DEV_TUNNEL", "")
-app.config["AZURE_USER_ASSIGNED_IDENTITY_CLIENT_ID"] = os.getenv("AZURE_USER_ASSIGNED_IDENTITY_CLIENT_ID", "")
+app.config["AZURE_USER_ASSIGNED_IDENTITY_CLIENT_ID"] = os.getenv(
+    "AZURE_USER_ASSIGNED_IDENTITY_CLIENT_ID", ""
+)
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s: %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s: %(message)s"
+)
 
 acs_handler = AcsEventHandler(app.config)
+
 
 @app.route("/acs/incomingcall", methods=["POST"])
 async def incoming_call_handler():
@@ -28,12 +32,14 @@ async def incoming_call_handler():
     host_url = request.host_url.replace("http://", "https://", 1).rstrip("/")
     return await acs_handler.process_incoming_call(events, host_url, app.config)
 
-@app.route('/acs/callbacks/<contextId>', methods=['POST'])
+
+@app.route("/acs/callbacks/<contextId>", methods=["POST"])
 async def acs_event_callbacks(contextId):
     raw_events = await request.get_json()
     return await acs_handler.process_callback_events(contextId, raw_events, app.config)
 
-@app.websocket('/acs/ws')
+
+@app.websocket("/acs/ws")
 async def acs_ws():
     print("Incoming ACS WebSocket connection")
     handler = ACSMediaHandler(app.config)
@@ -46,7 +52,8 @@ async def acs_ws():
     except Exception as e:
         print(f"[ACS WS] closed: {e}")
 
-@app.websocket('/web/ws')
+
+@app.websocket("/web/ws")
 async def web_ws():
     print("Incoming Web WebSocket connection")
     handler = ACSMediaHandler(app.config)
@@ -59,9 +66,11 @@ async def web_ws():
     except Exception as e:
         print(f"[Web WS] closed: {e}")
 
+
 @app.route("/")
 async def index():
-    return await app.send_static_file('index.html')
+    return await app.send_static_file("index.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8000)

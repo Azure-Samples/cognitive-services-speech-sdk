@@ -8,8 +8,6 @@ dependencies = [
     "httpx",
     "python-dotenv",
     "quart-cors",
-    "sounddevice",
-    "numpy",
     "azure-core",
     "azure-communication-identity",
     "aiohttp",

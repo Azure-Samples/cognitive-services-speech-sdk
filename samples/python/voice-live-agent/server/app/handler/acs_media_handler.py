@@ -2,9 +2,11 @@ import asyncio
 import base64
 import json
 import uuid
+
+from azure.identity.aio import ManagedIdentityCredential
 from websockets.asyncio.client import connect as ws_connect
 from websockets.typing import Data
-from azure.identity.aio import ManagedIdentityCredential
+
 
 def session_config():
     return {
@@ -28,10 +30,11 @@ def session_config():
             "voice": {
                 "name": "en-US-Aria:DragonHDLatestNeural",
                 "type": "azure-standard",
-                "temperature": 0.8
-            }
-        }
+                "temperature": 0.8,
+            },
+        },
     }
+
 
 class ACSMediaHandler:
     incoming_websocket = None
@@ -89,15 +92,14 @@ class ACSMediaHandler:
         asyncio.create_task(self._receiver_loop())
         self.send_task = asyncio.create_task(self._sender_loop())
 
-    async def init_incoming_websocket(self, socket, is_raw_audio = True):
+    async def init_incoming_websocket(self, socket, is_raw_audio=True):
         self.incoming_websocket = socket
         self.is_raw_audio = is_raw_audio
 
     async def audio_to_voicelive(self, audio_b64: str):
-        await self.send_queue.put(json.dumps({
-            "type": "input_audio_buffer.append",
-            "audio": audio_b64
-        }))
+        await self.send_queue.put(
+            json.dumps({"type": "input_audio_buffer.append", "audio": audio_b64})
+        )
 
     async def _send_json(self, obj):
         if self.ws:
@@ -128,7 +130,9 @@ class ACSMediaHandler:
 
                     case "input_audio_buffer.speech_started":
                         audio_start_ms = event.get("audio_start_ms")
-                        print(f"Voice activity detection started at {audio_start_ms} [ms]")
+                        print(
+                            f"Voice activity detection started at {audio_start_ms} [ms]"
+                        )
                         await self.stop_audio()
 
                     case "input_audio_buffer.speech_stopped":
@@ -147,19 +151,20 @@ class ACSMediaHandler:
                         response = event.get("response", {})
                         print(f"  Response Id: {response.get('id')}")
                         if response.get("status_details"):
-                            print(f"  Status Details: {json.dumps(response.get('status_details'), indent=2)}")
+                            print(
+                                f"  Status Details: {json.dumps(response.get('status_details'), indent=2)}"
+                            )
 
                     case "response.audio_transcript.done":
                         transcript = event.get("transcript")
                         print(f" AI:-- {transcript}")
                         # Just for debug
-                        await self.send_message(json.dumps({
-                            "Kind": "Transcription",
-                            "Text": transcript
-                    }))
+                        await self.send_message(
+                            json.dumps({"Kind": "Transcription", "Text": transcript})
+                        )
 
                     case "response.audio.delta":
-                        if(self.is_raw_audio):
+                        if self.is_raw_audio:
                             delta = event.get("delta")
                             audio_bytes = base64.b64decode(delta)
                             await self.send_message(audio_bytes)
@@ -174,7 +179,6 @@ class ACSMediaHandler:
         except Exception as e:
             print(f"[VoiceLiveACSHandler] Receiver error: {e}")
 
-
     async def send_message(self, message: Data):
         try:
             # print(f"Sending to client: {type(message), message[:30]}")
@@ -186,27 +190,21 @@ class ACSMediaHandler:
         try:
             data = {
                 "Kind": "AudioData",
-                "AudioData": {
-                    "Data": base64_data
-                },
-                "StopAudio": None
+                "AudioData": {"Data": base64_data},
+                "StopAudio": None,
             }
             await self.send_message(json.dumps(data))
         except Exception as e:
             print(f"[VoiceLiveACSHandler] Error in voicelive_to_acs: {e}")
 
     async def stop_audio(self):
-        stop_audio_data = {
-            "Kind": "StopAudio",
-            "AudioData": None,
-            "StopAudio": {}
-        }
+        stop_audio_data = {"Kind": "StopAudio", "AudioData": None, "StopAudio": {}}
         await self.send_message(json.dumps(stop_audio_data))
 
     async def acs_to_voicelive(self, stream_data):
         try:
             data = json.loads(stream_data)
-            kind = data['kind']
+            kind = data["kind"]
             if kind == "AudioData":
                 audio_data_section = data.get("audioData", {})
                 if not audio_data_section.get("silent", True):
@@ -214,7 +212,7 @@ class ACSMediaHandler:
                     await self.audio_to_voicelive(audio_data)
         except Exception as e:
             print(f"[VoiceLiveACSHandler] Error processing WebSocket message: {e}")
-    
+
     async def web_to_voicelive(self, audio_bytes):
         audio_b64 = base64.b64encode(audio_bytes).decode("ascii")
         await self.audio_to_voicelive(audio_b64)
