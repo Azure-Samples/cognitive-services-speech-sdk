@@ -131,7 +131,10 @@ function preparePeerConnection() {
             let audioElement = document.createElement('audio')
             audioElement.id = 'audioPlayer'
             audioElement.srcObject = event.streams[0]
-            audioElement.autoplay = true
+            audioElement.autoplay = false
+            audioElement.addEventListener('loadeddata', () => {
+                audioElement.play()
+            })
 
             audioElement.onplaying = () => {
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
@@ -153,7 +156,11 @@ function preparePeerConnection() {
             let videoElement = document.createElement('video')
             videoElement.id = 'videoPlayer'
             videoElement.srcObject = event.streams[0]
-            videoElement.autoplay = true
+            videoElement.autoplay = false
+            videoElement.addEventListener('loadeddata', () => {
+                videoElement.play()
+            })
+
             videoElement.playsInline = true
             videoElement.style.width = '0.5px'
             document.getElementById('remoteVideo').appendChild(videoElement)
