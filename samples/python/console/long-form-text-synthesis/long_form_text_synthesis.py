@@ -21,7 +21,7 @@ from tqdm import tqdm
 from synthesizer_pool import SynthesizerPool
 
 # Only needed for first run
-nltk.download('punkt')
+nltk.download('punkt_tab')
 
 logger = logging.getLogger(__name__)
 
