@@ -1,9 +1,23 @@
-# JavaScript Speech Recognition, Synthesis and Translation Sample for Node.js
+# Scenarios: Language Learning via Azure Pronunciation Assessment with Speech to Text
 
-This sample demonstrates how to recognize and synthesis speech with the Speech SDK for JavaScript on Node.js. It is based on the [Microsoft Cognitive Services Speech SDK for JavaScript](https://aka.ms/csspeech/npmpackage).
-See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started-speech-to-text?pivots=programming-language-nodejs) for introductory information on the Speech SDK for JavaScript on Node.js.
+This sample demonstrates how to use Azure pronunciation assessment SDK for language learning.
 
-## Prerequisites
+## Option 1: Run the Sample Easily in Visual Studio Code (Recommended)
+This is the easiest way to get started. The Azure AI Speech Toolkit extension automates setup, environment configuration and run.
+
+- Install [Azure AI Speech Toolkit](https://marketplace.visualstudio.com/items?itemName=ms-azureaispeech.azure-ai-speech-toolkit) extension in VS Code.
+- In extension's panel, click `View Samples` and download this sample from sample gallery.
+- From the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`), run:
+  - `Azure AI Speech Toolkit: Configure Azure Speech Resources` to select an **Azure AI Service** resource (one-time setup).
+  - `Azure AI Speech Toolkit: Configure and Setup the Sample App` to prepare the project (one-time setup).
+  - `Azure AI Speech Toolkit: Run the Sample App` to run the sample.
+
+## Option 2: Manual Setup and Run (Advanced)
+Follow these steps if you prefer not to use VS Code.
+
+### Prerequisites
+
+Before you get started, here's a list of prerequisites:
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
 * A [Node.js](https://nodejs.org) compatible device.
@@ -21,8 +35,6 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 
 ## Run the sample
 
-The sample demonstrates the speech, intent, and translation recognizers, as well as speech synthesizer. You can start them individually by calling:
-
 ```shell
 node index.js [pronunciationAssessment|pronunciationAssessmentConfiguredWithJson|pronunciationAssessmentContinue|pronunciationAssessmentFromMicrophone] {filename}
 ```
@@ -37,6 +49,10 @@ To use the sample provided, follow these steps:
 * Run `node pronunciationAssessmentFromMicrophone.js`
 * Once you see the 'Listening for speech' message, you can speak into the mic
 * You should see the final response after you have seen the 'buffer of speech received' message.
+
+## Support
+
+If you have a problem or are missing a feature, please have a look at our [support page](https://docs.microsoft.com/azure/cognitive-services/speech-service/support).
 
 ## References
 
