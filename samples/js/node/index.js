@@ -6,10 +6,6 @@ import * as speech from "./speech.js";
 import * as intent from "./intent.js";
 import * as translate from "./translation.js";
 import * as synthesis from "./synthesis.js";
-import * as pronunciationAssessmentContinue from "./pronunciationAssessmentContinue.js";
-import * as pronunciationAssessment from "./pronunciationAssessment.js";
-import * as pronunciationAssessmentConfiguredWithJson from "./pronunciationAssessmentConfiguredWithJson.js";
-import * as pronunciationAssessmentFromMicrophone from "./pronunciationAssessmentFromMicrophone.js";
 
 if (process.argv.length > 3) {
     settings.filename = process.argv[3];
@@ -31,25 +27,6 @@ if (process.argv.length > 2) {
             console.log("Now synthesizing to: " + settings.filename);
             synthesis.main(settings, settings.filename);
             break;
-        
-        case "pronunciationAssessmentContinue":
-            console.log("Now pronunciation assessment to: " + settings.filename);
-            pronunciationAssessmentContinue.main(settings);
-            break;
-
-        case "pronunciationAssessment":
-            console.log("Now pronunciation assessment to: " + settings.filename);
-            pronunciationAssessment.main(settings);
-            break;
-
-        case "pronunciationAssessmentConfiguredWithJson":
-            console.log("Now pronunciation assessment to: " + settings.filename);
-            pronunciationAssessmentConfiguredWithJson.main(settings);
-            break;
-
-        case "pronunciationAssessmentFromMicrophone":
-            pronunciationAssessmentFromMicrophone.main(settings);
-            break;
 
         case "speech":
         default:
@@ -59,5 +36,5 @@ if (process.argv.length > 2) {
     }
 }
 else {
-    console.log("usage: index.js [speech|intent|translate|synthesis|pronunciationAssessment|pronunciationAssessmentContinue|pronunciationAssessmentConfiguredWithJson|pronunciationAssessmentFromMicrophone] {filename}");
+    console.log("usage: index.js [speech|intent|translate|synthesis] {filename}");
 }
