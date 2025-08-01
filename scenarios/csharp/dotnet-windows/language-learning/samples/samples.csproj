@@ -66,46 +66,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\sharedcontent\console\helper.cs">
-      <Link>helper.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\intent_recognition_samples.cs">
-      <Link>intent_recognition_samples.cs</Link>
-    </Compile>
     <Compile Include="..\..\..\sharedcontent\console\Program.cs">
       <Link>Program.cs</Link>
     </Compile>
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_samples.cs">
       <Link>speech_recognition_samples.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_token_sample.cs">
-      <Link>speech_recognition_with_token_sample.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_samples.cs">
-      <Link>speech_synthesis_samples.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_with_token_sample.cs">
-      <Link>speech_synthesis_with_token_sample.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\speech_synthesis_server_scenario_sample.cs">
-      <Link>speech_synthesis_server_scenario_sample.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\translation_samples.cs">
-      <Link>translation_samples.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\..\..\sharedcontent\console\remote_meeting_samples.cs">
-      <Link>remote_meeting_samples.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_language_id_samples.cs">
-      <Link>speech_recognition_with_language_id_samples.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\standalone_language_detection_samples.cs">
-      <Link>standalone_language_detection_samples.cs</Link>
-    </Compile>
-    <Compile Include="..\..\..\sharedcontent\console\speech_diagnostics_logging_samples.cs">
-      <Link>speech_diagnostics_logging_samples.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -115,28 +82,23 @@
       <Link>whatstheweatherlike.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\..\sharedcontent\console\wreck-a-nice-beach.wav">
-      <Link>wreck-a-nice-beach.wav</Link>
+    <Content Include="..\..\..\sharedcontent\console\zhcn_continuous_mode_sample.txt">
+      <Link>zhcn_continuous_mode_sample.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\..\sharedcontent\console\whatstheweatherlike.mp3">
-      <Link>whatstheweatherlike.mp3</Link>
+    <Content Include="..\..\..\sharedcontent\console\zhcn_continuous_mode_sample.wav">
+      <Link>zhcn_continuous_mode_sample.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\..\sharedcontent\console\katiesteve.wav">
-      <Link>katiesteve.wav</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\sharedcontent\console\en-us_zh-cn.wav">
-      <Link>en-us_zh-cn.wav</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\..\sharedcontent\console\LanguageDetection_enUS.wav">
-      <Link>LanguageDetection_enUS.wav</Link>
+    <Content Include="..\..\..\sharedcontent\console\zhcn_short_dummy_sample.wav">
+      <Link>zhcn_short_dummy_sample.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="DiffPlex">
+      <Version>1.7.1</Version>
+    </PackageReference>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.45.0" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.45.0" />
