@@ -37,7 +37,11 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
         const mediaPlayer = document.createElement(event.track.kind)
         mediaPlayer.id = event.track.kind
         mediaPlayer.srcObject = event.streams[0]
-        mediaPlayer.autoplay = true
+        mediaPlayer.autoplay = false
+        mediaPlayer.addEventListener('loadeddata', () => {
+            mediaPlayer.play()
+        })
+
         document.getElementById('remoteVideo').appendChild(mediaPlayer)
         document.getElementById('videoLabel').hidden = true
         document.getElementById('overlayArea').hidden = false

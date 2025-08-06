@@ -5,6 +5,7 @@
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 import os
+import json
 import requests
 from time import sleep
 
@@ -101,6 +102,8 @@ class PersonalVoice(StatusObject):
             config.logger.debug('PersonalVoice.create succeeded personal_voice_id = %s' % personal_voice_id)
         elif personal_voice.status == Status.Failed:
             config.logger.debug('PersonalVoice.create failed personal_voice_id = %s' % personal_voice_id)
+            message = ('Failed response:' + os.linesep + json.dumps(response.json(), indent=4))
+            config.logger.error(message)
         return personal_voice
 
     @staticmethod
