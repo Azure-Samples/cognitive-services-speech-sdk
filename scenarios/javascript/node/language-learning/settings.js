@@ -9,10 +9,4 @@ export const language =          "en-US";
 
 // Replace with the full path to a wav file you want to recognize or overwrite.
 export const filename =          "YourAudioFile.wav"; // 16000 Hz, Mono
-
-// Replace with your own Language Understanding subscription key (endpoint
-// key), region, and app ID in case you want to run the intent sample.
-export const luSubscriptionKey = "YourLanguageUnderstandingSubscriptionKey";
-export const luServiceRegion =   "YourLanguageUnderstandingServiceRegion";
-export const luAppId =           "YourLanguageUnderstandingAppId";
-
+export const dummyFilename =     "YourDummySample.wav";
