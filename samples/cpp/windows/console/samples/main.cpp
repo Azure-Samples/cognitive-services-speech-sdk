@@ -98,18 +98,15 @@ void SpeechSamples()
         cout << "5.) Speech recognition using pull stream input.\n";
         cout << "6.) Speech recognition using push stream input.\n";
         cout << "7.) Speech recognition using microphone with a keyword trigger.\n";
-        cout << "8.) Pronunciation assessment using microphone input.\n";
-        cout << "9.) Speech recognition from default microphone with Microsoft Audio Stack enabled.\n";
-        cout << "a.) Speech recognition from a microphone with Microsoft Audio Stack enabled and\n"
+        cout << "8.) Speech recognition from default microphone with Microsoft Audio Stack enabled.\n";
+        cout << "9.) Speech recognition from a microphone with Microsoft Audio Stack enabled and\n"
                 "    pre-defined microphone array geometry specified.\n";
-        cout << "b.) Speech recognition from multi-channel file with Microsoft Audio Stack enabled and\n"
+        cout << "a.) Speech recognition from multi-channel file with Microsoft Audio Stack enabled and\n"
                 "    custom microphone array geometry specified.\n";
-        cout << "c.) Speech recognition from pull stream with custom set of enhancements from\n"
+        cout << "b.) Speech recognition from pull stream with custom set of enhancements from\n"
                 "    Microsoft Audio Stack enabled.\n";
-        cout << "d.) Speech recognition from push stream with Microsoft Audio Stack enabled and\n"
+        cout << "c.) Speech recognition from push stream with Microsoft Audio Stack enabled and\n"
                 "    beam-forming angles specified.\n";
-        cout << "e.) Pronunciation assessment with stream.\n";
-        cout << "f.) Pronunciation assessment configured with json.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -140,34 +137,22 @@ void SpeechSamples()
             KeywordTriggeredSpeechRecognitionWithMicrophone();
             break;
         case '8':
-            PronunciationAssessmentWithMicrophone();
+            SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled();
             break;
         case '9':
-            SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled();
+            SpeechRecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
             break;
         case 'A':
         case 'a':
-            SpeechRecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified();
+            SpeechContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
             break;
         case 'B':
         case 'b':
-            SpeechContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeometrySpecified();
+            SpeechRecognitionFromPullStreamWithSelectMASEnhancementsEnabled();
             break;
         case 'C':
         case 'c':
-            SpeechRecognitionFromPullStreamWithSelectMASEnhancementsEnabled();
-            break;
-        case 'D':
-        case 'd':
             SpeechContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
-            break;
-        case 'E':
-        case 'e':
-            PronunciationAssessmentWithStream();
-            break;
-        case 'F':
-        case 'f':
-            PronunciationAssessmentConfiguredWithJson();
             break;
         case '0':
             break;
