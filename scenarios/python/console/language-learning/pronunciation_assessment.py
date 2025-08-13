@@ -18,7 +18,7 @@ import uuid
 import azure.cognitiveservices.speech as speechsdk
 import requests
 
-from utils import read_wave_header, push_stream_writer, get_reference_words, WaveHeader16K16BitMono
+from utils import read_wave_header, push_stream_writer, get_reference_words, WaveHeader16K16BitMono, align_lists_with_diff_handling
 
 with open("config.json", "r") as config_file:
     config = json.load(config_file)
@@ -342,6 +342,9 @@ def pronunciation_assessment_continuous_from_file():
     # even if miscue is enabled.
     # We need to compare with the reference text after received all recognized words to get these error words.
     if enable_miscue and not unscripted_scenario:
+        # align the reference words basing on recognized words.
+        reference_words = align_lists_with_diff_handling(reference_words, [x.word.lower() for x in recognized_words])
+
         diff = difflib.SequenceMatcher(None, reference_words, [x.word.lower() for x in recognized_words])
         final_words = []
         for tag, i1, i2, j1, j2 in diff.get_opcodes():
@@ -364,6 +367,11 @@ def pronunciation_assessment_continuous_from_file():
                 final_words += recognized_words[j1:j2]
     else:
         final_words = recognized_words
+
+    # If accuracy score is below 60, mark as mispronunciation
+    for idx, word in enumerate(final_words):
+        if word.accuracy_score < 60:
+            word._error_type = "Mispronunciation"
 
     durations_sum = sum([d for w, d in zip(recognized_words, durations) if w.error_type == "None"])
 

@@ -157,6 +157,94 @@ def get_reference_words(wave_filename, reference_text, language, speech_key, spe
         return None
 
 
+# Aligns two token lists using SequenceMatcher and handles differences.
+# Equal segments are copied directly.
+# 'Replace' segments are aligned strictly if identical after joining,
+# otherwise aligned using align_raw_tokens_by_ref().
+# 'Delete' segments from raw are preserved.
+def align_lists_with_diff_handling(raw, ref):
+    from difflib import SequenceMatcher
+
+    aligned_raw = []
+
+    sm = SequenceMatcher(None, raw, ref)
+    for tag, i1, i2, j1, j2 in sm.get_opcodes():
+        if tag == 'equal':
+            aligned_raw.extend(raw[i1:i2])
+        elif tag == 'replace':
+            # Strict comparison
+            if "".join(raw[i1:i2]) == "".join(ref[j1:j2]):
+                aligned_raw.extend(ref[j1:j2])
+            else:
+                aligned_part = align_raw_tokens_by_ref(raw[i1:i2], ref[j1:j2])
+                aligned_raw.extend(aligned_part)
+        elif tag == 'delete':
+            aligned_raw.extend(raw[i1:i2])
+    return aligned_raw
+
+
+# Aligns raw_list tokens to ref_list
+# by merging consecutive tokens and splitting them
+# when a reference word is found inside the merged string.
+def align_raw_tokens_by_ref(raw_list, ref_list):
+    ref_idx = 0
+    raw_idx = 0
+    ref_len = len(ref_list)
+    aligned_raw = []
+
+    # Use a copy to avoid modifying the original list.
+    raw_copy = list(raw_list)
+
+    while raw_idx < len(raw_copy) and ref_idx < ref_len:
+        merged_split_done = False
+        for length in range(1, len(raw_copy) + 1):
+            if raw_idx + length > len(raw_copy):
+                break
+            merged_raw = ''.join(raw_copy[raw_idx:raw_idx + length])
+            ref_word = ref_list[ref_idx]
+
+            if ref_word in merged_raw:
+                parts = merged_raw.split(ref_word, 1)
+
+                # Handle prefix part before ref_word
+                if parts[0]:
+                    aligned_raw.append(parts[0])
+
+                # Append the matched ref_word
+                aligned_raw.append(ref_word)
+
+                # Handle suffix part after ref_word
+                if parts[1]:
+                    raw_copy[raw_idx] = parts[1]
+                    # Remove the extra merged tokens
+                    for _ in range(1, length):
+                        raw_copy.pop(raw_idx + 1)
+                else:
+                    # No suffix: remove all merged tokens
+                    for _ in range(length):
+                        raw_copy.pop(raw_idx)
+
+                ref_idx += 1
+                merged_split_done = True
+
+            if merged_split_done:
+                break
+
+            # If no match after merging all tokens,
+            # align current token directly
+            if length == len(raw_copy):
+                aligned_raw.append(raw_copy[raw_idx])
+                raw_idx += 1
+                ref_idx += 1
+
+    # Append any remaining raw tokens
+    while raw_idx < len(raw_copy):
+        aligned_raw.append(raw_copy[raw_idx])
+        raw_idx += 1
+
+    return aligned_raw
+
+
 # A common wave header, with zero audio length
 # Since stream data doesn't contain header, but the API requires header to fetch format information,
 # so you need post this header as first chunk for each query
