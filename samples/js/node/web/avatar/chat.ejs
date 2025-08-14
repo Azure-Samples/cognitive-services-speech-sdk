@@ -21,7 +21,7 @@
   <label style="font-size: medium;" for="azureOpenAIDeploymentName">Azure OpenAI Deployment Name:</label>
   <input id="azureOpenAIDeploymentName" type="text" size="32" style="font-size: medium;" /><br />
   <label style="font-size: medium;"  for="prompt">System Prompt:</label><br/>
-  <textarea id="prompt" style="width: 640px;">You are an AI assistant that helps people find information.</textarea>
+  <textarea id="prompt" style="max-width: 640px;">You are an AI assistant that helps people find information.</textarea>
   <div style="background-color: white; width: 300px;">
     <input type="checkbox" id="enableOyd" onchange="window.updataEnableOyd()">Enable On Your Data</input><br />
   </div>
@@ -70,22 +70,16 @@
 <button id="clearChatHistory" onclick="window.clearChatHistory()">Clear Chat History</button>
 <button id="stopSession" onclick="window.stopSession()" disabled>Close Avatar Session</button>
 
-<div id="videoContainer" style="position: relative; width: 960px;">
+<div id="videoContainer" style="position: relative; max-width: 960px;">
   <div id="overlayArea" style="position: absolute;">
     <textarea id="chatHistory" style="
-        width: 360px;
-        height: 500px;
-        font-size: medium;
         border: none;
         resize: none;
         background-color: transparent;
         overflow: hidden;" hidden></textarea>
   </div>
-  <div id="overlayArea" style="position: absolute; left: 720px">
+  <div id="overlayArea" style="position: absolute; left: 68%">
     <textarea id="latencyLog" style="
-        width: 360px;
-        height: 500px;
-        font-size: medium;
         border: none;
         resize: none;
         background-color: transparent;
@@ -100,6 +94,6 @@
 <div id="showTypeMessageCheckbox">
   <input type="checkbox" id="showTypeMessage" onchange="window.updateTypeMessageBox()" disabled>Type Message</input><br />
 </div>
-<textarea id="userMessageBox" style="width: 960px; height: 40px" hidden></textarea><br/>
+<textarea id="userMessageBox" style="max-width: 960px; height: 40px" hidden></textarea><br/>
 </body>
 </html>
