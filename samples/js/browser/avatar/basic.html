@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Talking Avatar Service Demo</title>
     <link href="./css/styles.css" rel="stylesheet">
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
@@ -12,18 +13,24 @@
 
 <div id="configuration">
   <h2 style="background-color: white; width: 300px;">Azure Speech Resource</h2>
-  <label style="font-size: medium;" for="region">Region:</label>
-  <select id="region" style="font-size: medium;">
-    <option value="westus2">West US 2</option>
-    <option value="westeurope">West Europe</option>
-    <option value="southeastasia">Southeast Asia</option>
-    <option value="southcentralus">South Central US</option>
-    <option value="northeurope">North Europe</option>
-    <option value="swedencentral">Sweden Central</option>
-    <option value="eastus2">East US 2</option>
-  </select>
-  <label style="font-size: medium;" for="APIKey">API Key:</label>
-  <input id="APIKey" type="password" size="32" style="font-size: medium;" />
+  <div id="azureSpeechResource" style="display: flex;align-items: center; flex-wrap: wrap;">
+    <div>
+      <label style="font-size: medium;" for="region">Region:</label>
+      <select id="region" style="font-size: medium;">
+        <option value="westus2">West US 2</option>
+        <option value="westeurope">West Europe</option>
+        <option value="southeastasia">Southeast Asia</option>
+        <option value="southcentralus">South Central US</option>
+        <option value="northeurope">North Europe</option>
+        <option value="swedencentral">Sweden Central</option>
+        <option value="eastus2">East US 2</option>
+      </select>
+    </div>
+    <div>
+      <label style="font-size: medium;" for="APIKey">API Key:</label>
+      <input id="APIKey" type="password" size="32" style="font-size: medium;" />
+    </div>
+  </div>
   <div style="background-color: white; width: 300px;">
     <input type="checkbox" id="enablePrivateEndpoint" onchange = "window.updatePrivateEndpoint()">Enable Private Endpoint</input><br />
   </div>
@@ -69,7 +76,7 @@
 <br/>
 
 <h2 id="videoLabel" style="background-color: white; width: 300px;">Avatar Video</h2>
-<div id="videoContainer" style="position: relative; width: 960px;">
+<div id="videoContainer" style="position: relative; max-width: 960px;">
   <div id="overlayArea" style="position: absolute;" hidden="hidden">
     <!-- Add your text or image controls here -->
     <p id="overlayText" style="font-size: large;">Live Video</p>
@@ -81,12 +88,11 @@
         text-align: center;
         color: white; 
         text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-        font-size: 22px; 
         position: absolute; 
         bottom: 5%; 
         z-index: 999;" hidden></div>
-  <canvas id="canvas" width="1920" height="1080" style="background-color: transparent;" hidden="hidden"></canvas>
-  <canvas id="tmpCanvas" width="1920" height="1080" hidden="hidden"></canvas>
+  <canvas id="canvas" max-width="1920" height="1080" style="background-color: transparent;" hidden="hidden"></canvas>
+  <canvas id="tmpCanvas" max-width="1920" height="1080" hidden="hidden"></canvas>
 </div>
 <br/>
 

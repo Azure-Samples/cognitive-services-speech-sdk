@@ -33,11 +33,13 @@ audio {
 }
 
 body {
+    height: 100%;
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     margin: 0;
     padding: 1em;
     word-break: break-word;
+    overflow-y: scroll;
 }
 
 button {
@@ -163,10 +165,8 @@ section:last-of-type {
     padding: 0 0 1em 0;
 }
 
-select {
+#azureSpeechResource div{
     margin: 0 1em 1em 0;
-    position: relative;
-    top: -1px;
 }
 
 h1 span {
@@ -221,6 +221,9 @@ strong {
 
 textarea {
     font-family: 'Roboto', sans-serif;
+    width: 800px;
+    min-height: 40px;
+    margin-bottom: 10px;
 }
 
 video {
@@ -233,6 +236,16 @@ video {
 
 ul {
     margin: 0 0 0.5em 0;
+}
+
+#chatHistory {
+    width: 360px;
+    height: 480px;
+    font-size: medium;
+}
+
+#subtitles {
+    font-size: 22px;
 }
 
 @media screen and (max-width: 650px) {
@@ -258,16 +271,53 @@ ul {
 }
 
 @media screen and (max-width: 450px) {
+    html {
+        height: 620px;
+        overflow-y: scroll;
+    }
+
     h1 {
         font-size: 20px;
     }
+
+    #privateEndpoint,
+    #azureOpenAIEndpoint,
+    #azureCogSearchEndpoint,
+    #sttLocales,
+    #backgroundImageUrl {
+        width: 100%; 
+        box-sizing: border-box;
+    }
+
+    textarea {
+        width: 100%;
+    }
+
+    #azureSpeechResource div{
+        margin: 0;
+    }
+
+    #chatHistory {
+        width: 150px;
+        height: 210px;
+        font-size: small;
+    }
+
+    #subtitles {
+        font-size: 16px;
+    }
+
+    #remoteVideo {
+        width: 100% !important;
+    }
+
+    #videoPlayer {
+        width: 410px !important;
+        height: calc(410px * 0.5625);
+    }
 }
 
-textarea {
-    width: 800px;
-    min-height: 60px;
-    margin-bottom: 10px;
-}
+
 
 #webrtc textarea {
     width: 800px;

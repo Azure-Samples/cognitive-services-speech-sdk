@@ -4,6 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Talking Avatar Service Demo</title>
     <link rel="stylesheet" href="~/css/styles.css">
     <link rel="icon" href="~/image/favicon.ico">
@@ -54,15 +55,15 @@
     <br />
 
     <h2 id="videoLabel" style="background-color: white; width: 300px;">Avatar Video</h2>
-    <div id="videoContainer" style="position: relative; width: 960px;">
+    <div id="videoContainer" style="position: relative; max-width: 960px;">
         <div id="overlayArea" style="position: absolute;" hidden="hidden">
             <!-- Add your text or image controls here -->
             <p id="overlayText" style="font-size: large;">Live Video</p>
             <!-- <img id="overlayImage" src="your-image-source.png" alt="Overlay Image"> -->
         </div>
         <div id="remoteVideo"></div>
-        <canvas id="canvas" width="1920" height="1080" style="background-color: transparent;" hidden="hidden"></canvas>
-        <canvas id="tmpCanvas" width="1920" height="1080" hidden="hidden"></canvas>
+        <canvas id="canvas" max-width="1920" height="1080" style="background-color: transparent;" hidden="hidden"></canvas>
+        <canvas id="tmpCanvas" max-width="1920" height="1080" hidden="hidden"></canvas>
     </div>
     <br />
 
