@@ -33,11 +33,13 @@ audio {
 }
 
 body {
+    height: 100;
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     margin: 0;
     padding: 1em;
     word-break: break-word;
+    overflow-y: scroll;
 }
 
 button {
@@ -221,6 +223,9 @@ strong {
 
 textarea {
     font-family: 'Roboto', sans-serif;
+    width: 800px;
+    min-height: 60px;
+    margin-bottom: 10px;
 }
 
 video {
@@ -233,6 +238,13 @@ video {
 
 ul {
     margin: 0 0 0.5em 0;
+}
+
+#chatHistory,
+#latencyLog{
+    width: 360px;
+    height: 480px;
+    font-size: medium;
 }
 
 @media screen and (max-width: 650px) {
@@ -258,16 +270,42 @@ ul {
 }
 
 @media screen and (max-width: 450px) {
+    html {
+        height: 620px;
+        overflow-y: scroll;
+    }
+    
     h1 {
         font-size: 20px;
     }
+
+    textarea {
+        width: 100%;
+    }
+
+    #chatHistory, 
+    #latencyLog {
+        width: 150px;
+        height: 210px;
+        font-size: small;
+    }
+
+    #remoteVideo {
+        width: 100% !important;
+    }
+
+    #videoPlayer {
+        width: 410px !important;
+        height: calc(410px * 0.5625);
+    }
+
+    #sttLocales,
+    #backgroundImageUrl {
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
 
-textarea {
-    width: 800px;
-    min-height: 60px;
-    margin-bottom: 10px;
-}
 
 #webrtc textarea {
     width: 800px;
