@@ -33,7 +33,7 @@ audio {
 }
 
 body {
-    height: 100;
+    height: 100%;
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
     margin: 0;
@@ -305,7 +305,6 @@ ul {
         box-sizing: border-box;
     }
 }
-
 
 #webrtc textarea {
     width: 800px;
