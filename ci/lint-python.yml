@@ -20,6 +20,6 @@ steps:
   displayName: Use Python 3.10
 - bash: |
     set -ex
-    python -m pip install flake8==7.2.0
+    python -m pip install flake8
     python -m flake8 --max-line-length 137
   displayName: Lint Python (samples)
