@@ -130,7 +130,8 @@ class VideoTranslationPlugin:
                 iteration_id = iteration.id
 
                 logger.debug(f"Translation successful! Translation ID: {translation_id}, Iteration ID: {iteration_id}")
-                return f"Translation successful! Translation ID:{translation_id} Result translation:{translation_info} Iteration ID:{iteration_id} Result iteration:{iteration_info}"
+                return (f"Translation successful! Translation ID:{translation_id} Result translation:{translation_info} "
+                        f"Iteration ID:{iteration_id} Result iteration:{iteration_info}")
             else:
                 logger.error(f"Translation request failed: {error}")
                 return f"Translation request failed: {error}\nPlease check your video URL, language codes, and try again."
@@ -142,7 +143,8 @@ class VideoTranslationPlugin:
     def create_iteration_with_webvtt(self,
                                      translation_id: Annotated[str, "The ID of the translation to iterate on"],
                                      webvtt_file_url: Annotated[str, "URL of the WebVTT file"],
-                                     webvtt_file_kind: Annotated[str, "Kind of WebVTT file: 'MetadataJson', 'SourceLocaleSubtitle', or 'TargetLocaleSubtitle'"],
+                                     webvtt_file_kind: Annotated[str, ("Kind of WebVTT file: 'MetadataJson', "
+                                                                       "'SourceLocaleSubtitle', or 'TargetLocaleSubtitle'")],
                                      export_subtitle_in_video: Annotated[bool, "Whether to embed subtitles in video (optional)"] = False
                                      ) -> Annotated[str, "Returns the status of the iteration creation"]:
         """Creates a new iteration with a WebVTT file for an existing translation."""
@@ -171,7 +173,8 @@ class VideoTranslationPlugin:
                 webvtt_kind_enum = WebvttFileKind.TargetLocaleSubtitle
             else:
                 logger.error(f"Invalid WebVTT file kind: {webvtt_file_kind}")
-                return f"Error: Invalid WebVTT file kind: '{webvtt_file_kind}'. Must be 'MetadataJson', 'SourceLocaleSubtitle', or 'TargetLocaleSubtitle'."
+                return (f"Error: Invalid WebVTT file kind: '{webvtt_file_kind}'. "
+                        f"Must be 'MetadataJson', 'SourceLocaleSubtitle', or 'TargetLocaleSubtitle'.")
 
             logger.debug(f"Running iteration with WebVTT kind: {webvtt_file_kind}")
             success, error, translation, iteration = self.client.run_iteration_with_webvtt_until_terminated(
@@ -201,7 +204,8 @@ class VideoTranslationPlugin:
                         logger.debug(f"Metadata available at: {iteration.result.metadataJsonWebvttFileUrl}")
                         results += f"Metadata: {iteration.result.metadataJsonWebvttFileUrl}\n"
 
-                return f"Iteration successfully created! Iteration ID: {iteration_id}\nTranslation: {translation}\nIteration Results:\n{results}"
+                return (f"Iteration successfully created! Iteration ID: {iteration_id}\n"
+                        f"Translation: {translation}\nIteration Results:\n{results}")
             else:
                 logger.error(f"Iteration creation failed: {error}")
                 return f"Iteration creation failed: {error}\nPlease verify your translation ID and WebVTT file URL."
@@ -227,7 +231,8 @@ class VideoTranslationPlugin:
             return f"An error occurred while listing translations: {str(e)}\nPlease try again later."
 
     @kernel_function(description="Gets details about a specific translation")
-    def get_translation_details(self, translation_id: Annotated[str, "The ID of the translation"]) -> Annotated[str, "Returns details about the specified translation"]:
+    def get_translation_details(self, translation_id: Annotated[str, "The ID of the translation"]) -> Annotated[
+            str, "Returns details about the specified translation"]:
         """Gets details about a specific translation."""
         try:
             logger.debug(f"Getting details for translation ID: {translation_id}")
@@ -245,10 +250,12 @@ class VideoTranslationPlugin:
                 return f"Translation not found or error: {error}\nPlease verify your translation ID."
         except Exception as e:
             logger.exception(f"Exception while getting translation details: {str(e)}")
-            return f"An error occurred while getting translation details: {str(e)}\nPlease check your translation ID and try again."
+            return (f"An error occurred while getting translation details: {str(e)}\n"
+                    f"Please check your translation ID and try again.")
 
     @kernel_function(description="Deletes a specific translation")
-    def delete_translation(self, translation_id: Annotated[str, "The ID of the translation to delete"]) -> Annotated[str, "Returns the status of the delete operation"]:
+    def delete_translation(self, translation_id: Annotated[str, "The ID of the translation to delete"]) -> Annotated[
+            str, "Returns the status of the delete operation"]:
         """Deletes a specific translation."""
         try:
             logger.debug(f"Attempting to delete translation ID: {translation_id}")
@@ -341,10 +348,14 @@ class VideoTranslationPlugin:
                         sas_url = f"{blob_url}?{sas_token}"
                         logger.debug("SAS URL generated (valid for 24 hours)")
 
-                        return f"File uploaded successfully! \nAccess URL: {blob_url} \nSecure access URL (valid for 24 hours): {sas_url}"
+                        return (f"File uploaded successfully! \nAccess URL: {blob_url} \n"
+                                f"Secure access URL (valid for 24 hours): {sas_url}")
                     except Exception as e:
                         logger.warning(f"Failed to generate SAS URL: {str(e)}")
-                        return f"File uploaded successfully! \nAccess URL: {blob_url} \nNote: Could not generate a secure access URL. Error: {str(e)} The user can either manually generate the SAS url from Azure portal or double check their permissions and credentials before trying again."
+                        return (f"File uploaded successfully! \nAccess URL: {blob_url} \n"
+                                f"Note: Could not generate a secure access URL. Error: {str(e)} "
+                                f"The user can either manually generate the SAS url from Azure portal "
+                                f"or double check their permissions and credentials before trying again.")
                 finally:
                     logger.debug("Closing blob service client")
                     await blob_service_client.close()
@@ -413,7 +424,7 @@ For remote video URLs:
 2. Make sure the URL is accessible (has necessary SAS token if from Azure Storage)
 
 In either case, gather the following information:
-1. Source language (e.g., en-US, ja-JP, es-ES) 
+1. Source language (e.g., en-US, ja-JP, es-ES)
 2. Target language (e.g., en-US, ja-JP, es-ES)
 3. Voice kind (PlatformVoice or PersonalVoice)
 
