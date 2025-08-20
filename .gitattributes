@@ -74,6 +74,7 @@ proguard-rules.pro text
 *.dockerignore text
 *.proto text
 *.ps1 text
+*.env.sample text
 
 
 # Bash only likes Unix line endings
