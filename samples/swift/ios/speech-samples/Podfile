@@ -1,6 +1,0 @@
-target 'speech-samples' do
-    platform :ios, '11.0'
-    pod 'MicrosoftCognitiveServicesSpeech-iOS', '~> 1.25'
-    pod 'Differ'
-    use_frameworks!
-end
