@@ -71,7 +71,7 @@ app.get('/api/get-speech-token', async (req, res, next) => {
 
 In the request, you create a `Ocp-Apim-Subscription-Key` header, and pass your speech key as the value. Then you make a request to the **issueToken** endpoint for your region, and an authorization token is returned. In a production application, this endpoint returning the token should be *restricted by additional user authentication* whenever possible. 
 
-On the front-end, both `public/index.html` and `public/synthesis.html` contain code (using the axios library) to retrieve the token from the server. 
+On the front-end, `index.html` contain code (using the axios library) to retrieve the token from the server. 
 
 ```javascript
 let authorizationEndpoint = "http://localhost:3001/api/get-speech-token";
