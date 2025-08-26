@@ -94,8 +94,17 @@
                     </select>
                 </td>
             </tr>
+            <tr id="miscueRow">
+                <td align="right">Miscue:</td>
+                <td align="left">
+                    <input type="checkbox"
+                        checked="checked"
+                        id ="enableMiscueCheckbox"
+                    />
+                </td>
+            </tr>
             <tr id="prosodyAssessmentRow">
-                <td align="right">Prosody assessment</td>
+                <td align="right">Prosody assessment:</td>
                 <td align="left">
                     <input type="checkbox"
                         checked="checked"
@@ -153,7 +162,7 @@
                     Reference Text:
                 </td>
                 <td>
-                    <input id="referenceText"
+                    <input id="referenceTextFieldId"
                         type="text"
                         size="60"
                         value=""
@@ -187,6 +196,7 @@
     <!-- Speech SDK REFERENCE -->
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 
     <!-- Speech Speech SDK Authorization token -->
     <script>
@@ -237,6 +247,7 @@
         var languageOptions, formatOption, filePicker, microphoneSources;
         var useDetailedResults;
         var enableProsodyAssessmentCheckbox;
+        var enableMiscueCheckbox;
         var recognizer;
         var inputSourceMicrophoneRadio, inputSourceFileRadio;
         var scenarioSelection, scenarioStartButton, scenarioStopButton;
@@ -244,7 +255,7 @@
         var reco;
         var audioFile;
         var microphoneId;
-        var referenceText;
+        var referenceTextField;
         var pronunciationAssessmentResults;
 
         var thingsToDisableDuringSession;
@@ -287,9 +298,10 @@
             inputSourceMicrophoneRadio = document.getElementById('inputSourceMicrophoneRadio');
             formatSimpleRadio = document.getElementById('formatSimpleRadio');
             formatDetailedRadio = document.getElementById('formatDetailedRadio');
-            referenceText = document.getElementById('referenceText');
+            referenceTextField = document.getElementById('referenceTextFieldId');
             scenarioId = document.getElementById('scenarioId');
             enableProsodyAssessmentCheckbox = document.getElementById('enableProsodyAssessmentCheckbox');
+            enableMiscueCheckbox = document.getElementById('enableMiscueCheckbox');
 
             thingsToDisableDuringSession = [
                 key,
@@ -300,9 +312,10 @@
                 scenarioSelection,
                 formatSimpleRadio,
                 formatDetailedRadio,
-                referenceText,
+                referenceTextField,
                 scenarioId,
                 enableProsodyAssessmentCheckbox,
+                enableMiscueCheckbox,
             ];
 
             function setScenario() {
@@ -338,10 +351,6 @@
             setScenario();
 
             scenarioStartButton.addEventListener("click", function () {
-                if (!referenceText.value) {
-                    alert("Please enter the reference text.");
-                    return;
-                }
                 switch (scenarioSelection.value) {
                     case 'pronunciationAssessmentOnce':
                         doPronunciationAssessmentOnceAsync();
@@ -420,6 +429,8 @@
             inputSourceMicrophoneRadio.addEventListener("click", function () {
                 enumerateMicrophones();
                 document.getElementById('inputSourceChooseFileButton').disabled = true;
+                audioFile = undefined;
+                document.getElementById('inputSourceFileLabel').innerHTML = "Audio file";
             });
 
             inputSourceFileRadio.addEventListener("click", function() {
@@ -450,8 +461,235 @@
         });
     </script>
 
+    <!-- Utils -->
+    <script>
+        async function cutFirst2Sec(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const audioCtx = new AudioContext();
+            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+            const frameCount = Math.min(audioBuffer.sampleRate * 2, audioBuffer.length);
+
+            const newBuffer = audioCtx.createBuffer(
+                audioBuffer.numberOfChannels,
+                frameCount,
+                audioBuffer.sampleRate
+            );
+
+            for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+                const oldData = audioBuffer.getChannelData(ch);
+                newBuffer.getChannelData(ch).set(oldData.subarray(0, frameCount));
+            }
+
+            return audioBufferToWav(newBuffer);
+
+            function audioBufferToWav(abuffer) {
+                const numOfChan = abuffer.numberOfChannels,
+                length = abuffer.length * numOfChan * 2 + 44,
+                buffer = new ArrayBuffer(length),
+                view = new DataView(buffer),
+                channels = [],
+                sampleRate = abuffer.sampleRate;
+
+                writeUTFBytes(view, 0, "RIFF");
+                view.setUint32(4, length - 8, true);
+                writeUTFBytes(view, 8, "WAVE");
+                writeUTFBytes(view, 12, "fmt ");
+                view.setUint32(16, 16, true);
+                view.setUint16(20, 1, true);
+                view.setUint16(22, numOfChan, true);
+                view.setUint32(24, sampleRate, true);
+                view.setUint32(28, sampleRate * 2 * numOfChan, true);
+                view.setUint16(32, numOfChan * 2, true);
+                view.setUint16(34, 16, true);
+                writeUTFBytes(view, 36, "data");
+                view.setUint32(40, length - 44, true);
+
+                let offset = 44;
+                for (let ch = 0; ch < numOfChan; ch++) {
+                    channels.push(abuffer.getChannelData(ch));
+                }
+                const interleaved = new Float32Array(abuffer.length * numOfChan);
+                for (let i = 0; i < abuffer.length; i++) {
+                    for (let ch = 0; ch < numOfChan; ch++) {
+                        interleaved[i * numOfChan + ch] = channels[ch][i];
+                    }
+                }
+                for (let i = 0; i < interleaved.length; i++, offset += 2) {
+                    let s = Math.max(-1, Math.min(1, interleaved[i]));
+                    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+                }
+                return new Blob([view], { type: "audio/wav" });
+
+                function writeUTFBytes(view, offset, string) {
+                    for (let i = 0; i < string.length; i++) {
+                        view.setUint8(offset + i, string.charCodeAt(i));
+                    }
+                }
+            }
+        }
+
+        function convertReferenceWords(referenceText, referenceWords) {
+            const dictionary = [...new Set(referenceWords)];
+            const maxLength = Math.max(...dictionary.map(word => word.length));
+
+            // From left to right to do the longest matching to get the word segmentation
+            function leftToRightSegmentation(text, dictionary) {
+                var result = [];
+                while (text.length > 0) {
+                    let subText = "";
+                    // If the length of the text is less than the maxLength, then the subText is the text itself
+                    if (text.length < maxLength) {
+                        subText = text;
+                    } else {
+                        subText = text.substring(0, maxLength);
+                    }
+                    while (subText.length > 0) {
+                        // If the subText is in the dictionary or the length of the subText is 1, then add it to the result
+                        if (dictionary.includes(subText) || subText.length === 1) {
+                            result.push(subText);
+                            // Remove the subText from the text
+                            text = text.slice(subText.length);
+                            break;
+                        } else {
+                            // If the subText is not in the dictionary, then remove the last character of the subText
+                            subText = subText.slice(0, -1);
+                        }
+                    }
+                }
+                return result;
+            }
+
+            // From right to left to do the longest matching to get the word segmentation
+            function rightToLeftSegmentation(text, dictionary) {
+                var result = [];
+                while (text.length > 0) {
+                    let subText = "";
+                    // If the length of the text is less than the maxLength, then the subText is the text itself
+                    if (text.length < maxLength) {
+                        subText = text;
+                    } else {
+                        subText = text.slice(-maxLength);
+                    }
+                    while (subText.length > 0) {
+                        // If the subText is in the dictionary or the length of the subText is 1, then add it to the result
+                        if (dictionary.includes(subText) || subText.length === 1) {
+                            result.push(subText);
+                            // Remove the subText from the text
+                            text = text.slice(0, -subText.length);
+                            break;
+                        } else {
+                            // If the subText is not in the dictionary, then remove the first character of the subText
+                            subText = subText.slice(1);
+                        }
+                    }
+                }
+                // Reverse the result to get the correct order
+                result = result.reverse();
+                return result;
+            }
+
+            function segment_word(referenceText, dictionary) {
+                const leftToRight = leftToRightSegmentation(referenceText, dictionary);
+                const rightToLeft = rightToLeftSegmentation(referenceText, dictionary);
+                if (leftToRight.join("") === referenceText) {
+                    return leftToRight;
+                } else if (rightToLeft.join("") === referenceText) {
+                    return rightToLeft;
+                } else {
+                    console.log("WW failed to segment the text with the dictionary")
+                    if (leftToRight.length < rightToLeft.length) {
+                        return leftToRight;
+                    } else if (leftToRight.length > rightToLeft.length) {
+                        return rightToLeft;
+                    } else {
+                        // If the word number is the same, then return the one with the smallest single word
+                        const leftToRightSingle = leftToRight.filter(word => word.length === 1).length;
+                        const rightToLeftSingle = rightToLeft.filter(word => word.length === 1).length;
+                        if (leftToRightSingle < rightToLeftSingle) {
+                            return leftToRight;
+                        } else {
+                            return rightToLeft;
+                        }
+                    }
+                }
+            }
+
+            // Remove punctuation from the reference text
+            referenceText = referenceText.split("").filter(char => /[\p{L}\p{N}\s]/u.test(char)).join("");
+            return segment_word(referenceText, dictionary);
+        }
+
+        async function getReferenceWords(referenceText) {
+            const cutBlob = await cutFirst2Sec(audioFile);
+            const dummyFile = new File([cutBlob], "dummy.wav", { type: "audio/wav" });
+            const audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(dummyFile);
+            const speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+
+            const speechRecognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+
+            // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+            const pronunciationConfig = new SpeechSDK.PronunciationAssessmentConfig(
+                referenceText,
+                SpeechSDK.PronunciationAssessmentGradingSystem.HundredMark,
+                SpeechSDK.PronunciationAssessmentGranularity.Phoneme,
+                true
+            );
+
+            // Apply pronunciation assessment config to speech recognizer
+            pronunciationConfig.applyTo(speechRecognizer);
+            const res = await new Promise((resolve, reject) => {
+                speechRecognizer.recognizeOnceAsync(
+                    (result) => {
+                        const referenceWords = [];
+                        if (result.reason == SpeechSDK.ResultReason.RecognizedSpeech) {
+                            const jo = JSON.parse(result.properties.getProperty(SpeechSDK.PropertyId.SpeechServiceResponse_JsonResult));
+                            _.forEach(jo.NBest[0].Words, (word) => {
+                                if (word.PronunciationAssessment.ErrorType != "Insertion") {
+                                    referenceWords.push(word.Word.toLowerCase());
+                                }
+                            })
+                        } else if (result.reason == SpeechSDK.ResultReason.NoMatch) {
+                            reject("No speech could be recognized");
+                        } else if (result.reason == SpeechSDK.ResultReason.Canceled) {
+                            reject(`Speech Recognition canceled: ${result.errorDetails}`);
+                        }
+                        resolve(convertReferenceWords(referenceText, referenceWords));
+                        speechRecognizer.close();
+                    },
+                    (err) => {
+                        reject(err);
+                        speechRecognizer.close();
+                    }
+                );
+            }).catch((reason) => console.log(reason));
+
+            return res;
+        }
+    </script>
+
     <!-- Configuration and setup common to SDK objects, including events -->
     <script>
+        var allWords = [];
+        var recognizedWordStrList = [];
+        var startOffset = 0;
+        var endOffset = 0;
+        var prosodyScores = [];
+        var durations = [];
+        var jo = {};
+        var referenceWords = [];
+
+        function resetVariables() {
+            allWords = [];
+            recognizedWordStrList = [];
+            startOffset = 0;
+            endOffset = 0;
+            prosodyScores = [];
+            durations = [];
+            jo = {};
+            referenceWords = [];
+        }
+
         function getAudioStream(audioFile, cb) {
             var fr = new FileReader();
             fr.readAsArrayBuffer(audioFile);
@@ -507,22 +745,54 @@
             return speechConfig;
         }
 
-        function getPronunciationAssessmentConfig() {
-            var pronunciationAssessmentConfig = new SpeechSDK.PronunciationAssessmentConfig(referenceText.value,
+        async function referenceTextHandler() {
+            let referenceText = referenceTextField.value;
+
+            // We need to convert the reference text to lower case, and split to words, then remove the punctuations.
+            if (["zh-cn"].includes(languageOptions.value.toLowerCase())) {
+                // Word segmentation for Chinese using the reference text and any short wave file
+                // Remove the blank characters in the reference text
+                referenceText = referenceText.replace(/ /g, "");
+                // TODO: handle the microphone input case.
+                if (audioFile && inputSourceFileRadio.checked) {
+                    referenceWords = await getReferenceWords(referenceText);
+                } else {
+                    referenceWords = [];
+                }
+                console.log("referenceTextHandler -> zh-CN: ", referenceWords.join(""));
+            } else {
+                referenceText = referenceText.toLocaleLowerCase() ?? "";
+                referenceWords = _.map(
+                    _.filter(referenceText.split(" "), (item) => !!item),
+                    (item) => item.replace(/^[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+|[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+$/g, "")
+                );
+            }
+            // Remove empty words
+            referenceWords = referenceWords.filter(w => w.trim().length > 0);
+            referenceText = referenceWords.join(" ");
+            return referenceText;
+        }
+
+        async function getPronunciationAssessmentConfig() {
+            const referenceText = await referenceTextHandler();
+            const enableMiscue = enableMiscueCheckbox.checked;
+            var pronunciationAssessmentConfig = new SpeechSDK.PronunciationAssessmentConfig(referenceText,
                 SpeechSDK.PronunciationAssessmentGradingSystem.HundredMark,
-                SpeechSDK.PronunciationAssessmentGranularity.Word, true);
+                SpeechSDK.PronunciationAssessmentGranularity.Word, enableMiscue);
             pronunciationAssessmentConfig.enableProsodyAssessment = enableProsodyAssessmentCheckbox.checked;
             return pronunciationAssessmentConfig;
         }
 
-        function getPronunciationAssessmentConfigFromJson() {
+        async function getPronunciationAssessmentConfigFromJson() {
+            const referenceText = await referenceTextHandler();
+            const enableMiscue = enableMiscueCheckbox.checked;
             var pronunciationAssessmentConfig = SpeechSDK.PronunciationAssessmentConfig.fromJSON(
                 "{\"GradingSystem\": \"HundredMark\", \
                 \"Granularity\": \"Phoneme\", \
-                \"EnableMiscue\": \"True\", \
+                \"EnableMiscue\": \"" + enableMiscue + "\", \
                 \"ScenarioId\": \"" + scenarioId.value + "\"}"
             );
-            pronunciationAssessmentConfig.referenceText = referenceText.value;
+            referenceText && (pronunciationAssessmentConfig.referenceText = referenceText);
             pronunciationAssessmentConfig.enableProsodyAssessment = enableProsodyAssessmentCheckbox.checked;
             return pronunciationAssessmentConfig;
         }
@@ -538,7 +808,6 @@
         }
 
         function onRecognized(sender, recognitionEventArgs) {
-            var result = recognitionEventArgs.result;
             onRecognizedResult(recognitionEventArgs.result);
         }
 
@@ -580,13 +849,30 @@
 
                     var pronunciationAssessmentResult = SpeechSDK.PronunciationAssessmentResult.fromResult(result);
                     phraseDiv.innerHTML += 
-                    `[Pronunciation result] Accuracy: ${pronunciationAssessmentResult.accuracyScore}; 
+                    `[Pronunciation result] Pronunciation score: ${pronunciationAssessmentResult.pronunciationScore};
+                    Accuracy: ${pronunciationAssessmentResult.accuracyScore}; 
                     Fluency: ${pronunciationAssessmentResult.fluencyScore};
                     Completeness: ${pronunciationAssessmentResult.completenessScore}`;
                     if (enableProsodyAssessmentCheckbox.checked) phraseDiv.innerHTML += `;
                     Prosody: ${pronunciationAssessmentResult.prosodyScore}`;
                     phraseDiv.innerHTML += ".\n";
-                    pronunciationAssessmentResults.push(pronunciationAssessmentResult);
+
+                    jo = JSON.parse(result.properties.getProperty(SpeechSDK.PropertyId.SpeechServiceResponse_JsonResult));
+                    const nb = jo["NBest"][0];
+                    const localtext = _.map(nb.Words, (item) => item.Word.toLowerCase());
+                    recognizedWordStrList = recognizedWordStrList.concat(localtext);
+                    prosodyScores.push(nb.PronunciationAssessment.ProsodyScore);
+                    const isSucceeded = jo.RecognitionStatus === 'Success';
+                    const nBestWords = jo.NBest[0].Words;
+
+                    if (isSucceeded && nBestWords) {
+                        allWords.push(...nBestWords);
+                    }
+
+                    if (startOffset == 0) {
+                        startOffset = nb.Words[0].Offset;
+                    }
+                    endOffset = nb.Words.slice(-1)[0].Offset + nb.Words.slice(-1)[0].Duration + 100000;
                     break;
             }
         }
@@ -668,51 +954,137 @@
             if (difflib === undefined) {
                 phraseDiv.innerHTML += `ERROR: difflib-browser.js is needed for pronunciation assessment calculation; see https://github.com/qiao/difflib.js`;
             }
-            // strip punctuation
-            var referenceWords = referenceText.value.toLowerCase().replace(/[.,\/#!?$%\^&\*;:{}=\-_`~()]/g,"");
-            referenceWords = referenceWords.split(' ');
-
-            var recognizedWords = [];
-            var sumDuration = 0;
-            var sumAccuracy = 0;
-            var sumFluency = 0;
-            var sumProsody = 0;
-            for (const result of pronunciationAssessmentResults) {
-                var duration = 0;
-                for (const word of result.detailResult.Words) {
-                    recognizedWords.push(word.Word);
-                    duration += word.Duration;
+            let referenceText = referenceTextField.value;
+            const enableMiscue = enableMiscueCheckbox.checked;
+            let unscriptedScenario = referenceText.length > 0 ? false : true;
+            let lastWords = [];
+            if (enableMiscue && !unscriptedScenario) {
+                // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
+                // We need to compare with the reference text after received all recognized words to get these error words.
+                const diff = new difflib.SequenceMatcher(null, referenceWords, recognizedWordStrList);
+                for (const d of diff.getOpcodes()) {
+                    if (d[0] == "insert" || d[0] == "replace") {
+                        for (let j = d[3]; j < d[4]; j++) {
+                            if (allWords && allWords.length > 0 && allWords[j].PronunciationAssessment.ErrorType !== "Insertion") {
+                                allWords[j].PronunciationAssessment.ErrorType = "Insertion";
+                            }
+                            lastWords.push(allWords[j]);
+                        }
+                    }
+                    if (d[0] == "delete" || d[0] == "replace") {
+                        if (
+                            d[2] == referenceWords.length &&
+                            !(
+                                jo.RecognitionStatus == "Success" ||
+                                jo.RecognitionStatus == "Failed"
+                            )
+                        )
+                        continue;
+                        for (let i = d[1]; i < d[2]; i++) {
+                            const word = {
+                                Word: referenceWords[i],
+                                PronunciationAssessment: {
+                                    ErrorType: "Omission",
+                                },
+                            };
+                            lastWords.push(word);
+                        }
+                    }
+                    if (d[0] == "equal") {
+                        for (let k = d[3], count = 0; k < d[4]; count++) {
+                            lastWords.push(allWords[k]);
+                            k++;
+                        }
+                    }
                 }
-                sumDuration += duration;
-                sumAccuracy += duration * result.accuracyScore;
-                sumFluency += duration * result.fluencyScore;
-                if (enableProsodyAssessmentCheckbox.checked) {
-                    sumProsody += duration * result.prosodyScore;
-                }
+            } else {
+                lastWords = allWords;
             }
 
-            // weighted accuracy and fluency scores
-            var accuracy = sumAccuracy / sumDuration;
-            var fluency = sumFluency / sumDuration;
-            var prosody = sumProsody / sumDuration;
-
-            var diff = new difflib.SequenceMatcher(null, referenceWords, recognizedWords);
-            diffWordsNum = 0;
-            for (const d of diff.getOpcodes()) {
-                if (d[0] == 'delete' || d[0] == 'replace') {
-                    diffWordsNum += (d[2] - d[1]);
+            // If accuracy score is below 60, mark as mispronunciation
+            _.forEach(lastWords, (word) => {
+                if( word.PronunciationAssessment.AccuracyScore < 60) {
+                    word.PronunciationAssessment.ErrorType = "Mispronunciation";
                 }
+            });
+
+            const accuracyScores = [];
+            const handledLastWords = [];
+            let validWordCount = 0;
+            _.forEach(lastWords, (word) => {
+                if (word && word.PronunciationAssessment.ErrorType != "Insertion") {
+                    accuracyScores.push(Number(word.PronunciationAssessment.AccuracyScore ?? 0));
+                    handledLastWords.push(word.Word);
+                }
+                if (word.PronunciationAssessment.ErrorType == "None" && (word.PronunciationAssessment.AccuracyScore ?? 0) >= 0) {
+                    validWordCount++;
+                    durations.push(Number(word.Duration) + 100000);
+                }
+            });
+
+            // We can calculate whole accuracy by averaging
+            const accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(2));
+
+            // Re-calculate the prosody score by averaging
+            let prosodyScore = NaN;
+            if (prosodyScores.length !== 0) {
+                prosodyScore = Number((_.sum(prosodyScores) / prosodyScores.length).toFixed(2));
             }
 
-            var completeness = (1 - diffWordsNum / referenceWords.length) * 100;
+            // Re-calculate fluency score
+            let fluencyScore = 0;
+            if (startOffset > 0) {
+                fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(2));
+            }
+
+            // Calculate whole completeness score
+            let compScore = 100;
+            if (!unscriptedScenario) {
+                compScore = Number(((validWordCount / handledLastWords.length) * 100).toFixed(2));
+                compScore = compScore > 100 ? 100 : compScore;
+            }
+
+            let pronunciationScore = 0;
+            if (!unscriptedScenario) {
+                // Scripted scenario
+                if (enableProsodyAssessmentCheckbox.checked && !Number.isNaN(prosodyScore)) {
+                    const sortedScores = [accuracyScore, prosodyScore, compScore, fluencyScore].sort((a, b) => a - b);
+                    pronunciationScore =
+                        sortedScores[0] * 0.4 +
+                        sortedScores[1] * 0.2 +
+                        sortedScores[2] * 0.2 +
+                        sortedScores[3] * 0.2;
+                } else {
+                    const sortedScores = [accuracyScore, compScore, fluencyScore].sort((a, b) => a - b);
+                    pronunciationScore =
+                        sortedScores[0] * 0.6 +
+                        sortedScores[1] * 0.2 +
+                        sortedScores[2] * 0.2;
+                }
+            } else {
+                // Unscripted scenario
+                if (enableProsodyAssessmentCheckbox.checked && !Number.isNaN(prosodyScore)) {
+                    const sortedScores = [accuracyScore, prosodyScore, fluencyScore].sort((a, b) => a - b);
+                    pronunciationScore =
+                        sortedScores[0] * 0.6 +
+                        sortedScores[1] * 0.2 +
+                        sortedScores[2] * 0.2;
+                } else {
+                    const sortedScores = [accuracyScore, fluencyScore].sort((a, b) => a - b);
+                    pronunciationScore =
+                        sortedScores[0] * 0.6 +
+                        sortedScores[1] * 0.4;
+                }
+            }
 
             phraseDiv.innerHTML +=
-                `[Overall Pronunciation result] Accuracy: ${accuracy}; 
-                       Fluency: ${fluency};
-                       Completeness: ${completeness}`;
+                `[Overall Pronunciation result] Pronunciation score: ${pronunciationScore.toFixed(0)};
+                       Accuracy: ${accuracyScore.toFixed(0)}; 
+                       Fluency: ${fluencyScore.toFixed(0)};
+                       Completeness: ${compScore.toFixed(0)}`;
             if (enableProsodyAssessmentCheckbox.checked) {
                 phraseDiv.innerHTML += `;
-                       Prosody: ${prosody}`;
+                       Prosody: ${prosodyScore.toFixed(0)}`;
             }
             phraseDiv.innerHTML += ".\n";
         }
@@ -721,12 +1093,13 @@
 
     <!-- Top-level scenario functions -->
     <script>
-        function doPronunciationAssessmentOnceAsync() {
+        async function doPronunciationAssessmentOnceAsync() {
             resetUiForScenarioStart();
+            resetVariables();
 
             var audioConfig = getAudioConfig();
             var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
-            var pronunciationAssessmentConfig = getPronunciationAssessmentConfig();
+            var pronunciationAssessmentConfig = await getPronunciationAssessmentConfig();
             if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
 
             // Create the SpeechRecognizer and set up common event handlers and PhraseList data
@@ -753,12 +1126,13 @@
                 });
         }
 
-        function doContinuousPronunciationAssessment() {
+        async function doContinuousPronunciationAssessment() {
             resetUiForScenarioStart();
+            resetVariables();
 
             var audioConfig = getAudioConfig();
             var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
-            var pronunciationAssessmentConfig = getPronunciationAssessmentConfig();
+            var pronunciationAssessmentConfig = await getPronunciationAssessmentConfig();
             if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
 
             // Create the SpeechRecognizer and set up common event handlers and PhraseList data
@@ -774,12 +1148,17 @@
             reco.startContinuousRecognitionAsync();
         }
 
-        function doContinuousPronunciationAssessmentFromStream() {
+        async function doContinuousPronunciationAssessmentFromStream() {
             resetUiForScenarioStart();
+            resetVariables();
+            if (inputSourceMicrophoneRadio.checked) {
+                alert("The current scenario does not support microphone input.");
+                return;
+            }
 
             var audioConfig = getAudioConfigFromStream();
             var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
-            var pronunciationAssessmentConfig = getPronunciationAssessmentConfig();
+            var pronunciationAssessmentConfig = await getPronunciationAssessmentConfig();
             if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
 
             // Create the SpeechRecognizer and set up common event handlers and PhraseList data
@@ -795,12 +1174,13 @@
             reco.startContinuousRecognitionAsync();
         }
 
-        function pronunciationAssessmentConfiguredWithJson() {
+        async function pronunciationAssessmentConfiguredWithJson() {
             resetUiForScenarioStart();
+            resetVariables();
 
             var audioConfig = getAudioConfig();
             var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
-            var pronunciationAssessmentConfig = getPronunciationAssessmentConfigFromJson();
+            var pronunciationAssessmentConfig = await getPronunciationAssessmentConfigFromJson();
             if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
 
             // Create the SpeechRecognizer and set up common event handlers and PhraseList data

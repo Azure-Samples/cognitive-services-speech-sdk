@@ -207,7 +207,7 @@ function convertReferenceWords(referenceText, referenceWords) {
 }
 
 export const getReferenceWords = async (settings, referenceText) => {
-    const audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(settings.filename));
+    const audioConfig = sdk.AudioConfig.fromWavFileInput(fs.readFileSync(settings.dummyFilename));
     const speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
     speechConfig.speechRecognitionLanguage = settings.language;
 
