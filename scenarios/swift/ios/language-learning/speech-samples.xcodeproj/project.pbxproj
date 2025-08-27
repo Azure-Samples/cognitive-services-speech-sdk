@@ -1,0 +1,434 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		071C9743C21F3C327237D771 /* Pods_speech_samples.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F75B62D68FA26B84DD23CFCC /* Pods_speech_samples.framework */; };
+		3CB230B12692E530009AD484 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB230B02692E530009AD484 /* AppDelegate.swift */; };
+		3CB230B32692E530009AD484 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB230B22692E530009AD484 /* SceneDelegate.swift */; };
+		3CB230B52692E530009AD484 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB230B42692E530009AD484 /* ViewController.swift */; };
+		3CB230B82692E530009AD484 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CB230B62692E530009AD484 /* Main.storyboard */; };
+		3CB230BA2692E546009AD484 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CB230B92692E546009AD484 /* Assets.xcassets */; };
+		3CB230BD2692E546009AD484 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CB230BB2692E546009AD484 /* LaunchScreen.storyboard */; };
+		3CB230E526943123009AD484 /* pronunciation_assessment.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3CB230E426943123009AD484 /* pronunciation_assessment.wav */; };
+		520398BD2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav in Resources */ = {isa = PBXBuildFile; fileRef = 520398BA2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav */; };
+		520398BE2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt in Resources */ = {isa = PBXBuildFile; fileRef = 520398BB2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt */; };
+		520398BF2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav in Resources */ = {isa = PBXBuildFile; fileRef = 520398BC2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav */; };
+		52FC64FE29CC4CB2000C8918 /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = 52FC64FD29CC4CB2000C8918 /* whatstheweatherlike.wav */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		3CB230AD2692E530009AD484 /* speech-samples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "speech-samples.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3CB230B02692E530009AD484 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		3CB230B22692E530009AD484 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		3CB230B42692E530009AD484 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		3CB230B72692E530009AD484 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		3CB230B92692E546009AD484 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3CB230BC2692E546009AD484 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		3CB230BE2692E546009AD484 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3CB230E426943123009AD484 /* pronunciation_assessment.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = pronunciation_assessment.wav; sourceTree = "<group>"; };
+		520398BA2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = zhcn_short_dummy_sample.wav; sourceTree = "<group>"; };
+		520398BB2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zhcn_continuous_mode_sample.txt; sourceTree = "<group>"; };
+		520398BC2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = zhcn_continuous_mode_sample.wav; sourceTree = "<group>"; };
+		52FC64FD29CC4CB2000C8918 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = whatstheweatherlike.wav; sourceTree = "<group>"; };
+		7216C25C7CBBBBCE69D14199 /* Pods-speech-samples.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-speech-samples.debug.xcconfig"; path = "Target Support Files/Pods-speech-samples/Pods-speech-samples.debug.xcconfig"; sourceTree = "<group>"; };
+		A10FCD8CC92F4B35619760A7 /* Pods-speech-samples.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-speech-samples.release.xcconfig"; path = "Target Support Files/Pods-speech-samples/Pods-speech-samples.release.xcconfig"; sourceTree = "<group>"; };
+		F75B62D68FA26B84DD23CFCC /* Pods_speech_samples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_speech_samples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3CB230AA2692E530009AD484 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				071C9743C21F3C327237D771 /* Pods_speech_samples.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		24FA6CF4926BAEF7C94067A1 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F75B62D68FA26B84DD23CFCC /* Pods_speech_samples.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3CB230A42692E52F009AD484 = {
+			isa = PBXGroup;
+			children = (
+				520398BB2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt */,
+				520398BC2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav */,
+				520398BA2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav */,
+				52FC64FD29CC4CB2000C8918 /* whatstheweatherlike.wav */,
+				3CB230E426943123009AD484 /* pronunciation_assessment.wav */,
+				3CB230AF2692E530009AD484 /* speech-samples */,
+				3CB230AE2692E530009AD484 /* Products */,
+				B3EDDB0E8999BD31A5D6A60E /* Pods */,
+				24FA6CF4926BAEF7C94067A1 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		3CB230AE2692E530009AD484 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3CB230AD2692E530009AD484 /* speech-samples.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3CB230AF2692E530009AD484 /* speech-samples */ = {
+			isa = PBXGroup;
+			children = (
+				3CB230B02692E530009AD484 /* AppDelegate.swift */,
+				3CB230B22692E530009AD484 /* SceneDelegate.swift */,
+				3CB230B42692E530009AD484 /* ViewController.swift */,
+				3CB230B62692E530009AD484 /* Main.storyboard */,
+				3CB230B92692E546009AD484 /* Assets.xcassets */,
+				3CB230BB2692E546009AD484 /* LaunchScreen.storyboard */,
+				3CB230BE2692E546009AD484 /* Info.plist */,
+			);
+			path = "speech-samples";
+			sourceTree = "<group>";
+		};
+		B3EDDB0E8999BD31A5D6A60E /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				7216C25C7CBBBBCE69D14199 /* Pods-speech-samples.debug.xcconfig */,
+				A10FCD8CC92F4B35619760A7 /* Pods-speech-samples.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3CB230AC2692E530009AD484 /* speech-samples */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3CB230D72692E547009AD484 /* Build configuration list for PBXNativeTarget "speech-samples" */;
+			buildPhases = (
+				2558E3CD3C700ED14726E0A9 /* [CP] Check Pods Manifest.lock */,
+				3CB230A92692E530009AD484 /* Sources */,
+				3CB230AA2692E530009AD484 /* Frameworks */,
+				3CB230AB2692E530009AD484 /* Resources */,
+				D0D48567F598D0C9B3110B9F /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "speech-samples";
+			productName = "speech-samples";
+			productReference = 3CB230AD2692E530009AD484 /* speech-samples.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3CB230A52692E52F009AD484 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1250;
+				LastUpgradeCheck = 1250;
+				TargetAttributes = {
+					3CB230AC2692E530009AD484 = {
+						CreatedOnToolsVersion = 12.5.1;
+					};
+				};
+			};
+			buildConfigurationList = 3CB230A82692E52F009AD484 /* Build configuration list for PBXProject "speech-samples" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 3CB230A42692E52F009AD484;
+			productRefGroup = 3CB230AE2692E530009AD484 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3CB230AC2692E530009AD484 /* speech-samples */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3CB230AB2692E530009AD484 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3CB230BD2692E546009AD484 /* LaunchScreen.storyboard in Resources */,
+				520398BD2CCB91FC00FD9FF6 /* zhcn_short_dummy_sample.wav in Resources */,
+				3CB230BA2692E546009AD484 /* Assets.xcassets in Resources */,
+				520398BE2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt in Resources */,
+				520398BF2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav in Resources */,
+				52FC64FE29CC4CB2000C8918 /* whatstheweatherlike.wav in Resources */,
+				3CB230E526943123009AD484 /* pronunciation_assessment.wav in Resources */,
+				3CB230B82692E530009AD484 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2558E3CD3C700ED14726E0A9 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-speech-samples-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D0D48567F598D0C9B3110B9F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-speech-samples/Pods-speech-samples-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-speech-samples/Pods-speech-samples-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-speech-samples/Pods-speech-samples-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3CB230A92692E530009AD484 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3CB230B52692E530009AD484 /* ViewController.swift in Sources */,
+				3CB230B12692E530009AD484 /* AppDelegate.swift in Sources */,
+				3CB230B32692E530009AD484 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		3CB230B62692E530009AD484 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3CB230B72692E530009AD484 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		3CB230BB2692E546009AD484 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3CB230BC2692E546009AD484 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		3CB230D52692E547009AD484 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3CB230D62692E547009AD484 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3CB230D82692E547009AD484 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7216C25C7CBBBBCE69D14199 /* Pods-speech-samples.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = "speech-samples/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.cognitiveservices.speech-samples";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3CB230D92692E547009AD484 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A10FCD8CC92F4B35619760A7 /* Pods-speech-samples.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = "speech-samples/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.microsoft.cognitiveservices.speech-samples";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3CB230A82692E52F009AD484 /* Build configuration list for PBXProject "speech-samples" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3CB230D52692E547009AD484 /* Debug */,
+				3CB230D62692E547009AD484 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3CB230D72692E547009AD484 /* Build configuration list for PBXNativeTarget "speech-samples" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3CB230D82692E547009AD484 /* Debug */,
+				3CB230D92692E547009AD484 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3CB230A52692E52F009AD484 /* Project object */;
+}

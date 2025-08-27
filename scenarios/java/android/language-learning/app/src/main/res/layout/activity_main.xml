@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.microsoft.cognitiveservices.speech.samples.sdkdemo.MainActivity">
+
+  <!-- Pronunciation Assessment Button -->
+  <Button
+      android:id="@+id/buttonPronunciationAssessment"
+      android:layout_width="336dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
+      android:text="Pronunciation Assessment"
+      android:textAllCaps="false"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
+
+  <!-- Pronunciation Assessment From Stream Button -->
+  <Button
+      android:id="@+id/buttonPronunciationAssessmentStream"
+      android:layout_width="336dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="8dp"
+      android:layout_marginEnd="8dp"
+      android:layout_marginBottom="8dp"
+      android:text="Pronunciation Assessment From Stream"
+      android:textAllCaps="false"
+      app:layout_constraintTop_toBottomOf="@id/buttonPronunciationAssessment"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
+
+  <!-- Recognized Text TextView -->
+  <TextView
+      android:id="@+id/recognizedText"
+      android:layout_width="0dp"
+      android:layout_height="157dp"
+      android:layout_marginStart="32dp"
+      android:layout_marginEnd="27dp"
+      android:layout_marginBottom="16dp"
+      android:scrollbars="vertical"
+      android:textAppearance="@style/TextAppearance.AppCompat.Title"
+      app:layout_constraintTop_toBottomOf="@id/buttonPronunciationAssessmentStream"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">SpeechSDKQuickstart</string>
+    <string name="speechButtonText">Recognize Speech</string>
+</resources>
