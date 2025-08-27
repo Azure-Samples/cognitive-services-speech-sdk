@@ -24,20 +24,43 @@ export const main = async (settings) => {
         "1500"
     );
 
-    var reference_text = "What's the weather like?";
+    var referenceText = "What's the weather like?";
+    var enableMiscue = true;
+    var enableProsodyAssessment = true;
+    var unscriptedScenario = referenceText.length > 0 ? false : true;
+
+    var referenceWords = [];
+
+    // We need to convert the reference text to lower case, and split to words, then remove the punctuations.
+    if (["zh-cn"].includes(settings.language.toLowerCase())) {
+        // Word segmentation for Chinese using the reference text and any short wave file
+        // Remove the blank characters in the reference text
+        referenceText = referenceText.replace(/ /g, "");
+        referenceWords = await utils.getReferenceWords(settings, referenceText);
+    } else {
+        referenceText = referenceText.toLocaleLowerCase() ?? "";
+        referenceWords = _.map(
+            _.filter(referenceText.split(" "), (item) => !!item),
+            (item) => item.replace(/^[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+|[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+$/g, "")
+        );
+    }
+    // Remove empty words
+    referenceWords = referenceWords.filter(w => w.trim().length > 0);
+    referenceText = referenceWords.join(" ");
+    console.log("Reference text:", referenceText);
+
     // create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
     const pronunciationAssessmentConfig = new sdk.PronunciationAssessmentConfig(
-        reference_text,
+        referenceText,
         sdk.PronunciationAssessmentGradingSystem.HundredMark,
         sdk.PronunciationAssessmentGranularity.Phoneme,
-        true
+        enableMiscue
     );
-    pronunciationAssessmentConfig.enableProsodyAssessment = true;
+    pronunciationAssessmentConfig.enableProsodyAssessment = enableProsodyAssessment;
 
-    // setting the recognition language to English.
     speechConfig.speechRecognitionLanguage = settings.language;
 
-    // create the speech recognizer.
+    // Creates a speech recognizer using a file as audio input.
     var reco = new sdk.SpeechRecognizer(speechConfig, audioConfig);
     // (Optional) get the session ID
     reco.sessionStarted = (_s, e) => {
@@ -45,12 +68,6 @@ export const main = async (settings) => {
     };
     pronunciationAssessmentConfig.applyTo(reco);
 
-    const scoreNumber = {
-        accuracyScore: 0,
-        fluencyScore: 0,
-        compScore: 0,
-        prosodyScore: 0,
-    };
     const allWords = [];
     var recognizedWordStrList = [];
     var startOffset = 0;
@@ -79,7 +96,7 @@ export const main = async (settings) => {
             "pronunciation score: ", pronunciation_result.pronunciationScore, '\n',
             "completeness score : ", pronunciation_result.completenessScore, '\n',
             "fluency score: ", pronunciation_result.fluencyScore, '\n',
-            "prosody score: ", pronunciation_result.prosodyScore
+            "prosody score: ", pronunciation_result.prosodyScore ?? NaN
         );
 
         jo = JSON.parse(e.result.properties.getProperty(sdk.PropertyId.SpeechServiceResponse_JsonResult));
@@ -101,59 +118,56 @@ export const main = async (settings) => {
     };
 
     async function calculateOverallPronunciationScore() {
-        let referenceWords = [];
-
-        // The sample code provides only zh-CN and en-US locales
-        if (["zh-cn"].includes(settings.language.toLowerCase())) {
-            // Split words for Chinese using the reference text and any short wave file
-            referenceWords = await utils.getReferenceWords(settings, reference_text);
-        } else {
-            const referenceText = reference_text.toLocaleLowerCase() ?? "";
-            referenceWords = _.map(
-                _.filter(referenceText.split(" "), (item) => !!item),
-                (item) => item.replace(/^[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+|[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+$/g, "")
-            );
-        }
-
-        // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
-        // We need to compare with the reference text after received all recognized words to get these error words.
-        const diff = new difflib.SequenceMatcher(null, referenceWords, recognizedWordStrList);
-        const lastWords = [];
-        for (const d of diff.getOpcodes()) {
-            if (d[0] == "insert" || d[0] == "replace") {
-                for (let j = d[3]; j < d[4]; j++) {
-                    if (allWords && allWords.length > 0 && allWords[j].PronunciationAssessment.ErrorType !== "Insertion") {
-                        allWords[j].PronunciationAssessment.ErrorType = "Insertion";
+        let lastWords = [];
+        if (enableMiscue && !unscriptedScenario) {
+            // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
+            // We need to compare with the reference text after received all recognized words to get these error words.
+            const diff = new difflib.SequenceMatcher(null, referenceWords, recognizedWordStrList);
+            for (const d of diff.getOpcodes()) {
+                if (d[0] == "insert" || d[0] == "replace") {
+                    for (let j = d[3]; j < d[4]; j++) {
+                        if (allWords && allWords.length > 0 && allWords[j].PronunciationAssessment.ErrorType !== "Insertion") {
+                            allWords[j].PronunciationAssessment.ErrorType = "Insertion";
+                        }
+                        lastWords.push(allWords[j]);
                     }
-                    lastWords.push(allWords[j]);
                 }
-            }
-            if (d[0] == "delete" || d[0] == "replace") {
-                if (
-                    d[2] == referenceWords.length &&
-                    !(
-                        jo.RecognitionStatus == "Success" ||
-                        jo.RecognitionStatus == "Failed"
+                if (d[0] == "delete" || d[0] == "replace") {
+                    if (
+                        d[2] == referenceWords.length &&
+                        !(
+                            jo.RecognitionStatus == "Success" ||
+                            jo.RecognitionStatus == "Failed"
+                        )
                     )
-                )
-                continue;
-                for (let i = d[1]; i < d[2]; i++) {
-                    const word = {
-                        Word: referenceWords[i],
-                        PronunciationAssessment: {
-                            ErrorType: "Omission",
-                        },
-                    };
-                    lastWords.push(word);
+                    continue;
+                    for (let i = d[1]; i < d[2]; i++) {
+                        const word = {
+                            Word: referenceWords[i],
+                            PronunciationAssessment: {
+                                ErrorType: "Omission",
+                            },
+                        };
+                        lastWords.push(word);
+                    }
+                }
+                if (d[0] == "equal") {
+                    for (let k = d[3], count = 0; k < d[4]; count++) {
+                        lastWords.push(allWords[k]);
+                        k++;
+                    }
                 }
             }
-            if (d[0] == "equal") {
-                for (let k = d[3], count = 0; k < d[4]; count++) {
-                    lastWords.push(allWords[k]);
-                    k++;
-                }
-            }
+        } else {
+            lastWords = allWords;
         }
+
+        // If accuracy score is below 60, mark as mispronunciation
+        _.forEach(lastWords, (word) => {
+            if( word.PronunciationAssessment.AccuracyScore < 60) {
+                word.PronunciationAssessment.ErrorType = "Mispronunciation";
+            }
+        });
 
         const accuracyScores = [];
         const handledLastWords = [];
@@ -169,40 +183,67 @@ export const main = async (settings) => {
             }
         });
 
-        // Calculate whole completeness score
-        let compScore = handledLastWords.length > 0 ? Number(((validWordCount / handledLastWords.length) * 100).toFixed(2)) : 0;
-        scoreNumber.compScore = compScore > 100 ? 100 : compScore;
-
         // We can calculate whole accuracy by averaging
-        scoreNumber.accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(2));
-
-        // Re-calculate fluency score
-        if (startOffset > 0) {
-            scoreNumber.fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(2));
-        }
+        const accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(2));
 
         // Re-calculate the prosody score by averaging
-        scoreNumber.prosodyScore = Number((_.sum(prosodyScores) / prosodyScores.length).toFixed(2));
+        let prosodyScore = NaN;
+        if (prosodyScores.length !== 0) {
+            prosodyScore = Number((_.sum(prosodyScores) / prosodyScores.length).toFixed(2));
+        }
 
-        const sortScore = Object.keys(scoreNumber).sort(function (a, b) {
-            return scoreNumber[a] - scoreNumber[b];
-        });
+        // Re-calculate fluency score
+        let fluencyScore = 0;
+        if (startOffset > 0) {
+            fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(2));
+        }
 
-        scoreNumber.pronScore = Number(
-            (
-                scoreNumber[sortScore["0"]] * 0.4 +
-                scoreNumber[sortScore["1"]] * 0.2 +
-                scoreNumber[sortScore["2"]] * 0.2 +
-                scoreNumber[sortScore["3"]] * 0.2
-            ).toFixed(2)
-        );
+        // Calculate whole completeness score
+        let compScore = 100;
+        if (!unscriptedScenario) {
+            compScore = Number(((validWordCount / handledLastWords.length) * 100).toFixed(2));
+            compScore = compScore > 100 ? 100 : compScore;
+        }
+
+        let pronunciationScore = 0;
+        if (!unscriptedScenario) {
+            // Scripted scenario
+            if (enableProsodyAssessment && !Number.isNaN(prosodyScore)) {
+                const sortedScores = [accuracyScore, prosodyScore, compScore, fluencyScore].sort((a, b) => a - b);
+                pronunciationScore =
+                    sortedScores[0] * 0.4 +
+                    sortedScores[1] * 0.2 +
+                    sortedScores[2] * 0.2 +
+                    sortedScores[3] * 0.2;
+            } else {
+                const sortedScores = [accuracyScore, compScore, fluencyScore].sort((a, b) => a - b);
+                pronunciationScore =
+                    sortedScores[0] * 0.6 +
+                    sortedScores[1] * 0.2 +
+                    sortedScores[2] * 0.2;
+            }
+        } else {
+            // Unscripted scenario
+            if (enableProsodyAssessment && !Number.isNaN(prosodyScore)) {
+                const sortedScores = [accuracyScore, prosodyScore, fluencyScore].sort((a, b) => a - b);
+                pronunciationScore =
+                    sortedScores[0] * 0.6 +
+                    sortedScores[1] * 0.2 +
+                    sortedScores[2] * 0.2;
+            } else {
+                const sortedScores = [accuracyScore, fluencyScore].sort((a, b) => a - b);
+                pronunciationScore =
+                    sortedScores[0] * 0.6 +
+                    sortedScores[1] * 0.4;
+            }
+        }
 
         console.log(
-            "    Paragraph pronunciation score: ", scoreNumber.pronScore,
-            ", accuracy score: ", scoreNumber.accuracyScore,
-            ", completeness score: ", scoreNumber.compScore,
-            ", fluency score: ", scoreNumber.fluencyScore,
-            ", prosody score: ", scoreNumber.prosodyScore
+            "    Paragraph pronunciation score: ", pronunciationScore.toFixed(0),
+            ", accuracy score: ", accuracyScore.toFixed(0),
+            ", completeness score: ", compScore.toFixed(0),
+            ", fluency score: ", fluencyScore.toFixed(0),
+            ", prosody score: ", prosodyScore.toFixed(0)
         );
 
         _.forEach(lastWords, (word, ind) => {
