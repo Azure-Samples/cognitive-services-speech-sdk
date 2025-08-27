@@ -747,15 +747,15 @@ namespace MicrosoftSpeechSDKSamples
 
             // Build Pronunciation Assessment parameters
             var pronAssessmentParams = new Dictionary<string, object>
-        {
-            { "GradingSystem", "HundredMark" },
-            { "Dimension", "Comprehensive" },
-            { "ReferenceText", referenceText },
-            { "EnableProsodyAssessment", enableProsodyAssessment },
-            { "PhonemeAlphabet", phonemeAlphabet },
-            { "EnableMiscue", enableMiscue },
-            { "NBestPhonemeCount", nbestPhonemeCount }
-        };
+            {
+                { "GradingSystem", "HundredMark" },
+                { "Dimension", "Comprehensive" },
+                { "ReferenceText", referenceText },
+                { "EnableProsodyAssessment", enableProsodyAssessment },
+                { "PhonemeAlphabet", phonemeAlphabet },
+                { "EnableMiscue", enableMiscue },
+                { "NBestPhonemeCount", nbestPhonemeCount }
+            };
 
             string pronAssessmentJson = JsonSerializer.Serialize(pronAssessmentParams);
             string pronAssessmentBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(pronAssessmentJson));
