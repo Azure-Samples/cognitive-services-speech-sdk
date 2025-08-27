@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\sharedcontent\console\Program.cs" Link="Program.cs" />
+    <Compile Include="..\..\..\sharedcontent\console\Program.cs" Link="Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_samples.cs" Link="speech_recognition_samples.cs" />
   </ItemGroup>
 
@@ -26,8 +28,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\..\..\sharedcontent\console\good_morning.pcm" Link="good_morning.pcm" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="DiffPlex" Version="1.7.1" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.45.0" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.45.0" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.45.0" />
