@@ -758,8 +758,8 @@
                     referenceWords = await getReferenceWords(referenceText);
                 } else {
                     referenceWords = [];
+                    return referenceText;
                 }
-                console.log("referenceTextHandler -> zh-CN: ", referenceWords.join(""));
             } else {
                 referenceText = referenceText.toLocaleLowerCase() ?? "";
                 referenceWords = _.map(
