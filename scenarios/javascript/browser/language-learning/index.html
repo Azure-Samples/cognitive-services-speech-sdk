@@ -793,23 +793,43 @@
             referenceWords = [];
         }
 
-        function getAudioStream(audioFile, cb) {
-            var fr = new FileReader();
-            fr.readAsArrayBuffer(audioFile);
-            fr.addEventListener("loadend", (e) => {
-                var buf = e.target.result;
-                cb(buf);
-            }, false);
+        function getAudioStreamChunked(audioFile, cb, done, chunkSize = 3200) {
+            let offset = 0;
+
+            function readNextChunk() {
+                const slice = audioFile.slice(offset, offset + chunkSize);
+                const fr = new FileReader();
+
+                fr.onload = (e) => {
+                    const buf = e.target.result;
+                    cb(buf);
+                    offset += chunkSize;
+                    if (offset < audioFile.size) {
+                        readNextChunk();
+                    } else {
+                        done && done();
+                    }
+                };
+
+                fr.readAsArrayBuffer(slice);
+            }
+
+            readNextChunk();
         }
 
         function getAudioConfigFromStream() {
             if (audioFile) {
                 let audioFormat = SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1);
                 let audioStream = SpeechSDK.AudioInputStream.createPushStream();
-                getAudioStream(audioFile, (b) => {
-                    audioStream.write(b.slice());
-                    audioStream.close();
-                });
+                getAudioStreamChunked(
+                    audioFile,
+                    (b) => {
+                        audioStream.write(b);
+                    },
+                    () => {
+                        audioStream.close();
+                    }
+                );
                 return SpeechSDK.AudioConfig.fromStreamInput(audioStream, audioFormat);
             } else if (inputSourceFileRadio.checked) {
                 alert('Please choose a file when selecting file input as your audio source.');
