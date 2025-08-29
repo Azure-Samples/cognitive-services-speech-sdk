@@ -4,6 +4,7 @@
 // pull in the required packages.
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import * as fs from "fs";
+import * as difflib from "difflib";
 import _ from "lodash";
 
 function ReadInt32(fd) {
@@ -175,7 +176,7 @@ function convertReferenceWords(referenceText, referenceWords) {
         return result;
     }
 
-    function segment_word(referenceText, dictionary) {
+    function segmentWord(referenceText, dictionary) {
         const leftToRight = leftToRightSegmentation(referenceText, dictionary);
         const rightToLeft = rightToLeftSegmentation(referenceText, dictionary);
         if (leftToRight.join("") === referenceText) {
@@ -203,7 +204,7 @@ function convertReferenceWords(referenceText, referenceWords) {
 
     // Remove punctuation from the reference text
     referenceText = referenceText.split("").filter(char => /[\p{L}\p{N}\s]/u.test(char)).join("");
-    return segment_word(referenceText, dictionary);
+    return segmentWord(referenceText, dictionary);
 }
 
 export const getReferenceWords = async (settings, referenceText) => {
@@ -251,4 +252,106 @@ export const getReferenceWords = async (settings, referenceText) => {
     }).catch((reason) => console.log(reason));
 
     return res
+}
+
+// Aligns two token lists using SequenceMatcher and handles differences.
+// Equal segments are copied directly.
+// 'Replace' segments are aligned strictly if identical after joining,
+// otherwise aligned using alignRawTokensByRef().
+// 'Delete' segments from raw are preserved.
+export const alignListsWithDiffHandling = (raw, ref) => {
+    const alignedRaw = [];
+
+    const sm = new difflib.SequenceMatcher(null, raw, ref);
+    for (const [tag, i1, i2, j1, j2] of sm.getOpcodes()) {
+        if (tag == 'equal') {
+            alignedRaw.push(...raw.slice(i1, i2));
+        } else if (tag == 'replace') {
+            // Strict comparison
+            if (raw.slice(i1, i2).join("") === ref.slice(j1, j2).join("")) {
+                alignedRaw.push(...ref.slice(j1, j2));
+            } else {
+                const alignedPart = alignRawTokensByRef(raw.slice(i1, i2), ref.slice(j1, j2));
+                alignedRaw.push(...alignedPart);
+            }
+        } else if (tag == 'delete') {
+            alignedRaw.push(...raw.slice(i1, i2));
+        }
+    }
+    return alignedRaw;
+}
+
+
+// Aligns rawList tokens to refList
+// by merging consecutive tokens and splitting them
+// when a reference word is found inside the merged string.
+function alignRawTokensByRef(rawList, refList) {
+    let refIdx = 0;
+    let rawIdx = 0;
+    const refLen = refList.length;
+    const alignedRaw = [];
+
+    // Use a copy to avoid modifying the original list.
+    const rawCopy = [...rawList];
+
+    while (rawIdx < rawCopy.length && refIdx < refLen) {
+        let mergedSplitDone = false;
+        for (let length = 1; length <= rawCopy.length; length++) {
+            if (rawIdx + length > rawCopy.length) {
+                break;
+            }
+            const mergedRaw = rawCopy.slice(rawIdx, rawIdx + length).join("");
+            const refWord = refList[refIdx];
+
+            if (mergedRaw.includes(refWord)) {
+                const parts = mergedRaw.split(refWord);
+                const limitedParts = [parts[0], mergedRaw.slice(parts[0].length + refWord.length)];
+
+                // Handle prefix part before refWord
+                if (limitedParts[0]) {
+                    alignedRaw.push(limitedParts[0]);
+                }
+
+                // Append the matched refWord
+                alignedRaw.push(refWord);
+
+                // Handle suffix part after refWord
+                if (limitedParts[1]) {
+                    rawCopy[rawIdx] = limitedParts[1];
+                    // Remove the extra merged tokens
+                    for (let i = 1; i < length; i++) {
+                        rawCopy.splice(rawIdx + 1, 1);
+                    }
+                } else {
+                    // No suffix: remove all merged tokens
+                    for (let i = 0; i < length; i++) {
+                        rawCopy.splice(rawIdx, 1);
+                    }
+                }
+
+                refIdx += 1;
+                mergedSplitDone = true;
+            }
+
+            if (mergedSplitDone) {
+                break;
+            }
+
+            // If no match after merging all tokens,
+            // align current token directly
+            if (length == rawCopy.length) {
+                alignedRaw.push(rawCopy[rawIdx]);
+                rawIdx += 1;
+                refIdx += 1;
+            }
+        }
+    }
+
+    // Append any remaining raw tokens
+    while (rawIdx < rawCopy.length) {
+        alignedRaw.push(rawCopy[rawIdx]);
+        rawIdx += 1;
+    }
+
+    return alignedRaw;
 }
