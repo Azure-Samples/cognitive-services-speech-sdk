@@ -17,6 +17,7 @@ public class Main {
         System.out.println("2. Pronunciation assessment with stream input.");
         System.out.println("3. Pronunciation assessment continuous with file.");
         System.out.println("4. Pronunciation assessment configured with JSON.");
+        System.out.println("5. Pronunciation assessment with REST API.");
 
         System.out.print(prompt);
 
@@ -37,6 +38,9 @@ public class Main {
                     break;
                 case "4":
                     SpeechRecognitionSamples.pronunciationAssessmentConfiguredWithJson();
+                    break;
+                case "5":
+                    SpeechRecognitionSamples.pronunciationAssessmentWithRestApi();
                     break;
                 case "0":
                     System.out.println("Exiting...");

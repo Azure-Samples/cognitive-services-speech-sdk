@@ -20,12 +20,23 @@ import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.io.FileInputStream;
 import java.io.StringReader;
+import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
+import java.util.UUID;
 
 import com.github.difflib.DiffUtils;
 
@@ -475,20 +486,52 @@ public class SpeechRecognitionSamples {
 
     // Pronunciation assessment continuous with file.
     // See more information at https://aka.ms/csspeech/pa
-    public static void pronunciationAssessmentContinuousWithFile() throws ExecutionException, InterruptedException, URISyntaxException {
+    public static void pronunciationAssessmentContinuousWithFile() throws ExecutionException, InterruptedException, URISyntaxException, IOException {
         // subscription key and endpoint URL. Replace with your own subscription key
         // and endpoint URL.
         SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourEndpointUrl"), "YourSubscriptionKey");
 
-
         // You can adjust the segmentation silence timeout based on your real scenario.
         config.setProperty(PropertyId.Speech_SegmentationSilenceTimeoutMs, "1500");
 
+        String referenceText = Files.readString(Path.of("src/resources/zhcn_continuous_mode_sample.txt"));
+
         // Replace the language with your language in BCP-47 format, e.g., en-US.
         String lang = "zh-CN";
+        Boolean enableMiscue = true;
+        Boolean enableProsodyAssessment = true;
+        Boolean unScriptedScenario = referenceText.length() > 0 ? false : true;
+
+        // We need to convert the reference text to lower case, and split to words, then remove the punctuations.
+        String[] referenceWords;
+        if (lang == "zh-CN")
+        {
+            // Split words for Chinese using the reference text and any short wave file
+
+            referenceText = referenceText.replace(" ", "");
+            referenceWords = getReferenceWords("src/resources/zhcn_short_dummy_sample.wav", referenceText, lang, config).toArray(new String[0]);
+        }
+        else
+        {
+            referenceWords = referenceText.toLowerCase().split(" ");
+            for (int j = 0; j < referenceWords.length; j++) {
+                referenceWords[j] = referenceWords[j].replaceAll("^\\p{Punct}+|\\p{Punct}+$","");
+            }
+        }
+
+        // Remove empty words
+        List<String> filteredWords = new ArrayList<>();
+        for (String w : referenceWords) {
+            if (w != null && !w.trim().isEmpty()) {
+                filteredWords.add(w);
+            }
+        }
+        referenceWords = filteredWords.toArray(new String[0]);
+        referenceText = String.join(" ", referenceWords);
+        System.out.println("Reference text: " + referenceText);
 
         // Creates a speech recognizer using wav file.
-        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("src/resources/zhcn_continuous_mode_sample.wav");
 
         stopRecognitionSemaphore = new Semaphore(0);
         List<String> recognizedWords = new ArrayList<>();
@@ -569,15 +612,14 @@ public class SpeechRecognitionSamples {
                 System.out.println("\n    Session stopped event.");
             });
 
-            boolean enableMiscue = true;
-            // The reference matches the input wave named YourAudioFile.wav.
-            String referenceText = "what's the weather like";
-
             // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
             PronunciationAssessmentConfig pronunciationConfig = new PronunciationAssessmentConfig(referenceText,
                     PronunciationAssessmentGradingSystem.HundredMark, PronunciationAssessmentGranularity.Phoneme, enableMiscue);
 
-            pronunciationConfig.enableProsodyAssessment();
+            if (enableProsodyAssessment)
+            {
+                pronunciationConfig.enableProsodyAssessment();
+            }
 
             recognizer.sessionStarted.addEventListener((s, e) -> {
                 System.out.println("SESSION ID: " + e.getSessionId());
@@ -596,22 +638,11 @@ public class SpeechRecognitionSamples {
             // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
             // even if miscue is enabled.
             // We need to compare with the reference text after received all recognized words to get these error words.
-            String[] referenceWords;
-            if (lang == "zh-CN")
-            {
-                // Split words for Chinese using the reference text and any short wave file
-                referenceWords = getReferenceWords("zhcn_short_dummy_audio.wav", referenceText, lang, config).toArray(new String[0]);
-            }
-            else
-            {
-                referenceWords = referenceText.toLowerCase().split(" ");
-                for (int j = 0; j < referenceWords.length; j++) {
-                    referenceWords[j] = referenceWords[j].replaceAll("^\\p{Punct}+|\\p{Punct}+$","");
-                }
-            }
-
             if (enableMiscue) {
-                Patch<String> diff = DiffUtils.diff(Arrays.asList(referenceWords), recognizedWords, true);
+
+                List<String> referenceWords_aligned = alignListsWithDiffHandling(Arrays.asList(referenceWords), recognizedWords);
+
+                Patch<String> diff = DiffUtils.diff(referenceWords_aligned, recognizedWords, true);
 
                 int currentIdx = 0;
                 for (AbstractDelta<String> d : diff.getDeltas()) {
@@ -638,6 +669,15 @@ public class SpeechRecognitionSamples {
             }
             else {
                 finalWords = pronWords;
+            }
+
+            // If accuracy score is below 60 and errorType is None, mark as mispronunciation
+            for (Word word : finalWords)
+            {
+                if ("None".equals(word.errorType) && word.accuracyScore < 60)
+                {
+                    word.errorType = "Mispronunciation";
+                }
             }
 
           //We can calculate whole accuracy by averaging
@@ -669,25 +709,299 @@ public class SpeechRecognitionSamples {
             double prosodyScore = prosodyScoreSum / prosodyScores.size();
 
             // Calculate whole completeness score
-            double completenessScore = (double)validCount / accuracyCount * 100;
-            completenessScore = completenessScore <= 100 ? completenessScore : 100;
+            double completenessScore = 0.0;
+            if (!unScriptedScenario)
+            {
+	            completenessScore = (double)validCount / accuracyCount * 100;
+	            completenessScore = completenessScore <= 100 ? completenessScore : 100;
+            }
+            else
+            {
+                completenessScore = 100;
+            }
 
-            double[] scores_all = {accuracyScore, prosodyScore, completenessScore, fluencyScore};
-            double minValue = Arrays.stream(scores_all).min().orElse(0.0);
-            double pronunciationScore = Arrays.stream(scores_all).map(x -> x * 0.2).sum() + minValue * 0.2;
+            double pronunciationScore = 0.0;
+            if (!unScriptedScenario)
+            {
+                // Scripted scenario
+                if (enableProsodyAssessment && !Double.isNaN(prosodyScore))
+                {
+		            double[] scores_all = {accuracyScore, prosodyScore, completenessScore, fluencyScore};
+		            double minValue = Arrays.stream(scores_all).min().orElse(0.0);
+		            pronunciationScore = Arrays.stream(scores_all).sum() * 0.2 + minValue * 0.2;
+                }
+                else
+                {
+		            double[] scores_all = {accuracyScore, completenessScore, fluencyScore};
+		            double minValue = Arrays.stream(scores_all).min().orElse(0.0);
+		            pronunciationScore = Arrays.stream(scores_all).sum() * 0.2 + minValue * 0.4;
+                }
+            }
+            else
+            {
+                // Unscripted scenario
+                if (enableProsodyAssessment && !Double.isNaN(prosodyScore))
+                {
+		            double[] scores_all = {accuracyScore, prosodyScore, fluencyScore};
+		            double minValue = Arrays.stream(scores_all).min().orElse(0.0);
+		            pronunciationScore = Arrays.stream(scores_all).sum() * 0.2 + minValue * 0.4;
+                }
+                else
+                {
+		            double[] scores_all = {accuracyScore, fluencyScore};
+		            double minValue = Arrays.stream(scores_all).min().orElse(0.0);
+		            pronunciationScore = Arrays.stream(scores_all).sum() * 0.4 + minValue * 0.2;
+                }
+            }
 
-            System.out.println("Paragraph accuracy score: " + accuracyScore + " prosody score: " + prosodyScore +
-                ", completeness score: " +completenessScore +
-                " , fluency score: " + fluencyScore + " , pronunciation score: " + pronunciationScore);
+            System.out.println(String.format(
+                    "Paragraph accuracy score: %.0f, prosody score: %.0f, fluency score: %.0f, completeness score: %.0f, pronunciation score: %.0f",
+                    accuracyScore, prosodyScore, fluencyScore, completenessScore, pronunciationScore
+                ));
             for (Word w : finalWords) {
                 System.out.println(" word: " + w.word + "\taccuracy score: " +
-                    w.accuracyScore + "\terror type: " + w.errorType);
+                    Math.round(w.accuracyScore) + "\terror type: " + w.errorType);
             }
         }
         config.close();
         audioInput.close();
         recognizer.close();
     }
+
+    // Performs pronunciation assessment asynchronously with REST API for a short audio file.
+    // See more information at https://learn.microsoft.com/azure/ai-services/speech-service/rest-speech-to-text-short
+    public static void pronunciationAssessmentWithRestApi() throws Exception {
+
+        String serviceRegion = "YourSubscriptionRegion";
+        String serviceKey = "YourSubscriptionKey";
+
+        // Build pronunciation assessment parameters
+        String locale = "en-US";
+        String referenceText = "Good morning.";
+        String audioFilePath = "src/resources/good_morning.pcm";
+        boolean enableProsodyAssessment = true;
+        String phonemeAlphabet = "SAPI"; // IPA or SAPI
+        boolean enableMiscue = true;
+        int nbestPhonemeCount = 5;
+        String pronAssessmentParamsJson = String.format(
+            "{\"GradingSystem\":\"HundredMark\",\"Dimension\":\"Comprehensive\",\"ReferenceText\":\"%s\","
+                + "\"EnableProsodyAssessment\":\"%s\",\"PhonemeAlphabet\":\"%s\",\"EnableMiscue\":\"%s\","
+                + "\"NBestPhonemeCount\":\"%s\"}",
+            referenceText, enableProsodyAssessment, phonemeAlphabet, enableMiscue, nbestPhonemeCount
+        );
+
+        String pronAssessmentParamsBase64 = Base64.getEncoder().encodeToString(pronAssessmentParamsJson.getBytes("UTF-8"));
+
+        String sessionId = UUID.randomUUID().toString().replace("-", "");
+
+        String urlStr = String.format(
+            "https://%s.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1?format=detailed&language=%s&X-ConnectionId=%s",
+            serviceRegion, locale, sessionId
+        );
+
+        System.out.println("II URL: " + urlStr);
+        System.out.println("II Config: " + pronAssessmentParamsJson);
+
+        File file = new File(audioFilePath);
+        InputStream audioStream = new BufferedInputStream(Files.newInputStream(file.toPath()));
+
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+        conn.setChunkedStreamingMode(1024);
+        conn.setRequestProperty("Accept", "application/json;text/xml");
+        conn.setRequestProperty("Connection", "Keep-Alive");
+        conn.setRequestProperty("Content-Type", "audio/wav; codecs=audio/pcm; samplerate=16000");
+        conn.setRequestProperty("Ocp-Apim-Subscription-Key", serviceKey);
+        conn.setRequestProperty("Pronunciation-Assessment", pronAssessmentParamsBase64);
+        conn.setRequestProperty("Transfer-Encoding", "chunked");
+        conn.setRequestProperty("Expect", "100-continue");
+
+        long uploadFinishTime = 0;
+        long getResponseTime;
+
+        try (OutputStream out = conn.getOutputStream()) {
+            if (WaveHeader16K16BitMono.length > 0) {
+                out.write(WaveHeader16K16BitMono);
+            }
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = audioStream.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+                out.flush();
+                Thread.sleep(1024 / 32);
+            }
+            uploadFinishTime = System.currentTimeMillis();
+        }
+
+        int responseCode = conn.getResponseCode();
+        getResponseTime = System.currentTimeMillis();
+        // Show Session ID
+        System.out.println("II Session ID: " + sessionId);
+
+        if (responseCode != 200) {
+            System.err.println("EE Error code: " + responseCode);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()))) {
+                reader.lines().forEach(System.err::println);
+            }
+        } else {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                System.out.println("II Response: " + response.toString());
+            }
+        }
+
+        long latency = getResponseTime - uploadFinishTime;
+        System.out.println("II Latency: " + latency + "ms");
+
+        audioStream.close();
+        conn.disconnect();
+    }
+
+    // Aligns tokens from the raw list to the reference list by merging or splitting tokens
+    public static List<String> alignRawTokensByRef(List<String> rawList, List<String> refList) {
+        int refIdx = 0;
+        int rawIdx = 0;
+        int refLen = refList.size();
+        List<String> alignedRaw = new ArrayList<>();
+
+        // Make a copy to avoid modifying the original list
+        List<String> rawCopy = new ArrayList<>(rawList);
+
+        while (rawIdx < rawCopy.size() && refIdx < refLen) {
+            boolean mergedSplitDone = false;
+
+            for (int length = 1; length <= rawCopy.size() - rawIdx; length++) {
+                if (rawIdx + length > rawCopy.size()) break;
+
+                // Merge consecutive tokens
+                String mergedRaw = String.join("", rawCopy.subList(rawIdx, rawIdx + length));
+                String refWord = refList.get(refIdx);
+
+                if (mergedRaw.contains(refWord)) {
+                    String[] parts = mergedRaw.split(java.util.regex.Pattern.quote(refWord), 2);
+
+                    // Handle prefix before refWord
+                    if (!parts[0].isEmpty()) {
+                        int consumed = 0;
+                        int tokenIdx = rawIdx;
+
+                        // Consume characters from rawCopy until we cover all of parts[0]
+                        while (consumed < parts[0].length() && tokenIdx < rawCopy.size()) {
+                            String token = rawCopy.get(tokenIdx);
+                            int remain = parts[0].length() - consumed;
+
+                            if (token.length() <= remain) {
+                                // Add it directly to aligned result if the whole token is fully within prefix
+                                alignedRaw.add(token);
+                                consumed += token.length();
+                                tokenIdx++;
+                            } else {
+                                // Add only the prefix part, the rest will be handled later
+                                String prefixPart = token.substring(0, remain);
+                                alignedRaw.add(prefixPart);
+                                consumed += remain;
+                            }
+                        }
+                    }
+
+                    // Append the matched refWord
+                    alignedRaw.add(refWord);
+
+                    // Handle suffix after refWord
+                    if (parts.length > 1 && !parts[1].isEmpty()) {
+                        rawCopy.set(rawIdx, parts[1]);
+                        // Remove extra merged tokens
+                        for (int i = 1; i < length; i++) {
+                            rawCopy.remove(rawIdx + 1);
+                        }
+                    } else {
+                        // No suffix: remove all merged tokens
+                        for (int i = 0; i < length; i++) {
+                            rawCopy.remove(rawIdx);
+                        }
+                    }
+
+                    refIdx++;
+                    mergedSplitDone = true;
+                }
+
+                if (mergedSplitDone) break;
+            }
+
+            if (!mergedSplitDone) {
+                refIdx++;
+            }
+        }
+
+        // Append any remaining raw tokens
+        while (rawIdx < rawCopy.size()) {
+            alignedRaw.add(rawCopy.get(rawIdx));
+            rawIdx++;
+        }
+
+        return alignedRaw;
+    }
+
+    // Aligns two token lists using DiffUtils.diff and handles differences.
+    // Equal segments are copied directly.
+    // 'Replace' segments are aligned strictly if identical after joining,
+    // otherwise aligned using alignRawTokensByRef().
+    // 'Delete' segments from raw are preserved.
+    public static List<String> alignListsWithDiffHandling(List<String> raw, List<String> ref) {
+        List<String> alignedRaw = new ArrayList<>();
+
+        Patch<String> diff = DiffUtils.diff(raw, ref, true);
+
+        for (AbstractDelta<String> d : diff.getDeltas())
+        {
+            if (d.getType() == DeltaType.EQUAL)
+            {
+                alignedRaw.addAll(d.getSource().getLines());
+            }
+            else if (d.getType() == DeltaType.DELETE)
+            {
+                alignedRaw.addAll(d.getSource().getLines());
+            }
+            else if (d.getType() == DeltaType.CHANGE)
+            {
+                if (String.join("", d.getSource().getLines()).equals(String.join("", d.getTarget().getLines())))
+                {
+                    alignedRaw.addAll(d.getTarget().getLines());
+                }
+                else
+                {
+                    List<String> alignPart = alignRawTokensByRef(d.getSource().getLines(), d.getTarget().getLines());
+                    alignedRaw.addAll(alignPart);
+                }
+            }
+        }
+
+        return alignedRaw;
+    }
+
+    public static final byte[] WaveHeader16K16BitMono = new byte[] {
+            82, 73, 70, 70,
+            78, (byte)128, 0, 0,
+            87, 65, 86, 69,
+            102, 109, 116, 32,
+            18, 0, 0, 0,
+            1, 0,
+            1, 0,
+            (byte)128, 62, 0, 0,
+            0, 125, 0, 0,
+            2, 0,
+            16, 0,
+            0, 0,
+            100, 97, 116, 97,
+            0, 0, 0, 0
+        };
 
     public static class Word {
         public String word;
