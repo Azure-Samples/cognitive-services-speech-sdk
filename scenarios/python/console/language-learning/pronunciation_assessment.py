@@ -370,7 +370,7 @@ def pronunciation_assessment_continuous_from_file():
 
     # If accuracy score is below 60, mark as mispronunciation
     for idx, word in enumerate(final_words):
-        if word.accuracy_score < 60:
+        if word.accuracy_score < 60 and word.error_type == "None":
             word._error_type = "Mispronunciation"
 
     durations_sum = sum([d for w, d in zip(recognized_words, durations) if w.error_type == "None"])
