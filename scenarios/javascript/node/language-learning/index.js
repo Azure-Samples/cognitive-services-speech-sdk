@@ -6,6 +6,7 @@ import * as pronunciationAssessmentContinue from "./pronunciationAssessmentConti
 import * as pronunciationAssessment from "./pronunciationAssessment.js";
 import * as pronunciationAssessmentConfiguredWithJson from "./pronunciationAssessmentConfiguredWithJson.js";
 import * as pronunciationAssessmentFromMicrophone from "./pronunciationAssessmentFromMicrophone.js";
+import * as pronunciationAssessmentWithRestAPI from "./pronunciationAssessmentWithRestAPI.js";
 
 if (process.argv.length > 3) {
     settings.filename = process.argv[3];
@@ -30,6 +31,10 @@ if (process.argv.length > 2) {
 
         case "pronunciationAssessmentFromMicrophone":
             pronunciationAssessmentFromMicrophone.main(settings);
+            break;
+        
+        case "pronunciationAssessmentWithRestAPI":
+            pronunciationAssessmentWithRestAPI.main(settings);
             break;
 
         default:
