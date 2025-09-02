@@ -138,6 +138,7 @@
                         <option value="pronunciationAssessmentContinuous">pronunciation assessment Continuous</option>
                         <option value="pronunciationAssessmentContinuousStream">pronunciation assessment stream Continuous</option>
                         <option value="pronunciationAssessmentConfiguredWithJson">pronunciation assessment configured with json</option>
+                        <option value="pronunciationAssessmentWithRestAPI">pronunciation assessment with rest API</option>
                     </select>
                 </td>
             </tr>
@@ -197,6 +198,7 @@
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuid.min.js"></script>
 
     <!-- Speech Speech SDK Authorization token -->
     <script>
@@ -322,6 +324,7 @@
                 var startButtonText = (function() {
                     switch (scenarioSelection.value) {
                         case 'pronunciationAssessmentConfiguredWithJson':
+                        case 'pronunciationAssessmentWithRestAPI':
                         case 'pronunciationAssessmentOnce': return 'recognizeOnceAsync()';
                         case 'pronunciationAssessmentContinuousStream': 
                         case 'pronunciationAssessmentContinuous': return 'startContinuousRecognitionAsync()';
@@ -330,6 +333,11 @@
 
                 scenarioStartButton.innerHTML = startButtonText;
                 scenarioStopButton.innerHTML = `STOP ${startButtonText}`;
+                if (scenarioSelection.value === 'pronunciationAssessmentWithRestAPI') {
+                    scenarioStopButton.style.display = 'none';
+                } else {
+                    scenarioStopButton.style.display = '';
+                }
 
                 document.getElementById('pronunciationAssessmentReferenceTextRow').style.display =
                     scenarioSelection.value.includes('pronunciation') ? '' : 'none';
@@ -363,6 +371,9 @@
                         break;
                     case 'pronunciationAssessmentConfiguredWithJson':
                         pronunciationAssessmentConfiguredWithJson();
+                        break;
+                    case 'pronunciationAssessmentWithRestAPI':
+                        pronunciationAssessmentWithRestAPI();
                         break;
                 }
             });
@@ -769,6 +780,13 @@
             return alignedRaw;
         }
 
+        function base64Encode(str) {
+            const bytes = new TextEncoder().encode(str);
+            let binary = "";
+            bytes.forEach((b) => binary += String.fromCharCode(b));
+            return btoa(binary);
+        }
+
     </script>
 
     <!-- Configuration and setup common to SDK objects, including events -->
@@ -866,6 +884,43 @@
 
             speechConfig.speechRecognitionLanguage = languageOptions.value;
             return speechConfig;
+        }
+
+        function configureRequestBody() {
+            let authKey = "";
+            if (authorizationToken) {
+                authKey = authorizationToken;
+            } else if (!key.value) {
+                alert("Please enter your Cognitive Services Speech subscription key!");
+                return undefined;
+            } else {
+                authKey = key.value;
+            }
+
+            const sessionId = uuid.v4().replace(/-/g, "");
+
+            const url = `https://${regionOptions.value}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1` +
+                        `?format=detailed&language=${languageOptions.value}&X-ConnectionId=${sessionId}`;
+
+            const pronAssessmentParamsJson = JSON.stringify({
+                GradingSystem: "HundredMark",
+                Dimension: "Comprehensive",
+                ReferenceText: referenceTextField.value,
+                EnableProsodyAssessment: enableProsodyAssessmentCheckbox.checked,
+                PhonemeAlphabet: "SAPI",
+                EnableMiscue: enableMiscueCheckbox.checked,
+                NBestPhonemeCount: 5
+            });
+            const pronAssessmentParams = base64Encode(pronAssessmentParamsJson);
+            const headers = {
+                "Accept": "application/json;text/xml",
+                "Connection": "Keep-Alive",
+                "Content-Type": "audio/wav; codecs=audio/pcm; samplerate=16000",
+                "Ocp-Apim-Subscription-Key": authKey,
+                "Pronunciation-Assessment": pronAssessmentParams
+            };
+
+            return [url, headers, sessionId];
         }
 
         async function referenceTextHandler() {
@@ -1217,6 +1272,9 @@
             phraseDiv.innerHTML += ".\n";
         }
 
+        function writeApiResultToUi(result) {
+            phraseDiv.innerHTML += JSON.stringify(result, null, 2);
+        }
     </script>
 
     <!-- Top-level scenario functions -->
@@ -1334,6 +1392,39 @@
                     phraseDiv.innerHTML += "ERROR: " + err;
                 }
             );
+        }
+
+        async function pronunciationAssessmentWithRestAPI() {
+            resetUiForScenarioStart();
+            resetVariables();
+
+            let url, headers, sessionId;
+            try {
+                [url, headers, sessionId] = configureRequestBody();
+            } catch (e) {
+                return;
+            }
+            statusDiv.innerHTML += `SessionId: ${sessionId}\n`;
+
+            const start = Date.now();
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers,
+                    body: audioFile
+                });
+                const getResponseTime = Date.now();
+                statusDiv.innerHTML += `Response Time: ${(getResponseTime - start)/1000}s\n`;
+                if (!response.ok) {
+                    const text = await response.text();
+                    statusDiv.innerHTML += `Error ${response.status}: ${text}\n`;
+                } else {
+                    const data = await response.json();
+                    writeApiResultToUi(data);
+                }
+            } catch (err) {
+                statusDiv.innerHTML += "Fetch failed: " + err;
+            }
         }
 
     </script>
