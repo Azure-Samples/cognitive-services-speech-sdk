@@ -6,15 +6,11 @@
     "@testing-library/jest-dom": "^5.11.8",
     "@testing-library/user-event": "^12.6.0",
     "axios": "^1.7.7",
-    "bootstrap": "^4.5.3",
     "dotenv": "^8.2.0",
-    "microsoft-cognitiveservices-speech-sdk": "^1.41",
-    "universal-cookie": "^4.0.4",
-    "web-vitals": "^0.2.4"
+    "microsoft-cognitiveservices-speech-sdk": "^1.41"
   },
   "scripts": {
-    "server": "node-env-run server --exec nodemon | pino-colada",
-    "dev": "run-p server start"
+    "server": "node server.js"
   },
   "browserslist": {
     "production": [
