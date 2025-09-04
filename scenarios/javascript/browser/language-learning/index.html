@@ -4,7 +4,6 @@
 <head>
     <title>Speech Sample</title>
     <meta charset="utf-8" />
-    <script type="text/javascript" src="./difflib-browser.js"></script>
 </head>
 
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
@@ -138,6 +137,7 @@
                         <option value="pronunciationAssessmentContinuous">pronunciation assessment Continuous</option>
                         <option value="pronunciationAssessmentContinuousStream">pronunciation assessment stream Continuous</option>
                         <option value="pronunciationAssessmentConfiguredWithJson">pronunciation assessment configured with json</option>
+                        <option value="pronunciationAssessmentWithRestAPI">pronunciation assessment with rest API</option>
                     </select>
                 </td>
             </tr>
@@ -195,8 +195,12 @@
 
     <!-- Speech SDK REFERENCE -->
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+    <!-- Other dependencies -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/qiao/difflib.js/dist/difflib-browser.js"></script>
 
     <!-- Speech Speech SDK Authorization token -->
     <script>
@@ -322,6 +326,7 @@
                 var startButtonText = (function() {
                     switch (scenarioSelection.value) {
                         case 'pronunciationAssessmentConfiguredWithJson':
+                        case 'pronunciationAssessmentWithRestAPI':
                         case 'pronunciationAssessmentOnce': return 'recognizeOnceAsync()';
                         case 'pronunciationAssessmentContinuousStream': 
                         case 'pronunciationAssessmentContinuous': return 'startContinuousRecognitionAsync()';
@@ -330,6 +335,11 @@
 
                 scenarioStartButton.innerHTML = startButtonText;
                 scenarioStopButton.innerHTML = `STOP ${startButtonText}`;
+                if (scenarioSelection.value === 'pronunciationAssessmentWithRestAPI') {
+                    scenarioStopButton.style.display = 'none';
+                } else {
+                    scenarioStopButton.style.display = '';
+                }
 
                 document.getElementById('pronunciationAssessmentReferenceTextRow').style.display =
                     scenarioSelection.value.includes('pronunciation') ? '' : 'none';
@@ -363,6 +373,9 @@
                         break;
                     case 'pronunciationAssessmentConfiguredWithJson':
                         pronunciationAssessmentConfiguredWithJson();
+                        break;
+                    case 'pronunciationAssessmentWithRestAPI':
+                        pronunciationAssessmentWithRestAPI();
                         break;
                 }
             });
@@ -463,72 +476,6 @@
 
     <!-- Utils -->
     <script>
-        async function cutFirst2Sec(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            const audioCtx = new AudioContext();
-            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-
-            const frameCount = Math.min(audioBuffer.sampleRate * 2, audioBuffer.length);
-
-            const newBuffer = audioCtx.createBuffer(
-                audioBuffer.numberOfChannels,
-                frameCount,
-                audioBuffer.sampleRate
-            );
-
-            for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
-                const oldData = audioBuffer.getChannelData(ch);
-                newBuffer.getChannelData(ch).set(oldData.subarray(0, frameCount));
-            }
-
-            return audioBufferToWav(newBuffer);
-
-            function audioBufferToWav(abuffer) {
-                const numOfChan = abuffer.numberOfChannels,
-                length = abuffer.length * numOfChan * 2 + 44,
-                buffer = new ArrayBuffer(length),
-                view = new DataView(buffer),
-                channels = [],
-                sampleRate = abuffer.sampleRate;
-
-                writeUTFBytes(view, 0, "RIFF");
-                view.setUint32(4, length - 8, true);
-                writeUTFBytes(view, 8, "WAVE");
-                writeUTFBytes(view, 12, "fmt ");
-                view.setUint32(16, 16, true);
-                view.setUint16(20, 1, true);
-                view.setUint16(22, numOfChan, true);
-                view.setUint32(24, sampleRate, true);
-                view.setUint32(28, sampleRate * 2 * numOfChan, true);
-                view.setUint16(32, numOfChan * 2, true);
-                view.setUint16(34, 16, true);
-                writeUTFBytes(view, 36, "data");
-                view.setUint32(40, length - 44, true);
-
-                let offset = 44;
-                for (let ch = 0; ch < numOfChan; ch++) {
-                    channels.push(abuffer.getChannelData(ch));
-                }
-                const interleaved = new Float32Array(abuffer.length * numOfChan);
-                for (let i = 0; i < abuffer.length; i++) {
-                    for (let ch = 0; ch < numOfChan; ch++) {
-                        interleaved[i * numOfChan + ch] = channels[ch][i];
-                    }
-                }
-                for (let i = 0; i < interleaved.length; i++, offset += 2) {
-                    let s = Math.max(-1, Math.min(1, interleaved[i]));
-                    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-                }
-                return new Blob([view], { type: "audio/wav" });
-
-                function writeUTFBytes(view, offset, string) {
-                    for (let i = 0; i < string.length; i++) {
-                        view.setUint8(offset + i, string.charCodeAt(i));
-                    }
-                }
-            }
-        }
-
         function convertReferenceWords(referenceText, referenceWords) {
             const dictionary = [...new Set(referenceWords)];
             const maxLength = Math.max(...dictionary.map(word => word.length));
@@ -621,9 +568,10 @@
         }
 
         async function getReferenceWords(referenceText) {
-            const cutBlob = await cutFirst2Sec(audioFile);
-            const dummyFile = new File([cutBlob], "dummy.wav", { type: "audio/wav" });
-            const audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(dummyFile);
+            const response = await fetch("zhcn_short_dummy_sample.wav");  // You need to start the server first. See the README for details.
+            const buffer = await response.arrayBuffer();
+            const uint8Array = new Uint8Array(buffer);
+            const audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(uint8Array);
             const speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
 
             const speechRecognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
@@ -769,6 +717,13 @@
             return alignedRaw;
         }
 
+        function base64Encode(str) {
+            const bytes = new TextEncoder().encode(str);
+            let binary = "";
+            bytes.forEach((b) => binary += String.fromCharCode(b));
+            return btoa(binary);
+        }
+
     </script>
 
     <!-- Configuration and setup common to SDK objects, including events -->
@@ -868,6 +823,42 @@
             return speechConfig;
         }
 
+        async function configureRequestBody() {
+            const headers = {
+                "Accept": "application/json;text/xml",
+                "Connection": "Keep-Alive",
+                "Content-Type": "audio/wav; codecs=audio/pcm; samplerate=16000",
+            };
+            if (authorizationToken) {
+                headers["Authorization"] = `Bearer ${authorizationToken}`;
+            } else if (!key.value) {
+                alert("Please enter your Cognitive Services Speech subscription key!");
+                return undefined;
+            } else {
+                headers["Ocp-Apim-Subscription-Key"] = key.value;
+            }
+
+            const sessionId = uuid.v4().replace(/-/g, "");
+
+            const url = `https://${regionOptions.value}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1` +
+                        `?format=detailed&language=${languageOptions.value}&X-ConnectionId=${sessionId}`;
+
+            const referenceText = await referenceTextHandler();
+            const pronAssessmentParamsJson = JSON.stringify({
+                GradingSystem: "HundredMark",
+                Dimension: "Comprehensive",
+                ReferenceText: referenceText,
+                EnableProsodyAssessment: enableProsodyAssessmentCheckbox.checked,
+                PhonemeAlphabet: "SAPI",
+                EnableMiscue: enableMiscueCheckbox.checked,
+                NBestPhonemeCount: 5
+            });
+            const pronAssessmentParams = base64Encode(pronAssessmentParamsJson);
+            headers["Pronunciation-Assessment"] = pronAssessmentParams;
+
+            return [url, headers, sessionId];
+        }
+
         async function referenceTextHandler() {
             let referenceText = referenceTextField.value;
 
@@ -876,13 +867,7 @@
                 // Word segmentation for Chinese using the reference text and any short wave file
                 // Remove the blank characters in the reference text
                 referenceText = referenceText.replace(/ /g, "");
-                // TODO: handle the microphone input case.
-                if (audioFile && inputSourceFileRadio.checked) {
-                    referenceWords = await getReferenceWords(referenceText);
-                } else {
-                    referenceWords = [];
-                    return referenceText;
-                }
+                referenceWords = await getReferenceWords(referenceText);
             } else {
                 referenceText = referenceText.toLocaleLowerCase() ?? "";
                 referenceWords = _.map(
@@ -1131,7 +1116,7 @@
 
             // If accuracy score is below 60, mark as mispronunciation
             _.forEach(lastWords, (word) => {
-                if( word.PronunciationAssessment.AccuracyScore < 60) {
+                if (word.PronunciationAssessment.AccuracyScore < 60 && word.PronunciationAssessment.ErrorType == "None") {
                     word.PronunciationAssessment.ErrorType = "Mispronunciation";
                 }
             });
@@ -1217,6 +1202,9 @@
             phraseDiv.innerHTML += ".\n";
         }
 
+        function writeApiResultToUi(result) {
+            phraseDiv.innerHTML += JSON.stringify(result, null, 2);
+        }
     </script>
 
     <!-- Top-level scenario functions -->
@@ -1334,6 +1322,43 @@
                     phraseDiv.innerHTML += "ERROR: " + err;
                 }
             );
+        }
+
+        async function pronunciationAssessmentWithRestAPI() {
+            resetUiForScenarioStart();
+            resetVariables();
+            if (inputSourceMicrophoneRadio.checked) {
+                alert("The current scenario does not support microphone input.");
+                return;
+            }
+
+            let url, headers, sessionId;
+            try {
+                [url, headers, sessionId] = await configureRequestBody();
+            } catch (e) {
+                return;
+            }
+            statusDiv.innerHTML += `SessionId: ${sessionId}\n`;
+
+            const start = Date.now();
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers,
+                    body: audioFile
+                });
+                const getResponseTime = Date.now();
+                statusDiv.innerHTML += `Response Time: ${(getResponseTime - start)/1000}s\n`;
+                if (!response.ok) {
+                    const text = await response.text();
+                    statusDiv.innerHTML += `Error ${response.status}: ${text}\n`;
+                } else {
+                    const data = await response.json();
+                    writeApiResultToUi(data);
+                }
+            } catch (err) {
+                statusDiv.innerHTML += "Fetch failed: " + err;
+            }
         }
 
     </script>

@@ -169,7 +169,7 @@ export const main = async (settings) => {
 
         // If accuracy score is below 60, mark as mispronunciation
         _.forEach(lastWords, (word) => {
-            if( word.PronunciationAssessment.AccuracyScore < 60) {
+            if (word.PronunciationAssessment.AccuracyScore < 60 && word.PronunciationAssessment.ErrorType == "None") {
                 word.PronunciationAssessment.ErrorType = "Mispronunciation";
             }
         });
