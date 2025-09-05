@@ -1,4 +1,4 @@
 {
     "SubscriptionKey": "your_subscription_key",
-    "ServiceRegion": "your_service_region"
+    "Endpoint": "your_endpoint"
 }

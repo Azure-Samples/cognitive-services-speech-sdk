@@ -7,20 +7,19 @@
 #include <thread>
 #include <speechapi_cxx.h>
 
-using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Intent;
 
-extern shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig();
-extern const string GetKeywordModelFileName();
-extern const string GetKeywordPhrase();
+extern std::shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig();
+extern const std::string GetKeywordModelFileName();
+extern const std::string GetKeywordPhrase();
 
 
 // Creates a pattern matching model with some example intents.
 // For more examples on intent patterns, see
 // https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/samples/cpp/windows/console/samples/intent_recognition_samples.cpp
-shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
+std::shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
 {
     // Create a pattern matching model. The id is necessary to identify this
     // model from others if there are several models in use at the same time.
@@ -28,7 +27,7 @@ shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
 
     // Make the keyword optional (surround with [ and ] in the pattern string)
     // in case the pattern matching model is used without keyword recognition.
-    string patternKeywordOptional = "[" + GetKeywordPhrase() + "][{any}]";
+    std::string patternKeywordOptional = "[" + GetKeywordPhrase() + "][{any}]";
 
     // Specify some intents to add. Example inputs:
     // - "Turn on the radio."
@@ -39,14 +38,14 @@ shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
     // - surround alternatives with ( and ) and separate with |
     // - surround optional parts with [ and ]
     // - default entity {any} matches any text
-    string patternTurnOn = "(turn|switch) on";
-    string patternTurnOff = "(turn|switch) off";
-    string patternTarget = "[{any}] {targetName}";      // using {any} to match any text before {targetName}
-    string patternLocation = "[{any}] {locationName}";  // using {any} to match any text before {locationName}
+    std::string patternTurnOn = "(turn|switch) on";
+    std::string patternTurnOff = "(turn|switch) off";
+    std::string patternTarget = "[{any}] {targetName}";      // using {any} to match any text before {targetName}
+    std::string patternLocation = "[{any}] {locationName}";  // using {any} to match any text before {locationName}
 
     // Define acceptable values for the entities. By default an entity can have any value.
     // If these are not defined, patterns with {any} before the entity name will not work.
-    const vector<string> targetNames = { "lamp", "lights", "radio", "TV" };
+    const std::vector<std::string> targetNames = { "lamp", "lights", "radio", "TV" };
     model->Entities.push_back(
         { "targetName",
         Intent::EntityType::List,
@@ -54,7 +53,7 @@ shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
         targetNames
         });
 
-    const vector<string> locationNames = { "living room", "bedroom", "kitchen" };
+    const std::vector<std::string> locationNames = { "living room", "bedroom", "kitchen" };
     model->Entities.push_back(
         { "locationName",
         Intent::EntityType::List,
@@ -63,7 +62,7 @@ shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
         });
 
     // Add intents (id, phrase(s)) to the model.
-    const vector<pair<string, vector<string>>> intents =
+    const std::vector<std::pair<std::string, std::vector<std::string>>> intents =
     {
         {
             "HomeAutomation.TurnOn",
@@ -81,7 +80,7 @@ shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
         }
     };
 
-    cout << "Added intents" << endl;
+    std::cout << "Added intents" << std::endl;
     for (const auto& intent : intents)
     {
         model->Intents.push_back({
@@ -89,25 +88,25 @@ shared_ptr<PatternMatchingModel> CreatePatternMatchingModel()
                 intent.second
             },
             intent.first });
-        cout << "  id=\"" << intent.first << "\"" << endl;
+        std::cout << "  id=\"" << intent.first << "\"" << std::endl;
         for (const auto& phrase : intent.second)
         {
-            cout << "    phrase=\"" << phrase << "\"" << endl;
+            std::cout << "    phrase=\"" << phrase << "\"" << std::endl;
         }
     }
-    cout << "where\n";
-    cout << "  targetName can be one of ";
+    std::cout << "where" << std::endl;
+    std::cout << "  targetName can be one of ";
     for (const auto& targetName : targetNames)
     {
-        cout << "\"" << targetName << "\" ";
+        std::cout << "\"" << targetName << "\" ";
     }
-    cout << endl;
-    cout << "  locationName can be one of ";
+    std::cout << std::endl;
+    std::cout << "  locationName can be one of ";
     for (const auto& locationName : locationNames)
     {
-        cout << "\"" << locationName << "\" ";
+        std::cout << "\"" << locationName << "\" ";
     }
-    cout << endl << endl;
+    std::cout << std::endl << std::endl;
 
     return model;
 }
@@ -125,7 +124,7 @@ void RecognizeIntent(bool useKeyword)
     // Creates a pattern matching model.
     auto patternMatchingModel = CreatePatternMatchingModel();
     // Adds the model to a new language model collection.
-    vector<shared_ptr<LanguageUnderstandingModel>> modelCollection;
+    std::vector<std::shared_ptr<LanguageUnderstandingModel>> modelCollection;
     modelCollection.push_back(patternMatchingModel);
     // Applies the language model collection to the recognizer.
     // This replaces all previously applied models.
@@ -137,7 +136,7 @@ void RecognizeIntent(bool useKeyword)
         // Intermediate result (hypothesis).
         if (e.Result->Reason == ResultReason::RecognizingSpeech)
         {
-            cout << "Recognizing:" << e.Result->Text << endl;
+            std::cout << "Recognizing:" << e.Result->Text << std::endl;
         }
         else if (e.Result->Reason == ResultReason::RecognizingKeyword)
         {
@@ -150,23 +149,23 @@ void RecognizeIntent(bool useKeyword)
         if (e.Result->Reason == ResultReason::RecognizedKeyword)
         {
             // Keyword detected, speech recognition will start.
-            cout << "KEYWORD: Text=" << e.Result->Text << endl;
+            std::cout << "KEYWORD: Text=" << e.Result->Text << std::endl;
         }
         else if (e.Result->Reason == ResultReason::RecognizedIntent)
         {
             // Final result (intent recognized). May differ from the last intermediate result.
-            cout << "RECOGNIZED: Text=" << e.Result->Text << endl;
-            cout << "  Intent Id: " << e.Result->IntentId << endl;
+            std::cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
+            std::cout << "  Intent Id: " << e.Result->IntentId << std::endl;
 
-            if (e.Result->IntentId.find("HomeAutomation") != string::npos)
+            if (e.Result->IntentId.find("HomeAutomation") != std::string::npos)
             {
                 auto entities = e.Result->GetEntities();
                 if (entities.find("targetName") != entities.end())
                 {
-                    cout << "     Target: " << entities["targetName"].c_str() << endl;
+                    std::cout << "     Target: " << entities["targetName"].c_str() << std::endl;
                     if (entities.find("locationName") != entities.end())
                     {
-                        cout << "   Location: " << entities["locationName"].c_str() << endl;
+                        std::cout << "   Location: " << entities["locationName"].c_str() << std::endl;
                     }
                 }
             }
@@ -174,29 +173,29 @@ void RecognizeIntent(bool useKeyword)
         else if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
             // Final result (no intent recognized). May differ from the last intermediate result.
-            cout << "RECOGNIZED: Text=" << e.Result->Text << endl;
-            cout << "  (intent not recognized)\n";
+            std::cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
+            std::cout << "  (intent not recognized)" << std::endl;
         }
         else if (e.Result->Reason == ResultReason::NoMatch)
         {
             // NoMatch occurs when no speech was recognized.
             auto reason = NoMatchDetails::FromResult(e.Result)->Reason;
-            cout << "NO MATCH: Reason=";
+            std::cout << "NO MATCH: Reason=";
             switch (reason)
             {
             case NoMatchReason::NotRecognized:
                 // Input audio was not silent but contained no recognizable speech.
-                cout << "NotRecognized" << endl;
+                std::cout << "NotRecognized" << std::endl;
                 break;
             case NoMatchReason::InitialSilenceTimeout:
                 // Input audio was silent and the silence timeout expired.
                 // In continuous recognition this can happen multiple times during
                 // a session, not just at the very beginning.
-                cout << "SilenceTimeout" << endl;
+                std::cout << "SilenceTimeout" << std::endl;
                 break;
             default:
                 // Other reasons are not supported in embedded speech at the moment.
-                cout << int(reason) << endl;
+                std::cout << int(reason) << std::endl;
                 break;
             }
         }
@@ -208,17 +207,17 @@ void RecognizeIntent(bool useKeyword)
         {
         case CancellationReason::EndOfStream:
             // Input stream was closed or the end of an input file was reached.
-            cout << "CANCELED: EndOfStream" << endl;
+            std::cout << "CANCELED: EndOfStream" << std::endl;
             break;
 
         case CancellationReason::Error:
             // NOTE: In case of an error, do not use the same recognizer for recognition anymore.
-            cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << endl;
-            cerr << "CANCELED: ErrorDetails=\"" << e.ErrorDetails << "\"" << endl;
+            std::cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << std::endl;
+            std::cerr << "CANCELED: ErrorDetails=\"" << e.ErrorDetails << "\"" << std::endl;
             break;
 
         default:
-            cout << "CANCELED: Reason=" << int(e.Reason) << endl;
+            std::cout << "CANCELED: Reason=" << int(e.Reason) << std::endl;
             break;
         }
     };
@@ -226,13 +225,13 @@ void RecognizeIntent(bool useKeyword)
     recognizer->SessionStarted += [](const SessionEventArgs& e)
     {
         UNUSED(e);
-        cout << "Session started." << endl;
+        std::cout << "Session started." << std::endl;
     };
 
     recognizer->SessionStopped += [](const SessionEventArgs& e)
     {
         UNUSED(e);
-        cout << "Session stopped." << endl;
+        std::cout << "Session stopped." << std::endl;
     };
 
     if (useKeyword)
@@ -249,8 +248,8 @@ void RecognizeIntent(bool useKeyword)
         // Steps 1-3 repeat until StopKeywordRecognitionAsync() is called.
         recognizer->StartKeywordRecognitionAsync(keywordModel).get();
 
-        cout << "Say something starting with \"" << GetKeywordPhrase() << "\" (press Enter to stop)...\n";
-        cin.get();
+        std::cout << "Say something starting with \"" << GetKeywordPhrase() << "\" (press Enter to stop)..." << std::endl;
+        std::cin.get();
 
         // Stops recognition.
         recognizer->StopKeywordRecognitionAsync().get();
@@ -260,8 +259,8 @@ void RecognizeIntent(bool useKeyword)
         // Starts continuous recognition.
         recognizer->StartContinuousRecognitionAsync().get();
 
-        cout << "Say something (press Enter to stop)...\n";
-        cin.get();
+        std::cout << "Say something (press Enter to stop)..." << std::endl;
+        std::cin.get();
 
         // Stops recognition.
         recognizer->StopContinuousRecognitionAsync().get();

@@ -23,6 +23,9 @@ This sample demonstrates various forms of speech recognition, intent recognition
   ```sh
   pip install azure-identity
   ```
+* For AAD token authentication, you need to set up a custom domain endpoint for your Speech resource. Update the following setting in the sample files:
+  * `YourEndpointWithCustomDomain`: replace with your Speech resource custom domain endpoint, such as `https://your-custom-domain.cognitiveservices.azure.com/`
+  * For details on setting up a custom domain with private links, see [Create a custom domain name](https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name)
 * [Download the sample code to your development PC.](/README.md#get-the-samples)
 * To tailor the sample to your configuration, use search and replace across the whole sample directory to update the following strings:
 

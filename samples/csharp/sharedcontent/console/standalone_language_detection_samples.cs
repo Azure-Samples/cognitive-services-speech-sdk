@@ -5,12 +5,12 @@
 
 // <toplevel>
 using System;
+using System.ClientModel;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
-
 // </toplevel>
 
 namespace MicrosoftSpeechSDKSamples
@@ -269,6 +269,126 @@ namespace MicrosoftSpeechSDKSamples
 
             // Create a SpeechConfig instance using the v2 endpoint and the token credential for authentication.
             var config = SpeechConfig.FromEndpoint(new Uri(v2Endpoint), credential);
+
+            // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
+            // Please refer to the documentation of Language ID for more information.
+            // http://aka.ms/speech/lid?pivots=programming-language-csharp
+            config.SetProperty(PropertyId.SpeechServiceConnection_LanguageIdMode, "Continuous");
+
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // Creates a speech recognizer using file as audio input.
+            // Replace with your own audio file name.
+            using (var audioInput = AudioConfig.FromWavFileInput(@"en-us_zh-cn.wav"))
+            {
+                using (var recognizer = new SourceLanguageRecognizer(config, autoDetectSourceLanguageConfig, audioInput))
+                {
+                    recognizer.Recognized += (s, e) =>
+                    {
+                        if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                        {
+                            var lidResult = AutoDetectSourceLanguageResult.FromResult(e.Result);
+                            Console.WriteLine($"DETECTED: Language={lidResult.Language}");
+                        }
+                        else if (e.Result.Reason == ResultReason.NoMatch)
+                        {
+                            Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                        }
+                    };
+
+                    recognizer.Canceled += (s, e) =>
+                    {
+                        Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                        if (e.Reason == CancellationReason.Error)
+                        {
+                            Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                            Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                            Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                        }
+
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    recognizer.SessionStarted += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session started event.");
+                    };
+
+                    recognizer.SessionStopped += (s, e) =>
+                    {
+                        Console.WriteLine("\n    Session stopped event.");
+                        Console.WriteLine("\nStop recognition.");
+                        stopRecognition.TrySetResult(0);
+                    };
+
+                    // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                    // Waits for completion.
+                    // Use Task.WaitAny to keep the task rooted.
+                    Task.WaitAny(new[] { stopRecognition.Task });
+
+                    // Stops recognition.
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+        }
+
+        // Language detection from microphone authenticated via API key credential.
+        public static async Task SingleDetectionWithApiKeyCredentialAsync()
+        {
+            var keyCred = new ApiKeyCredential("YourSubscriptionKey");
+
+            // Replace with your own endpoint.
+            // The default language is "en-us".
+            var config = SpeechConfig.FromEndpoint(new Uri("YourEndpoint"), keyCred);
+
+            // Creates a source language recognizer using microphone as audio input.
+            using (var recognizer = new SourceLanguageRecognizer(config, autoDetectSourceLanguageConfig))
+            {
+                // Starts recognizing.
+                Console.WriteLine("Say something in English or Mandarin Chinese...");
+
+                // Starts language detection, and returns after a single utterance is recognized.
+                // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+                // shot detection like command or query.
+                // For long-running multi-utterance detection, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                // Checks result.
+                if (result.Reason == ResultReason.RecognizedSpeech)
+                {
+                    var lidResult = AutoDetectSourceLanguageResult.FromResult(result);
+                    Console.WriteLine($"DETECTED: Language={lidResult.Language}");
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: The spoken language could not be detected.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
+                }
+            }
+        }
+
+        // Continuous language detection authenticated via API key credential
+        public static async Task ContinuousLanguageDetectionWithApiKeyCredentialAsync()
+        {
+            var keyCred = new ApiKeyCredential("YourSubscriptionKey");
+
+            // Replace with your own endpoint.
+            // The default language is "en-us".
+            var config = SpeechConfig.FromEndpoint(new Uri("YourEndpoint"), keyCred);
 
             // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
             // Please refer to the documentation of Language ID for more information.
