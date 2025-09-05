@@ -8,10 +8,10 @@ import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import * as readline from "readline";
 
 // replace with your own subscription key,
-// service region (e.g., "westus"), and
+// service endpoint (e.g., "https://westus.api.cognitive.microsoft.com"), and
 // the name of the file you save the synthesized audio.
 var subscriptionKey = "YourSubscriptionKey";
-var serviceRegion = "YourServiceRegion"; // e.g., "westus"
+var endpoint = "YourServiceEndpoint"; // e.g., "https://westus.api.cognitive.microsoft.com"
 var filename = "YourAudioFile.wav";
 
 // we are done with the setup
@@ -19,7 +19,7 @@ var filename = "YourAudioFile.wav";
 // now create the audio-config pointing to our stream and
 // the speech config specifying the language.
 var audioConfig = sdk.AudioConfig.fromAudioFileOutput(filename);
-var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+  var speechConfig = sdk.SpeechConfig.fromEndpoint(new URL(endpoint), subscriptionKey);
 
 // create the speech synthesizer.
 var synthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);

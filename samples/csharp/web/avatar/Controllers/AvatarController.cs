@@ -72,7 +72,7 @@ namespace Avatar.Controllers
             try
             {
                 // Retrieve the speech token and other variables
-                var speechToken = GlobalVariables.SpeechToken;
+                var speechToken = GlobalVariables.SpeechToken;  // CodeQL [SM04498] This is the sample code, and will not leak any app tokens.
                 var speechRegion = _clientSettings.SpeechRegion;
                 var speechPrivateEndpoint = _clientSettings.SpeechPrivateEndpoint;
 

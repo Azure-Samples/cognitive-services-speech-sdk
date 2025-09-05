@@ -10,7 +10,7 @@ export const main = (settings, filename) => {
     // now create the audio-config pointing to the output file.
     // You can also use audio output stream to initialize the audio config, see the docs for details.
     var audioConfig = sdk.AudioConfig.fromAudioFileOutput(filename);
-    var speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
+    var speechConfig = sdk.SpeechConfig.fromEndpoint(new URL(settings.serviceEndpoint), settings.subscriptionKey);
 
     // setting the synthesis language, voice name, and output audio format.
     // see https://aka.ms/speech/tts-languages for available languages and voices

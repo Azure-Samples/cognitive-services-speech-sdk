@@ -6,11 +6,11 @@ import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import * as fs from "fs";
 
 // replace with your own subscription key,
-// service region (e.g., "centralus"), and
+// service endpoint (e.g., "https://westus.api.cognitive.microsoft.com"), and
 // the name of the file you want to transcribe
 // through the conversation transcriber.
 var subscriptionKey = "YourSubscriptionKey";
-var serviceRegion = "YourServiceRegion"; // e.g., "centralus"
+var endpoint = "YourServiceEndpoint"; // e.g., "https://westus.api.cognitive.microsoft.com"
 var filename = "YourAudioFile.wav";
 
 // create the push stream we need for the speech sdk.
@@ -27,7 +27,7 @@ pushStream.close();
 console.log("Transcribing from: " + filename);
 // now create the audio-config pointing to our stream and
 // the speech config specifying the language.
-var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+var speechConfig = sdk.SpeechConfig.fromEndpoint(new URL(endpoint), subscriptionKey);
 var audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
 
 // create the conversation transcriber.

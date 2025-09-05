@@ -17,6 +17,7 @@ import io
 
 try:
     import azure.cognitiveservices.speech as speechsdk
+    from azure.identity import DefaultAzureCredential
 except ImportError:
     print(
         """
@@ -24,6 +25,9 @@ except ImportError:
     Refer to
     https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-python for
     installation instructions.
+
+    For AAD authentication, install the azure-identity package:
+    pip install azure-identity
     """
     )
     sys.exit(1)
@@ -33,6 +37,11 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and endpoint.
 speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+
+# Set up endpoint with custom domain. This is required when using AAD token credential to authenticate.
+# For details on setting up a custom domain with private links, see:
+# https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
+speech_endpoint_with_custom_domain = "YourServiceEndpointWithCustomDomain"
 
 # Specify the path to an audio file containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
@@ -781,3 +790,142 @@ def speech_recognize_keyword_locally_from_microphone():
     #   stop_future = keyword_recognizer.stop_recognition_async()
     #   print('Stopping...')
     #   stopped = stop_future.get()
+
+
+def speech_recognize_once_from_file_with_aad():
+    """
+    Performs one-shot speech recognition from a file using Azure AD authentication.
+
+    This sample shows how to use DefaultAzureCredential with a custom domain endpoint
+    for speech recognition. This is useful for enterprise applications where centralized
+    authentication is required instead of subscription keys.
+
+    You can use other credential types from azure.identity based on your scenario:
+    - InteractiveBrowserCredential: Good for interactive applications
+    - ClientSecretCredential: Good for service-to-service authentication
+    - ManagedIdentityCredential: Good for Azure-hosted applications
+    - ChainedTokenCredential: Combine multiple credential types
+
+    For details, see: https://learn.microsoft.com/python/api/azure-identity/azure.identity
+    """
+    print("Speech recognition with Azure AD authentication...")
+
+    try:
+        # Create DefaultAzureCredential which tries multiple authentication methods
+        auth_credential = DefaultAzureCredential()
+
+        # Create the speech config with endpoint and authentication
+        # Note: You must replace 'YourServiceEndpointWithCustomDomain' with a properly configured custom domain endpoint
+        # when using token authentication in production to avoid misconfiguration issues.
+        speech_config = speechsdk.SpeechConfig(endpoint=speech_endpoint_with_custom_domain, token_credential=auth_credential)
+        speech_config.speech_recognition_language = "en-US"
+
+        # Create an audio configuration using a file
+        audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+        # Creates a speech recognizer using file as audio input and the authentication config
+        speech_recognizer = speechsdk.SpeechRecognizer(
+            speech_config=speech_config,
+            audio_config=audio_config
+        )
+
+        # Start speech recognition
+        print(f"Recognizing speech from file: {weatherfilename}")
+        result = speech_recognizer.recognize_once()
+
+        # Process and print the result
+        if result.reason == speechsdk.ResultReason.RecognizedSpeech:
+            print(f"Recognized: {result.text}")
+        elif result.reason == speechsdk.ResultReason.NoMatch:
+            print(f"No speech could be recognized: {result.no_match_details}")
+        elif result.reason == speechsdk.ResultReason.Canceled:
+            cancellation_details = result.cancellation_details
+            print(f"Speech recognition canceled: {cancellation_details.reason}")
+            if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                print(f"Error details: {cancellation_details.error_details}")
+                print(f"Error code: {cancellation_details.error_code}")
+
+    except Exception as e:
+        print(f"Error using Azure AD authentication: {e}")
+        print("Make sure you have:")
+        print("1. Installed azure-identity: pip install azure-identity")
+        print("2. Set up a custom domain endpoint for your Speech resource")
+        print("3. Proper permissions to access the Speech resource")
+
+
+def speech_recognize_continuous_from_file_with_aad():
+    """
+    Performs continuous speech recognition from a file using Azure AD authentication.
+
+    This sample shows how to use DefaultAzureCredential with a custom domain endpoint
+    for continuous speech recognition. This is useful for enterprise applications where centralized
+    authentication is required instead of subscription keys.
+
+    You can use other credential types from azure.identity based on your scenario:
+    - InteractiveBrowserCredential: Good for interactive applications
+    - ClientSecretCredential: Good for service-to-service authentication
+    - ManagedIdentityCredential: Good for Azure-hosted applications
+    - ChainedTokenCredential: Combine multiple credential types
+
+    For details, see: https://learn.microsoft.com/python/api/azure-identity/azure.identity
+    """
+    print("Continuous speech recognition with Azure AD authentication...")
+
+    try:
+        # Create DefaultAzureCredential which tries multiple authentication methods
+        auth_credential = DefaultAzureCredential()
+
+        # Create the speech config with endpoint and authentication
+        # Note: You must use a custom domain endpoint when using token authentication
+        speech_config = speechsdk.SpeechConfig(endpoint=speech_endpoint_with_custom_domain, token_credential=auth_credential)
+        speech_config.speech_recognition_language = "en-US"
+
+        # Create an audio configuration using a file
+        audio_config = speechsdk.audio.AudioConfig(filename=weatherfilename)
+
+        # Creates a speech recognizer using file as audio input and the authentication config
+        speech_recognizer = speechsdk.SpeechRecognizer(
+            speech_config=speech_config,
+            audio_config=audio_config
+        )
+
+        done = False
+
+        def stop_cb(evt: speechsdk.SessionEventArgs):
+            """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+            print("CLOSING on {}".format(evt))
+            nonlocal done
+            done = True
+
+        # Connect callbacks to the events fired by the speech recognizer
+        speech_recognizer.recognizing.connect(lambda evt: print("RECOGNIZING: {}".format(evt)))
+        speech_recognizer.recognized.connect(lambda evt: print("RECOGNIZED: {}".format(evt)))
+        speech_recognizer.session_started.connect(lambda evt: print("SESSION STARTED: {}".format(evt)))
+        speech_recognizer.session_stopped.connect(lambda evt: print("SESSION STOPPED {}".format(evt)))
+        speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
+
+        # Stop continuous recognition on either session stopped or canceled events
+        speech_recognizer.session_stopped.connect(stop_cb)
+        speech_recognizer.canceled.connect(stop_cb)
+
+        # Start continuous speech recognition
+        print(f"Starting continuous recognition from file: {weatherfilename}")
+        speech_recognizer.start_continuous_recognition()
+
+        timeout = 60  # Set a timeout of 60 seconds
+        start_time = time.time()
+        while not done and (time.time() - start_time) < timeout:
+            time.sleep(0.5)
+
+        if not done:
+            print("Timeout reached, stopping recognition.")
+            speech_recognizer.stop_continuous_recognition()
+
+        speech_recognizer.stop_continuous_recognition()
+
+    except Exception as e:
+        print(f"Error using Azure AD authentication: {e}")
+        print("Make sure you have:")
+        print("1. Installed azure-identity: pip install azure-identity")
+        print("2. Set up a custom domain endpoint for your Speech resource")
+        print("3. Proper permissions to access the Speech resource")

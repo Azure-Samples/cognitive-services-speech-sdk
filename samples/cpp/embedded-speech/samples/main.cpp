@@ -6,8 +6,6 @@
 #include <iostream>
 #include <speechapi_cxx.h>
 
-using namespace std;
-
 extern bool VerifySettings();
 extern bool HasSpeechRecognitionModel();
 extern bool HasSpeechSynthesisVoice();
@@ -43,39 +41,39 @@ int main()
             return 1;
         }
 
-        string input;
+        std::string input;
         do
         {
-            cout << "\nEMBEDDED SPEECH SAMPLES\n";
-            cout << "\nSpeech recognition\n";
-            cout << " 1. List embedded speech recognition models.\n";
-            cout << " 2. Embedded speech recognition with microphone input.\n";
-            cout << " 3. Embedded speech recognition with microphone input, keyword-triggered.\n";
-            cout << " 4. Embedded speech recognition with WAV file input.\n";
-            cout << " 5. Embedded speech recognition with push stream input.\n";
-            cout << " 6. Embedded speech recognition with pull stream input.\n";
-            cout << " 7. Hybrid (cloud & embedded) speech recognition with microphone input.\n";
-            cout << "\nIntent recognition\n";
-            cout << " 8. Embedded intent recognition with microphone input.\n";
-            cout << " 9. Embedded intent recognition with microphone input, keyword-triggered.\n";
-            cout << "\nSpeech synthesis\n";
-            cout << "10. List embedded speech synthesis voices.\n";
-            cout << "11. Embedded speech synthesis with speaker output.\n";
-            cout << "12. Hybrid (cloud & embedded) speech synthesis with speaker output.\n";
-            cout << "\nSpeech translation\n";
-            cout << "13. List embedded speech translation models.\n";
-            cout << "14. Embedded speech translation with microphone input.\n";
-            cout << "\nDevice performance measurement\n";
-            cout << "15. Embedded speech recognition.\n";
-            cout << "\nChoose a number (or none for exit) and press Enter: ";
-            cout.flush();
+            std::cout << "\nEMBEDDED SPEECH SAMPLES\n";
+            std::cout << "\nSpeech recognition\n";
+            std::cout << " 1. List embedded speech recognition models.\n";
+            std::cout << " 2. Embedded speech recognition with microphone input.\n";
+            std::cout << " 3. Embedded speech recognition with microphone input, keyword-triggered.\n";
+            std::cout << " 4. Embedded speech recognition with WAV file input.\n";
+            std::cout << " 5. Embedded speech recognition with push stream input.\n";
+            std::cout << " 6. Embedded speech recognition with pull stream input.\n";
+            std::cout << " 7. Hybrid (cloud & embedded) speech recognition with microphone input.\n";
+            std::cout << "\nIntent recognition\n";
+            std::cout << " 8. Embedded intent recognition with microphone input.\n";
+            std::cout << " 9. Embedded intent recognition with microphone input, keyword-triggered.\n";
+            std::cout << "\nSpeech synthesis\n";
+            std::cout << "10. List embedded speech synthesis voices.\n";
+            std::cout << "11. Embedded speech synthesis with speaker output.\n";
+            std::cout << "12. Hybrid (cloud & embedded) speech synthesis with speaker output.\n";
+            std::cout << "\nSpeech translation\n";
+            std::cout << "13. List embedded speech translation models.\n";
+            std::cout << "14. Embedded speech translation with microphone input.\n";
+            std::cout << "\nDevice performance measurement\n";
+            std::cout << "15. Embedded speech recognition.\n";
+            std::cout << "\nChoose a number (or none for exit) and press Enter: ";
+            std::cout.flush();
 
             input.clear();
-            getline(cin, input);
+            std::getline(std::cin, input);
             if (input.empty()) break;
 
             int choice;
-            istringstream iss(input);
+            std::istringstream iss(input);
             iss >> choice;
 
             switch (choice)
@@ -130,9 +128,9 @@ int main()
             }
         } while (true);
     }
-    catch (const exception& e)
+    catch (const std::exception& e)
     {
-        cerr << "Exception caught: " << e.what() << endl;
+        std::cerr << "Exception caught: " << e.what() << std::endl;
         return 2;
     }
 

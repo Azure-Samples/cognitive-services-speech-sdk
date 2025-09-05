@@ -7,13 +7,12 @@
 #include <thread>
 #include <speechapi_cxx.h>
 
-using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 using namespace Microsoft::CognitiveServices::Speech::Translation;
 
-extern shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig();
-extern shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig();
+extern std::shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig();
+extern std::shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig();
 
 
 // Lists available embedded speech translation models.
@@ -31,34 +30,34 @@ void ListEmbeddedSpeechTranslationModels()
 
     if (!models.empty())
     {
-        cout << "Models found [" << models.size() << "]:" << endl;
+        std::cout << "Models found [" << models.size() << "]:" << std::endl;
         for (const auto& model : models)
         {
-            cout << endl;
-            cout << model->Name << endl;
-            cout << " Source language(s) [" << model->SourceLanguages.size() << "]: ";
+            std::cout << std::endl;
+            std::cout << model->Name << std::endl;
+            std::cout << " Source language(s) [" << model->SourceLanguages.size() << "]: ";
             for (const auto& sourceLang : model->SourceLanguages)
             {
-                cout << sourceLang << " ";
+                std::cout << sourceLang << " ";
             }
-            cout << endl;
-            cout << " Target language(s) [" << model->TargetLanguages.size() << "]: ";
+            std::cout << std::endl;
+            std::cout << " Target language(s) [" << model->TargetLanguages.size() << "]: ";
             for (const auto& targetLang : model->TargetLanguages)
             {
-                cout << targetLang << " ";
+                std::cout << targetLang << " ";
             }
-            cout << endl;
-            cout << " Path: " << model->Path << endl;
+            std::cout << std::endl;
+            std::cout << " Path: " << model->Path << std::endl;
         }
     }
     else
     {
-        cerr << "No models found. Either the path is not valid or the format of model(s) is unknown." << endl;
+        std::cerr << "No models found. Either the path is not valid or the format of model(s) is unknown." << std::endl;
     }
 }
 
 
-void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
+void TranslateSpeech(std::shared_ptr<TranslationRecognizer> recognizer)
 {
     // Subscribes to events.
     recognizer->Recognizing += [](const TranslationRecognitionEventArgs& e)
@@ -82,7 +81,7 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
             {
                 auto targetLang = translation.first;
                 auto outputText = translation.second;
-                cout << "Translating [" << sourceLang << " -> " << targetLang << "]: " << outputText << endl;
+                std::cout << "Translating [" << sourceLang << " -> " << targetLang << "]: " << outputText << std::endl;
             }
         }
     };
@@ -99,29 +98,29 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
             {
                 auto targetLang = translation.first;
                 auto outputText = translation.second;
-                cout << "TRANSLATED [" << sourceLang << " -> " << targetLang << "]: " << outputText << endl;
+                std::cout << "TRANSLATED [" << sourceLang << " -> " << targetLang << "]: " << outputText << std::endl;
             }
         }
         else if (e.Result->Reason == ResultReason::NoMatch)
         {
             // NoMatch occurs when no speech phrase was recognized.
             auto reason = NoMatchDetails::FromResult(e.Result)->Reason;
-            cout << "NO MATCH: Reason=";
+            std::cout << "NO MATCH: Reason=";
             switch (reason)
             {
             case NoMatchReason::NotRecognized:
                 // Input audio was not silent but contained no recognizable speech.
-                cout << "NotRecognized" << endl;
+                std::cout << "NotRecognized" << std::endl;
                 break;
             case NoMatchReason::InitialSilenceTimeout:
                 // Input audio was silent and the (initial) silence timeout expired.
                 // In continuous recognition this can happen multiple times during
                 // a session, not just at the very beginning.
-                cout << "InitialSilenceTimeout" << endl;
+                std::cout << "InitialSilenceTimeout" << std::endl;
                 break;
             default:
                 // Other reasons are not supported in embedded speech at the moment.
-                cout << int(reason) << endl;
+                std::cout << int(reason) << std::endl;
                 break;
             }
         }
@@ -133,17 +132,17 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
         {
         case CancellationReason::EndOfStream:
             // Input stream was closed or the end of an input file was reached.
-            cout << "CANCELED: EndOfStream" << endl;
+            std::cout << "CANCELED: EndOfStream" << std::endl;
             break;
 
         case CancellationReason::Error:
             // NOTE: In case of an error, do not use the same recognizer for recognition anymore.
-            cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << endl;
-            cerr << "CANCELED: ErrorDetails=\"" << e.ErrorDetails << "\"" << endl;
+            std::cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << std::endl;
+            std::cerr << "CANCELED: ErrorDetails=\"" << e.ErrorDetails << "\"" << std::endl;
             break;
 
         default:
-            cout << "CANCELED: Reason=" << int(e.Reason) << endl;
+            std::cout << "CANCELED: Reason=" << int(e.Reason) << std::endl;
             break;
         }
     };
@@ -151,13 +150,13 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
     recognizer->SessionStarted += [](const SessionEventArgs& e)
     {
         UNUSED(e);
-        cout << "Session started." << endl;
+        std::cout << "Session started." << std::endl;
     };
 
     recognizer->SessionStopped += [](const SessionEventArgs& e)
     {
         UNUSED(e);
-        cout << "Session stopped." << endl;
+        std::cout << "Session stopped." << std::endl;
     };
 
     // The following lines run continuous recognition that listens for speech
@@ -172,8 +171,8 @@ void TranslateSpeech(shared_ptr<TranslationRecognizer> recognizer)
     // Starts continuous recognition.
     recognizer->StartContinuousRecognitionAsync().get();
 
-    cout << "Say something (press Enter to stop)...\n";
-    cin.get();
+    std::cout << "Say something (press Enter to stop)..." << std::endl;
+    std::cin.get();
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().get();

@@ -33,7 +33,7 @@ speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.
 # Set up endpoint with custom domain. This is required when using aad token credential to authenticate.
 # For details on setting up a custom domain with private links, see:
 # https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
-speech_endpoint_with_custom_domain = "https://YourCustomDomain.cognitiveservices.azure.com/"
+speech_endpoint_with_custom_domain = "YourServiceEndpointWithCustomDomain"
 
 # This sample uses a wavfile which is captured using a supported Speech SDK devices (8 channel, 16kHz, 16-bit PCM)
 # See https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-devices-sdk-microphone

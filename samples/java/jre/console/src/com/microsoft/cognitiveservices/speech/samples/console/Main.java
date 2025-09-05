@@ -68,6 +68,9 @@ public class Main {
         System.out.println("51. Authenticate with an AAD token credential for speech recognition.");
         System.out.println("52. Authenticate with an AAD token credential for continuous speech recognition.");
         System.out.println("53. Authenticate with an AAD token credential for translation.");
+        System.out.println("51. Authenticate with an key credential for speech recognition.");
+        System.out.println("52. Authenticate with an key credential for continuous speech recognition.");
+        System.out.println("53. Authenticate with an key credential for translation.");
 
         System.out.print(prompt);
 
@@ -235,6 +238,15 @@ public class Main {
                     break;
                 case "53" :
                     TranslationSamples.translationWithAADTokenCredentialAsync();
+                    break;
+                case "54" :
+                    SpeechRecognitionSamples.recognitionWithKeyCredentialAsync();
+                    break;
+                case "55" :
+                    SpeechRecognitionSamples.continuousRecognitionWithKeyCredentialAsync();
+                    break;
+                case "56" :
+                    TranslationSamples.translationWithKeyCredentialAsync();
                     break;
                 case "0":
                     System.out.println("Exiting...");

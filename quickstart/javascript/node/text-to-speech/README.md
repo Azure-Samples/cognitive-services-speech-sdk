@@ -14,8 +14,7 @@ This sample demonstrates how to synthesize speech with the Speech SDK for JavaSc
   This will place the Speech SDK library in the `node_modules` directory.
 * Update the `index.js` file with your configuration:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourServiceRegion` with the service region of your subscription.
-    For example, replace with `westus` if you are using the 30-day free trial subscription.
+  * Replace the endpoint URL YourServiceEndpoint with the endpoint of your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
   * Replace the string `YourAudioFile.wav` with a path you desire.
 
 ## Run the sample

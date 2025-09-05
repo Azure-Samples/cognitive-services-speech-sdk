@@ -3,8 +3,12 @@
 
 import * as settings from "./settings.js";
 import * as speech from "./speech.js";
+import * as speechTokenCredential from "./speechTokenCredential.js";
+import * as speechKeyCredential from "./speechKeyCredential.js";
 import * as intent from "./intent.js";
 import * as translate from "./translation.js";
+import * as translationTokenCredential from "./translationTokenCredential.js";
+import * as translationKeyCredential from "./translationKeyCredential.js";
 import * as synthesis from "./synthesis.js";
 
 if (process.argv.length > 3) {
@@ -23,9 +27,29 @@ if (process.argv.length > 2) {
             translate.main(settings);
             break;
 
+        case "translationTokenCredential":
+            console.log("Now translating with token credential from: " + settings.filename);
+            translationTokenCredential.main(settings);
+            break;
+
+        case "translationKeyCredential":
+            console.log("Now translating with key credential from: " + settings.filename);
+            translationKeyCredential.main(settings);
+            break;
+
         case "synthesis":
             console.log("Now synthesizing to: " + settings.filename);
             synthesis.main(settings, settings.filename);
+            break;
+
+        case "speechTokenCredential":
+            console.log("Now recognizing speech with token credential from: " + settings.filename);
+            speechTokenCredential.main(settings);
+            break;
+
+        case "speechKeyCredential":
+            console.log("Now recognizing speech with key credential from: " + settings.filename);
+            speechKeyCredential.main(settings);
             break;
 
         case "speech":
@@ -36,5 +60,5 @@ if (process.argv.length > 2) {
     }
 }
 else {
-    console.log("usage: index.js [speech|intent|translate|synthesis] {filename}");
+    console.log("usage: index.js [speech|speechTokenCredential|speechKeyCredential|intent|translate|translationTokenCredential|translationKeyCredential|synthesis] {filename}");
 }

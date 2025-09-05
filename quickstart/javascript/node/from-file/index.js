@@ -8,11 +8,11 @@
   import * as fs from "fs";
   
   // replace with your own subscription key,
-  // service region (e.g., "westus"), and
+  // service endpoint (e.g., "https://westus.api.cognitive.microsoft.com"), and
   // the name of the file you want to run
   // through the speech recognizer.
   var subscriptionKey = "YourSubscriptionKey";
-  var serviceRegion = "YourServiceRegion"; // e.g., "westus"
+  var endpoint = "YourServiceEndpoint"; // e.g., "https://westus.api.cognitive.microsoft.com"
   var filename = "YourAudioFile.wav"; // 16000 Hz, Mono
   
   // create the push stream we need for the speech sdk.
@@ -31,7 +31,7 @@
   // now create the audio-config pointing to our stream and
   // the speech config specifying the language.
   var audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
-  var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+  var speechConfig = sdk.SpeechConfig.fromEndpoint(new URL(endpoint), subscriptionKey);
   
   // setting the recognition language to English.
   speechConfig.speechRecognitionLanguage = "en-US";

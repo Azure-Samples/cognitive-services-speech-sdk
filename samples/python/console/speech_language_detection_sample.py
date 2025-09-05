@@ -125,7 +125,7 @@ def speech_language_detection_once_from_file():
     # </SpeechLanguageDetectionWithFile>
 
 
-def speech_language_detection_once_from_file_continuous():
+def speech_language_detection_continuous_from_file():
     """performs continuous speech language detection with input from an audio file"""
     # <SpeechContinuousLanguageDetectionWithFile>
     # Creates an AutoDetectSourceLanguageConfig, which defines a number of possible spoken languages

@@ -266,7 +266,10 @@ public class SpeechRecognitionSamples
                 int bytesRead;
 
                 // Read audio data from the input stream to a data buffer.
-                while ((bytesRead = input.read(buffer)) != -1)
+                // If the method used to read the input stream can return
+                // a negative number of bytes in case of an error, check
+                // the value and do not pass a negative number to the SDK.
+                while ((bytesRead = input.read(buffer)) >= 0)
                 {
                     if (bytesRead == buffer.length)
                     {
@@ -328,6 +331,10 @@ public class SpeechRecognitionSamples
             {
                 System.out.println("PullStreamInputReader: " + e.toString());
             }
+
+            // If the method used to read the input stream can return
+            // a negative number of bytes in case of an error, check
+            // the value and do not pass a negative number to the SDK.
             return (int)Math.max(0, bytesRead);
         }
 
