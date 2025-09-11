@@ -34,6 +34,8 @@ samples = OrderedDict([
         speech_sample.speech_recognition_with_push_stream_mulaw,
         speech_sample.speech_recognize_keyword_from_microphone,
         speech_sample.speech_recognize_keyword_locally_from_microphone,
+        speech_sample.speech_recognize_once_from_file_with_aad,
+        speech_sample.speech_recognize_continuous_from_file_with_aad,
     ]), (intent_sample, [
         intent_sample.recognize_intent_once_from_mic,
         intent_sample.recognize_intent_once_async_from_mic,
@@ -45,9 +47,12 @@ samples = OrderedDict([
         translation_sample.translation_continuous,
         translation_sample.translation_once_with_lid_from_file,
         translation_sample.translation_continuous_with_lid_from_multilingual_file,
+        translation_sample.translation_once_from_file_with_aad_token_credential,
+        translation_sample.translation_continuous_from_file_with_aad_token_credential,
     ]), (transcription_sample, [
         transcription_sample.conversation_transcription,
         transcription_sample.conversation_transcription_from_microphone,
+        transcription_sample.conversation_transcription_with_aad_token_credential,
     ]), (meeting_transcription_sample, [
         meeting_transcription_sample.meeting_transcription_differentiate_speakers,
     ]), (speech_synthesis_sample, [
@@ -70,7 +75,7 @@ samples = OrderedDict([
     ]), (speech_language_detection_sample, [
         speech_language_detection_sample.speech_language_detection_once_from_mic,
         speech_language_detection_sample.speech_language_detection_once_from_file,
-        speech_language_detection_sample.speech_language_detection_once_from_continuous,
+        speech_language_detection_sample.speech_language_detection_continuous_from_file,
     ]), (speech_diagnostics_logging_sample, [
         speech_diagnostics_logging_sample.speech_diagnostics_file_logger_without_filter,
         speech_diagnostics_logging_sample.speech_diagnostics_file_logger_with_filter,

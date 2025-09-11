@@ -24,6 +24,7 @@ import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.azure.core.credential.AzureKeyCredential;
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 // <toplevel>
@@ -330,6 +331,112 @@ public class TranslationSamples {
         // Replace with your own endpoint URL.
         // The default language is "en-us".
         SpeechTranslationConfig config = SpeechTranslationConfig.fromEndpoint(new URI("YourCustomDomainEndpointUrl"), credential);
+
+        // Sets source and target language(s).
+        String fromLanguage = "en-US";
+        config.setSpeechRecognitionLanguage(fromLanguage);
+        config.addTargetLanguage("de");
+
+        // Sets voice name of synthesis output.
+        String GermanVoice = "de-DE-AmalaNeural";
+        config.setVoiceName(GermanVoice);
+
+        // Creates a translation recognizer using microphone as audio input.
+        TranslationRecognizer recognizer = new TranslationRecognizer(config);
+        {
+            // Subscribes to events.
+            recognizer.recognizing.addEventListener((s, e) -> {
+                System.out.println("RECOGNIZING in '" + fromLanguage + "': Text=" + e.getResult().getText());
+
+                Map<String, String> map = e.getResult().getTranslations();
+                for(String element : map.keySet()) {
+                    System.out.println("    TRANSLATING into '" + element + "'': " + map.get(element));
+                }
+            });
+
+            recognizer.recognized.addEventListener((s, e) -> {
+                if (e.getResult().getReason() == ResultReason.TranslatedSpeech) {
+                    System.out.println("RECOGNIZED in '" + fromLanguage + "': Text=" + e.getResult().getText());
+
+                    Map<String, String> map = e.getResult().getTranslations();
+                    for(String element : map.keySet()) {
+                        System.out.println("    TRANSLATED into '" + element + "'': " + map.get(element));
+                    }
+                }
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                    System.out.println("    Speech not translated.");
+                }
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
+                }
+            });
+
+            recognizer.synthesizing.addEventListener((s, e) -> {
+                byte[] data = e.getResult().getAudio();
+
+                System.out.println("Synthesis result received. Size of audio data: " + data.length);
+
+                // Play the TTS data of we got more than the wav header.
+                if (data != null && data.length > 44) {
+                    try {
+                        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(data);
+                        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(arrayInputStream);
+                        AudioFormat audioFormat = audioInputStream.getFormat();
+                        DataLine.Info info = new DataLine.Info(Clip.class, audioFormat);
+                        Clip clip = (Clip) AudioSystem.getLine(info);
+
+                        clip.open(audioInputStream);
+                        clip.start();
+                    } catch (LineUnavailableException e1) {
+                        e1.printStackTrace();
+                    } catch (UnsupportedAudioFileException e1) {
+                        e1.printStackTrace();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            });
+
+            recognizer.canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
+
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+            });
+
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\nSession started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\nSession stopped event.");
+            });
+
+            // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+            System.out.println("Say something...");
+            recognizer.startContinuousRecognitionAsync().get();
+
+            System.out.println("Press any key to stop");
+            new Scanner(System.in).nextLine();
+
+            recognizer.stopContinuousRecognitionAsync().get();
+        }
+    }
+
+    // Translation authenticated via key crendential..
+    public static void translationWithKeyCredentialAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException
+    {
+        AzureKeyCredential azureKeyCredential = new AzureKeyCredential("YourSubscriptionKey");
+
+        // Creates an instance of a speech config with specified key credential and
+        // endpoint URL with custom domain(see: https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name). 
+        // Replace with your own endpoint URL.
+        // The default language is "en-us".
+        SpeechTranslationConfig config = SpeechTranslationConfig.fromEndpoint(new URI("YourCustomDomainEndpointUrl"), azureKeyCredential);
 
         // Sets source and target language(s).
         String fromLanguage = "en-US";

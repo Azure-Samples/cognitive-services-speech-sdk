@@ -6,7 +6,6 @@
 #include <iostream>
 #include <speechapi_cxx.h>
 
-using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 
 #include <stdio.h>  /* for FILENAME_MAX */
@@ -24,7 +23,7 @@ using namespace Microsoft::CognitiveServices::Speech;
 // Embedded speech model license (text).
 // This applies to embedded speech recognition, synthesis and translation.
 // It is presumed that all the customer's embedded speech models use the same license.
-const string EmbeddedSpeechModelLicense = "YourEmbeddedSpeechModelLicense"; // or set EMBEDDED_SPEECH_MODEL_LICENSE
+const std::string EmbeddedSpeechModelLicense = "YourEmbeddedSpeechModelLicense"; // or set EMBEDDED_SPEECH_MODEL_LICENSE
 
 // Path to the local embedded speech recognition model(s) on the device file system.
 // This may be a single model folder or a top-level folder for several models.
@@ -32,11 +31,11 @@ const string EmbeddedSpeechModelLicense = "YourEmbeddedSpeechModelLicense"; // o
 // The path is recursively searched for model files.
 // Files belonging to a specific model must be available as normal individual files in a model folder,
 // not inside an archive, and they must be readable by the application process.
-const string EmbeddedSpeechRecognitionModelPath = "YourEmbeddedSpeechRecognitionModelPath"; // or set EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH
+const std::string EmbeddedSpeechRecognitionModelPath = "YourEmbeddedSpeechRecognitionModelPath"; // or set EMBEDDED_SPEECH_RECOGNITION_MODEL_PATH
 
 // Name of the embedded speech recognition model to be used for recognition.
 // For example: "en-US" or "Microsoft Speech Recognizer en-US FP Model V8"
-const string EmbeddedSpeechRecognitionModelName = "YourEmbeddedSpeechRecognitionModelName"; // or set EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME
+const std::string EmbeddedSpeechRecognitionModelName = "YourEmbeddedSpeechRecognitionModelName"; // or set EMBEDDED_SPEECH_RECOGNITION_MODEL_NAME
 
 // Path to the local embedded speech synthesis voice(s) on the device file system.
 // This may be a single voice folder or a top-level folder for several voices.
@@ -44,11 +43,11 @@ const string EmbeddedSpeechRecognitionModelName = "YourEmbeddedSpeechRecognition
 // The path is recursively searched for voice files.
 // Files belonging to a specific voice must be available as normal individual files in a voice folder,
 // not inside an archive, and they must be readable by the application process.
-const string EmbeddedSpeechSynthesisVoicePath = "YourEmbeddedSpeechSynthesisVoicePath"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH
+const std::string EmbeddedSpeechSynthesisVoicePath = "YourEmbeddedSpeechSynthesisVoicePath"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_PATH
 
 // Name of the embedded speech synthesis voice to be used for synthesis.
 // For example: "en-US-JennyNeural" or "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
-const string EmbeddedSpeechSynthesisVoiceName = "YourEmbeddedSpeechSynthesisVoiceName"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME
+const std::string EmbeddedSpeechSynthesisVoiceName = "YourEmbeddedSpeechSynthesisVoiceName"; // or set EMBEDDED_SPEECH_SYNTHESIS_VOICE_NAME
 
 // Path to the local embedded speech translation model(s) on the device file system.
 // This may be a single model folder or a top-level folder for several models.
@@ -56,19 +55,19 @@ const string EmbeddedSpeechSynthesisVoiceName = "YourEmbeddedSpeechSynthesisVoic
 // The path is recursively searched for model files.
 // Files belonging to a specific model must be available as normal individual files in a model folder,
 // not inside an archive, and they must be readable by the application process.
-const string EmbeddedSpeechTranslationModelPath = "YourEmbeddedSpeechTranslationModelPath"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH
+const std::string EmbeddedSpeechTranslationModelPath = "YourEmbeddedSpeechTranslationModelPath"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_PATH
 
 // Name of the embedded speech translation model to be used for translation.
 // For example: "Microsoft Speech Translator Many-to-English Model V2"
-const string EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME
+const std::string EmbeddedSpeechTranslationModelName = "YourEmbeddedSpeechTranslationModelName"; // or set EMBEDDED_SPEECH_TRANSLATION_MODEL_NAME
 
 // Cloud speech service subscription and language settings.
 // These are needed with hybrid (cloud & embedded) speech configuration.
 // The language must be specified in BCP-47 format, case-sensitive.
-const string CloudSpeechSubscriptionKey = "YourCloudSpeechSubscriptionKey"; // or set CLOUD_SPEECH_SUBSCRIPTION_KEY
-const string CloudSpeechServiceEndpoint = "YourCloudSpeechServiceEndpoint"; // or set CLOUD_SPEECH_SERVICE_ENDPOINT
-const string CloudSpeechRecognitionLanguage = "en-US"; // or set CLOUD_SPEECH_RECOGNITION_LANGUAGE
-const string CloudSpeechSynthesisLanguage = "en-US"; // or set CLOUD_SPEECH_SYNTHESIS_LANGUAGE
+const std::string CloudSpeechSubscriptionKey = "YourCloudSpeechSubscriptionKey"; // or set CLOUD_SPEECH_SUBSCRIPTION_KEY
+const std::string CloudSpeechServiceEndpoint = "YourCloudSpeechServiceEndpoint"; // or set CLOUD_SPEECH_SERVICE_ENDPOINT
+const std::string CloudSpeechRecognitionLanguage = "en-US"; // or set CLOUD_SPEECH_RECOGNITION_LANGUAGE
+const std::string CloudSpeechSynthesisLanguage = "en-US"; // or set CLOUD_SPEECH_SYNTHESIS_LANGUAGE
 
 // END OF CONFIGURABLE SETTINGS
 
@@ -80,39 +79,39 @@ uint8_t GetEmbeddedSpeechBitsPerSample() { return 16; }         // DO NOT MODIFY
 uint8_t GetEmbeddedSpeechChannels() { return 1; }               // DO NOT MODIFY; no other format supported
 
 // Get names and other properties of example files included with the sample project.
-const string GetSpeechRawAudioFileName() { return "data/speech_test.raw"; }
-const string GetSpeechWavAudioFileName() { return "data/speech_test.wav"; }
-const string GetPerfTestAudioFileName() { return "data/performance_test.wav"; }
+const std::string GetSpeechRawAudioFileName() { return "data/speech_test.raw"; }
+const std::string GetSpeechWavAudioFileName() { return "data/speech_test.wav"; }
+const std::string GetPerfTestAudioFileName() { return "data/performance_test.wav"; }
 
 // For more information about keyword recognition and models, see
 // https://docs.microsoft.com/azure/cognitive-services/speech-service/keyword-recognition-overview
-const string GetKeywordModelFileName() { return "data/keyword_computer.table"; }
-const string GetKeywordPhrase() { return "Computer"; }
+const std::string GetKeywordModelFileName() { return "data/keyword_computer.table"; }
+const std::string GetKeywordPhrase() { return "Computer"; }
 
 // Get a setting value from environment or defaults.
-const string GetSetting(const char* environmentVariableName, const string& defaultValue)
+const std::string GetSetting(const char* environmentVariableName, const std::string& defaultValue)
 {
 #pragma warning(suppress : 4996) // getenv
-    auto value = getenv(environmentVariableName);
+    auto value = std::getenv(environmentVariableName);
     return value ? value : defaultValue;
 }
 
 
 // These are set in VerifySettings() after some basic verification.
-string SpeechModelLicense;
-string SpeechRecognitionModelPath;
-string SpeechRecognitionModelName;
-string SpeechSynthesisVoicePath;
-string SpeechSynthesisVoiceName;
-string SpeechTranslationModelPath;
-string SpeechTranslationModelName;
+std::string SpeechModelLicense;
+std::string SpeechRecognitionModelPath;
+std::string SpeechRecognitionModelName;
+std::string SpeechSynthesisVoicePath;
+std::string SpeechSynthesisVoiceName;
+std::string SpeechTranslationModelPath;
+std::string SpeechTranslationModelName;
 
 // Utility functions for main menu.
 bool HasSpeechRecognitionModel()
 {
     if (SpeechRecognitionModelPath.empty() || SpeechRecognitionModelName.empty())
     {
-        cerr << "## ERROR: No speech recognition model specified.\n";
+        std::cerr << "## ERROR: No speech recognition model specified." << std::endl;
         return false;
     }
     return true;
@@ -122,7 +121,7 @@ bool HasSpeechSynthesisVoice()
 {
     if (SpeechSynthesisVoicePath.empty() || SpeechSynthesisVoiceName.empty())
     {
-        cerr << "## ERROR: No speech synthesis voice specified.\n";
+        std::cerr << "## ERROR: No speech synthesis voice specified." << std::endl;
         return false;
     }
     return true;
@@ -132,16 +131,16 @@ bool HasSpeechTranslationModel()
 {
     if (SpeechTranslationModelPath.empty() || SpeechTranslationModelName.empty())
     {
-        cerr << "## ERROR: No speech translation model specified.\n";
+        std::cerr << "## ERROR: No speech translation model specified." << std::endl;
         return false;
     }
     return true;
 }
 
 // Creates an instance of an embedded speech config.
-shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
+std::shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
 {
-    vector<string> paths;
+    std::vector<std::string> paths;
 
     // Add paths for offline data.
     if (!SpeechRecognitionModelPath.empty())
@@ -159,7 +158,7 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
 
     if (paths.size() == 0)
     {
-        cerr << "## ERROR: No model path(s) specified.\n";
+        std::cerr << "## ERROR: No model path(s) specified." << std::endl;
         return nullptr;
     }
 
@@ -185,7 +184,7 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
     {
         // Mandatory configuration for embedded speech synthesis.
         config->SetSpeechSynthesisVoice(SpeechSynthesisVoiceName, SpeechModelLicense);
-        if (SpeechSynthesisVoiceName.find("Neural") != string::npos)
+        if (SpeechSynthesisVoiceName.find("Neural") != std::string::npos)
         {
             // Embedded neural voices only support 24kHz sample rate.
             config->SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat::Riff24Khz16BitMonoPcm);
@@ -208,7 +207,7 @@ shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
 
 
 // Creates an instance of a hybrid (cloud & embedded) speech config.
-shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig()
+std::shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig()
 {
     auto cloudSpeechConfig = SpeechConfig::FromEndpoint(
         GetSetting("CLOUD_SPEECH_SERVICE_ENDPOINT", CloudSpeechServiceEndpoint),
@@ -233,22 +232,22 @@ shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig()
 // Do some basic verification of embedded speech settings.
 bool VerifySettings()
 {
-    vector<char> cwd;
+    std::vector<char> cwd;
     cwd.resize(FILENAME_MAX);
 
     if (GetCurrentDir(cwd.data(), FILENAME_MAX))
     {
-        cout << "Current working directory: " << cwd.data() << endl;
+        std::cout << "Current working directory: " << cwd.data() << std::endl;
     }
     else
     {
-        cout << "## WARNING: Cannot get the current working directory, errno=" << errno << endl;
+        std::cout << "## WARNING: Cannot get the current working directory, errno=" << errno << std::endl;
     }
 
     SpeechModelLicense = GetSetting("EMBEDDED_SPEECH_MODEL_LICENSE", EmbeddedSpeechModelLicense);
     if (SpeechModelLicense.empty() || SpeechModelLicense.compare("YourEmbeddedSpeechModelLicense") == 0)
     {
-        cerr << "## ERROR: The embedded speech model license is not set.\n";
+        std::cerr << "## ERROR: The embedded speech model license is not set." << std::endl;
         return false;
     }
 
@@ -292,14 +291,14 @@ bool VerifySettings()
         auto models = config->GetSpeechRecognitionModels();
 
         auto result =
-            find_if(models.begin(), models.end(), [&](shared_ptr<SpeechRecognitionModel> model)
+            std::find_if(models.begin(), models.end(), [&](std::shared_ptr<SpeechRecognitionModel> model)
                 {
                     return model->Name.compare(SpeechRecognitionModelName) == 0 || model->Locales[0].compare(SpeechRecognitionModelName) == 0;
                 });
 
         if (result == models.end())
         {
-            cout << "## WARNING: Cannot locate an embedded speech recognition model \"" << SpeechRecognitionModelName << "\"\n";
+            std::cout << "## WARNING: Cannot locate an embedded speech recognition model \"" << SpeechRecognitionModelName << "\"" << std::endl;
         }
     }
 
@@ -316,7 +315,7 @@ bool VerifySettings()
         {
             const auto& voices = voicesList->Voices;
             auto result =
-                find_if(voices.begin(), voices.end(), [&](shared_ptr<VoiceInfo> voice)
+                std::find_if(voices.begin(), voices.end(), [&](std::shared_ptr<VoiceInfo> voice)
                     {
                         return voice->Name.compare(SpeechSynthesisVoiceName) == 0 || voice->ShortName.compare(SpeechSynthesisVoiceName) == 0;
                     });
@@ -329,7 +328,7 @@ bool VerifySettings()
 
         if (!found)
         {
-            cout << "## WARNING: Cannot locate an embedded speech synthesis voice \"" << SpeechSynthesisVoiceName << "\"\n";
+            std::cout << "## WARNING: Cannot locate an embedded speech synthesis voice \"" << SpeechSynthesisVoiceName << "\"" << std::endl;
         }
     }
 
@@ -340,26 +339,26 @@ bool VerifySettings()
         auto models = config->GetSpeechTranslationModels();
 
         auto result =
-            find_if(models.begin(), models.end(), [&](shared_ptr<SpeechTranslationModel> model)
+            std::find_if(models.begin(), models.end(), [&](std::shared_ptr<SpeechTranslationModel> model)
                 {
                     return model->Name.compare(SpeechTranslationModelName) == 0;
                 });
 
         if (result == models.end())
         {
-            cout << "## WARNING: Cannot locate an embedded speech translation model \"" << SpeechTranslationModelName << "\"\n";
+            std::cout << "## WARNING: Cannot locate an embedded speech translation model \"" << SpeechTranslationModelName << "\"" << std::endl;
         }
     }
 
-    cout << "Embedded speech recognition\n";
-    cout << "  model search path: " << (SpeechRecognitionModelPath.empty() ? "(not set)" : SpeechRecognitionModelPath) << endl;
-    cout << "  model name:        " << (SpeechRecognitionModelName.empty() ? "(not set)" : SpeechRecognitionModelName) << endl;
-    cout << "Embedded speech synthesis\n";
-    cout << "  voice search path: " << (SpeechSynthesisVoicePath.empty() ? "(not set)" : SpeechSynthesisVoicePath) << endl;
-    cout << "  voice name:        " << (SpeechSynthesisVoiceName.empty() ? "(not set)" : SpeechSynthesisVoiceName) << endl;
-    cout << "Embedded speech translation\n";
-    cout << "  model search path: " << (SpeechTranslationModelPath.empty() ? "(not set)" : SpeechTranslationModelPath) << endl;
-    cout << "  model name:        " << (SpeechTranslationModelName.empty() ? "(not set)" : SpeechTranslationModelName) << endl;
+    std::cout << "Embedded speech recognition" << std::endl;
+    std::cout << "  model search path: " << (SpeechRecognitionModelPath.empty() ? "(not set)" : SpeechRecognitionModelPath) << std::endl;
+    std::cout << "  model name:        " << (SpeechRecognitionModelName.empty() ? "(not set)" : SpeechRecognitionModelName) << std::endl;
+    std::cout << "Embedded speech synthesis" << std::endl;
+    std::cout << "  voice search path: " << (SpeechSynthesisVoicePath.empty() ? "(not set)" : SpeechSynthesisVoicePath) << std::endl;
+    std::cout << "  voice name:        " << (SpeechSynthesisVoiceName.empty() ? "(not set)" : SpeechSynthesisVoiceName) << std::endl;
+    std::cout << "Embedded speech translation" << std::endl;
+    std::cout << "  model search path: " << (SpeechTranslationModelPath.empty() ? "(not set)" : SpeechTranslationModelPath) << std::endl;
+    std::cout << "  model name:        " << (SpeechTranslationModelName.empty() ? "(not set)" : SpeechTranslationModelName) << std::endl;
 
     return true;
 }

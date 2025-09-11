@@ -5,6 +5,7 @@
 
 // <toplevel>
 using System;
+using System.ClientModel;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
@@ -947,7 +948,7 @@ namespace MicrosoftSpeechSDKSamples
                     var model = KeywordRecognitionModel.FromFile("YourKeywordRecognitionModelFile.table");
                     var result = await recognizer.RecognizeOnceAsync(model).ConfigureAwait(false);
                     Console.WriteLine($"got result reason as {result.Reason}");
-                    if(result.Reason == ResultReason.RecognizedKeyword)
+                    if (result.Reason == ResultReason.RecognizedKeyword)
                     {
                         var stream = AudioDataStream.FromResult(result);
 
@@ -1306,7 +1307,7 @@ namespace MicrosoftSpeechSDKSamples
                 using (var audioProcessingOptions = AudioProcessingOptions.Create(AudioProcessingConstants.AUDIO_INPUT_PROCESSING_ENABLE_DEFAULT,
                                                                                   microphoneArrayGeometry,
                                                                                   SpeakerReferenceChannel.LastChannel))
-                using(var audioInput = AudioConfig.FromStreamInput(pushStream, audioProcessingOptions))
+                using (var audioInput = AudioConfig.FromStreamInput(pushStream, audioProcessingOptions))
                 {
                     // Creates a speech recognizer using audio stream input.
                     using (var recognizer = new SpeechRecognizer(config, audioInput))
@@ -1386,7 +1387,7 @@ namespace MicrosoftSpeechSDKSamples
         }
 
         // Speech continous recognition authenticated via aad token crendential.
-        public static async Task RecognitionContiniusAADTokenCredentialAsync()
+        public static async Task RecognitionContinuousAADTokenCredentialAsync()
         {
             // Create a token credential using DefaultAzureCredential.
             // This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
@@ -1504,6 +1505,145 @@ namespace MicrosoftSpeechSDKSamples
 
             // Create a SpeechConfig instance using the v2 endpoint and the token credential for authentication.
             var config = SpeechConfig.FromEndpoint(new Uri(v2Endpoint), credential);
+
+            // Creates a speech recognizer using microphone as audio input.
+            using (var recognizer = new SpeechRecognizer(config))
+            {
+                // Starts recognizing.
+                Console.WriteLine("Say something...");
+
+                // Starts speech recognition, and returns after a single utterance is recognized. The end of a
+                // single utterance is determined by listening for silence at the end or until a maximum of about 30
+                // seconds of audio is processed.  The task returns the recognition text as result.
+                // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
+                // shot recognition like command or query.
+                // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
+                var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
+
+                // Checks result.
+                if (result.Reason == ResultReason.RecognizedSpeech)
+                {
+                    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
+                }
+                else if (result.Reason == ResultReason.NoMatch)
+                {
+                    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                }
+                else if (result.Reason == ResultReason.Canceled)
+                {
+                    var cancellation = CancellationDetails.FromResult(result);
+                    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
+
+                    if (cancellation.Reason == CancellationReason.Error)
+                    {
+                        Console.WriteLine($"CANCELED: ErrorCode={cancellation.ErrorCode}");
+                        Console.WriteLine($"CANCELED: ErrorDetails={cancellation.ErrorDetails}");
+                        Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                    }
+                }
+            }
+        }
+
+        // Speech continous recognition authenticated via api key crendential.
+        public static async Task RecognitionContinuousApiKeyCredentialAsync()
+        {
+            var keyCred = new ApiKeyCredential("YourSubscriptionKey");
+
+            // Replace with your own endpoint.
+            // The default language is "en-us".
+            var config = SpeechConfig.FromEndpoint(new Uri("YourEndpoint"), keyCred);
+            var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // Create a push stream
+            using (var pushStream = AudioInputStream.CreatePushStream())
+            {
+                using (var audioInput = AudioConfig.FromStreamInput(pushStream))
+                {
+                    // Creates a speech recognizer using audio stream input.
+                    using (var recognizer = new SpeechRecognizer(config, audioInput))
+                    {
+                        // Subscribes to events.
+                        recognizer.Recognizing += (s, e) =>
+                        {
+                            Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                        };
+
+                        recognizer.Recognized += (s, e) =>
+                        {
+                            if (e.Result.Reason == ResultReason.RecognizedSpeech)
+                            {
+                                Console.WriteLine($"RECOGNIZED: Text={e.Result.Text}");
+                            }
+                            else if (e.Result.Reason == ResultReason.NoMatch)
+                            {
+                                Console.WriteLine($"NOMATCH: Speech could not be recognized.");
+                            }
+                        };
+
+                        recognizer.Canceled += (s, e) =>
+                        {
+                            Console.WriteLine($"CANCELED: Reason={e.Reason}");
+
+                            if (e.Reason == CancellationReason.Error)
+                            {
+                                Console.WriteLine($"CANCELED: ErrorCode={e.ErrorCode}");
+                                Console.WriteLine($"CANCELED: ErrorDetails={e.ErrorDetails}");
+                                Console.WriteLine($"CANCELED: Did you update the subscription info?");
+                            }
+
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        recognizer.SessionStarted += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession started event.");
+                        };
+
+                        recognizer.SessionStopped += (s, e) =>
+                        {
+                            Console.WriteLine("\nSession stopped event.");
+                            Console.WriteLine("\nStop recognition.");
+                            stopRecognition.TrySetResult(0);
+                        };
+
+                        // Starts continuous recognition. Uses StopContinuousRecognitionAsync() to stop recognition.
+                        await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+                        // open and read the wave file and push the buffers into the recognizer
+                        using (BinaryAudioStreamReader reader = Helper.CreateWavReader(@"whatstheweatherlike.wav"))
+                        {
+                            byte[] buffer = new byte[1000];
+                            while (true)
+                            {
+                                var readSamples = reader.Read(buffer, (uint)buffer.Length);
+                                if (readSamples == 0)
+                                {
+                                    break;
+                                }
+                                pushStream.Write(buffer, readSamples);
+                            }
+                        }
+                        pushStream.Close();
+
+                        // Waits for completion.
+                        // Use Task.WaitAny to keep the task rooted.
+                        Task.WaitAny(new[] { stopRecognition.Task });
+
+                        // Stops recognition.
+                        await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                    }
+                }
+            }
+        }
+
+        // Speech once recognition authenticated via api key credential.
+        public static async Task RecognitionOnceApiKeyCredentialAsync()
+        {
+            var keyCred = new ApiKeyCredential("YourSubscriptionKey");
+
+            // Replace with your own endpoint.
+            // The default language is "en-us".
+            var config = SpeechConfig.FromEndpoint(new Uri("YourEndpoint"), keyCred);
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = new SpeechRecognizer(config))
