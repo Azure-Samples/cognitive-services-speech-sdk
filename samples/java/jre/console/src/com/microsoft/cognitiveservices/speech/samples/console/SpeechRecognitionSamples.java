@@ -29,6 +29,7 @@ import jakarta.json.JsonReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.azure.core.credential.AzureKeyCredential;
 import com.azure.core.credential.TokenCredential;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.github.difflib.DiffUtils;
@@ -1420,6 +1421,116 @@ public class SpeechRecognitionSamples {
         // Replace with your own endpoint URL.
         // The default language is "en-us".
         SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourCustomDomainEndpointUrl"), credential);
+
+        // Creates a speech recognizer using file as audio input.
+        // Replace with your own audio file name.
+        AudioConfig audioInput = AudioConfig.fromWavFileInput("YourAudioFile.wav");
+
+        SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput);
+        {
+            // Subscribes to events.
+            recognizer.recognizing.addEventListener((s, e) -> {
+                System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
+            });
+
+            recognizer.recognized.addEventListener((s, e) -> {
+                if (e.getResult().getReason() == ResultReason.RecognizedSpeech) {
+                    System.out.println("RECOGNIZED: Text=" + e.getResult().getText());
+                }
+                else if (e.getResult().getReason() == ResultReason.NoMatch) {
+                    System.out.println("NOMATCH: Speech could not be recognized.");
+                }
+            });
+
+            recognizer.canceled.addEventListener((s, e) -> {
+                System.out.println("CANCELED: Reason=" + e.getReason());
+
+                if (e.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + e.getErrorCode());
+                    System.out.println("CANCELED: ErrorDetails=" + e.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+
+                stopRecognitionSemaphore.release();
+            });
+
+            recognizer.sessionStarted.addEventListener((s, e) -> {
+                System.out.println("\n    Session started event.");
+            });
+
+            recognizer.sessionStopped.addEventListener((s, e) -> {
+                System.out.println("\n    Session stopped event.");
+            });
+
+            // Starts continuous recognition. Uses stopContinuousRecognitionAsync() to stop recognition.
+            recognizer.startContinuousRecognitionAsync().get();
+
+            // Waits for completion.
+            stopRecognitionSemaphore.acquire();
+
+            recognizer.stopContinuousRecognitionAsync().get();
+        }
+
+        config.close();
+        audioInput.close();
+        recognizer.close();
+    }
+
+    // Speech recognition authenticated via key crendential.
+    public static void recognitionWithKeyCredentialAsync() throws InterruptedException, ExecutionException, URISyntaxException
+    {
+        AzureKeyCredential azureKeyCredential = new AzureKeyCredential("YourSubscriptionKey");
+
+        // Creates an instance of a speech config with specified key credential and
+        // endpoint URL with custom domain(see: https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name). 
+        // Replace with your own endpoint URL.
+        // The default language is "en-us".
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourCustomDomainEndpointUrl"), azureKeyCredential);
+
+        // Creates a speech recognizer using microphone as audio input.
+        SpeechRecognizer recognizer = new SpeechRecognizer(config);
+        {
+            // Starts recognizing.
+            System.out.println("Say something...");
+
+            // Starts recognition. It returns when the first utterance has been recognized.
+            SpeechRecognitionResult result = recognizer.recognizeOnceAsync().get();
+
+            // Checks result.
+            if (result.getReason() == ResultReason.RecognizedSpeech) {
+                System.out.println("RECOGNIZED: Text=" + result.getText());
+            }
+            else if (result.getReason() == ResultReason.NoMatch) {
+                System.out.println("NOMATCH: Speech could not be recognized.");
+            }
+            else if (result.getReason() == ResultReason.Canceled) {
+                CancellationDetails cancellation = CancellationDetails.fromResult(result);
+                System.out.println("CANCELED: Reason=" + cancellation.getReason());
+
+                if (cancellation.getReason() == CancellationReason.Error) {
+                    System.out.println("CANCELED: ErrorCode=" + cancellation.getErrorCode());
+                    System.out.println("CANCELED: ErrorDetails=" + cancellation.getErrorDetails());
+                    System.out.println("CANCELED: Did you update the subscription info?");
+                }
+            }
+
+            result.close();
+        }
+
+        config.close();
+        recognizer.close();
+    }
+
+    // Speech continuous recognition authenticated via key crendential.
+    public static void continuousRecognitionWithKeyCredentialAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException
+    {
+        AzureKeyCredential azureKeyCredential = new AzureKeyCredential("YourSubscriptionKey");
+
+        // Creates an instance of a speech config with specified key credential and
+        // endpoint URL with custom domain(see: https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name). 
+        // Replace with your own endpoint URL.
+        // The default language is "en-us".
+        SpeechConfig config = SpeechConfig.fromEndpoint(new URI("YourCustomDomainEndpointUrl"), azureKeyCredential);
 
         // Creates a speech recognizer using file as audio input.
         // Replace with your own audio file name.

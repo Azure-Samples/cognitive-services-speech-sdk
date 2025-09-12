@@ -4,6 +4,7 @@
 // pull in the required packages.
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import * as filePushStream from "./filePushStream.js";
+import { DefaultAzureCredential } from "@azure/identity";
 
 export const main = (settings) => {
 
@@ -11,7 +12,18 @@ export const main = (settings) => {
   // the speech config specifying the language.
   var audioStream = filePushStream.openPushStream(settings.filename);
   var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
-  var translationConfig = sdk.SpeechTranslationConfig.fromEndpoint(new URL(settings.serviceEndpoint), settings.subscriptionKey);
+  
+  // Create a token credential using DefaultAzureCredential.
+  // This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
+  // For more types of token credentials, refer to:
+  // https://learn.microsoft.com/javascript/api/@azure/identity/defaultazurecredential
+  const credential = new DefaultAzureCredential();
+
+  // Create SpeechTranslationConfig using the fromEndpoint method with DefaultAzureCredential
+  // This is required when using a private endpoint with a custom domain.
+  // For details on setting up a custom domain with private links, see:
+  // https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
+  var translationConfig = sdk.SpeechTranslationConfig.fromEndpoint(new URL(settings.serviceEndpoint), credential);
 
   // setting the recognition language to English.
   translationConfig.speechRecognitionLanguage = settings.language;
@@ -31,7 +43,7 @@ export const main = (settings) => {
   recognizer.recognizing = function (s, e) {
       var str = ("(recognizing) Reason: " + sdk.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:");
 
-      var language = "de";
+      var language = "de-DE";
       str += " [" + language + "] " + e.result.translations.get(language);
 
       console.log(str);

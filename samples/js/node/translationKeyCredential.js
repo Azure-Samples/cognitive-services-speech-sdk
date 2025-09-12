@@ -4,6 +4,7 @@
 // pull in the required packages.
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import * as filePushStream from "./filePushStream.js";
+import { AzureKeyCredential } from "@azure/core-auth";
 
 export const main = (settings) => {
 
@@ -11,7 +12,10 @@ export const main = (settings) => {
   // the speech config specifying the language.
   var audioStream = filePushStream.openPushStream(settings.filename);
   var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
-  var translationConfig = sdk.SpeechTranslationConfig.fromEndpoint(new URL(settings.serviceEndpoint), settings.subscriptionKey);
+  const keyCredential = new AzureKeyCredential(settings.subscriptionKey);
+
+  // Create SpeechTranslationConfig using the fromEndpoint method with AzureKeyCredential
+  var translationConfig = sdk.SpeechTranslationConfig.fromEndpoint(new URL(settings.serviceEndpoint), keyCredential);
 
   // setting the recognition language to English.
   translationConfig.speechRecognitionLanguage = settings.language;
@@ -31,7 +35,7 @@ export const main = (settings) => {
   recognizer.recognizing = function (s, e) {
       var str = ("(recognizing) Reason: " + sdk.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:");
 
-      var language = "de";
+      var language = "de-DE";
       str += " [" + language + "] " + e.result.translations.get(language);
 
       console.log(str);
@@ -44,7 +48,7 @@ export const main = (settings) => {
   recognizer.recognized = function (s, e) {
       var str = "\r\n(recognized)  Reason: " + sdk.ResultReason[e.result.reason] + " Text: " + e.result.text + " Translations:";
 
-      var language = "de";
+      var language = "de-DE";
       str += " [" + language + "] " + e.result.translations.get(language);
       str += "\r\n";
 
