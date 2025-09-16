@@ -274,6 +274,8 @@ class ViewController: UIViewController {
         speechConfig?.setPropertyTo("1500", by: SPXPropertyId.speechSegmentationSilenceTimeoutMs)
         
         let language = "zh-CN"
+        let enableMiscue = true
+        let enableProsodyAssessment = true
         
         speechConfig?.speechRecognitionLanguage = language
 
@@ -291,7 +293,27 @@ class ViewController: UIViewController {
         
         let audioConfig = SPXAudioConfiguration.init(wavFileInput: path!)
 
-        let referenceText = try! String(contentsOfFile: referencePath!, encoding: .utf8)
+        var referenceText = try! String(contentsOfFile: referencePath!, encoding: .utf8)
+        let unscriptedScenario = referenceText.isEmpty
+
+        // We need to convert the reference text to lower case, and split to words, then remove the punctuations.
+        var referenceWords: [String] = []
+        if (language == "zh-CN"){
+             // Split words for Chinese using the reference text and any short wave file
+            referenceText = referenceText.replacingOccurrences(of: " ", with: "")
+
+             referenceWords = getReferenceWords(waveFilename: short_audio!, referenceText: referenceText, language: language, speechConfig: speechConfig!)!
+         }
+         else {
+             for w in referenceText.words {
+                 referenceWords.append(String(w).lowercased().trimmingCharacters(in: .punctuationCharacters))
+             }
+         }
+
+        // Remove empty words
+        referenceWords = referenceWords.filter{ !$0.trimmingCharacters(in: .whitespaces).isEmpty}
+        referenceText = referenceWords.joined(separator: " ")
+        print("Reference text: \(referenceText)")
 
         var pronConfig: SPXPronunciationAssessmentConfiguration?
         do {
@@ -302,7 +324,10 @@ class ViewController: UIViewController {
             return
         }
         
-        pronConfig?.enableProsodyAssessment()
+        if enableProsodyAssessment
+        {
+            pronConfig?.enableProsodyAssessment()
+        }
 
         let reco = try! SPXSpeechRecognizer(speechConfiguration: speechConfig!, audioConfiguration: audioConfig!)
         
@@ -350,21 +375,10 @@ class ViewController: UIViewController {
         }
         try! reco.stopContinuousRecognition()
 
-        var referenceWords: [String] = []
-        if (language == "zh-CN"){
-             // Split words for Chinese using the reference text and any short wave file
-             referenceWords = getReferenceWords(waveFilename: short_audio!, referenceText: referenceText, language: language, speechConfig: speechConfig!)!
-         }
-         else {
-             for w in referenceText.words {
-                 referenceWords.append(String(w).lowercased().trimmingCharacters(in: .punctuationCharacters))
-             }
-         }
-         let enableMiscue = true
          var finalWords: [Word] = []
          var validWordCount = 0
          
-         if (enableMiscue){
+         if (enableMiscue && !unscriptedScenario){
              let diff = referenceWords.outputDiffPathTraces(to: recognizedWords)
              for e in diff {
                  if e.from.x + 1 == e.to.x && e.from.y + 1 == e.to.y {
@@ -406,19 +420,68 @@ class ViewController: UIViewController {
              }
              let accuracyScore = totalAccuracyScore / Double(accuracyCount)
              
+             // Re-calculate the prosody score
+             var prosodyScore = 0.0
+             if (prosodyScores.isEmpty)
+             {
+                 prosodyScore = Double.nan
+             }
+             else
+             {
+                 prosodyScore = prosodyScores.reduce(0, +) / Double(prosodyScores.count)
+             }
+
              startOffset = pronWords[0].offset
              let fluencyScore: Double = durationSum / Double(endOffset - startOffset) * 100.0
              
-             let completenessScore: Double = Double(validCount) / Double(accuracyCount) * 100.0
+             // Calculate whole completeness score
+             var completenessScore = 0.0
+             if (!unscriptedScenario)
+             {
+                 completenessScore = Double(validCount) / Double(accuracyCount) * 100.0
+                 completenessScore = min(completenessScore, 100)
+             }
+             else
+             {
+                 completenessScore = 100
+             }
              
-             let scores_all: [Double] = [accuracyScore, fluencyScore, completenessScore]
-             let pronunciationScore = scores_all.map{$0 * 0.2}.reduce(0, +) + scores_all.min()! * 0.4
+             var pronunciationScore = 0.0
+             var sortedScores: [Double] = []
+             if (!unscriptedScenario)
+             {
+                 // Scripted scenario
+                 if (enableProsodyAssessment && !prosodyScore.isNaN)
+                 {
+                     sortedScores = [accuracyScore, prosodyScore, fluencyScore, completenessScore].sorted()
+                     pronunciationScore = sortedScores[0] * 0.4 + sortedScores[1] * 0.2 + sortedScores[2] * 0.2 + sortedScores[3] * 0.2
+                 }
+                 else
+                 {
+                     sortedScores = [accuracyScore, fluencyScore, completenessScore].sorted()
+                     pronunciationScore = sortedScores[0] * 0.6 + sortedScores[1] * 0.2 + sortedScores[2] * 0.2
+                 }
+             }
+             else
+             {
+                 // Unscripted scenario
+                 if (enableProsodyAssessment && !prosodyScore.isNaN)
+                 {
+                     sortedScores = [accuracyScore, prosodyScore, fluencyScore].sorted()
+                     pronunciationScore = sortedScores[0] * 0.6 + sortedScores[1] * 0.2 + sortedScores[2] * 0.2
+                 }
+                 else
+                 {
+                     sortedScores = [accuracyScore, fluencyScore].sorted()
+                     pronunciationScore = sortedScores[0] * 0.6 + sortedScores[1] * 0.4
+                 }
+             }
              
-             var resultText = String(format: "Assessment finished. \nOverall accuracy score: %.2f, fluency score: %.2f, completeness score: %.2f, pronunciation score: %.2f", accuracyScore, fluencyScore, completenessScore, pronunciationScore)
+             var resultText = String(format: "Assessment finished. \nOverall accuracy score: %.0f, prosody score: %.0f, fluency score: %.0f, completeness score: %.0f, pronunciation score: %.0f", accuracyScore, prosodyScore, fluencyScore, completenessScore, pronunciationScore)
 
-             for w in finalWords {
+             for (idx, word) in finalWords.enumerated() {
                  resultText += "\n"
-                 resultText += " word: \(w.word)\taccuracy score: \(w.accuracyScore)\terror type: \(w.errorType);"
+                 resultText += String(format: "   %03d: word: %@\taccuracy score: %.0f\terror type: %@;",idx + 1, word.word, word.accuracyScore, word.errorType)
              }
              self.updateLabel(text: resultText, color: UIColor.black)
          }
