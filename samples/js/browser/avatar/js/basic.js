@@ -222,6 +222,8 @@ window.startSession = () => {
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
 
     const videoFormat = new SpeechSDK.AvatarVideoFormat()
+    videoFormat.width = 1920
+    videoFormat.height = 1080
     let videoCropTopLeftX = document.getElementById('videoCrop').checked ? 600 : 0
     let videoCropBottomRightX = document.getElementById('videoCrop').checked ? 1320 : 1920
     videoFormat.setCropRange(new SpeechSDK.Coordinate(videoCropTopLeftX, 0), new SpeechSDK.Coordinate(videoCropBottomRightX, 1080));
