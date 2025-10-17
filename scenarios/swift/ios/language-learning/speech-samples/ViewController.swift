@@ -256,6 +256,137 @@ class ViewController: UIViewController {
         return result
     }
 
+    /// Aligns tokens from the raw list to the reference list by merging or splitting tokens.
+    /// - Parameters:
+    ///   - rawList: The list of tokens as originally segmented.
+    ///   - refList: The target list of reference tokens that should guide the alignment process.
+    /// - Returns: A new array of strings representing the raw tokens realigned so that they are consistent with the reference list.
+    func alignRawTokensByRef(rawList: [String], refList: [String]) -> [String] {
+        var alignedRaw: [String] = []
+        var rawCopy = rawList
+        var refIdx = 0
+
+        while !rawCopy.isEmpty && refIdx < refList.count {
+            let refWord = refList[refIdx]
+            var mergedSplitDone = false
+
+            // Try merging 1..N tokens from current position
+            for length in 1...rawCopy.count {
+                let mergedRaw = rawCopy.prefix(length).joined()
+
+                guard mergedRaw.contains(refWord) else { continue }
+
+                // Split merged string into prefix/refWord/suffix
+                let parts = mergedRaw.components(separatedBy: refWord)
+                let prefix = parts.first ?? ""
+                let suffix = parts.count > 1 ? parts[1] : ""
+
+                // Handle prefix tokens before the matched refWord
+                if !prefix.isEmpty {
+                    var remainingPrefix = prefix
+                    while !remainingPrefix.isEmpty && !rawCopy.isEmpty {
+                        let token = rawCopy.removeFirst()
+                        if remainingPrefix.hasPrefix(token) {
+                            alignedRaw.append(token)
+                            remainingPrefix.removeFirst(token.count)
+                        } else {
+                            let prefixPart = String(token.prefix(remainingPrefix.count))
+                            alignedRaw.append(prefixPart)
+                            let leftover = String(token.dropFirst(remainingPrefix.count))
+                            if !leftover.isEmpty {
+                                rawCopy.insert(leftover, at: 0)
+                            }
+                            remainingPrefix = ""
+                        }
+                    }
+                }
+
+                // Add matched refWord
+                alignedRaw.append(refWord)
+
+                // Handle suffix (remaining part after refWord)
+                rawCopy.removeFirst(length)
+                if !suffix.isEmpty {
+                    rawCopy.insert(suffix, at: 0)
+                }
+
+                refIdx += 1
+                mergedSplitDone = true
+                break
+            }
+
+            // If nothing matched, skip the reference token
+            if !mergedSplitDone {
+                refIdx += 1
+            }
+        }
+
+        // Append any leftover raw tokens
+        alignedRaw.append(contentsOf: rawCopy)
+
+        return alignedRaw
+    }
+
+    // Align rawWords basing on recognizedWords using outputDiffPathTraces
+    func alignListsWithDiffPath(rawWords: [String], recognizedWords: [String]) -> [String] {
+        // Get the diff path between reference and recognized word lists
+        let diff = rawWords.outputDiffPathTraces(to: recognizedWords)
+
+        // Final output list
+        var finalWords: [String] = []
+
+        // Temporary storage for omissions and insertions between two matches
+        var tempOmissions: [String] = []
+        var tempInsertions: [String] = []
+
+        for e in diff {
+            // Match
+            if e.from.x + 1 == e.to.x && e.from.y + 1 == e.to.y {
+                // If there are any previous omissions/insertions before this match
+                if !tempOmissions.isEmpty || !tempInsertions.isEmpty {
+                    if tempInsertions.isEmpty {
+                        // Only omissions found
+                        finalWords.append(contentsOf: tempOmissions)
+                    }
+                    if !tempOmissions.isEmpty && !tempInsertions.isEmpty {
+                        // Both omissions and insertions found
+                        let alignedOmission = alignRawTokensByRef(rawList: tempOmissions, refList: tempInsertions)
+                        finalWords.append(contentsOf: alignedOmission)
+                    }
+                    // Clear temporary buffers
+                    tempOmissions.removeAll()
+                    tempInsertions.removeAll()
+                }
+                // Add the matched reference word
+                finalWords.append(rawWords[e.from.x])
+            }
+            // Insertion
+            else if e.from.y < e.to.y {
+                let insertedWord = recognizedWords[e.from.y]
+                tempInsertions.append(insertedWord)
+            }
+            // Omission
+            else if e.from.x < e.to.x {
+                let omittedWord = rawWords[e.from.x]
+                tempOmissions.append(omittedWord)
+            }
+        }
+
+        // Handle remaining omissions/insertions at the end of the sequence
+        if !tempOmissions.isEmpty || !tempInsertions.isEmpty {
+            if tempInsertions.isEmpty {
+                finalWords.append(contentsOf: tempOmissions)
+            }
+            if !tempOmissions.isEmpty && !tempInsertions.isEmpty {
+                // Both omissions and insertions found
+                let alignedOmission = alignRawTokensByRef(rawList: tempOmissions, refList: tempInsertions)
+                finalWords.append(contentsOf: alignedOmission)
+            }
+        }
+
+        return finalWords
+    }
+
     /**
      * Continuous Pronunciation Assessment Sample.
      *
@@ -269,7 +400,7 @@ class ViewController: UIViewController {
             print("error \(error) happened")
             speechConfig = nil
         }
-        
+
         // You can adjust the segmentation silence timeout based on your real scenario
         speechConfig?.setPropertyTo("1500", by: SPXPropertyId.speechSegmentationSilenceTimeoutMs)
         
@@ -379,6 +510,9 @@ class ViewController: UIViewController {
          var validWordCount = 0
          
          if (enableMiscue && !unscriptedScenario){
+
+             referenceWords = alignListsWithDiffPath(rawWords: referenceWords, recognizedWords: recognizedWords)
+
              let diff = referenceWords.outputDiffPathTraces(to: recognizedWords)
              for e in diff {
                  if e.from.x + 1 == e.to.x && e.from.y + 1 == e.to.y {
@@ -406,7 +540,14 @@ class ViewController: UIViewController {
              var accuracyCount: Int = 0
              var validCount: Int = 0
              var durationSum: Double = 0.0
-             
+
+             // Mark as Mispronunciation if the accuracy score falls below 60
+             for i in 0..<finalWords.count {
+                 if finalWords[i].accuracyScore < 60 && finalWords[i].errorType == "None" {
+                     finalWords[i].errorType = "Mispronunciation"
+                 }
+             }
+
              for word in finalWords {
                  if word.errorType != "Insertion" {
                      totalAccuracyScore += word.accuracyScore
