@@ -172,15 +172,19 @@ namespace Avatar.Controllers
 
                 var customVoiceEndpointId = clientContext.CustomVoiceEndpointId;
 
+                var isCustomAvatar = (Request.Headers["IsCustomAvatar"].FirstOrDefault()?.ToLowerInvariant() ?? "false") == "true";
+                var isCustomVoice = !string.IsNullOrEmpty(customVoiceEndpointId);
+                var endpointRoute = isCustomAvatar || isCustomVoice ? "voice" : "tts";
+
                 SpeechConfig speechConfig;
                 if (!string.IsNullOrEmpty(_clientSettings.SpeechPrivateEndpoint))
                 {
                     var speechPrivateEndpointWss = _clientSettings.SpeechPrivateEndpoint.Replace("https://", "wss://");
-                    speechConfig = SpeechConfig.FromEndpoint(new Uri($"{speechPrivateEndpointWss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true"), _clientSettings.SpeechKey);
+                    speechConfig = SpeechConfig.FromEndpoint(new Uri($"{speechPrivateEndpointWss}/{endpointRoute}/cognitiveservices/websocket/v1?enableTalkingAvatar=true"), _clientSettings.SpeechKey);
                 }
                 else
                 {
-                    string endpointUrl = $"wss://{_clientSettings.SpeechRegion}.tts.speech.microsoft.com/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true";
+                    string endpointUrl = $"wss://{_clientSettings.SpeechRegion}.{endpointRoute}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true";
                     speechConfig = SpeechConfig.FromEndpoint(new Uri(endpointUrl), _clientSettings.SpeechKey);
                 }
 
@@ -228,7 +232,6 @@ namespace Avatar.Controllers
                 var avatarStyle = Request.Headers["AvatarStyle"].FirstOrDefault();
                 var backgroundColor = Request.Headers["BackgroundColor"].FirstOrDefault() ?? "#FFFFFFFF";
                 var backgroundImageUrl = Request.Headers["BackgroundImageUrl"].FirstOrDefault();
-                var isCustomAvatar = Request.Headers["IsCustomAvatar"].FirstOrDefault();
                 var transparentBackground = Request.Headers["TransparentBackground"].FirstOrDefault() ?? "false";
                 var videoCrop = Request.Headers["VideoCrop"].FirstOrDefault() ?? "false";
 
@@ -280,7 +283,7 @@ namespace Avatar.Controllers
                             },
                             talkingAvatar = new
                             {
-                                customized = (isCustomAvatar?.ToLower() ?? "false") == "true",
+                                customized = isCustomAvatar,
                                 character = avatarCharacter,
                                 style = avatarStyle,
                                 background = new
