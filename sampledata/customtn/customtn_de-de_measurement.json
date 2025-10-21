@@ -1,0 +1,19 @@
+{
+  "RuleSetList": [
+    {
+      "SupportLanguage": ["de-de"],
+      "RuleList": [
+        {
+          "SearchPattern": "\\b((\\d{1,3}(\\.\\d{3})*(,\\d+)?)|(\\d+(,\\d+)?))\\s?([W|l|N|V|K|t|m|s|g|A|J|Ω|T|C|F|H|S])\\b(?=\\s|,|$|\\.$|!|\\?|:|;|\"|\\))",
+          "ReplacePattern": "<say-as interpret-as=\"unit\">$1 $7</say-as>",
+          "Comment": "support \"valid number + single letter unit\" to add say-as unit tag, valid number: cardinal, decimal separator \",\", thousand separator \".\""
+        },
+        {
+          "SearchPattern": "\\b(\\D+)\\s(mN)\\b",
+          "ReplacePattern": "$1 Millinewton",
+          "Comment": "support mN expand to Millinewton when preceding word is not digit"
+        }
+      ]
+    }
+  ]
+}

@@ -9,6 +9,7 @@ Pronunciation Assessment samples for the Microsoft Cognitive Services Speech SDK
 
 import base64
 import json
+import math
 import string
 import threading
 import time
@@ -17,9 +18,9 @@ import uuid
 import azure.cognitiveservices.speech as speechsdk
 import requests
 
-from utils import read_wave_header, push_stream_writer, get_reference_words, WaveHeader16K16BitMono
+from utils import read_wave_header, push_stream_writer, get_reference_words, WaveHeader16K16BitMono, align_lists_with_diff_handling
 
-with open('config.json', 'r') as config_file:
+with open("config.json", "r") as config_file:
     config = json.load(config_file)
 
 speech_key = config.get("SubscriptionKey")
@@ -243,8 +244,26 @@ def pronunciation_assessment_continuous_from_file():
     with open(ZHCN_LONG_TEXT_FILE, "r", encoding="utf-8") as t:
         reference_text = t.readline()
 
+    language = "zh-CN"
     enable_miscue = True
     enable_prosody_assessment = True
+    unscripted_scenario = False if len(reference_text) > 0 else True
+
+    # We need to convert the reference text to lower case, and split to words, then remove the punctuations.
+    if language.lower() == "zh-cn":
+        # Word segmentation for Chinese using the reference text and any short wave file
+        # Remove the blank characters in the reference text
+        reference_text = reference_text.replace(" ", "")
+        reference_words = get_reference_words(
+            ZHCN_SHORT_WAVE_FILE, reference_text, language, speech_key, speech_endpoint
+        )
+    else:
+        reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
+    # Remove empty words
+    reference_words = [w for w in reference_words if len(w.strip()) > 0]
+    reference_text = " ".join(reference_words)
+    print("Reference text:", reference_text)
+
     pronunciation_config = speechsdk.PronunciationAssessmentConfig(
         reference_text=reference_text,
         grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
@@ -255,7 +274,6 @@ def pronunciation_assessment_continuous_from_file():
         pronunciation_config.enable_prosody_assessment()
 
     # Creates a speech recognizer using a file as audio input.
-    language = "zh-CN"
     speech_recognizer = speechsdk.SpeechRecognizer(
         speech_config=speech_config, language=language, audio_config=audio_config
     )
@@ -320,19 +338,13 @@ def pronunciation_assessment_continuous_from_file():
 
     speech_recognizer.stop_continuous_recognition()
 
-    # We need to convert the reference text to lower case, and split to words, then remove the punctuations.
-    if language == "zh-CN":
-        # Split words for Chinese using the reference text and any short wave file
-        reference_words = get_reference_words(
-            ZHCN_SHORT_WAVE_FILE, reference_text, language, speech_key, speech_endpoint
-        )
-    else:
-        reference_words = [w.strip(string.punctuation) for w in reference_text.lower().split()]
-
     # For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
     # even if miscue is enabled.
     # We need to compare with the reference text after received all recognized words to get these error words.
-    if enable_miscue:
+    if enable_miscue and not unscripted_scenario:
+        # align the reference words basing on recognized words.
+        reference_words = align_lists_with_diff_handling(reference_words, [x.word.lower() for x in recognized_words])
+
         diff = difflib.SequenceMatcher(None, reference_words, [x.word.lower() for x in recognized_words])
         final_words = []
         for tag, i1, i2, j1, j2 in diff.get_opcodes():
@@ -356,6 +368,11 @@ def pronunciation_assessment_continuous_from_file():
     else:
         final_words = recognized_words
 
+    # If accuracy score is below 60, mark as mispronunciation
+    for idx, word in enumerate(final_words):
+        if word.accuracy_score < 60 and word.error_type == "None":
+            word._error_type = "Mispronunciation"
+
     durations_sum = sum([d for w, d in zip(recognized_words, durations) if w.error_type == "None"])
 
     # We can calculate whole accuracy by averaging
@@ -376,23 +393,41 @@ def pronunciation_assessment_continuous_from_file():
     if startOffset > 0:
         fluency_score = durations_sum / (endOffset - startOffset) * 100
     # Calculate whole completeness score
-    handled_final_words = [w.word for w in final_words if w.error_type != "Insertion"]
-    completeness_score = len([w for w in final_words if w.error_type == "None"]) / len(handled_final_words) * 100
-    completeness_score = completeness_score if completeness_score <= 100 else 100
-    sorted_scores = sorted([accuracy_score, prosody_score, completeness_score, fluency_score])
-    pronunciation_score = (
-        sorted_scores[0] * 0.4 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2 + sorted_scores[3] * 0.2
-    )
+    if not unscripted_scenario:
+        handled_final_words = [w.word for w in final_words if w.error_type != "Insertion"]
+        completeness_score = len([w for w in final_words if w.error_type == "None"]) / len(handled_final_words) * 100
+        completeness_score = completeness_score if completeness_score <= 100 else 100
+    else:
+        completeness_score = 100
+
+    if not unscripted_scenario:
+        # Scripted scenario
+        if enable_prosody_assessment and not math.isnan(prosody_score):
+            sorted_scores = sorted([accuracy_score, prosody_score, completeness_score, fluency_score])
+            pronunciation_score = (
+                sorted_scores[0] * 0.4 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2 + sorted_scores[3] * 0.2
+            )
+        else:
+            sorted_scores = sorted([accuracy_score, fluency_score, completeness_score])
+            pronunciation_score = sorted_scores[0] * 0.6 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2
+    else:
+        # Unscripted scenario
+        if enable_prosody_assessment and not math.isnan(prosody_score):
+            sorted_scores = sorted([accuracy_score, prosody_score, fluency_score])
+            pronunciation_score = sorted_scores[0] * 0.6 + sorted_scores[1] * 0.2 + sorted_scores[2] * 0.2
+        else:
+            sorted_scores = sorted([accuracy_score, fluency_score])
+            pronunciation_score = sorted_scores[0] * 0.6 + sorted_scores[1] * 0.4
 
     print(
-        f"    Paragraph accuracy score: {accuracy_score:.2f}, prosody score: {prosody_score:.2f}, "
-        f"fluency score: {fluency_score:.2f}, completeness score: {completeness_score:.2f}, "
-        f"pronunciation score: {pronunciation_score:.2f}"
+        f"    Paragraph accuracy score: {accuracy_score:.0f}, prosody score: {prosody_score:.0f}, "
+        f"fluency score: {fluency_score:.0f}, completeness score: {completeness_score:.0f}, "
+        f"pronunciation score: {pronunciation_score:.0f}"
     )
 
     for idx, word in enumerate(final_words):
         print(
-            f"    {idx + 1:03d}: word: {word.word}\taccuracy score: {word.accuracy_score}\t"
+            f"    {idx + 1:03d}: word: {word.word}\taccuracy score: {word.accuracy_score:.0f}\t"
             f"error type: {word.error_type}"
         )
 

@@ -54,24 +54,23 @@ public class Main {
                 + "custom microphone array geometry specified.");
         System.out.println("38. Speech recognition from pull stream with custom set of enhancements from Microsoft Audio Stack enabled.");
         System.out.println("39. Speech recognition from push stream with Microsoft Audio Stack enabled and beamforming angles specified.");
-        System.out.println("40. Pronunciation assessment with microphone input.");
-        System.out.println("41. Pronunciation assessment with stream input.");
-        System.out.println("42. Pronunciation assessment continuous with file.");
-        System.out.println("43. Pronunciation assessment configured with JSON.");
-        System.out.println("44. Speech synthesis to audio and SRT files.");
-        System.out.println("45. Recognize once from file, with at-start language detection.");
-        System.out.println("46. Continuous speech recognition from file, with at-start language detection.");
-        System.out.println("47. Continuous speech recognition from file, with at-start language detection with custom model.");
-        System.out.println("48. Continuous speech recognition from file, with continuous language detection with custom models.");
-        System.out.println("49. Diagnostics logging to file (without a filter).");
-        System.out.println("50. Diagnostics logging to file (with a filter).");
-        System.out.println("51. Diagnostics Subscribing to logging event (without a filter).");
-        System.out.println("52. Diagnostics Subscribing to logging event (with a filter).");
-        System.out.println("53. Diagnostics logging to memory buffer with logging level (with or without filter).");
-        System.out.println("54. Diagnostics logging to memory buffer with ingested self-defined SPX trace mark.");
-        System.out.println("55. Authenticate with an AAD token credential for speech recognition.");
-        System.out.println("56. Authenticate with an AAD token credential for continuous speech recognition.");
-        System.out.println("57. Authenticate with an AAD token credential for translation.");
+        System.out.println("40. Speech synthesis to audio and SRT files.");
+        System.out.println("41. Recognize once from file, with at-start language detection.");
+        System.out.println("42. Continuous speech recognition from file, with at-start language detection.");
+        System.out.println("43. Continuous speech recognition from file, with at-start language detection with custom model.");
+        System.out.println("44. Continuous speech recognition from file, with continuous language detection with custom models.");
+        System.out.println("45. Diagnostics logging to file (without a filter).");
+        System.out.println("46. Diagnostics logging to file (with a filter).");
+        System.out.println("47. Diagnostics Subscribing to logging event (without a filter).");
+        System.out.println("48. Diagnostics Subscribing to logging event (with a filter).");
+        System.out.println("49. Diagnostics logging to memory buffer with logging level (with or without filter).");
+        System.out.println("50. Diagnostics logging to memory buffer with ingested self-defined SPX trace mark.");
+        System.out.println("51. Authenticate with an AAD token credential for speech recognition.");
+        System.out.println("52. Authenticate with an AAD token credential for continuous speech recognition.");
+        System.out.println("53. Authenticate with an AAD token credential for translation.");
+        System.out.println("51. Authenticate with an key credential for speech recognition.");
+        System.out.println("52. Authenticate with an key credential for continuous speech recognition.");
+        System.out.println("53. Authenticate with an key credential for translation.");
 
         System.out.print(prompt);
 
@@ -199,58 +198,55 @@ public class Main {
                     SpeechRecognitionSamples.continuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
                     break;
                 case "40":
-                    SpeechRecognitionSamples.pronunciationAssessmentWithMicrophoneAsync();
-                    break;
-                case "41":
-                    SpeechRecognitionSamples.pronunciationAssessmentWithPushStream();
-                    break;
-                case "42":
-                    SpeechRecognitionSamples.pronunciationAssessmentContinuousWithFile();;
-                    break;
-                case "43":
-                    SpeechRecognitionSamples.pronunciationAssessmentConfiguredWithJson();
-                    break;
-                case "44":
                     SpeechSynthesisSamples.synthesisWordBoundaryEventToSrtAsync();
                     break;
-                case "45":
+                case "41":
                     SpeechRecognitionSamples.recognizeOnceFromFileWithAtStartLanguageDetection();
                     break;
-                case "46":
+                case "42":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetection();
                     break;
-                case "47":
+                case "43":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithAtStartLanguageDetectionWithCustomModels();
                     break;
-                case "48":
+                case "44":
                     SpeechRecognitionSamples.continuousRecognitionFromFileWithContinuousLanguageDetectionWithCustomModels();
                     break;
-                case "49":
+                case "45":
                     SpeechDiagnosticsLoggingSamples.fileLoggerWithoutFilter();
                     break;
-                case "50":
+                case "46":
                     SpeechDiagnosticsLoggingSamples.fileLoggerWithFilter();
                     break;
-                case "51":
+                case "47":
                     SpeechDiagnosticsLoggingSamples.eventLoggerWithoutFilter();
                     break;
-                case "52":
+                case "48":
                     SpeechDiagnosticsLoggingSamples.eventLoggerWithFilter();
                     break;
-                case "53":
+                case "49":
                     SpeechDiagnosticsLoggingSamples.memoryLoggerWithOrWithoutFilter();
                     break;
-                case "54":
+                case "50":
                     SpeechDiagnosticsLoggingSamples.selfDefinedSpxTraceLogging();
                     break;
-                case "55" :
+                case "51" :
                     SpeechRecognitionSamples.recognitionWithAADTokenCredentialAsync();
                     break;
-                case "56" :
+                case "52" :
                     SpeechRecognitionSamples.continuousRecognitionWithAADTokenCredentialAsync();
                     break;
-                case "57" :
+                case "53" :
                     TranslationSamples.translationWithAADTokenCredentialAsync();
+                    break;
+                case "54" :
+                    SpeechRecognitionSamples.recognitionWithKeyCredentialAsync();
+                    break;
+                case "55" :
+                    SpeechRecognitionSamples.continuousRecognitionWithKeyCredentialAsync();
+                    break;
+                case "56" :
+                    TranslationSamples.translationWithKeyCredentialAsync();
                     break;
                 case "0":
                     System.out.println("Exiting...");

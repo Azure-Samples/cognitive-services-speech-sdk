@@ -30,7 +30,7 @@ speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.
 # Set up endpoint with custom domain. This is required when using aad token credential to authenticate.
 # For details on setting up a custom domain with private links, see:
 # https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
-speech_endpoint_with_custom_domain = "https://YourCustomDomain.cognitiveservices.azure.com/"
+speech_endpoint_with_custom_domain = "YourServiceEndpointWithCustomDomain"
 
 # Specify the path to audio files containing speech (mono WAV / PCM with a sampling rate of 16
 # kHz).
@@ -357,7 +357,7 @@ def translation_once_from_file_with_aad_token_credential():
             print("Error details: {}".format(result.cancellation_details.error_details))
 
 
-def translation_continuous_with_aad_token_credential():
+def translation_continuous_from_file_with_aad_token_credential():
     """performs continuous speech translation authenticated via aad token credential"""
     # Create a token credential using DefaultAzureCredential.
     # This credential supports multiple authentication methods, including Managed Identity,

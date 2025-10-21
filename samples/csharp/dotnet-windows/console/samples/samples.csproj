@@ -135,24 +135,12 @@
       <Link>LanguageDetection_enUS.wav</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="zhcn_continuous_mode_sample.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="zhcn_continuous_mode_sample.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="zhcn_short_dummy_sample.wav">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="DiffPlex">
-      <Version>1.7.1</Version>
-    </PackageReference>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.45.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.45.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.45.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.46.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.46.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.46.0" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

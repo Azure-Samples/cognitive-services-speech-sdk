@@ -237,14 +237,20 @@ namespace MicrosoftSpeechSDKSamples
                 while (true)
                 {
                     // Read audio data from the input stream to a data buffer.
-                    var bytesRead = input.Read(buffer, 0, buffer.Length);
+                    int bytesRead = input.Read(buffer, 0, buffer.Length);
 
                     // Copy audio data from the data buffer into a push stream
                     // for the Speech SDK to consume.
                     // Data must NOT include any headers, only audio samples.
-                    pushStream.Write(buffer, bytesRead);
+                    // If the method used to read the input stream can return
+                    // a negative number of bytes in case of an error, check
+                    // the value and do not pass a negative number to the SDK.
+                    if (bytesRead >= 0)
+                    {
+                        pushStream.Write(buffer, bytesRead);
+                    }
 
-                    if (bytesRead == 0)
+                    if (bytesRead <= 0)
                     {
                         input.Close();
                         break;
@@ -287,7 +293,12 @@ namespace MicrosoftSpeechSDKSamples
                 // Copy audio data from the input stream into a data buffer for the
                 // Speech SDK to consume.
                 // Data must NOT include any headers, only audio samples.
-                return _input.Read(buffer, 0, (int)size);
+                int bytesRead = _input.Read(buffer, 0, (int)size);
+
+                // If the method used to read the input stream can return
+                // a negative number of bytes in case of an error, check
+                // the value and do not pass a negative number to the SDK.
+                return (bytesRead >= 0) ? bytesRead : 0;
             }
 
             // This method is called for cleanup of resources.

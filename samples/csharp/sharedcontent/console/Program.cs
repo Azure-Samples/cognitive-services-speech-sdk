@@ -37,7 +37,6 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 7. Standalone language detection samples.");
                 Console.WriteLine(" 8. Speech recognition with Microsoft Audio Stack (MAS) samples.");
                 Console.WriteLine(" 9. Diagnostics logging samples (trace logging).");
-                Console.WriteLine(" a. Pronunciation assessment samples.");
                 Console.WriteLine("");
                 Console.Write(mainPrompt);
 
@@ -82,9 +81,6 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.NumPad9:
                         SpeechDiagnosticsLogging();
                         break;
-                    case ConsoleKey.A:
-                        PronunciationAssessment();
-                        break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
                         Console.WriteLine(exiting);
@@ -126,6 +122,8 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" d. Speech recognition with file input and a switch to secondary region.");
                 Console.WriteLine(" e. Speech continuous recognition authenticated via AAD token crendential.");
                 Console.WriteLine(" f. Speech once recognition authenticated via AAD token crendential.");
+                Console.WriteLine(" g. Speech continuous recognition authenticated via API key crendential.");
+                Console.WriteLine(" h. Speech once recognition authenticated via API key crendential.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -184,10 +182,16 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechRecognitionSamples.RecognitionOnceWithFileAsyncSwitchSecondaryRegion().Wait();
                         break;
                     case ConsoleKey.E:
-                        SpeechRecognitionSamples.RecognitionContiniusAADTokenCredentialAsync().Wait();
+                        SpeechRecognitionSamples.RecognitionContinuousAADTokenCredentialAsync().Wait();
                         break;
                     case ConsoleKey.F:
                         SpeechRecognitionSamples.RecognitionOnceAADTokenCredentialAsync().Wait();
+                        break;
+                    case ConsoleKey.G:
+                        SpeechRecognitionSamples.RecognitionContinuousApiKeyCredentialAsync().Wait();
+                        break;
+                    case ConsoleKey.H:
+                        SpeechRecognitionSamples.RecognitionOnceApiKeyCredentialAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -359,6 +363,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 5. Translation with language detection samples.");
                 Console.WriteLine(" 6. Multilingual Translation with language identification.");
                 Console.WriteLine(" 7. Translation authenticated via AAD token credential.");
+                Console.WriteLine(" 8. Translation authenticated via API key credential.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -395,6 +400,10 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D7:
                     case ConsoleKey.NumPad7:
                         TranslationSamples.TranslationWithAADTokenCredential().Wait();
+                        break;
+                    case ConsoleKey.D8:
+                    case ConsoleKey.NumPad8:
+                        TranslationSamples.TranslationWithApiKeyCredential().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -581,7 +590,9 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 2. Single utterance language detection, with WAV file input.");
                 Console.WriteLine(" 3. Continuous language detection with multi-lingual WAV file input.");
                 Console.WriteLine(" 4. Single utterance language detection via aad token crendential.");
-                Console.WriteLine(" 5. Continuous language detection authticated via aad token crendential.");
+                Console.WriteLine(" 5. Continuous language detection authenticated via aad token crendential.");
+                Console.WriteLine(" 6. Single utterance language detection via API key crendential.");
+                Console.WriteLine(" 7. Continuous language detection authenticated via API key crendential.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -610,6 +621,14 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D5:
                     case ConsoleKey.NumPad5:
                         StandaloneLanguageDetectionSamples.ContinuousLanguageDetectionWithAADTokenCredentialAsync().Wait();
+                        break;
+                    case ConsoleKey.D6:
+                    case ConsoleKey.NumPad6:
+                        StandaloneLanguageDetectionSamples.SingleDetectionWithApiKeyCredentialAsync().Wait();
+                        break;
+                    case ConsoleKey.D7:
+                    case ConsoleKey.NumPad7:
+                        StandaloneLanguageDetectionSamples.ContinuousLanguageDetectionWithApiKeyCredentialAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -788,71 +807,6 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D5:
                     case ConsoleKey.NumPad5:
                         SpeechDiagnosticsLoggingSamples.MemoryLoggerWithOrWithoutFilter();
-                        break;
-                    case ConsoleKey.D0:
-                    case ConsoleKey.NumPad0:
-                        Console.WriteLine(back);
-                        sampleWasRun = false;
-                        break;
-                    default:
-                        Console.WriteLine(invalid);
-                        sampleWasRun = false;
-                        break;
-                }
-
-                if (sampleWasRun) Console.WriteLine(done);
-
-            } while (x.Key != ConsoleKey.D0);
-        }
-
-        //
-        // Shows pronunciation assessment samples.
-        // See more information at https://aka.ms/csspeech/pa
-        //
-        private static void PronunciationAssessment()
-        {
-            ConsoleKeyInfo x;
-
-            do
-            {
-                Console.WriteLine("");
-                Console.WriteLine(" Speech SDK - Pronunciation Assessment");
-                Console.WriteLine("");
-                Console.WriteLine(choose);
-                Console.WriteLine("");
-                Console.WriteLine(" 1. Pronunciation assessment with microphone input.");
-                Console.WriteLine(" 2. Pronunciation assessment with stream input.");
-                Console.WriteLine(" 3. Pronunciation assessment configured with json.");
-                Console.WriteLine(" 4. Pronunciation assessment continuous with file.");
-                Console.WriteLine(" 5. Pronunciation assessment with Microsoft Audio Stack.");
-                Console.WriteLine("");
-                Console.Write(prompt);
-
-                x = Console.ReadKey();
-                Console.WriteLine("\n");
-                bool sampleWasRun = true;
-
-                switch (x.Key)
-                {
-                    case ConsoleKey.D1:
-                    case ConsoleKey.NumPad1:
-                        SpeechRecognitionSamples.PronunciationAssessmentWithMicrophoneAsync().Wait();
-                        break;
-                    case ConsoleKey.D2:
-                    case ConsoleKey.NumPad2:
-                        SpeechRecognitionSamples.PronunciationAssessmentWithStream();
-                        break;
-                    case ConsoleKey.D3:
-                    case ConsoleKey.NumPad3:
-                        SpeechRecognitionSamples.PronunciationAssessmentConfiguredWithJson().Wait();
-                        break;
-                    case ConsoleKey.D4:
-                    case ConsoleKey.NumPad4:
-                        SpeechRecognitionSamples.PronunciationAssessmentContinuousWithFile().Wait();
-                        break;
-                    case ConsoleKey.D5:
-                    case ConsoleKey.NumPad5:
-                        SpeechRecognitionSamples.PronunciationAssessmentWithMas().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:

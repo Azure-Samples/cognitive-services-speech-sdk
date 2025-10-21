@@ -12,7 +12,7 @@ export const main = (settings) => {
 
   var audioStream = filePushStream.openPushStream(settings.filename);
   var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
-  var speechConfig = sdk.SpeechConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
+  var speechConfig = sdk.SpeechConfig.fromEndpoint(new URL(settings.serviceEndpoint), settings.subscriptionKey);
 
   // setting the recognition language to English.
   speechConfig.speechRecognitionLanguage = settings.language;

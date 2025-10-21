@@ -3,6 +3,7 @@
 
 // pull in the required packages.
 import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import * as filePushStream from "./filePushStream.js";
 
 export const main = (settings) => {
 
@@ -10,7 +11,7 @@ export const main = (settings) => {
   // the speech config specifying the language.
   var audioStream = filePushStream.openPushStream(settings.filename);
   var audioConfig = sdk.AudioConfig.fromStreamInput(audioStream);
-  var translationConfig = sdk.SpeechTranslationConfig.fromSubscription(settings.subscriptionKey, settings.serviceRegion);
+  var translationConfig = sdk.SpeechTranslationConfig.fromEndpoint(new URL(settings.serviceEndpoint), settings.subscriptionKey);
 
   // setting the recognition language to English.
   translationConfig.speechRecognitionLanguage = settings.language;

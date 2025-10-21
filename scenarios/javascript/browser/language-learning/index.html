@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Speech Sample</title>
+    <meta charset="utf-8" />
+</head>
+
+<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
+    <div id="warning">
+        <h1 style="font-weight:500;">Speech Recognition Speech SDK not found
+            (microsoft.cognitiveservices.speech.sdk.bundle.js missing).</h1>
+    </div>
+    <div id="content" style="display:none">
+        <table>
+            <tr>
+                <td></td>
+                <td>
+                    <h2 style="font-weight:500;">Microsoft Cognitive Services Speech SDK</h2>
+                    <h3 style="font-weight:500;">Javascript Browser Sample</h3>
+                </td>
+            </tr>
+            <tr>
+                <td align="right"><a href="https://www.microsoft.com/cognitive-services/sign-up"
+                        target="_blank">Subscription</a>:</td>
+                <td><input id="key" type="text" size="60" placeholder="required: speech subscription key"></td>
+            </tr>
+            <tr>
+                <td align="right">Region:</td>
+                <td align="left">
+                    <select id="regionOptions">
+                        <option value="westus" selected="selected">West US</option>
+                        <option value="westus2">West US 2</option>
+                        <option value="eastus">East US</option>
+                        <option value="eastus2">East US 2</option>
+                        <option value="eastasia">East Asia</option>
+                        <option value="southeastasia">South East Asia</option>
+                        <option value="northeurope">North Europe</option>
+                        <option value="westeurope">West Europe</option>
+                        <option value="usgovarizona">US Gov Arizona</option>
+                        <option value="usgovvirginia">US Gov Virginia</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">Scenario ID</td>
+                <td align="left">
+                    <input
+                        id="scenarioId"
+                        type="text"
+                        size="60"
+                        value=""
+                        placeholder="Optional: Scenario ID will be assigned by product team"
+                    >
+                </td>
+            </tr>
+            <tr>
+                <td align="right">Recognition language:</td>
+                <td align="left">
+                    <!-- For the full list of supported languages see:
+                        https://docs.microsoft.com/azure/cognitive-services/speech-service/supported-languages -->
+                    <select id="languageOptions">
+                        <option value="ar-EG">Arabic - EG</option>
+                        <option value="ca-ES">Catalan - ES</option>
+                        <option value="zh-CN">Chinese - CN</option>
+                        <option value="zh-HK">Chinese - HK</option>
+                        <option value="zh-TW">Chinese - TW</option>
+                        <option value="da-DK">Danish - DK</option>
+                        <option value="da-DK">Danish - DK</option>
+                        <option value="nl-NL">Dutch - NL</option>
+                        <option value="en-AU">English - AU</option>
+                        <option value="en-CA">English - CA</option>
+                        <option value="en-GB">English - GB</option>
+                        <option value="en-IN">English - IN</option>
+                        <option value="en-NZ">English - NZ</option>
+                        <option value="en-US" selected="selected">English - US</option>
+                        <option value="de-DE">German - DE</option>
+                        <option value="es-ES">Spanish - ES</option>
+                        <option value="es-MX">Spanish - MX</option>
+                        <option value="fi-FI">Finnish - FI</option>
+                        <option value="fr-CA">French - CA</option>
+                        <option value="fr-FR">French - FR</option>
+                        <option value="hi-IN">Hindi - IN</option>
+                        <option value="it-IT">Italian - IT</option>
+                        <option value="ja-JP">Japanese - JP</option>
+                        <option value="ko-KR">Korean - KR</option>
+                        <option value="nb-NO">Norwegian - NO</option>
+                        <option value="pl-PL">Polish - PL</option>
+                        <option value="pt-BR">Portuguese - BR</option>
+                        <option value="pt-PT">Portuguese - PT</option>
+                        <option value="ru-RU">Russian - RU</option>
+                        <option value="sv-SE">Swedish - SE</option>
+                    </select>
+                </td>
+            </tr>
+            <tr id="miscueRow">
+                <td align="right">Miscue:</td>
+                <td align="left">
+                    <input type="checkbox"
+                        checked="checked"
+                        id ="enableMiscueCheckbox"
+                    />
+                </td>
+            </tr>
+            <tr id="prosodyAssessmentRow">
+                <td align="right">Prosody assessment:</td>
+                <td align="left">
+                    <input type="checkbox"
+                        checked="checked"
+                        id ="enableProsodyAssessmentCheckbox"
+                    />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">Audio Input:</td>
+                <td align="left">
+                    <input type="radio"
+                        name="inputSourceOption"
+                        checked="checked"
+                        id="inputSourceMicrophoneRadio"
+                        value="Microphone"/>
+                    <select id="microphoneSources" disabled="true"/>
+                    <input type="radio"
+                        name="inputSourceOption"
+                        id="inputSourceFileRadio"
+                        value="File"/>
+                    <label id="inputSourceFileLabel" for="inputSourceFileRadio">Audio file</label>
+                    <button id="inputSourceChooseFileButton" disabled="true">...</button>
+                    <input type="file" id="filePicker" accept=".wav" style="display:none" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">Scenario:</td>
+                <td align="left">
+                    <select id="scenarioSelection">
+                        <option value="pronunciationAssessmentOnce">pronunciation assessment Single-shot</option>
+                        <option value="pronunciationAssessmentContinuous">pronunciation assessment Continuous</option>
+                        <option value="pronunciationAssessmentContinuousStream">pronunciation assessment stream Continuous</option>
+                        <option value="pronunciationAssessmentConfiguredWithJson">pronunciation assessment configured with json</option>
+                        <option value="pronunciationAssessmentWithRestAPI">pronunciation assessment with rest API</option>
+                    </select>
+                </td>
+            </tr>
+            <tr id="formatOptionRow">
+                <td align="right">Result Format:</td>
+                <td align="left">
+                    <input type="radio"
+                        name="formatOption"
+                        checked="checked"
+                        id ="formatSimpleRadio"
+                        value="Simple"/>
+                    <label for="formatSimpleRadio">Simple</label>
+                    <input type="radio"
+                        name="formatOption"
+                        id ="formatDetailedRadio"
+                        value="Detailed"/>
+                    <label for="formatDetailedRadio">Detailed</label>
+                </td>
+            </tr>
+            <tr id="pronunciationAssessmentReferenceTextRow">
+                <td align="right">
+                    Reference Text:
+                </td>
+                <td>
+                    <input id="referenceTextFieldId"
+                        type="text"
+                        size="60"
+                        value=""
+                        placeholder="pronunciation assessment reference text.">
+                </td>
+            </tr>
+            <tr>
+                <td align="right"><b></b></td>
+                <td>
+                    <button id="scenarioStartButton">Start</button>
+                    <button id="scenarioStopButton" disabled="disabled">Stop</button>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">Results:</td>
+                <td align="left">
+                    <textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">Events:</td>
+                <td align="left">
+                    <textarea id="statusDiv"
+                        style="display: inline-block;width:500px;height:200px;overflow: scroll;white-space: nowrap;">
+                    </textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Speech SDK REFERENCE -->
+    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
+    <!-- Other dependencies -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/qiao/difflib.js/dist/difflib-browser.js"></script>
+
+    <!-- Speech Speech SDK Authorization token -->
+    <script>
+        // Note: Replace the URL with a valid endpoint to retrieve
+        //       authorization tokens for your subscription.
+
+        // An authorization token is a more secure method to authenticate for a browser deployment as
+        // it allows the subscription keys to be kept secure on a server and a 10 minute use token to be
+        // handed out to clients from an endpoint that can be protected from unauthorized access.
+        let authorizationEndpoint = "http://localhost:3001/api/get-speech-token";
+
+        async function RequestAuthorizationToken() {
+          if (authorizationEndpoint) {
+            try {
+              const res = await axios.get(authorizationEndpoint);
+              const token = res.data.token;
+              const region = res.data.region;
+              regionOptions.value = region;
+              authorizationToken = token;
+
+              console.log('Token fetched from back-end: ' + token);
+            } catch (err) {
+                console.log(err);
+            }
+          }
+        }
+    </script>
+
+    <!-- Speech SDK presence check -->
+    <script>
+        // On document load resolve the Speech SDK dependency
+        function Initialize(onComplete) {
+            if (!!window.SpeechSDK) {
+                document.getElementById('content').style.display = 'block';
+                document.getElementById('warning').style.display = 'none';
+                onComplete(window.SpeechSDK);
+            }
+        }
+    </script>
+
+    <!-- Browser Hooks -->
+    <script>
+        var SpeechSDK;
+        var phraseDiv, statusDiv;
+        var key, authorizationToken;
+        var regionOptions;
+        var scenarioId;
+        var languageOptions, formatOption, filePicker, microphoneSources;
+        var useDetailedResults;
+        var enableProsodyAssessmentCheckbox;
+        var enableMiscueCheckbox;
+        var recognizer;
+        var inputSourceMicrophoneRadio, inputSourceFileRadio;
+        var scenarioSelection, scenarioStartButton, scenarioStopButton;
+        var formatSimpleRadio, formatDetailedRadio;
+        var reco;
+        var audioFile;
+        var microphoneId;
+        var referenceTextField;
+        var pronunciationAssessmentResults;
+
+        var thingsToDisableDuringSession;
+
+        var soundContext = undefined;
+        try {
+            var AudioContext = window.AudioContext // our preferred impl
+                || window.webkitAudioContext       // fallback, mostly when on Safari
+                || false;                          // could not find.
+
+            if (AudioContext) {
+                soundContext = new AudioContext();
+            } else {
+                alert("Audio context not supported");
+            }
+        } catch (e) {
+            window.console.log("no sound context found, no audio output. " + e);
+        }
+
+        function resetUiForScenarioStart() {
+            phraseDiv.innerHTML = "";
+            statusDiv.innerHTML = "";
+            useDetailedResults = document.querySelector('input[name="formatOption"]:checked').value === "Detailed";
+            pronunciationAssessmentResults = [];
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            scenarioStartButton = document.getElementById('scenarioStartButton');
+            scenarioStopButton = document.getElementById('scenarioStopButton');
+            scenarioSelection = document.getElementById('scenarioSelection');
+
+            phraseDiv = document.getElementById("phraseDiv");
+            statusDiv = document.getElementById("statusDiv");
+            key = document.getElementById("key");
+            languageOptions = document.getElementById("languageOptions");
+            regionOptions = document.getElementById("regionOptions");
+            filePicker = document.getElementById('filePicker');
+            microphoneSources = document.getElementById("microphoneSources");
+            inputSourceFileRadio = document.getElementById('inputSourceFileRadio');
+            inputSourceMicrophoneRadio = document.getElementById('inputSourceMicrophoneRadio');
+            formatSimpleRadio = document.getElementById('formatSimpleRadio');
+            formatDetailedRadio = document.getElementById('formatDetailedRadio');
+            referenceTextField = document.getElementById('referenceTextFieldId');
+            scenarioId = document.getElementById('scenarioId');
+            enableProsodyAssessmentCheckbox = document.getElementById('enableProsodyAssessmentCheckbox');
+            enableMiscueCheckbox = document.getElementById('enableMiscueCheckbox');
+
+            thingsToDisableDuringSession = [
+                key,
+                regionOptions,
+                languageOptions,
+                inputSourceMicrophoneRadio,
+                inputSourceFileRadio,
+                scenarioSelection,
+                formatSimpleRadio,
+                formatDetailedRadio,
+                referenceTextField,
+                scenarioId,
+                enableProsodyAssessmentCheckbox,
+                enableMiscueCheckbox,
+            ];
+
+            function setScenario() {
+                var startButtonText = (function() {
+                    switch (scenarioSelection.value) {
+                        case 'pronunciationAssessmentConfiguredWithJson':
+                        case 'pronunciationAssessmentWithRestAPI':
+                        case 'pronunciationAssessmentOnce': return 'recognizeOnceAsync()';
+                        case 'pronunciationAssessmentContinuousStream': 
+                        case 'pronunciationAssessmentContinuous': return 'startContinuousRecognitionAsync()';
+                    }
+                })();
+
+                scenarioStartButton.innerHTML = startButtonText;
+                scenarioStopButton.innerHTML = `STOP ${startButtonText}`;
+                if (scenarioSelection.value === 'pronunciationAssessmentWithRestAPI') {
+                    scenarioStopButton.style.display = 'none';
+                } else {
+                    scenarioStopButton.style.display = '';
+                }
+
+                document.getElementById('pronunciationAssessmentReferenceTextRow').style.display =
+                    scenarioSelection.value.includes('pronunciation') ? '' : 'none';
+
+            }
+
+            languageOptions.addEventListener("change", function () {
+                if (languageOptions.value !== "en-US") {
+                    document.getElementById("prosodyAssessmentRow").style.display = "none";
+                    enableProsodyAssessmentCheckbox.checked = false;
+                } else {
+                    document.getElementById("prosodyAssessmentRow").style.display = "";
+                }
+            });
+
+            scenarioSelection.addEventListener("change", function () {
+                setScenario();
+            });
+            setScenario();
+
+            scenarioStartButton.addEventListener("click", function () {
+                switch (scenarioSelection.value) {
+                    case 'pronunciationAssessmentOnce':
+                        doPronunciationAssessmentOnceAsync();
+                        break;
+                    case 'pronunciationAssessmentContinuous':
+                        doContinuousPronunciationAssessment();
+                        break;
+                    case 'pronunciationAssessmentContinuousStream':
+                        doContinuousPronunciationAssessmentFromStream();
+                        break;
+                    case 'pronunciationAssessmentConfiguredWithJson':
+                        pronunciationAssessmentConfiguredWithJson();
+                        break;
+                    case 'pronunciationAssessmentWithRestAPI':
+                        pronunciationAssessmentWithRestAPI();
+                        break;
+                }
+            });
+
+            scenarioStopButton.addEventListener("click", function() {
+                switch (scenarioSelection.value) {
+                    case 'pronunciationAssessmentConfiguredWithJson':
+                    case 'pronunciationAssessmentOnce':
+                        reco.close();
+                        reco = undefined;
+                        break;
+                    case 'pronunciationAssessmentContinuousStream':
+                    case 'pronunciationAssessmentContinuous':
+                        reco.stopContinuousRecognitionAsync(
+                            function () {
+                                reco.close();
+                                reco = undefined;
+                            },
+                            function (err) {
+                                reco.close();
+                                reco = undefined;
+                            }
+                        );
+                        break;
+                }
+            });
+
+            function enumerateMicrophones() {
+                if (!navigator || !navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                    console.log(`Unable to query for audio input devices. Default will be used.\r\n`);
+                    return;
+                }
+
+                navigator.mediaDevices.enumerateDevices().then((devices) => {
+                    microphoneSources.innerHTML = '';
+
+                    // Not all environments will be able to enumerate mic labels and ids. All environments will be able
+                    // to select a default input, assuming appropriate permissions.
+                    var defaultOption = document.createElement('option');
+                    defaultOption.appendChild(document.createTextNode('Default Microphone'));
+                    microphoneSources.appendChild(defaultOption);
+
+                    for (const device of devices) {
+                        if (device.kind === "audioinput") {
+                            if (!device.deviceId) {
+                                window.console.log(
+                                    `Warning: unable to enumerate a microphone deviceId. This may be due to limitations`
+                                    + ` with availability in a non-HTTPS context per mediaDevices constraints.`); 
+                            }
+                            else {
+                                var opt = document.createElement('option');
+                                opt.value = device.deviceId;
+                                opt.appendChild(document.createTextNode(device.label));
+
+                                microphoneSources.appendChild(opt);
+                            }
+                        }
+                    }
+
+                    microphoneSources.disabled = (microphoneSources.options.length == 1);
+                });
+            }
+
+            inputSourceMicrophoneRadio.addEventListener("click", function () {
+                enumerateMicrophones();
+                document.getElementById('inputSourceChooseFileButton').disabled = true;
+                audioFile = undefined;
+                document.getElementById('inputSourceFileLabel').innerHTML = "Audio file";
+            });
+
+            inputSourceFileRadio.addEventListener("click", function() {
+                document.getElementById('inputSourceChooseFileButton').disabled = false;
+            });
+
+            document.getElementById('inputSourceChooseFileButton').addEventListener("click", function() {
+                document.getElementById('inputSourceFileLabel').innerHTML = 'Select audio file';
+                audioFile = undefined;
+                filePicker.click();
+            });
+
+            filePicker.addEventListener("change", function () {
+                audioFile = filePicker.files[0];
+                document.getElementById('inputSourceFileLabel').innerHTML = audioFile.name;
+            });
+
+            enumerateMicrophones();
+
+            Initialize(async function (speechSdk) {
+                SpeechSDK = speechSdk;
+
+                // in case we have a function for getting an authorization token, call it.
+                if (typeof RequestAuthorizationToken === "function") {
+                    await RequestAuthorizationToken();
+                }
+            });
+        });
+    </script>
+
+    <!-- Utils -->
+    <script>
+        function convertReferenceWords(referenceText, referenceWords) {
+            const dictionary = [...new Set(referenceWords)];
+            const maxLength = Math.max(...dictionary.map(word => word.length));
+
+            // From left to right to do the longest matching to get the word segmentation
+            function leftToRightSegmentation(text, dictionary) {
+                var result = [];
+                while (text.length > 0) {
+                    let subText = "";
+                    // If the length of the text is less than the maxLength, then the subText is the text itself
+                    if (text.length < maxLength) {
+                        subText = text;
+                    } else {
+                        subText = text.substring(0, maxLength);
+                    }
+                    while (subText.length > 0) {
+                        // If the subText is in the dictionary or the length of the subText is 1, then add it to the result
+                        if (dictionary.includes(subText) || subText.length === 1) {
+                            result.push(subText);
+                            // Remove the subText from the text
+                            text = text.slice(subText.length);
+                            break;
+                        } else {
+                            // If the subText is not in the dictionary, then remove the last character of the subText
+                            subText = subText.slice(0, -1);
+                        }
+                    }
+                }
+                return result;
+            }
+
+            // From right to left to do the longest matching to get the word segmentation
+            function rightToLeftSegmentation(text, dictionary) {
+                var result = [];
+                while (text.length > 0) {
+                    let subText = "";
+                    // If the length of the text is less than the maxLength, then the subText is the text itself
+                    if (text.length < maxLength) {
+                        subText = text;
+                    } else {
+                        subText = text.slice(-maxLength);
+                    }
+                    while (subText.length > 0) {
+                        // If the subText is in the dictionary or the length of the subText is 1, then add it to the result
+                        if (dictionary.includes(subText) || subText.length === 1) {
+                            result.push(subText);
+                            // Remove the subText from the text
+                            text = text.slice(0, -subText.length);
+                            break;
+                        } else {
+                            // If the subText is not in the dictionary, then remove the first character of the subText
+                            subText = subText.slice(1);
+                        }
+                    }
+                }
+                // Reverse the result to get the correct order
+                result = result.reverse();
+                return result;
+            }
+
+            function segment_word(referenceText, dictionary) {
+                const leftToRight = leftToRightSegmentation(referenceText, dictionary);
+                const rightToLeft = rightToLeftSegmentation(referenceText, dictionary);
+                if (leftToRight.join("") === referenceText) {
+                    return leftToRight;
+                } else if (rightToLeft.join("") === referenceText) {
+                    return rightToLeft;
+                } else {
+                    console.log("WW failed to segment the text with the dictionary")
+                    if (leftToRight.length < rightToLeft.length) {
+                        return leftToRight;
+                    } else if (leftToRight.length > rightToLeft.length) {
+                        return rightToLeft;
+                    } else {
+                        // If the word number is the same, then return the one with the smallest single word
+                        const leftToRightSingle = leftToRight.filter(word => word.length === 1).length;
+                        const rightToLeftSingle = rightToLeft.filter(word => word.length === 1).length;
+                        if (leftToRightSingle < rightToLeftSingle) {
+                            return leftToRight;
+                        } else {
+                            return rightToLeft;
+                        }
+                    }
+                }
+            }
+
+            // Remove punctuation from the reference text
+            referenceText = referenceText.split("").filter(char => /[\p{L}\p{N}\s]/u.test(char)).join("");
+            return segment_word(referenceText, dictionary);
+        }
+
+        async function getReferenceWords(referenceText) {
+            const response = await fetch("zhcn_short_dummy_sample.wav");  // You need to start the server first. See the README for details.
+            const buffer = await response.arrayBuffer();
+            const uint8Array = new Uint8Array(buffer);
+            const audioConfig = SpeechSDK.AudioConfig.fromWavFileInput(uint8Array);
+            const speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+
+            const speechRecognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+
+            // Create pronunciation assessment config, set grading system, granularity and if enable miscue based on your requirement.
+            const pronunciationConfig = new SpeechSDK.PronunciationAssessmentConfig(
+                referenceText,
+                SpeechSDK.PronunciationAssessmentGradingSystem.HundredMark,
+                SpeechSDK.PronunciationAssessmentGranularity.Phoneme,
+                true
+            );
+
+            // Apply pronunciation assessment config to speech recognizer
+            pronunciationConfig.applyTo(speechRecognizer);
+            const res = await new Promise((resolve, reject) => {
+                speechRecognizer.recognizeOnceAsync(
+                    (result) => {
+                        const referenceWords = [];
+                        if (result.reason == SpeechSDK.ResultReason.RecognizedSpeech) {
+                            const jo = JSON.parse(result.properties.getProperty(SpeechSDK.PropertyId.SpeechServiceResponse_JsonResult));
+                            _.forEach(jo.NBest[0].Words, (word) => {
+                                if (word.PronunciationAssessment.ErrorType != "Insertion") {
+                                    referenceWords.push(word.Word.toLowerCase());
+                                }
+                            })
+                        } else if (result.reason == SpeechSDK.ResultReason.NoMatch) {
+                            reject("No speech could be recognized");
+                        } else if (result.reason == SpeechSDK.ResultReason.Canceled) {
+                            reject(`Speech Recognition canceled: ${result.errorDetails}`);
+                        }
+                        resolve(convertReferenceWords(referenceText, referenceWords));
+                        speechRecognizer.close();
+                    },
+                    (err) => {
+                        reject(err);
+                        speechRecognizer.close();
+                    }
+                );
+            }).catch((reason) => console.log(reason));
+
+            return res;
+        }
+        
+        // Aligns two token lists using SequenceMatcher and handles differences.
+        // Equal segments are copied directly.
+        // 'Replace' segments are aligned strictly if identical after joining,
+        // otherwise aligned using alignRawTokensByRef().
+        // 'Delete' segments from raw are preserved.
+        function alignListsWithDiffHandling(raw, ref) {
+            const alignedRaw = [];
+
+            const sm = new difflib.SequenceMatcher(null, raw, ref);
+            for (const [tag, i1, i2, j1, j2] of sm.getOpcodes()) {
+                if (tag == 'equal') {
+                    alignedRaw.push(...raw.slice(i1, i2));
+                } else if (tag == 'replace') {
+                    // Strict comparison
+                    if (raw.slice(i1, i2).join("") === ref.slice(j1, j2).join("")) {
+                        alignedRaw.push(...ref.slice(j1, j2));
+                    } else {
+                        const alignedPart = alignRawTokensByRef(raw.slice(i1, i2), ref.slice(j1, j2));
+                        alignedRaw.push(...alignedPart);
+                    }
+                } else if (tag == 'delete') {
+                    alignedRaw.push(...raw.slice(i1, i2));
+                }
+            }
+            return alignedRaw;
+        }
+
+
+        // Aligns rawList tokens to refList
+        // by merging consecutive tokens and splitting them
+        // when a reference word is found inside the merged string.
+        function alignRawTokensByRef(rawList, refList) {
+            let refIdx = 0;
+            let rawIdx = 0;
+            const refLen = refList.length;
+            const alignedRaw = [];
+
+            // Use a copy to avoid modifying the original list.
+            const rawCopy = [...rawList];
+
+            while (rawIdx < rawCopy.length && refIdx < refLen) {
+                let mergedSplitDone = false;
+                for (let length = 1; length <= rawCopy.length; length++) {
+                    if (rawIdx + length > rawCopy.length) {
+                        break;
+                    }
+                    const mergedRaw = rawCopy.slice(rawIdx, rawIdx + length).join("");
+                    const refWord = refList[refIdx];
+
+                    if (mergedRaw.includes(refWord)) {
+                        const parts = mergedRaw.split(refWord);
+                        const limitedParts = [parts[0], mergedRaw.slice(parts[0].length + refWord.length)];
+
+                        // Handle prefix part before refWord
+                        if (limitedParts[0]) {
+                            alignedRaw.push(limitedParts[0]);
+                        }
+
+                        // Append the matched refWord
+                        alignedRaw.push(refWord);
+
+                        // Handle suffix part after refWord
+                        if (limitedParts[1]) {
+                            rawCopy[rawIdx] = limitedParts[1];
+                            // Remove the extra merged tokens
+                            for (let i = 1; i < length; i++) {
+                                rawCopy.splice(rawIdx + 1, 1);
+                            }
+                        } else {
+                            // No suffix: remove all merged tokens
+                            for (let i = 0; i < length; i++) {
+                                rawCopy.splice(rawIdx, 1);
+                            }
+                        }
+
+                        refIdx += 1;
+                        mergedSplitDone = true;
+                    }
+
+                    if (mergedSplitDone) {
+                        break;
+                    }
+
+                    // If no match after merging all tokens,
+                    // align current token directly
+                    if (length == rawCopy.length) {
+                        alignedRaw.push(rawCopy[rawIdx]);
+                        rawIdx += 1;
+                        refIdx += 1;
+                    }
+                }
+            }
+
+            // Append any remaining raw tokens
+            while (rawIdx < rawCopy.length) {
+                alignedRaw.push(rawCopy[rawIdx]);
+                rawIdx += 1;
+            }
+
+            return alignedRaw;
+        }
+
+        function base64Encode(str) {
+            const bytes = new TextEncoder().encode(str);
+            let binary = "";
+            bytes.forEach((b) => binary += String.fromCharCode(b));
+            return btoa(binary);
+        }
+
+    </script>
+
+    <!-- Configuration and setup common to SDK objects, including events -->
+    <script>
+        var allWords = [];
+        var recognizedWordStrList = [];
+        var startOffset = 0;
+        var endOffset = 0;
+        var prosodyScores = [];
+        var durations = [];
+        var jo = {};
+        var referenceWords = [];
+
+        function resetVariables() {
+            allWords = [];
+            recognizedWordStrList = [];
+            startOffset = 0;
+            endOffset = 0;
+            prosodyScores = [];
+            durations = [];
+            jo = {};
+            referenceWords = [];
+        }
+
+        function getAudioStreamChunked(audioFile, cb, done, chunkSize = 3200) {
+            let offset = 0;
+
+            function readNextChunk() {
+                const slice = audioFile.slice(offset, offset + chunkSize);
+                const fr = new FileReader();
+
+                fr.onload = (e) => {
+                    const buf = e.target.result;
+                    cb(buf);
+                    offset += chunkSize;
+                    if (offset < audioFile.size) {
+                        readNextChunk();
+                    } else {
+                        done && done();
+                    }
+                };
+
+                fr.readAsArrayBuffer(slice);
+            }
+
+            readNextChunk();
+        }
+
+        function getAudioConfigFromStream() {
+            if (audioFile) {
+                let audioFormat = SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000, 16, 1);
+                let audioStream = SpeechSDK.AudioInputStream.createPushStream();
+                getAudioStreamChunked(
+                    audioFile,
+                    (b) => {
+                        audioStream.write(b);
+                    },
+                    () => {
+                        audioStream.close();
+                    }
+                );
+                return SpeechSDK.AudioConfig.fromStreamInput(audioStream, audioFormat);
+            } else if (inputSourceFileRadio.checked) {
+                alert('Please choose a file when selecting file input as your audio source.');
+                return;
+            }
+        }
+
+        function getAudioConfig() {
+            // If an audio file was specified, use it. Otherwise, use the microphone.
+            // Depending on browser security settings, the user may be prompted to allow microphone use. Using
+            // continuous recognition allows multiple phrases to be recognized from a single use authorization.
+            if (audioFile) {
+                return SpeechSDK.AudioConfig.fromWavFileInput(audioFile);
+            } else if (inputSourceFileRadio.checked) {
+                alert('Please choose a file when selecting file input as your audio source.');
+                return;
+            } else if (microphoneSources.value) {
+                return SpeechSDK.AudioConfig.fromMicrophoneInput(microphoneSources.value);
+            } else {
+                return SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+            }
+        }
+
+        function getSpeechConfig(sdkConfigType) {
+            let speechConfig;
+            if (authorizationToken) {
+                speechConfig = sdkConfigType.fromAuthorizationToken(authorizationToken, regionOptions.value);
+            } else if (!key.value) {
+                alert("Please enter your Cognitive Services Speech subscription key!");
+                return undefined;
+            } else {
+                speechConfig = sdkConfigType.fromSubscription(key.value, regionOptions.value);
+            }
+
+            speechConfig.speechRecognitionLanguage = languageOptions.value;
+            return speechConfig;
+        }
+
+        async function configureRequestBody() {
+            const headers = {
+                "Accept": "application/json;text/xml",
+                "Connection": "Keep-Alive",
+                "Content-Type": "audio/wav; codecs=audio/pcm; samplerate=16000",
+            };
+            if (authorizationToken) {
+                headers["Authorization"] = `Bearer ${authorizationToken}`;
+            } else if (!key.value) {
+                alert("Please enter your Cognitive Services Speech subscription key!");
+                return undefined;
+            } else {
+                headers["Ocp-Apim-Subscription-Key"] = key.value;
+            }
+
+            const sessionId = uuid.v4().replace(/-/g, "");
+
+            const url = `https://${regionOptions.value}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1` +
+                        `?format=detailed&language=${languageOptions.value}&X-ConnectionId=${sessionId}`;
+
+            const referenceText = await referenceTextHandler();
+            const pronAssessmentParamsJson = JSON.stringify({
+                GradingSystem: "HundredMark",
+                Dimension: "Comprehensive",
+                ReferenceText: referenceText,
+                EnableProsodyAssessment: enableProsodyAssessmentCheckbox.checked,
+                PhonemeAlphabet: "SAPI",
+                EnableMiscue: enableMiscueCheckbox.checked,
+                NBestPhonemeCount: 5
+            });
+            const pronAssessmentParams = base64Encode(pronAssessmentParamsJson);
+            headers["Pronunciation-Assessment"] = pronAssessmentParams;
+
+            return [url, headers, sessionId];
+        }
+
+        async function referenceTextHandler() {
+            let referenceText = referenceTextField.value;
+
+            // We need to convert the reference text to lower case, and split to words, then remove the punctuations.
+            if (["zh-cn"].includes(languageOptions.value.toLowerCase())) {
+                // Word segmentation for Chinese using the reference text and any short wave file
+                // Remove the blank characters in the reference text
+                referenceText = referenceText.replace(/ /g, "");
+                referenceWords = await getReferenceWords(referenceText);
+            } else {
+                referenceText = referenceText.toLocaleLowerCase() ?? "";
+                referenceWords = _.map(
+                    _.filter(referenceText.split(" "), (item) => !!item),
+                    (item) => item.replace(/^[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+|[\s!\"#$%&()*+,-./:;<=>?@[\]^_`{|}~]+$/g, "")
+                );
+            }
+            // Remove empty words
+            referenceWords = referenceWords.filter(w => w.trim().length > 0);
+            referenceText = referenceWords.join(" ");
+            return referenceText;
+        }
+
+        async function getPronunciationAssessmentConfig() {
+            const referenceText = await referenceTextHandler();
+            const enableMiscue = enableMiscueCheckbox.checked;
+            var pronunciationAssessmentConfig = new SpeechSDK.PronunciationAssessmentConfig(referenceText,
+                SpeechSDK.PronunciationAssessmentGradingSystem.HundredMark,
+                SpeechSDK.PronunciationAssessmentGranularity.Word, enableMiscue);
+            pronunciationAssessmentConfig.enableProsodyAssessment = enableProsodyAssessmentCheckbox.checked;
+            return pronunciationAssessmentConfig;
+        }
+
+        async function getPronunciationAssessmentConfigFromJson() {
+            const referenceText = await referenceTextHandler();
+            const enableMiscue = enableMiscueCheckbox.checked;
+            var pronunciationAssessmentConfig = SpeechSDK.PronunciationAssessmentConfig.fromJSON(
+                "{\"GradingSystem\": \"HundredMark\", \
+                \"Granularity\": \"Phoneme\", \
+                \"EnableMiscue\": \"" + enableMiscue + "\", \
+                \"ScenarioId\": \"" + scenarioId.value + "\"}"
+            );
+            referenceText && (pronunciationAssessmentConfig.referenceText = referenceText);
+            pronunciationAssessmentConfig.enableProsodyAssessment = enableProsodyAssessmentCheckbox.checked;
+            return pronunciationAssessmentConfig;
+        }
+
+        function onRecognizing(sender, recognitionEventArgs) {
+            var result = recognitionEventArgs.result;
+            statusDiv.innerHTML += `(recognizing) Reason: ${SpeechSDK.ResultReason[result.reason]}`
+                + ` Text: ${result.text}\r\n`;
+            // Update the hypothesis line in the phrase/result view (only have one)
+            phraseDiv.innerHTML = phraseDiv.innerHTML.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2')
+                + `${result.text} [...]\r\n`;
+            phraseDiv.scrollTop = phraseDiv.scrollHeight;
+        }
+
+        function onRecognized(sender, recognitionEventArgs) {
+            onRecognizedResult(recognitionEventArgs.result);
+        }
+
+        function onRecognizedResult(result) {
+            phraseDiv.scrollTop = phraseDiv.scrollHeight;
+
+            statusDiv.innerHTML += `(recognized)  Reason: ${SpeechSDK.ResultReason[result.reason]}`;
+            phraseDiv.innerHTML = phraseDiv.innerHTML.replace(/(.*)(^|[\r\n]+).*\[\.\.\.\][\r\n]+/, '$1$2');
+
+            switch (result.reason) {
+                case SpeechSDK.ResultReason.NoMatch:
+                    var noMatchDetail = SpeechSDK.NoMatchDetails.fromResult(result);
+                    statusDiv.innerHTML += ` NoMatchReason: ${SpeechSDK.NoMatchReason[noMatchDetail.reason]}\r\n`;
+                    break;
+                case SpeechSDK.ResultReason.Canceled:
+                    var cancelDetails = SpeechSDK.CancellationDetails.fromResult(result);
+                    statusDiv.innerHTML += ` CancellationReason: ${SpeechSDK.CancellationReason[cancelDetails.reason]}`;
+                        + (cancelDetails.reason === SpeechSDK.CancellationReason.Error 
+                            ? `: ${cancelDetails.errorDetails}` : ``)
+                        + `\r\n`;
+                    break;
+                case SpeechSDK.ResultReason.RecognizedSpeech:
+                    statusDiv.innerHTML += `\r\n`;
+
+                    if (useDetailedResults) {
+                        var detailedResultJson = JSON.parse(result.json);
+
+                        // Detailed result JSON includes substantial extra information:
+                        //  detailedResultJson['NBest'] is an array of recognition alternates
+                        //  detailedResultJson['NBest'][0] is the highest-confidence alternate
+                        //  ...['Confidence'] is the raw confidence score of an alternate
+                        //  ...['Lexical'] and others provide different result forms
+                        var displayText = detailedResultJson['DisplayText'];
+                        phraseDiv.innerHTML += `Detailed result for "${displayText}":\r\n`
+                        + `${JSON.stringify(detailedResultJson, null, 2)}\r\n`;
+                    } else if (result.text) {
+                        phraseDiv.innerHTML += `${result.text}\r\n`;
+                    }
+
+                    var pronunciationAssessmentResult = SpeechSDK.PronunciationAssessmentResult.fromResult(result);
+                    phraseDiv.innerHTML += 
+                    `[Pronunciation result] Pronunciation score: ${pronunciationAssessmentResult.pronunciationScore};
+                    Accuracy: ${pronunciationAssessmentResult.accuracyScore}; 
+                    Fluency: ${pronunciationAssessmentResult.fluencyScore};
+                    Completeness: ${pronunciationAssessmentResult.completenessScore}`;
+                    if (enableProsodyAssessmentCheckbox.checked) phraseDiv.innerHTML += `;
+                    Prosody: ${pronunciationAssessmentResult.prosodyScore}`;
+                    phraseDiv.innerHTML += ".\n";
+
+                    jo = JSON.parse(result.properties.getProperty(SpeechSDK.PropertyId.SpeechServiceResponse_JsonResult));
+                    const nb = jo["NBest"][0];
+                    const localtext = _.map(nb.Words, (item) => item.Word.toLowerCase());
+                    recognizedWordStrList = recognizedWordStrList.concat(localtext);
+                    prosodyScores.push(nb.PronunciationAssessment.ProsodyScore);
+                    const isSucceeded = jo.RecognitionStatus === 'Success';
+                    const nBestWords = jo.NBest[0].Words;
+
+                    if (isSucceeded && nBestWords) {
+                        allWords.push(...nBestWords);
+                    }
+
+                    if (startOffset == 0) {
+                        startOffset = nb.Words[0].Offset;
+                    }
+                    endOffset = nb.Words.slice(-1)[0].Offset + nb.Words.slice(-1)[0].Duration + 100000;
+                    break;
+            }
+        }
+
+        function onSessionStarted(sender, sessionEventArgs) {
+            statusDiv.innerHTML += `(sessionStarted) SessionId: ${sessionEventArgs.sessionId}\r\n`;
+
+            for (const thingToDisableDuringSession of thingsToDisableDuringSession) {
+                thingToDisableDuringSession.disabled = true;
+            }
+
+            scenarioStartButton.disabled = true;
+            scenarioStopButton.disabled = false;
+        }
+
+        function onSessionStopped(sender, sessionEventArgs) {
+            statusDiv.innerHTML += `(sessionStopped) SessionId: ${sessionEventArgs.sessionId}\r\n`;
+
+            if (scenarioSelection.value == 'pronunciationAssessmentContinuous' || 
+                scenarioSelection.value == 'pronunciationAssessmentContinuousStream'
+            ) {
+                calculateOverallPronunciationScore();
+            }
+
+            for (const thingToDisableDuringSession of thingsToDisableDuringSession) {
+                thingToDisableDuringSession.disabled = false;
+            }
+
+            scenarioStartButton.disabled = false;
+            scenarioStopButton.disabled = true;
+        }
+
+        function onCanceled (sender, cancellationEventArgs) {
+            window.console.log(cancellationEventArgs);
+
+            statusDiv.innerHTML += "(cancel) Reason: " + SpeechSDK.CancellationReason[cancellationEventArgs.reason];
+            if (cancellationEventArgs.reason === SpeechSDK.CancellationReason.Error) {
+                statusDiv.innerHTML += ": " + cancellationEventArgs.errorDetails;
+            }
+            statusDiv.innerHTML += "\r\n";
+        }
+
+        function applyCommonConfigurationTo(recognizer) {
+            // The 'recognizing' event signals that an intermediate recognition result is received.
+            // Intermediate results arrive while audio is being processed and represent the current "best guess" about
+            // what's been spoken so far.
+            recognizer.recognizing = onRecognizing;
+
+            // The 'recognized' event signals that a finalized recognition result has been received. These results are
+            // formed across complete utterance audio (with either silence or eof at the end) and will include
+            // punctuation, capitalization, and potentially other extra details.
+            // 
+            // * In the case of continuous scenarios, these final results will be generated after each segment of audio
+            //   with sufficient silence at the end.
+            // * In the case of intent scenarios, only these final results will contain intent JSON data.
+            // * Single-shot scenarios can also use a continuation on recognizeOnceAsync calls to handle this without
+            //   event registration.
+            recognizer.recognized = onRecognized;
+
+            // The 'canceled' event signals that the service has stopped processing speech.
+            // https://docs.microsoft.com/javascript/api/microsoft-cognitiveservices-speech-sdk/speechrecognitioncanceledeventargs?view=azure-node-latest
+            // This can happen for two broad classes of reasons:
+            // 1. An error was encountered.
+            //    In this case, the .errorDetails property will contain a textual representation of the error.
+            // 2. No additional audio is available.
+            //    This is caused by the input stream being closed or reaching the end of an audio file.
+            recognizer.canceled = onCanceled;
+
+            // The 'sessionStarted' event signals that audio has begun flowing and an interaction with the service has
+            // started.
+            recognizer.sessionStarted = onSessionStarted;
+
+            // The 'sessionStopped' event signals that the current interaction with the speech service has ended and
+            // audio has stopped flowing.
+            recognizer.sessionStopped = onSessionStopped;
+        }
+
+        function calculateOverallPronunciationScore() {
+            if (difflib === undefined) {
+                phraseDiv.innerHTML += `ERROR: difflib-browser.js is needed for pronunciation assessment calculation; see https://github.com/qiao/difflib.js`;
+            }
+            let referenceText = referenceTextField.value;
+            const enableMiscue = enableMiscueCheckbox.checked;
+            let unscriptedScenario = referenceText.length > 0 ? false : true;
+            let lastWords = [];
+            if (enableMiscue && !unscriptedScenario) {
+                // align the reference words basing on recognized words.
+                referenceWords = alignListsWithDiffHandling(
+                    referenceWords,
+                    allWords.map(x => x.Word.toLowerCase())
+                );
+                // For continuous pronunciation assessment mode, the service won't return the words with `Insertion` or `Omission`
+                // We need to compare with the reference text after received all recognized words to get these error words.
+                const diff = new difflib.SequenceMatcher(null, referenceWords, recognizedWordStrList);
+                for (const d of diff.getOpcodes()) {
+                    if (d[0] == "insert" || d[0] == "replace") {
+                        for (let j = d[3]; j < d[4]; j++) {
+                            if (allWords && allWords.length > 0 && allWords[j].PronunciationAssessment.ErrorType !== "Insertion") {
+                                allWords[j].PronunciationAssessment.ErrorType = "Insertion";
+                            }
+                            lastWords.push(allWords[j]);
+                        }
+                    }
+                    if (d[0] == "delete" || d[0] == "replace") {
+                        if (
+                            d[2] == referenceWords.length &&
+                            !(
+                                jo.RecognitionStatus == "Success" ||
+                                jo.RecognitionStatus == "Failed"
+                            )
+                        )
+                        continue;
+                        for (let i = d[1]; i < d[2]; i++) {
+                            const word = {
+                                Word: referenceWords[i],
+                                PronunciationAssessment: {
+                                    ErrorType: "Omission",
+                                },
+                            };
+                            lastWords.push(word);
+                        }
+                    }
+                    if (d[0] == "equal") {
+                        for (let k = d[3], count = 0; k < d[4]; count++) {
+                            lastWords.push(allWords[k]);
+                            k++;
+                        }
+                    }
+                }
+            } else {
+                lastWords = allWords;
+            }
+
+            // If accuracy score is below 60, mark as mispronunciation
+            _.forEach(lastWords, (word) => {
+                if (word.PronunciationAssessment.AccuracyScore < 60 && word.PronunciationAssessment.ErrorType == "None") {
+                    word.PronunciationAssessment.ErrorType = "Mispronunciation";
+                }
+            });
+
+            const accuracyScores = [];
+            const handledLastWords = [];
+            let validWordCount = 0;
+            _.forEach(lastWords, (word) => {
+                if (word && word.PronunciationAssessment.ErrorType != "Insertion") {
+                    accuracyScores.push(Number(word.PronunciationAssessment.AccuracyScore ?? 0));
+                    handledLastWords.push(word.Word);
+                }
+                if (word.PronunciationAssessment.ErrorType == "None" && (word.PronunciationAssessment.AccuracyScore ?? 0) >= 0) {
+                    validWordCount++;
+                    durations.push(Number(word.Duration) + 100000);
+                }
+            });
+
+            // We can calculate whole accuracy by averaging
+            const accuracyScore = Number((_.sum(accuracyScores) / accuracyScores.length).toFixed(2));
+
+            // Re-calculate the prosody score by averaging
+            let prosodyScore = NaN;
+            if (prosodyScores.length !== 0) {
+                prosodyScore = Number((_.sum(prosodyScores) / prosodyScores.length).toFixed(2));
+            }
+
+            // Re-calculate fluency score
+            let fluencyScore = 0;
+            if (startOffset > 0) {
+                fluencyScore = Number((_.sum(durations) / (endOffset - startOffset) * 100).toFixed(2));
+            }
+
+            // Calculate whole completeness score
+            let compScore = 100;
+            if (!unscriptedScenario) {
+                compScore = Number(((validWordCount / handledLastWords.length) * 100).toFixed(2));
+                compScore = compScore > 100 ? 100 : compScore;
+            }
+
+            let pronunciationScore = 0;
+            if (!unscriptedScenario) {
+                // Scripted scenario
+                if (enableProsodyAssessmentCheckbox.checked && !Number.isNaN(prosodyScore)) {
+                    const sortedScores = [accuracyScore, prosodyScore, compScore, fluencyScore].sort((a, b) => a - b);
+                    pronunciationScore =
+                        sortedScores[0] * 0.4 +
+                        sortedScores[1] * 0.2 +
+                        sortedScores[2] * 0.2 +
+                        sortedScores[3] * 0.2;
+                } else {
+                    const sortedScores = [accuracyScore, compScore, fluencyScore].sort((a, b) => a - b);
+                    pronunciationScore =
+                        sortedScores[0] * 0.6 +
+                        sortedScores[1] * 0.2 +
+                        sortedScores[2] * 0.2;
+                }
+            } else {
+                // Unscripted scenario
+                if (enableProsodyAssessmentCheckbox.checked && !Number.isNaN(prosodyScore)) {
+                    const sortedScores = [accuracyScore, prosodyScore, fluencyScore].sort((a, b) => a - b);
+                    pronunciationScore =
+                        sortedScores[0] * 0.6 +
+                        sortedScores[1] * 0.2 +
+                        sortedScores[2] * 0.2;
+                } else {
+                    const sortedScores = [accuracyScore, fluencyScore].sort((a, b) => a - b);
+                    pronunciationScore =
+                        sortedScores[0] * 0.6 +
+                        sortedScores[1] * 0.4;
+                }
+            }
+
+            phraseDiv.innerHTML +=
+                `[Overall Pronunciation result] Pronunciation score: ${pronunciationScore.toFixed(0)};
+                       Accuracy: ${accuracyScore.toFixed(0)}; 
+                       Fluency: ${fluencyScore.toFixed(0)};
+                       Completeness: ${compScore.toFixed(0)}`;
+            if (enableProsodyAssessmentCheckbox.checked) {
+                phraseDiv.innerHTML += `;
+                       Prosody: ${prosodyScore.toFixed(0)}`;
+            }
+            phraseDiv.innerHTML += ".\n";
+        }
+
+        function writeApiResultToUi(result) {
+            phraseDiv.innerHTML += JSON.stringify(result, null, 2);
+        }
+    </script>
+
+    <!-- Top-level scenario functions -->
+    <script>
+        async function doPronunciationAssessmentOnceAsync() {
+            resetUiForScenarioStart();
+            resetVariables();
+
+            var audioConfig = getAudioConfig();
+            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+            var pronunciationAssessmentConfig = await getPronunciationAssessmentConfig();
+            if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
+
+            // Create the SpeechRecognizer and set up common event handlers and PhraseList data
+            reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+            applyCommonConfigurationTo(reco);
+
+            // Apply pronunciation assessment config to recognizer.
+            pronunciationAssessmentConfig.applyTo(reco);
+
+            // Note: in this scenario sample, the 'recognized' event is not being set to instead demonstrate
+            // continuation on the 'recognizeOnceAsync' call. 'recognized' can be set in much the same way as
+            // 'recognizing' if an event-driven approach is preferable.
+            reco.recognized = undefined;
+
+            // Note: this scenario sample demonstrates result handling via continuation on the recognizeOnceAsync call.
+            // The 'recognized' event handler can be used in a similar fashion.
+            reco.recognizeOnceAsync(
+                function (successfulResult) {
+                    onRecognizedResult(successfulResult);
+                },
+                function (err) {
+                    window.console.log(err);
+                    phraseDiv.innerHTML += "ERROR: " + err;
+                });
+        }
+
+        async function doContinuousPronunciationAssessment() {
+            resetUiForScenarioStart();
+            resetVariables();
+
+            var audioConfig = getAudioConfig();
+            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+            var pronunciationAssessmentConfig = await getPronunciationAssessmentConfig();
+            if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
+
+            // Create the SpeechRecognizer and set up common event handlers and PhraseList data
+            reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+            applyCommonConfigurationTo(reco);
+
+            // Apply pronunciation assessment config to recognizer.
+            pronunciationAssessmentConfig.applyTo(reco);
+
+            // Start the continuous recognition. Note that, in this continuous scenario, activity is purely event-
+            // driven, as use of continuation (as is in the single-shot sample) isn't applicable when there's not a
+            // single result.
+            reco.startContinuousRecognitionAsync();
+        }
+
+        async function doContinuousPronunciationAssessmentFromStream() {
+            resetUiForScenarioStart();
+            resetVariables();
+            if (inputSourceMicrophoneRadio.checked) {
+                alert("The current scenario does not support microphone input.");
+                return;
+            }
+
+            var audioConfig = getAudioConfigFromStream();
+            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+            var pronunciationAssessmentConfig = await getPronunciationAssessmentConfig();
+            if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
+
+            // Create the SpeechRecognizer and set up common event handlers and PhraseList data
+            reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+            applyCommonConfigurationTo(reco);
+
+            // Apply pronunciation assessment config to recognizer.
+            pronunciationAssessmentConfig.applyTo(reco);
+
+            // Start the continuous recognition. Note that, in this continuous scenario, activity is purely event-
+            // driven, as use of continuation (as is in the single-shot sample) isn't applicable when there's not a
+            // single result.
+            reco.startContinuousRecognitionAsync();
+        }
+
+        async function pronunciationAssessmentConfiguredWithJson() {
+            resetUiForScenarioStart();
+            resetVariables();
+
+            var audioConfig = getAudioConfig();
+            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
+            var pronunciationAssessmentConfig = await getPronunciationAssessmentConfigFromJson();
+            if (!audioConfig || !speechConfig || !pronunciationAssessmentConfig) return;
+
+            // Create the SpeechRecognizer and set up common event handlers and PhraseList data
+            reco = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+            applyCommonConfigurationTo(reco);
+
+            // Apply pronunciation assessment config to recognizer.
+            pronunciationAssessmentConfig.applyTo(reco);
+
+            // Note: in this scenario sample, the 'recognized' event is not being set to instead demonstrate
+            // continuation on the 'recognizeOnceAsync' call. 'recognized' can be set in much the same way as
+            // 'recognizing' if an event-driven approach is preferable.
+            reco.recognized = undefined;
+
+            // Note: this scenario sample demonstrates result handling via continuation on the recognizeOnceAsync call.
+            // The 'recognized' event handler can be used in a similar fashion.
+            reco.recognizeOnceAsync(
+                function (successfulResult) {
+                    onRecognizedResult(successfulResult);
+                },
+                function (err) {
+                    window.console.log(err);
+                    phraseDiv.innerHTML += "ERROR: " + err;
+                }
+            );
+        }
+
+        async function pronunciationAssessmentWithRestAPI() {
+            resetUiForScenarioStart();
+            resetVariables();
+            if (inputSourceMicrophoneRadio.checked) {
+                alert("The current scenario does not support microphone input.");
+                return;
+            }
+
+            let url, headers, sessionId;
+            try {
+                [url, headers, sessionId] = await configureRequestBody();
+            } catch (e) {
+                return;
+            }
+            statusDiv.innerHTML += `SessionId: ${sessionId}\n`;
+
+            const start = Date.now();
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers,
+                    body: audioFile
+                });
+                const getResponseTime = Date.now();
+                statusDiv.innerHTML += `Response Time: ${(getResponseTime - start)/1000}s\n`;
+                if (!response.ok) {
+                    const text = await response.text();
+                    statusDiv.innerHTML += `Error ${response.status}: ${text}\n`;
+                } else {
+                    const data = await response.json();
+                    writeApiResultToUi(data);
+                }
+            } catch (err) {
+                statusDiv.innerHTML += "Fetch failed: " + err;
+            }
+        }
+
+    </script>
+</body>
+
+</html>

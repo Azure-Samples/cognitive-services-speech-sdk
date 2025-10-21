@@ -1,0 +1,514 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3C00A32C25F8727100512312 /* AudioRecorder.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C00A32B25F8727100512312 /* AudioRecorder.m */; };
+		3C1B8BCA2679C50600706BB3 /* pronunciation-assessment.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */; };
+		522D4F6D2E5621B700D5A136 /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 522D4F6C2E5621B700D5A136 /* MicrosoftCognitiveServicesSpeech.xcframework */; };
+		F3184E4B214674D60096193E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E4A214674D60096193E /* AppDelegate.m */; };
+		F3184E4E214674D60096193E /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E4D214674D60096193E /* ViewController.m */; };
+		F3184E53214674DA0096193E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F3184E52214674DA0096193E /* Assets.xcassets */; };
+		F3184E59214674DA0096193E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F3184E58214674DA0096193E /* main.m */; };
+		F3184E68214685C80096193E /* whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = F3184E67214685C70096193E /* whatstheweatherlike.wav */; };
+		F3D2F4A1216A516E006E5F52 /* speech-samplesUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = F3D2F4A0216A516E006E5F52 /* speech-samplesUITests.m */; };
+		F3D2F4AC216A563C006E5F52 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3D2F4A8216A5538006E5F52 /* XCTest.framework */; };
+		FCFC930029A7BC3E00A91C8F /* kws.table in Resources */ = {isa = PBXBuildFile; fileRef = FCFC92FE29A7BC3E00A91C8F /* kws.table */; };
+		FCFC930129A7BC3E00A91C8F /* kws_whatstheweatherlike.wav in Resources */ = {isa = PBXBuildFile; fileRef = FCFC92FF29A7BC3E00A91C8F /* kws_whatstheweatherlike.wav */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F3D2F4A3216A516E006E5F52 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F3184E3E214674D60096193E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F3184E45214674D60096193E;
+			remoteInfo = "speech-samples";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F376164021540C9D0097B6F1 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		3C00A32A25F8726500512312 /* AudioRecorder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioRecorder.h; sourceTree = "<group>"; };
+		3C00A32B25F8727100512312 /* AudioRecorder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AudioRecorder.m; sourceTree = "<group>"; };
+		3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "pronunciation-assessment.wav"; sourceTree = "<group>"; };
+		522D4F6C2E5621B700D5A136 /* MicrosoftCognitiveServicesSpeech.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = MicrosoftCognitiveServicesSpeech.xcframework; path = "/Users/test/Downloads/MicrosoftCognitiveServicesSpeech-XCFramework-1.46.0/MicrosoftCognitiveServicesSpeech.xcframework"; sourceTree = "<absolute>"; };
+		F3184E46214674D60096193E /* speech-samples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "speech-samples.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3184E49214674D60096193E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		F3184E4A214674D60096193E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		F3184E4C214674D60096193E /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		F3184E4D214674D60096193E /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		F3184E52214674DA0096193E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F3184E57214674DA0096193E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F3184E58214674DA0096193E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		F3184E67214685C70096193E /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = whatstheweatherlike.wav; path = ./whatstheweatherlike.wav; sourceTree = "<group>"; };
+		F3D2F49E216A516E006E5F52 /* speech-samplesUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "speech-samplesUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3D2F4A0216A516E006E5F52 /* speech-samplesUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "speech-samplesUITests.m"; sourceTree = "<group>"; };
+		F3D2F4A2216A516E006E5F52 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F3D2F4A8216A5538006E5F52 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		FCFC92FE29A7BC3E00A91C8F /* kws.table */ = {isa = PBXFileReference; lastKnownFileType = file; path = kws.table; sourceTree = "<group>"; };
+		FCFC92FF29A7BC3E00A91C8F /* kws_whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = kws_whatstheweatherlike.wav; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F3184E43214674D60096193E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				522D4F6D2E5621B700D5A136 /* MicrosoftCognitiveServicesSpeech.xcframework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3D2F49B216A516E006E5F52 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F3D2F4AC216A563C006E5F52 /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F3184E3D214674D60096193E = {
+			isa = PBXGroup;
+			children = (
+				522D4F6C2E5621B700D5A136 /* MicrosoftCognitiveServicesSpeech.xcframework */,
+				FCFC92FF29A7BC3E00A91C8F /* kws_whatstheweatherlike.wav */,
+				FCFC92FE29A7BC3E00A91C8F /* kws.table */,
+				3C1B8BC92679C50600706BB3 /* pronunciation-assessment.wav */,
+				F3184E67214685C70096193E /* whatstheweatherlike.wav */,
+				F3184E48214674D60096193E /* speech-samples */,
+				F3D2F49F216A516E006E5F52 /* speech-samplesUITests */,
+				F3184E47214674D60096193E /* Products */,
+				F3184E5F214675180096193E /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		F3184E47214674D60096193E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F3184E46214674D60096193E /* speech-samples.app */,
+				F3D2F49E216A516E006E5F52 /* speech-samplesUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F3184E48214674D60096193E /* speech-samples */ = {
+			isa = PBXGroup;
+			children = (
+				F3184E49214674D60096193E /* AppDelegate.h */,
+				F3184E4A214674D60096193E /* AppDelegate.m */,
+				F3184E52214674DA0096193E /* Assets.xcassets */,
+				3C00A32A25F8726500512312 /* AudioRecorder.h */,
+				3C00A32B25F8727100512312 /* AudioRecorder.m */,
+				F3184E57214674DA0096193E /* Info.plist */,
+				F3184E58214674DA0096193E /* main.m */,
+				F3184E4C214674D60096193E /* ViewController.h */,
+				F3184E4D214674D60096193E /* ViewController.m */,
+			);
+			path = "speech-samples";
+			sourceTree = "<group>";
+		};
+		F3184E5F214675180096193E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F3D2F4A8216A5538006E5F52 /* XCTest.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F3D2F49F216A516E006E5F52 /* speech-samplesUITests */ = {
+			isa = PBXGroup;
+			children = (
+				F3D2F4A0216A516E006E5F52 /* speech-samplesUITests.m */,
+				F3D2F4A2216A516E006E5F52 /* Info.plist */,
+			);
+			path = "speech-samplesUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F3184E45214674D60096193E /* speech-samples */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F3184E5C214674DA0096193E /* Build configuration list for PBXNativeTarget "speech-samples" */;
+			buildPhases = (
+				F3184E42214674D60096193E /* Sources */,
+				F3184E43214674D60096193E /* Frameworks */,
+				F3184E44214674D60096193E /* Resources */,
+				F376164021540C9D0097B6F1 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "speech-samples";
+			productName = "speech-samples";
+			productReference = F3184E46214674D60096193E /* speech-samples.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F3D2F49D216A516E006E5F52 /* speech-samplesUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F3D2F4A5216A516E006E5F52 /* Build configuration list for PBXNativeTarget "speech-samplesUITests" */;
+			buildPhases = (
+				F3D2F49A216A516E006E5F52 /* Sources */,
+				F3D2F49B216A516E006E5F52 /* Frameworks */,
+				F3D2F49C216A516E006E5F52 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F3D2F4A4216A516E006E5F52 /* PBXTargetDependency */,
+			);
+			name = "speech-samplesUITests";
+			productName = "speech-samplesUITests";
+			productReference = F3D2F49E216A516E006E5F52 /* speech-samplesUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F3184E3E214674D60096193E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0940;
+				ORGANIZATIONNAME = TestOrg;
+				TargetAttributes = {
+					F3184E45214674D60096193E = {
+						CreatedOnToolsVersion = 9.4.1;
+					};
+					F3D2F49D216A516E006E5F52 = {
+						CreatedOnToolsVersion = 9.4.1;
+						TestTargetID = F3184E45214674D60096193E;
+					};
+				};
+			};
+			buildConfigurationList = F3184E41214674D60096193E /* Build configuration list for PBXProject "speech-samples" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F3184E3D214674D60096193E;
+			productRefGroup = F3184E47214674D60096193E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F3184E45214674D60096193E /* speech-samples */,
+				F3D2F49D216A516E006E5F52 /* speech-samplesUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F3184E44214674D60096193E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCFC930029A7BC3E00A91C8F /* kws.table in Resources */,
+				3C1B8BCA2679C50600706BB3 /* pronunciation-assessment.wav in Resources */,
+				FCFC930129A7BC3E00A91C8F /* kws_whatstheweatherlike.wav in Resources */,
+				F3184E68214685C80096193E /* whatstheweatherlike.wav in Resources */,
+				F3184E53214674DA0096193E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3D2F49C216A516E006E5F52 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F3184E42214674D60096193E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F3184E4E214674D60096193E /* ViewController.m in Sources */,
+				F3184E59214674DA0096193E /* main.m in Sources */,
+				F3184E4B214674D60096193E /* AppDelegate.m in Sources */,
+				3C00A32C25F8727100512312 /* AudioRecorder.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F3D2F49A216A516E006E5F52 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F3D2F4A1216A516E006E5F52 /* speech-samplesUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F3D2F4A4216A516E006E5F52 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F3184E45214674D60096193E /* speech-samples */;
+			targetProxy = F3D2F4A3216A516E006E5F52 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F3184E5A214674DA0096193E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_WORKSPACE = YES;
+			};
+			name = Debug;
+		};
+		F3184E5B214674DA0096193E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+				VALIDATE_WORKSPACE = YES;
+			};
+			name = Release;
+		};
+		F3184E5D214674DA0096193E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "speech-samples/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(SRCROOT)/..",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "corp.microsoft.testorg.speech-samples";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F3184E5E214674DA0096193E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = "";
+				INFOPLIST_FILE = "speech-samples/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(SRCROOT)/..",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = "";
+				PRODUCT_BUNDLE_IDENTIFIER = "corp.microsoft.testorg.speech-samples";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F3D2F4A6216A516E006E5F52 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+					armv7,
+					i386,
+				);
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "speech-samplesUITests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "testorg.speech-samplesUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "speech-samples";
+			};
+			name = Debug;
+		};
+		F3D2F4A7216A516E006E5F52 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					"$(ARCHS_STANDARD)",
+					armv7s,
+					armv7,
+					i386,
+				);
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "speech-samplesUITests/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "testorg.speech-samplesUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "speech-samples";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F3184E41214674D60096193E /* Build configuration list for PBXProject "speech-samples" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3184E5A214674DA0096193E /* Debug */,
+				F3184E5B214674DA0096193E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F3184E5C214674DA0096193E /* Build configuration list for PBXNativeTarget "speech-samples" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3184E5D214674DA0096193E /* Debug */,
+				F3184E5E214674DA0096193E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F3D2F4A5216A516E006E5F52 /* Build configuration list for PBXNativeTarget "speech-samplesUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F3D2F4A6216A516E006E5F52 /* Debug */,
+				F3D2F4A7216A516E006E5F52 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F3184E3E214674D60096193E /* Project object */;
+}

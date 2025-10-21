@@ -8,22 +8,21 @@
 #include <speechapi_cxx.h>
 #include <nlohmann/json.hpp>
 
-using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
 
-extern shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig();
-extern shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig();
+extern std::shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig();
+extern std::shared_ptr<HybridSpeechConfig> CreateHybridSpeechConfig();
 
 extern uint32_t GetEmbeddedSpeechSamplesPerSecond();
 extern uint8_t GetEmbeddedSpeechBitsPerSample();
 extern uint8_t GetEmbeddedSpeechChannels();
 
-extern const string GetSpeechRawAudioFileName();
-extern const string GetSpeechWavAudioFileName();
-extern const string GetKeywordModelFileName();
-extern const string GetKeywordPhrase();
-extern const string GetPerfTestAudioFileName();
+extern const std::string GetSpeechRawAudioFileName();
+extern const std::string GetSpeechWavAudioFileName();
+extern const std::string GetKeywordModelFileName();
+extern const std::string GetKeywordPhrase();
+extern const std::string GetPerfTestAudioFileName();
 
 
 // Lists available embedded speech recognition models.
@@ -41,43 +40,43 @@ void ListEmbeddedSpeechRecognitionModels()
 
     if (!models.empty())
     {
-        cout << "Models found:" << endl;
+        std::cout << "Models found:" << std::endl;
         for (const auto& model : models)
         {
-            cout << model->Name << endl;
-            cout << " Locale(s): ";
+            std::cout << model->Name << std::endl;
+            std::cout << " Locale(s): ";
             for (const auto& locale : model->Locales)
             {
-                cout << locale << " ";
+                std::cout << locale << " ";
             }
-            cout << endl;
-            cout << " Path:      " << model->Path << endl;
+            std::cout << std::endl;
+            std::cout << " Path:      " << model->Path << std::endl;
         }
 
         // To find a model that supports a specific locale, for example:
         /*
         auto locale = "en-US";
         auto found =
-            find_if(models.begin(), models.end(), [&](shared_ptr<SpeechRecognitionModel> model)
+            std::find_if(models.begin(), models.end(), [&](std::shared_ptr<SpeechRecognitionModel> model)
                 {
                     return model->Locales[0].compare(locale) == 0;
                 });
         if (found != models.end())
         {
-            cout << "Found " << locale << " model: " << (*found)->Name << endl;
+            std::cout << "Found " << locale << " model: " << (*found)->Name << std::endl;
         }
         */
     }
     else
     {
-        cerr << "No models found. Either the path is not valid or the format of model(s) is unknown." << endl;
+        std::cerr << "No models found. Either the path is not valid or the format of model(s) is unknown." << std::endl;
     }
 }
 
 
-void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, bool waitForUser)
+void RecognizeSpeech(std::shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, bool waitForUser)
 {
-    promise<void> recognitionEnd;
+    std::promise<void> recognitionEnd;
 
     // Subscribes to events.
     recognizer->Recognizing += [](const SpeechRecognitionEventArgs& e)
@@ -85,7 +84,7 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
         // Intermediate result (hypothesis).
         if (e.Result->Reason == ResultReason::RecognizingSpeech)
         {
-            cout << "Recognizing:" << e.Result->Text << endl;
+            std::cout << "Recognizing:" << e.Result->Text << std::endl;
         }
         else if (e.Result->Reason == ResultReason::RecognizingKeyword)
         {
@@ -98,18 +97,18 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
         if (e.Result->Reason == ResultReason::RecognizedKeyword)
         {
             // Keyword detected, speech recognition will start.
-            cout << "KEYWORD: Text=" << e.Result->Text << endl;
+            std::cout << "KEYWORD: Text=" << e.Result->Text << std::endl;
         }
         else if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
             // Final result. May differ from the last intermediate result.
-            cout << "RECOGNIZED: Text=" << e.Result->Text << endl;
+            std::cout << "RECOGNIZED: Text=" << e.Result->Text << std::endl;
 
             // See where the result came from, cloud (online) or embedded (offline)
             // speech recognition.
             // This can change during a session where HybridSpeechConfig is used.
             /*
-            cout << "Recognition backend: " << e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_RecognitionBackend) << endl;
+            std::cout << "Recognition backend: " << e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_RecognitionBackend) << std::endl;
             */
 
             // Recognition results in JSON format.
@@ -126,13 +125,13 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
             // phrase offset and duration only indicate a time window inside of
             // which the phrase appeared, not the accurate start and end of speech.
             /*
-            string jsonResult = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
-            cout << "JSON result: " << jsonResult << endl;
+            std::string jsonResult = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+            std::cout << "JSON result: " << jsonResult << std::endl;
             */
             // For parsing and better presentation, use e.g. nlohmann/json.
             /*
             auto json = nlohmann::json::parse(jsonResult);
-            cout << json.dump(4) << endl;
+            std::cout << json.dump(4) << std::endl;
 
             if (json.contains("NBest")) // detailed results
             {
@@ -141,9 +140,9 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
                 {
                     for (const auto& word : best["Words"])
                     {
-                        cout << "Word: " << word["Word"] << " | "
+                        std::cout << "Word: " << word["Word"] << " | "
                             << "Offset: " << word["Offset"] / 10000 << "ms | "
-                            << "Duration: " << word["Duration"] / 10000 << "ms" << endl;
+                            << "Duration: " << word["Duration"] / 10000 << "ms" << std::endl;
                     }
                 }
             }
@@ -153,22 +152,22 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
         {
             // NoMatch occurs when no speech phrase was recognized.
             auto reason = NoMatchDetails::FromResult(e.Result)->Reason;
-            cout << "NO MATCH: Reason=";
+            std::cout << "NO MATCH: Reason=";
             switch (reason)
             {
             case NoMatchReason::NotRecognized:
                 // Input audio was not silent but contained no recognizable speech.
-                cout << "NotRecognized" << endl;
+                std::cout << "NotRecognized" << std::endl;
                 break;
             case NoMatchReason::InitialSilenceTimeout:
                 // Input audio was silent and the (initial) silence timeout expired.
                 // In continuous recognition this can happen multiple times during
                 // a session, not just at the very beginning.
-                cout << "InitialSilenceTimeout" << endl;
+                std::cout << "InitialSilenceTimeout" << std::endl;
                 break;
             default:
                 // Other reasons are not supported in embedded speech at the moment.
-                cout << int(reason) << endl;
+                std::cout << int(reason) << std::endl;
                 break;
             }
         }
@@ -180,17 +179,17 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
         {
         case CancellationReason::EndOfStream:
             // Input stream was closed or the end of an input file was reached.
-            cout << "CANCELED: EndOfStream" << endl;
+            std::cout << "CANCELED: EndOfStream" << std::endl;
             break;
 
         case CancellationReason::Error:
             // NOTE: In case of an error, do not use the same recognizer for recognition anymore.
-            cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << endl;
-            cerr << "CANCELED: ErrorDetails=\"" << e.ErrorDetails << "\"" << endl;
+            std::cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << std::endl;
+            std::cerr << "CANCELED: ErrorDetails=\"" << e.ErrorDetails << "\"" << std::endl;
             break;
 
         default:
-            cout << "CANCELED: Reason=" << int(e.Reason) << endl;
+            std::cout << "CANCELED: Reason=" << int(e.Reason) << std::endl;
             break;
         }
     };
@@ -198,13 +197,13 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
     recognizer->SessionStarted += [](const SessionEventArgs& e)
     {
         UNUSED(e);
-        cout << "Session started." << endl;
+        std::cout << "Session started." << std::endl;
     };
 
     recognizer->SessionStopped += [&recognitionEnd](const SessionEventArgs& e)
     {
         UNUSED(e);
-        cout << "Session stopped." << endl;
+        std::cout << "Session stopped." << std::endl;
         recognitionEnd.set_value();
     };
 
@@ -222,8 +221,8 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
         // Steps 1-3 repeat until StopKeywordRecognitionAsync() is called.
         recognizer->StartKeywordRecognitionAsync(keywordModel).get();
 
-        cout << "Say something starting with \"" << GetKeywordPhrase() << "\" (press Enter to stop)...\n";
-        cin.get();
+        std::cout << "Say something starting with \"" << GetKeywordPhrase() << "\" (press Enter to stop)..." << std::endl;
+        std::cin.get();
 
         // Stops recognition.
         recognizer->StopKeywordRecognitionAsync().get();
@@ -244,8 +243,8 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
 
         if (waitForUser)
         {
-            cout << "Say something (press Enter to stop)...\n";
-            cin.get();
+            std::cout << "Say something (press Enter to stop)..." << std::endl;
+            std::cin.get();
         }
         else
         {
@@ -262,42 +261,48 @@ void RecognizeSpeech(shared_ptr<SpeechRecognizer> recognizer, bool useKeyword, b
 // Push stream can be used when input audio is not generated faster than it
 // can be processed (i.e. the generation of input is the limiting factor).
 // The application determines the rate of input data transfer.
-void PushStreamInputReader(shared_ptr<PushAudioInputStream> pushStream)
+void PushStreamInputReader(std::shared_ptr<PushAudioInputStream> pushStream)
 {
     try
     {
         // In this example the input stream is a file. Modify the code to use
         // a non-file source (e.g. some audio API that returns data) as needed.
-        ifstream input(GetSpeechRawAudioFileName(), ios::in | ios::binary);
+        std::ifstream input(GetSpeechRawAudioFileName(), std::ios::in | std::ios::binary);
 
         if (!input.good())
         {
-            throw invalid_argument("Failed to open input file " + GetSpeechRawAudioFileName());
+            throw std::invalid_argument("Failed to open input file " + GetSpeechRawAudioFileName());
         }
 
-        vector<uint8_t> buffer(3200); // 100ms of 16kHz 16-bit mono audio
+        std::vector<uint8_t> buffer(3200); // 100ms of 16kHz 16-bit mono audio
 
         while (true)
         {
             // Read audio data from the input stream to a data buffer.
             input.read((char*)buffer.data(), buffer.size());
-            auto bytesRead = input.gcount();
+            std::streamsize bytesRead = input.gcount();
 
             // Copy audio data from the data buffer into a push stream
             // for the Speech SDK to consume.
             // Data must NOT include any headers, only audio samples.
-            pushStream->Write(buffer.data(), (uint32_t)bytesRead);
+            // If the method used to read the input stream can return
+            // a negative number of bytes in case of an error, check
+            // the value and do not pass a negative number to the SDK.
+            if (bytesRead >= 0)
+            {
+                pushStream->Write(buffer.data(), (uint32_t)bytesRead);
+            }
 
-            if (!input)
+            if (!input || bytesRead <= 0)
             {
                 input.close();
                 break;
             }
         }
     }
-    catch (const exception& e)
+    catch (const std::exception& e)
     {
-        cerr << "PushStreamInputReader: " << e.what() << endl;
+        std::cerr << "PushStreamInputReader: " << e.what() << std::endl;
     }
 
     pushStream->Close();
@@ -311,17 +316,17 @@ void PushStreamInputReader(shared_ptr<PushAudioInputStream> pushStream)
 class PullStreamInputReader final : public PullAudioInputStreamCallback
 {
 private:
-    ifstream m_input;
+    std::ifstream m_input;
 
 public:
     PullStreamInputReader()
     {
         // In this example the input stream is a file. Modify the code to use
         // a non-file source (e.g. audio API that returns data) as necessary.
-        m_input.open(GetSpeechRawAudioFileName(), ios::in | ios::binary);
+        m_input.open(GetSpeechRawAudioFileName(), std::ios::in | std::ios::binary);
         if (!m_input.good())
         {
-            throw invalid_argument("Failed to open input file " + GetSpeechRawAudioFileName());
+            throw std::invalid_argument("Failed to open input file " + GetSpeechRawAudioFileName());
         }
     }
 
@@ -336,7 +341,12 @@ public:
         // Speech SDK to consume.
         // Data must NOT include any headers, only audio samples.
         m_input.read((char*)buffer, size);
-        return (int)m_input.gcount();
+        std::streamsize bytesRead = m_input.gcount();
+
+        // If the method used to read the input stream can return
+        // a negative number of bytes in case of an error, check
+        // the value and do not pass a negative number to the SDK.
+        return (bytesRead >= 0) ? (int)bytesRead : 0;
     }
 
     // This method is called for cleanup of resources.
@@ -350,8 +360,8 @@ public:
 // Recognizes speech using embedded speech config and the system default microphone device.
 void EmbeddedSpeechRecognitionFromMicrophone()
 {
-    auto useKeyword = false;
-    auto waitForUser = true;
+    bool useKeyword = false;
+    bool waitForUser = true;
 
     auto speechConfig = CreateEmbeddedSpeechConfig();
     auto audioConfig = AudioConfig::FromDefaultMicrophoneInput();
@@ -365,8 +375,8 @@ void EmbeddedSpeechRecognitionFromMicrophone()
 // Recognition is triggered with a keyword.
 void EmbeddedSpeechRecognitionWithKeywordFromMicrophone()
 {
-    auto useKeyword = true;
-    auto waitForUser = true;
+    bool useKeyword = true;
+    bool waitForUser = true;
 
     auto speechConfig = CreateEmbeddedSpeechConfig();
     auto audioConfig = AudioConfig::FromDefaultMicrophoneInput();
@@ -379,8 +389,8 @@ void EmbeddedSpeechRecognitionWithKeywordFromMicrophone()
 // Recognizes speech using embedded speech config and a WAV file.
 void EmbeddedSpeechRecognitionFromWavFile()
 {
-    auto useKeyword = false;
-    auto waitForUser = false;
+    bool useKeyword = false;
+    bool waitForUser = false;
 
     auto speechConfig = CreateEmbeddedSpeechConfig();
     auto audioConfig = AudioConfig::FromWavFileInput(GetSpeechWavAudioFileName());
@@ -399,8 +409,8 @@ void EmbeddedSpeechRecognitionFromWavFile()
 // Recognizes speech using embedded speech config and a push stream.
 void EmbeddedSpeechRecognitionFromPushStream()
 {
-    auto useKeyword = false;
-    auto waitForUser = false;
+    bool useKeyword = false;
+    bool waitForUser = false;
 
     auto speechConfig = CreateEmbeddedSpeechConfig();
     auto audioFormat = AudioStreamFormat::GetWaveFormatPCM(GetEmbeddedSpeechSamplesPerSecond(), GetEmbeddedSpeechBitsPerSample(), GetEmbeddedSpeechChannels());
@@ -408,7 +418,7 @@ void EmbeddedSpeechRecognitionFromPushStream()
     auto audioConfig = AudioConfig::FromStreamInput(pushStream);
 
     // Push data into the stream in another thread.
-    auto pushStreamThread = thread(PushStreamInputReader, pushStream);
+    auto pushStreamThread = std::thread(PushStreamInputReader, pushStream);
 
     auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
     RecognizeSpeech(recognizer, useKeyword, waitForUser);
@@ -423,12 +433,12 @@ void EmbeddedSpeechRecognitionFromPushStream()
 // Recognizes speech using embedded speech config and a pull stream.
 void EmbeddedSpeechRecognitionFromPullStream()
 {
-    auto useKeyword = false;
-    auto waitForUser = false;
+    bool useKeyword = false;
+    bool waitForUser = false;
 
     auto speechConfig = CreateEmbeddedSpeechConfig();
     auto audioFormat = AudioStreamFormat::GetWaveFormatPCM(GetEmbeddedSpeechSamplesPerSecond(), GetEmbeddedSpeechBitsPerSample(), GetEmbeddedSpeechChannels());
-    auto pullStreamCallback = make_shared<PullStreamInputReader>();
+    auto pullStreamCallback = std::make_shared<PullStreamInputReader>();
     auto pullStream = AudioInputStream::CreatePullStream(audioFormat, pullStreamCallback);
     auto audioConfig = AudioConfig::FromStreamInput(pullStream);
 
@@ -440,8 +450,8 @@ void EmbeddedSpeechRecognitionFromPullStream()
 // Recognizes speech using hybrid (cloud & embedded) speech config and the system default microphone device.
 void HybridSpeechRecognitionFromMicrophone()
 {
-    auto useKeyword = false;
-    auto waitForUser = true;
+    bool useKeyword = false;
+    bool waitForUser = true;
 
     auto speechConfig = CreateHybridSpeechConfig();
     auto audioConfig = AudioConfig::FromDefaultMicrophoneInput();
@@ -462,13 +472,13 @@ void EmbeddedSpeechRecognitionPerformanceTest()
 
     auto recognizer = SpeechRecognizer::FromConfig(speechConfig, audioConfig);
 
-    promise<void> recognitionEnd;
+    std::promise<void> recognitionEnd;
     int resultCount = 0;
 
     // Subscribes to events.
     recognizer->SpeechStartDetected += [](const RecognitionEventArgs&)
     {
-        cout << "Processing, please wait...\n";
+        std::cout << "Processing, please wait..." << std::endl;
     };
 
     recognizer->Recognized += [&resultCount](const SpeechRecognitionEventArgs& e)
@@ -476,20 +486,20 @@ void EmbeddedSpeechRecognitionPerformanceTest()
         if (e.Result->Reason == ResultReason::RecognizedSpeech)
         {
             resultCount++;
-            cout << "[" << resultCount << "] RECOGNIZED: Text=" << e.Result->Text << endl;
+            std::cout << "[" << resultCount << "] RECOGNIZED: Text=" << e.Result->Text << std::endl;
 
             // Recognition results in JSON format.
-            string jsonResult = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
+            std::string jsonResult = e.Result->Properties.GetProperty(PropertyId::SpeechServiceResponse_JsonResult);
             auto json = nlohmann::json::parse(jsonResult);
 
             if (json.contains("PerformanceCounters"))
             {
                 const auto& perfCounters = json["PerformanceCounters"];
-                cout << "[" << resultCount << "] PerformanceCounters: " << perfCounters.dump(4) << endl;
+                std::cout << "[" << resultCount << "] PerformanceCounters: " << perfCounters.dump(4) << std::endl;
             }
             else
             {
-                cerr << "ERROR: No performance counters data found.\n";
+                std::cerr << "ERROR: No performance counters data found." << std::endl;
             }
         }
     };
@@ -498,13 +508,13 @@ void EmbeddedSpeechRecognitionPerformanceTest()
     {
         if (e.Reason == CancellationReason::Error)
         {
-            cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << " ErrorDetails=" << e.ErrorDetails << endl;
+            std::cerr << "CANCELED: ErrorCode=" << int(e.ErrorCode) << " ErrorDetails=" << e.ErrorDetails << std::endl;
         }
     };
 
     recognizer->SessionStopped += [&recognitionEnd](const SessionEventArgs&)
     {
-        cout << "All done! Please go to https://aka.ms/embedded-speech for information on how to evaluate the results.\n";
+        std::cout << "All done! Please go to https://aka.ms/embedded-speech for information on how to evaluate the results." << std::endl;
         recognitionEnd.set_value();
     };
 
