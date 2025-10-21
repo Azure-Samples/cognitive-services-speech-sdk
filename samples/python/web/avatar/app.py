@@ -174,12 +174,12 @@ def connectAvatar() -> Response:
                 while not speech_token:
                     time.sleep(0.2)
                 speech_config = speechsdk.SpeechConfig(
-                    endpoint=f'wss://{speech_region}.{endpoint_route}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+                    endpoint=f'wss://{speech_region}.{endpoint_route}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')  # noqa: E501
                 speech_config.authorization_token = speech_token
             else:
                 speech_config = speechsdk.SpeechConfig(
                     subscription=speech_key,
-                    endpoint=f'wss://{speech_region}.{endpoint_route}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+                    endpoint=f'wss://{speech_region}.{endpoint_route}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')  # noqa: E501
 
         if custom_voice_endpoint_id:
             speech_config.endpoint_id = custom_voice_endpoint_id
