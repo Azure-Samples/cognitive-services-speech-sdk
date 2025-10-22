@@ -153,6 +153,10 @@ app.post('/api/connectAvatar', async (req, res) => {
 
         const custom_voice_endpoint_id = client_context['custom_voice_endpoint_id']
 
+        let is_custom_avatar = req.headers['iscustomavatar']?.toLowerCase() === 'true'
+        let is_custom_voice = custom_voice_endpoint_id !== undefined && custom_voice_endpoint_id !== null && custom_voice_endpoint_id !== ''
+        let endpoint_route = is_custom_avatar || is_custom_voice ? 'voice' : 'tts'
+
         let speech_config
         if (speech_private_endpoint) {
             const speech_private_endpoint_wss = speech_private_endpoint.replace('https://', 'wss://')
@@ -160,20 +164,20 @@ app.post('/api/connectAvatar', async (req, res) => {
                 while (!speech_token) {
                     await new Promise(r => setTimeout(r, 200))
                 }
-                speech_config = speechsdk.SpeechConfig.fromEndpoint(new URL(`${speech_private_endpoint_wss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`))
+                speech_config = speechsdk.SpeechConfig.fromEndpoint(new URL(`${speech_private_endpoint_wss}/${endpoint_route}/cognitiveservices/websocket/v1?enableTalkingAvatar=true`))
                 speech_config.authorizationToken = speech_token
             } else {
-                speech_config = speechsdk.SpeechConfig.fromEndpoint(new URL(`${speech_private_endpoint_wss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), speech_key)
+                speech_config = speechsdk.SpeechConfig.fromEndpoint(new URL(`${speech_private_endpoint_wss}/${endpoint_route}/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), speech_key)
             }
         } else {
             if (enable_token_auth_for_speech) {
                 while (!speech_token) {
                     await new Promise(r => setTimeout(r, 200))
                 }
-                speech_config = speechsdk.SpeechConfig.fromEndpoint(new URL(`wss://${speech_region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true`))
+                speech_config = speechsdk.SpeechConfig.fromEndpoint(new URL(`wss://${speech_region}.${endpoint_route}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true`))
                 speech_config.authorizationToken = speech_token
             } else {
-                speech_config = speechsdk.SpeechConfig.fromEndpoint(new URL(`wss://${speech_region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), speech_key)
+                speech_config = speechsdk.SpeechConfig.fromEndpoint(new URL(`wss://${speech_region}.${endpoint_route}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), speech_key)
 
             }
         }
@@ -200,7 +204,6 @@ app.post('/api/connectAvatar', async (req, res) => {
         const avatar_style = req.headers['avatarstyle']
         const background_color = req.headers['backgroundcolor'] || 'FFFFFFFF'
         const background_image_url = req.headers['backgroundimageurl']
-        const is_custom_avatar = req.headers['iscustomavatar']?.toLowerCase() === 'true'
         const transparent_background = req.headers['transparentbackground']?.toLowerCase() === 'true'
         const video_crop = req.headers['videocrop']?.toLowerCase() === 'true'
 

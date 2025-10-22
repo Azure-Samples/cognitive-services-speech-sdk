@@ -152,6 +152,10 @@ def connectAvatar() -> Response:
 
     custom_voice_endpoint_id = client_context['custom_voice_endpoint_id']
 
+    is_custom_avatar = request.headers.get('IsCustomAvatar').lower() == 'true'
+    is_custom_voice = custom_voice_endpoint_id is not None and custom_voice_endpoint_id != ''
+    endpoint_route = 'voice' if is_custom_avatar or is_custom_voice else 'tts'
+
     try:
         if speech_private_endpoint:
             speech_private_endpoint_wss = speech_private_endpoint.replace('https://', 'wss://')
@@ -159,23 +163,23 @@ def connectAvatar() -> Response:
                 while not speech_token:
                     time.sleep(0.2)
                 speech_config = speechsdk.SpeechConfig(
-                    endpoint=f'{speech_private_endpoint_wss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+                    endpoint=f'{speech_private_endpoint_wss}/{endpoint_route}/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
                 speech_config.authorization_token = speech_token
             else:
                 speech_config = speechsdk.SpeechConfig(
                     subscription=speech_key,
-                    endpoint=f'{speech_private_endpoint_wss}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+                    endpoint=f'{speech_private_endpoint_wss}/{endpoint_route}/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
         else:
             if enable_token_auth_for_speech:
                 while not speech_token:
                     time.sleep(0.2)
                 speech_config = speechsdk.SpeechConfig(
-                    endpoint=f'wss://{speech_region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+                    endpoint=f'wss://{speech_region}.{endpoint_route}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')  # noqa: E501
                 speech_config.authorization_token = speech_token
             else:
                 speech_config = speechsdk.SpeechConfig(
                     subscription=speech_key,
-                    endpoint=f'wss://{speech_region}.tts.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')
+                    endpoint=f'wss://{speech_region}.{endpoint_route}.speech.microsoft.com/cognitiveservices/websocket/v1?enableTalkingAvatar=true')  # noqa: E501
 
         if custom_voice_endpoint_id:
             speech_config.endpoint_id = custom_voice_endpoint_id
@@ -196,7 +200,6 @@ def connectAvatar() -> Response:
         avatar_style = request.headers.get('AvatarStyle')
         background_color = '#FFFFFFFF' if request.headers.get('BackgroundColor') is None else request.headers.get('BackgroundColor')
         background_image_url = request.headers.get('BackgroundImageUrl')
-        is_custom_avatar = request.headers.get('IsCustomAvatar')
         transparent_background = (
             'false' if request.headers.get('TransparentBackground') is None
             else request.headers.get('TransparentBackground'))
@@ -229,7 +232,7 @@ def connectAvatar() -> Response:
                         'bitrate': 1000000
                     },
                     'talkingAvatar': {
-                        'customized': is_custom_avatar.lower() == 'true',
+                        'customized': is_custom_avatar,
                         'character': avatar_character,
                         'style': avatar_style,
                         'background': {

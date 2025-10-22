@@ -42,8 +42,11 @@ function connectAvatar() {
     }
 
     let speechSynthesisConfig
+    let isCustomAvatar = document.getElementById('customizedAvatar').checked
+    let isCustomVoice = document.getElementById('customVoiceEndpointId').value !== ''
+    let endpoint_route = isCustomAvatar || isCustomVoice ? 'voice' : 'tts'
     if (privateEndpointEnabled) {
-        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey) 
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/${endpoint_route}/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey)
     } else {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
     }
