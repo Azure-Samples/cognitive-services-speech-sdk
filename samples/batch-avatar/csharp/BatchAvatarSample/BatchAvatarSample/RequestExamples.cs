@@ -65,4 +65,24 @@ internal static class RequestExamples
             BackgroundColor = "#FFFFFFFF",
         },
     };
+
+    public static BatchAvatarRequest VoiceSyncForAvatar = new()
+    {
+        InputKind = "PlainText",
+        Inputs =
+            [
+                new BatchAvatarInput
+                {
+                    Content = "Hi, I'm a virtual assistant created by Microsoft.",
+                },
+            ],
+        AvatarConfig = new()
+        {
+            TalkingAvatarCharacter = "my-custom-avatar",
+            Customized = true,
+            UseBuiltInVoice = true,
+            VideoFormat = "mp4",
+            VideoCodec = "h264",
+        },
+    };
 }

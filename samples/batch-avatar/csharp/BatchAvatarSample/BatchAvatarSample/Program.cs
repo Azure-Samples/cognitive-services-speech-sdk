@@ -97,8 +97,7 @@ internal class Program
 
     private static async Task<BatchAvatarJob> CreateBatchAvatarJob(HttpClient httpClient, string jobUri)
     {
-        // To use SSML as input, please refer to RequestExamples.SsmlRequest
-        // To use your custom neural voice, please refer to RequestExamples.CustomVoiceRequest
+        // Please refer to RequestExamples.cs for more request examples.
         var requestBody = new BatchAvatarRequest
         {
             InputKind = "PlainText",
@@ -122,6 +121,7 @@ internal class Program
                 SubtitleType = "soft_embedded",
                 BackgroundColor = "#FFFFFFFF",              // background color in RGBA format, default is white; can be set to 'transparent' for transparent background
                 Customized = false,                         // Set to true if you want to use custom avatar
+                UseBuiltInVoice = false,                    // Set to true to use voice sync for avatar for custom avatar
             },
         };
 
