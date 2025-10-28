@@ -21,7 +21,7 @@ public class BatchAvatarRequest
 
     public BatchSynthesisProperties? Properties { get; set; }
 
-    public required BatchAvatarconfig AvatarConfig { get; set; }
+    public required BatchAvatarConfig AvatarConfig { get; set; }
 }
 
 public class BatchAvatarJob
@@ -42,7 +42,7 @@ public class BatchAvatarJob
 
     public BatchSynthesisProperties? Properties { get; set; }
 
-    public required BatchAvatarconfig AvatarConfig { get; set; }
+    public required BatchAvatarConfig AvatarConfig { get; set; }
 
     public BatchSynthesisOutputs? Outputs { get; set; }
 }
@@ -94,7 +94,7 @@ public class BatchSynthesisconfig
     public string? Volume { get; set; }
 }
 
-public class BatchAvatarconfig
+public class BatchAvatarConfig
 {
     public required string TalkingAvatarCharacter { get; set; }
 
@@ -121,6 +121,8 @@ public class BatchAvatarconfig
     public bool? Customized { get; set; }
 
     public bool? UseBuiltInVoice { get; set; }
+
+    public string? PhotoAvatarBaseModel { get; set; }
 }
 
 public class Videocrop

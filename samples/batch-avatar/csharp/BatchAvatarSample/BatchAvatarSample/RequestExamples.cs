@@ -49,7 +49,7 @@ internal static class RequestExamples
         // Invalid voice name or deployment ID will be rejected.
         CustomVoices = new Dictionary<string, Guid>
         {
-            ["YOUR_CUSTOM_VOICE_NAME"]  = Guid.Parse("YOUR_CUSTOM_VOICE_DEPLOYMENT_ID"),
+            ["YOUR_CUSTOM_VOICE_NAME"]  = Guid.Parse("12345678-0000-0000-0000-000000000000"),
         },
         SynthesisConfig = new()
         {
@@ -81,6 +81,45 @@ internal static class RequestExamples
             TalkingAvatarCharacter = "my-custom-avatar",
             Customized = true,
             UseBuiltInVoice = true,
+            VideoFormat = "mp4",
+            VideoCodec = "h264",
+        },
+    };
+
+    public static BatchAvatarRequest PublicPhotoAvatar = new()
+    {
+        InputKind = "PlainText",
+        Inputs =
+            [
+                new BatchAvatarInput
+                {
+                    Content = "Hi, I'm a virtual assistant created by Microsoft.",
+                },
+            ],
+        AvatarConfig = new()
+        {
+            TalkingAvatarCharacter = "Anika",
+            PhotoAvatarBaseModel = "vasa-1",
+            VideoFormat = "mp4",
+            VideoCodec = "h264",
+        },
+    };
+
+    public static BatchAvatarRequest CustomPhotoAvatar = new()
+    {
+        InputKind = "PlainText",
+        Inputs =
+            [
+                new BatchAvatarInput
+                {
+                    Content = "Hi, I'm a virtual assistant created by Microsoft.",
+                },
+            ],
+        AvatarConfig = new()
+        {
+            TalkingAvatarCharacter = "my-photo-avatar",
+            Customized = true,
+            PhotoAvatarBaseModel = "vasa-1",
             VideoFormat = "mp4",
             VideoCodec = "h264",
         },
