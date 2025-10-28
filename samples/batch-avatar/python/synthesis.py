@@ -75,9 +75,16 @@ def submit_synthesis(job_id: str):
             },
         ],
         "avatarConfig": {
-            "customized": False,  # set to True if you want to use customized avatar
+            # uncomment below for photo avatar
+            # "photoAvatarBaseModel": "vasa-1",
+            # "talkingAvatarCharacter": "anika",
+            # "talkingAvatarStyle": "",
+
+            # comment below for photo avatar
             "talkingAvatarCharacter": "lisa",  # talking avatar character
             "talkingAvatarStyle": "graceful-sitting",  # talking avatar style, required for prebuilt avatar, optional for custom avatar
+
+            "customized": False,  # set to True if you want to use customized avatar
             "videoFormat": "mp4",  # mp4 or webm, webm is required for transparent background
             "videoCodec": "h264",  # hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
             "subtitleType": "soft_embedded",

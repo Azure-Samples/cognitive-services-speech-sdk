@@ -55,6 +55,7 @@ function connectAvatar() {
     const talkingAvatarCharacter = document.getElementById('talkingAvatarCharacter').value
     const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
     const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle)
+    avatarConfig.photoAvatarBaseModel = document.getElementById('photoAvatar').checked ? 'vasa-1' : ''
     avatarConfig.customized = document.getElementById('customizedAvatar').checked
     avatarConfig.useBuiltInVoice = document.getElementById('useBuiltInVoice').checked
     avatarSynthesizer = new SpeechSDK.AvatarSynthesizer(speechSynthesisConfig, avatarConfig)
@@ -213,13 +214,13 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
                 }
 
                 // Append the new video element
-                videoElement.style.width = '960px'
+                videoElement.style.width = document.getElementById('photoAvatar').checked ? '512px' : '960px'
                 document.getElementById('remoteVideo').appendChild(videoElement)
 
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
                 document.getElementById('microphone').disabled = false
                 document.getElementById('stopSession').disabled = false
-                document.getElementById('remoteVideo').style.width = '960px'
+                document.getElementById('remoteVideo').style.width = document.getElementById('photoAvatar').checked ? '512px' : '960px'
                 document.getElementById('chatHistory').hidden = false
                 document.getElementById('showTypeMessage').disabled = false
 
@@ -878,6 +879,16 @@ window.updatePrivateEndpoint = () => {
         document.getElementById('showPrivateEndpointCheckBox').hidden = false
     } else {
         document.getElementById('showPrivateEndpointCheckBox').hidden = true
+    }
+}
+
+window.updatePhotoAvatarBox = () => {
+    if (document.getElementById('photoAvatar').checked) {
+        document.getElementById('talkingAvatarCharacter').value = 'anika'
+        document.getElementById('talkingAvatarStyle').value = ''
+    } else {
+        document.getElementById('talkingAvatarCharacter').value = 'lisa'
+        document.getElementById('talkingAvatarStyle').value = 'casual-sitting'
     }
 }
 
