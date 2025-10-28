@@ -152,6 +152,7 @@ def connectAvatar() -> Response:
 
     custom_voice_endpoint_id = client_context['custom_voice_endpoint_id']
 
+    is_photo_avatar = request.headers.get('IsPhotoAvatar').lower() == 'true'
     is_custom_avatar = request.headers.get('IsCustomAvatar').lower() == 'true'
     is_custom_voice = custom_voice_endpoint_id is not None and custom_voice_endpoint_id != ''
     endpoint_route = 'voice' if is_custom_avatar or is_custom_voice else 'tts'
@@ -232,6 +233,7 @@ def connectAvatar() -> Response:
                         'bitrate': 1000000
                     },
                     'talkingAvatar': {
+                        'photoAvatarBaseModel': 'vasa-1' if is_photo_avatar else '',
                         'customized': is_custom_avatar,
                         'character': avatar_character,
                         'style': avatar_style,
