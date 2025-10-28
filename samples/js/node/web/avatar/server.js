@@ -153,6 +153,7 @@ app.post('/api/connectAvatar', async (req, res) => {
 
         const custom_voice_endpoint_id = client_context['custom_voice_endpoint_id']
 
+        let is_photo_avatar = req.headers['isphotoavatar']?.toLowerCase() === 'true'
         let is_custom_avatar = req.headers['iscustomavatar']?.toLowerCase() === 'true'
         let is_custom_voice = custom_voice_endpoint_id !== undefined && custom_voice_endpoint_id !== null && custom_voice_endpoint_id !== ''
         let endpoint_route = is_custom_avatar || is_custom_voice ? 'voice' : 'tts'
@@ -230,6 +231,7 @@ app.post('/api/connectAvatar', async (req, res) => {
                         codec: 'H264'
                     },
                     talkingAvatar: {
+                        photoAvatarBaseModel: is_photo_avatar ? 'vasa-1' : '',
                         customized: is_custom_avatar,
                         useBuiltInVoice: false,
                         character: avatar_character,
