@@ -96,9 +96,13 @@ internal static class RequestExamples
                     Content = "Hi, I'm a virtual assistant created by Microsoft.",
                 },
             ],
+        SynthesisConfig = new()
+        {
+            Voice = "en-US-AndrewNeural",
+        },
         AvatarConfig = new()
         {
-            TalkingAvatarCharacter = "Anika",
+            TalkingAvatarCharacter = "Matteo",
             PhotoAvatarBaseModel = "vasa-1",
             VideoFormat = "mp4",
             VideoCodec = "h264",
@@ -115,6 +119,10 @@ internal static class RequestExamples
                     Content = "Hi, I'm a virtual assistant created by Microsoft.",
                 },
             ],
+        SynthesisConfig = new()
+        {
+            Voice = "en-US-AndrewNeural",
+        },
         AvatarConfig = new()
         {
             TalkingAvatarCharacter = "my-photo-avatar",

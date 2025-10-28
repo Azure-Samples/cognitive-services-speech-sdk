@@ -120,7 +120,6 @@ internal class Program
                 TalkingAvatarCharacter = "lisa",            // Avatar character
                 TalkingAvatarStyle = "graceful-sitting",    // Avatar style, required for prebuilt avatar, optional for custom avatar
                 Customized = false,                         // Set to true if you want to use custom avatar
-                PhotoAvatarBaseModel = "vasa-1",            // base model for custom photo avatar, standard or premium; required for custom avatar
                 VideoFormat = "mp4",                        // mp4 or webm, webm is required for transparent background
                 VideoCodec = "h264",                        // hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
                 SubtitleType = "soft_embedded",
