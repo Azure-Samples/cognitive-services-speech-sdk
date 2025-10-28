@@ -89,9 +89,11 @@ def submit_synthesis(job_id: str):
             "videoCodec": "h264",  # hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
             "subtitleType": "soft_embedded",
             "backgroundColor": "#FFFFFFFF",  # background color in RGBA format, default is white;
-                                             # can be set to 'transparent' for transparent background
+                                               # can be set to 'transparent' for transparent background
             # "backgroundImage": "https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg",
             # background image URL, only support https, either backgroundImage or backgroundColor can be set
+            "useBuiltInVoice": False,  # whether to use voice sync of custom avatar.
+                                       # Only valid if customized is True and the custom avatar is trained with voice sync enabled.
         }
     }
 
