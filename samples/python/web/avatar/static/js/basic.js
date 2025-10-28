@@ -185,6 +185,7 @@ function connectToAvatarService(peerConnection) {
         'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
         'BackgroundColor': document.getElementById('backgroundColor').value,
         'BackgroundImageUrl': document.getElementById('backgroundImageUrl').value,
+        'IsPhotoAvatar': document.getElementById('photoAvatar').checked,
         'IsCustomAvatar': document.getElementById('customizedAvatar').checked,
         'TransparentBackground': document.getElementById('transparentBackground').checked,
         'VideoCrop': document.getElementById('videoCrop').checked
@@ -341,6 +342,16 @@ window.stopSession = () => {
         },
         body: ''
     })
+}
+
+window.updatePhotoAvatarBox = () => {
+    if (document.getElementById('photoAvatar').checked) {
+        document.getElementById('talkingAvatarCharacter').value = 'anika'
+        document.getElementById('talkingAvatarStyle').value = ''
+    } else {
+        document.getElementById('talkingAvatarCharacter').value = 'lisa'
+        document.getElementById('talkingAvatarStyle').value = 'casual-sitting'
+    }
 }
 
 window.updataTransparentBackground = () => {

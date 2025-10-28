@@ -82,6 +82,7 @@
   <label style="font-size: medium;" for="talkingAvatarStyle">Avatar Style:</label>
   <input id="talkingAvatarStyle" type="text" size="16" style="font-size: medium;" value="casual-sitting"></input><br />
   <div style="background-color: white; width: 400px;">
+    <input type="checkbox" id="photoAvatar" onchange="window.updatePhotoAvatarBox()">Photo Avatar</input>
     <input type="checkbox" id="customizedAvatar" onchange="window.updateCustomAvatarBox()">Custom Avatar</input>
     <input type="checkbox" id="useBuiltInVoice" style="width: 12px;" disabled>Use Built-In Voice</input><br />
   </div>
@@ -114,7 +115,7 @@
     <div id="localVideo" hidden>
       <video src="video/lisa-casual-sitting-idle.mp4" autoplay loop muted></video>
     </div>
-    <div id="remoteVideo"></div>
+    <div id="remoteVideo" style="margin: 0 auto;"></div>
     <div id="subtitles" style="
         width: 100%;
         text-align: center;
