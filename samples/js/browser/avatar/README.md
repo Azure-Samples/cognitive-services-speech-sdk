@@ -19,6 +19,7 @@ This sample demonstrates the basic usage of Azure text-to-speech avatar real-tim
         * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
         * Background Color - The color of the avatar background.
+        * Photo Avatar - Check this if you want to use photo avatar.
         * Custom Avatar - Check this if you are using a custom avatar.
         * Use Built-In Voice - Check this if you want to use built-in voice, the voice that was built together with your custom avatar.
         * Transparent Background - Check this if you want to use transparent background for the avatar. When this is checked, the background color of the video stream from server side is automatically set to green(#00FF00FF), and the js code on client side (check the `makeBackgroundTransparent` function in main.js) will do the real-time matting by replacing the green color with transparent color.
@@ -60,6 +61,7 @@ This sample demonstrates the chat scenario, with integration of Azure speech-to-
     * Avatar Configuration
         * Avatar Character - The character of the avatar. By default it's `lisa`, and you can update this value to use a different avatar.
         * Avatar Style - The style of the avatar. You can update this value to use a different avatar style. This parameter is optional for custom avatar.
+        * Photo Avatar - Check this if you want to use photo avatar.
         * Custom Avatar - Check this if you are using a custom avatar.
         * Use Built-In Voice - Check this if you want to use built-in voice, the voice that was built together with your custom avatar.
         * Auto Reconnect - Check this if you want to enable auto reconnect. If this is checked, the avatar video stream is automatically reconnected once the connection is lost.
