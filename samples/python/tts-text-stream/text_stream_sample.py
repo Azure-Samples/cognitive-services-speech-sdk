@@ -17,7 +17,10 @@ speech_config = speechsdk.SpeechConfig(
 )
 
 # set a voice name
-speech_config.speech_synthesis_voice_name = "en-US-BrianMultilingualNeural"
+# To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+# otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
+voice = "en-us-Ava:DragonHDLatestNeural"
+speech_config.speech_synthesis_voice_name = voice
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 
 speech_synthesizer.synthesizing.connect(lambda evt: print("[audio]", end=""))

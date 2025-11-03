@@ -14,8 +14,10 @@ export const main = (settings, filename) => {
 
     // setting the synthesis language, voice name, and output audio format.
     // see https://aka.ms/speech/tts-languages for available languages and voices
+    // To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+    // otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
     speechConfig.speechSynthesisLanguage = settings.language;
-    speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural";
+    speechConfig.speechSynthesisVoiceName = "en-us-Ava:DragonHDLatestNeural";
     speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
 
     var rl = readline.createInterface({

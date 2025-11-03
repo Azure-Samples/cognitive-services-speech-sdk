@@ -114,11 +114,13 @@ void SpeechSynthesisWithVoice()
     auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
 
     // Sets the voice name.
-    // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
+    // To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+    // otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
     // The full list of supported voices can be found here:
     // https://aka.ms/csspeech/voicenames
     // And, you can try GetVoicesAsync method to get all available voices (see SpeechSynthesisGetAvailableVoices() sample below).
-    auto voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)";
+    // auto voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)";
+    auto voice = "en-us-Ava:DragonHDLatestNeural";
     config->SetSpeechSynthesisVoiceName(voice);
 
     // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.

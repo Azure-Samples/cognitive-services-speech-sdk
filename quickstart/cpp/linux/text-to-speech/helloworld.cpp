@@ -17,7 +17,10 @@ void synthesizeSpeech()
     auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
 
     // Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
-    config->SetSpeechSynthesisVoiceName("en-US-AriaNeural");
+    // To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+    // otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
+    // config->SetSpeechSynthesisVoiceName("en-US-AriaNeural");
+    config->SetSpeechSynthesisVoiceName("en-us-Ava:DragonHDLatestNeural");
 
     // Creates a speech synthesizer using the default speaker as audio output. The default spoken language is "en-us".
     auto synthesizer = SpeechSynthesizer::FromConfig(config);

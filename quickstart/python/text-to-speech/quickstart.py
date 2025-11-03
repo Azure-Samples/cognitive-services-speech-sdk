@@ -18,7 +18,10 @@ speech_endpoint = config.get("Endpoint")
 speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
 # Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
-speech_config.speech_synthesis_voice_name = "en-US-AriaNeural"
+# To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+# otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
+# speech_config.speech_synthesis_voice_name = "en-US-AriaNeural"
+speech_config.speech_synthesis_voice_name = "en-us-Ava:DragonHDLatestNeural"
 
 # Creates a speech synthesizer using the default speaker as audio output.
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)

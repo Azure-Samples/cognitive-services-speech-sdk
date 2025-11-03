@@ -147,13 +147,16 @@
     // Sets the synthesis language.
     // The full list of supported language can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/language-support#text-to-speech
-    speechConfig.speechSynthesisLanguage = @"en-GB";
+    speechConfig.speechSynthesisLanguage = @"en-US";
     // Sets the voice name
     // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
     // The full list of supported voices can be found here:
     // https://aka.ms/csspeech/voicenames
     // And, you can try getVoices method to get all available voices.
-    speechConfig.speechSynthesisVoiceName = @"Microsoft Server Speech Text to Speech Voice (en-GB, RyanNeural)";
+    // To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+    // otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
+    speechConfig.speechSynthesisVoiceName = @"en-us-Ava:DragonHDLatestNeural";
+    
     // Sets the synthesis output format.
     // The full list of supported format can be found here:
     // https://docs.microsoft.com/azure/cognitive-services/speech-service/rest-text-to-speech#audio-outputs

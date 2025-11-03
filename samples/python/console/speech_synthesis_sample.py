@@ -92,7 +92,9 @@ def speech_synthesis_with_voice():
     # https://aka.ms/csspeech/voicenames
     # And, you can try get_voices_async method to get all available voices.
     # See speech_synthesis_get_available_voices() sample below.
-    voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)"
+    # To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+    # otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
+    voice = "en-us-Ava:DragonHDLatestNeural"
     speech_config.speech_synthesis_voice_name = voice
     # Creates a speech synthesizer for the specified voice,
     # using the default speaker as audio output.

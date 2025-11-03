@@ -30,7 +30,11 @@ public class Main {
         try (SpeechConfig config = SpeechConfig.fromEndpoint(new java.net.URI(endpointUrl), speechSubscriptionKey)) {
             // Set the voice name, refer to https://aka.ms/speech/voices/neural for full
             // list.
-            config.setSpeechSynthesisVoiceName("en-US-AriaNeural");
+
+            // To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+            // otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
+            // config.setSpeechSynthesisVoiceName("en-US-AriaNeural");
+            config.setSpeechSynthesisVoiceName("en-us-Ava:DragonHDLatestNeural");
             try (SpeechSynthesizer synth = new SpeechSynthesizer(config)) {
 
                 assert (config != null);

@@ -257,8 +257,12 @@ namespace MicrosoftSpeechSDKSamples
         private const int concurrency = 64;
         public static void SpeechSynthesizeWithPool()
         {
+            // To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
+            // otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
+            // string voice = "en-US-JennyNeural";
+            string voice = "en-us-Ava:DragonHDLatestNeural";
             SynthesisServer server = new SynthesisServer(subscriptionKey, region,
-                    "en-US-JennyNeural", SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3, concurrency);
+                    voice, SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3, concurrency);
 
             for (var turn = 0; turn < 3; turn++)
             {
