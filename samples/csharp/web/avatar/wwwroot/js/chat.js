@@ -186,13 +186,13 @@ function preparePeerConnection() {
                 }
 
                 // Append the new video element
-                videoElement.style.width = '960px'
+                videoElement.style.width = document.getElementById('photoAvatar').checked ? '512px' : '960px'
                 document.getElementById('remoteVideo').appendChild(videoElement)
 
                 console.log(`WebRTC ${event.track.kind} channel connected.`)
                 document.getElementById('microphone').disabled = false
                 document.getElementById('stopSession').disabled = false
-                document.getElementById('remoteVideo').style.width = '960px'
+                document.getElementById('remoteVideo').style.width = document.getElementById('photoAvatar').checked ? '512px' : '960px'
                 document.getElementById('chatHistory').hidden = false
                 document.getElementById('latencyLog').hidden = false
                 document.getElementById('showTypeMessage').disabled = false
@@ -303,6 +303,7 @@ function connectToAvatarService(peerConnection) {
         'ClientId': clientId,
         'AvatarCharacter': document.getElementById('talkingAvatarCharacter').value,
         'AvatarStyle': document.getElementById('talkingAvatarStyle').value,
+        'IsPhotoAvatar': document.getElementById('photoAvatar').checked,
         'IsCustomAvatar': document.getElementById('customizedAvatar').checked
     }
 
@@ -694,6 +695,16 @@ window.updataEnableOyd = () => {
         document.getElementById('cogSearchConfig').hidden = false
     } else {
         document.getElementById('cogSearchConfig').hidden = true
+    }
+}
+
+window.updatePhotoAvatarBox = () => {
+    if (document.getElementById('photoAvatar').checked) {
+        document.getElementById('talkingAvatarCharacter').value = 'anika'
+        document.getElementById('talkingAvatarStyle').value = ''
+    } else {
+        document.getElementById('talkingAvatarCharacter').value = 'lisa'
+        document.getElementById('talkingAvatarStyle').value = 'casual-sitting'
     }
 }
 

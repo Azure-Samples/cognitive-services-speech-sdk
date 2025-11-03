@@ -52,7 +52,8 @@
   <input id="talkingAvatarCharacter" type="text" size="16" style="font-size: medium;" value="lisa"></input><br />
   <label style="font-size: medium;" for="talkingAvatarStyle">Avatar Style:</label>
   <input id="talkingAvatarStyle" type="text" size="16" style="font-size: medium;" value="casual-sitting"></input><br />
-  <div style="background-color: white; width: 200px;">
+  <div style="background-color: white; width: 300px;">
+    <input type="checkbox" id="photoAvatar" onchange="window.updatePhotoAvatarBox()">Photo Avatar</input>
     <input type="checkbox" id="customizedAvatar">Custom Avatar</input><br />
   </div>
   <div style="background-color: white; width: 200px;">
@@ -88,7 +89,7 @@
   <div id="localVideo" hidden>
     <video src="{{ url_for('static', filename='video/lisa-casual-sitting-idle.mp4') }}" autoplay loop muted></video>
   </div>
-  <div id="remoteVideo"></div>
+  <div id="remoteVideo" style="margin: 0 auto;"></div>
 </div>
 
 <div id="showTypeMessageCheckbox">

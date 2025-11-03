@@ -21,7 +21,7 @@ public class BatchAvatarRequest
 
     public BatchSynthesisProperties? Properties { get; set; }
 
-    public required BatchAvatarconfig AvatarConfig { get; set; }
+    public required BatchAvatarConfig AvatarConfig { get; set; }
 }
 
 public class BatchAvatarJob
@@ -42,7 +42,7 @@ public class BatchAvatarJob
 
     public BatchSynthesisProperties? Properties { get; set; }
 
-    public required BatchAvatarconfig AvatarConfig { get; set; }
+    public required BatchAvatarConfig AvatarConfig { get; set; }
 
     public BatchSynthesisOutputs? Outputs { get; set; }
 }
@@ -62,23 +62,23 @@ public class BatchSynthesisProperties
 
     public string? DestinationPath { get; set; }
 
-    public int? sizeInBytes { get; set; }
+    public int? SizeInBytes { get; set; }
 
-    public int? succeededCount { get; set; }
+    public int? SucceededCount { get; set; }
 
-    public int? failedCount { get; set; }
+    public int? FailedCount { get; set; }
 
-    public int? durationInMilliseconds { get; set; }
+    public int? DurationInMilliseconds { get; set; }
 
-    public Billingdetails? billingDetails { get; set; }
+    public Billingdetails? BillingDetails { get; set; }
 
     public Error? Error { get; set; }
 }
 
 public class Billingdetails
 {
-    public int neuralCharacters { get; set; }
-    public int talkingAvatarDurationSeconds { get; set; }
+    public int NeuralCharacters { get; set; }
+    public int TalkingAvatarDurationSeconds { get; set; }
 }
 
 public class BatchSynthesisconfig
@@ -94,7 +94,7 @@ public class BatchSynthesisconfig
     public string? Volume { get; set; }
 }
 
-public class BatchAvatarconfig
+public class BatchAvatarConfig
 {
     public required string TalkingAvatarCharacter { get; set; }
 
@@ -119,6 +119,10 @@ public class BatchAvatarconfig
     public int? BitrateKbps { get; set; }
 
     public bool? Customized { get; set; }
+
+    public bool? UseBuiltInVoice { get; set; }
+
+    public string? PhotoAvatarBaseModel { get; set; }
 }
 
 public class Videocrop
@@ -143,7 +147,7 @@ public class BillingDetails
 
     public long CustomNeuralCharacters { get; set; }
 
-    public long talkingAvatarDurationSeconds { get; set; }
+    public long TalkingAvatarDurationSeconds { get; set; }
 
     public long AoaiCharacters { get; set; }
 
