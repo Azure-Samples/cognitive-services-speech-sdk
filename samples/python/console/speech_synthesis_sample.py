@@ -86,14 +86,16 @@ def speech_synthesis_with_voice():
     """performs speech synthesis to the default speaker with specified voice"""
     # Creates an instance of a speech config with specified subscription key and endpoint.
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
-    # Sets the synthesis voice name.
-    # e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
-    # The full list of supported voices can be found here:
-    # https://aka.ms/csspeech/voicenames
+    # Configure the voice for speech synthesis. For a complete list of available voices,
+    # visit https://aka.ms/speech/voices/neural
     # And, you can try get_voices_async method to get all available voices.
     # See speech_synthesis_get_available_voices() sample below.
-    # To use latest LLM based neural voice, set voice name to "en-us-Ava:DragonHDLatestNeural" in its available regions like eastus
-    # otherwise, you can set to non HD Neural voice like en-US-AriaNeural, en-US-AvaMultilingualNeural, etc.
+    #
+    # To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
+    # (available in regions such as East US). Alternatively, use standard neural voices like
+    # "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
+    #
+    # For HD neural voice region availability, see https://aka.ms/speech/regions
     voice = "en-us-Ava:DragonHDLatestNeural"
     speech_config.speech_synthesis_voice_name = voice
     # Creates a speech synthesizer for the specified voice,
