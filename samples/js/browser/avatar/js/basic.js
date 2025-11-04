@@ -214,8 +214,11 @@ window.startSession = () => {
     }
 
     let speechSynthesisConfig
+    let isCustomAvatar = document.getElementById('customizedAvatar').checked
+    let isCustomVoice = document.getElementById('customVoiceEndpointId').value !== ''
+    let endpoint_route = isCustomAvatar || isCustomVoice ? 'voice' : 'tts'
     if (privateEndpointEnabled) {
-        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/tts/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey) 
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/${endpoint_route}/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey)
     } else {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
     }
@@ -229,6 +232,7 @@ window.startSession = () => {
     const talkingAvatarCharacter = document.getElementById('talkingAvatarCharacter').value
     const talkingAvatarStyle = document.getElementById('talkingAvatarStyle').value
     const avatarConfig = new SpeechSDK.AvatarConfig(talkingAvatarCharacter, talkingAvatarStyle, videoFormat)
+    avatarConfig.photoAvatarBaseModel = document.getElementById('photoAvatar').checked ? 'vasa-1' : ''
     avatarConfig.customized = document.getElementById('customizedAvatar').checked
     avatarConfig.useBuiltInVoice = document.getElementById('useBuiltInVoice').checked 
     avatarConfig.backgroundColor = document.getElementById('backgroundColor').value
@@ -332,6 +336,16 @@ window.updatePrivateEndpoint = () => {
         document.getElementById('showPrivateEndpointCheckBox').hidden = false
     } else {
         document.getElementById('showPrivateEndpointCheckBox').hidden = true
+    }
+}
+
+window.updatePhotoAvatarBox = () => {
+    if (document.getElementById('photoAvatar').checked) {
+        document.getElementById('talkingAvatarCharacter').value = 'anika'
+        document.getElementById('talkingAvatarStyle').value = ''
+    } else {
+        document.getElementById('talkingAvatarCharacter').value = 'lisa'
+        document.getElementById('talkingAvatarStyle').value = 'casual-sitting'
     }
 }
 
