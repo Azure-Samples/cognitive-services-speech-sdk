@@ -172,6 +172,7 @@ namespace Avatar.Controllers
 
                 var customVoiceEndpointId = clientContext.CustomVoiceEndpointId;
 
+                var isPhotoAvatar = (Request.Headers["IsPhotoAvatar"].FirstOrDefault()?.ToLowerInvariant() ?? "false") == "true";
                 var isCustomAvatar = (Request.Headers["IsCustomAvatar"].FirstOrDefault()?.ToLowerInvariant() ?? "false") == "true";
                 var isCustomVoice = !string.IsNullOrEmpty(customVoiceEndpointId);
                 var endpointRoute = isCustomAvatar || isCustomVoice ? "voice" : "tts";
@@ -283,6 +284,7 @@ namespace Avatar.Controllers
                             },
                             talkingAvatar = new
                             {
+                                photoAvatarBaseModel = isPhotoAvatar ? "vasa-1" : string.Empty,
                                 customized = isCustomAvatar,
                                 character = avatarCharacter,
                                 style = avatarStyle,

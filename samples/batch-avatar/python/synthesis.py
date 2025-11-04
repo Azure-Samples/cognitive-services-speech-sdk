@@ -75,16 +75,25 @@ def submit_synthesis(job_id: str):
             },
         ],
         "avatarConfig": {
-            "customized": False,  # set to True if you want to use customized avatar
+            # uncomment below for photo avatar
+            # "photoAvatarBaseModel": "vasa-1",
+            # "talkingAvatarCharacter": "anika",
+            # "talkingAvatarStyle": "",
+
+            # comment below for photo avatar
             "talkingAvatarCharacter": "lisa",  # talking avatar character
             "talkingAvatarStyle": "graceful-sitting",  # talking avatar style, required for prebuilt avatar, optional for custom avatar
+
+            "customized": False,  # set to True if you want to use customized avatar
             "videoFormat": "mp4",  # mp4 or webm, webm is required for transparent background
             "videoCodec": "h264",  # hevc, h264 or vp9, vp9 is required for transparent background; default is hevc
             "subtitleType": "soft_embedded",
             "backgroundColor": "#FFFFFFFF",  # background color in RGBA format, default is white;
-                                             # can be set to 'transparent' for transparent background
+                                               # can be set to 'transparent' for transparent background
             # "backgroundImage": "https://samples-files.com/samples/Images/jpg/1920-1080-sample.jpg",
             # background image URL, only support https, either backgroundImage or backgroundColor can be set
+            "useBuiltInVoice": False,  # whether to use voice sync of custom avatar.
+                                       # Only valid if customized is True and the custom avatar is trained with voice sync enabled.
         }
     }
 
