@@ -40,8 +40,16 @@ namespace Demo
             // set output format
             speechConfig.SetSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm);
 
-            // set a voice name
-            speechConfig.SetProperty(PropertyId.SpeechServiceConnection_SynthVoice, "en-US-BrianMultilingualNeural");
+            // Configure the voice for speech synthesis. For a complete list of available voices,
+            // visit https://aka.ms/speech/voices/neural
+            // 
+            // To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
+            // (available in regions such as East US). Alternatively, use standard neural voices like
+            // "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
+            // 
+            // For HD neural voice region availability, see https://aka.ms/speech/regions
+            string voice = "en-us-Ava:DragonHDLatestNeural";
+            speechConfig.SetProperty(PropertyId.SpeechServiceConnection_SynthVoice, voice);
 
             // set timeout value to bigger ones to avoid sdk cancel the request when GPT latency too high
             speechConfig.SetProperty(PropertyId.SpeechSynthesis_FrameTimeoutInterval, "10000");

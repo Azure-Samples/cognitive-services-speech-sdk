@@ -114,12 +114,17 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
-            // Sets the voice name.
-            // e.g. "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)".
-            // The full list of supported voices can be found here:
-            // https://aka.ms/csspeech/voicenames
-            // And, you can try GetVoicesAsync method to get all available voices (see SynthesisGetAvailableVoicesAsync() sample below).
-            var voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)";
+            // Configure the voice for speech synthesis. For a complete list of available voices,
+            // visit https://aka.ms/speech/voices/neural
+            // 
+            // To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
+            // (available in regions such as East US). Alternatively, use standard neural voices like
+            // "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
+            // 
+            // For HD neural voice region availability, see https://aka.ms/speech/regions
+            // You can also try GetVoicesAsync method to get all available voices (see SynthesisGetAvailableVoicesAsync() sample below).
+            // var voice = "Microsoft Server Speech Text to Speech Voice (en-US, JennyNeural)";
+            var voice = "en-us-Ava:DragonHDLatestNeural";
             config.SpeechSynthesisVoiceName = voice;
 
             // Creates a speech synthesizer for the specified voice, using the default speaker as audio output.

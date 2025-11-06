@@ -124,8 +124,17 @@ public class MainActivity extends AppCompatActivity {
         speechConfig = SpeechConfig.fromSubscription(speechSubscriptionKey, serviceRegion);
         // Use 24k Hz format for higher quality.
         speechConfig.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm);
-        // Set voice name.
-        speechConfig.setSpeechSynthesisVoiceName("en-US-JennyNeural");
+
+        // Configure the voice for speech synthesis. For a complete list of available voices,
+        // visit https://aka.ms/speech/voices/neural
+        // 
+        // To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
+        // (available in regions such as East US). Alternatively, use standard neural voices like
+        // "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
+        // 
+        // For HD neural voice region availability, see https://aka.ms/speech/regions
+        // speechConfig.setSpeechSynthesisVoiceName("en-US-JennyNeural");
+        speechConfig.setSpeechSynthesisVoiceName("en-us-Ava:DragonHDLatestNeural");
         synthesizer = new SpeechSynthesizer(speechConfig, null);
         connection = Connection.fromSpeechSynthesizer(synthesizer);
 
