@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+        <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-        <!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
+        <!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
         <WindowsPackageType>None</WindowsPackageType>
         <OutputType>Exe</OutputType>
         <RootNamespace>speech_to_text</RootNamespace>
@@ -31,12 +31,12 @@
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(TargetFramework)'=='net8.0-ios'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-ios'">
         <ProvisioningType>manual</ProvisioningType>
         <MtouchExtraArgs>-gcc_flags="-framework AudioToolbox"</MtouchExtraArgs>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(TargetFramework)'=='net8.0-maccatalyst'">
+    <PropertyGroup Condition="'$(TargetFramework)'=='net9.0-maccatalyst'">
         <ProvisioningType>manual</ProvisioningType>
         <MtouchExtraArgs>-gcc_flags="-framework AudioToolbox"</MtouchExtraArgs>
     </PropertyGroup>
@@ -60,10 +60,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.82" />
+        <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.120" />
         <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.46.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
-        <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
     </ItemGroup>
 
 </Project>
