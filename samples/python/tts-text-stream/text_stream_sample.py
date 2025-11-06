@@ -18,11 +18,11 @@ speech_config = speechsdk.SpeechConfig(
 
 # Configure the voice for speech synthesis. For a complete list of available voices,
 # visit https://aka.ms/speech/voices/neural
-# 
+#
 # To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
 # (available in regions such as East US). Alternatively, use standard neural voices like
 # "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
-# 
+#
 # For HD neural voice region availability, see https://aka.ms/speech/regions
 voice = "en-us-Ava:DragonHDLatestNeural"
 speech_config.speech_synthesis_voice_name = voice
