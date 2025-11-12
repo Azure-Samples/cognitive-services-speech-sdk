@@ -257,8 +257,18 @@ namespace MicrosoftSpeechSDKSamples
         private const int concurrency = 64;
         public static void SpeechSynthesizeWithPool()
         {
+            // Configure the voice for speech synthesis. For a complete list of available voices,
+            // visit https://aka.ms/speech/voices/neural
+            // 
+            // To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
+            // (available in regions such as East US). Alternatively, use standard neural voices like
+            // "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
+            // 
+            // For HD neural voice region availability, see https://aka.ms/speech/regions
+            // string voice = "en-US-JennyNeural";
+            string voice = "en-us-Ava:DragonHDLatestNeural";
             SynthesisServer server = new SynthesisServer(subscriptionKey, region,
-                    "en-US-JennyNeural", SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3, concurrency);
+                    voice, SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3, concurrency);
 
             for (var turn = 0; turn < 3; turn++)
             {
