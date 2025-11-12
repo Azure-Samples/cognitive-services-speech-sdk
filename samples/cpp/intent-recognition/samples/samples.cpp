@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See https://aka.ms/csspeech/license for the full license information.
 //
+#include "intent_recognizer/stdafx.h"
 
 #include <speechapi_cxx.h> // from Speech SDK
 #include <intentapi_cxx.h> // from this project
@@ -5602,4 +5603,24 @@ TEST_CASE("IntentRecognizer::PatternMatching::ZH Prebuilt integer entities", "[z
     RequireIntentId(intentResult, "");
     intentResult = intentRecognizer->RecognizeOnceAsync(" ").get();
     RequireIntentId(intentResult, "");
+}
+
+
+TEST_CASE("IntentRecognizer::PatternMatching::IntentList for hi", "[hi]")
+{
+    SECTION("Basic Hindi intents")
+    {
+        auto phrase = std::string("पिछले सात कैरेक्टर को बोल्ड करें।");
+        auto intent = std::string("पिछले सात कैरेक्टर को बोल्ड करें");
+
+        auto intentRecognizer = IntentRecognizer::FromLanguage("hi-IN");
+        intentRecognizer->AddIntent(intent, "intent");
+
+        auto intentResult = intentRecognizer->RecognizeOnceAsync(phrase).get();
+
+        // Log the results
+        SPX_TRACE_INFO("Intent Id: %s", intentResult->IntentId.c_str());
+        SPX_TRACE_INFO("Recognized Text: %s", intentResult->GetDetailedResult().c_str());
+        RequireIntentId(intentResult, "intent");
+    }
 }

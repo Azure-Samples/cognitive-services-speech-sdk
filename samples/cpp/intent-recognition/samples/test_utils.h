@@ -13,6 +13,8 @@ void RequireEntity(std::shared_ptr<IntentRecognitionResult> result, std::string 
 void RequireNoEntity(std::shared_ptr<IntentRecognitionResult> result, std::string expectedEntityId);
 void RequireAlternateIntentId(std::shared_ptr<IntentRecognitionResult> result, std::string expectedIntentId);
 void RequireAlternateCount(std::shared_ptr<IntentRecognitionResult> result, int expectedCount);
+std::string stringToHex(const std::string& str);
+std::string dumpStringToUTF8(const std::string& str, bool escapeAscii = false);
 
 inline bool exists(const std::string& name) {
     return std::ifstream(name.c_str()).good();

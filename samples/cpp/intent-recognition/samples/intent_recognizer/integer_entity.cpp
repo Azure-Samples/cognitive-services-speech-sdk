@@ -86,10 +86,10 @@ void CSpxIntegerEntity::Init(const std::string& name, const OrthographyInformati
     else
     {
         // fall back to default and use English
-        SPX_TRACE_ERROR(
-            "No explicit integer parser for '%s' language. Disabling integer parsing",
+        SPX_TRACE_WARNING(
+            "No explicit integer parser for '%s' language. Fallig back to English",
             orthography.Name.c_str());
-        m_integerParser = std::static_pointer_cast<ISpxIntegerParser>(std::make_shared<NoOpIntegerParser>());
+        m_integerParser = std::static_pointer_cast<ISpxIntegerParser>(std::make_shared<CSpxENIntegerParser>());
     }
 }
 
