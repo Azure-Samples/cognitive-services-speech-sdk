@@ -44,10 +44,8 @@ import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.DeltaType;
 import com.github.difflib.patch.Patch;
 
-// <toplevel>
 import com.microsoft.cognitiveservices.speech.*;
 import com.microsoft.cognitiveservices.speech.audio.*;
-// </toplevel>
 
 @SuppressWarnings("resource") // scanner
 public class SpeechRecognitionSamples {

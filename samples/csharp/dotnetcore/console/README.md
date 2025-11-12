@@ -1,6 +1,6 @@
 # C# Console app for .NET Core (Windows or Linux)
 
-This sample demonstrates various forms of speech recognition, intent recognition, and translation using the Speech SDK for C#.
+This sample demonstrates various forms of speech recognition and translation using the Speech SDK for C#.
 It runs under .NET 8.0 or later on Windows or Linux (see the list of [supported Linux distributions and target architectures](https://docs.microsoft.com/azure/cognitive-services/speech-service/speech-sdk?tabs=linux)).
 
 ## Prerequisites
@@ -25,11 +25,6 @@ It runs under .NET 8.0 or later on Windows or Linux (see the list of [supported 
   * `YourServiceRegion`: replace with the [region](https://aka.ms/csspeech/region) your subscription is associated with.
     For example, `westus` or `northeurope`.
   * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
-  * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
-    * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
-    * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
-    * `YourLanguageUnderstandingAppId`: replace with the ID of a Language Understanding service application that you want to recognize intents with.
-    * `YourLanguageUnderstandingIntentName1`, `YourLanguageUnderstandingIntentName2`, `YourLanguageUnderstandingIntentName3`: replace with names of intents that your Language Understanding service application recognizes.
   * The following settings apply to keyword-triggered recognition:
     * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
     * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.

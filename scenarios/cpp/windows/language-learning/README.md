@@ -1,6 +1,6 @@
 # C++ Console app for Windows
 
-This sample demonstrates various forms of speech recognition, intent recognition, conversation transcription and translation using the Speech SDK for C++ on Windows.
+This sample demonstrates various forms of speech recognition, conversation transcription and translation using the Speech SDK for C++ on Windows.
 
 > **Note:**
 > Conversation Transcription is in [Preview](https://aka.ms/cts/ctsoverview). The
@@ -26,7 +26,6 @@ This sample demonstrates various forms of speech recognition, intent recognition
   * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.
-  * On a 32-bit Windows installation, choose `x86` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 
 > **Note**

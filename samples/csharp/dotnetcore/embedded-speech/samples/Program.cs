@@ -4,6 +4,7 @@
 //
 
 using System;
+using Microsoft.CognitiveServices.Speech.Diagnostics.Logging;
 
 namespace MicrosoftSpeechSDKSamples
 {
@@ -19,6 +20,13 @@ namespace MicrosoftSpeechSDKSamples
                     return 1;
                 }
 
+                // Enable Speech SDK logging. If you want to report an issue, include this log with the report.
+                // If no path is specified, the log file will be created in the program default working folder.
+                // If a path is specified, make sure that it is writable by the application process.
+                /*
+                FileLogger.Start("SpeechSDK.log");
+                */
+
                 string input;
                 do
                 {
@@ -31,18 +39,15 @@ namespace MicrosoftSpeechSDKSamples
                     Console.WriteLine(" 5. Embedded speech recognition with push stream input.");
                     Console.WriteLine(" 6. Embedded speech recognition with pull stream input.");
                     Console.WriteLine(" 7. Hybrid (cloud & embedded) speech recognition with microphone input.");
-                    Console.WriteLine("\nIntent recognition");
-                    Console.WriteLine(" 8. Embedded intent recognition with microphone input.");
-                    Console.WriteLine(" 9. Embedded intent recognition with microphone input, keyword-triggered.");
                     Console.WriteLine("\nSpeech synthesis");
-                    Console.WriteLine("10. List embedded speech synthesis voices.");
-                    Console.WriteLine("11. Embedded speech synthesis with speaker output.");
-                    Console.WriteLine("12. Hybrid (cloud & embedded) speech synthesis with speaker output.");
+                    Console.WriteLine(" 8. List embedded speech synthesis voices.");
+                    Console.WriteLine(" 9. Embedded speech synthesis with speaker output.");
+                    Console.WriteLine("10. Hybrid (cloud & embedded) speech synthesis with speaker output.");
                     Console.WriteLine("\nSpeech translation");
-                    Console.WriteLine("13. List embedded speech translation models.");
-                    Console.WriteLine("14. Embedded speech translation with microphone input.");
+                    Console.WriteLine("11. List embedded speech translation models.");
+                    Console.WriteLine("12. Embedded speech translation with microphone input.");
                     Console.WriteLine("\nDevice performance measurement");
-                    Console.WriteLine("15. Embedded speech recognition.");
+                    Console.WriteLine("13. Embedded speech recognition.");
                     Console.Write("\nChoose a number (or none for exit) and press Enter: ");
 
                     input = Console.ReadLine();
@@ -76,33 +81,29 @@ namespace MicrosoftSpeechSDKSamples
                             if (Settings.HasSpeechRecognitionModel()) SpeechRecognitionSamples.HybridRecognitionFromMicrophone();
                             break;
                         case 8:
-                            if (Settings.HasSpeechRecognitionModel()) IntentRecognitionSamples.EmbeddedRecognitionFromMicrophone();
-                            break;
-                        case 9:
-                            if (Settings.HasSpeechRecognitionModel()) IntentRecognitionSamples.EmbeddedRecognitionWithKeywordFromMicrophone();
-                            break;
-                        case 10:
                             SpeechSynthesisSamples.ListEmbeddedVoicesAsync().Wait();
                             break;
-                        case 11:
+                        case 9:
                             if (Settings.HasSpeechSynthesisVoice()) SpeechSynthesisSamples.EmbeddedSynthesisToSpeaker();
                             break;
-                        case 12:
+                        case 10:
                             if (Settings.HasSpeechSynthesisVoice()) SpeechSynthesisSamples.HybridSynthesisToSpeaker();
                             break;
-                        case 13:
+                        case 11:
                             SpeechTranslationSamples.ListEmbeddedModels();
                             break;
-                        case 14:
+                        case 12:
                             if (Settings.HasSpeechTranslationModel()) SpeechTranslationSamples.EmbeddedTranslationFromMicrophone();
                             break;
-                        case 15:
+                        case 13:
                             if (Settings.HasSpeechRecognitionModel()) SpeechRecognitionSamples.EmbeddedSpeechRecognitionPerformanceTest().Wait();
                             break;
                         default:
                             break;
                     }
                 } while (true);
+
+                FileLogger.Stop();
             }
             catch (Exception e)
             {

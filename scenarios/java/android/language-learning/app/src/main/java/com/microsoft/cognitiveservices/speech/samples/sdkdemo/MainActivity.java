@@ -54,10 +54,6 @@ public class MainActivity extends AppCompatActivity {
     // Replace below with your own service region (e.g., "westus").
     private static final String SpeechRegion = "YourServiceRegion";
 
-    //
-    // Configuration for intent recognition
-    //
-
     private TextView recognizedTextView;
 
     private Button pronunciationAssessmentButton;

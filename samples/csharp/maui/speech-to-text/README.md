@@ -3,7 +3,7 @@
 This Speech SDK sample demonstrates how to use speech to text functionalities with Microsoft CognitiveServices Speech SDK for MAUI.
 
 > Note:
-> The Speech SDK for MAUI supports Windows (x86, x64, ARM/ARM64), Android (x86, x64 and ARM32/64), iOS (x64/ARM64 simulators and ARM64 device) and Maccatalyst (x64, ARM64) targets.
+> The Speech SDK for MAUI supports Windows (x64, ARM64), Android (x86, x64 and ARM32/64), iOS (x64/ARM64 simulators and ARM64 device) and Maccatalyst (x64, ARM64) targets.
 
 ## Prerequisites
 

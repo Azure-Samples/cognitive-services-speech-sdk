@@ -35,9 +35,9 @@
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="DiffPlex" Version="1.7.1" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.46.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.46.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.46.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.47.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.47.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.47.0" />
   </ItemGroup>
 
 

@@ -28,7 +28,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Navigate to the directory of this sample
 * Edit the file `Makefile`:
   * In the line `SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK` change the right-hand side to point to the location of your extract Speech SDK for Linux.
-  * If you are running on Linux x86 (32-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=x86`.
+  * If you are running on Linux ARM32 (32-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=arm32`.
   * If you are running on Linux ARM64 (64-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=arm64`.
 * Edit the `helloworld.cpp` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.

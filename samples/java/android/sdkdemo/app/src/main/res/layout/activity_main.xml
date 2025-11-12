@@ -43,24 +43,10 @@
       android:layout_marginStart="8dp"
       android:text="Recognize continuously"
       android:textAllCaps="false"
-      app:layout_constraintBottom_toTopOf="@+id/buttonRecognizeIntent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeIntermediate" />
-
-  <Button
-      android:id="@+id/buttonRecognizeIntent"
-      android:layout_width="336dp"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="8dp"
-      android:layout_marginEnd="8dp"
-      android:layout_marginBottom="8dp"
-      android:text="Recognize intent"
-      android:textAllCaps="false"
       app:layout_constraintBottom_toTopOf="@+id/buttonRecognizeWithKeyword"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeContinuous" />
+      app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeIntermediate" />
 
   <Button
       android:id="@+id/buttonRecognizeWithKeyword"
@@ -75,7 +61,7 @@
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintHorizontal_bias="0.406"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeIntent" />
+      app:layout_constraintTop_toBottomOf="@+id/buttonRecognizeContinuous" />
 
   <TextView
       android:id="@+id/recognizedText"

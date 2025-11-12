@@ -19,7 +19,6 @@ This sample tool uses the two Open Source NuGet packages [NAudio.Core](https://w
 * Navigate to the folder containing this sample, and select the solution file contained within it.
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.
-  * On a 32-bit Windows installation, choose `x86` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 
 ## Run the sample

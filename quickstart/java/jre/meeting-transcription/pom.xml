@@ -39,12 +39,12 @@
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>1.46.0</version>
+      <version>1.47.0</version>
     </dependency>
     <dependency>
       <groupId>com.azure</groupId>
       <artifactId>azure-identity</artifactId>
-      <version>1.15.4</version>
+      <version>1.18.0</version>
     </dependency>
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -53,14 +53,4 @@
     </dependency>
   </dependencies>
   <!-- </dependencies> -->
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>io.netty</groupId>
-        <artifactId>netty-codec-http2</artifactId>
-        <version>4.1.124.Final</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>

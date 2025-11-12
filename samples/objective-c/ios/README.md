@@ -11,7 +11,7 @@ The sample shows how to implement this for speech recognition from microphone.
 
 ## Example app with various samples
 
-This [sample app](./speech-samples) shows various other techniques that can be used with speech, translation and intent recognizers:
+This [sample app](./speech-samples) shows various other techniques that can be used with speech and translation recognizers:
 
 - using phrase hints to improve recognition results
 - using continuous recognition

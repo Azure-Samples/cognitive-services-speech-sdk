@@ -6,7 +6,6 @@ See [this article](https://docs.microsoft.com/azure/cognitive-services/speech-se
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-* For intent recognition: an *endpoint* subscription key for the [Language Understanding Intelligent Service (LUIS)](https://www.luis.ai/home), and an application ID.
 * A PC or Mac, with a working speaker.
 * A text editor.
 * Ensure you have [Node.js](https://nodejs.org/en/download/) installed.

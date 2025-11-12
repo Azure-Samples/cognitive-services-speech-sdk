@@ -103,7 +103,6 @@ void spx_gst_init_extra() {
     GST_PLUGIN_STATIC_REGISTER(openjpeg);
     GST_PLUGIN_STATIC_REGISTER(spandsp);
     GST_PLUGIN_STATIC_REGISTER(sbc);
-    GST_PLUGIN_STATIC_REGISTER(assrender);
     GST_PLUGIN_STATIC_REGISTER(asfmux);
     GST_PLUGIN_STATIC_REGISTER(dtsdec);
     GST_PLUGIN_STATIC_REGISTER(mpegpsdemux);

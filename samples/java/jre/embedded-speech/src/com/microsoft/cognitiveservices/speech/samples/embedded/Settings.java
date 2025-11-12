@@ -161,16 +161,9 @@ public class Settings
         // embedded speech synthesis will fail.
         EmbeddedSpeechConfig config = EmbeddedSpeechConfig.fromPaths(paths);
 
-        // Enable Speech SDK logging. If you want to report an issue, include this log with the report.
-        // If no path is specified, the log file will be created in the program default working folder.
-        // If a path is specified, make sure that it is writable by the application process.
-        /*
-        config.setProperty(PropertyId.Speech_LogFilename, "SpeechSDK.log");
-        */
-
         if (!SpeechRecognitionModelName.isEmpty())
         {
-            // Mandatory configuration for embedded speech (and intent) recognition.
+            // Mandatory configuration for embedded speech recognition.
             config.setSpeechRecognitionModel(SpeechRecognitionModelName, SpeechModelLicense);
         }
 

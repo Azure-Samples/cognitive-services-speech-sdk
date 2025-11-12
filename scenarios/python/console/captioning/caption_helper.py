@@ -159,7 +159,6 @@ class CaptionHelper(object):
 
     def is_final_result(self, result: speechsdk.RecognitionResult) -> bool:
         return (speechsdk.ResultReason.RecognizedSpeech == result.reason or
-                speechsdk.ResultReason.RecognizedIntent == result.reason or
                 speechsdk.ResultReason.TranslatedSpeech == result.reason)
 
     def lines_from_text(self, text: str) -> List[str]:
