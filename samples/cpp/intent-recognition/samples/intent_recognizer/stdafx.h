@@ -32,6 +32,11 @@
 #endif
 #define SPX_TRACE_ERROR(...)
 
+#ifdef SPX_TRACE_WARNING
+#undef SPX_TRACE_WARNING
+#endif
+#define SPX_TRACE_WARNING(...)
+
 #ifdef UNUSED
 #undef UNUSED
 #endif
