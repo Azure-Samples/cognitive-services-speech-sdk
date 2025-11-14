@@ -26,7 +26,6 @@
 
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
-using namespace Microsoft::CognitiveServices::Speech::Speaker;
 
 // Helper functions.
 template <typename T>

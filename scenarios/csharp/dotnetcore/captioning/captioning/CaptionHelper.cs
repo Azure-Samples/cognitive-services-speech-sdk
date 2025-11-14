@@ -11,7 +11,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
-using Microsoft.CognitiveServices.Speech.Intent;
 using Microsoft.CognitiveServices.Speech.Translation;
 using Microsoft.CognitiveServices.Speech.Transcription;
 using System.Collections.Generic;
@@ -238,7 +237,6 @@ namespace Captioning
         {
             RecognitionResult? final = result as RecognitionResult;
             return final?.Reason == ResultReason.RecognizedSpeech ||
-                   final?.Reason == ResultReason.RecognizedIntent ||
                    final?.Reason == ResultReason.TranslatedSpeech;
         }
 

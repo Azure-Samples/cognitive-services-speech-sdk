@@ -19,9 +19,6 @@ extern void EmbeddedSpeechRecognitionFromPushStream();
 extern void EmbeddedSpeechRecognitionFromPullStream();
 extern void HybridSpeechRecognitionFromMicrophone();
 
-extern void EmbeddedIntentRecognitionFromMicrophone();
-extern void EmbeddedIntentRecognitionWithKeywordFromMicrophone();
-
 extern void ListEmbeddedSpeechSynthesisVoices();
 extern void EmbeddedSpeechSynthesisToSpeaker();
 extern void HybridSpeechSynthesisToSpeaker();
@@ -30,6 +27,8 @@ extern void ListEmbeddedSpeechTranslationModels();
 extern void EmbeddedSpeechTranslationFromMicrophone();
 
 extern void EmbeddedSpeechRecognitionPerformanceTest();
+
+using namespace Microsoft::CognitiveServices::Speech::Diagnostics::Logging;
 
 
 int main()
@@ -40,6 +39,13 @@ int main()
         {
             return 1;
         }
+
+        // Enable Speech SDK logging. If you want to report an issue, include this log with the report.
+        // If no path is specified, the log file will be created in the program default working folder.
+        // If a path is specified, make sure that it is writable by the application process.
+        /*
+        FileLogger::Start("SpeechSDK.log");
+        */
 
         std::string input;
         do
@@ -53,18 +59,15 @@ int main()
             std::cout << " 5. Embedded speech recognition with push stream input.\n";
             std::cout << " 6. Embedded speech recognition with pull stream input.\n";
             std::cout << " 7. Hybrid (cloud & embedded) speech recognition with microphone input.\n";
-            std::cout << "\nIntent recognition\n";
-            std::cout << " 8. Embedded intent recognition with microphone input.\n";
-            std::cout << " 9. Embedded intent recognition with microphone input, keyword-triggered.\n";
             std::cout << "\nSpeech synthesis\n";
-            std::cout << "10. List embedded speech synthesis voices.\n";
-            std::cout << "11. Embedded speech synthesis with speaker output.\n";
-            std::cout << "12. Hybrid (cloud & embedded) speech synthesis with speaker output.\n";
+            std::cout << " 8. List embedded speech synthesis voices.\n";
+            std::cout << " 9. Embedded speech synthesis with speaker output.\n";
+            std::cout << "10. Hybrid (cloud & embedded) speech synthesis with speaker output.\n";
             std::cout << "\nSpeech translation\n";
-            std::cout << "13. List embedded speech translation models.\n";
-            std::cout << "14. Embedded speech translation with microphone input.\n";
+            std::cout << "11. List embedded speech translation models.\n";
+            std::cout << "12. Embedded speech translation with microphone input.\n";
             std::cout << "\nDevice performance measurement\n";
-            std::cout << "15. Embedded speech recognition.\n";
+            std::cout << "13. Embedded speech recognition.\n";
             std::cout << "\nChoose a number (or none for exit) and press Enter: ";
             std::cout.flush();
 
@@ -100,33 +103,29 @@ int main()
                 if (HasSpeechRecognitionModel()) HybridSpeechRecognitionFromMicrophone();
                 break;
             case 8:
-                if (HasSpeechRecognitionModel()) EmbeddedIntentRecognitionFromMicrophone();
-                break;
-            case 9:
-                if (HasSpeechRecognitionModel()) EmbeddedIntentRecognitionWithKeywordFromMicrophone();
-                break;
-            case 10:
                 ListEmbeddedSpeechSynthesisVoices();
                 break;
-            case 11:
+            case 9:
                 if (HasSpeechSynthesisVoice()) EmbeddedSpeechSynthesisToSpeaker();
                 break;
-            case 12:
+            case 10:
                 if (HasSpeechSynthesisVoice()) HybridSpeechSynthesisToSpeaker();
                 break;
-            case 13:
+            case 11:
                 ListEmbeddedSpeechTranslationModels();
                 break;
-            case 14:
+            case 12:
                 if (HasSpeechTranslationModel()) EmbeddedSpeechTranslationFromMicrophone();
                 break;
-            case 15:
+            case 13:
                 if (HasSpeechRecognitionModel()) EmbeddedSpeechRecognitionPerformanceTest();
                 break;
             default:
                 break;
             }
         } while (true);
+
+        FileLogger::Stop();
     }
     catch (const std::exception& e)
     {

@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="..\..\..\sharedcontent\console\helper.cs" Link="helper.cs" />
-    <Compile Include="..\..\..\sharedcontent\console\intent_recognition_samples.cs" Link="intent_recognition_samples.cs" />
     <Compile Include="..\..\..\sharedcontent\console\Program.cs" Link="Program.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_samples.cs" Link="speech_recognition_samples.cs" />
     <Compile Include="..\..\..\sharedcontent\console\speech_recognition_with_token_sample.cs" Link="speech_recognition_with_token_sample.cs" />
@@ -57,9 +56,9 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.13.1" />
     <PackageReference Include="DiffPlex" Version="1.7.1" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.46.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.46.0" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.46.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.47.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Remoteconversation" Version="1.47.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech.Extension.MAS" Version="1.47.0" />
   </ItemGroup>
 
 

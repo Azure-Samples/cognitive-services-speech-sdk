@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See https://aka.ms/csspeech/license for the full license information.
 //
 
+#include <fstream>
 #include <iostream>
 #include <thread>
 #include <speechapi_cxx.h>

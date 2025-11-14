@@ -1,6 +1,6 @@
 # Speech recognition sample for Android
 
-This sample demonstrates how to recognize speech and intents with Java using the Speech SDK for Android.
+This sample demonstrates how to recognize speech with Java using the Speech SDK for Android.
 
 > **Note:**
 > this sample is *not* for the Speech Devices SDK and the Roobo device.

@@ -10,7 +10,7 @@
 SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK
 
 # If you'd like to build for
-# - Linux x86 (32-bit), replace "x64" below with "x86".
+# - Linux ARM32 (32-bit), replace "x64" below with "arm32".
 # - Linux ARM64 (64-bit), replace "x64" below with "arm64".
 TARGET_PLATFORM:=x64
 

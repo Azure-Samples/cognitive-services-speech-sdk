@@ -273,7 +273,6 @@ public class CaptionHelper
     private static boolean IsFinalResult(RecognitionResult result)
     {
         return result.getReason() == ResultReason.RecognizedSpeech ||
-               result.getReason() == ResultReason.RecognizedIntent ||
                result.getReason() == ResultReason.TranslatedSpeech;
     }
 }

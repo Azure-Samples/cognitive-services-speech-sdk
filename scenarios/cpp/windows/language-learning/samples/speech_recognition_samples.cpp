@@ -5,7 +5,6 @@
 
 #include "stdafx.h"
 
-// <toplevel>
 #include <speechapi_cxx.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -20,7 +19,6 @@
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
 using namespace Microsoft::CognitiveServices::Speech::Audio;
-// </toplevel>
 
 // Pronunciation assessment.
 void PronunciationAssessmentWithMicrophone()

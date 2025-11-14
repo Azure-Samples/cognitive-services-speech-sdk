@@ -290,7 +290,6 @@ public:
     static bool IsFinalResult(std::shared_ptr<RecognitionResult> result)
     {
         return result->Reason == ResultReason::RecognizedSpeech ||
-               result->Reason == ResultReason::RecognizedIntent ||
                result->Reason == ResultReason::TranslatedSpeech;
     }
 };

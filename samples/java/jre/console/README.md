@@ -1,6 +1,6 @@
 # Java Console app for the Java Run-Time Environment (JRE) on Windows or Linux
 
-This sample demonstrates various forms of speech recognition, intent recognition, speech synthesis, and translation using the Speech SDK for Java on Windows or Linux.
+This sample demonstrates various forms of speech recognition, speech synthesis, and translation using the Speech SDK for Java on Windows or Linux.
 
 ## Prerequisites
 
@@ -21,11 +21,6 @@ This sample demonstrates various forms of speech recognition, intent recognition
     `https://westus.api.cognitive.microsoft.com/`.
   * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
   * `YourAudioFile.wav`: replace with a path to a `.wav` file on your disk **(required format: 16 kHz sample rate, 16 bit samples, mono / single-channel)**
-  * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
-    * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
-    * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
-    * `YourLanguageUnderstandingAppId`: replace with the ID of a Language Understanding service application that you want to recognize intents with.
-    * `YourLanguageUnderstandingIntentName1`, `YourLanguageUnderstandingIntentName2`, `YourLanguageUnderstandingIntentName3`: replace with names of intents that your Language Understanding service application recognizes.
   * The following settings apply to keyword-triggered recognition:
     * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
     * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.

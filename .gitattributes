@@ -63,7 +63,6 @@ proguard-rules.pro text
 *.toml text
 *.ts text
 *.txt text
-*.unity text
 *.vcxproj text
 *.vcxproj.filters text
 *.xaml text

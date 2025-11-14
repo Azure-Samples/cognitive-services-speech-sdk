@@ -56,12 +56,12 @@
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>1.46.0</version>
+      <version>1.47.0</version>
     </dependency>
     <dependency>
       <groupId>com.azure</groupId>
       <artifactId>azure-identity</artifactId>
-      <version>1.13.1</version>
+      <version>1.18.0</version>
     </dependency>
     <dependency>
       <groupId>jakarta.json</groupId>

@@ -19,7 +19,6 @@
 SPEECHSDK_ROOT:=/change/to/point/to/extracted/SpeechSDK
 
 # If you'd like to build for
-# - Linux x86 (32-bit), replace "x64" below with "x86".
 # - Linux ARM64 (64-bit), replace "x64" below with "arm64".
 # - Linux ARM32 (32-bit), replace "x64" below with "arm32".
 TARGET_PLATFORM:=x64
@@ -43,7 +42,7 @@ LIBS:=-lMicrosoft.CognitiveServices.Speech.core -lpthread -l:libasound.so.2 -lcu
 
 all: sample
 
-sample: main.cpp speech_recognition_samples.cpp speech_synthesis_samples.cpp translation_samples.cpp intent_recognition_samples.cpp conversation_transcriber_samples.cpp meeting_transcriber_samples.cpp speaker_recognition_samples.cpp standalone_language_detection_samples.cpp diagnostics_logging_samples.cpp
+sample: main.cpp speech_recognition_samples.cpp speech_synthesis_samples.cpp translation_samples.cpp conversation_transcriber_samples.cpp meeting_transcriber_samples.cpp standalone_language_detection_samples.cpp diagnostics_logging_samples.cpp
 	g++ $^ -o $@ \
 	    --std=c++14 \
 	    $(patsubst %,-I%, $(INCPATH)) \

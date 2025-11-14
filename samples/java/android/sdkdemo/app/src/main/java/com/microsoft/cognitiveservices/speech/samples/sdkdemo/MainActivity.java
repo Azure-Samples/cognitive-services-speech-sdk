@@ -28,10 +28,7 @@ import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.WordLevelTimingResult;
 import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.ResultReason;
-import com.microsoft.cognitiveservices.speech.intent.LanguageUnderstandingModel;
 import com.microsoft.cognitiveservices.speech.SpeechConfig;
-import com.microsoft.cognitiveservices.speech.intent.IntentRecognitionResult;
-import com.microsoft.cognitiveservices.speech.intent.IntentRecognizer;
 import com.microsoft.cognitiveservices.speech.SpeechRecognitionResult;
 import com.microsoft.cognitiveservices.speech.SpeechRecognizer;
 import com.microsoft.cognitiveservices.speech.CancellationDetails;
@@ -65,17 +62,6 @@ public class MainActivity extends AppCompatActivity {
     // Replace below with your own service region (e.g., "westus").
     private static final String SpeechRegion = "YourServiceRegion";
 
-    //
-    // Configuration for intent recognition
-    //
-
-    // Replace below with your own Language Understanding subscription key
-    // The intent recognition service calls the required key 'endpoint key'.
-    private static final String LanguageUnderstandingSubscriptionKey = "YourLanguageUnderstandingSubscriptionKey";
-    // Replace below with the deployment region of your Language Understanding application
-    private static final String LanguageUnderstandingServiceRegion = "YourLanguageUnderstandingServiceRegion";
-    // Replace below with the application ID of your Language Understanding application
-    private static final String LanguageUnderstandingAppId = "YourLanguageUnderstandingAppId";
     // Replace below with your own Keyword model file, kws.table model file is configured for "Computer" keyword
     private static final String KwsModelFile = "kws.table";
 
@@ -84,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     private Button recognizeButton;
     private Button recognizeIntermediateButton;
     private Button recognizeContinuousButton;
-    private Button recognizeIntentButton;
     private Button recognizeWithKeywordButton;
 
     private MicrophoneStream microphoneStream;
@@ -112,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
         recognizeButton = findViewById(R.id.buttonRecognize);
         recognizeIntermediateButton = findViewById(R.id.buttonRecognizeIntermediate);
         recognizeContinuousButton = findViewById(R.id.buttonRecognizeContinuous);
-        recognizeIntentButton = findViewById(R.id.buttonRecognizeIntent);
         recognizeWithKeywordButton = findViewById(R.id.buttonRecognizeWithKeyword);
 
         // Initialize SpeechSDK and request required permissions.
@@ -285,57 +269,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ///////////////////////////////////////////////////
-        // recognize intent
-        ///////////////////////////////////////////////////
-        recognizeIntentButton.setOnClickListener(view -> {
-            final String logTag = "intent";
-            final ArrayList<String> content = new ArrayList<>();
-
-            disableButtons();
-            clearTextBox();
-
-            content.add("");
-            content.add("");
-            try {
-                final SpeechConfig intentConfig = SpeechConfig.fromSubscription(LanguageUnderstandingSubscriptionKey, LanguageUnderstandingServiceRegion);
-
-                final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
-                final IntentRecognizer reco = new IntentRecognizer(intentConfig, audioInput);
-
-                LanguageUnderstandingModel intentModel = LanguageUnderstandingModel.fromAppId(LanguageUnderstandingAppId);
-                reco.addAllIntents(intentModel);
-
-                reco.recognizing.addEventListener((o, intentRecognitionResultEventArgs) -> {
-                    final String s = intentRecognitionResultEventArgs.getResult().getText();
-                    Log.i(logTag, "Intermediate result received: " + s);
-                    content.set(0, s);
-                    setRecognizedText(TextUtils.join(System.lineSeparator(), content));
-                });
-
-                final Future<IntentRecognitionResult> task = reco.recognizeOnceAsync();
-                setOnTaskCompletedListener(task, result -> {
-                    Log.i(logTag, "Continuous recognition stopped.");
-                    String s = result.getText();
-
-                    if (result.getReason() != ResultReason.RecognizedIntent) {
-                        String errorDetails = (result.getReason() == ResultReason.Canceled) ? CancellationDetails.fromResult(result).getErrorDetails() : "";
-                        s = "Intent failed with " + result.getReason() + ". Did you enter your Language Understanding subscription?" + System.lineSeparator() + errorDetails;
-                    }
-
-                    String intentId = result.getIntentId();
-                    Log.i(logTag, "Final result received: " + s + ", intent: " + intentId);
-                    content.set(0, s);
-                    content.set(1, " [intent: " + intentId + "]");
-                    setRecognizedText(TextUtils.join(System.lineSeparator(), content));
-                    enableButtons();
-                });
-            } catch (Exception ex) {
-                System.out.println(ex.getMessage());
-                displayException(ex);
-            }
-        });
-
-        ///////////////////////////////////////////////////
         // recognize with keyword
         ///////////////////////////////////////////////////
         recognizeWithKeywordButton.setOnClickListener(new View.OnClickListener() {
@@ -446,7 +379,6 @@ public class MainActivity extends AppCompatActivity {
             recognizeButton.setEnabled(false);
             recognizeIntermediateButton.setEnabled(false);
             recognizeContinuousButton.setEnabled(false);
-            recognizeIntentButton.setEnabled(false);
             recognizeWithKeywordButton.setEnabled(false);
         });
     }
@@ -456,7 +388,6 @@ public class MainActivity extends AppCompatActivity {
             recognizeButton.setEnabled(true);
             recognizeIntermediateButton.setEnabled(true);
             recognizeContinuousButton.setEnabled(true);
-            recognizeIntentButton.setEnabled(true);
             recognizeWithKeywordButton.setEnabled(true);
         });
     }

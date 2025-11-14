@@ -5,7 +5,6 @@ import * as settings from "./settings.js";
 import * as speech from "./speech.js";
 import * as speechTokenCredential from "./speechTokenCredential.js";
 import * as speechKeyCredential from "./speechKeyCredential.js";
-import * as intent from "./intent.js";
 import * as translate from "./translation.js";
 import * as translationTokenCredential from "./translationTokenCredential.js";
 import * as translationKeyCredential from "./translationKeyCredential.js";
@@ -17,11 +16,6 @@ if (process.argv.length > 3) {
 
 if (process.argv.length > 2) {
     switch (process.argv[2]) {
-        case "intent":
-            console.log("Now recognizing intent from: " + settings.filename);
-            intent.main(settings);
-            break;
-
         case "translate":
             console.log("Now translating from: " + settings.filename);
             translate.main(settings);
@@ -60,5 +54,5 @@ if (process.argv.length > 2) {
     }
 }
 else {
-    console.log("usage: index.js [speech|speechTokenCredential|speechKeyCredential|intent|translate|translationTokenCredential|translationKeyCredential|synthesis] {filename}");
+    console.log("usage: index.js [speech|speechTokenCredential|speechKeyCredential|translate|translationTokenCredential|translationKeyCredential|synthesis] {filename}");
 }

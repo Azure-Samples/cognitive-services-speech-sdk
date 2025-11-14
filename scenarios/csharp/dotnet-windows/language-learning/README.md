@@ -26,7 +26,6 @@ It runs under the .NET Framework 4.6.1 (or above) on Windows.
   * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.
-  * On a 32-bit Windows installation, choose `x86` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 
 ## Run the sample
