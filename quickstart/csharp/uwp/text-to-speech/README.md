@@ -20,7 +20,6 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
     For example, the endpoint might look like `https://westus.api.cognitive.microsoft.com` if your resource is in the West US region.
 * Set the active solution configuration and platform to the desired values under **Build** \> **Configuration Manager**:
   * On a 64-bit Windows installation, choose `x64` as active solution platform.
-  * On a 32-bit Windows installation, choose `x86` as active solution platform.
 * Press Ctrl+Shift+B, or select **Build** \> **Build Solution**.
 
 ## Run the sample

@@ -104,7 +104,6 @@
                     <select id="scenarioSelection">
                         <option value="speechRecognizerRecognizeOnce">Single-shot speech-to-text</option>
                         <option value="speechRecognizerContinuous">Continuous speech-to-text</option>
-                        <option value="intentRecognizerRecognizeOnce">Single-shot intent recognition</option>
                         <option value="translationRecognizerContinuous">Continuous translation</option>
                     </select>
                 </td>
@@ -163,12 +162,6 @@
                     </select>
                     <input id="voiceOutput" type="checkbox" checked>
                     <label for="voiceOutput">voice output</label>
-                </td>
-            </tr>
-            <tr id="languageUnderstandingAppIdRow">
-                <td align="right">Application ID:</td>
-                <td>
-                    <input id="appId" type="text" size="60" placeholder="required: appId for the Language Understanding service"/>
                 </td>
             </tr>
             <tr>
@@ -256,7 +249,7 @@
     <script>
         var SpeechSDK;
         var phraseDiv, statusDiv;
-        var key, authorizationToken, appId, phrases;
+        var key, authorizationToken, phrases;
         var regionOptions;
         var languageOptions, formatOption, filePicker, microphoneSources;
         var useDetailedResults;
@@ -300,7 +293,6 @@
             phraseDiv = document.getElementById("phraseDiv");
             statusDiv = document.getElementById("statusDiv");
             key = document.getElementById("key");
-            appId = document.getElementById("appId");
             phrases = document.getElementById("phrases");
             languageOptions = document.getElementById("languageOptions");
             languageTargetOptions = document.getElementById("languageTargetOptions");
@@ -322,7 +314,6 @@
                 scenarioSelection,
                 formatSimpleRadio,
                 formatDetailedRadio,
-                appId,
                 phrases,
                 languageTargetOptions
             ];
@@ -330,8 +321,7 @@
             function setScenario() {
                 var startButtonText = (function() {
                     switch (scenarioSelection.value) {
-                        case 'speechRecognizerRecognizeOnce':
-                        case 'intentRecognizerRecognizeOnce': return 'recognizeOnceAsync()';
+                        case 'speechRecognizerRecognizeOnce': return 'recognizeOnceAsync()';
                         case 'speechRecognizerContinuous': return 'startContinuousRecognitionAsync()';
                         case 'translationRecognizerContinuous': return 'startContinuousTranslation()';
                     }
@@ -339,9 +329,6 @@
 
                 scenarioStartButton.innerHTML = startButtonText;
                 scenarioStopButton.innerHTML = `STOP ${startButtonText}`;
-
-                document.getElementById('languageUnderstandingAppIdRow').style.display =
-                    scenarioSelection.value === 'intentRecognizerRecognizeOnce' ? '' : 'none';
 
                 var detailedResultsSupported = 
                     (scenarioSelection.value === "speechRecognizerRecognizeOnce"
@@ -366,9 +353,6 @@
                     case 'speechRecognizerContinuous':
                         doContinuousRecognition();
                         break;
-                    case 'intentRecognizerRecognizeOnce':
-                        doRecognizeIntentOnceAsync();
-                        break;
                     case 'translationRecognizerContinuous':
                         doContinuousTranslation();
                         break;
@@ -378,7 +362,6 @@
             scenarioStopButton.addEventListener("click", function() {
                 switch (scenarioSelection.value) {
                     case 'speechRecognizerRecognizeOnce':
-                    case 'intentRecognizerRecognizeOnce':
                         reco.close();
                         reco = undefined;
                         break;
@@ -548,8 +531,7 @@
             phraseDiv.scrollTop = phraseDiv.scrollHeight;
 
             statusDiv.innerHTML += `(recognized)  Reason: ${SpeechSDK.ResultReason[result.reason]}`;
-            if (scenarioSelection.value === 'speechRecognizerRecognizeOnce'
-                || scenarioSelection.value === 'intentRecognizerRecognizeOnce') {
+            if (scenarioSelection.value === 'speechRecognizerRecognizeOnce') {
                 // Clear the final results view for single-shot scenarios
                 phraseDiv.innerHTML = '';
             } else {
@@ -571,7 +553,6 @@
                     break;
                 case SpeechSDK.ResultReason.RecognizedSpeech:
                 case SpeechSDK.ResultReason.TranslatedSpeech:
-                case SpeechSDK.ResultReason.RecognizedIntent:
                     statusDiv.innerHTML += `\r\n`;
 
                     if (useDetailedResults) {
@@ -587,12 +568,6 @@
                         + `${JSON.stringify(detailedResultJson, null, 2)}\r\n`;
                     } else if (result.text) {
                         phraseDiv.innerHTML += `${result.text}\r\n`;
-                    }
-
-                    var intentJson = result.properties
-                        .getProperty(SpeechSDK.PropertyId.LanguageUnderstandingServiceResponse_JsonResult);
-                    if (intentJson) {
-                        phraseDiv.innerHTML += `${intentJson}\r\n`;
                     }
 
                     if (result.translations) {
@@ -651,7 +626,6 @@
             // 
             // * In the case of continuous scenarios, these final results will be generated after each segment of audio
             //   with sufficient silence at the end.
-            // * In the case of intent scenarios, only these final results will contain intent JSON data.
             // * Single-shot scenarios can also use a continuation on recognizeOnceAsync calls to handle this without
             //   event registration.
             recognizer.recognized = onRecognized;
@@ -731,31 +705,6 @@
             // driven, as use of continuation (as is in the single-shot sample) isn't applicable when there's not a
             // single result.
             reco.startContinuousRecognitionAsync();
-        }
-
-        function doRecognizeIntentOnceAsync() {
-            resetUiForScenarioStart();
-            var audioConfig = getAudioConfig();
-            var speechConfig = getSpeechConfig(SpeechSDK.SpeechConfig);
-            if (!audioConfig || !speechConfig) return;
-
-            if (!appId.value) {
-                alert('A language understanding appId is required for intent recognition.');
-                return;
-            }
-
-            // Intent recognizers should be configured with a LanguageUnderstandingModel derived from a known appId.
-            // Set up a Language Understanding Model from Language Understanding Intelligent Service (LUIS).
-            // See https://www.luis.ai/home for more information on LUIS.
-            reco = new SpeechSDK.IntentRecognizer(speechConfig, audioConfig);
-            var intentModel = SpeechSDK.LanguageUnderstandingModel.fromAppId(appId.value);
-            reco.addAllIntents(intentModel);
-
-            // Apply standard event handlers and PhraseListGrammar data
-            applyCommonConfigurationTo(reco);
-
-            // Start the intent recognition. Results will arrive on the appropriate event handlers.
-            reco.recognizeOnceAsync();
         }
 
         function doContinuousTranslation() {

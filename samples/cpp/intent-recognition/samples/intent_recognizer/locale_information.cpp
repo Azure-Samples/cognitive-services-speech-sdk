@@ -17,7 +17,7 @@ namespace Intent {
 namespace Impl {
 namespace Locales {
 
-    static const std::array<const OrthographyInformation, 6> ORTHOGRAPHY_INFORMATION =
+    static const std::array<const OrthographyInformation, 7> ORTHOGRAPHY_INFORMATION =
     {
         // English (the default one to use) should be first
         OrthographyInformation{
@@ -72,6 +72,15 @@ namespace Locales {
             "=<>‾_＿\\-－‐‑—―〜・･,，、､;；:：!！?？.．‥…。｡＇‘’\"＂“”（）［］｛｝〈〉《》「｢」｣『』【】〔〕‖§¶@＠ * ＊ / ／＼ & ＆#＃†‡′″〃※∶․︒﹒'ʼ՚᾽᾿%٪﹪％؉‰$﹩＄£₤¥￥₩￦₨₹‒⁻₋−➖﹣،٫︐︑﹑+⁺₊➕﬩﹢＋﹐", // PatternPunctuation
             "！。？?", // SentenceEndCharacters
             { }, // WordBoundary
+            false // RightToLeft
+        },
+        OrthographyInformation{
+            "hi",
+            "\t\r\n ", // Whitespace
+            "[]{}()!?।॥.,:;'\"@#$₹%&*+-=<>/\\^_=`~‑—‒⁻₋−➖﹣－…''""§@*/\\&#†‡′″£₤￡﹩＄€؉‰٪﹪％ʼ՚᾽᾿'＇∶︓﹕：․।︒﹒．｡¥￥₩￦₨،٫⹁、︐︑﹐﹑،､⁺₊➕﬩﹢＋", // InputPunctuation
+            "!?।॥.,:;'\"@#$₹%&*+-=<>/\\^_=`~‑—‒⁻₋−➖﹣－…''""§@*/\\&#†‡′″£₤￡﹩＄€؉‰٪﹪％ʼ՚᾽᾿'＇∶︓﹕：․।︒﹒．｡¥￥₩￦₨،٫⹁、︐︑﹐﹑،､⁺₊➕﬩﹢＋", // PatternPunctuation
+            "।!.?", // SentenceEndCharacters
+            { ' ' }, // WordBoundary
             false // RightToLeft
         }
     };

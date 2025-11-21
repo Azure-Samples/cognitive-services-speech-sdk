@@ -7,7 +7,6 @@
 import platform
 from collections import OrderedDict
 
-import intent_sample
 import speech_language_detection_sample
 import speech_sample
 import speech_synthesis_sample
@@ -36,11 +35,6 @@ samples = OrderedDict([
         speech_sample.speech_recognize_keyword_locally_from_microphone,
         speech_sample.speech_recognize_once_from_file_with_aad,
         speech_sample.speech_recognize_continuous_from_file_with_aad,
-    ]), (intent_sample, [
-        intent_sample.recognize_intent_once_from_mic,
-        intent_sample.recognize_intent_once_async_from_mic,
-        intent_sample.recognize_intent_once_from_file,
-        intent_sample.recognize_intent_continuous,
     ]), (translation_sample, [
         translation_sample.translation_once_from_mic,
         translation_sample.translation_once_from_file,

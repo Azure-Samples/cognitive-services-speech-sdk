@@ -1,6 +1,6 @@
 # Python console app
 
-This sample demonstrates various forms of speech recognition, intent recognition, speech synthesis, translation and transcription using the Speech SDK for Python.
+This sample demonstrates various forms of speech recognition, speech synthesis, translation and transcription using the Speech SDK for Python.
 
 ## Prerequisites
 
@@ -31,10 +31,6 @@ This sample demonstrates various forms of speech recognition, intent recognition
 
   * `YourSubscriptionKey`: replace with your subscription key.
   * `https://YourServiceRegion.api.cognitive.microsoft.com`: replace with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
-  * The following settings apply for intent recognition powered by the [Language Understanding service (LUIS)](https://aka.ms/csspeech/luisdocs):
-    * `YourLanguageUnderstandingSubscriptionKey`: replace with your Language Understanding service subscription key (endpoint key).
-    * `YourLanguageUnderstandingServiceRegion`: replace with the region associated with your Language Understanding service subscription.
-    * `YourLanguageUnderstandingAppId`: replace with the ID of a Language Understanding service application that you want to recognize intents with.
   * The following settings apply to keyword-triggered recognition:
     * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.
     * `YourKeyword`: replace with the phrase your keyword recognition model triggers on.

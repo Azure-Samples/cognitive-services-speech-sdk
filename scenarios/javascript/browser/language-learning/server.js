@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
-// <disable>JS1001.SyntaxError</disable>
+/* eslint-disable JS1001 */
 
 (function () {
     "use strict";
@@ -53,4 +53,3 @@
         console.log('Express server is running on localhost:3001');
     });
 }());
-// </disable>

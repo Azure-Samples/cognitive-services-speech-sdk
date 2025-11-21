@@ -12,10 +12,16 @@ export const main = (settings, filename) => {
     var audioConfig = sdk.AudioConfig.fromAudioFileOutput(filename);
     var speechConfig = sdk.SpeechConfig.fromEndpoint(new URL(settings.serviceEndpoint), settings.subscriptionKey);
 
-    // setting the synthesis language, voice name, and output audio format.
-    // see https://aka.ms/speech/tts-languages for available languages and voices
+    // Configure the voice for speech synthesis. For a complete list of available voices,
+    // visit https://aka.ms/speech/voices/neural
+    // 
+    // To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
+    // (available in regions such as East US). Alternatively, use standard neural voices like
+    // "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
+    // 
+    // For HD neural voice region availability, see https://aka.ms/speech/regions
     speechConfig.speechSynthesisLanguage = settings.language;
-    speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural";
+    speechConfig.speechSynthesisVoiceName = "en-us-Ava:DragonHDLatestNeural";
     speechConfig.speechSynthesisOutputFormat = sdk.SpeechSynthesisOutputFormat.Audio16Khz32KBitRateMonoMp3;
 
     var rl = readline.createInterface({

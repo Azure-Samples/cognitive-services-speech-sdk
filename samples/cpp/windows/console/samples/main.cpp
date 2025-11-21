@@ -24,12 +24,6 @@ extern void SpeechContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCust
 extern void SpeechRecognitionFromPullStreamWithSelectMASEnhancementsEnabled();
 extern void SpeechContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified();
 
-extern void IntentRecognitionWithMicrophone();
-extern void IntentRecognitionWithPatternMatchingAndMicrophone();
-extern void IntentRecognitionWithLanguage();
-extern void IntentContinuousRecognitionWithFile();
-extern void IntentPatternMatchingWithMicrophoneAndKeywordSpotting();
-
 extern void TranslationWithMicrophone();
 extern void TranslationContinuousRecognition();
 
@@ -61,12 +55,7 @@ extern void MeetingTranscriptionWithPullAudioStreamUsingMultichannelAudio();
 extern void MeetingTranscriptionWithPushAudioStreamUsingMultichannelAudio();
 extern void MeetingTranscriptionWithMultichannelAudioFile();
 
-extern void SpeakerVerificationWithMicrophone();
-extern void SpeakerVerificationWithPushStream();
-extern void SpeakerIdentificationWithPullStream();
-extern void SpeakerIdentificationWithMicrophone();
-
-// Language Id related tests
+// Language Id related samples
 extern void SpeechRecognitionAndLanguageIdWithMicrophone();
 extern void SpeechRecognitionAndLanguageIdWithCustomModelsWithMicrophone();
 extern void SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile();
@@ -200,46 +189,6 @@ void SpeechWithLanguageIdSamples()
             break;
         case '3':
             SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile();
-            break;
-        case '0':
-            break;
-        }
-    } while (input[0] != '0');
-}
-
-void IntentSamples()
-{
-    string input;
-    do
-    {
-        cout << "\nINTENT RECOGNITION SAMPLES:\n";
-        cout << "1.) Intent recognition with microphone input.\n";
-        cout << "2.) Intent recognition in the specified language.\n";
-        cout << "3.) Intent continuous recognition with file input.\n";
-        cout << "4.) Intent recognition from default microphone and pattern matching.\n";
-        cout << "5.) Intent recognition with keyword spotting from default microphone and pattern matching.\n";
-        cout << "\nChoice (0 for MAIN MENU): ";
-        cout.flush();
-
-        input.clear();
-        getline(cin, input);
-
-        switch (input[0])
-        {
-        case '1':
-            IntentRecognitionWithMicrophone();
-            break;
-        case '2':
-            IntentRecognitionWithLanguage();
-            break;
-        case '3':
-            IntentContinuousRecognitionWithFile();
-            break;
-        case '4':
-            IntentRecognitionWithPatternMatchingAndMicrophone();
-            break;
-        case '5':
-            IntentPatternMatchingWithMicrophoneAndKeywordSpotting();
             break;
         case '0':
             break;
@@ -463,46 +412,6 @@ void MeetingTranscriberSamples()
     } while (input[0] != '0');
 }
 
-void SpeakerRecognitionSamples()
-{
-    string input;
-    do
-    {
-        cout << "\nSpeakerRecognition SAMPLES:\n";
-        cout << "1.) Speaker verification with microphone input.\n";
-        cout << "2.) Speaker verification with push audio stream input.\n";
-        cout << "3.) Speaker identification with pull audio stream input.\n";
-        cout << "4.) Speaker identification with microphone input.\n";
-        cout << "\nChoice (0 for MAIN MENU): ";
-        cout.flush();
-
-        input.clear();
-        getline(cin, input);
-
-        switch (input[0])
-        {
-        case '1':
-            SpeakerVerificationWithMicrophone();
-            break;
-
-        case '2':
-            SpeakerVerificationWithPushStream();
-            break;
-
-        case '3':
-            SpeakerIdentificationWithPullStream();
-            break;
-
-        case '4':
-            SpeakerIdentificationWithMicrophone();
-            break;
-
-        case '0':
-            break;
-        }
-    } while (input[0] != '0');
-}
-
 void StandaloneLanguageDetectionSamples()
 {
     string input;
@@ -589,15 +498,13 @@ int main(int argc, char **argv)
     {
         cout << "\nMAIN MENU\n";
         cout << "1.) Speech recognition samples.\n";
-        cout << "2.) Intent recognition samples.\n";
-        cout << "3.) Translation samples.\n";
-        cout << "4.) Speech synthesis samples.\n";
-        cout << "5.) Conversation transcriber samples.\n";
-        cout << "6.) Meeting transcriber samples.\n";
-        cout << "7.) Speaker recognition samples.\n";
-        cout << "8.) Standalone language detection samples.\n";
-        cout << "9.) Speech recognition with language detection samples.\n";
-        cout << "10.) Diagnostics logging samples (trace logging).\n";
+        cout << "2.) Translation samples.\n";
+        cout << "3.) Speech synthesis samples.\n";
+        cout << "4.) Conversation transcriber samples.\n";
+        cout << "5.) Meeting transcriber samples.\n";
+        cout << "6.) Standalone language detection samples.\n";
+        cout << "7.) Speech recognition with language detection samples.\n";
+        cout << "8.) Diagnostics logging samples (trace logging).\n";
         cout << "\nChoice (0 to Exit): ";
         cout.flush();
 
@@ -620,30 +527,24 @@ int main(int argc, char **argv)
             SpeechSamples();
             break;
         case 2:
-            IntentSamples();
-            break;
-        case 3:
             TranslationSamples();
             break;
-        case 4:
+        case 3:
             SpeechSynthesisSamples();
             break;
-        case 5:
+        case 4:
             ConversationTranscriberSamples();
             break;
-        case 6:
+        case 5:
             MeetingTranscriberSamples();
             break;
-        case 7:
-            SpeakerRecognitionSamples();
-            break;
-        case 8:
+        case 6:
             StandaloneLanguageDetectionSamples();
             break;
-        case 9:
+        case 7:
             SpeechWithLanguageIdSamples();
             break;
-        case 10:
+        case 8:
             DiagnosticsLoggingSamples();
             break;
         case 0:

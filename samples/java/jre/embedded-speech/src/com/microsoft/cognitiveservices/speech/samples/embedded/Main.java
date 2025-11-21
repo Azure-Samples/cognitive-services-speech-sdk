@@ -4,6 +4,7 @@
 //
 package com.microsoft.cognitiveservices.speech.samples.embedded;
 
+import com.microsoft.cognitiveservices.speech.diagnostics.logging.FileLogger;
 import java.util.Scanner;
 
 
@@ -20,6 +21,13 @@ public class Main
                 System.exit(1);
             }
 
+            // Enable Speech SDK logging. If you want to report an issue, include this log with the report.
+            // If no path is specified, the log file will be created in the program default working folder.
+            // If a path is specified, make sure that it is writable by the application process.
+            /*
+            FileLogger.start("SpeechSDK.log");
+            */
+
             String input;
             do
             {
@@ -32,18 +40,15 @@ public class Main
                 System.out.println(" 5. Embedded speech recognition with push stream input.");
                 System.out.println(" 6. Embedded speech recognition with pull stream input.");
                 System.out.println(" 7. Hybrid (cloud & embedded) speech recognition with microphone input.");
-                System.out.println("\nIntent recognition");
-                System.out.println(" 8. Embedded intent recognition with microphone input.");
-                System.out.println(" 9. Embedded intent recognition with microphone input, keyword-triggered.");
                 System.out.println("\nSpeech synthesis");
-                System.out.println("10. List embedded speech synthesis voices.");
-                System.out.println("11. Embedded speech synthesis with speaker output.");
-                System.out.println("12. Hybrid (cloud & embedded) speech synthesis with speaker output.");
+                System.out.println(" 8. List embedded speech synthesis voices.");
+                System.out.println(" 9. Embedded speech synthesis with speaker output.");
+                System.out.println("10. Hybrid (cloud & embedded) speech synthesis with speaker output.");
                 System.out.println("\nSpeech translation");
-                System.out.println("13. List embedded speech translation models.");
-                System.out.println("14. Embedded speech translation with microphone input.");
+                System.out.println("11. List embedded speech translation models.");
+                System.out.println("12. Embedded speech translation with microphone input.");
                 System.out.println("\nDevice performance measurement");
-                System.out.println("15. Embedded speech recognition.");
+                System.out.println("13. Embedded speech recognition.");
                 System.out.print("\nChoose a number (or none for exit) and press Enter: ");
     
                 input = new Scanner(System.in).nextLine();
@@ -75,33 +80,29 @@ public class Main
                     if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.hybridRecognitionFromMicrophone();
                     break;
                 case 8:
-                    if (Settings.hasSpeechRecognitionModel()) IntentRecognitionSamples.embeddedRecognitionFromMicrophone();
-                    break;
-                case 9:
-                    if (Settings.hasSpeechRecognitionModel()) IntentRecognitionSamples.embeddedRecognitionWithKeywordFromMicrophone();
-                    break;
-                case 10:
                     SpeechSynthesisSamples.listEmbeddedVoicesAsync();
                     break;
-                case 11:
+                case 9:
                     if (Settings.hasSpeechSynthesisVoice()) SpeechSynthesisSamples.embeddedSynthesisToSpeaker();
                     break;
-                case 12:
+                case 10:
                     if (Settings.hasSpeechSynthesisVoice()) SpeechSynthesisSamples.hybridSynthesisToSpeaker();
                     break;
-                case 13:
+                case 11:
                     SpeechTranslationSamples.listEmbeddedModels();
                     break;
-                case 14:
+                case 12:
                     if (Settings.hasSpeechTranslationModel()) SpeechTranslationSamples.embeddedTranslationFromMicrophone();
                     break;
-                case 15:
+                case 13:
                     if (Settings.hasSpeechRecognitionModel()) SpeechRecognitionSamples.embeddedRecognitionPerformanceTest();
                     break;
                 default:
                     break;
                 }
             } while (true);
+
+            FileLogger.stop();
         }
         catch (Exception e)
         {

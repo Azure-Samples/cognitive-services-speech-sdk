@@ -167,16 +167,9 @@ std::shared_ptr<EmbeddedSpeechConfig> CreateEmbeddedSpeechConfig()
     // embedded speech synthesis will fail.
     auto config = EmbeddedSpeechConfig::FromPaths(paths);
 
-    // Enable Speech SDK logging. If you want to report an issue, include this log with the report.
-    // If no path is specified, the log file will be created in the program default working folder.
-    // If a path is specified, make sure that it is writable by the application process.
-    /*
-    config->SetProperty(PropertyId::Speech_LogFilename, "SpeechSDK.log");
-    */
-
     if (!SpeechRecognitionModelName.empty())
     {
-        // Mandatory configuration for embedded speech (and intent) recognition.
+        // Mandatory configuration for embedded speech recognition.
         config->SetSpeechRecognitionModel(SpeechRecognitionModelName, SpeechModelLicense);
     }
 

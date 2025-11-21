@@ -23,11 +23,6 @@ public class Main {
         System.out.println(" 8. Translation with microphone input.");
         System.out.println(" 9. Translation with file input.");
         System.out.println("10. Translation with audio stream.");
-        System.out.println("11. Intent recognition with microphone.");
-        System.out.println("12. Intent recognition with language.");
-        System.out.println("13. Intent continuous recognition using events with file.");
-        System.out.println("14. Intent Pattern Matching with microphone.");
-        System.out.println("15. Intent Pattern Matching with microphone and keyword spotting.");
         System.out.println("16. Speech continuous recognition using events with a PushStream.");
         System.out.println("17. Speech continuous recognition using events with file and Phrase List.");
         System.out.println("18. Speech synthesis to speaker output.");
@@ -43,10 +38,6 @@ public class Main {
         System.out.println("28. Speech synthesis word boundary event.");
         System.out.println("29. Speech synthesis server scenario example.");
         System.out.println("30. Speech synthesis with source language auto detection.");
-        System.out.println("31. Speaker verification with microphone.");
-        System.out.println("32. Speaker verification with file.");
-        System.out.println("33. Speaker identification with microphone.");
-        System.out.println("34. Speaker identification with file.");
         System.out.println("35. Speech recognition from default microphone with Microsoft Audio Stack enabled.");
         System.out.println("36. Speech recognition from a microphone with Microsoft Audio Stack enabled and "
                 + "pre-defined microphone array geometry specified.");
@@ -110,21 +101,6 @@ public class Main {
                 case "10":
                     TranslationSamples.translationWithAudioStreamAsync();
                     break;
-                case "11":
-                    IntentRecognitionSamples.intentRecognitionWithMicrophone();
-                    break;
-                case "12":
-                    IntentRecognitionSamples.intentRecognitionWithLanguage();
-                    break;
-                case "13":
-                    IntentRecognitionSamples.intentContinuousRecognitionWithFile();
-                    break;
-                case "14":
-                    IntentRecognitionSamples.IntentPatternMatchingWithMicrophone();
-                    break;
-                case "15":
-                    IntentRecognitionSamples.IntentPatternMatchingWithMicrophoneAndKeywordSpotting();
-                    break;
                 case "16":
                     SpeechRecognitionSamples.continuousRecognitionWithPushStream();
                     break;
@@ -169,18 +145,6 @@ public class Main {
                     break;
                 case "30":
                     SpeechSynthesisSamples.synthesisWithSourceLanguageAutoDetectionAsync();
-                    break;
-                case "31":
-                    SpeakerRecognitionSamples.verificationWithMicrophoneAsync();
-                    break;
-                case "32":
-                    SpeakerRecognitionSamples.verificationWithFileAsync();
-                    break;
-                case "33":
-                    SpeakerRecognitionSamples.identificationWithMicrophoneAsync();
-                    break;
-                case "34":
-                    SpeakerRecognitionSamples.identificationWithFileAsync();
                     break;
                 case "35":
                     SpeechRecognitionSamples.continuousRecognitionFromDefaultMicrophoneWithMASEnabled();

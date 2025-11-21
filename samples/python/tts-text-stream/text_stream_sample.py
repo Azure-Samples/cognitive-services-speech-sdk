@@ -16,8 +16,16 @@ speech_config = speechsdk.SpeechConfig(
     subscription=os.getenv("AZURE_TTS_API_KEY")
 )
 
-# set a voice name
-speech_config.speech_synthesis_voice_name = "en-US-BrianMultilingualNeural"
+# Configure the voice for speech synthesis. For a complete list of available voices,
+# visit https://aka.ms/speech/voices/neural
+#
+# To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
+# (available in regions such as East US). Alternatively, use standard neural voices like
+# "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
+#
+# For HD neural voice region availability, see https://aka.ms/speech/regions
+voice = "en-us-Ava:DragonHDLatestNeural"
+speech_config.speech_synthesis_voice_name = voice
 speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 
 speech_synthesizer.synthesizing.connect(lambda evt: print("[audio]", end=""))

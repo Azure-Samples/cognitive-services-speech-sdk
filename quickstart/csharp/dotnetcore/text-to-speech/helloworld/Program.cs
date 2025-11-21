@@ -26,8 +26,16 @@ namespace helloworld
             // Replace with your own endpoint and subscription key.
             var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
 
-            // Set the voice name, refer to https://aka.ms/speech/voices/neural for full list.
-            config.SpeechSynthesisVoiceName = "en-US-AriaNeural";
+            // Configure the voice for speech synthesis. For a complete list of available voices,
+            // visit https://aka.ms/speech/voices/neural
+            // 
+            // To use the latest LLM-based HD neural voice, set the voice name to "en-us-Ava:DragonHDLatestNeural"
+            // (available in regions such as East US). Alternatively, use standard neural voices like
+            // "en-US-AriaNeural" or "en-US-AvaMultilingualNeural".
+            // 
+            // For HD neural voice region availability, see https://aka.ms/speech/regions
+            // config.SpeechSynthesisVoiceName = "en-US-AriaNeural";
+            config.SpeechSynthesisVoiceName = "en-US-Ava:DragonHDLatestNeural";
 
 
             // Creates a speech synthesizer using the default speaker as audio output.

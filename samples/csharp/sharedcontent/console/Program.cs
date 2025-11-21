@@ -30,13 +30,12 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine("");
                 Console.WriteLine(" 1. Speech recognition samples.");
                 Console.WriteLine(" 2. Speech translation samples.");
-                Console.WriteLine(" 3. Intent recognition samples.");
-                Console.WriteLine(" 4. Speech synthesis samples.");
-                Console.WriteLine(" 5. Meeting transcriber samples.");
-                Console.WriteLine(" 6. Speech recognition with language detection enabled samples");
-                Console.WriteLine(" 7. Standalone language detection samples.");
-                Console.WriteLine(" 8. Speech recognition with Microsoft Audio Stack (MAS) samples.");
-                Console.WriteLine(" 9. Diagnostics logging samples (trace logging).");
+                Console.WriteLine(" 3. Speech synthesis samples.");
+                Console.WriteLine(" 4. Meeting transcriber samples.");
+                Console.WriteLine(" 5. Speech recognition with language detection enabled samples");
+                Console.WriteLine(" 6. Standalone language detection samples.");
+                Console.WriteLine(" 7. Speech recognition with Microsoft Audio Stack (MAS) samples.");
+                Console.WriteLine(" 8. Diagnostics logging samples (trace logging).");
                 Console.WriteLine("");
                 Console.Write(mainPrompt);
 
@@ -55,30 +54,26 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.D3:
                     case ConsoleKey.NumPad3:
-                        IntentRecognition();
+                        SpeechSynthesis();
                         break;
                     case ConsoleKey.D4:
                     case ConsoleKey.NumPad4:
-                        SpeechSynthesis();
+                        MeetingTranscriber();
                         break;
                     case ConsoleKey.D5:
                     case ConsoleKey.NumPad5:
-                        MeetingTranscriber();
+                        SpeechRecognitionWithLanguageDetectionEnabled();
                         break;
                     case ConsoleKey.D6:
                     case ConsoleKey.NumPad6:
-                        SpeechRecognitionWithLanguageDetectionEnabled();
+                        LanguageDetectionSamples();
                         break;
                     case ConsoleKey.D7:
                     case ConsoleKey.NumPad7:
-                        LanguageDetectionSamples();
+                        SpeechRecognitionWithMASEnabled();
                         break;
                     case ConsoleKey.D8:
                     case ConsoleKey.NumPad8:
-                        SpeechRecognitionWithMASEnabled();
-                        break;
-                    case ConsoleKey.D9:
-                    case ConsoleKey.NumPad9:
                         SpeechDiagnosticsLogging();
                         break;
                     case ConsoleKey.D0:
@@ -404,67 +399,6 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D8:
                     case ConsoleKey.NumPad8:
                         TranslationSamples.TranslationWithApiKeyCredential().Wait();
-                        break;
-                    case ConsoleKey.D0:
-                    case ConsoleKey.NumPad0:
-                        Console.WriteLine(back);
-                        sampleWasRun = false;
-                        break;
-                    default:
-                        Console.WriteLine(invalid);
-                        sampleWasRun = false;
-                        break;
-                }
-
-                if (sampleWasRun) Console.WriteLine(done);
-
-            } while (x.Key != ConsoleKey.D0);
-        }
-
-        private static void IntentRecognition()
-        {
-            ConsoleKeyInfo x;
-
-            do
-            {
-                Console.WriteLine("");
-                Console.WriteLine(" Speech SDK - Intent Recognition Samples");
-                Console.WriteLine("");
-                Console.WriteLine(choose);
-                Console.WriteLine("");
-                Console.WriteLine(" 1. Intent recognition with microphone input.");
-                Console.WriteLine(" 2. Intent continuous recognition with file input.");
-                Console.WriteLine(" 3. Intent recognition in the specified language with microphone input.");
-                Console.WriteLine(" 4. Intent recognition from default microphone and pattern matching.");
-                Console.WriteLine(" 5. Intent recognition with keyword spotting from default microphone and pattern matching.");
-                Console.WriteLine("");
-                Console.Write(prompt);
-
-                x = Console.ReadKey();
-                Console.WriteLine("\n");
-                bool sampleWasRun = true;
-
-                switch (x.Key)
-                {
-                    case ConsoleKey.D1:
-                    case ConsoleKey.NumPad1:
-                        IntentRecognitionSamples.RecognitionWithMicrophoneAsync().Wait();
-                        break;
-                    case ConsoleKey.D2:
-                    case ConsoleKey.NumPad2:
-                        IntentRecognitionSamples.ContinuousRecognitionWithFileAsync().Wait();
-                        break;
-                    case ConsoleKey.D3:
-                    case ConsoleKey.NumPad3:
-                        IntentRecognitionSamples.RecognitionWithMicrophoneUsingLanguageAsync().Wait();
-                        break;
-                    case ConsoleKey.D4:
-                    case ConsoleKey.NumPad4:
-                        IntentRecognitionSamples.IntentPatternMatchingWithMicrophoneAsync().Wait();
-                        break;
-                    case ConsoleKey.D5:
-                    case ConsoleKey.NumPad5:
-                        IntentRecognitionSamples.IntentPatternMatchingWithMicrophoneAndKeywordSpottingAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:

@@ -20,7 +20,7 @@ using (var recognizer = new SpeechRecognizer(config))
 }
 ```
 
-The same concept is applied for creating `IntentRecognizer` and `TranslationRecognizer`, except that `SpeechTranslationConfig` is required for creating `TranslationRecognizer`.
+The same concept is applied for creating `TranslationRecognizer`, except that `SpeechTranslationConfig` is required for creating `TranslationRecognizer`.
 
 ### Using file input
 
@@ -65,31 +65,17 @@ The payload name of each event has also been changed.
 | old API | new API |
 |------| ------- |
 | SpeechRecognitionResultEventArgs | SpeechRecognitionEventArgs |
-| IntentRecognitionResultEventArgs | IntentRecognitionEventArgs |
 | TranslationTextResultEventArgs | TranslationRecognitionEventArgs |
 | TranslationSynthesisResultEventArgs | TranslationSynthesisEventArgs |
-| RecognitionErrorEventArgs | SpeechRecognitionCanceledEventArgs, IntentRecognitionCanceledEventArgs, TranslationRecognitionCanceledEventArgs |
+| RecognitionErrorEventArgs | SpeechRecognitionCanceledEventArgs, TranslationRecognitionCanceledEventArgs |
 
 ## Recognition result
 
-The Speech SDK Release 1.0.0 introduces the `ResultReason` class that defines a unified recognition status for all three recognizers (speech, intent, and translation). With that, the field `RecognitionStatus` in `SpeechRecognitionResult` is changed to `Reason`, and the field `TranslationStatus`in `TranslationTextResult` is removed. In addition, `CancellationDetails` and `NoMatchDetails` are introduced in release 1.0.0 to describe reasons why a canceled or nomatch result is returned.
+The Speech SDK Release 1.0.0 introduces the `ResultReason` class that defines a unified recognition status for all three recognizers (speech and translation). With that, the field `RecognitionStatus` in `SpeechRecognitionResult` is changed to `Reason`, and the field `TranslationStatus`in `TranslationTextResult` is removed. In addition, `CancellationDetails` and `NoMatchDetails` are introduced in release 1.0.0 to describe reasons why a canceled or nomatch result is returned.
 
-There are also changes in class inheritance hierarchy. `RecognitionResult`is introduced as a base class for `SpeechRecognitionResult`, `IntentRecognitionResult`, and `TranslationRecognitionResult`.
+There are also changes in class inheritance hierarchy. `RecognitionResult`is introduced as a base class for `SpeechRecognitionResult` and `TranslationRecognitionResult`.
 
 For translation, the `TranslationTextResult` is renamed to `TranslationRecognitionResult`.
-
-## Intent recognizer
-
-Based on feedback from users, the `AddIntent()` methods in `IntentRecognizer` changed their signature.
-
-| old API | new API |
-|------| ------- |
-| AddIntent(intentId, phrase) | AddIntent(phrase, intentId) |
-| n.a.| AddIntent(phrase) |
-| AddIntent(intentId, model, intentName) | AddIntent(model, intentName, intentId) |
-| n.a | AddIntent(model, intentName) |
-| n.a.| AddAllIntents(model) |
-| n.a.| AddAllIntents(model, intentId) |
 
 ## UTF8 encoding in C/C++ API
 
@@ -98,33 +84,10 @@ Starting from this release, the C/C++ APIs now use UTF8 encoding. The C++ API no
 
 # C#
 
-## Creating a SpeechRecognizer, IntentRecognizer, or TranslationRecognizer
+## Creating a SpeechRecognizer or TranslationRecognizer
 
 The `SpeechFactory` used to create the various types of recognizers has been replaced by constructors for recognizers.
-They take a `SpeechConfig` instance and, optionally, a `AudioConfig` instance as argument. For example, for an intent recognizer:
-
-Old API:
-```csharp
-var factory = SpeechFactory.FromSubscription("SubscriptionKey", "ServiceRegion");
-
-// for recognition from microphone:
-var recognizer_microphone = factory.CreateIntentRecognizer();
-
-// for recognition from file:
-var recognizer_file = factory.CreateSpeechRecognizerWithFileInput(@"whatstheweatherlike.wav")
-```
-
-New API:
-```csharp
-var config = SpeechConfig.FromSubscription("SubscriptionKey", "ServiceRegion");
-var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav");
-
-// for recognition from microphone:
-var recognizer_microphone = new IntentRecognizer(config);
-
-// for recognition from file:
-var recognizer_file = new IntentRecognizer(config, audioInput);
-```
+They take a `SpeechConfig` instance and, optionally, a `AudioConfig` instance as argument.
 
 ## Recognition Results
 
@@ -179,58 +142,6 @@ else if (result.Reason == ResultReason.Canceled)
 }
 ```
 
-### Intent recognition
-
-Old API:
-```csharp
-var result = await recognizer.RecognizeAsync().ConfigureAwait(false);
-
-// Checks result.
-if (result.RecognitionStatus != RecognitionStatus.Recognized)
-{
-    Console.WriteLine($"Recognition status: {result.RecognitionStatus.ToString()}");
-    if (result.RecognitionStatus == RecognitionStatus.Canceled)
-    {
-        Console.WriteLine($"There was an error, reason: {result.RecognitionFailureReason}");
-    }
-    else
-    {
-        Console.WriteLine("No speech could be recognized.\n");
-    }
-}
-else
-{
-    Console.WriteLine($"We recognized: {result.Text}.");
-    Console.WriteLine($"\n    Intent Id: {result.IntentId}.");
-    Console.WriteLine($"\n    Language Understanding JSON: {result.Properties.Get<string>(ResultPropertyKind.LanguageUnderstandingJson)}.");
-}
-```
-
-New API:
-```csharp
-var result = await recognizer.RecognizeOnceAsync().ConfigureAwait(false);
-if (result.Reason == ResultReason.RecognizedIntent)
-{
-    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
-    Console.WriteLine($"    Intent Id: {result.IntentId}.");
-    Console.WriteLine($"    Language Understanding JSON: {result.Properties.GetProperty(PropertyId.LanguageUnderstandingServiceResponse_JsonResult)}.");
-}
-else if (result.Reason == ResultReason.RecognizedSpeech)
-{
-    Console.WriteLine($"RECOGNIZED: Text={result.Text}");
-    Console.WriteLine($"    Intent not recognized.");
-}
-else if (result.Reason == ResultReason.NoMatch)
-{
-    Console.WriteLine($"NOMATCH: Speech could not be recognized.");
-}
-else if (result.Reason == ResultReason.Canceled)
-{
-    var cancellation = CancellationDetails.FromResult(result);
-    Console.WriteLine($"CANCELED: Reason={cancellation.Reason}");
-}
-```
-
 ## Cancellation
 
 In particular, the `ResultReason` for recognition results that have been canceled allows better insight into why the cancellation occurred.
@@ -261,24 +172,6 @@ if (result.Reason == ResultReason.Canceled)
         Console.WriteLine($"CANCELED: Did you update the subscription info?");
     }
 }
-```
-
-## Adding Intents
-
-The order of the arguments of the `IntentRecognizer.AddIntent` method has changed.
-
-Old API:
-```
-recognizer.AddIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-recognizer.AddIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-recognizer.AddIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
-```
-
-New API:
-```
-recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
-recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
-recognizer.AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 ```
 
 ## TranslationSynthesisResult
@@ -323,53 +216,12 @@ var audio = AudioConfig.fromWavFileInput("whatstheweatherlike.wav");
 var recognizer = new SpeechRecognizer(config, audio);
 ```
 
-## Adding Intents
-
-The order of the arguments of the `IntentRecognizer.AddIntent` method has changed.
-
-Old API:
-```java
-recognizer.addIntent("id1", model, "YourLanguageUnderstandingIntentName1");
-recognizer.addIntent("id2", model, "YourLanguageUnderstandingIntentName2");
-recognizer.addIntent("any-IntentId-here", model, "YourLanguageUnderstandingIntentName3");
-```
-
-New API:
-```java
-recognizer.addIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
-recognizer.addIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
-recognizer.addIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
-```
-
 # C++
 
-## Creating a SpeechRecognizer, IntentRecognizer, or TranslationRecognizer
+## Creating a SpeechRecognizer or TranslationRecognizer
 
 The `SpeechFactory` used to create the various types of recognizers has been replaced by constructors for recognizers.
-They take a `SpeechConfig` instance and, optionally, a `AudioConfig` instance as argument. For example, for an intent recognizer:
-
-Old API:
-```cpp
-auto factory = SpeechFactory::FromSubscription(L"YourSubscriptionKey", L"YourServiceRegion");
-
-// for recognition from microphone:
-auto recognizer = factory->CreateIntentRecognizer();
-
-// for recognition from file:
-auto recognizer = factory->CreateIntentRecognizerWithFileInput(L"whatstheweatherlike.wav");
-```
-
-New API:
-```cpp
-auto speechConfig = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
-
-// for recognition from microphone:
-auto recognizer = IntentRecognizer::FromConfig(speechConfig);
-
-// for recognition from file:
-auto audioInput = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
-auto recognizer = IntentRecognizer::FromConfig(speechConfig, audioInput);
-```
+They take a `SpeechConfig` instance and, optionally, a `AudioConfig` instance as argument.
 
 ## Recognition Results
 
@@ -435,62 +287,6 @@ else if (result->Reason == ResultReason::Canceled)
 }
 ```
 
-### Intent recognition
-
-Old API:
-```cpp
-if (result->Reason != Reason::Recognized)
-{
-    wcout << L"Recognition Status: " << int(result->Reason) << L". ";
-    if (result->Reason == Reason::Canceled)
-    {
-        wcout << L"There was an error, reason: " << result->ErrorDetails << std::endl;
-    }
-    else
-    {
-        wcout << L"No speech could be recognized.\n";
-    }
-}
-else
-{
-    wcout << L"We recognized: " << result->Text << std::endl;
-    wcout << L"    Intent Id: " << result->IntentId << std::endl;
-    wcout << L"    Intent response in Json: " << result->Properties[ResultProperty::LanguageUnderstandingJson].GetString() << std::endl;
-}
-```
-
-New API:
-```cpp
-auto result = recognizer->RecognizeOnceAsync().get();
-
-// Checks result.
-if (result->Reason == ResultReason::RecognizedIntent)
-{
-    cout << "RECOGNIZED: Text=" << result->Text << std::endl;
-    cout << "  Intent Id: " << result->IntentId << std::endl;
-    cout << "  Intent Service JSON: " << result->Properties.GetProperty(PropertyId::LanguageUnderstandingServiceResponse_JsonResult) << std::endl;
-}
-else if (result->Reason == ResultReason::RecognizedSpeech)
-{
-    cout << "RECOGNIZED: Text=" << result->Text << " (intent could not be recognized)" << std::endl;
-}
-else if (result->Reason == ResultReason::NoMatch)
-{
-    cout << "NOMATCH: Speech could not be recognized." << std::endl;
-}
-else if (result->Reason == ResultReason::Canceled)
-{
-    auto cancellation = CancellationDetails::FromResult(result);
-    cout << "CANCELED: Reason=" << (int)cancellation->Reason << std::endl;
-
-    if (cancellation->Reason == CancellationReason::Error)
-    {
-        cout << "CANCELED: ErrorDetails=" << cancellation->ErrorDetails << std::endl;
-        cout << "CANCELED: Did you update the subscription info?" << std::endl;
-    }
-}
-```
-
 ## Cancellation
 
 In particular, the `ResultReason` for recognition results that have been canceled allows better insight into why the cancellation occurred.
@@ -522,24 +318,4 @@ if (result->Reason == ResultReason::Canceled)
         cout << "CANCELED: Did you update the subscription info?" << std::endl;
     }
 }
-```
-
-## Adding Intents
-
-The order of the arguments of the `IntentRecognizer.AddIntent` method has changed.
-
-Old API:
-```cpp
-auto model = LanguageUnderstandingModel::FromAppId(L"YourLanguageUnderstandingAppId");
-recognizer->AddIntent(L"id1", model, L"YourLanguageUnderstandingIntentName1");
-recognizer->AddIntent("id2", model, L"YourLanguageUnderstandingIntentName2");
-recognizer->AddIntent("any-IntentId-here", model, L"YourLanguageUnderstandingIntentName3");
-```
-
-New API:
-```cpp
-auto model = LanguageUnderstandingModel::FromAppId("YourLanguageUnderstandingAppId");
-recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName1", "id1");
-recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName2", "id2");
-recognizer->AddIntent(model, "YourLanguageUnderstandingIntentName3", "any-IntentId-here");
 ```
