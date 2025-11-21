@@ -1,0 +1,118 @@
+.settings {
+    width: fit-content;
+    border: 1px solid #D1D1D1;
+    border-radius: 6px;
+    padding: 5px 10px;
+}
+
+.settings-svg {
+    margin-right: 5px;
+}
+
+.developer-mode { 
+    margin-right: 10px;
+}
+
+.developer-content {
+    height: 98%;
+}
+
+.content {
+    height: 80%;
+}
+
+.content video {
+    width: 100%;
+    height: 80%;
+}
+
+.developer-content video {
+    width: 100%;
+    height: 80%;
+}
+
+.messages-area {
+    margin: 15px 0;
+}
+
+.recording-border {
+    width: 600px;
+    border: 1px solid #D1D1D1;
+    border-radius: 6px;
+    padding: 20px 10px;
+}
+
+.sound-wave {
+    width: auto;
+    height: 50px;
+    margin-right: 20px;
+}
+
+.sound-wave2 {
+    margin-right: 0px;
+    margin-left: 20px;
+}
+
+.sound-wave-item {
+    background-color: #5765CA;
+    width: 10px;
+    margin-right: 8px;
+    border-radius: 5px;
+}
+
+.volume-circle {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background-color: lightgray;
+    transition: transform 0.5s ease;
+}
+
+.microphone {
+    margin-left: 5px;
+}
+
+.robot-svg {
+    position: absolute;
+}
+
+.volume-circle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid lightgray;
+    border-radius: 50%;
+    opacity: 0;
+    animation: ripple 2s linear 1s infinite;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(1);
+        opacity: 0.0;
+    }
+
+    25% {
+        transform: scale(1.25);
+        opacity: 0.1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.3;
+    }
+
+    75% {
+        transform: scale(1.75);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(2);
+        opacity: 0.0;
+    }
+}
