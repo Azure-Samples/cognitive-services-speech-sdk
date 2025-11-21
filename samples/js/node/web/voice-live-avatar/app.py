@@ -412,7 +412,8 @@ async def get_agents():
         async with DefaultAzureCredential() as credential:
             async with AgentsClient(
                 endpoint=f"{AI_SERVICE_ENDPOINT}/api/projects/{AZURE_FOUNDRY_PROJECT_NAME}",
-                credential=credential) as client:
+                credential=credential
+            ) as client:
                 async for agent in client.list_agents():
                     yield {
                         "name": agent.name,
