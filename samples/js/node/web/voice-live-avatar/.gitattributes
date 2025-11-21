@@ -1,0 +1,3 @@
+*.mjs text
+*.tsx text
+*.woff binary
