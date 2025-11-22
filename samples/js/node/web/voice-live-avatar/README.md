@@ -41,8 +41,8 @@ This sample can be deployed to cloud for global access. The recommended hosting 
 
 * Step 1: Push the Docker image to a container registry, such as [Azure Container Registry](https://learn.microsoft.com/azure/container-registry/). You can use the following command to push the image to Azure Container Registry:
   ```bash
-    docker tag voice-live-avatar <your-registry-name>.azurecr.io/voice-live-avatar:latest
-    docker push <your-registry-name>.azurecr.io/voice-live-avatar:latest
+  docker tag voice-live-avatar <your-registry-name>.azurecr.io/voice-live-avatar:latest
+  docker push <your-registry-name>.azurecr.io/voice-live-avatar:latest
   ```
 
 * Step 2: Create an `Azure Container App` and deploy the Docker image built from above steps, following [Deploy from an existing container image](https://learn.microsoft.com/azure/container-apps/quickstart-portal). Make sure to set the environment variables as described in the previous sections, such as `SPEECH_REGION`, `SPEECH_KEY`, etc.
