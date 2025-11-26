@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <intentapi_cxx_exports.h>
+
 namespace Microsoft {
 namespace SpeechSDK {
 namespace Standalone {
@@ -17,7 +19,7 @@ namespace Intent {
 /// <summary>
 /// Represents a pattern matching intent used for intent recognition.
 /// </summary>
-struct PatternMatchingIntent
+struct INTENT_API PatternMatchingIntent
 {
     /// <summary>
     /// Phrases and patterns that will trigger this intent. At least one phrase must exist to be able to

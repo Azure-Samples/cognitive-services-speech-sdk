@@ -60,7 +60,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;INTENTRECOGNIZER_EXPORTS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>..\samples\intent_api;..\samples\intent_recognizer\include;..\samples\json_parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -77,7 +77,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;INTENTRECOGNIZER_EXPORTS;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>..\samples\intent_api;..\samples\intent_recognizer\include;..\samples\json_parser;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -89,6 +89,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\samples\intent_api\intentapi_cxx.cpp" />
     <ClCompile Include="..\samples\intent_recognizer\en_integer_parser.cpp" />
     <ClCompile Include="..\samples\intent_recognizer\es_integer_parser.cpp" />
     <ClCompile Include="..\samples\intent_recognizer\fr_integer_parser.cpp" />
@@ -111,6 +112,7 @@
   <ItemGroup>
     <ClInclude Include="..\samples\intent_api\intentapi_cxx.h" />
     <ClInclude Include="..\samples\intent_api\intentapi_cxx_enums.h" />
+    <ClInclude Include="..\samples\intent_api\intentapi_cxx_exports.h" />
     <ClInclude Include="..\samples\intent_api\intentapi_cxx_intent_recognition_result.h" />
     <ClInclude Include="..\samples\intent_api\intentapi_cxx_intent_recognizer.h" />
     <ClInclude Include="..\samples\intent_api\intentapi_cxx_language_understanding_model.h" />
