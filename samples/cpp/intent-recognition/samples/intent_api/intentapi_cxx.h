@@ -6,6 +6,7 @@
 //
 #pragma once
 
+#include <intentapi_cxx_exports.h>
 #include <intentapi_cxx_enums.h>
 #include <intentapi_cxx_intent_recognition_result.h>
 #include <intentapi_cxx_intent_recognizer.h>

@@ -10,6 +10,7 @@
 #include <map>
 
 #include <ajv.h>
+#include <intentapi_cxx_exports.h>
 
 namespace Microsoft {
 namespace SpeechSDK {
@@ -19,76 +20,23 @@ namespace Intent {
 /// <summary>
 /// Represents the result of an intent recognition.
 /// </summary>
-class IntentRecognitionResult final
+class INTENT_API IntentRecognitionResult final
 {
 public:
 
-    /// <summary>
-    /// Constructor. Creates a new instance using the provided parameters.
-    /// </summary>
-    /// <param name="intentId">Result intent id.</param>
-    /// <param name="jsonResult">Simple result JSON string.</param>
-    /// <param name="detailedJsonResult">Detailed result JSON string.</param>
-    IntentRecognitionResult(std::string& intentId, std::string& jsonResult, std::string& detailedJsonResult) :
-        m_intentId(intentId),
-        IntentId(m_intentId),
-        m_detailedJsonResult(detailedJsonResult)
-    {
-        PopulateIntentFields(jsonResult);
-    }
+    IntentRecognitionResult(std::string& intentId, std::string& jsonResult, std::string& detailedJsonResult);
 
-    /// <summary>
-    /// A call to return a map of the entities found in the utterance.
-    /// </summary>
-    /// <returns>
-    /// A map with the entity name as a key and containing the value of the entity found in the utterance.
-    /// </returns>
-    const std::map<std::string, std::string>& GetEntities() const
-    {
-        return m_entities;
-    }
+    const std::map<std::string, std::string>& GetEntities() const;
 
-    /// <summary>
-    /// A call to return the detailed results.
-    /// </summary>
-    /// <returns>
-    /// The detailed results as a JSON string.
-    /// </returns>
-    const std::string& GetDetailedResult() const
-    {
-        return m_detailedJsonResult;
-    }
+    const std::string& GetDetailedResult() const;
 
-    /// <summary>
-    /// Destructor.
-    /// </summary>
-    ~IntentRecognitionResult()
-    {
-    }
+    ~IntentRecognitionResult();
 
-    /// <summary>
-    /// Unique intent id.
-    /// </summary>
     const std::string& IntentId;
 
 private:
 
-    void PopulateIntentFields(std::string& jsonResult)
-    {
-        auto parser = ajv::json::Parse(jsonResult);
-        auto reader = parser.Reader();
-        for (auto name = reader.FirstName(); name.IsOk(); name++)
-        {
-            auto key = name.AsString(false); // Do not convert Unicode escape sequences in the name,
-            auto item = reader[key.c_str()]; // otherwise the corresponding value will not be found.
-            auto value = item.AsString();
-            if (!value.empty())
-            {
-                key = name.AsString();
-                m_entities[key] = value;
-            }
-        }
-    }
+    void PopulateIntentFields(std::string& jsonResult);
 
     std::string m_intentId;
     std::map<std::string, std::string> m_entities;

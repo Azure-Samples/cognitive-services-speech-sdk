@@ -6,6 +6,8 @@
 //
 #pragma once
 
+#include <intentapi_cxx_exports.h>
+
 namespace Microsoft {
 namespace SpeechSDK {
 namespace Standalone {
@@ -14,7 +16,7 @@ namespace Intent {
 /// <summary>
 /// Represents language understanding model used for intent recognition.
 /// </summary>
-class LanguageUnderstandingModel 
+class INTENT_API LanguageUnderstandingModel 
 {
 public:
 

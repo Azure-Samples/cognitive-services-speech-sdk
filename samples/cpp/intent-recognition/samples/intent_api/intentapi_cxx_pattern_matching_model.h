@@ -21,7 +21,7 @@ namespace Intent {
 /// <summary>
 /// Represents a pattern matching model used for intent recognition.
 /// </summary>
-class PatternMatchingModel : public LanguageUnderstandingModel
+class INTENT_API PatternMatchingModel : public LanguageUnderstandingModel
 {
 public:
 

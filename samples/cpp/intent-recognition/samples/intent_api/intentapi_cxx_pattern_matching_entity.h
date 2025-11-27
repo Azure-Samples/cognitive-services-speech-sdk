@@ -6,6 +6,10 @@
 //
 #pragma once
 
+#include <string>
+#include <vector>
+
+#include <intentapi_cxx_exports.h>
 #include <intentapi_cxx_enums.h>
 
 namespace Microsoft {
@@ -16,7 +20,7 @@ namespace Intent {
 /// <summary>
 /// Represents a pattern matching entity used for intent recognition.
 /// </summary>
-struct PatternMatchingEntity
+struct INTENT_API PatternMatchingEntity
 {
     /// <summary>
     /// An Id used to define this Entity if it is matched. This id must appear in an intent phrase
