@@ -19,7 +19,7 @@ namespace Intent {
 /// <summary>
 /// Represents a pattern matching intent used for intent recognition.
 /// </summary>
-struct INTENT_API PatternMatchingIntent
+struct PatternMatchingIntent
 {
     /// <summary>
     /// Phrases and patterns that will trigger this intent. At least one phrase must exist to be able to

@@ -25,6 +25,10 @@ class INTENT_API IntentRecognitionResult final
 public:
 
     IntentRecognitionResult(std::string& intentId, std::string& jsonResult, std::string& detailedJsonResult);
+    IntentRecognitionResult(const IntentRecognitionResult& other);
+    IntentRecognitionResult& operator=(const IntentRecognitionResult& other);
+    IntentRecognitionResult(IntentRecognitionResult&&) = delete;
+    IntentRecognitionResult& operator=(IntentRecognitionResult&&) = delete;
 
     const std::map<std::string, std::string>& GetEntities() const;
 
@@ -32,15 +36,21 @@ public:
 
     ~IntentRecognitionResult();
 
-    const std::string& IntentId;
-
 private:
 
     void PopulateIntentFields(std::string& jsonResult);
 
-    std::string m_intentId;
-    std::map<std::string, std::string> m_entities;
-    std::string m_detailedJsonResult;
+    struct Storage
+    {
+        std::string intentId;
+        std::map<std::string, std::string> entities;
+        std::string detailedJsonResult;
+    };
+
+    Storage* m_storage;
+
+public:
+    const std::string& IntentId;
 };
 
 }}}}

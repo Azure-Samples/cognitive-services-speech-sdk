@@ -20,7 +20,7 @@ namespace Intent {
 /// <summary>
 /// Represents a pattern matching entity used for intent recognition.
 /// </summary>
-struct INTENT_API PatternMatchingEntity
+struct PatternMatchingEntity
 {
     /// <summary>
     /// An Id used to define this Entity if it is matched. This id must appear in an intent phrase

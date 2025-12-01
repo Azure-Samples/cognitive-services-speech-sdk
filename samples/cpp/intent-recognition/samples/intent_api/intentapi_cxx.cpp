@@ -14,22 +14,41 @@
 using namespace Microsoft::SpeechSDK::Standalone::Intent;
 
 IntentRecognitionResult::IntentRecognitionResult(std::string& intentId, std::string& jsonResult, std::string& detailedJsonResult)
-	: m_intentId(intentId), IntentId(m_intentId), m_detailedJsonResult(detailedJsonResult)
+	: m_storage(new Storage()), IntentId(m_storage->intentId)
 {
+	m_storage->intentId = intentId;
+	m_storage->detailedJsonResult = detailedJsonResult;
 	PopulateIntentFields(jsonResult);
+}
+
+IntentRecognitionResult::IntentRecognitionResult(const IntentRecognitionResult& other)
+	: m_storage(new Storage(*other.m_storage)), IntentId(m_storage->intentId)
+{
+}
+
+IntentRecognitionResult& IntentRecognitionResult::operator=(const IntentRecognitionResult& other)
+{
+	if (this != &other)
+	{
+		*m_storage = *other.m_storage;
+	}
+	return *this;
 }
 
 const std::map<std::string, std::string>& IntentRecognitionResult::GetEntities() const
 {
-	return m_entities;
+	return m_storage->entities;
 }
 
 const std::string& IntentRecognitionResult::GetDetailedResult() const
 {
-	return m_detailedJsonResult;
+	return m_storage->detailedJsonResult;
 }
 
-IntentRecognitionResult::~IntentRecognitionResult() = default;
+IntentRecognitionResult::~IntentRecognitionResult()
+{
+	delete m_storage;
+}
 
 void IntentRecognitionResult::PopulateIntentFields(std::string& jsonResult)
 {
@@ -43,7 +62,7 @@ void IntentRecognitionResult::PopulateIntentFields(std::string& jsonResult)
 		if (!value.empty())
 		{
 			key = name.AsString();
-			m_entities[key] = value;
+			m_storage->entities[key] = value;
 		}
 	}
 }
@@ -54,25 +73,34 @@ std::shared_ptr<IntentRecognizer> IntentRecognizer::FromLanguage(const std::stri
 }
 
 IntentRecognizer::IntentRecognizer(const std::string& language)
-	: m_language(language)
+	: m_state(new State())
 {
-	m_recognizer = std::make_shared<CSpxIntentRecognizer>(language);
-	m_recognizer->Init();
+	m_state->language = language;
+	m_state->recognizer = std::make_shared<CSpxIntentRecognizer>(language);
+	m_state->recognizer->Init();
 }
 
 IntentRecognizer::~IntentRecognizer()
 {
-	m_recognizer->Term();
+	if (m_state != nullptr)
+	{
+		if (m_state->recognizer)
+		{
+			m_state->recognizer->Term();
+		}
+		delete m_state;
+		m_state = nullptr;
+	}
 }
 
 std::future<std::shared_ptr<IntentRecognitionResult>> IntentRecognizer::RecognizeOnceAsync(std::string text)
 {
-	auto keepAlive = this->shared_from_this();
-	auto future = std::async(std::launch::async, [keepAlive, this, text]() -> std::shared_ptr<IntentRecognitionResult> {
+	auto recognizer = m_state->recognizer;
+	auto future = std::async(std::launch::async, [recognizer, text]() -> std::shared_ptr<IntentRecognitionResult> {
 		std::string intentId;
 		std::string jsonResult;
 		std::string detailedJsonResult;
-		m_recognizer->ProcessText(text, intentId, jsonResult, detailedJsonResult);
+		recognizer->ProcessText(text, intentId, jsonResult, detailedJsonResult);
 
 		return std::make_shared<IntentRecognitionResult>(intentId, jsonResult, detailedJsonResult);
 	});
@@ -98,7 +126,7 @@ void IntentRecognizer::AddIntent(std::shared_ptr<LanguageUnderstandingModel> mod
 	switch (model->GetModelType())
 	{
 	case LanguageUnderstandingModel::LanguageUnderstandingModelType::PatternMatchingModel:
-		m_recognizer->ClearLanguageModels();
+		m_state->recognizer->ClearLanguageModels();
 		AddPatternMatchingModel(model);
 		(void)intentName;
 		break;
@@ -112,7 +140,7 @@ void IntentRecognizer::AddIntent(std::shared_ptr<LanguageUnderstandingModel> mod
 	switch (model->GetModelType())
 	{
 	case LanguageUnderstandingModel::LanguageUnderstandingModelType::PatternMatchingModel:
-		m_recognizer->ClearLanguageModels();
+		m_state->recognizer->ClearLanguageModels();
 		AddPatternMatchingModel(model);
 		(void)intentName;
 		(void)intentId;
@@ -127,7 +155,7 @@ void IntentRecognizer::AddAllIntents(std::shared_ptr<LanguageUnderstandingModel>
 	switch (model->GetModelType())
 	{
 	case LanguageUnderstandingModel::LanguageUnderstandingModelType::PatternMatchingModel:
-		m_recognizer->ClearLanguageModels();
+		m_state->recognizer->ClearLanguageModels();
 		AddPatternMatchingModel(model);
 		break;
 	default:
@@ -140,7 +168,7 @@ void IntentRecognizer::AddAllIntents(std::shared_ptr<LanguageUnderstandingModel>
 	switch (model->GetModelType())
 	{
 	case LanguageUnderstandingModel::LanguageUnderstandingModelType::PatternMatchingModel:
-		m_recognizer->ClearLanguageModels();
+		m_state->recognizer->ClearLanguageModels();
 		AddPatternMatchingModel(model);
 		(void)intentId;
 		break;
@@ -153,7 +181,7 @@ bool IntentRecognizer::ApplyLanguageModels(const std::vector<std::shared_ptr<Lan
 {
 	bool result = true;
 
-	m_recognizer->ClearLanguageModels();
+	m_state->recognizer->ClearLanguageModels();
 
 	for (auto model : collection)
 	{
@@ -171,7 +199,7 @@ bool IntentRecognizer::ApplyLanguageModels(const std::vector<std::shared_ptr<Lan
 
 void IntentRecognizer::AddIntent(std::shared_ptr<ISpxTrigger> trigger, const std::string& intentId)
 {
-	m_recognizer->AddIntentTrigger(intentId, trigger, "");
+	m_state->recognizer->AddIntentTrigger(intentId, trigger, "");
 }
 
 void IntentRecognizer::AddPatternMatchingModel(const std::shared_ptr<LanguageUnderstandingModel>& luModel) const
@@ -181,7 +209,7 @@ void IntentRecognizer::AddPatternMatchingModel(const std::shared_ptr<LanguageUnd
 
 	auto pmModel = std::make_shared<CSpxPatternMatchingModel>(modelId);
 	auto pmFactory = std::make_shared<CSpxPatternMatchingFactory>();
-	pmFactory->Init(pmModel, m_language);
+	pmFactory->Init(pmModel, m_state->language);
 
 	typedef PhraseGetterHr(__stdcall* INTENT_PATTERN_MATCHING_MODEL_GET_STR_FROM_INDEX)(void* context, size_t index, const char** str, size_t* size);
 	INTENT_PATTERN_MATCHING_MODEL_GET_STR_FROM_INDEX phraseGetter = [](void* context, size_t index, const char** phrase, size_t* phraseLen) -> PhraseGetterHr {
@@ -257,5 +285,5 @@ void IntentRecognizer::AddPatternMatchingModel(const std::shared_ptr<LanguageUnd
 	auto pmTrigger = std::shared_ptr<ISpxTrigger>(new CSpxIntentTrigger());
 	pmTrigger->InitPatternMatchingModelTrigger(pmModel);
 
-	m_recognizer->AddIntentTrigger("", pmTrigger, modelId);
+	m_state->recognizer->AddIntentTrigger("", pmTrigger, modelId);
 }

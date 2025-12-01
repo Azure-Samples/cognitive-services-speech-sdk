@@ -23,6 +23,21 @@ namespace Intent {
 /// </summary>
 class INTENT_API PatternMatchingModel : public LanguageUnderstandingModel
 {
+private:
+    struct Storage
+    {
+        explicit Storage(const std::string& id) : modelId(id) {}
+
+        Storage(const Storage& other) = default;
+        Storage& operator=(const Storage& other) = default;
+
+        std::string modelId;
+        std::vector<PatternMatchingIntent> intents;
+        std::vector<PatternMatchingEntity> entities;
+    };
+
+    Storage* m_storage;
+
 public:
 
     /// <summary>
@@ -95,26 +110,56 @@ public:
         return ParseJSONFile(str);
     }
 
+    PatternMatchingModel(const PatternMatchingModel& other)
+        : LanguageUnderstandingModel(other),
+          m_storage(new Storage(*other.m_storage)),
+          Intents(m_storage->intents),
+          Entities(m_storage->entities)
+    {
+    }
+
+    PatternMatchingModel& operator=(const PatternMatchingModel& other)
+    {
+        if (this != &other)
+        {
+            m_type = other.m_type;
+            *m_storage = *other.m_storage;
+        }
+        return *this;
+    }
+
+    PatternMatchingModel(PatternMatchingModel&&) = delete;
+    PatternMatchingModel& operator=(PatternMatchingModel&&) = delete;
+
     /// <summary>
     /// Returns id for this model.
     /// </summary>
     /// <returns>A string representing the id of this model.</returns>
-    std::string GetModelId() const { return m_modelId; }
+    std::string GetModelId() const { return m_storage->modelId; }
 
     /// <summary>
     /// This container of Intents is used to define all the Intents this model will look for.
     /// </summary>
-    std::vector<PatternMatchingIntent> Intents;
+    std::vector<PatternMatchingIntent>& Intents;
 
     /// <summary>
     /// This container of Intents is used to define all the Intents this model will look for.
     /// </summary>
-    std::vector<PatternMatchingEntity> Entities;
+    std::vector<PatternMatchingEntity>& Entities;
+
+    ~PatternMatchingModel()
+    {
+        delete m_storage;
+    }
 
 private:
-    PatternMatchingModel(const std::string& modelId) : LanguageUnderstandingModel(LanguageUnderstandingModelType::PatternMatchingModel), m_modelId(modelId) {}
-
-    std::string m_modelId;
+    PatternMatchingModel(const std::string& modelId)
+        : LanguageUnderstandingModel(LanguageUnderstandingModelType::PatternMatchingModel),
+          m_storage(new Storage(modelId)),
+          Intents(m_storage->intents),
+          Entities(m_storage->entities)
+    {
+    }
 
     static std::shared_ptr<PatternMatchingModel> ParseJSONFile(const std::string& fileContents)
     {
@@ -149,7 +194,7 @@ private:
             }
             else if (nameStr == "name" && item.IsString())
             {
-                model->m_modelId = item.AsString();
+                model->m_storage->modelId = item.AsString();
             }
             else if ((nameStr == "patternAnyEntities" || nameStr == "entities") && item.IsArray())
             {

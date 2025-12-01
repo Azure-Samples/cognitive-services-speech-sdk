@@ -7,6 +7,7 @@
 #pragma once
 
 #include <future>
+#include <memory>
 #include <sstream>
 
 #include <intentapi_cxx_exports.h>
@@ -26,13 +27,18 @@ namespace Intent {
 /// It does not use or depend on cloud services and does not require the Speech SDK to run.
 /// Supported languages are listed in https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=intent-recognizer-pattern-matcher
 /// </summary>
-class INTENT_API IntentRecognizer : public std::enable_shared_from_this<IntentRecognizer>
+class INTENT_API IntentRecognizer
 {
 public:
 
     static std::shared_ptr<IntentRecognizer> FromLanguage(const std::string& language = "en-US");
 
     explicit IntentRecognizer(const std::string& language);
+
+    IntentRecognizer(const IntentRecognizer&) = delete;
+    IntentRecognizer& operator=(const IntentRecognizer&) = delete;
+    IntentRecognizer(IntentRecognizer&&) = delete;
+    IntentRecognizer& operator=(IntentRecognizer&&) = delete;
 
     ~IntentRecognizer();
 
@@ -66,8 +72,13 @@ private:
 
     void AddPatternMatchingModel(const std::shared_ptr<LanguageUnderstandingModel>& luModel) const;
 
-    std::shared_ptr<CSpxIntentRecognizer> m_recognizer;
-    std::string m_language;
+    struct State
+    {
+        std::shared_ptr<CSpxIntentRecognizer> recognizer;
+        std::string language;
+    };
+
+    State* m_state;
 };
 
 }}}}
