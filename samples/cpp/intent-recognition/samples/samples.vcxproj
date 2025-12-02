@@ -343,6 +343,12 @@
     <ClInclude Include="samples.h" />
     <ClInclude Include="test_utils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IntentRecognizer\IntentRecognizer.vcxproj">
+      <Project>{e26df1a4-1860-43bc-873f-5dbf30fa7b90}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

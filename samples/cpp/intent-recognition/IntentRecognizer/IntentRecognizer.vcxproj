@@ -89,7 +89,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\samples\intent_api\intentapi_cxx.cpp" />
+	<ClCompile Include="..\samples\intent_api\intentapi_cxx.cpp" />
     <ClCompile Include="..\samples\intent_recognizer\en_integer_parser.cpp" />
     <ClCompile Include="..\samples\intent_recognizer\es_integer_parser.cpp" />
     <ClCompile Include="..\samples\intent_recognizer\fr_integer_parser.cpp" />
