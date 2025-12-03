@@ -6,6 +6,10 @@
 //
 #pragma once
 
+#include <string>
+#include <vector>
+
+#include <intentapi_cxx_exports.h>
 #include <intentapi_cxx_enums.h>
 
 namespace Microsoft {
