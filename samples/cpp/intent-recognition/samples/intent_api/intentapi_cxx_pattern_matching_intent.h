@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <intentapi_cxx_exports.h>
+
 namespace Microsoft {
 namespace SpeechSDK {
 namespace Standalone {

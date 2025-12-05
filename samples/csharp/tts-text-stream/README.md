@@ -27,7 +27,8 @@ For now we only support set voice name and output format.
 Please specify SpeechSynthesisRequestInputType.TextStream when creating the request.
 
 ### Send text to stream
-For each text that generated from GPT, call `request.InputStream.Write(text);` to send text to the stream.
+For each text that generated from GPT, call `request.InputStream.Write(text);` to send text to the stream.  
+Please do not wait too long(longer than 30s) between creating the request and sending the first text, and also between sending two texts, otherwise the connection may be closed by server and you may got 503 error.
 
 ### Close text stream
 When GPT finished the output, call `request.InputStream.Close();` to close the stream.
