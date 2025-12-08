@@ -242,6 +242,14 @@ def connectAvatar() -> Response:
                             'image': {
                                 'url': background_image_url
                             }
+                        },
+                        'scene': {
+                            'zoom': 1.0,
+                            'positionX': 0.0,
+                            'positionY': 0.0,
+                            'rotationX': 0.0,
+                            'rotationY': 0.0,
+                            'rotationZ': 0.0
                         }
                     }
                 }
@@ -398,6 +406,27 @@ def stopSpeaking() -> Response:
     client_id = uuid.UUID(request.headers.get('ClientId'))
     stopSpeakingInternal(client_id, False)
     return Response('Speaking stopped.', status=200)
+
+
+# The API route to update the avatar scene
+@app.route("/api/updateScene", methods=["POST"])
+def updateScene() -> Response:
+    client_id = uuid.UUID(request.headers.get('ClientId'))
+    scene_request = json.loads(request.data)
+    scene_config = {
+        'avatarScene': {
+            'zoom': scene_request['zoom'],
+            'positionX': scene_request['positionX'],
+            'positionY': scene_request['positionY'],
+            'rotationX': scene_request['rotationX'],
+            'rotationY': scene_request['rotationY'],
+            'rotationZ': scene_request['rotationZ']
+        }
+    }
+    client_context = client_contexts[client_id]
+    speech_synthesizer_connection = client_context['speech_synthesizer_connection']
+    speech_synthesizer_connection.send_message_async('synthesis.control', json.dumps(scene_config)).get()
+    return Response('Scene updated.', status=200)
 
 
 # The API route for chat
