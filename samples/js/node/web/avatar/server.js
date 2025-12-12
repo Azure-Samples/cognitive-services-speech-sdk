@@ -239,6 +239,14 @@ app.post('/api/connectAvatar', async (req, res) => {
                         background: {
                             color: transparent_background ? '#00FF00FF' : background_color,
                             image: { url: background_image_url }
+                        },
+                        scene: {
+                            zoom: 1.0,
+                            positionX: 0.0,
+                            positionY: 0.0,
+                            rotationX: 0.0,
+                            rotationY: 0.0,
+                            rotationZ: 0.0
                         }
                     }
                 }
@@ -434,6 +442,34 @@ app.post('/api/stopSpeaking', async (req, res) => {
     const client_id = req.headers['clientid']
     await stopSpeakingInternal(client_id, false)
     res.status(200).send('Speaking stopped.')
+})
+
+// The API route to update the avatar scene
+app.post('/api/updateScene', async (req, res) => {
+    try {
+        const client_id = req.headers['clientid']
+        const scene_request = req.body
+        const scene_config = {
+            avatarScene: {
+                zoom: scene_request.zoom,
+                positionX: scene_request.positionX,
+                positionY: scene_request.positionY,
+                rotationX: scene_request.rotationX,
+                rotationY: scene_request.rotationY,
+                rotationZ: scene_request.rotationZ
+            }
+        }
+        const client_context = client_contexts[client_id]
+        const avatar_connection = client_context.speech_synthesizer_connection
+        if (avatar_connection) {
+            await avatar_connection.sendMessageAsync('synthesis.control', JSON.stringify(scene_config))
+            res.status(200).send('Scene updated.')
+        } else {
+            res.status(400).send('Connection not available.')
+        }
+    } catch (error) {
+        res.status(500).send(`Error: ${error.message}`)
+    }
 })
 
 // The API route for chat
@@ -894,7 +930,6 @@ async function stopSpeakingInternal(client_id, skipClearingSpokenTextQueue) {
     const avatar_connection = client_context.speech_synthesizer_connection
     if (avatar_connection) {
         await avatar_connection.sendMessageAsync('synthesis.control', '{"action":"stop"}')
-        avatar_connection.close()
     }
 
 }

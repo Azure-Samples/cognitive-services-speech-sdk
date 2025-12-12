@@ -119,6 +119,10 @@ function preparePeerConnection() {
             document.getElementById('stopSession').disabled = false
             document.getElementById('speak').disabled = false
             document.getElementById('configuration').hidden = true
+            if (document.getElementById('photoAvatar').checked) {
+                document.getElementById('photoAvatarSceneConfig').hidden = false
+                window.resetPhotoAvatarScene()
+            }
         }
 
         if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
@@ -127,6 +131,9 @@ function preparePeerConnection() {
             document.getElementById('stopSession').disabled = true
             document.getElementById('startSession').disabled = false
             document.getElementById('configuration').hidden = false
+            if (document.getElementById('photoAvatar').checked) {
+                document.getElementById('photoAvatarSceneConfig').hidden = true
+            }
         }
     }
 
@@ -209,6 +216,9 @@ function connectToAvatarService(peerConnection) {
         } else {
             document.getElementById('startSession').disabled = false;
             document.getElementById('configuration').hidden = false;
+            if (document.getElementById('photoAvatar').checked) {
+                document.getElementById('photoAvatarSceneConfig').hidden = true
+            }
             throw new Error(`Failed connecting to the Avatar service: ${response.status} ${response.statusText}`)
         }
     })
@@ -367,6 +377,59 @@ window.updataTransparentBackground = () => {
         document.getElementById('backgroundColor').disabled = false
         document.getElementById('backgroundImageUrl').disabled = false
     }
+}
+
+window.updatePhotoAvatarScene = () => {
+    const zoom = parseFloat(document.getElementById('sliderZoom').value)
+    const positionX = parseFloat(document.getElementById('sliderPositionX').value)
+    const positionY = parseFloat(document.getElementById('sliderPositionY').value)
+    const rotationX = parseFloat(document.getElementById('sliderRotationX').value)
+    const rotationY = parseFloat(document.getElementById('sliderRotationY').value)
+    const rotationZ = parseFloat(document.getElementById('sliderRotationZ').value)
+
+    // Update the displayed values
+    document.getElementById('valueZoom').textContent = zoom.toFixed() + '%'
+    document.getElementById('valuePositionX').textContent = positionX.toFixed() + '%'
+    document.getElementById('valuePositionY').textContent = positionY.toFixed() + '%'
+    document.getElementById('valueRotationX').textContent = rotationX.toFixed() + ' deg'
+    document.getElementById('valueRotationY').textContent = rotationY.toFixed() + ' deg'
+    document.getElementById('valueRotationZ').textContent = rotationZ.toFixed() + ' deg'
+    const sceneRequest = {
+        zoom: zoom / 100,
+        positionX: positionX / 100,
+        positionY: positionY / 100,
+        rotationX: rotationX * Math.PI / 180,
+        rotationY: rotationY * Math.PI / 180,
+        rotationZ: rotationZ * Math.PI / 180
+    }
+
+    fetch('/api/updateScene', {
+        method: 'POST',
+        headers: {
+            'ClientId': clientId,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(sceneRequest)
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log(`[${new Date().toISOString()}] Scene updated successfully.`)
+        } else {
+            console.error(`[${new Date().toISOString()}] Failed to update scene. ${response.status} ${response.statusText}`)
+        }
+    })
+    .catch(error => {
+        console.error(`[${new Date().toISOString()}] Error updating scene: ${error}`)
+    })
+}
+
+window.resetPhotoAvatarScene = () => {
+    document.getElementById('sliderZoom').value = 100.0
+    document.getElementById('sliderPositionX').value = 0.0
+    document.getElementById('sliderPositionY').value = 0.0
+    document.getElementById('sliderRotationX').value = 0.0
+    document.getElementById('sliderRotationY').value = 0.0
+    document.getElementById('sliderRotationZ').value = 0.0
 }
 
 window.onbeforeunload = () => {
