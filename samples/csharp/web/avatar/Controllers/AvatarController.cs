@@ -295,6 +295,15 @@ namespace Avatar.Controllers
                                     {
                                         url = backgroundImageUrl
                                     }
+                                },
+                                scene = new
+                                {
+                                    zoom = 1.0,
+                                    positionX = 0.0,
+                                    positionY = 0.0,
+                                    rotationX = 0.0,
+                                    rotationY = 0.0,
+                                    rotationZ = 0.0
                                 }
                             }
                         }
@@ -385,6 +394,53 @@ namespace Avatar.Controllers
 
                 // Return a success message
                 return Ok("Speaking stopped.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("api/updateScene")]
+        public async Task<IActionResult> UpdateScene()
+        {
+            try
+            {
+                var clientIdHeader = Request.Headers["ClientId"];
+                if (!Guid.TryParse(clientIdHeader, out Guid clientId))
+                {
+                    return BadRequest("Invalid ClientId");
+                }
+
+                string jsonData;
+                using (var reader = new StreamReader(Request.Body, Encoding.UTF8))
+                {
+                    jsonData = await reader.ReadToEndAsync();
+                }
+
+                var sceneRequest = JsonConvert.DeserializeObject<JObject>(jsonData);
+                var sceneConfig = new
+                {
+                    avatarScene = new
+                    {
+                        zoom = sceneRequest?["zoom"],
+                        positionX = sceneRequest?["positionX"],
+                        positionY = sceneRequest?["positionY"],
+                        rotationX = sceneRequest?["rotationX"],
+                        rotationY = sceneRequest?["rotationY"],
+                        rotationZ = sceneRequest?["rotationZ"]
+                    }
+                };
+
+                var clientContext = _clientService.GetClientContext(clientId);
+                var connection = clientContext.SpeechSynthesizerConnection as Connection;
+                if (connection != null)
+                {
+                    await connection.SendMessageAsync("synthesis.control", JsonConvert.SerializeObject(sceneConfig));
+                    return Ok("Scene updated.");
+                }
+
+                return BadRequest("Connection not available.");
             }
             catch (Exception ex)
             {
