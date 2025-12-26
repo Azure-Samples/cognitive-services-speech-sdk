@@ -97,6 +97,28 @@
 </div>
 <br/>
 
+<div id="photoAvatarSceneConfig" style="background-color: white; width: 300px; padding: 10px;" hidden="hidden">
+  <label style="font-size: medium;" for="sliderZoom">Zoom:</label>
+  <input type="range" id="sliderZoom" min="70" max="100" step="1" value="100" oninput="window.updatePhotoAvatarScene()">
+  <span id="valueZoom">100%</span><br/>
+  <label style="font-size: medium;" for="sliderPositionX">Position X:</label>
+  <input type="range" id="sliderPositionX" min="-50" max="50" step="1" value="0" oninput="window.updatePhotoAvatarScene()">
+  <span id="valuePositionX">0%</span><br/>
+  <label style="font-size: medium;" for="sliderPositionY">Position Y:</label>
+  <input type="range" id="sliderPositionY" min="-15" max="50" step="1" value="0" oninput="window.updatePhotoAvatarScene()">
+  <span id="valuePositionY">0%</span><br/>
+  <label style="font-size: medium;" for="sliderRotationX">Rotation X:</label>
+  <input type="range" id="sliderRotationX" min="-30" max="30" step="1" value="0" oninput="window.updatePhotoAvatarScene()">
+  <span id="valueRotationX">0 deg</span><br/>
+  <label style="font-size: medium;" for="sliderRotationY">Rotation Y:</label>
+  <input type="range" id="sliderRotationY" min="-30" max="30" step="1" value="0" oninput="window.updatePhotoAvatarScene()">
+  <span id="valueRotationY">0 deg</span><br/>
+  <label style="font-size: medium;" for="sliderRotationZ">Rotation Z:</label>
+  <input type="range" id="sliderRotationZ" min="-30" max="30" step="1" value="0" oninput="window.updatePhotoAvatarScene()">
+  <span id="valueRotationZ">0 deg</span><br/>
+</div>
+<br/>
+
 <h2 style="background-color: white; width: 300px;">Logs</h2>
 <div id="logging" style="background-color: white;"></div>
 </body>
