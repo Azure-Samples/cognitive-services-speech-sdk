@@ -249,7 +249,8 @@ def connectAvatar() -> Response:
                             'positionY': 0.0,
                             'rotationX': 0.0,
                             'rotationY': 0.0,
-                            'rotationZ': 0.0
+                            'rotationZ': 0.0,
+                            'amplitude': 1.0
                         }
                     }
                 }
@@ -420,7 +421,8 @@ def updateScene() -> Response:
             'positionY': scene_request['positionY'],
             'rotationX': scene_request['rotationX'],
             'rotationY': scene_request['rotationY'],
-            'rotationZ': scene_request['rotationZ']
+            'rotationZ': scene_request['rotationZ'],
+            'amplitude': scene_request['amplitude']
         }
     }
     client_context = client_contexts[client_id]
