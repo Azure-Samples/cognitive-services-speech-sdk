@@ -386,6 +386,7 @@ window.updatePhotoAvatarScene = () => {
     const rotationX = parseFloat(document.getElementById('sliderRotationX').value)
     const rotationY = parseFloat(document.getElementById('sliderRotationY').value)
     const rotationZ = parseFloat(document.getElementById('sliderRotationZ').value)
+    const amplitude = parseFloat(document.getElementById('sliderAmplitude').value)
 
     // Update the displayed values
     document.getElementById('valueZoom').textContent = zoom.toFixed() + '%'
@@ -394,13 +395,16 @@ window.updatePhotoAvatarScene = () => {
     document.getElementById('valueRotationX').textContent = rotationX.toFixed() + ' deg'
     document.getElementById('valueRotationY').textContent = rotationY.toFixed() + ' deg'
     document.getElementById('valueRotationZ').textContent = rotationZ.toFixed() + ' deg'
+    document.getElementById('valueAmplitude').textContent = amplitude.toFixed() + '%'
+
     const sceneRequest = {
         zoom: zoom / 100,
         positionX: positionX / 100,
         positionY: positionY / 100,
         rotationX: rotationX * Math.PI / 180,
         rotationY: rotationY * Math.PI / 180,
-        rotationZ: rotationZ * Math.PI / 180
+        rotationZ: rotationZ * Math.PI / 180,
+        amplitude: amplitude / 100
     }
 
     fetch('/api/updateScene', {
@@ -430,6 +434,14 @@ window.resetPhotoAvatarScene = () => {
     document.getElementById('sliderRotationX').value = 0.0
     document.getElementById('sliderRotationY').value = 0.0
     document.getElementById('sliderRotationZ').value = 0.0
+    document.getElementById('sliderAmplitude').value = 100.0
+    document.getElementById('valueZoom').textContent = '100%'
+    document.getElementById('valuePositionX').textContent = '0%'
+    document.getElementById('valuePositionY').textContent = '0%'
+    document.getElementById('valueRotationX').textContent = '0 deg'
+    document.getElementById('valueRotationY').textContent = '0 deg'
+    document.getElementById('valueRotationZ').textContent = '0 deg'
+    document.getElementById('valueAmplitude').textContent = '100%'
 }
 
 window.onbeforeunload = () => {
