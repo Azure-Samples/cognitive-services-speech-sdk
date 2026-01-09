@@ -303,7 +303,8 @@ namespace Avatar.Controllers
                                     positionY = 0.0,
                                     rotationX = 0.0,
                                     rotationY = 0.0,
-                                    rotationZ = 0.0
+                                    rotationZ = 0.0,
+                                    amplitude = 1.0
                                 }
                             }
                         }
@@ -428,7 +429,8 @@ namespace Avatar.Controllers
                         positionY = sceneRequest?["positionY"],
                         rotationX = sceneRequest?["rotationX"],
                         rotationY = sceneRequest?["rotationY"],
-                        rotationZ = sceneRequest?["rotationZ"]
+                        rotationZ = sceneRequest?["rotationZ"],
+                        amplitude = sceneRequest?["amplitude"]
                     }
                 };
 
