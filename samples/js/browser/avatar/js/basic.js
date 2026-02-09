@@ -102,6 +102,10 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             document.getElementById('stopSession').disabled = false
             document.getElementById('speak').disabled = false
             document.getElementById('configuration').hidden = true
+            if (document.getElementById('photoAvatar').checked) {
+                document.getElementById('photoAvatarSceneConfig').hidden = false
+                window.resetPhotoAvatarScene()
+            }
         }
 
         if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
@@ -110,6 +114,9 @@ function setupWebRTC(iceServerUrl, iceServerUsername, iceServerCredential) {
             document.getElementById('stopSession').disabled = true
             document.getElementById('startSession').disabled = false
             document.getElementById('configuration').hidden = false
+            if (document.getElementById('photoAvatar').checked) {
+                document.getElementById('photoAvatarSceneConfig').hidden = true
+            }
         }
     }
 
@@ -237,6 +244,7 @@ window.startSession = () => {
     avatarConfig.useBuiltInVoice = document.getElementById('useBuiltInVoice').checked 
     avatarConfig.backgroundColor = document.getElementById('backgroundColor').value
     avatarConfig.backgroundImage = document.getElementById('backgroundImageUrl').value
+    avatarConfig.scene = new SpeechSDK.AvatarSceneConfig(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
 
     document.getElementById('startSession').disabled = true
     
@@ -356,4 +364,60 @@ window.updateCustomAvatarBox = () => {
         document.getElementById('useBuiltInVoice').disabled = true
         document.getElementById('useBuiltInVoice').checked = false
     }
+}
+
+window.updatePhotoAvatarScene = () => {
+    const zoom = parseFloat(document.getElementById('sliderZoom').value)
+    const positionX = parseFloat(document.getElementById('sliderPositionX').value)
+    const positionY = parseFloat(document.getElementById('sliderPositionY').value)
+    const rotationX = parseFloat(document.getElementById('sliderRotationX').value)
+    const rotationY = parseFloat(document.getElementById('sliderRotationY').value)
+    const rotationZ = parseFloat(document.getElementById('sliderRotationZ').value)
+    const amplitude = parseFloat(document.getElementById('sliderAmplitude').value)
+
+    // Update the displayed values
+    document.getElementById('valueZoom').textContent = zoom.toFixed() + '%'
+    document.getElementById('valuePositionX').textContent = positionX.toFixed() + '%'
+    document.getElementById('valuePositionY').textContent = positionY.toFixed() + '%'
+    document.getElementById('valueRotationX').textContent = rotationX.toFixed() + ' deg'
+    document.getElementById('valueRotationY').textContent = rotationY.toFixed() + ' deg'
+    document.getElementById('valueRotationZ').textContent = rotationZ.toFixed() + ' deg'
+    document.getElementById('valueAmplitude').textContent = amplitude.toFixed() + '%'
+
+    const sceneConfig = new SpeechSDK.AvatarSceneConfig(
+        zoom / 100,
+        positionX / 100,
+        positionY / 100,
+        rotationX * Math.PI / 180,
+        rotationY * Math.PI / 180,
+        rotationZ * Math.PI / 180,
+        amplitude / 100
+    )
+
+    avatarSynthesizer.updateSceneAsync(sceneConfig).then(
+        () => {
+            console.log(`[${new Date().toISOString()}] Scene updated successfully.`)
+        }
+    ).catch(
+        (error) => {
+            console.error(`[${new Date().toISOString()}] Error updating scene: ${error}`)
+        }
+    )
+}
+
+window.resetPhotoAvatarScene = () => {
+    document.getElementById('sliderZoom').value = 100.0
+    document.getElementById('sliderPositionX').value = 0.0
+    document.getElementById('sliderPositionY').value = 0.0
+    document.getElementById('sliderRotationX').value = 0.0
+    document.getElementById('sliderRotationY').value = 0.0
+    document.getElementById('sliderRotationZ').value = 0.0
+    document.getElementById('sliderAmplitude').value = 100.0
+    document.getElementById('valueZoom').textContent = '100%'
+    document.getElementById('valuePositionX').textContent = '0%'
+    document.getElementById('valuePositionY').textContent = '0%'
+    document.getElementById('valueRotationX').textContent = '0 deg'
+    document.getElementById('valueRotationY').textContent = '0 deg'
+    document.getElementById('valueRotationZ').textContent = '0 deg'
+    document.getElementById('valueAmplitude').textContent = '100%'
 }

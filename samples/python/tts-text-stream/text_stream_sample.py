@@ -50,7 +50,7 @@ if deployment:
 speech_config.speech_synthesis_voice_name = voice
 
 print("=" * 70)
-print(f"Azure TTS Text Streaming with GPT")
+print("Azure TTS Text Streaming with GPT")
 print("=" * 70)
 print(f"Endpoint: {endpoint}")
 print(f"Voice: {voice}")
@@ -71,12 +71,14 @@ channels = 1
 # List to collect audio chunks for saving to file
 audio_chunks = []
 
+
 def synthesizing_callback(evt):
     """Called when audio chunks are available during synthesis."""
     if evt.result.audio_data:
         audio_chunk = evt.result.audio_data
         audio_chunks.append(audio_chunk)
         print(f"[audio chunk: {len(audio_chunk)} bytes]\n", end="")
+
 
 speech_synthesizer.synthesizing.connect(synthesizing_callback)
 
@@ -113,6 +115,7 @@ tts_request.input_stream.close()
 result = tts_task.get()
 print("[TTS END]")
 
+
 # Write WAV file with header
 def write_wav_file(filename, audio_data, sample_rate, bits_per_sample, channels):
     """Write WAV file with proper header."""
@@ -140,6 +143,7 @@ def write_wav_file(filename, audio_data, sample_rate, bits_per_sample, channels)
         wav_file.write(b'data')
         wav_file.write(struct.pack('<I', data_size))
         wav_file.write(audio_data)
+
 
 # Combine all audio chunks
 audio_data = b''.join(audio_chunks)
