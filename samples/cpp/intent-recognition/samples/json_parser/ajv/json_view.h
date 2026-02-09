@@ -778,7 +778,7 @@ namespace ajv {
     {
         m_openItems--;
         m_items[item].end = psz;
-        return ++psz;
+        return psz ? psz + 1 : psz;
     }
 
     AJV_FN_NO_INLINE_(const char*) JsonView::CopyItem(const _item& item, char* dest, size_t cch)

@@ -1,0 +1,5 @@
+termcolor
+orjson
+urllib3>=2.6.3
+requests
+pydantic

@@ -1,0 +1,4 @@
+requests
+numpy
+soundfile
+urllib3>=2.6.3

@@ -6,10 +6,10 @@ This demo shows that how to synthesize long-form text using Speech SDK.
 
 Refer to [this readme](../README.md) for prerequisites of speech SDK installation.
 
-This sample uses `nltk` package to tokenize the input text. Install it using the following command:
+Install the required packages using the following command:
 
 ```sh
-pip install nltk
+pip install -r requirements.txt
 ```
 
 ## Steps to synthesize long-form text
