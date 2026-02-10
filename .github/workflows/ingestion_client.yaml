@@ -122,8 +122,11 @@ jobs:
       - name: Clean Solution
         run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
 
+      - name: Restore BatchIngestionClient
+        run: dotnet restore ./samples/ingestion/ingestion-client/BatchIngestionClient.sln
+
       - name: Build BatchIngestionClient
-        run: dotnet build samples/ingestion/ingestion-client --configuration Release
+        run: dotnet build ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release --no-restore
 
   publish:
     runs-on: ubuntu-latest
