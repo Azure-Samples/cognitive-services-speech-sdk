@@ -114,7 +114,7 @@ jobs:
 
       - name: Verify Release Versions
         if: steps.get_release_versions.outputs.version == ''
-        uses: actions/github-script@v4
+        uses: actions/github-script@v3
         with:
           script: |
             core.setFailed('Invalid version specified.')
@@ -122,11 +122,8 @@ jobs:
       - name: Clean Solution
         run: dotnet clean ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release && dotnet nuget locals all --clear
 
-      - name: Restore BatchIngestionClient
-        run: dotnet restore ./samples/ingestion/ingestion-client/BatchIngestionClient.sln
-
       - name: Build BatchIngestionClient
-        run: dotnet build ./samples/ingestion/ingestion-client/BatchIngestionClient.sln --configuration Release --no-restore
+        run: dotnet build samples/ingestion/ingestion-client --configuration Release
 
   publish:
     runs-on: ubuntu-latest
