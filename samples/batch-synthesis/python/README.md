@@ -28,17 +28,10 @@ Follow these steps if you prefer not to use VS Code.
 
 ### Install dependencies
 
-The sample uses the `requests` library. You can install it with the command
+Install the required packages with the command:
 
 ```sh
-pip install requests
-```
-
-We recommend using a passwordless authentication provided by the `azure-identity` library.
-You can install it with the command
-
-```sh
-pip install azure-identity
+pip install -r requirements.txt
 ```
 
 ### Set Up Environment Variables

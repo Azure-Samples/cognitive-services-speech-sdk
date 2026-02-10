@@ -1,2 +1,4 @@
 requests
+urllib3>=2.6.3
 azure-identity
+azure-core>=1.38.0

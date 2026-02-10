@@ -24,7 +24,7 @@ if [ "$action" == "configure" ]; then
         exit 1
     fi
 
-    pip install requests
+    pip install -r requirements.txt
 elif [ "$action" == "run" ]; then
     # Load environment variables from .env file
     ENV_FILE=".env/.env.dev" 
