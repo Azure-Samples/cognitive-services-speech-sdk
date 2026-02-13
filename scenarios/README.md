@@ -9,7 +9,7 @@ name: "Speech Scenarios and Use Cases"
 description: "Learn how to use the Speech SDK in certain popular scenarios such as call center and captioning."
 products:
 - azure
-- azure-cognitive-services
+- ai-services
 ---
 
 # Sample Repository for Speech Scenarios
