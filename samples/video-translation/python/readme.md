@@ -8,11 +8,7 @@
 ## Python version:
     3.11.10
 ## Dependency modules:
-    pip3 install termcolor
-    pip3 install orjson
-    pip3 install urllib3
-    pip3 install requests
-    pip3 install pydantic
+    pip3 install -r requirements.txt
 
 # Platform dependency:
 ## VS Code

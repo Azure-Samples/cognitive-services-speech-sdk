@@ -17,7 +17,7 @@ if ($action -eq "configure") {
         exit 1
     }
 
-    pip install requests
+    pip install -r requirements.txt
 }
 elseif ($action -eq "run") {
     # Define the path to your .env file

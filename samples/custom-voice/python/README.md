@@ -2,11 +2,10 @@
 
 ## Install dependencies
 
-The sample uses the `requests` and `Cognitive Services Speech SDK` library. You can install it with the command
+The sample uses the `requests` and `Cognitive Services Speech SDK` library. You can install them with the command
 
 ```sh
-pip install requests
-pip install azure-cognitiveservices-speech
+pip install -r requirements.txt
 ```
 
 ## Run the sample code

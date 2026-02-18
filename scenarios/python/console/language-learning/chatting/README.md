@@ -9,7 +9,7 @@ Refer to [this readme](../README.md) for prerequisites of speech SDK installatio
 This sample uses `requests`, `numpy` and `soundfile` packages. Install them using the following command:
 
 ```sh
-pip install requests numpy soundfile
+pip install -r requirements.txt
 ```
 
 ## Run the sample
