@@ -4,8 +4,8 @@
 //
 #include "intent_recognizer/stdafx.h"
 
-#include "intent_api/intentapi_cxx.h" // from this project, must be included before speechapi_cxx.h
 #include <speechapi_cxx.h> // from Speech SDK
+#include <intentapi_cxx.h> // from this project
 
 #define CATCH_CONFIG_WINDOWS_CRTDBG
 #include "catch2/catch_amalgamated.hpp"

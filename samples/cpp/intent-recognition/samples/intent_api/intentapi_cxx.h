@@ -6,10 +6,11 @@
 //
 #pragma once
 
-#include "intentapi_cxx_enums.h"
-#include "intentapi_cxx_intent_recognition_result.h"
-#include "intentapi_cxx_intent_recognizer.h"
-#include "intentapi_cxx_language_understanding_model.h"
-#include "intentapi_cxx_pattern_matching_entity.h"
-#include "intentapi_cxx_pattern_matching_intent.h"
-#include "intentapi_cxx_pattern_matching_model.h"
+#include <intentapi_cxx_exports.h>
+#include <intentapi_cxx_enums.h>
+#include <intentapi_cxx_intent_recognition_result.h>
+#include <intentapi_cxx_intent_recognizer.h>
+#include <intentapi_cxx_language_understanding_model.h>
+#include <intentapi_cxx_pattern_matching_entity.h>
+#include <intentapi_cxx_pattern_matching_intent.h>
+#include <intentapi_cxx_pattern_matching_model.h>
