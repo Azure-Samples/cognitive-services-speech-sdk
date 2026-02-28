@@ -21,5 +21,3 @@ class OperationStatus(str, Enum):
     Succeeded = 'Succeeded'
     Failed = 'Failed'
     Canceled = 'Canceled'
-
-

@@ -29,4 +29,3 @@ class EnableEmotionalPlatformVoice(str, Enum):
 
 class InputFileSourceKind(str, Enum):
     AzureStorageBlobManagedIdentity = 'AzureStorageBlobManagedIdentity'
-

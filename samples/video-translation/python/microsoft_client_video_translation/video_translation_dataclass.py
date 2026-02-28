@@ -7,17 +7,14 @@ from dataclasses import dataclass
 from urllib3.util import Url
 from typing import Optional
 
-from microsoft_speech_client_common.client_common_enum import (
-    OperationStatus, OneApiState
-)
-
 from microsoft_client_video_translation.video_translation_enum import (
     WebvttFileKind, VoiceKind, EnableEmotionalPlatformVoice, InputFileSourceKind
 )
 
 from microsoft_speech_client_common.client_common_dataclass import (
-    StatelessResourceBaseDefinition, StatefulResourceBaseDefinition
+    StatefulResourceBaseDefinition
 )
+
 
 @dataclass(kw_only=True)
 class TranslationInputBaseDefinition:
@@ -44,6 +41,7 @@ class TranslationInputDefinition(TranslationInputBaseDefinition):
     enableLipSync: Optional[bool] = None
     inputFileSourceKind: Optional[InputFileSourceKind] = None
     inputFileAzureStorageBlobManagedIdentityClientId: Optional[str] = None
+
 
 @dataclass(kw_only=True)
 class IterationInputDefinition(TranslationInputBaseDefinition):

@@ -27,7 +27,7 @@ from microsoft_speech_client_common.client_common_util import (
 
 class SpeechLongRunningTaskClientBase:
     """Base class for Speech service clients that handle long-running task operations."""
-    
+
     region = ""
     sub_key = ""
     api_version = ""
@@ -36,11 +36,11 @@ class SpeechLongRunningTaskClientBase:
     http = None
 
     def __init__(self,
-                region: str,
-                sub_key: str,
-                api_version: str,
-                service_url_segment_name: str,
-                long_running_tasks_url_segment_name: str):
+                 region: str,
+                 sub_key: str,
+                 api_version: str,
+                 service_url_segment_name: str,
+                 long_running_tasks_url_segment_name: str):
         """
         Initialize the base client with common configuration.
         
@@ -51,10 +51,10 @@ class SpeechLongRunningTaskClientBase:
         """
         if region is None or sub_key is None:
             raise ValueError("Region and subscription key are required")
-        
+
         if service_url_segment_name is None or long_running_tasks_url_segment_name is None:
             raise ValueError("Service URL segment and long-running task URL segment are required")
-        
+
         self.region = region
         self.sub_key = sub_key
         self.api_version = api_version
@@ -145,11 +145,8 @@ class SpeechLongRunningTaskClientBase:
         return self.build_url(path)
 
     def build_long_running_tasks_url(self) -> Url:
-        if id is None:
-            raise ValueError
         path = self.build_long_running_tasks_path()
         return self.build_url(path)
-
 
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/create-translation
     def request_create_long_running_task_until_terminated(
@@ -161,15 +158,18 @@ class SpeechLongRunningTaskClientBase:
         if id is None or creation_body is None:
             raise ValueError
 
-        success, error, response, operation_location_url = self.request_create_long_running_task_with_id(
-            id=id,
-            creation_body=creation_body,
-            operation_id=operation_id)
+        success, error, response, operation_location_url = (
+            self.request_create_long_running_task_with_id(
+                id=id,
+                creation_body=creation_body,
+                operation_id=operation_id))
         if not success:
             return False, error, None, None
-        
+
         if not success or operation_location_url is None:
-            print(colored(f"Failed to create task with ID {operation_location_url} with error: {error}", 'red'))
+            print(colored(
+                f"Failed to create task with ID {operation_location_url} "
+                f"with error: {error}", 'red'))
             return False, error, None, None
 
         self.request_operation_until_terminated(operation_location_url)
@@ -193,7 +193,7 @@ class SpeechLongRunningTaskClientBase:
             creation_body=creation_body,
             operation_id=operation_id
         )
-    
+
     def request_create_long_running_task_with_url(
             self,
             url: Url,
@@ -214,8 +214,11 @@ class SpeechLongRunningTaskClientBase:
         json_formatted_str = json.dumps(dataclasses.asdict(creation_body), indent=2)
         print(json_formatted_str)
 
-        # For task creation may need longer timeout, set to 60 seconds here. For other APIs, can use default timeout (10 seconds as set in __init__)
-        response = self.http.request("PUT", url.url, headers=headers, body=encoded_creation_body, timeout=60)
+        # For task creation may need longer timeout, set to 60 seconds here.
+        # For other APIs, can use default timeout (10 seconds as set in __init__)
+        response = self.http.request(
+            "PUT", url.url, headers=headers, body=encoded_creation_body,
+            timeout=60)
 
         #   OK = 200,
         #   Created = 201,
@@ -226,10 +229,11 @@ class SpeechLongRunningTaskClientBase:
         operation_location_url = urllib3.util.parse_url(operation_location)
         return True, None, response, operation_location_url
 
-    def request_list_long_running_tasks(self,
-                                  top: int = None,
-                                  skip: int = None,
-                                  maxPageSize: int = None) -> tuple[bool, str, HTTPResponse]:
+    def request_list_long_running_tasks(
+            self,
+            top: int = None,
+            skip: int = None,
+            maxPageSize: int = None) -> tuple[bool, str, HTTPResponse]:
 
         url = self.build_long_running_tasks_url()
         args = {}
@@ -243,8 +247,9 @@ class SpeechLongRunningTaskClientBase:
         url = append_url_args(url, args)
         return self.request_list_with_url(url)
 
-    def request_list_with_url(self,
-                              url: Url) -> tuple[bool, str, HTTPResponse]:
+    def request_list_with_url(
+            self,
+            url: Url) -> tuple[bool, str, HTTPResponse]:
         headers = self.build_request_header()
 
         print(f"Requesting http GET: {url}")
@@ -256,16 +261,18 @@ class SpeechLongRunningTaskClientBase:
             return False, error, None
         return True, None, response
 
-    def request_get_long_running_task(self,
-                                     id: str) -> tuple[bool, str, HTTPResponse]:
+    def request_get_long_running_task(
+            self,
+            id: str) -> tuple[bool, str, HTTPResponse]:
         if id is None:
             raise ValueError
 
         url = self.build_long_running_task_url(id)
         return self.request_get_with_url(url)
 
-    def request_get_with_url(self,
-                            url: Url) -> tuple[bool, str, HTTPResponse]:
+    def request_get_with_url(
+            self,
+            url: Url) -> tuple[bool, str, HTTPResponse]:
         if url is None:
             raise ValueError
 
@@ -306,7 +313,7 @@ class SpeechLongRunningTaskClientBase:
 
         if print_url:
             print(f"Requesting http GET: {operation_location}")
-        
+
         response = self.http.request("GET", operation_location.url, headers=headers)
 
         #   OK = 200
@@ -359,7 +366,7 @@ class SpeechLongRunningTaskClientBase:
             operation_location=operation_location,
             print_url=True
         )
-        
+
         if not success or response_operation is None:
             print(colored(
                 f"Failed to query operation from location {operation_location} with error: {error}",
@@ -373,18 +380,18 @@ class SpeechLongRunningTaskClientBase:
                 operation_location=operation_location,
                 print_url=False
             )
-            
+
             if not success or response_operation is None:
                 print(colored(
                     f"Failed to query operation from location {operation_location} with error: {error}",
                     'red'
                 ))
                 return None
-            
+
             if last_status != response_operation.status:
                 print(response_operation.status)
                 last_status = response_operation.status
-            
+
             print(".", end="", flush=True)
             time.sleep(poll_interval_seconds)
 
