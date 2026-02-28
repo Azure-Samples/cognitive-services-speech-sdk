@@ -11,18 +11,18 @@ using System;
 
 public partial class BaseOptions
 {
-    [Option('r', "region", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.Region)]
+    [Option('r', "region", Required = true, HelpText = CommonPublicConst.ArgumentDescription.Region)]
     public string Region { get; set; }
 
-    [Option('s', "subscriptionKey", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.SubscriptionKey)]
+    [Option('s', "subscriptionKey", Required = false, HelpText = CommonPublicConst.ArgumentDescription.SubscriptionKey)]
     public string SubscriptionKey { get; set; }
 
-    [Option('d', "customDomainName", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.CustomDomainName)]
-    public string customDomainName { get; set; }
+    [Option('d', "CustomDomainName", Required = false, HelpText = CommonPublicConst.ArgumentDescription.CustomDomainName)]
+    public string CustomDomainName { get; set; }
 
-    [Option('m', "managedIdentityClientId", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.ManagedIdentityClientId)]
+    [Option('m', "managedIdentityClientId", Required = false, HelpText = CommonPublicConst.ArgumentDescription.ManagedIdentityClientId)]
     public Guid ManagedIdentityClientId { get; set; }
 
-    [Option('v', "apiVersion", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.ApiVersion)]
+    [Option('v', "apiVersion", Required = true, HelpText = CommonPublicConst.ArgumentDescription.ApiVersion)]
     public string ApiVersion { get; set; }
 }

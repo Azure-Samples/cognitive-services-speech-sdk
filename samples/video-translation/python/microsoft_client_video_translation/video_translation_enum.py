@@ -9,25 +9,6 @@ class VoiceKind(str, Enum):
     PersonalVoice = 'PersonalVoice'
 
 
-class Region(str, Enum):
-    eastus = 'eastus'
-
-
-class OneApiState(str, Enum):
-    NotStarted = 'NotStarted'
-    Running = 'Running'
-    Succeeded = 'Succeeded'
-    Failed = 'Failed'
-
-
-class OperationStatus(str, Enum):
-    NotStarted = 'NotStarted'
-    Running = 'Running'
-    Succeeded = 'Succeeded'
-    Failed = 'Failed'
-    Canceled = 'Canceled'
-
-
 class WebvttFileKind(str, Enum):
     SourceLocaleSubtitle = 'SourceLocaleSubtitle'
     TargetLocaleSubtitle = 'TargetLocaleSubtitle'
@@ -44,3 +25,8 @@ class EnableEmotionalPlatformVoice(str, Enum):
     Auto = 'Auto'
     Enable = 'Enable'
     Disable = 'Disable'
+
+
+class InputFileSourceKind(str, Enum):
+    AzureStorageBlobManagedIdentity = 'AzureStorageBlobManagedIdentity'
+
