@@ -1,4 +1,4 @@
-﻿// <copyright file="VideoFileSourceKind.cs" company="Microsoft Corporation">
+// <copyright file="VideoFileSourceKind.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // </copyright>
 
