@@ -43,7 +43,7 @@ class SpeechLongRunningTaskClientBase:
                  long_running_tasks_url_segment_name: str):
         """
         Initialize the base client with common configuration.
-        
+
         Args:
             region: Azure region for the service
             sub_key: Subscription key for authentication
@@ -130,15 +130,17 @@ class SpeechLongRunningTaskClientBase:
     def build_long_running_tasks_path(self) -> str:
         return f"{self.service_url_segment_name}/{self.long_running_tasks_url_segment_name}"
 
-    def build_long_running_task_path(self,
-                                    id: str) -> str:
+    def build_long_running_task_path(
+            self,
+            id: str) -> str:
         if id is None:
             raise ValueError
         tasks_path = self.build_long_running_tasks_path()
         return f"{tasks_path}/{id}"
 
-    def build_long_running_task_url(self,
-                                   id: str) -> Url:
+    def build_long_running_task_url(
+            self,
+            id: str) -> Url:
         if id is None:
             raise ValueError
         path = self.build_long_running_task_path(id)
@@ -298,11 +300,11 @@ class SpeechLongRunningTaskClientBase:
     ) -> tuple[bool, str, OperationDefinition]:
         """
         Query the status of a long-running operation.
-        
+
         Args:
             operation_location: URL of the operation to query
             print_url: Whether to print the URL being requested
-            
+
         Returns:
             Tuple of (success, error_message, operation_definition)
         """
@@ -351,11 +353,11 @@ class SpeechLongRunningTaskClientBase:
     ) -> OperationStatus:
         """
         Poll a long-running operation until it reaches a terminal state.
-        
+
         Args:
             operation_location: URL of the operation to poll
             poll_interval_seconds: Time to wait between polls (default: 5 seconds)
-            
+
         Returns:
             Final operation status
         """

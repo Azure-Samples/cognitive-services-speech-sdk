@@ -1,22 +1,13 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
-import urllib3
-import orjson
 import uuid
-import requests
 import locale
 import json
 import dataclasses
 from termcolor import colored
 from datetime import datetime
 from urllib3.util import Url
-from microsoft_speech_client_common.client_common_const import (
-    HTTP_HEADERS_OPERATION_LOCATION
-)
-from microsoft_speech_client_common.client_common_enum import (
-    OperationStatus
-)
 from microsoft_client_video_translation.video_translation_enum import (
     VoiceKind, WebvttFileKind, EnableEmotionalPlatformVoice
 )
@@ -25,16 +16,15 @@ from microsoft_client_video_translation.video_translation_dataclass import (
     IterationInputDefinition, IterationDefinition, TranslationDefinition,
     PagedTranslationDefinition, PagedIterationDefinition
 )
-from microsoft_speech_client_common.client_common_dataclass import (
-    OperationDefinition
-)
 from microsoft_speech_client_common.client_common_util import (
-    dict_to_dataclass, append_url_args
+    dict_to_dataclass
+)
+from microsoft_speech_client_common.client_common_enum import (
+    OperationStatus
 )
 from microsoft_speech_client_common.client_common_client_base import (
     SpeechLongRunningTaskClientBase
 )
-import time
 
 
 class VideoTranslationClient(SpeechLongRunningTaskClientBase):
@@ -92,7 +82,7 @@ class VideoTranslationClient(SpeechLongRunningTaskClientBase):
         now = datetime.now()
         nowString = now.strftime("%m%d%Y%H%M%S")
         translation_id = f"{nowString}_{source_locale}_{target_locale}_{voice_kind}"
-        
+
         # Create translation
         operation_id = str(uuid.uuid4())
         create_translation_request_body = self.create_translation_creation_request_body(
@@ -135,7 +125,7 @@ class VideoTranslationClient(SpeechLongRunningTaskClientBase):
             push_result_to_azure_storage_blob_dir_url=push_result_to_azure_storage_blob_dir_url,
             push_result_to_azure_storage_blob_managed_identity_client_id=push_result_to_azure_storage_blob_managed_identity_client_id,
         )
-        
+
         success, error, response_translation, operation_location = self.request_create_translation(
             translation_id=translation_id,
             translation_create_body=create_translation_request_body,
@@ -408,7 +398,7 @@ class VideoTranslationClient(SpeechLongRunningTaskClientBase):
         (success, error, response) = self.request_get_with_url(url)
         if not success or response is None:
             return success, error, response
-        
+
         response_iteration_json = response.json()
         response_iteration = dict_to_dataclass(
             data=response_iteration_json,
@@ -427,7 +417,7 @@ class VideoTranslationClient(SpeechLongRunningTaskClientBase):
             maxPageSize=maxPageSize)
         if not success:
             return False, error, None
-        
+
         response_translations_json = response.json()
         response_translations = dict_to_dataclass(
             data=response_translations_json,
@@ -440,7 +430,7 @@ class VideoTranslationClient(SpeechLongRunningTaskClientBase):
         success, error, response = self.request_list_with_url(url)
         if not success:
             return False, error, None
-        
+
         response_iterations_json = response.json()
         response_iterations = dict_to_dataclass(
             data=response_iterations_json,
@@ -559,10 +549,12 @@ class VideoTranslationClient(SpeechLongRunningTaskClientBase):
             iteration_create_input.adjustBackgroundVolumeMultiplier = adjust_background_volume_multiplier
 
         if push_result_to_azure_storage_blob_dir_url is not None:
-            iteration_create_input.pushResultToAzureStorageBlobDirUrl = push_result_to_azure_storage_blob_dir_url
+            iteration_create_input.pushResultToAzureStorageBlobDirUrl = (
+                push_result_to_azure_storage_blob_dir_url)
 
         if push_result_to_azure_storage_blob_managed_identity_client_id is not None:
-            iteration_create_input.pushResultToAzureStorageBlobManagedIdentityClientId = push_result_to_azure_storage_blob_managed_identity_client_id
+            iteration_create_input.pushResultToAzureStorageBlobManagedIdentityClientId = (
+                push_result_to_azure_storage_blob_managed_identity_client_id)
 
         if webvtt_file_kind is not None and webvtt_file_url is not None:
             iteration_create_input.webvttFile = WebvttFileDefinition(
@@ -600,7 +592,7 @@ class VideoTranslationClient(SpeechLongRunningTaskClientBase):
 
         if not success:
             return False, error, None, None
-        
+
         response_translation_json = response.json()
         response_translation = dict_to_dataclass(
             data=response_translation_json,

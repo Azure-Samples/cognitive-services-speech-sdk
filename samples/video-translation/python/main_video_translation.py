@@ -4,7 +4,6 @@
 import argparse
 import json
 import dataclasses
-import uuid
 import urllib3
 from termcolor import colored
 from microsoft_client_video_translation.video_translation_client import VideoTranslationClient
@@ -14,7 +13,10 @@ from microsoft_client_video_translation.video_translation_enum import WebvttFile
 #  we cannot set the default value in the argument parser, if the user does not provide this parameter,
 #  we will pass null to the API, and the API will use true as the default value.
 # With this function, cmd line parser support specify false explicitly.
-# Without this function, the command line parser will set parameter to null if cmd arg with this: "--adjust_webvtt_alignment false", which is not expected.
+# Without this function, the command line parser will set parameter to null if
+# cmd arg with this: "--adjust_webvtt_alignment false", which is not expected.
+
+
 def str_to_bool(value):
     """Convert string to boolean for argparse."""
     if value is None:
@@ -96,24 +98,33 @@ ARGUMENT_HELP_EXPORT_TARGET_LOCALE_ADVANCED_SUBTITLE_FILE = (
     'if not specified, iteration response will not include advanced subtitle.'
 )
 ARGUMENT_HELP_SUBTITLE_PRIMARY_COLOR = (
-    'This parameter specifies the primary color of the subtitles in the video translation output. '
-    'The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, '
-    'where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue '
-    'component, <aa> represents the alpha component, 00 means fully opaque, and FF means fully transparent. For example, EBA205 or #EBA205 would set the subtitle color to a '
-    'specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and '
-    'visual appeal, if not specified, it will use default white color.'
+    'This parameter specifies the primary color of the subtitles in the '
+    'video translation output. The value should be provided in the format '
+    '<rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, '
+    'where <rr> represents the red component of the color, <gg> represents '
+    'the green component, <bb> represents the blue component, <aa> represents '
+    'the alpha component, 00 means fully opaque, and FF means fully transparent. '
+    'For example, EBA205 or #EBA205 would set the subtitle color to a '
+    'specific shade of yellow. This parameter allows for customization of '
+    'subtitle appearance to enhance readability and visual appeal, if not '
+    'specified, it will use default white color.'
 )
 ARGUMENT_HELP_SUBTITLE_OUTLINE_COLOR = (
-    'This parameter specifies the outline color of the subtitles in the video translation output. '
-    'The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, '
-    'where <rr> represents the red component of the color, <gg> represents the green component, '
-    '<bb> represents the blue component, <aa> represents the alpha component, 00 means fully opaque, and FF means fully transparent. For example, EBA205 or #EBA205 would set '
-    'the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance '
-    'to enhance readability and visual appeal, if not specified, it will use default black color.'
+    'This parameter specifies the outline color of the subtitles in the video '
+    'translation output. The value should be provided in the format '
+    '<rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, '
+    'where <rr> represents the red component of the color, <gg> represents '
+    'the green component, <bb> represents the blue component, <aa> represents '
+    'the alpha component, 00 means fully opaque, and FF means fully transparent. '
+    'For example, EBA205 or #EBA205 would set the subtitle color to a '
+    'specific shade of yellow. This parameter allows for customization of '
+    'subtitle appearance to enhance readability and visual appeal, if not '
+    'specified, it will use default black color.'
 )
 ARGUMENT_HELP_SUBTITLE_FONT_SIZE = (
-    'This parameter specifies the font size of subtitles in the video translation output between 5 and 30, '
-    'if not specified, it will use the language dependent default value.'
+    'This parameter specifies the font size of subtitles in the video '
+    'translation output between 5 and 30, if not specified, it will use the '
+    'language dependent default value.'
 )
 ARGUMENT_HELP_WEBVTT_FILE_KIND = (
     'Translation webvtt file kind.'
@@ -122,10 +133,12 @@ ARGUMENT_HELP_WEBVTT_FILE_BLOB_URL = (
     'Translation webvtt file url.'
 )
 ARGUMENT_HELP_ADJUST_WEBVTT_ALIGNMENT = (
-    'Recommended: Do not set this parameter unless you have specific requirements. '
-    'The default behavior is optimized for most customers. Specify whether to adjust webvtt alignment according to the synthesized audio for the translated text. '
-    'If true (default), alignment will be adjusted. If false, alignment will not be adjusted. '
-    'When not specified, the default value is true (provided as null to the API).'
+    'Recommended: Do not set this parameter unless you have specific '
+    'requirements. The default behavior is optimized for most customers. '
+    'Specify whether to adjust webvtt alignment according to the '
+    'synthesized audio for the translated text. If true (default), alignment '
+    'will be adjusted. If false, alignment will not be adjusted. When not '
+    'specified, the default value is true (provided as null to the API).'
 )
 ARGUMENT_HELP_USE24K_PROMPT_AUDIO = (
     'Recommended: Do not set this parameter unless you have specific requirements. '
@@ -162,6 +175,7 @@ ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID = (
     'Specify the Azure Managed Identity Client ID (GUID) to push results to Azure Storage Blob. '
     'This allows secure write access to storage using managed identity authentication.'
 )
+
 
 def handle_create_translation_and_iteration_and_wait_until_terminated(args):
     client = VideoTranslationClient(
@@ -462,19 +476,48 @@ translate_parser.add_argument(
 translate_parser.add_argument(
     '--export_target_locale_advanced_subtitle_file', required=False, type=bool,
     help=ARGUMENT_HELP_EXPORT_TARGET_LOCALE_ADVANCED_SUBTITLE_FILE)
-translate_parser.add_argument('--subtitle_primary_color', required=False, type=str, help=ARGUMENT_HELP_SUBTITLE_PRIMARY_COLOR)
-translate_parser.add_argument('--subtitle_outline_color', required=False, type=str, help=ARGUMENT_HELP_SUBTITLE_OUTLINE_COLOR)
-translate_parser.add_argument('--subtitle_font_size', required=False, type=int, help=ARGUMENT_HELP_SUBTITLE_FONT_SIZE)
-translate_parser.add_argument('--subtitle_vertical_margin', required=False, type=int, help=ARGUMENT_HELP_SUBTITLE_VERTICAL_MARGIN)
-translate_parser.add_argument('--adjust_webvtt_alignment', required=False, type=str_to_bool, help=ARGUMENT_HELP_ADJUST_WEBVTT_ALIGNMENT)
-translate_parser.add_argument('--use24k_prompt_audio', required=False, type=bool, help=ARGUMENT_HELP_USE24K_PROMPT_AUDIO)
-translate_parser.add_argument('--export_adjusted_prompt_audio_in_webvtt', required=False, type=bool, help=ARGUMENT_HELP_EXPORT_ADJUSTED_PROMPT_AUDIO_IN_WEBVTT)
-translate_parser.add_argument('--adjust_background_volume_multiplier', required=False, type=float, help=ARGUMENT_HELP_ADJUST_BACKGROUND_VOLUME_MULTIPLIER)
-translate_parser.add_argument('--push_result_to_azure_storage_blob_dir_url', required=False, type=str, help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_DIR_URL)
-translate_parser.add_argument('--push_result_to_azure_storage_blob_managed_identity_client_id', required=False, type=str, help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
-translate_parser.add_argument('--input_file_azure_storage_blob_managed_identity_client_id', required=False, type=str, help=ARGUMENT_HELP_INPUT_FILE_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
-translate_parser.add_argument('--input_file_source_kind', required=False, type=str, help=ARGUMENT_HELP_INPUT_FILE_SOURCE_KIND)
-translate_parser.add_argument('--webvtt_file_kind', required=False, type=str, default=WebvttFileKind.MetadataJson.value, help=ARGUMENT_HELP_WEBVTT_FILE_KIND)
+translate_parser.add_argument(
+    '--subtitle_primary_color', required=False, type=str,
+    help=ARGUMENT_HELP_SUBTITLE_PRIMARY_COLOR)
+translate_parser.add_argument(
+    '--subtitle_outline_color', required=False, type=str,
+    help=ARGUMENT_HELP_SUBTITLE_OUTLINE_COLOR)
+translate_parser.add_argument(
+    '--subtitle_font_size', required=False, type=int,
+    help=ARGUMENT_HELP_SUBTITLE_FONT_SIZE)
+translate_parser.add_argument(
+    '--subtitle_vertical_margin', required=False, type=int,
+    help=ARGUMENT_HELP_SUBTITLE_VERTICAL_MARGIN)
+translate_parser.add_argument(
+    '--adjust_webvtt_alignment', required=False, type=str_to_bool,
+    help=ARGUMENT_HELP_ADJUST_WEBVTT_ALIGNMENT)
+translate_parser.add_argument(
+    '--use24k_prompt_audio', required=False, type=bool,
+    help=ARGUMENT_HELP_USE24K_PROMPT_AUDIO)
+translate_parser.add_argument(
+    '--export_adjusted_prompt_audio_in_webvtt', required=False, type=bool,
+    help=ARGUMENT_HELP_EXPORT_ADJUSTED_PROMPT_AUDIO_IN_WEBVTT)
+translate_parser.add_argument(
+    '--adjust_background_volume_multiplier', required=False, type=float,
+    help=ARGUMENT_HELP_ADJUST_BACKGROUND_VOLUME_MULTIPLIER)
+translate_parser.add_argument(
+    '--push_result_to_azure_storage_blob_dir_url', required=False, type=str,
+    help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_DIR_URL)
+translate_parser.add_argument(
+    '--push_result_to_azure_storage_blob_managed_identity_client_id',
+    required=False, type=str,
+    help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
+translate_parser.add_argument(
+    '--input_file_azure_storage_blob_managed_identity_client_id',
+    required=False, type=str,
+    help=ARGUMENT_HELP_INPUT_FILE_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
+translate_parser.add_argument(
+    '--input_file_source_kind', required=False, type=str,
+    help=ARGUMENT_HELP_INPUT_FILE_SOURCE_KIND)
+translate_parser.add_argument(
+    '--webvtt_file_kind', required=False, type=str,
+    default=WebvttFileKind.MetadataJson.value,
+    help=ARGUMENT_HELP_WEBVTT_FILE_KIND)
 translate_parser.add_argument('--webvtt_file_blob_url', required=False, type=str, help=ARGUMENT_HELP_WEBVTT_FILE_BLOB_URL)
 translate_parser.set_defaults(func=handle_create_translation_and_iteration_and_wait_until_terminated)
 
@@ -510,17 +553,39 @@ translate_parser.add_argument(
 translate_parser.add_argument(
     '--export_target_locale_advanced_subtitle_file', required=False, type=bool,
     help=ARGUMENT_HELP_EXPORT_TARGET_LOCALE_ADVANCED_SUBTITLE_FILE)
-translate_parser.add_argument('--subtitle_primary_color', required=False, type=str, help=ARGUMENT_HELP_SUBTITLE_PRIMARY_COLOR)
-translate_parser.add_argument('--subtitle_outline_color', required=False, type=str, help=ARGUMENT_HELP_SUBTITLE_OUTLINE_COLOR)
-translate_parser.add_argument('--subtitle_font_size', required=False, type=int, help=ARGUMENT_HELP_SUBTITLE_FONT_SIZE)
-translate_parser.add_argument('--subtitle_vertical_margin', required=False, type=int, help=ARGUMENT_HELP_SUBTITLE_VERTICAL_MARGIN)
-translate_parser.add_argument('--adjust_webvtt_alignment', required=False, type=str_to_bool, help=ARGUMENT_HELP_ADJUST_WEBVTT_ALIGNMENT)
-translate_parser.add_argument('--use24k_prompt_audio', required=False, type=bool, help=ARGUMENT_HELP_USE24K_PROMPT_AUDIO)
-translate_parser.add_argument('--export_adjusted_prompt_audio_in_webvtt', required=False, type=bool, help=ARGUMENT_HELP_EXPORT_ADJUSTED_PROMPT_AUDIO_IN_WEBVTT)
-translate_parser.add_argument('--adjust_background_volume_multiplier', required=False, type=float, help=ARGUMENT_HELP_ADJUST_BACKGROUND_VOLUME_MULTIPLIER)
-translate_parser.add_argument('--push_result_to_azure_storage_blob_dir_url', required=False, type=str, help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_DIR_URL)
-translate_parser.add_argument('--push_result_to_azure_storage_blob_managed_identity_client_id', required=False, type=str, help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
-translate_parser.set_defaults(func=handle_create_iteration_with_webvtt_and_wait_until_terminated)
+translate_parser.add_argument(
+    '--subtitle_primary_color', required=False, type=str,
+    help=ARGUMENT_HELP_SUBTITLE_PRIMARY_COLOR)
+translate_parser.add_argument(
+    '--subtitle_outline_color', required=False, type=str,
+    help=ARGUMENT_HELP_SUBTITLE_OUTLINE_COLOR)
+translate_parser.add_argument(
+    '--subtitle_font_size', required=False, type=int,
+    help=ARGUMENT_HELP_SUBTITLE_FONT_SIZE)
+translate_parser.add_argument(
+    '--subtitle_vertical_margin', required=False, type=int,
+    help=ARGUMENT_HELP_SUBTITLE_VERTICAL_MARGIN)
+translate_parser.add_argument(
+    '--adjust_webvtt_alignment', required=False, type=str_to_bool,
+    help=ARGUMENT_HELP_ADJUST_WEBVTT_ALIGNMENT)
+translate_parser.add_argument(
+    '--use24k_prompt_audio', required=False, type=bool,
+    help=ARGUMENT_HELP_USE24K_PROMPT_AUDIO)
+translate_parser.add_argument(
+    '--export_adjusted_prompt_audio_in_webvtt', required=False, type=bool,
+    help=ARGUMENT_HELP_EXPORT_ADJUSTED_PROMPT_AUDIO_IN_WEBVTT)
+translate_parser.add_argument(
+    '--adjust_background_volume_multiplier', required=False, type=float,
+    help=ARGUMENT_HELP_ADJUST_BACKGROUND_VOLUME_MULTIPLIER)
+translate_parser.add_argument(
+    '--push_result_to_azure_storage_blob_dir_url', required=False, type=str,
+    help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_DIR_URL)
+translate_parser.add_argument(
+    '--push_result_to_azure_storage_blob_managed_identity_client_id',
+    required=False, type=str,
+    help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
+translate_parser.set_defaults(
+    func=handle_create_iteration_with_webvtt_and_wait_until_terminated)
 
 translate_parser = sub_parsers.add_parser('request_create_translation_api', help='Request create translation API.')
 translate_parser.add_argument('--translation_id', required=True, type=str, help='Translation resource ID.')
@@ -535,9 +600,16 @@ translate_parser.add_argument(
     '--subtitle_max_char_count_per_segment', required=False, type=int,
     help=ARGUMENT_HELP_SUBTITLE_MAX_CHAR_COUNT_PER_SEGMENT)
 translate_parser.add_argument('--export_subtitle_in_wideo', required=False, type=bool, help=ARGUMENT_HELP_EXPORT_SUBTITLE_IN_VIDEO)
-translate_parser.add_argument('--translation_display_name', required=False, type=str, help='Translation display name.')
-translate_parser.add_argument('--translation_description', required=False, type=str, help='Translation description.')
-translate_parser.add_argument('--input_file_azure_storage_blob_managed_identity_client_id', required=False, type=str, help=ARGUMENT_HELP_INPUT_FILE_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
+translate_parser.add_argument(
+    '--translation_display_name', required=False, type=str,
+    help='Translation display name.')
+translate_parser.add_argument(
+    '--translation_description', required=False, type=str,
+    help='Translation description.')
+translate_parser.add_argument(
+    '--input_file_azure_storage_blob_managed_identity_client_id',
+    required=False, type=str,
+    help=ARGUMENT_HELP_INPUT_FILE_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
 translate_parser.add_argument('--input_file_source_kind', required=False, type=str, help=ARGUMENT_HELP_INPUT_FILE_SOURCE_KIND)
 translate_parser.add_argument('--operation_id', required=False, type=str, help='Specify operation ID.')
 translate_parser.set_defaults(func=handle_request_create_translation_api)
@@ -560,10 +632,18 @@ translate_parser.set_defaults(func=handle_request_delete_translation_api)
 translate_parser = sub_parsers.add_parser('request_create_iteration_api', help='Request create iteration API.')
 translate_parser.add_argument('--translation_id', required=True, type=str, help='Translation ID.')
 translate_parser.add_argument('--iteration_id', required=True, type=str, help='Iteration ID.')
-translate_parser.add_argument('--iteration_description', required=False, type=str, help='Iteration description.')
-translate_parser.add_argument('--operation_id', required=False, type=str, help='Specify operation ID.')
-translate_parser.add_argument('--webvtt_file_blob_url', required=False, type=str, help=ARGUMENT_HELP_WEBVTT_FILE_BLOB_URL)
-translate_parser.add_argument('--webvtt_file_kind', required=False, type=str, default=WebvttFileKind.MetadataJson.value, help=ARGUMENT_HELP_WEBVTT_FILE_KIND)
+translate_parser.add_argument(
+    '--iteration_description', required=False, type=str,
+    help='Iteration description.')
+translate_parser.add_argument(
+    '--operation_id', required=False, type=str, help='Specify operation ID.')
+translate_parser.add_argument(
+    '--webvtt_file_blob_url', required=False, type=str,
+    help=ARGUMENT_HELP_WEBVTT_FILE_BLOB_URL)
+translate_parser.add_argument(
+    '--webvtt_file_kind', required=False, type=str,
+    default=WebvttFileKind.MetadataJson.value,
+    help=ARGUMENT_HELP_WEBVTT_FILE_KIND)
 translate_parser.add_argument('--speaker_count', required=False, type=int, help=ARGUMENT_HELP_SPEAKER_COUNT)
 translate_parser.add_argument(
     '--subtitle_max_char_count_per_segment', required=False, type=int,
@@ -599,15 +679,21 @@ translate_parser.add_argument(
 translate_parser.add_argument(
     '--adjust_webvtt_alignment', required=False, type=str_to_bool, help=ARGUMENT_HELP_ADJUST_WEBVTT_ALIGNMENT)
 translate_parser.add_argument(
-    '--use24k_prompt_audio', required=False, type=bool, help=ARGUMENT_HELP_USE24K_PROMPT_AUDIO)
+    '--use24k_prompt_audio', required=False, type=bool,
+    help=ARGUMENT_HELP_USE24K_PROMPT_AUDIO)
 translate_parser.add_argument(
-    '--export_adjusted_prompt_audio_in_webvtt', required=False, type=bool, help=ARGUMENT_HELP_EXPORT_ADJUSTED_PROMPT_AUDIO_IN_WEBVTT)
+    '--export_adjusted_prompt_audio_in_webvtt', required=False, type=bool,
+    help=ARGUMENT_HELP_EXPORT_ADJUSTED_PROMPT_AUDIO_IN_WEBVTT)
 translate_parser.add_argument(
-    '--adjust_background_volume_multiplier', required=False, type=float, help=ARGUMENT_HELP_ADJUST_BACKGROUND_VOLUME_MULTIPLIER)
+    '--adjust_background_volume_multiplier', required=False, type=float,
+    help=ARGUMENT_HELP_ADJUST_BACKGROUND_VOLUME_MULTIPLIER)
 translate_parser.add_argument(
-    '--push_result_to_azure_storage_blob_dir_url', required=False, type=str, help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_DIR_URL)
+    '--push_result_to_azure_storage_blob_dir_url', required=False, type=str,
+    help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_DIR_URL)
 translate_parser.add_argument(
-    '--push_result_to_azure_storage_blob_managed_identity_client_id', required=False, type=str, help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
+    '--push_result_to_azure_storage_blob_managed_identity_client_id',
+    required=False, type=str,
+    help=ARGUMENT_HELP_PUSH_RESULT_TO_AZURE_STORAGE_BLOB_MANAGED_IDENTITY_CLIENT_ID)
 translate_parser.set_defaults(func=handle_request_create_iteration_api)
 
 translate_parser = sub_parsers.add_parser('request_get_iteration_api', help='Request get iteration API.')
