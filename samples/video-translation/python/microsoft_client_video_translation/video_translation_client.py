@@ -11,55 +11,45 @@ import dataclasses
 from termcolor import colored
 from datetime import datetime
 from urllib3.util import Url
-from microsoft_video_translation_client.video_translation_const import (
+from microsoft_speech_client_common.client_common_const import (
     HTTP_HEADERS_OPERATION_LOCATION
 )
-from microsoft_video_translation_client.video_translation_enum import (
-    VoiceKind, OperationStatus, WebvttFileKind, EnableEmotionalPlatformVoice
+from microsoft_speech_client_common.client_common_enum import (
+    OperationStatus
 )
-from microsoft_video_translation_client.video_translation_dataclass import (
-    OperationDefinition, WebvttFileDefinition, TranslationInputDefinition,
+from microsoft_client_video_translation.video_translation_enum import (
+    VoiceKind, WebvttFileKind, EnableEmotionalPlatformVoice
+)
+from microsoft_client_video_translation.video_translation_dataclass import (
+    WebvttFileDefinition, TranslationInputDefinition,
     IterationInputDefinition, IterationDefinition, TranslationDefinition,
     PagedTranslationDefinition, PagedIterationDefinition
 )
-from microsoft_video_translation_client.video_translation_util import (
+from microsoft_speech_client_common.client_common_dataclass import (
+    OperationDefinition
+)
+from microsoft_speech_client_common.client_common_util import (
     dict_to_dataclass, append_url_args
+)
+from microsoft_speech_client_common.client_common_client_base import (
+    SpeechLongRunningTaskClientBase
 )
 import time
 
 
-class VideoTranslationClient:
+class VideoTranslationClient(SpeechLongRunningTaskClientBase):
     URL_SEGMENT_NAME_TRANSLATIONS = "translations"
     URL_SEGMENT_NAME_ITERATIONS = "iterations"
     URL_PATH_ROOT = "videotranslation"
 
-    region = ""
-    sub_key = ""
-    api_version = ""
-
     def __init__(self, region, sub_key, api_version):
-        if region is None or sub_key is None:
-            raise ValueError
-        self.region = region
-        self.sub_key = sub_key
-        self.api_version = api_version
-
-        # not retry for below response code:
-        #   OK = 200,
-        #   Created = 201,
-        #   NoContent = 204,
-        #   BadRequest = 400,
-        #   Unauthorized = 401,
-        #   Forbidden = 403,
-        #   NotFound = 404,
-        #   Conflict = 409
-        status_forcelist = tuple(
-            set(x for x in requests.status_codes._codes)
-            - set(x for x in [200, 201, 204, 400, 401, 403, 404, 409])
+        super().__init__(
+            region=region,
+            sub_key=sub_key,
+            api_version=api_version,
+            service_url_segment_name=self.URL_PATH_ROOT,
+            long_running_tasks_url_segment_name=self.URL_SEGMENT_NAME_TRANSLATIONS
         )
-        retries = urllib3.Retry(total=5, status_forcelist=status_forcelist)
-        timeout = urllib3.util.Timeout(10)
-        self.http = urllib3.PoolManager(timeout=timeout, retries=retries)
 
     # For most common scenario, customer not need provide webvtt first iteration.
     # Even, it is supported to provide webvtt for the first iteration, customer can
@@ -71,6 +61,8 @@ class VideoTranslationClient:
         source_locale: locale,
         target_locale: locale,
         voice_kind: VoiceKind,
+        webvtt_file_kind: WebvttFileKind = None,
+        webvtt_file_url: Url = None,
         enable_emotional_platform_voice: EnableEmotionalPlatformVoice = None,
         enable_lip_sync: bool = None,
         speaker_count: int = None,
@@ -83,16 +75,27 @@ class VideoTranslationClient:
         export_target_locale_advanced_subtitle_file: bool = None,
         subtitle_primary_color: str = None,
         subtitle_outline_color: str = None,
-        subtitle_font_size: int = None
-    ) -> tuple[bool, str, TranslationDefinition, IterationDefinition]:
+        subtitle_font_size: int = None,
+        subtitle_vertical_margin: int = None,
+        adjust_webvtt_alignment: bool = None,
+        use24k_prompt_audio: bool = None,
+        export_adjusted_prompt_audio_in_webvtt: bool = None,
+        adjust_background_volume_multiplier: float = None,
+        push_result_to_azure_storage_blob_dir_url: Url = None,
+        push_result_to_azure_storage_blob_managed_identity_client_id: str = None,
+        input_file_azure_storage_blob_managed_identity_client_id: str = None,
+        input_file_source_kind: str = None
+    ) -> tuple[bool, str, TranslationDefinition]:
         if (video_file_url is None and audio_file_url is None) or target_locale is None or voice_kind is None:
             raise ValueError
 
         now = datetime.now()
         nowString = now.strftime("%m%d%Y%H%M%S")
         translation_id = f"{nowString}_{source_locale}_{target_locale}_{voice_kind}"
-        success, error, translation = self.create_translation_until_terminated(
-            translation_id=translation_id,
+        
+        # Create translation
+        operation_id = str(uuid.uuid4())
+        create_translation_request_body = self.create_translation_creation_request_body(
             video_file_url=video_file_url,
             audio_file_url=audio_file_url,
             source_locale=source_locale,
@@ -101,19 +104,17 @@ class VideoTranslationClient:
             enable_lip_sync=enable_lip_sync,
             speaker_count=speaker_count,
             subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
-            export_subtitle_in_video=export_subtitle_in_video
+            export_subtitle_in_video=export_subtitle_in_video,
+            input_file_azure_storage_blob_managed_identity_client_id=input_file_azure_storage_blob_managed_identity_client_id,
+            input_file_source_kind=input_file_source_kind,
+            translation_display_name=None,
+            translation_description=None
         )
-        if not success:
-            return False, error, None, None
 
-        print(colored("succesfully created translation:", 'green'))
-        json_formatted_str = json.dumps(dataclasses.asdict(translation), indent=2)
-        print(json_formatted_str)
-
-        iteration_id = f"{nowString}_default"
-        success, error, iteration = self.create_iteration_until_terminated(
-            translation_id=translation_id,
-            iteration_id=iteration_id,
+        create_translation_request_body.input.autoCreateFirstIteration = True
+        create_translation_request_body.firstIterationInput = self.create_iteration_creation_input_request_body(
+            webvtt_file_kind=webvtt_file_kind,
+            webvtt_file_url=webvtt_file_url,
             speaker_count=speaker_count,
             enable_emotional_platform_voice=enable_emotional_platform_voice,
             subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
@@ -126,15 +127,39 @@ class VideoTranslationClient:
             subtitle_primary_color=subtitle_primary_color,
             subtitle_outline_color=subtitle_outline_color,
             subtitle_font_size=subtitle_font_size,
+            subtitle_vertical_margin=subtitle_vertical_margin,
+            adjust_webvtt_alignment=adjust_webvtt_alignment,
+            use24k_prompt_audio=use24k_prompt_audio,
+            export_adjusted_prompt_audio_in_webvtt=export_adjusted_prompt_audio_in_webvtt,
+            adjust_background_volume_multiplier=adjust_background_volume_multiplier,
+            push_result_to_azure_storage_blob_dir_url=push_result_to_azure_storage_blob_dir_url,
+            push_result_to_azure_storage_blob_managed_identity_client_id=push_result_to_azure_storage_blob_managed_identity_client_id,
         )
-        if not success:
-            return False, error, None, None
+        
+        success, error, response_translation, operation_location = self.request_create_translation(
+            translation_id=translation_id,
+            translation_create_body=create_translation_request_body,
+            operation_id=operation_id)
+        if not success or operation_location is None:
+            print(colored(f"Failed to create translation with ID {translation_id} with error: {error}", 'red'))
+            return False, error, None
 
-        print(colored("succesfully created iteration:", 'green'))
-        json_formatted_str = json.dumps(dataclasses.asdict(iteration), indent=2)
+        self.request_operation_until_terminated(operation_location)
+
+        success, error, translation = self.request_get_translation(translation_id)
+        if not success:
+            print(colored(f"Failed to query translation {translation_id} with error: {error}", 'red'))
+            return False, error, None
+        if translation.status != OperationStatus.Succeeded:
+            print(colored(f"Translation creation failed with error: {error}", 'red'))
+            print(json.dumps(dataclasses.asdict(translation), indent=2))
+            return False, translation.translationFailureReason, None
+
+        print(colored("succesfully created translation with first iteration:", 'green'))
+        json_formatted_str = json.dumps(dataclasses.asdict(translation), indent=2)
         print(json_formatted_str)
 
-        return True, None, translation, iteration
+        return True, None, translation
 
     # For iteration from secondary, webvtt file is required.
     def run_iteration_with_webvtt_until_terminated(
@@ -153,7 +178,14 @@ class VideoTranslationClient:
         export_target_locale_advanced_subtitle_file: bool = None,
         subtitle_primary_color: str = None,
         subtitle_outline_color: str = None,
-        subtitle_font_size: int = None
+        subtitle_font_size: int = None,
+        subtitle_vertical_margin: int = None,
+        adjust_webvtt_alignment: bool = None,
+        use24k_prompt_audio: bool = None,
+        export_adjusted_prompt_audio_in_webvtt: bool = None,
+        adjust_background_volume_multiplier: float = None,
+        push_result_to_azure_storage_blob_dir_url: Url = None,
+        push_result_to_azure_storage_blob_managed_identity_client_id: str = None
     ) -> tuple[bool, str, TranslationDefinition, IterationDefinition]:
         if webvtt_file_kind is None or webvtt_file_url is None:
             raise ValueError
@@ -185,7 +217,14 @@ class VideoTranslationClient:
             export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
             subtitle_primary_color=subtitle_primary_color,
             subtitle_outline_color=subtitle_outline_color,
-            subtitle_font_size=subtitle_font_size
+            subtitle_font_size=subtitle_font_size,
+            subtitle_vertical_margin=subtitle_vertical_margin,
+            adjust_webvtt_alignment=adjust_webvtt_alignment,
+            use24k_prompt_audio=use24k_prompt_audio,
+            export_adjusted_prompt_audio_in_webvtt=export_adjusted_prompt_audio_in_webvtt,
+            adjust_background_volume_multiplier=adjust_background_volume_multiplier,
+            push_result_to_azure_storage_blob_dir_url=push_result_to_azure_storage_blob_dir_url,
+            push_result_to_azure_storage_blob_managed_identity_client_id=push_result_to_azure_storage_blob_managed_identity_client_id
         )
         if not success:
             return False, error, None, None
@@ -204,10 +243,11 @@ class VideoTranslationClient:
         speaker_count: int = None,
         subtitle_max_char_count_per_segment: int = None,
         export_subtitle_in_video: bool = None,
+        input_file_azure_storage_blob_managed_identity_client_id: str = None,
+        input_file_source_kind: str = None,
     ) -> tuple[bool, str, TranslationDefinition]:
         operation_id = str(uuid.uuid4())
-        success, error, response_translation, operation_location = self.request_create_translation(
-            translation_id=translation_id,
+        request_body = self.create_translation_creation_request_body(
             video_file_url=video_file_url,
             audio_file_url=audio_file_url,
             source_locale=source_locale,
@@ -217,8 +257,14 @@ class VideoTranslationClient:
             speaker_count=speaker_count,
             subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
             export_subtitle_in_video=export_subtitle_in_video,
+            input_file_azure_storage_blob_managed_identity_client_id=input_file_azure_storage_blob_managed_identity_client_id,
+            input_file_source_kind=input_file_source_kind,
             translation_display_name=None,
-            translation_description=None,
+            translation_description=None
+        )
+        success, error, response_translation, operation_location = self.request_create_translation(
+            translation_id=translation_id,
+            translation_create_body=request_body,
             operation_id=operation_id)
         if not success or operation_location is None:
             print(colored(f"Failed to create translation with ID {translation_id} with error: {error}", 'red'))
@@ -237,31 +283,6 @@ class VideoTranslationClient:
 
         return True, None, response_translation
 
-    def request_operation_until_terminated(self, operation_location: Url):
-        success, error, response_operation = self.request_get_operation(operation_location=operation_location, printUrl=True)
-        if not success or response_operation is None:
-            print(colored(
-                f"Failed to query operation for translation creation from location {operation_location} with error: {error}",
-                'red'))
-            return
-
-        lastStatus = None
-        while response_operation.status in [OperationStatus.Running, OperationStatus.NotStarted]:
-            success, error, response_operation = self.request_get_operation(operation_location=operation_location, printUrl=False)
-            if not success or response_operation is None:
-                print(colored(
-                    f"Failed to query operation for translation creation from location {operation_location} with error: {error}",
-                    'red'))
-                return
-            if lastStatus != response_operation.status:
-                print(response_operation.status)
-                lastStatus = response_operation.status
-            print(".", end="")
-            # in seconds
-            time.sleep(5)
-
-        return response_operation.status
-
     def create_iteration_until_terminated(
         self,
         translation_id: str,
@@ -279,7 +300,14 @@ class VideoTranslationClient:
         export_target_locale_advanced_subtitle_file: bool = None,
         subtitle_primary_color: str = None,
         subtitle_outline_color: str = None,
-        subtitle_font_size: int = None
+        subtitle_font_size: int = None,
+        subtitle_vertical_margin: int = None,
+        adjust_webvtt_alignment: bool = None,
+        use24k_prompt_audio: bool = None,
+        export_adjusted_prompt_audio_in_webvtt: bool = None,
+        adjust_background_volume_multiplier: float = None,
+        push_result_to_azure_storage_blob_dir_url: Url = None,
+        push_result_to_azure_storage_blob_managed_identity_client_id: str = None
     ) -> tuple[bool, str, IterationDefinition]:
         if translation_id is None or iteration_id is None:
             raise ValueError
@@ -301,7 +329,14 @@ class VideoTranslationClient:
             export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
             subtitle_primary_color=subtitle_primary_color,
             subtitle_outline_color=subtitle_outline_color,
-            subtitle_font_size=subtitle_font_size)
+            subtitle_font_size=subtitle_font_size,
+            subtitle_vertical_margin=subtitle_vertical_margin,
+            adjust_webvtt_alignment=adjust_webvtt_alignment,
+            use24k_prompt_audio=use24k_prompt_audio,
+            export_adjusted_prompt_audio_in_webvtt=export_adjusted_prompt_audio_in_webvtt,
+            adjust_background_volume_multiplier=adjust_background_volume_multiplier,
+            push_result_to_azure_storage_blob_dir_url=push_result_to_azure_storage_blob_dir_url,
+            push_result_to_azure_storage_blob_managed_identity_client_id=push_result_to_azure_storage_blob_managed_identity_client_id)
         if not success:
             print(colored(f"Failed to create iteration with ID {iteration_id} for translation {translation_id} with error: {error}",
                           'red'))
@@ -320,21 +355,11 @@ class VideoTranslationClient:
 
         return True, None, response_iteration
 
-    def build_translations_path(self) -> str:
-        return f"{self.URL_PATH_ROOT}/{self.URL_SEGMENT_NAME_TRANSLATIONS}"
-
-    def build_translation_path(self,
-                               translation_id: str) -> str:
-        if translation_id is None:
-            raise ValueError
-        translations_path = self.build_translations_path()
-        return f"{translations_path}/{translation_id}"
-
     def build_iterations_path(self,
                               translation_id: str) -> str:
         if translation_id is None:
             raise ValueError
-        translation_path = self.build_translation_path(translation_id)
+        translation_path = self.build_long_running_task_path(translation_id)
         return f"{translation_path}/{self.URL_SEGMENT_NAME_ITERATIONS}"
 
     def build_iteration_path(self,
@@ -344,27 +369,6 @@ class VideoTranslationClient:
             raise ValueError
         iterations_path = self.build_iterations_path(translation_id)
         return f"{iterations_path}/{iteration_id}"
-
-    def build_host(self) -> str:
-        return f"{self.region}.api.cognitive.microsoft.com"
-
-    def build_url(self,
-                  segments: str) -> Url:
-        if segments is None:
-            raise ValueError
-        host = self.build_host()
-        return urllib3.util.parse_url(f"https://{host}/{segments}?api-version={self.api_version}")
-
-    def build_translations_url(self) -> Url:
-        path = self.build_translations_path()
-        return self.build_url(path)
-
-    def build_translation_url(self,
-                              translation_id: str) -> Url:
-        if translation_id is None:
-            raise ValueError
-        path = self.build_translation_path(translation_id)
-        return self.build_url(path)
 
     def build_iterations_url(self,
                              translation_id: str) -> Url:
@@ -381,61 +385,17 @@ class VideoTranslationClient:
         path = self.build_iteration_path(translation_id, iteration_id)
         return self.build_url(path)
 
-    def build_request_header(self) -> dict:
-        return {
-            "Ocp-Apim-Subscription-Key": self.sub_key
-        }
-
-    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/operation-operations/get-operation
-    def request_get_operation(self,
-                              operation_location: Url,
-                              printUrl: bool) -> tuple[bool, str, OperationDefinition]:
-        if operation_location is None:
-            raise ValueError
-
-        headers = self.build_request_header()
-
-        if printUrl:
-            print(f"Requesting http GET: {operation_location}")
-        response = self.http.request("GET", operation_location.url, headers=headers)
-
-        #   OK = 200,
-        #   NotFound = 404,
-        if response.status == 200:
-            response_json = response.json()
-            response = dict_to_dataclass(
-                data=response_json,
-                dataclass_type=OperationDefinition)
-            return True, None, response
-        elif response.status == 404:
-            return True, None, None
-
-        return False, response.reason, None
-
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/get-translation
     def request_get_translation(self,
                                 translation_id: str) -> tuple[bool, str, TranslationDefinition]:
-        if translation_id is None:
-            raise ValueError
-
-        url = self.build_translation_url(translation_id)
-        headers = self.build_request_header()
-
-        print(f"Requesting http GET: {url}")
-        response = self.http.request("GET", url.url, headers=headers)
-
-        #   OK = 200,
-        #   NotFound = 404,
-        if response.status == 200:
-            response_translation_json = response.json()
-            response_translation = dict_to_dataclass(
-                data=response_translation_json,
-                dataclass_type=TranslationDefinition)
-            return True, None, response_translation
-        elif response.status == 404:
-            return True, None, None
-
-        return False, response.reason, None
+        success, error, response = self.request_get_long_running_task(translation_id)
+        if not success or response is None:
+            return success, error, response
+        response_translation_json = response.json()
+        response_translation = dict_to_dataclass(
+            data=response_translation_json,
+            dataclass_type=TranslationDefinition)
+        return True, None, response_translation
 
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/get-iteration
     def request_get_iteration(self,
@@ -445,23 +405,15 @@ class VideoTranslationClient:
             raise ValueError
 
         url = self.build_iteration_url(translation_id, iteration_id)
-        headers = self.build_request_header()
-
-        print(f"Requesting http GET: {url}")
-        response = self.http.request("GET", url.url, headers=headers)
-
-        #   OK = 200,
-        #   NotFound = 404,
-        if response.status == 200:
-            response_iteration_json = response.json()
-            response_iteration = dict_to_dataclass(
-                data=response_iteration_json,
-                dataclass_type=IterationDefinition)
-            return True, None, response_iteration
-        elif response.status == 404:
-            return True, None, None
-
-        return False, response.reason, None
+        (success, error, response) = self.request_get_with_url(url)
+        if not success or response is None:
+            return success, error, response
+        
+        response_iteration_json = response.json()
+        response_iteration = dict_to_dataclass(
+            data=response_iteration_json,
+            dataclass_type=IterationDefinition)
+        return True, None, response_iteration
 
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/list-translation
     def request_list_translations(self,
@@ -469,26 +421,13 @@ class VideoTranslationClient:
                                   skip: int = None,
                                   maxPageSize: int = None) -> tuple[bool, str, PagedTranslationDefinition]:
 
-        url = self.build_translations_url()
-        args = {}
-        if top is not None:
-            args["top"] = top
-        if skip is not None:
-            args["skip"] = skip
-        if maxPageSize is not None:
-            args["maxPageSize"] = maxPageSize
-
-        url = append_url_args(url, args)
-
-        headers = self.build_request_header()
-
-        print(f"Requesting http GET: {url}")
-        response = self.http.request("GET", url.url, headers=headers)
-
-        #   OK = 200,
-        if response.status not in [200]:
-            error = response.data.decode('utf-8')
+        success, error, response = self.request_list_long_running_tasks(
+            top=top,
+            skip=skip,
+            maxPageSize=maxPageSize)
+        if not success:
             return False, error, None
+        
         response_translations_json = response.json()
         response_translations = dict_to_dataclass(
             data=response_translations_json,
@@ -498,15 +437,10 @@ class VideoTranslationClient:
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/list-iteration
     def request_list_iterations(self) -> tuple[bool, str, PagedIterationDefinition]:
         url = self.build_iterations_url()
-        headers = self.build_request_header()
-
-        print(f"Requesting http GET: {url}")
-        response = self.http.request("GET", url.url, headers=headers)
-
-        #   OK = 200,
-        if response.status not in [200]:
-            error = response.data.decode('utf-8')
+        success, error, response = self.request_list_with_url(url)
+        if not success:
             return False, error, None
+        
         response_iterations_json = response.json()
         response_iterations = dict_to_dataclass(
             data=response_iterations_json,
@@ -516,22 +450,11 @@ class VideoTranslationClient:
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/delete-translation
     def request_delete_translation(self,
                                    translation_id: str) -> tuple[bool, str]:
-        url = self.build_translation_url(translation_id)
-        headers = self.build_request_header()
-
-        print(f"Requesting http DELETE: {url}")
-        response = self.http.request("DELETE", url.url, headers=headers)
-
-        #   NoContent = 204,
-        if response.status not in [204]:
-            error = response.data.decode('utf-8')
-            return False, error
-        return True, None
+        return self.request_delete_long_running_task(translation_id)
 
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/translation-operations/create-translation
-    def request_create_translation(
+    def create_translation_creation_request_body(
             self,
-            translation_id: str,
             video_file_url: str,
             audio_file_url: str,
             source_locale: locale,
@@ -541,13 +464,13 @@ class VideoTranslationClient:
             speaker_count: int = None,
             subtitle_max_char_count_per_segment: int = None,
             export_subtitle_in_video: bool = None,
+            input_file_azure_storage_blob_managed_identity_client_id: str = None,
+            input_file_source_kind: str = None,
             translation_display_name: str = None,
             translation_description: str = None,
-            operation_id: str = None,
-            ) -> tuple[bool, str, TranslationDefinition, Url]:
-        if translation_id is None or (video_file_url is None and audio_file_url is None) or target_locale is None or voice_kind is None:
+            ) -> TranslationDefinition:
+        if (video_file_url is None and audio_file_url is None) or target_locale is None or voice_kind is None:
             raise ValueError
-
         translation_create_input_body = TranslationInputDefinition(
             sourceLocale=source_locale,
             targetLocale=target_locale,
@@ -558,49 +481,25 @@ class VideoTranslationClient:
             speakerCount=speaker_count,
             subtitleMaxCharCountPerSegment=subtitle_max_char_count_per_segment,
             exportSubtitleInVideo=export_subtitle_in_video,
+            inputFileAzureStorageBlobManagedIdentityClientId=input_file_azure_storage_blob_managed_identity_client_id,
+            inputFileSourceKind=input_file_source_kind,
         )
-
         translation_create_body = TranslationDefinition(
             input=translation_create_input_body,
             displayName=translation_display_name,
             description=translation_description,
         )
-
-        encoded_translation_create_body = orjson.dumps(dataclasses.asdict(translation_create_body))
-
-        url = self.build_translation_url(translation_id)
-        headers = self.build_request_header()
-        headers["Operation-Id"] = operation_id
-
-        print(f"Requesting http PUT: {url}")
-        response = self.http.request("PUT", url.url, headers=headers, body=encoded_translation_create_body)
-
-        #   OK = 200,
-        #   Created = 201,
-        if response.status not in [200, 201]:
-            error = response.data.decode('utf-8')
-            return False, error, None, None
-        response_translation_json = response.json()
-        response_translation = dict_to_dataclass(
-            data=response_translation_json,
-            dataclass_type=TranslationDefinition)
-        operation_location = response.headers[HTTP_HEADERS_OPERATION_LOCATION]
-        operation_location_url = urllib3.util.parse_url(operation_location)
-        return True, None, response_translation, operation_location_url
+        return translation_create_body
 
     # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/create-iteration
-    def request_create_iteration(
+    def create_iteration_creation_input_request_body(
             self,
-            translation_id: str,
-            iteration_id: str,
             webvtt_file_kind: WebvttFileKind = None,
             webvtt_file_url: Url = None,
             speaker_count: int = None,
             enable_emotional_platform_voice: EnableEmotionalPlatformVoice = None,
             subtitle_max_char_count_per_segment: int = None,
             export_subtitle_in_video: bool = None,
-            iteration_description: str = None,
-            operation_id: str = None,
             tts_custom_lexicon_file_url: Url = None,
             tts_custom_lexicon_file_id_in_audio_content_creation: str = None,
             enable_video_speed_adjustment: bool = None,
@@ -608,11 +507,16 @@ class VideoTranslationClient:
             export_target_locale_advanced_subtitle_file: bool = None,
             subtitle_primary_color: str = None,
             subtitle_outline_color: str = None,
-            subtitle_font_size: int = None
-            ) -> tuple[bool, str, IterationDefinition, Url]:
-        if translation_id is None or iteration_id is None:
-            raise ValueError
-
+            subtitle_font_size: int = None,
+            subtitle_vertical_margin: int = None,
+            adjust_webvtt_alignment: bool = None,
+            use24k_prompt_audio: bool = None,
+            export_adjusted_prompt_audio_in_webvtt: bool = None,
+            adjust_background_volume_multiplier: float = None,
+            push_result_to_azure_storage_blob_dir_url: Url = None,
+            push_result_to_azure_storage_blob_managed_identity_client_id: str = None,
+            iteration_description: str = None,
+            ) -> IterationDefinition:
         iteration_create_input = IterationInputDefinition()
 
         if speaker_count is not None:
@@ -639,9 +543,6 @@ class VideoTranslationClient:
         if export_target_locale_advanced_subtitle_file is not None:
             iteration_create_input.exportTargetLocaleAdvancedSubtitleFile = export_target_locale_advanced_subtitle_file
 
-        if export_target_locale_advanced_subtitle_file is not None:
-            iteration_create_input.exportTargetLocaleAdvancedSubtitleFile = export_target_locale_advanced_subtitle_file
-
         if subtitle_primary_color is not None:
             iteration_create_input.subtitlePrimaryColor = subtitle_primary_color
 
@@ -651,39 +552,133 @@ class VideoTranslationClient:
         if subtitle_font_size is not None:
             iteration_create_input.subtitleFontSize = subtitle_font_size
 
+        if subtitle_vertical_margin is not None:
+            iteration_create_input.subtitleVerticalMargin = subtitle_vertical_margin
+
+        if adjust_background_volume_multiplier is not None:
+            iteration_create_input.adjustBackgroundVolumeMultiplier = adjust_background_volume_multiplier
+
+        if push_result_to_azure_storage_blob_dir_url is not None:
+            iteration_create_input.pushResultToAzureStorageBlobDirUrl = push_result_to_azure_storage_blob_dir_url
+
+        if push_result_to_azure_storage_blob_managed_identity_client_id is not None:
+            iteration_create_input.pushResultToAzureStorageBlobManagedIdentityClientId = push_result_to_azure_storage_blob_managed_identity_client_id
+
         if webvtt_file_kind is not None and webvtt_file_url is not None:
             iteration_create_input.webvttFile = WebvttFileDefinition(
                 kind=webvtt_file_kind,
                 url=webvtt_file_url,
             )
 
+        # This parameter is only needed when webvtt file is provided.
+        if adjust_webvtt_alignment is not None and iteration_create_input.webvttFile is not None:
+            iteration_create_input.adjustWebvttAlignment = adjust_webvtt_alignment
+
+        if use24k_prompt_audio is not None:
+            iteration_create_input.use24kPromptAudio = use24k_prompt_audio
+
+        if export_adjusted_prompt_audio_in_webvtt is not None:
+            iteration_create_input.exportAdjustedPromptAudioInWebvtt = export_adjusted_prompt_audio_in_webvtt
+
         if enable_emotional_platform_voice is not None:
             iteration_create_input.enableEmotionalPlatformVoice = enable_emotional_platform_voice
 
+        return iteration_create_input
+
+    def request_create_translation(
+            self,
+            translation_id: str,
+            translation_create_body: TranslationDefinition,
+            operation_id: str = None
+            ) -> tuple[bool, str, TranslationDefinition, Url]:
+        if translation_id is None or translation_create_body is None:
+            raise ValueError
+        success, error, response, operation_location_url = self.request_create_long_running_task_with_id(
+            id=translation_id,
+            creation_body=translation_create_body,
+            operation_id=operation_id)
+
+        if not success:
+            return False, error, None, None
+        
+        response_translation_json = response.json()
+        response_translation = dict_to_dataclass(
+            data=response_translation_json,
+            dataclass_type=TranslationDefinition)
+        return True, None, response_translation, operation_location_url
+
+    # https://learn.microsoft.com/rest/api/aiservices/videotranslation/iteration-operations/create-iteration
+    def request_create_iteration(
+            self,
+            translation_id: str,
+            iteration_id: str,
+            webvtt_file_kind: WebvttFileKind = None,
+            webvtt_file_url: Url = None,
+            speaker_count: int = None,
+            enable_emotional_platform_voice: EnableEmotionalPlatformVoice = None,
+            subtitle_max_char_count_per_segment: int = None,
+            export_subtitle_in_video: bool = None,
+            iteration_description: str = None,
+            operation_id: str = None,
+            tts_custom_lexicon_file_url: Url = None,
+            tts_custom_lexicon_file_id_in_audio_content_creation: str = None,
+            enable_video_speed_adjustment: bool = None,
+            enable_ocr_correction_from_subtitle: bool = None,
+            export_target_locale_advanced_subtitle_file: bool = None,
+            subtitle_primary_color: str = None,
+            subtitle_outline_color: str = None,
+            subtitle_font_size: int = None,
+            subtitle_vertical_margin: int = None,
+            adjust_webvtt_alignment: bool = None,
+            use24k_prompt_audio: bool = None,
+            export_adjusted_prompt_audio_in_webvtt: bool = None,
+            adjust_background_volume_multiplier: float = None,
+            push_result_to_azure_storage_blob_dir_url: Url = None,
+            push_result_to_azure_storage_blob_managed_identity_client_id: str = None
+            ) -> tuple[bool, str, IterationDefinition, Url]:
+        if translation_id is None or iteration_id is None:
+            raise ValueError
+
         iteration_create_body = IterationDefinition(
-            input=iteration_create_input,
             description=iteration_description,
         )
 
-        encoded_iteration_create_body = orjson.dumps(dataclasses.asdict(iteration_create_body))
+        iteration_create_body.input = self.create_iteration_creation_input_request_body(
+            webvtt_file_kind=webvtt_file_kind,
+            webvtt_file_url=webvtt_file_url,
+            speaker_count=speaker_count,
+            enable_emotional_platform_voice=enable_emotional_platform_voice,
+            subtitle_max_char_count_per_segment=subtitle_max_char_count_per_segment,
+            export_subtitle_in_video=export_subtitle_in_video,
+            tts_custom_lexicon_file_url=tts_custom_lexicon_file_url,
+            tts_custom_lexicon_file_id_in_audio_content_creation=tts_custom_lexicon_file_id_in_audio_content_creation,
+            enable_video_speed_adjustment=enable_video_speed_adjustment,
+            enable_ocr_correction_from_subtitle=enable_ocr_correction_from_subtitle,
+            export_target_locale_advanced_subtitle_file=export_target_locale_advanced_subtitle_file,
+            subtitle_primary_color=subtitle_primary_color,
+            subtitle_outline_color=subtitle_outline_color,
+            subtitle_font_size=subtitle_font_size,
+            subtitle_vertical_margin=subtitle_vertical_margin,
+            adjust_webvtt_alignment=adjust_webvtt_alignment,
+            use24k_prompt_audio=use24k_prompt_audio,
+            export_adjusted_prompt_audio_in_webvtt=export_adjusted_prompt_audio_in_webvtt,
+            adjust_background_volume_multiplier=adjust_background_volume_multiplier,
+            push_result_to_azure_storage_blob_dir_url=push_result_to_azure_storage_blob_dir_url,
+            push_result_to_azure_storage_blob_managed_identity_client_id=push_result_to_azure_storage_blob_managed_identity_client_id,
+            iteration_description=iteration_description,
+        )
+
         url = self.build_iteration_url(translation_id, iteration_id)
-        if operation_id is None:
-            operation_id = str(uuid.uuid4())
-        headers = self.build_request_header()
-        headers["Operation-Id"] = operation_id
+        success, error, response, operation_location_url = self.request_create_long_running_task_with_url(
+            url=url,
+            creation_body=iteration_create_body,
+            operation_id=operation_id
+        )
 
-        print(f"Requesting http PUT: {url}")
-        response = self.http.request("PUT", url.url, headers=headers, body=encoded_iteration_create_body)
-
-        #   OK = 200,
-        #   Created = 201,
-        if response.status not in [200, 201]:
-            error = response.data.decode('utf-8')
+        if not success:
             return False, error, None, None
         response_iteration_json = response.json()
         response_iteration = dict_to_dataclass(
             data=response_iteration_json,
             dataclass_type=IterationDefinition)
-        operation_location = response.headers[HTTP_HEADERS_OPERATION_LOCATION]
-        operation_location_url = urllib3.util.parse_url(operation_location)
         return True, None, response_iteration, operation_location_url

@@ -35,7 +35,10 @@ public abstract class HttpClientConfigBase
         {
             // Use APIM for public API.
             var url = this.RootAddress;
-            url = url.AppendPathSegment(RouteBase);
+            if (!string.IsNullOrWhiteSpace(this.RouteBase))
+            {
+                url = url.AppendPathSegment(this.RouteBase);
+            }
 
             if (this.IsApiVersionInUrlSegment)
             {

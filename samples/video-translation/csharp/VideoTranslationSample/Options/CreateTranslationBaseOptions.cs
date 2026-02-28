@@ -6,6 +6,7 @@
 namespace Microsoft.SpeechServices.VideoTranslationSample.PublicPreview;
 
 using CommandLine;
+using Microsoft.SpeechServices.Common.Client;
 using Microsoft.SpeechServices.CommonLib;
 using System;
 using System.Globalization;
@@ -13,8 +14,31 @@ using VoiceKind = Cris.Http.DTOs.Public.VideoTranslation.Public20250520.VoiceKin
 
 public partial class CreateTranslationBaseOptions : BaseOptions
 {
-    [Option("translationId", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.TranslationId)]
+    [Option("translationId", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.TranslationId)]
     public string TranslationId { get; set; }
+
+    public string TranslationIdOrNew
+    {
+        get
+        {
+            return string.IsNullOrWhiteSpace(this.TranslationId) ?
+                Guid.NewGuid().ToString() : this.TranslationId;
+        }
+    }
+
+    [Option(
+        "autoCreateFirstIteration",
+        Required = false,
+        HelpText = "Auto create first iteration.")]
+    public bool? AutoCreateFirstIteration { get; set; }
+
+    public bool AutoCreateFirstIterationWithDefault()
+    {
+        // If not specified, the default value is true,
+        // which means it will auto create first iteration when creating translation,
+        // this is for better performance.
+        return this.AutoCreateFirstIteration ?? true;
+    }
 
     [Option("videoFileAzureBlobUrl", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.VideoFileAzureBlobUrl)]
     public Uri VideoFileAzureBlobUrl { get; set; }
@@ -48,5 +72,11 @@ public partial class CreateTranslationBaseOptions : BaseOptions
 
     [Option("translationDescription", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.TranslationDescription)]
     public string TranslationDescription { get; set; }
+
+    [Option("inputFileSourceKind", Required = false, HelpText = "Specifies the type of source for the input media file. If set to AzureStorageBlobManagedIdentity, the input media file is expected to be stored in Azure Blob Storage and accessed using a managed identity.")]
+    public InputFileSourceKind InputFileSourceKind { get; set; }
+
+    [Option("inputFileAzureStorageBlobManagedIdentityClientId", Required = false, HelpText = "provide the Azure Active Directory client ID of the managed identity for accessing Azure Blob Storage. If this client ID is not specified, the system-assigned managed identity will be used by default.")]
+    public Guid InputFileAzureStorageBlobManagedIdentityClientId { get; set; }
 }
 

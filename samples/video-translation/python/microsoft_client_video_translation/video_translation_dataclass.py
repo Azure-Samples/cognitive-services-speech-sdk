@@ -7,16 +7,17 @@ from dataclasses import dataclass
 from urllib3.util import Url
 from typing import Optional
 
-from microsoft_video_translation_client.video_translation_enum import (
-    OperationStatus, WebvttFileKind, VoiceKind, OneApiState, EnableEmotionalPlatformVoice
+from microsoft_speech_client_common.client_common_enum import (
+    OperationStatus, OneApiState
 )
 
+from microsoft_client_video_translation.video_translation_enum import (
+    WebvttFileKind, VoiceKind, EnableEmotionalPlatformVoice, InputFileSourceKind
+)
 
-@dataclass(kw_only=True)
-class OperationDefinition:
-    id: str
-    status: OperationStatus
-
+from microsoft_speech_client_common.client_common_dataclass import (
+    StatelessResourceBaseDefinition, StatefulResourceBaseDefinition
+)
 
 @dataclass(kw_only=True)
 class TranslationInputBaseDefinition:
@@ -39,22 +40,10 @@ class TranslationInputDefinition(TranslationInputBaseDefinition):
     sourceLocale: locale = None
     targetLocale: locale
     voiceKind: VoiceKind
+    autoCreateFirstIteration: Optional[bool] = None
     enableLipSync: Optional[bool] = None
-
-
-@dataclass(kw_only=True)
-class StatelessResourceBaseDefinition:
-    id: Optional[str] = None
-    displayName: Optional[str] = None
-    description: Optional[str] = None
-    createdDateTime: Optional[datetime] = None
-
-
-@dataclass(kw_only=True)
-class StatefulResourceBaseDefinition(StatelessResourceBaseDefinition):
-    status: Optional[OneApiState] = None
-    lastActionDateTime: Optional[datetime] = None
-
+    inputFileSourceKind: Optional[InputFileSourceKind] = None
+    inputFileAzureStorageBlobManagedIdentityClientId: Optional[str] = None
 
 @dataclass(kw_only=True)
 class IterationInputDefinition(TranslationInputBaseDefinition):
@@ -68,6 +57,13 @@ class IterationInputDefinition(TranslationInputBaseDefinition):
     subtitlePrimaryColor: Optional[str] = None
     subtitleOutlineColor: Optional[str] = None
     subtitleFontSize: Optional[int] = None
+    subtitleVerticalMargin: Optional[int] = None
+    adjustWebvttAlignment: Optional[bool] = None
+    use24kPromptAudio: Optional[bool] = None
+    exportAdjustedPromptAudioInWebvtt: Optional[bool] = None
+    adjustBackgroundVolumeMultiplier: Optional[float] = None
+    pushResultToAzureStorageBlobDirUrl: Optional[Url] = None
+    pushResultToAzureStorageBlobManagedIdentityClientId: Optional[str] = None
 
 
 @dataclass(kw_only=True)
@@ -82,15 +78,17 @@ class IterationResultDefinition:
 class IterationDefinition(StatefulResourceBaseDefinition):
     input: IterationInputDefinition
     result: Optional[IterationResultDefinition] = None
-    iterationFailureReason: Optional[str] = None
+    failureReason: Optional[str] = None
 
 
 @dataclass(kw_only=True)
 class TranslationDefinition(StatefulResourceBaseDefinition):
     input: TranslationInputDefinition
+    firstIterationInput: Optional[IterationInputDefinition] = None
     latestIteration: Optional[IterationDefinition] = None
     latestSucceededIteration: Optional[IterationDefinition] = None
-    translationFailureReason: Optional[str] = None
+    failureReason: Optional[str] = None
+    expiresDateTime: Optional[datetime] = None
 
 
 @dataclass(kw_only=True)
