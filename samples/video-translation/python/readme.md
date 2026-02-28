@@ -45,8 +45,9 @@ Run main_video_translation.py with command in below pattern:
 ## Supported API version
 | API version | Description |
 | --- | --- |
-| 2024-05-20-preview | Released public preview version |
+| 2026-03-01 | This is latest API version |
 | 2025-05-20 | This is public GA version |
+| 2024-05-20-preview | Released public preview version |
 
 ## Global parameters
 | Argument name | Description | 
@@ -115,7 +116,7 @@ Reference function handleCreateTranslationAndIterationAndWaitUntilTerminated in 
 | --- | --- |
 | --video_file_blob_url | Translation video file Azure blob url, .mp4 file format, maximum 5GB file size and 4 hours video duration. Provide the input media file using either videoFileUrl or audioFileUrl, these parameters are mutually exclusive—only one of them is required. If both are provided, the request will be considered invalid. |
 | --audio_file_blob_url | Translation audio file Azure blob url, .mp3 or .wav file format, maximum 5GB file size and 4 hours video duration. Provide the input media file using either videoFileUrl or audioFileUrl, these parameters are mutually exclusive—only one of them is required. If both are provided, the request will be considered invalid. |
-| --source_locale | The source locale of the video file. Locale code follows BCP-47. You can find the text to speech locale list at https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts. If not specified, the source locale will be auto-detected from the video file (auto detect is only supported after version 2025-05-20). |
+| --source_locale | The source locale of the video file. Locale code follows BCP-47. You can find the text to speech locale list at https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts. If not specified, the source locale will be auto-detected from the video file. |
 | --target_locale | The target locale of the translation. Locale code follows BCP-47. You can find the text to speech locale list at https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts. |
 | --voice_kind | Translation voice kind. Valid values: PlatformVoice, PersonalVoice. |
 | --enable_lip_sync | Indicate whether to enable lip sync. If not provided, the default value is false to disable the lip sync. |

@@ -142,6 +142,8 @@ For using user account(default credential) need below steps:
    Use region identifier for the region argument.
 
 ## Supported API versions:
+* 2026-03-01
+* 2025-05-20
 * 2024-05-20-preview
 
 ## Supported VoiceKind
