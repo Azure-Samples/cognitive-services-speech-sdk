@@ -38,7 +38,7 @@ public partial class BaseOptions
                 StringComparison.OrdinalIgnoreCase))
         {
             // For API version 2025-05-20 and previous, always keep the parameter null, since the parameter is not released in public doc for those versions.
-            // This is for backward compatiable for user who keep using old API version with latest client tool.
+            // This is for backward compatible for user who keep using old API version with latest client tool.
             return null;
         }
         else
