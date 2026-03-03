@@ -85,7 +85,7 @@ public partial class CreateIterationAndWaitUntilTerminatedOptions : BaseOptions
         "adjustWebvttAlignment",
         Required = false,
         HelpText = VideoTranslationPublicConst.ArgumentDescription.AdjustWebvttAlignment)]
-    public bool AdjustWebvttAlignment { get; set; }
+    public bool? AdjustWebvttAlignment { get; set; }
 
     [Option(
         "subtitleVerticalMargin",

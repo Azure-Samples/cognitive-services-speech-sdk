@@ -76,8 +76,6 @@ class SpeechLongRunningTaskClientBase:
             set(x for x in range(100, 600))
             - set([200, 201, 204, 400, 401, 403, 404, 409])
         )
-        retries = urllib3.Retry(total=5, status_forcelist=status_forcelist)
-        retries.RETRY_AFTER_STATUS_CODES = frozenset(status_forcelist)
 
         # Use a custom Retry subclass that logs on each retry
         class LoggingRetry(urllib3.Retry):
@@ -97,6 +95,7 @@ class SpeechLongRunningTaskClientBase:
                 return super().increment(method=method, url=url, response=response, error=error, _pool=_pool, _stacktrace=_stacktrace)
 
         retries = LoggingRetry(total=5, status_forcelist=status_forcelist)
+        retries.RETRY_AFTER_STATUS_CODES = frozenset(status_forcelist)
         timeout = urllib3.util.Timeout(10)
         self.http = urllib3.PoolManager(timeout=timeout, retries=retries)
 

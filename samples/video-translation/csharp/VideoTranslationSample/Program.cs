@@ -216,6 +216,7 @@ internal class Program
                             PushResultToAzureStorageBlobDirUrl = options.PushResultToAzureStorageBlobDirUrl,
                             PushResultToAzureStorageBlobManagedIdentityClientId = options.PushResultToAzureStorageBlobManagedIdentityClientId == Guid.Empty ?
                                 null : options.PushResultToAzureStorageBlobManagedIdentityClientId,
+                            AdjustWebvttAlignment = options.AdjustWebvttAlignmentApiParameter(options.ApiVersion, options.AdjustWebvttAlignment),
                         }
                     };
 
@@ -276,7 +277,7 @@ internal class Program
         EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
                         SubtitleVerticalMargin = options.SubtitleVerticalMargin ==
         VideoTranslationPublicConst.DefaultValue.SubtitleVerticalMargin ? null : options.SubtitleVerticalMargin,
-                        AdjustWebvttAlignment = options.AdjustWebvttAlignmentApiParameter(options.ApiVersion),
+                        AdjustWebvttAlignment = options.AdjustWebvttAlignmentApiParameter(options.ApiVersion, options.AdjustWebvttAlignment),
                         Use24kPromptAudio = options.Use24kPromptAudio ? true : null,
                         AdjustBackgroundVolumeMultiplier = options.AdjustBackgroundVolumeMultiplier == 0 ?
             null : options.AdjustBackgroundVolumeMultiplier,

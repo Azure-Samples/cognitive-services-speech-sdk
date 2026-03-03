@@ -22,8 +22,7 @@ public class ApimApiRegionConfig : IRegionConfig
     {
         get
         {
-            if (this.RegionIdentifier.StartsWith("http", StringComparison.OrdinalIgnoreCase) ||
-                this.This.IsLocal)
+            if (this.RegionIdentifier.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
                 return new Uri(this.RegionIdentifier);
             }

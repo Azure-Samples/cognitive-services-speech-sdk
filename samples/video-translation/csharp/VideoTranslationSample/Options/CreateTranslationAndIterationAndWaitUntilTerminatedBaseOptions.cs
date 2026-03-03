@@ -67,32 +67,10 @@ public class CreateTranslationAndIterationAndWaitUntilTerminatedBaseOptions : Cr
         HelpText = VideoTranslationPublicConst.ArgumentDescription.AdjustWebvttAlignment)]
     public bool? AdjustWebvttAlignment { get; set; }
 
-    public bool? AdjustWebvttAlignmentApiParameter(string apiVersion)
-    {
-        if (string.Equals(
-                CommonPublicConst.ApiVersions.ApiVersion20240520Preview,
-                apiVersion,
-                StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(
-                CommonPublicConst.ApiVersions.ApiVersion20250520,
-                apiVersion,
-                StringComparison.OrdinalIgnoreCase))
-        {
-            // For API version 2025-05-20 and previous, always keep the parameter null, since the parameter is not released in public doc for those versions.
-            // This is for backward compatiable for user who keep using old API version with latest client tool.
-            return null;
-        }
-        else
-        {
-            // For API version 2025-03-01 and later, the default value is true if this parameter is not provided.
-            return this.AdjustWebvttAlignment;
-        }
-    }
-
     [Option(
         "use24kPromptAudio",
         Default = false,
-        HelpText = VideoTranslationPublicConst.ArgumentDescription.AdjustWebvttAlignment)]
+        HelpText = VideoTranslationPublicConst.ArgumentDescription.Use24kPromptAudio)]
     public bool Use24kPromptAudio { get; set; }
 
     [Option(
