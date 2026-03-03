@@ -7,11 +7,9 @@ namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public;
 
 using System;
 
-public abstract class StatelessResourceBase
+public abstract class StatelessResourceBase : ResourceBase
 {
     public Uri Self { get; set; }
-
-    public string Id { get; set; }
 
     public string DisplayName { get; set; }
 

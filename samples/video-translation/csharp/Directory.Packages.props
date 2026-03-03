@@ -1,6 +1,7 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" />
@@ -27,7 +28,7 @@
     <PackageVersion Include="Microsoft.Azure.Common" Version="2.1.0" />
     <PackageVersion Include="Microsoft.Azure.Common.Dependencies" Version="1.0.0" />
     <PackageVersion Include="Microsoft.Azure.KeyVault" Version="1.0.0" />
-    <PackageVersion Include="Microsoft.Azure.KeyVault.Core" Version="1.0.0" />
+    <PackageVersion Include="Microsoft.Azure.KeyVault.Core" Version="2.0.4" />
     <PackageVersion Include="microsoft.azure.storage.blob" Version="11.2.3" />
     <PackageVersion Include="Microsoft.Cloud.InstrumentationFramework" Version="3.0.6.79" />
     <PackageVersion Include="Microsoft.CognitiveServices.Speech" Version="1.40.0" />
@@ -64,7 +65,7 @@
     <PackageVersion Include="SendGrid" Version="9.24.1" />
     <PackageVersion Include="SubtitlesParser" Version="1.5.1" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.8.6" />
-    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="4.3.0" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="6.0.1" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Private.ServiceModel" Version="4.10.3" />
     <PackageVersion Include="System.Reactive" Version="4.1.2" />
@@ -75,8 +76,8 @@
     <PackageVersion Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" />
     <PackageVersion Include="System.Spatial" Version="5.8.2" />
     <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.3.0" />
-    <PackageVersion Include="System.ValueTuple" Version="4.4.0" />
+    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+    <PackageVersion Include="System.ValueTuple" Version="4.5.0" />
     <PackageVersion Include="VisioForge.DotNet.Core.TRIAL" Version="15.1.12" />
     <PackageVersion Include="WindowsAzure.ServiceBus" Version="3.4.6" />
     <PackageVersion Include="WindowsAzure.Storage" Version="8.7.0" />

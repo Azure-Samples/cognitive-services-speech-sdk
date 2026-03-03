@@ -3,15 +3,21 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+using System;
+
 namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 
-public class Translation : StatefulResourceBase
+public partial class Translation : StatefulResourceBase
 {
     public TranslationInput Input { get; set; }
+
+    public IterationInput FirstIterationInput { get; set; }
 
     public Iteration LatestIteration { get; set; }
 
     public Iteration LatestSucceededIteration { get; set; }
 
     public string FailureReason { get; set; }
+
+    public DateTime? ExpiresDateTime { get; set; }
 }
