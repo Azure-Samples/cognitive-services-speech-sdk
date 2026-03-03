@@ -23,7 +23,7 @@
     
 ### Debug 
     Copy .\.vscode\launch_sample_video_translation.json file to .\.vscode\launch.json
-    And replace the placeholder with actual vaules like: sub_key, source_locale, target_locale, translation_id, video_file_blob_url etc.
+    And replace the placeholder with actual values like: sub_key, source_locale, target_locale, translation_id, video_file_blob_url etc.
 
 # Conda support:
     conda create -n VideoTranslation_ClientSampleCode python=3.11.10
