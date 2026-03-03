@@ -8,7 +8,7 @@ import urllib3
 import uuid
 import time
 from termcolor import colored
-from urllib3.util import Url
+from urllib3.util.url import Url
 from urllib3 import HTTPResponse
 from microsoft_speech_client_common.client_common_const import (
     HTTP_HEADERS_OPERATION_LOCATION

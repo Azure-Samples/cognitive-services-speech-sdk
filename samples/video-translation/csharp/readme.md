@@ -110,8 +110,8 @@ For using user account(default credential) need below steps:
    | --targetLocale | True | en-US | Target locale of the translation. |
    | --translationId | True | MyTranslateVideo1FromZhCNToEnUS2024050601 | Translation ID. |
    | --iterationId | True | MyFirstIteration2024050601 | Iteration ID. |
-   | --videoFileAzureBlobUrl | True | URL | Please provide video file URL, with or without SAS, which is hosted in an Azure storage blob, videoFileAzureBlobUrl and audioFileAzureBlobUrl are conflict, only one of them are required. |
-   | --audioFileAzureBlobUrl | True | URL | Please provide audio file URL, with or without SAS, which is hosted in an Azure storage blob, videoFileAzureBlobUrl and audioFileAzureBlobUrl are conflict, only one of them are required. |
+   | --videoFileAzureBlobUrl | False | URL | Please provide video file URL, with or without SAS, which is hosted in an Azure storage blob, videoFileAzureBlobUrl and audioFileAzureBlobUrl are conflict, only one of them are required. |
+   | --audioFileAzureBlobUrl | False | URL | Please provide audio file URL, with or without SAS, which is hosted in an Azure storage blob, videoFileAzureBlobUrl and audioFileAzureBlobUrl are conflict, only one of them are required. |
    | --webvttFileAzureBlobUrl | False | URL | Please provide the WebVTT file URL, with or without SAS, which is hosted in an Azure storage blob. It is optional for the first iteration of the translation but required from the second iteration. |
    | --webvttFileKind | False | TargetLocaleSubtitle/SourceLocaleSubtitle/MetadataJson | Please specify the kind of WebVTT file with a value of TargetLocaleSubtitle, SourceLocaleSubtitle, or MetadataJson. |
    | --subtitleMaxCharCountPerSegment | False | 100 | Please specify the maximum display character count per segment for the subtitles. |

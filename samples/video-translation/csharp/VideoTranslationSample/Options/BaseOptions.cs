@@ -17,7 +17,7 @@ public partial class BaseOptions
     [Option('s', "subscriptionKey", Required = false, HelpText = CommonPublicConst.ArgumentDescription.SubscriptionKey)]
     public string SubscriptionKey { get; set; }
 
-    [Option('d', "CustomDomainName", Required = false, HelpText = CommonPublicConst.ArgumentDescription.CustomDomainName)]
+    [Option('d', "customDomainName", Required = false, HelpText = CommonPublicConst.ArgumentDescription.CustomDomainName)]
     public string CustomDomainName { get; set; }
 
     [Option('m', "managedIdentityClientId", Required = false, HelpText = CommonPublicConst.ArgumentDescription.ManagedIdentityClientId)]
