@@ -1,4 +1,4 @@
-# Examples to synthesis with input text stream
+# Examples of synthesis with input text stream
 
 The input text stream API is designed to generate audio from text that is being streamed or generated in chunks. A typical scenario is to speak text generated from GPT-like models. Compared to non-text stream APIs, the text stream API significantly reduces TTS latency.
 
@@ -35,7 +35,7 @@ private static final String OPENAI_KEY = "YourOpenAIKey";
 1. Connect an Android device or start an emulator.
 2. Build the project in Android Studio.
 3. Run the application.
-4. Click **Start Stream** to connect to the backend LLM and hear the streaming TTS output.
+4. Click **Start Chat** to connect to the backend LLM and hear the streaming TTS output.
 
 ## API overview
 ### Create text stream request
@@ -43,7 +43,7 @@ To use the text stream API, you have to use the websocket V2 endpoint.
 ```wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v2```
 
 ### Set global properties
-Since the input of text stream API is parital text. SSML, which is based on XML, is not supported. And thus properties that set in SSML should be set in a new way.  
+Since the input of text stream API is partial text. SSML, which is based on XML, is not supported. And thus properties that set in SSML should be set in a new way.  
 
 For now we only support set voice name and output format.
 

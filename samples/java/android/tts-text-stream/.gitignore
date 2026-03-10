@@ -1,0 +1,24 @@
+# Gradle build files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Android Studio IDE
+.idea/
+*.iml
+*.iws
+
+# MacOS
+.DS_Store
+
+# Log Files
+*.log
+
+# NDK
+.cxx/
+.externalNativeBuild/
+
+# Captures (e.g., from Android Studio profiler)
+captures/

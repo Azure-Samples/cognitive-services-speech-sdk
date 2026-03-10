@@ -39,7 +39,6 @@ dependencies {
     // Speech SDK
     // implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.48.1'
     implementation files('client-sdk-embedded-1.48.1.aar')
-    implementation 'com.azure:azure-ai-openai:1.0.0-beta.10'
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
