@@ -186,10 +186,6 @@ public class MarkdownStreamFilter {
                 htmlTagBuffer.setLength(0);
                 break;
             case FOOTNOTE:
-                // Incomplete footnote, output what we have
-                if (footnoteBuffer.length() > 0) {
-                    leftover.append("注释").append(footnoteBuffer);
-                }
                 footnoteBuffer.setLength(0);
                 break;
             case TASK_LIST_MARKER:
