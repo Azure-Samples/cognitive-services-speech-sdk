@@ -9,6 +9,7 @@ using Flurl;
 using Flurl.Http;
 using Flurl.Util;
 using Microsoft.SpeechServices.CommonLib;
+using Microsoft.SpeechServices.CommonLib.HttpClient;
 using Microsoft.SpeechServices.CommonLib.Util;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public;
 using Microsoft.SpeechServices.DataContracts;

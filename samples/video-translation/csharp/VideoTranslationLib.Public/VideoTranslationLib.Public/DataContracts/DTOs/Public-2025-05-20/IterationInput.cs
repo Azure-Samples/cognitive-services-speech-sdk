@@ -7,7 +7,6 @@ namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public
 
 using Microsoft.SpeechServices.Common.Client.Enums.VideoTranslation;
 using System;
-using System.Runtime.InteropServices;
 
 public partial class IterationInput
 {
@@ -37,4 +36,16 @@ public partial class IterationInput
     public string SubtitleOutlineColor { get; set; }
 
     public int? SubtitleFontSize { get; set; }
+
+    public int? SubtitleVerticalMargin { get; set; }
+
+    public bool? AdjustWebvttAlignment { get; init; }
+
+    public bool? Use24kPromptAudio { get; set; }
+
+    public double? AdjustBackgroundVolumeMultiplier { get; set; }
+
+    public Uri PushResultToAzureStorageBlobDirUrl { get; set; }
+
+    public Guid? PushResultToAzureStorageBlobManagedIdentityClientId { get; set; }
 }

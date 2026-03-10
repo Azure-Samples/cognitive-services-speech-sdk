@@ -5,6 +5,7 @@
 
 namespace Microsoft.SpeechServices.CommonLib.Public.Interface;
 
+using Flurl;
 using System;
 
 public class ApimApiRegionConfig : IRegionConfig
@@ -17,7 +18,22 @@ public class ApimApiRegionConfig : IRegionConfig
 
     public string RegionIdentifier { get; private set; }
 
-    public Uri EndpointUrl => new Uri($"https://{HostName}");
+    public Uri EndpointUrl
+    {
+        get
+        {
+            if (this.RegionIdentifier.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                return new Uri(this.RegionIdentifier);
+            }
+            else
+            {
+                return new Uri($"https://{HostName}");
+            }
+        }
+    }
 
     private string HostName => $"{this.RegionIdentifier}.api.cognitive.microsoft.com";
+
+    private IRegionConfig This => this;
 }

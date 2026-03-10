@@ -6,8 +6,10 @@
 namespace Microsoft.SpeechServices.VideoTranslation.ApiSampleCode.PublicPreview;
 
 using CommandLine;
+using Microsoft.SpeechServices.Common.Client;
 using Microsoft.SpeechServices.Common.Client.Enums.VideoTranslation;
 using Microsoft.SpeechServices.CommonLib;
+using Microsoft.SpeechServices.CommonLib.HttpClient;
 using Microsoft.SpeechServices.CommonLib.Public.Interface;
 using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 using Microsoft.SpeechServices.VideoTranslationSample.Advanced.HttpClient;
@@ -65,11 +67,11 @@ internal class Program
         var httpConfig = new VideoTranslationPublicPreviewHttpClientConfig(
             regionConfig: regionConfig,
             subKey: baseOptions.SubscriptionKey,
-            customDomainName: baseOptions.customDomainName,
+            customDomainName: baseOptions.CustomDomainName,
             managedIdentityClientId: baseOptions.ManagedIdentityClientId == Guid.Empty ? null : baseOptions.ManagedIdentityClientId)
         {
             ApiVersion = string.IsNullOrEmpty(baseOptions.ApiVersion) ?
-                CommonPublicConst.ApiVersions.ApiVersion20240520Preview : baseOptions.ApiVersion,
+                CommonPublicConst.ApiVersions.ApiVersion20260301 : baseOptions.ApiVersion,
         };
 
         var translationClient = new TranslationClient(httpConfig);
@@ -120,11 +122,11 @@ internal class Program
                     break;
                 }
 
-            case CreateTranslationOptions options:
+            case CreateTranslationAndWaitUntilTerminatedOptions options:
                 {
                     var translation = new Translation()
                     {
-                        Id = options.TranslationId,
+                        Id = options.TranslationIdOrNew,
                         DisplayName = options.TranslationName,
                         Description = options.TranslationDescription,
                         Input = new TranslationInput()
@@ -134,7 +136,7 @@ internal class Program
                             VoiceKind = options.VoiceKind,
                             SpeakerCount = options.SpeakerCount,
                             SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
-                            ExportSubtitleInVideo = options.ExportSubtitleInVideo,
+                            ExportSubtitleInVideo = options.ExportSubtitleInVideo ? true : null,
                             VideoFileUrl = options.VideoFileAzureBlobUrl,
                             AudioFileUrl = options.AudioFileAzureBlobUrl,
                             EnableLipSync = options.EnableLipSync ? true : null,
@@ -184,16 +186,17 @@ internal class Program
 
             case CreateIterationAndWaitUntilTerminatedOptions options:
                 {
+                    var iterationId = options.IterationIdOrNew;
                     var iteration = new Iteration()
                     {
-                        Id = options.IterationId,
+                        Id = iterationId,
                         DisplayName = string.IsNullOrEmpty(options.IterationName) ?
-                            options.IterationId : options.IterationName,
+                            iterationId : options.IterationName,
                         Input = new IterationInput()
                         {
                             SpeakerCount = options.SpeakerCount,
                             SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
-                            ExportSubtitleInVideo = options.ExportSubtitleInVideo,
+                            ExportSubtitleInVideo = options.ExportSubtitleInVideo ? true : null,
                             WebvttFile = options.WebvttFile,
                             TtsCustomLexiconFileIdInAudioContentCreation = options.TtsCustomLexiconFileIdInAudioContentCreation == Guid.Empty ?
                                 null : options.TtsCustomLexiconFileIdInAudioContentCreation,
@@ -206,6 +209,14 @@ internal class Program
                             EnableEmotionalPlatformVoice = options.EnableEmotionalPlatformVoice ==
                                 EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
                             SubtitleFontSize = options.SubtitleFontSize == 0 ? null : options.SubtitleFontSize,
+                            SubtitleVerticalMargin = options.SubtitleVerticalMargin ==
+                                VideoTranslationPublicConst.DefaultValue.SubtitleVerticalMargin ? null : options.SubtitleVerticalMargin,
+                            AdjustBackgroundVolumeMultiplier = options.AdjustBackgroundVolumeMultiplier == 0 ?
+                                null : options.AdjustBackgroundVolumeMultiplier,
+                            PushResultToAzureStorageBlobDirUrl = options.PushResultToAzureStorageBlobDirUrl,
+                            PushResultToAzureStorageBlobManagedIdentityClientId = options.PushResultToAzureStorageBlobManagedIdentityClientId == Guid.Empty ?
+                                null : options.PushResultToAzureStorageBlobManagedIdentityClientId,
+                            AdjustWebvttAlignment = options.AdjustWebvttAlignmentApiParameter(options.ApiVersion, options.AdjustWebvttAlignment),
                         }
                     };
 
@@ -241,58 +252,99 @@ internal class Program
 
             case CreateTranslationAndIterationAndWaitUntilTerminatedOptions options:
                 {
-                    var iteration = new Iteration()
+                    var iterationInput = new IterationInput()
                     {
-                        Id = options.IterationId,
-                        DisplayName = options.IterationId,
-                        Input = new IterationInput()
+                        SpeakerCount = options.SpeakerCount,
+                        SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
+                        ExportSubtitleInVideo = options.ExportSubtitleInVideo ? true : null,
+                        WebvttFile = options.WebvttFileAzureBlobUrl == null ? null : new WebvttFile()
                         {
-                            SpeakerCount = options.SpeakerCount,
-                            SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
-                            ExportSubtitleInVideo = options.ExportSubtitleInVideo,
-                            WebvttFile = options.WebvttFileAzureBlobUrl == null ? null : new WebvttFile()
-                            {
-                                Kind = options.WebvttFileKind == WebvttFileKind.None ?
-                                    throw new ArgumentException($"Please specify {nameof(options.WebvttFileKind)}") :
-                                    options.WebvttFileKind,
-                                Url = options.WebvttFileAzureBlobUrl,
-                            },
-                            TtsCustomLexiconFileUrl = options.TtsCustomLexiconFileUrl,
-                            TtsCustomLexiconFileIdInAudioContentCreation = options.TtsCustomLexiconFileIdInAudioContentCreation == Guid.Empty ?
-                                null : options.TtsCustomLexiconFileIdInAudioContentCreation,
-                            EnableVideoSpeedAdjustment = options.EnableVideoSpeedAdjustment ? true : null,
-                            EnableOcrCorrectionFromSubtitle = options.EnableOcrCorrectionFromSubtitle ? true : null,
-                            ExportTargetLocaleAdvancedSubtitleFile = options.ExportTargetLocaleAdvancedSubtitleFile ? true : null,
-                            SubtitlePrimaryColor = options.SubtitlePrimaryRgbaColor,
-                            SubtitleOutlineColor = options.SubtitleOutlineRgbaColor,
-                            SubtitleFontSize = options.SubtitleFontSize == 0 ? null : options.SubtitleFontSize,
-                            EnableEmotionalPlatformVoice = options.EnableEmotionalPlatformVoice ==
-                                EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
-                        }
+                            Kind = options.WebvttFileKind == WebvttFileKind.None ?
+                throw new ArgumentException($"Please specify {nameof(options.WebvttFileKind)}") :
+                options.WebvttFileKind,
+                            Url = options.WebvttFileAzureBlobUrl,
+                        },
+                        TtsCustomLexiconFileUrl = options.TtsCustomLexiconFileUrl,
+                        TtsCustomLexiconFileIdInAudioContentCreation = options.TtsCustomLexiconFileIdInAudioContentCreation == Guid.Empty ?
+            null : options.TtsCustomLexiconFileIdInAudioContentCreation,
+                        EnableVideoSpeedAdjustment = options.EnableVideoSpeedAdjustment ? true : null,
+                        EnableOcrCorrectionFromSubtitle = options.EnableOcrCorrectionFromSubtitle ? true : null,
+                        ExportTargetLocaleAdvancedSubtitleFile = options.ExportTargetLocaleAdvancedSubtitleFile ? true : null,
+                        SubtitlePrimaryColor = options.SubtitlePrimaryRgbaColor,
+                        SubtitleOutlineColor = options.SubtitleOutlineRgbaColor,
+                        SubtitleFontSize = options.SubtitleFontSize == 0 ? null : options.SubtitleFontSize,
+                        EnableEmotionalPlatformVoice = options.EnableEmotionalPlatformVoice ==
+        EnableEmotionalPlatformVoiceKind.Auto ? null : options.EnableEmotionalPlatformVoice,
+                        SubtitleVerticalMargin = options.SubtitleVerticalMargin ==
+        VideoTranslationPublicConst.DefaultValue.SubtitleVerticalMargin ? null : options.SubtitleVerticalMargin,
+                        AdjustWebvttAlignment = options.AdjustWebvttAlignmentApiParameter(options.ApiVersion, options.AdjustWebvttAlignment),
+                        Use24kPromptAudio = options.Use24kPromptAudio ? true : null,
+                        AdjustBackgroundVolumeMultiplier = options.AdjustBackgroundVolumeMultiplier == 0 ?
+            null : options.AdjustBackgroundVolumeMultiplier,
+                        PushResultToAzureStorageBlobDirUrl = options.PushResultToAzureStorageBlobDirUrl,
+                        PushResultToAzureStorageBlobManagedIdentityClientId = options.PushResultToAzureStorageBlobManagedIdentityClientId == Guid.Empty ?
+        null : options.PushResultToAzureStorageBlobManagedIdentityClientId,
                     };
 
+                    if (string.IsNullOrWhiteSpace(options.VideoFileAzureBlobUrl?.OriginalString) &&
+                        string.IsNullOrWhiteSpace(options.AudioFileAzureBlobUrl?.OriginalString))
+                    {
+                        throw new ArgumentException($"Please provide either {nameof(options.VideoFileAzureBlobUrl)} or {nameof(options.AudioFileAzureBlobUrl)}");
+                    }
+
+                    var translationId = options.TranslationIdOrNew;
                     var translation = new Translation()
                     {
-                        Id = options.TranslationId,
-                        DisplayName = options.TranslationId,
-                        Description = options.TranslationId,
+                        Id = translationId,
+                        DisplayName = translationId,
+                        Description = translationId,
                         Input = new TranslationInput()
                         {
+                            EnableLipSync = options.EnableLipSync ? true : null,
+                            SpeakerCount = options.SpeakerCount,
+                            SubtitleMaxCharCountPerSegment = options.SubtitleMaxCharCountPerSegment,
+                            ExportSubtitleInVideo = options.ExportSubtitleInVideo ? true : null,
                             SourceLocale = options.SourceLocale,
                             TargetLocale = options.TargetLocale,
                             VoiceKind = options.VoiceKind,
-                            SpeakerCount = iteration.Input?.SpeakerCount,
-                            SubtitleMaxCharCountPerSegment = iteration.Input?.SubtitleMaxCharCountPerSegment,
-                            ExportSubtitleInVideo = iteration.Input?.ExportSubtitleInVideo,
                             VideoFileUrl = options.VideoFileAzureBlobUrl,
                             AudioFileUrl = options.AudioFileAzureBlobUrl,
-                            EnableLipSync = options.EnableLipSync ? true : null,
-                        }
+                            AutoCreateFirstIteration = options.AutoCreateFirstIterationWithDefault(),
+#pragma warning disable CS0618 // Type or member is obsolete
+                            InputFileSourceKind = options.InputFileSourceKind == InputFileSourceKind.None ?
+#pragma warning restore CS0618 // Type or member is obsolete
+                                null : options.InputFileSourceKind,
+                            InputFileAzureStorageBlobManagedIdentityClientId = options.InputFileAzureStorageBlobManagedIdentityClientId == Guid.Empty ?
+                                null : options.InputFileAzureStorageBlobManagedIdentityClientId,
+                        },
+                        FirstIterationInput = iterationInput,
                     };
 
-                    (translation, iteration) = await translationClient.CreateTranslationAndIterationAndWaitUntilTerminatedAsync(
-                        translation: translation,
-                        iteration: iteration).ConfigureAwait(false);
+                    if (options.AutoCreateFirstIterationWithDefault())
+                    {
+                        translation = await translationClient.CreateTranslationAndWaitUntilTerminatedAsync(
+                            translation: translation).ConfigureAwait(false);
+                        Console.WriteLine();
+                        Console.WriteLine("Created translation:");
+                        Console.WriteLine(JsonConvert.SerializeObject(
+                            translation,
+                            Formatting.Indented,
+                            CommonPublicConst.Json.WriterSettings));
+                    }
+                    else
+                    {
+                        var iteration = new Iteration()
+                        {
+                            Id = VideoTranslationPublicConst.DefaultValue.IterationId,
+                            DisplayName = VideoTranslationPublicConst.DefaultValue.IterationId,
+                            Input = iterationInput,
+                        };
+
+                        (translation, iteration) = await translationClient.CreateTranslationAndIterationAndWaitUntilTerminatedAsync(
+                            translation: translation,
+                            iteration: iteration).ConfigureAwait(false);
+                    }
+
                     break;
                 }
 

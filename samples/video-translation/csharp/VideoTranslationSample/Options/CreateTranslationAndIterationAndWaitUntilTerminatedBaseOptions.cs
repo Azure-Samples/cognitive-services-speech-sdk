@@ -13,13 +13,14 @@ using System;
 
 public class CreateTranslationAndIterationAndWaitUntilTerminatedBaseOptions : CreateTranslationBaseOptions
 {
-    [Option("iterationId", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.IterationId)]
-    public string IterationId { get; set; }
-
     [Option("webvttFileAzureBlobUrl", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.WebvttFileAzureBlobUrl)]
     public Uri WebvttFileAzureBlobUrl { get; set; }
 
-    [Option("webvttFileKind", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.WebvttFileKind)]
+    [Option(
+        "webvttFileKind",
+        Required = false,
+        Default = WebvttFileKind.MetadataJson,
+        HelpText = VideoTranslationPublicConst.ArgumentDescription.WebvttFileKind)]
     public WebvttFileKind WebvttFileKind { get; set; }
 
     [Option("ttsCustomLexiconFileUrl", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.TtsCustomLexiconFileUrl)]
@@ -49,5 +50,53 @@ public class CreateTranslationAndIterationAndWaitUntilTerminatedBaseOptions : Cr
 
     [Option("enableEmotionalPlatformVoice", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.EnableEmotionalPlatformVoice)]
     public EnableEmotionalPlatformVoiceKind EnableEmotionalPlatformVoice { get; set; }
+
+    // Not use bool for this --adjustWebvttAlignment argument because:
+    //      from API version 2026-03-01, the default value is true if this parameter is not provided,
+    //      but if set default value to true for this bool type parameter,
+    //      this command line parser doesn't support specify false,
+    //      it will always set this parameter to true even user specify
+    //      "--adjustWebvttAlignment false" in command line, which is not expected.
+    // When use this bool? type for --adjustWebvttAlignment argument, it can specify parameter like this:
+    //      "--adjustWebvttAlignment" :which means null for API request, the same behavior as true.
+    //      "--adjustWebvttAlignment true" :which means true for API request.
+    //      "--adjustWebvttAlignment false" :which means false for API request.
+    [Option(
+        "adjustWebvttAlignment",
+        Required = false,
+        HelpText = VideoTranslationPublicConst.ArgumentDescription.AdjustWebvttAlignment)]
+    public bool? AdjustWebvttAlignment { get; set; }
+
+    [Option(
+        "use24kPromptAudio",
+        Default = false,
+        HelpText = VideoTranslationPublicConst.ArgumentDescription.Use24kPromptAudio)]
+    public bool Use24kPromptAudio { get; set; }
+
+    [Option(
+        "subtitleVerticalMargin",
+        Required = false,
+        Default = VideoTranslationPublicConst.DefaultValue.SubtitleVerticalMargin,
+    HelpText = "Subtitle vertical margin must be between 0 and 200(default 10).")]
+    public int SubtitleVerticalMargin { get; set; }
+
+    [Option(
+        "adjustBackgroundVolumeMultiplier",
+        Required = false,
+        Default = 0,
+        HelpText = VideoTranslationPublicConst.ArgumentDescription.AdjustBackgroundVolumeMultiplier)]
+    public double AdjustBackgroundVolumeMultiplier { get; set; }
+
+    [Option(
+        "pushResultToAzureStorageBlobDirUrl",
+        Required = false,
+        HelpText = "Push result to Azure storage blob dir URL.")]
+    public Uri PushResultToAzureStorageBlobDirUrl { get; set; }
+
+    [Option(
+        "pushResultToAzureStorageBlobManagedIdentityClientId",
+        Required = false,
+        HelpText = "User-assigned managed identity client ID.")]
+    public Guid PushResultToAzureStorageBlobManagedIdentityClientId { get; set; }
 }
 

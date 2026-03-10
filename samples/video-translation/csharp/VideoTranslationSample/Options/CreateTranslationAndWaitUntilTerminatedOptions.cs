@@ -9,8 +9,8 @@ using CommandLine;
 using System;
 using System.Globalization;
 
-[Verb("createTranslation", HelpText = "Create translation.")]
-public partial class CreateTranslationOptions : CreateTranslationBaseOptions
+[Verb("createTranslationAndWaitUntilTerminated", HelpText = "Create translation and wait until terminated.")]
+public partial class CreateTranslationAndWaitUntilTerminatedOptions : CreateTranslationBaseOptions
 {
 }
 

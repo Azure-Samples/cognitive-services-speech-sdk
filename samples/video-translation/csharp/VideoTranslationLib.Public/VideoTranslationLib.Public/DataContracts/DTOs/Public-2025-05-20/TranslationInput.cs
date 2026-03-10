@@ -5,6 +5,7 @@
 
 namespace Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
 
+using Microsoft.SpeechServices.Common.Client;
 using System;
 using System.Globalization;
 
@@ -15,6 +16,8 @@ public partial class TranslationInput
     public CultureInfo TargetLocale { get; set; }
 
     public VoiceKind VoiceKind { get; set; }
+
+    public bool? AutoCreateFirstIteration { get; set; }
 
     public int? SpeakerCount { get; set; }
 
@@ -27,4 +30,8 @@ public partial class TranslationInput
     public Uri AudioFileUrl { get; set; }
 
     public bool? EnableLipSync { get; set; }
+
+    public InputFileSourceKind? InputFileSourceKind { get; set; }
+
+    public Guid? InputFileAzureStorageBlobManagedIdentityClientId { get; set; }
 }

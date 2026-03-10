@@ -11,18 +11,40 @@ using System;
 
 public partial class BaseOptions
 {
-    [Option('r', "region", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.Region)]
+    [Option('r', "region", Required = true, HelpText = CommonPublicConst.ArgumentDescription.Region)]
     public string Region { get; set; }
 
-    [Option('s', "subscriptionKey", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.SubscriptionKey)]
+    [Option('s', "subscriptionKey", Required = false, HelpText = CommonPublicConst.ArgumentDescription.SubscriptionKey)]
     public string SubscriptionKey { get; set; }
 
-    [Option('d', "customDomainName", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.CustomDomainName)]
-    public string customDomainName { get; set; }
+    [Option('d', "customDomainName", Required = false, HelpText = CommonPublicConst.ArgumentDescription.CustomDomainName)]
+    public string CustomDomainName { get; set; }
 
-    [Option('m', "managedIdentityClientId", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.ManagedIdentityClientId)]
+    [Option('m', "managedIdentityClientId", Required = false, HelpText = CommonPublicConst.ArgumentDescription.ManagedIdentityClientId)]
     public Guid ManagedIdentityClientId { get; set; }
 
-    [Option('v', "apiVersion", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.ApiVersion)]
+    [Option('v', "apiVersion", Required = true, HelpText = CommonPublicConst.ArgumentDescription.ApiVersion)]
     public string ApiVersion { get; set; }
+
+    public bool? AdjustWebvttAlignmentApiParameter(string apiVersion, bool? adjustWebvttAlignment)
+    {
+        if (string.Equals(
+                CommonPublicConst.ApiVersions.ApiVersion20240520Preview,
+                apiVersion,
+                StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(
+                CommonPublicConst.ApiVersions.ApiVersion20250520,
+                apiVersion,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            // For API version 2025-05-20 and previous, always keep the parameter null, since the parameter is not released in public doc for those versions.
+            // This is for backward compatible for user who keep using old API version with latest client tool.
+            return null;
+        }
+        else
+        {
+            // For API version 2026-03-01 and later, the default value is true if this parameter is not provided.
+            return adjustWebvttAlignment;
+        }
+    }
 }
