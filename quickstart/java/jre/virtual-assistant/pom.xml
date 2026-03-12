@@ -24,12 +24,17 @@
         <dependency>
             <groupId>com.microsoft.cognitiveservices.speech</groupId>
             <artifactId>client-sdk</artifactId>
-            <version>1.47.0</version>
+            <version>1.48.1</version>
         </dependency>
         <dependency>
           <groupId>com.azure</groupId>
           <artifactId>azure-identity</artifactId>
           <version>1.18.0</version>
+        </dependency>
+        <dependency>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+          <version>4.1.129.Final</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -75,7 +80,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>9.37.2</version>
+            <version>9.37.4</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -91,6 +96,21 @@
             <groupId>com.squareup.okio</groupId>
             <artifactId>okio</artifactId>
             <version>1.17.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>1.6.0</version>
         </dependency>
     </dependencies>
     <!-- </dependencies> -->

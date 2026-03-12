@@ -63,7 +63,7 @@ public abstract class HttpClientBase
             }
             else if (string.IsNullOrEmpty(speechConfig.CustomDomainName))
             {
-                // OAuth only avaible when custom domain enabled.
+                // OAuth only available when custom domain enabled.
                 throw new NotSupportedException($"Please provide either key or custom domain name");
             }
         }
@@ -96,11 +96,12 @@ public abstract class HttpClientBase
         }
 
         this.Logger?.LogDebug(url.Url.ToString());
+        Console.WriteLine($"Deleting: {url.Url}");
         return await this.RequestWithRetryAsync(async () =>
         {
             return await url
-            .DeleteAsync()
-            .ConfigureAwait(false);
+                .DeleteAsync()
+                .ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 
@@ -138,27 +139,6 @@ public abstract class HttpClientBase
                 .ReceiveJson<T>()
                 .ConfigureAwait(false);
         }).ConfigureAwait(false);
-    }
-
-    protected async Task<IFlurlRequest> BuildBackendPathVersionRequestBaseAsync(
-        IReadOnlyDictionary<string, string> additionalHeaders = null)
-    {
-        var url = this.BaseConfig.RootUrl
-            .AppendPathSegment(this.ControllerName);
-        var request = await this.AuthenticateAsync(url).ConfigureAwait(false);
-        if (additionalHeaders != null)
-        {
-            foreach (var additionalHeader in additionalHeaders)
-            {
-                request = request.WithHeader(additionalHeader.Key, additionalHeader.Value);
-            }
-        }
-
-        // Default json serializer will serialize enum to number, which will cause API parse DTO failure:
-        //  "Error converting value 0 to type 'Microsoft.SpeechServices.Common.Client.OneApiState'. Path 'Status', line 1, position 56."
-        request.Settings.JsonSerializer = new NewtonsoftJsonSerializer(CommonPublicConst.Json.WriterSettings);
-
-        return request;
     }
 
     protected async Task<IFlurlRequest> BuildRequestBaseAsync(

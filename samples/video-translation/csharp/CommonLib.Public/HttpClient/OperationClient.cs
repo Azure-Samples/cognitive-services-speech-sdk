@@ -3,13 +3,13 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
-namespace VideoTranslationPublicPreviewLib.HttpClient;
+namespace Microsoft.SpeechServices.CommonLib.HttpClient;
 
 using Flurl;
 using Flurl.Http;
 using Microsoft.SpeechServices.CommonLib;
 using Microsoft.SpeechServices.CommonLib.Util;
-using Microsoft.SpeechServices.Cris.Http.DTOs.Public.VideoTranslation.Public20250520;
+using Microsoft.SpeechServices.DataContracts;
 using System;
 using System.Linq;
 using System.Net;

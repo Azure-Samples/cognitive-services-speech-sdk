@@ -17,7 +17,7 @@ Video translation client tool and API sample code
 
    1. Upload video file to Azure storage blob, and then create translation and run first iteration with below command:
 
-   > VideoTranslationSample createTranslationAndIterationAndWaitUntilTerminated --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --sourceLocale [SourceLocale] --targetLocales [TargetLocale] --voiceKind [PersonalVoice/PlatformVoice] -videoFileAzureBlobUrl [VideoFileAzureBlobUrl]
+   > VideoTranslationSample createTranslationAndIterationAndWaitUntilTerminated --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --sourceLocale [SourceLocale] --targetLocale [TargetLocale] --voiceKind [PersonalVoice/PlatformVoice] -videoFileAzureBlobUrl [VideoFileAzureBlobUrl]
 
    2. Download translated metadata json webvtt file to local, and modify it for content editing.
    You can use [Subtitle Edit Tool](https://github.com/SubtitleEdit/subtitleedit) for assistance.
@@ -82,7 +82,7 @@ For using user account(default credential) need below steps:
 
    Iteration API core library: [IterationClient.cs](VideoTranslationLib.Public/VideoTranslationLib.ReferenceFiles/HttpClient/IterationClient.cs)
 
-   Operation API core library: [OperationClient.cs](VideoTranslationLib.Public/VideoTranslationLib.ReferenceFiles/HttpClient/OperationClient.cs)
+   Operation API core library: [OperationClient.cs](CommonLib.Public/HttpClient/OperationClient.cs)
 
 # For project CommonLib
    Do not upgrade Flurl to version 4.0 because it does not support NewtonJson for ReceiveJson.
@@ -90,7 +90,7 @@ For using user account(default credential) need below steps:
 # Command Line Usage
    | Description | Command line arguments |
    | ------------ | -------------- |
-   | Upload the new video file for translation and run the first iteration of the translation. | createTranslationAndIterationAndWaitUntilTerminated --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --sourceLocale [SourceLocale] --targetLocales [TargetLocale] --voiceKind [PersonalVoice/PlatformVoice] --videoFileAzureBlobUrl [VideoFileAzureBlobUrl] |
+   | Upload the new video file for translation and run the first iteration of the translation. | createTranslationAndIterationAndWaitUntilTerminated --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --sourceLocale [SourceLocale] --targetLocale [TargetLocale] --voiceKind [PersonalVoice/PlatformVoice] --videoFileAzureBlobUrl [VideoFileAzureBlobUrl] |
    | Create a translation for the video file. | createTranslation --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --sourceLocale [SourceLocale] --targetLocale [TargetLocale] --voiceKind [PersonalVoice/PlatformVoice] --translationId [TranslationId] --videoFileAzureBlobUrl [VideoFileAzureBlobUrl] |
    | Query the translations. | queryTranslations --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] |
    | Query the translation by ID. | queryTranslation --region [RegionIdentifier] --subscriptionKey [YourSpeechResourceKey] --apiVersion [ApiVersion] --translationId [TranslationId] |
@@ -102,42 +102,48 @@ For using user account(default credential) need below steps:
 # Command line tool arguments
    | Argument | Is Required | Supported Values Sample | Description |
    | -------- | -------- | ---------------- | ----------- |
-   | --region  | True | eastus | Provide the region of the API request. |
+   | --region | True | eastus | Provide the region of the API request. |
    | --subscriptionKey | True | | Provide your speech resource key. |
    | --apiVersion | True | 2024-05-20-preview | Provide the version of the API request. |
    | --voiceKind | True | PlatformVoice/PersonalVoice | Synthesize TTS for the translated target video using either PlatformVoice or PersonalVoice. |
-   | --sourceLocale | True | en-US | The locale of the input video file. |
-   | --targetLocales | True | en-US | Target locale of the translation. |
+   | --sourceLocale | False | en-US | The locale of the input video file, if not provided, it will be auto-detected. |
+   | --targetLocale | True | en-US | Target locale of the translation. |
    | --translationId | True | MyTranslateVideo1FromZhCNToEnUS2024050601 | Translation ID. |
    | --iterationId | True | MyFirstIteration2024050601 | Iteration ID. |
-   | --videoFileAzureBlobUrl | True | URL | Please proivde video file URL, with or without SAS, which is hosted in an Azure storage blob. |
+   | --videoFileAzureBlobUrl | False | URL | Please provide video file URL, with or without SAS, which is hosted in an Azure storage blob, videoFileAzureBlobUrl and audioFileAzureBlobUrl are conflict, only one of them are required. |
+   | --audioFileAzureBlobUrl | False | URL | Please provide audio file URL, with or without SAS, which is hosted in an Azure storage blob, videoFileAzureBlobUrl and audioFileAzureBlobUrl are conflict, only one of them are required. |
    | --webvttFileAzureBlobUrl | False | URL | Please provide the WebVTT file URL, with or without SAS, which is hosted in an Azure storage blob. It is optional for the first iteration of the translation but required from the second iteration. |
    | --webvttFileKind | False | TargetLocaleSubtitle/SourceLocaleSubtitle/MetadataJson | Please specify the kind of WebVTT file with a value of TargetLocaleSubtitle, SourceLocaleSubtitle, or MetadataJson. |
    | --subtitleMaxCharCountPerSegment | False | 100 | Please specify the maximum display character count per segment for the subtitles. |
    | --speakerCount | False | 1 | Please specify the speaker count of the video. |
    | --exportSubtitleInVideo | False | False | Please indicate whether to export subtitles in the video. |
+   | --ttsCustomLexiconFileUrl | False | URL | Translate with TTS custom lexicon for TTS synthesis, provide the custom lexicon file with URL, ttsCustomLexiconFileUrl and ttsCustomLexiconFileIdInAudioContentCreation are conflict, only one of them are required. |
+   | --ttsCustomLexiconFileIdInAudioContentCreation | False | URL | Translate with TTS custom lexicon for TTS synthesis, provide the custom lexicon file with file ID in Audio Content Creation, ttsCustomLexiconFileUrl and ttsCustomLexiconFileIdInAudioContentCreation are conflict, only one of them are required. |
+   | --enableVideoSpeedAdjustment | False | True | This parameter allows for the adjustment of video playback speed to ensure better alignment with translated audio. When enabled, the API can slow down or speed up the video to match the timing of the translated audio, providing a more synchronized and seamless viewing experience. |
+   | --enableOcrCorrectionFromSubtitle | False | True | Indicate whether allow the API to correct the speech recognition (SR) results using the subtitles from the original video file. By leveraging the existing subtitles, the API can enhance the accuracy of the transcribed text, ensuring that the final output is more precise and reliable. |
+   | --exportTargetLocaleAdvancedSubtitleFile | False | True | This parameter, when enabled, allows the API to export subtitles in the Advanced SubStation Alpha format. The subtitle file can specify font styles and colors, which helps in addressing character display issues in certain target locales such as Arabic (Ar), Japanese (Ja), Korean (Ko), and Chinese (Ch). By using this parameter, you can ensure that the subtitles are visually appealing and correctly rendered across different languages and regions. |
+   | --subtitlePrimaryRgbaColor | False | #EBA205 | This parameter specifies the primary color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component, 00 means fully opaque, and FF means fully transparent. For example, EBA205 or #EBA205 would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal. If not specified, it will use default white color. |
+   | --subtitleOutlineRgbaColor | False | #EBA205 | This parameter specifies the outline color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component, 00 means fully opaque, and FF means fully transparent. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal. |
+   | --subtitleFontSize | False | 16 | This parameter specifies the font size of subtitles in the video translation output between 5 and 30. If not specified, it will use the language dependent default value. |
+   | --enableEmotionalPlatformVoice | False | Auto/Enable/Disable | This parameter specifies whether to enable emotion for platform voice. By default, the server determines whether to apply emotion based on the target locale to optimize quality. If not specified, the API will automatically decide whether to enable emotional expression on the server side. |
+   | --adjustWebvttAlignment | False | True/False | Starting from API version 2026-03-01, this parameter controls whether the system automatically adjusts WebVTT segment alignment in the WebVTT file provided by the customer. For API version 2026-03-01 and later, the default value of this parameter is true. For API versions 2025-05-20 and before, if not specified, the WebVTT segment alignment will not be changed to preserve backward compatibility. If you want to ensure that WebVTT alignment remains unchanged, please explicitly set this parameter to false. |
+   | --subtitleVerticalMargin | False | 10 | Subtitle vertical margin must be between 0 and 200. Default value is 10. |
+   | --adjustBackgroundVolumeMultiplier | False | 0.6 | Adjust the background volume based on the maximum volume with this multiplier factor. The value range is (0, 1], the suggested value is 0.6 if you want to adjust the background volume. If not specified or set to 0, the original background audio volume will be kept unchanged. |
+   | --pushResultToAzureStorageBlobDirUrl | False | URL | Push result to Azure storage blob directory URL. When specified, the translated output files will be automatically uploaded to this Azure Blob Storage location. |
+   | --pushResultToAzureStorageBlobManagedIdentityClientId | False | GUID | User-assigned managed identity client ID for accessing the Azure storage blob specified in pushResultToAzureStorageBlobDirUrl. If not specified, system-assigned managed identity will be used. |
+   | --use24kPromptAudio | False | False | Recommended: Do not set this parameter unless you have specific requirements. The default behavior is optimized for most customers. When this parameter is set to true, the service uses a higher sample rate (24 kHz) prompt audio for voice prompting. If this parameter is not specified or is set to false, the service continues to use 16 kHz prompt audio by default, which generally provides better overall synthesis quality. |
+   | --enableLipSync | False | False | Indicate whether to enable lip sync. If not provided, the default value is false to disable the lip sync. |
+   | --inputFileSourceKind | False | AzureStorageBlobManagedIdentity | Specifies the type of source for the input media file. If set to AzureStorageBlobManagedIdentity, the input media file is expected to be stored in Azure Blob Storage and accessed using a managed identity. |
+   | --inputFileAzureStorageBlobManagedIdentityClientId | False | GUID | Provide the Azure Active Directory client ID of the managed identity for accessing Azure Blob Storage. If this client ID is not specified, the system-assigned managed identity will be used by default. |
 
-## Below arguments are only available after API version: 2025-05-20
-| Argument | Description |
-| --- | --- |
-| --source_locale | Support optional for auto detect |
-| --audio_file_blob_url | Support translate audio file |  
-| --tts_custom_lexicon_file_url | Translate with TTS custom lexicon for TTS synthesis, provide the custom lexicon file with URL, ttsCustomLexiconFileUrl and ttsCustomLexiconFileIdInAudioContentCreation are conflict, only one of them are required. |
-|  --tts_custom_lexicon_file_id_in_audio_content_creation | Translate with TTS custom lexicon for TTS synthesis, provide the custom lexicon file with file ID in Audio Content Creation, ttsCustomLexiconFileUrl and ttsCustomLexiconFileIdInAudioContentCreation are conflict, only one of them are required. |
-| --enable_video_speed_adjustment | This parameter allows for the adjustment of video playback speed to ensure better alignment with translated audio. When enabled, the API can slow down or speed up the video to match the timing of the translated audio, providing a more synchronized and seamless viewing experience. |
-| --enable_ocr_correction_from_subtitle | Indicate whether allow the API to correct the speech recognition (SR) results using the subtitles from the original video file. By leveraging the existing subtitles, the API can enhance the accuracy of the transcribed text, ensuring that the final output is more precise and reliable. |
-| --export_target_locale_advanced_subtitle_file | This parameter, when enabled, allows the API to export subtitles in the Advanced SubStation Alpha format. The subtitle file can specify font styles and colors, which helps in addressing character display issues in certain target locales such as Arabic (Ar), Japanese (Ja), Korean (Ko), and Chinese (Ch). By using this parameter, you can ensure that the subtitles are visually appealing and correctly rendered across different languages and regions. |
-| --subtitle_primary_color | This parameter specifies the primary color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal. |
-| --subtitle_outline_color | This parameter specifies the outline color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal. |
-| --subtitle_font_size | This parameter specifies the font size of subtitles in the video translation output. |
-
-# Argument definitions
 ## Supported regions
    https://learn.microsoft.com/azure/ai-services/speech-service/regions
 
    Use region identifier for the region argument.
 
 ## Supported API versions:
+* 2026-03-01
+* 2025-05-20
 * 2024-05-20-preview
 
 ## Supported VoiceKind

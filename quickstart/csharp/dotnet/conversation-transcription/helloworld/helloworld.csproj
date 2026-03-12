@@ -101,7 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CognitiveServices.Speech">
-      <Version>1.47.0</Version>
+      <Version>1.48.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.1</Version>

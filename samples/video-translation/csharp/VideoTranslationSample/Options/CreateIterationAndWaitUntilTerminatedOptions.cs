@@ -17,8 +17,21 @@ public partial class CreateIterationAndWaitUntilTerminatedOptions : BaseOptions
     [Option("translationId", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.TranslationId)]
     public string TranslationId { get; set; }
 
-    [Option("iterationId", Required = true, HelpText = VideoTranslationPublicConst.ArgumentDescription.IterationId)]
+    [Option("iterationId", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.IterationId)]
     public string IterationId { get; set; }
+
+    public string IterationIdOrNew
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(this.IterationId))
+            {
+                return this.IterationId;
+            }
+
+            return Guid.NewGuid().ToString();
+        }
+    }
 
     [Option("iterationName", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.IterationName)]
     public string IterationName { get; set; }
@@ -38,7 +51,10 @@ public partial class CreateIterationAndWaitUntilTerminatedOptions : BaseOptions
     [Option("webvttFileAzureBlobUrl", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.WebvttFileAzureBlobUrl)]
     public Uri WebvttFileAzureBlobUrl { get; set; }
 
-    [Option("webvttFileKind", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.WebvttFileKind)]
+    [Option("webvttFileKind",
+        Required = false,
+        Default = WebvttFileKind.MetadataJson,
+        HelpText = VideoTranslationPublicConst.ArgumentDescription.WebvttFileKind)]
     public WebvttFileKind WebvttFileKind { get; set; }
 
     [Option("ttsCustomLexiconFileUrl", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.TtsCustomLexiconFileUrl)]
@@ -64,6 +80,28 @@ public partial class CreateIterationAndWaitUntilTerminatedOptions : BaseOptions
 
     [Option("enableEmotionalPlatformVoice", Required = false, HelpText = VideoTranslationPublicConst.ArgumentDescription.EnableEmotionalPlatformVoice)]
     public EnableEmotionalPlatformVoiceKind EnableEmotionalPlatformVoice { get; set; }
+
+    [Option(
+        "adjustWebvttAlignment",
+        Required = false,
+        HelpText = VideoTranslationPublicConst.ArgumentDescription.AdjustWebvttAlignment)]
+    public bool? AdjustWebvttAlignment { get; set; }
+
+    [Option(
+        "subtitleVerticalMargin",
+        Required = false,
+        Default = VideoTranslationPublicConst.DefaultValue.SubtitleVerticalMargin,
+        HelpText = "Subtitle vertical margin must be between 0 and 200(default 10).")]
+    public int SubtitleVerticalMargin { get; set; }
+
+    [Option("adjustBackgroundVolumeMultiplier", Required = false, Default = 0, HelpText = "Adjust the background volume based on the maximum volume with this multiplier factor. The value range is (0, 1], the suggested value is 0.6 if you want to adjust the background volume. If not specified, the original background audio volume will be kept unchanged.")]
+    public double AdjustBackgroundVolumeMultiplier { get; set; }
+
+    [Option("pushResultToAzureStorageBlobDirUrl", Required = false, HelpText = "Push result to Azure storage blob dir URL.")]
+    public Uri PushResultToAzureStorageBlobDirUrl { get; set; }
+
+    [Option("pushResultToAzureStorageBlobManagedIdentityClientId", Required = false, HelpText = "User-assigned managed identity client ID.")]
+    public Guid PushResultToAzureStorageBlobManagedIdentityClientId { get; set; }
 
     public WebvttFile WebvttFile
     {

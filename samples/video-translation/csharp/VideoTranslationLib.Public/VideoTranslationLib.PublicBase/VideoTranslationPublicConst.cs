@@ -7,19 +7,24 @@ namespace Microsoft.SpeechServices.CommonLib;
 
 public static class VideoTranslationPublicConst
 {
+    public static class DefaultValue
+    {
+        public const string IterationId = "default";
+
+        public const int SubtitleFontSize = 16;
+
+        public const int SubtitleVerticalMargin = 10;
+
+        // If not specified, API will not adjust background volume.
+        // If specify this property, the recommended default value is 0.6.
+        public const double AdjustBackgroundVolumeMultiplier = 0.6;
+    }
+
     public static class ArgumentDescription
     {
-        public const string Region = "specify speech resource region.";
-
-        public const string SubscriptionKey = "Specify speech resource key for authentication by key, then don't need specify customDomainName.";
-
-        public const string CustomDomainName = "Specify custom domain name part of the endpoint: https://[customDomainName].cognitiveservices.azure.com/, then don't need specify subscriptionKey.";
-
-        public const string ManagedIdentityClientId = "Specify managed identity client ID, only optional available when specify custom domain.";
-
-        public const string ApiVersion = "Specify API version.";
-
         public const string TranslationId = "Specify translation ID.";
+
+        public const string AdjustBackgroundVolumeMultiplier = "Adjust the background volume based on the maximum volume with this multiplier factor. The value range is (0, 1], the suggested value is 0.6 if you want to adjust the background volume. If not specified, the original background audio volume will be kept unchanged.";
 
         public const string SourceLocale = "The source locale of the video file. Locale code follows BCP-47. You can find the text to speech locale list here https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts , if not specified, the source locale will be auto-detected from the video file, the auto detect is only supported after version 2025-05-20.";
         public const string TargetLocale = "The target locale of the translation. Locale code follows BCP-47. You can find the text to speech locale list here https://learn.microsoft.com/azure/ai-services/speech-service/language-support?tabs=tts.";
@@ -45,10 +50,12 @@ public static class VideoTranslationPublicConst
         public const string EnableVideoSpeedAdjustment = "This parameter allows for the adjustment of video playback speed to ensure better alignment with translated audio. When enabled, the API can slow down or speed up the video to match the timing of the translated audio, providing a more synchronized and seamless viewing experience, if not specified, video speed will not be adjusted.";
         public const string EnableOcrCorrectionFromSubtitle = "Indicate whether to allow the API to correct the speech recognition (SR) results using the subtitles from the original video file. By leveraging the existing subtitles, the API can enhance the accuracy of the transcribed text, ensuring that the final output is more precise and reliable, if not specified, translation will not do correction from OCR subtitle.";
 
-        public const string SubtitlePrimaryRgbaColor = "This parameter specifies the primary color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal, if not specified, it will use default white color.";
-        public const string SubtitleOutlineRgbaColor = "This parameter specifies the outline color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal, if not specified, it will use default black color.";
+        public const string SubtitlePrimaryRgbaColor = "This parameter specifies the primary color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component, 00 means fully opaque, and FF means fully transparent. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal, if not specified, it will use default white color.";
+        public const string SubtitleOutlineRgbaColor = "This parameter specifies the outline color of the subtitles in the video translation output. The value should be provided in the format <rr><gg><bb>, #<rr><gg><bb>, <rr><gg><bb><aa> or #<rr><gg><bb><aa>, where <rr> represents the red component of the color, <gg> represents the green component, <bb> represents the blue component, <aa> represents the alpha component, 00 means fully opaque, and FF means fully transparent. For example, EBA205 or #EBA205  would set the subtitle color to a specific shade of yellow. This parameter allows for customization of subtitle appearance to enhance readability and visual appeal, if not specified, it will use default black color.";
         public const string SubtitleFontSize = "This parameter specifies the font size of subtitles in the video translation output between 5 and 30, if not specified, it will use the language dependent default value.";
         public const string EnableEmotionalPlatformVoice = "This parameter specifies whether to enable emotion for platform voice. By default, the server determines whether to apply emotion based on the target locale to optimize quality. If not specified, the API will automatically decide whether to enable emotional expression on the server side.";
+        public const string AdjustWebvttAlignment = "Starting from API version 2026-03-01, we introduce a new parameter during iteration creation: Iteration.Input.AdjustWebvttAlignment. This parameter controls whether the system automatically adjusts WebVTT segment alignment in the WebVTT file provided by the customer. For API version 2026-03-01 and later, the default value of this parameter is true, as we recommend enabling automatic alignment adjustment in most scenarios. Please note that if this parameter is not explicitly specified, the default behavior differs depending on the API version: API versions 2025-05-20 and before. If adjustWebvttAlignment is not specified, the WebVTT segment alignment will not be changed, to preserve backward compatibility. API version 2026-03-01 and later. If adjustWebvttAlignment is not specified, the WebVTT segment alignment will be adjusted by default. Therefore, if you want to ensure that WebVTT alignment remains unchanged, please explicitly set this parameter to false when creating the iteration";
+        public const string Use24kPromptAudio = "Recommended: Do not set this parameter unless you have specific requirements. The default behavior is optimized for most customers. When this parameter is set to true, the service uses a higher sample rate (24 kHz) prompt audio for voice prompting. If this parameter is not specified or is set to false, the service continues to use 16 kHz prompt audio by default, which generally provides better overall synthesis quality.";
 
         public static class EventHub
         {

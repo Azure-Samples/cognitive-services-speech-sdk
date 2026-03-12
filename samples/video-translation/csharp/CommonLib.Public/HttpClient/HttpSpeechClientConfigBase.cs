@@ -45,6 +45,6 @@ public abstract class HttpSpeechClientConfigBase : HttpClientConfigBase
 
     public string SubscriptionKey { get; set; }
 
-    // For speech resource, OAuth only avaible when CustomDomainName enabled.
+    // For speech resource, OAuth only available when CustomDomainName enabled.
     public string CustomDomainName { get; set; }
 }

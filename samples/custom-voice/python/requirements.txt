@@ -1,0 +1,3 @@
+requests
+azure-cognitiveservices-speech
+urllib3>=2.6.3

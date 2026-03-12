@@ -10,8 +10,10 @@
 #if defined(_WIN32)
 #ifdef INTENTRECOGNIZER_EXPORTS
 #define INTENT_API __declspec(dllexport)
-#else
+#elif defined(INTENTRECOGNIZER_DLL)
 #define INTENT_API __declspec(dllimport)
+#else
+#define INTENT_API
 #endif
 #else
 #define INTENT_API

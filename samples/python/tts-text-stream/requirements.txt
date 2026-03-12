@@ -1,2 +1,4 @@
 azure-cognitiveservices-speech
 openai>=1.76.0
+urllib3>=2.6.3
+azure-core>=1.38.0
