@@ -267,6 +267,11 @@ namespace Avatar.Controllers
                             },
                             format = new
                             {
+                                resolution = new
+                                {
+                                    width = 1920,
+                                    height = 1080
+                                },
                                 crop = new
                                 {
                                     topLeft = new
@@ -280,7 +285,7 @@ namespace Avatar.Controllers
                                         y = 1080
                                     }
                                 },
-                                bitrate = 1000000
+                                bitrate = isPhotoAvatar ? 500000 : 1000000
                             },
                             talkingAvatar = new
                             {
