@@ -247,7 +247,7 @@ window.startSession = () => {
     avatarConfig.useBuiltInVoice = document.getElementById('useBuiltInVoice').checked 
     avatarConfig.backgroundColor = document.getElementById('backgroundColor').value
     avatarConfig.backgroundImage = document.getElementById('backgroundImageUrl').value
-    avatarConfig.scene = new SpeechSDK.AvatarSceneConfig(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
+    avatarConfig.scene = new SpeechSDK.AvatarSceneConfig(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6)
 
     document.getElementById('startSession').disabled = true
     
