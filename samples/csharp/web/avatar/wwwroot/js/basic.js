@@ -434,14 +434,14 @@ window.resetPhotoAvatarScene = () => {
     document.getElementById('sliderRotationX').value = 0.0
     document.getElementById('sliderRotationY').value = 0.0
     document.getElementById('sliderRotationZ').value = 0.0
-    document.getElementById('sliderAmplitude').value = 100.0
+    document.getElementById('sliderAmplitude').value = 60.0
     document.getElementById('valueZoom').textContent = '100%'
     document.getElementById('valuePositionX').textContent = '0%'
     document.getElementById('valuePositionY').textContent = '0%'
     document.getElementById('valueRotationX').textContent = '0 deg'
     document.getElementById('valueRotationY').textContent = '0 deg'
     document.getElementById('valueRotationZ').textContent = '0 deg'
-    document.getElementById('valueAmplitude').textContent = '100%'
+    document.getElementById('valueAmplitude').textContent = '60%'
 }
 
 window.onbeforeunload = () => {

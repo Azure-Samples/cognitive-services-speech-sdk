@@ -309,7 +309,7 @@ namespace Avatar.Controllers
                                     rotationX = 0.0,
                                     rotationY = 0.0,
                                     rotationZ = 0.0,
-                                    amplitude = 1.0
+                                    amplitude = 0.6
                                 }
                             }
                         }
