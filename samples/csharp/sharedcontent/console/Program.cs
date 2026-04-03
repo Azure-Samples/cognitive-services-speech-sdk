@@ -36,6 +36,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 6. Standalone language detection samples.");
                 Console.WriteLine(" 7. Speech recognition with Microsoft Audio Stack (MAS) samples.");
                 Console.WriteLine(" 8. Diagnostics logging samples (trace logging).");
+                Console.WriteLine(" 9. Conversation transcription samples (speaker diarization).");
                 Console.WriteLine("");
                 Console.Write(mainPrompt);
 
@@ -75,6 +76,10 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D8:
                     case ConsoleKey.NumPad8:
                         SpeechDiagnosticsLogging();
+                        break;
+                    case ConsoleKey.D9:
+                    case ConsoleKey.NumPad9:
+                        ConversationTranscription();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -676,6 +681,65 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D5:
                     case ConsoleKey.NumPad5:
                         SpeechRecognitionSamples.ContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAnglesSpecified().Wait();
+                        break;
+                    case ConsoleKey.D0:
+                    case ConsoleKey.NumPad0:
+                        Console.WriteLine(back);
+                        sampleWasRun = false;
+                        break;
+                    default:
+                        Console.WriteLine(invalid);
+                        sampleWasRun = false;
+                        break;
+                }
+
+                if (sampleWasRun) Console.WriteLine(done);
+
+            } while (x.Key != ConsoleKey.D0);
+        }
+
+        //
+        // Conversation transcription (speaker diarization) samples
+        //
+        private static void ConversationTranscription()
+        {
+            ConsoleKeyInfo x;
+
+            do
+            {
+                Console.WriteLine("");
+                Console.WriteLine(" Speech SDK - Conversation Transcription Samples (Speaker Diarization)");
+                Console.WriteLine("");
+                Console.WriteLine(choose);
+                Console.WriteLine("");
+                Console.WriteLine(" 1. Conversation transcription from microphone.");
+                Console.WriteLine(" 2. Conversation transcription from WAV file.");
+                Console.WriteLine(" 3. Conversation transcription with specified language.");
+                Console.WriteLine(" 4. Conversation transcription with push audio stream.");
+                Console.WriteLine("");
+                Console.Write(prompt);
+
+                x = Console.ReadKey();
+                Console.WriteLine("\n");
+                bool sampleWasRun = true;
+
+                switch (x.Key)
+                {
+                    case ConsoleKey.D1:
+                    case ConsoleKey.NumPad1:
+                        ConversationTranscriptionSamples.TranscribeConversationFromMicrophoneAsync().Wait();
+                        break;
+                    case ConsoleKey.D2:
+                    case ConsoleKey.NumPad2:
+                        ConversationTranscriptionSamples.TranscribeConversationFromFileAsync().Wait();
+                        break;
+                    case ConsoleKey.D3:
+                    case ConsoleKey.NumPad3:
+                        ConversationTranscriptionSamples.TranscribeConversationWithLanguageAsync().Wait();
+                        break;
+                    case ConsoleKey.D4:
+                    case ConsoleKey.NumPad4:
+                        ConversationTranscriptionSamples.TranscribeConversationWithPushStreamAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
