@@ -53,6 +53,10 @@ class Model(StatusObject):
             properties = json_dict['properties']
             if 'failureReason' in properties:
                 self.failure_reason = properties['failureReason']
+            if 'failedTrainingsets' in properties:
+                self.failed_trainingsets = properties['failedTrainingsets']
+            if 'secondaryLocales' in properties:
+                self.secondary_locales = properties['secondaryLocales']
 
     # get all models in project
     # when project_id is None, get all models in current speech account

@@ -1,11 +1,11 @@
 
 # Examples to use Custom Voice
 
-The Custom Voice API (Preview) is designed to create professional voice and personal voice. The functionality is exposed through a REST API and is easy to access from many programming languages.
+The Custom Voice API is designed to create professional voice and personal voice. The functionality is exposed through a REST API and is easy to access from many programming languages.
 
 For a detailed explanation see the [custom neural voice documentation](https://learn.microsoft.com/azure/ai-services/speech-service/custom-neural-voice) and the `README.md` in the language specific subdirectories.
 
-REST API doc: [custom voice REST API](https://learn.microsoft.com/rest/api/aiservices/speechapi/operation-groups?view=rest-aiservices-speechapi-2024-02-01-preview).
+REST API doc: [custom voice REST API](https://learn.microsoft.com/rest/api/aiservices/speechapi/operation-groups?view=rest-aiservices-speechapi-2026-01-01).
 
 Available samples:
 

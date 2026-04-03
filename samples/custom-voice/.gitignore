@@ -1,0 +1,2 @@
+# Environment files containing secrets - do not commit
+.env

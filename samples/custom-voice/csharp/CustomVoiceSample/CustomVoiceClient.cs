@@ -11,7 +11,7 @@ using Newtonsoft.Json.Converters;
 public class CustomVoiceClient
 {
     private const string OcpApimSubscriptionKey = "Ocp-Apim-Subscription-Key";
-    private const string ApiVersion = "api-version=2023-12-01-preview";
+    private const string ApiVersion = "api-version=2026-01-01";
 
     private readonly string baseUri;
 

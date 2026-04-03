@@ -9,45 +9,79 @@ import uuid
 import os
 import datetime
 import logging
+from dotenv import load_dotenv
 try:
     import customvoice
 except ImportError:
-    print('Pleae copy folder https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/'
+    print('Please copy folder https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/'
           'samples/custom-voice/python/customvoice and keep the same folder structure as github.')
     quit()
 
+# Settings are loaded from environment variables.
+# Copy ../.env.sample to ../.env and fill in your values.
+# See ../.env.sample for the full list of available variables.
+# Load .env file from parent directory (samples/custom-voice/.env).
+# This also works when running from the command line: python professional_voice_sample.py
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_SCRIPT_DIR, '..', '.env'))
+
+# Speech resource
+REGION = os.environ.get('SPEECH_REGION', 'eastus')
+SPEECH_KEY = os.environ.get('SPEECH_KEY', '')
+
+# Voice consent file path
+CONSENT_FILE_PATH = os.environ.get('CONSENT_FILE_PATH', os.path.join(_SCRIPT_DIR, 'TestData', 'VoiceTalentVerbalStatement.wav'))
+
+# Training data folder (audio .wav + script .txt)
+TRAINING_DATA_FOLDER = os.environ.get('TRAINING_DATA_FOLDER', '')
+
+# Azure Blob Storage
+BLOB_ACCOUNT_URL = os.environ.get('BLOB_ACCOUNT_URL', '')
+BLOB_ACCOUNT_KEY = os.environ.get('BLOB_ACCOUNT_KEY', '')
+BLOB_CONTAINER_NAME = os.environ.get('BLOB_CONTAINER_NAME', 'voicedata')
+
+# Voice settings
+VOICE_TALENT_NAME = os.environ.get('VOICE_TALENT_NAME', 'Sample Voice Actor')
+COMPANY_NAME = os.environ.get('COMPANY_NAME', 'Contoso')
+VOICE_NAME = os.environ.get('VOICE_NAME', 'SampleVoiceNeural')
+RECIPE_KIND = os.environ.get('RECIPE_KIND', 'Default')
+
+# Resource IDs (can keep defaults)
+LOCALE = os.environ.get('LOCALE', 'en-us')
+PROJECT_ID = os.environ.get('PROFESSIONAL_PROJECT_ID', 'professional-voice-project-1')
+CONSENT_ID = os.environ.get('PROFESSIONAL_CONSENT_ID', 'professional-voice-consent-1')
+TRAINING_SET_ID = os.environ.get('PROFESSIONAL_TRAINING_SET_ID', 'professional-voice-trainingset-1')
+MODEL_ID = os.environ.get('PROFESSIONAL_MODEL_ID', 'professional-voice-model-1')
+ENDPOINT_ID = os.environ.get('PROFESSIONAL_ENDPOINT_ID', str(uuid.uuid4()))
+
+# ==================================================================================
+
 
 def create_project():
-    project = customvoice.Project.create(config, project_id, customvoice.ProjectKind.ProfessionalVoice)
+    project = customvoice.Project.create(config, PROJECT_ID, customvoice.ProjectKind.ProfessionalVoice, locale=LOCALE)
     print('Project created. project id: %s' % project.id)
 
 
 def upload_consent():
-    # Custom Voice training need voice consent file with template below.
-    # I [voice talent name] am aware that recordings of my voice will be used by [company name] to create
-    # and use a synthetic version of my voice.
-    # You can find sample consent file here
-    # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/VoiceTalentVerbalStatement.wav
-    consent_file_path = r'D:\CNV_API\VoiceTalentVerbalStatement.wav'
-    # Custom voice consent file path with voice actor details and consent information
-    consent = customvoice.Consent.create(config, project_id, consent_id,
-                                         voice_talent_name='Sample Voice Actor',
-                                         company_name='Contoso',
-                                         audio_file_path=consent_file_path,
-                                         locale='en-us')
+    consent = customvoice.Consent.create(config, PROJECT_ID, CONSENT_ID,
+                                         voice_talent_name=VOICE_TALENT_NAME,
+                                         company_name=COMPANY_NAME,
+                                         audio_file_path=CONSENT_FILE_PATH,
+                                         locale=LOCALE)
     print('Consent created. consent id: %s' % consent.id)
 
 
-# Upload wave and script file in local_folder to Azure blob under https://blob_url/container_name/blob_prefix/
-# If container_name doesnt exists, will create a new container.
-def upload_training_set_to_blob(blob_url: str, blob_key: str, container_name: str, blob_prefix: str, local_folder: str):
-    message = 'Uploading data from ' + local_folder + ' to https://' + blob_url + '/' + container_name + '/' + blob_prefix
+# Upload wave and script file in local_folder to Azure blob under blob_url/container_name/blob_prefix/
+# If container_name doesn't exist, will create a new container.
+def upload_training_set_to_blob(local_folder: str):
+    blob_prefix = str(uuid.uuid4()) + '/'
+    message = 'Uploading data from %s to %s/%s/%s' % (local_folder, BLOB_ACCOUNT_URL, BLOB_CONTAINER_NAME, blob_prefix)
     print(message)
 
     from azure.storage.blob import BlobServiceClient, generate_container_sas, ContainerSasPermissions
     from azure.core.exceptions import ResourceNotFoundError
-    blob_service_client = BlobServiceClient(account_url=blob_url, credential=blob_key)
-    container_client = blob_service_client.get_container_client(container_name)
+    blob_service_client = BlobServiceClient(account_url=BLOB_ACCOUNT_URL, credential=BLOB_ACCOUNT_KEY)
+    container_client = blob_service_client.get_container_client(BLOB_CONTAINER_NAME)
     try:
         container_client.get_container_properties()
     except ResourceNotFoundError:
@@ -66,42 +100,30 @@ def upload_training_set_to_blob(blob_url: str, blob_key: str, container_name: st
                 permission=ContainerSasPermissions(read=True, list=True),
                 expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
             )
-    return sas_token
+    return blob_prefix, sas_token
 
 
 def upload_training_set():
     # Create training set
-    training_set = customvoice.TrainingSet.create(config, project_id, training_set_id, locale='en-US')
+    training_set = customvoice.TrainingSet.create(config, PROJECT_ID, TRAINING_SET_ID, locale=LOCALE)
 
-    # Upload wave and script from local_folder to Azure blob.
-    blob_url = 'contoso.blob.core.windows.net'
-    blob_key = '<put your Azure Storage accout key here>'
-    container_name = 'voicedata'
-    blob_prefix = str(uuid.uuid4()) + '/'
-    print('blob_prefix: %s' % blob_prefix)
-    # You can find sample script and audio file here.
-    # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/SampleScript.txt
-    # https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/SampleAudios.zip
-    # Pleae unzip audio file. Put both audio and script file in foler below.
-    local_folder = r'D:\CNV_API\SampleAudios'
-    sas_token = upload_training_set_to_blob(blob_url, blob_key, container_name, blob_prefix, local_folder)
-    print('sas_token: %s' % sas_token)
+    # Upload wave and script from local folder to Azure blob.
+    blob_prefix, sas_token = upload_training_set_to_blob(TRAINING_DATA_FOLDER)
 
-    # Upload data to training et
-    containeUrlWithSAS = "https://" + blob_url + '/' + container_name + '?' + sas_token
-    print('containeUrl: %s' % containeUrlWithSAS)
-    audios = customvoice.AzureBlobContentSource(containeUrlWithSAS, blob_prefix, ['.wav'])
-    scripts = customvoice.AzureBlobContentSource(containeUrlWithSAS, blob_prefix, ['.txt'])
-    customvoice.TrainingSet.upload_data(config, training_set_id, kind=customvoice.DatasetKind.AudioAndScript,
+    # Upload data to training set
+    container_url_with_sas = BLOB_ACCOUNT_URL + '/' + BLOB_CONTAINER_NAME + '?' + sas_token
+    audios = customvoice.AzureBlobContentSource(container_url_with_sas, blob_prefix, ['.wav'])
+    scripts = customvoice.AzureBlobContentSource(container_url_with_sas, blob_prefix, ['.txt'])
+    customvoice.TrainingSet.upload_data(config, TRAINING_SET_ID, kind=customvoice.DatasetKind.AudioAndScript,
                                         audios=audios, scripts=scripts)
 
     # Wait for training set ready
-    print('Training set is processing in server. It takes around 5 minutes to 1 hour depend on data size.')
-    training_set = customvoice.TrainingSet.get(config, training_set_id)
+    print('Training set is processing in server. It takes around 5 minutes to 1 hour depending on data size.')
+    training_set = customvoice.TrainingSet.get(config, TRAINING_SET_ID)
     while training_set.status != customvoice.Status.Succeeded and training_set.status != customvoice.Status.Failed:
         print('.', end='', flush=True)
         sleep(10)
-        training_set = customvoice.TrainingSet.get(config, training_set_id)
+        training_set = customvoice.TrainingSet.get(config, TRAINING_SET_ID)
     if training_set.status == customvoice.Status.Failed:
         print('Training set failed')
         raise Exception
@@ -110,11 +132,11 @@ def upload_training_set():
 
 
 def train_model():
-    model = customvoice.Model.create(config, project_id, model_id,
-                                     voice_name='SampleVoiceNeural',
-                                     recipe_kind=customvoice.RecipeKind.Default.name,
-                                     consent_id=consent_id,
-                                     training_set_id=training_set_id)
+    model = customvoice.Model.create(config, PROJECT_ID, MODEL_ID,
+                                     voice_name=VOICE_NAME,
+                                     recipe_kind=RECIPE_KIND,
+                                     consent_id=CONSENT_ID,
+                                     training_set_id=TRAINING_SET_ID)
     print('Started model training. model id: %s' % model.id)
 
     # Wait for model ready
@@ -122,7 +144,7 @@ def train_model():
     while model.status != customvoice.Status.Succeeded and model.status != customvoice.Status.Failed:
         print('.', end='', flush=True)
         sleep(300)
-        model = customvoice.Model.get(config, model_id)
+        model = customvoice.Model.get(config, MODEL_ID)
     if model.status == customvoice.Status.Failed:
         print('Model training failed. Failure reason: %s' % model.failure_reason)
         raise Exception
@@ -131,15 +153,15 @@ def train_model():
 
 
 def deploy_model():
-    endpoint = customvoice.Endpoint.create(config, project_id, endpoint_id, model_id)
-    print('Start deploying model . endpoint id: %s' % endpoint.id)
+    endpoint = customvoice.Endpoint.create(config, PROJECT_ID, ENDPOINT_ID, MODEL_ID)
+    print('Start deploying model. endpoint id: %s' % endpoint.id)
 
     # Wait for model deploy
     print('Deploying model. It takes around 1 to 5 minutes.')
     while endpoint.status != customvoice.Status.Succeeded and endpoint.status != customvoice.Status.Failed:
         print('.', end='', flush=True)
         sleep(10)
-        endpoint = customvoice.Endpoint.get(config, endpoint_id)
+        endpoint = customvoice.Endpoint.get(config, ENDPOINT_ID)
     if endpoint.status == customvoice.Status.Failed:
         print('Model deploy failed')
         raise Exception
@@ -147,39 +169,48 @@ def deploy_model():
         print('Model deploy succeeded')
 
 
-region = 'eastus'  # eastus, westeurope, southeastasia
-key = '<put your speech accout key here>'
+if __name__ == '__main__':
+    # Validate required settings
+    missing = []
+    if not SPEECH_KEY:
+        missing.append('SPEECH_KEY')
+    if not TRAINING_DATA_FOLDER:
+        missing.append('TRAINING_DATA_FOLDER')
+    if not BLOB_ACCOUNT_URL:
+        missing.append('BLOB_ACCOUNT_URL')
+    if not BLOB_ACCOUNT_KEY:
+        missing.append('BLOB_ACCOUNT_KEY')
+    if missing:
+        print('ERROR: The following required environment variables are not set:')
+        for var in missing:
+            print('  - %s' % var)
+        print()
+        print('Please copy .env.sample to .env and fill in your values, or set them in .vscode/launch.json.')
+        quit()
 
-logging.basicConfig(filename="customvoice.log",
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    filemode='w')
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+    logging.basicConfig(filename="customvoice.log",
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                        filemode='w')
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
 
-config = customvoice.Config(key, region, logger)
+    config = customvoice.Config(SPEECH_KEY, REGION, logger)
 
+    # step 1: create project
+    create_project()
 
-project_id = 'professional-voice-project-1'
-consent_id = 'professional-voice-consent-1'
-training_set_id = 'professional-voice-trainingset-1'
-model_id = 'professional-voice-model-1'
-endpoint_id = str(uuid.uuid4())
+    # step 2: upload consent file
+    upload_consent()
 
-# step 1: creat project
-create_project()
+    # step 3: upload training set
+    upload_training_set()
 
-# step 2: upload consent file
-upload_consent()
+    # step 4: train model
+    train_model()
 
-# step 3: upload training set
-upload_training_set()
+    # step 5: deploy model
+    deploy_model()
 
-# step 4: train model
-train_model()
-
-# step 5: deploy model
-deploy_model()
-
-# step 6: synthesis with endpoint
-# You can find sample code here
-# https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/d806061d8ab00e9729128839bf5051c4871ab35f/samples/python/console/speech_synthesis_sample.py#LL119C1-L119C43
+    # step 6: synthesis with endpoint
+    # You can find sample code here
+    # https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/d806061d8ab00e9729128839bf5051c4871ab35f/samples/python/console/speech_synthesis_sample.py#LL119C1-L119C43
