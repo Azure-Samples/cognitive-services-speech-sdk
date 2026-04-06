@@ -35,7 +35,7 @@ except ImportError:
 
 # Set up the subscription info for the Speech Service
 # Replace with your own subscription key and endpoint.
-speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+speech_key, speech_endpoint = "YourSubscriptionKey", "YourServiceEndpoint"
 
 # Set up the parameters for Azure OAI Services
 oai_resource_name = "YourOaiResourceName"

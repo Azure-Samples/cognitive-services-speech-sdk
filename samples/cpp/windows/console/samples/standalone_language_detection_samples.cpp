@@ -21,7 +21,7 @@ void StandaloneLanguageDetectionWithMicrophone()
     // <StandaloneLanguageDetectionWithMicrophone>
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Define the set of spoken languages that will need to be identified
     auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromLanguages({ "de-DE", "zh-CN", "en-US"});
@@ -69,7 +69,7 @@ void StandaloneLanguageDetectionWithFileInput()
     // <StandaloneLanguageDetectionWithFileInput>
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Request detailed output format.
     config->SetOutputFormat(OutputFormat::Detailed);
@@ -124,7 +124,7 @@ void StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput()
     // <StandaloneLanguageDetectionInContinuousModeWithMultiLingualFileInput>
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
     // Please refer to the documentation of Language ID for more information.

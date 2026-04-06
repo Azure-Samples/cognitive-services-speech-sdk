@@ -25,7 +25,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = new SpeechRecognizer(config))
@@ -71,7 +71,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "de-DE";
@@ -147,7 +147,7 @@ namespace MicrosoftSpeechSDKSamples
             // <recognitionCustomized>
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
             // Replace with the CRIS endpoint id of your customized model.
             var sourceLanguageConfig = SourceLanguageConfig.FromLanguage("en-US", "YourEndpointId");
 
@@ -195,7 +195,7 @@ namespace MicrosoftSpeechSDKSamples
             // <recognitionContinuousWithFile>
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -268,7 +268,7 @@ namespace MicrosoftSpeechSDKSamples
             // <recognitionWithCompressedInputPullStreamAudio>
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -345,7 +345,7 @@ namespace MicrosoftSpeechSDKSamples
             // <recognitionWithCompressedInputPushStreamAudio>
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -435,7 +435,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -507,7 +507,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -598,7 +598,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates an instance of a keyword recognition model. Update this to
             // point to the location of your keyword recognition model.
@@ -687,7 +687,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -763,7 +763,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates an instance of AutoDetectSourceLanguageConfig with the 2 source language candidates
             // Currently this feature only supports 2 different language candidates
@@ -849,7 +849,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var sourceLanguageConfigs = new SourceLanguageConfig[]
             {
@@ -968,7 +968,7 @@ namespace MicrosoftSpeechSDKSamples
         private static async Task<RecognitionResult> RecognizeOnceAsyncInternal(string key, string region)
         {
             RecognitionResult recognitionResult = null;
-            var config = SpeechConfig.FromEndpoint(new Uri($"https://{region}.api.cognitive.microsoft.com"), key);
+            var config = SpeechConfig.FromEndpoint(new Uri(region), key);
 
             // Creates a speech recognizer using file as audio input.
             using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
@@ -1006,7 +1006,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -1082,7 +1082,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates an instance of audio config using a microphone as audio input and with audio processing options specified.
             // All default enhancements from Microsoft Audio Stack are enabled and preset microphone array geometry is specified
@@ -1135,7 +1135,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -1227,7 +1227,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates an instance of audio config with pull stream as audio input and with audio processing options specified.
             // All default enhancements from Microsoft Audio Stack are enabled except acoustic echo cancellation and preset
@@ -1278,7 +1278,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             var stopRecognition = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 

@@ -28,7 +28,7 @@ namespace MicrosoftSpeechSDKSamples
             // <languageDetectionWithMicrophone>
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a source language recognizer using microphone as audio input.
             using (var recognizer = new SourceLanguageRecognizer(config, autoDetectSourceLanguageConfig))
@@ -74,7 +74,7 @@ namespace MicrosoftSpeechSDKSamples
             // <languageDetectionInAccuracyWithFile>
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech recognizer using file as audio input.
             // Replace with your own audio file name.
@@ -123,7 +123,7 @@ namespace MicrosoftSpeechSDKSamples
             // <languageDetectionContinuousWithFile>
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Set the mode of input language detection to either "AtStart" (the default) or "Continuous".
             // Please refer to the documentation of Language ID for more information.

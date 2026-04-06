@@ -21,8 +21,7 @@ See the [accompanying article](https://docs.microsoft.com/azure/cognitive-servic
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * Edit the `Main` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
-  * Replace the string `YourEndpointUrl` with the endpoint URL of your subscription.
-    For example, replace with `https://westus.api.cognitive.microsoft.com/` if your service region is `westus`.
+  * Replace the string `YourEndpointUrl` with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section (e.g., `https://my-speech-resource.cognitiveservices.azure.com/`).
 * Save the modified file.
 
 ## Run the sample

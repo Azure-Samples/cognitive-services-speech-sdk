@@ -129,7 +129,7 @@ for **Release** configuration.
 * To run the application without debugging, press Ctrl+F5 or use **Debug** \> **Start Without Debugging**.
 * If you didn't update `Settings.cs` or want to override built-in settings:
   * Open menu **Debug** \> **samples Debug Properties**, go to **Environment variables**.
-  * Enter *Name* (like `CLOUD_SPEECH_SERVICE_ENDPOINT`) and *Value* (for example, `https://westcentralus.api.cognitive.microsoft.com/`) for each setting as listed in [build instructions](#build-the-sample). Do not use quotation marks around the values.
+  * Enter *Name* (like `CLOUD_SPEECH_SERVICE_ENDPOINT`) and *Value* (for example, `https://my-speech-resource.cognitiveservices.azure.com/`) for each setting as listed in [build instructions](#build-the-sample). Do not use quotation marks around the values.
 
 **Note:** On **macOS** there is no access to the microphone from Visual Studio by default, and you must use the command-line for speech recognition to work.
 
@@ -156,13 +156,13 @@ If you didn't update `Settings.cs` or want to override built-in settings, set en
 
 **Windows**
 ```sh
-set CLOUD_SPEECH_SERVICE_ENDPOINT=https://westcentralus.api.cognitive.microsoft.com/
+set CLOUD_SPEECH_SERVICE_ENDPOINT=https://my-speech-resource.cognitiveservices.azure.com/
 ```
 **Note:** On Windows, do **not** use quotation marks around the values of environment variables (even if there are spaces in them). Otherwise the quotation marks will end up as part of the setting values which will not work.
 
 **Linux, macOS**
 ```sh
-export CLOUD_SPEECH_SERVICE_ENDPOINT="https://westcentralus.api.cognitive.microsoft.com/"
+export CLOUD_SPEECH_SERVICE_ENDPOINT="https://my-speech-resource.cognitiveservices.azure.com/"
 ```
 **Note:** On Linux and macOS, use quotation marks around the values of environment variables set on the command line as shown in the example. Otherwise strings with spaces (like embedded speech model/voice names) will be cut short.
 

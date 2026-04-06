@@ -46,8 +46,7 @@ Follow these steps if you prefer not to use VS Code.
   * If you are running on Linux ARM64 (64-bit), change the line `TARGET_PLATFORM:=x64` to `TARGET_PLATFORM:=arm64`.
 * Edit the `helloworld.cpp` source:
   * Replace the variable `subscriptionKey` with your own subscription key.
-  * Replace the variable `endpoint` with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
-    For example, the endpoint might look like `https://westus.api.cognitive.microsoft.com` if your resource is in the West US region. Make sure the endpoint in your code matches the one in your Azure resource, otherwise you'll get a 401 unauthorized access error.
+  * Replace the variable `endpoint` with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section (e.g., `https://my-speech-resource.cognitiveservices.azure.com`).
 
 ### Build the sample
 Run the command `make` to build the sample. This will generate the `helloworld` executable.

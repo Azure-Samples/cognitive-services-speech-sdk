@@ -135,7 +135,7 @@ Sample settings:
   * Add environment settings (`name=value`) as listed in [build instructions](#build-the-sample).
     For example:
     ```sh
-    CLOUD_SPEECH_SERVICE_ENDPOINT=https://westcentralus.api.cognitive.microsoft.com/
+    CLOUD_SPEECH_SERVICE_ENDPOINT=https://my-speech-resource.cognitiveservices.azure.com/
     ```
     Notes:
     * Make sure that each `name=value` appears on a separate line.
@@ -167,13 +167,13 @@ If you didn't update `settings.cpp` or want to override built-in settings, set e
 
 **Windows**
 ```sh
-set CLOUD_SPEECH_SERVICE_ENDPOINT=https://westcentralus.api.cognitive.microsoft.com/
+set CLOUD_SPEECH_SERVICE_ENDPOINT=https://my-speech-resource.cognitiveservices.azure.com/
 ```
 **Note:** On Windows, do **not** use quotation marks around the values of environment variables (even if there are spaces in them). Otherwise the quotation marks will end up as part of the setting values which will not work.
 
 **Linux, macOS**
 ```sh
-export CLOUD_SPEECH_SERVICE_ENDPOINT="https://westcentralus.api.cognitive.microsoft.com/"
+export CLOUD_SPEECH_SERVICE_ENDPOINT="https://my-speech-resource.cognitiveservices.azure.com/"
 ```
 **Note:** On Linux and macOS, use quotation marks around the values of environment variables set on the command line as shown in the example. Otherwise strings with spaces (like embedded speech model/voice names) will be cut short.
 

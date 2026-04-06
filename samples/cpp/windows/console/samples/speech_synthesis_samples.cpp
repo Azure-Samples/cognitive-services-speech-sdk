@@ -17,7 +17,7 @@ void SpeechSynthesisToSpeaker()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer using the default speaker as audio output. The default spoken language is "en-us".
     auto synthesizer = SpeechSynthesizer::FromConfig(config);
@@ -61,7 +61,7 @@ void SpeechSynthesisWithLanguage()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Sets the synthesis language.
     // The full list of supported language can be found here:
@@ -111,7 +111,7 @@ void SpeechSynthesisWithVoice()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Configure the voice for speech synthesis. For a complete list of available voices,
     // visit https://aka.ms/speech/voices/neural
@@ -169,7 +169,7 @@ void SpeechSynthesisUsingCustomVoice()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
     // Replace with the endpoint id of your Custom Voice model.
     config->SetEndpointId("YourEndpointId");
     // Replace with the voice name of your Custom Voice model.
@@ -217,7 +217,7 @@ void SpeechSynthesisToWaveFile()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer using file as audio output.
     // Replace with your own audio file name.
@@ -264,7 +264,7 @@ void SpeechSynthesisToMp3File()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Sets the synthesis output format.
     // The full list of supported format can be found here:
@@ -316,7 +316,7 @@ void SpeechSynthesisToPullAudioOutputStream()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates an audio out stream.
     auto stream = AudioOutputStream::CreatePullStream();
@@ -439,7 +439,7 @@ void SpeechSynthesisToPushAudioOutputStream()
 
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates an instance of the callback class inherited from PushAudioOutputStreamCallback.
     auto callback = std::make_shared<PushAudioOutputStreamSampleCallback>();
@@ -492,7 +492,7 @@ void SpeechSynthesisToResult()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer with a null output stream.
     // This means the audio output data will not be written to any stream.
@@ -540,7 +540,7 @@ void SpeechSynthesisToAudioDataStream()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer with a null output stream.
     // This means the audio output data will not be written to any stream.
@@ -609,7 +609,7 @@ void SpeechSynthesisEvents()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer with a null output stream.
     // This means the audio output data will not be written to any stream.
@@ -675,7 +675,7 @@ void SpeechSynthesisWordBoundaryEvent()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer with a null output stream.
     // This means the audio output data will not be written to any stream.
@@ -734,7 +734,7 @@ void SpeechSynthesisVisemeEvent()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer with a null output stream.
     // This means the audio output data will not be written to any stream.
@@ -791,7 +791,7 @@ void SpeechSynthesisBookmarkEvent()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer with a null output stream.
     // This means the audio output data will not be written to any stream.
@@ -840,7 +840,7 @@ void SpeechSynthesisWithSourceLanguageAutoDetection()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    const auto speechConfig = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    const auto speechConfig = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Currently this feature only supports open languages range
     const auto autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig::FromOpenRange();
@@ -882,7 +882,7 @@ void SpeechSynthesisGetAvailableVoices()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    const auto speechConfig = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    const auto speechConfig = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech synthesizer.
     auto synthesizer = SpeechSynthesizer::FromConfig(speechConfig, nullptr);

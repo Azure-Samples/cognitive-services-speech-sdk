@@ -5,23 +5,21 @@
 // <code>
 package speechsdk.quickstart;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.UUID;
 
-import com.microsoft.cognitiveservices.speech.*;
-import com.microsoft.cognitiveservices.speech.audio.*;
-import com.microsoft.cognitiveservices.speech.transcription.*;
+import com.microsoft.cognitiveservices.speech.CancellationReason;
+import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
+import com.microsoft.cognitiveservices.speech.audio.AudioInputStream;
+import com.microsoft.cognitiveservices.speech.audio.AudioStreamFormat;
+import com.microsoft.cognitiveservices.speech.audio.PushAudioInputStream;
+import com.microsoft.cognitiveservices.speech.transcription.ConversationTranscriber;
 
 /**
  * Quickstart: transcribe conversations using the Speech SDK for Java.
@@ -35,7 +33,7 @@ public class Main {
 
         // Replace below with your own subscription key
         String subscriptionKey = "YourSubscriptionKey";
-        // Replace below with your own endpoint URL (e.g., "https://centralus.api.cognitive.microsoft.com/")
+        // Replace below with your own endpoint URL (e.g., "https://my-speech-resource.cognitiveservices.azure.com")
         String endpointUrl = "YourEndpointUrl";
 
         // Choose transcription from file or microphone by commenting and uncommenting the following function calls.

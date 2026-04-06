@@ -5,16 +5,20 @@
 // <code>
 package speechsdk.quickstart;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import org.json.JSONObject;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
-import com.microsoft.cognitiveservices.speech.*;
-import com.microsoft.cognitiveservices.speech.translation.*;
+
+import org.json.JSONObject;
+
+import com.microsoft.cognitiveservices.speech.CancellationReason;
+import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.translation.SpeechTranslationConfig;
+import com.microsoft.cognitiveservices.speech.translation.TranslationRecognizer;
 
 public class Main {
 
@@ -26,11 +30,9 @@ public class Main {
 
         // Replace with your own subscription key.
         String speechSubscriptionKey = jsonObject.getString("SubscriptionKey");
-        // Replace below with your own service region (e.g., "westus").
-        String speechServiceRegion = jsonObject.getString("ServiceRegion");
 
-        // Replace below with your own endpoint URL (e.g., "https://westus.api.cognitive.microsoft.com")
-        String endpointUrl = "https://" + speechServiceRegion + ".api.cognitive.microsoft.com/";
+        // Replace below with your own endpoint URL (e.g., "https://my-speech-resource.cognitiveservices.azure.com")
+        String endpointUrl = "YourServiceEndpoint";
         
         // Creates an instance of a translation recognizer using speech translation configuration with specified
         // endpoint and subscription key and microphone as default audio input.

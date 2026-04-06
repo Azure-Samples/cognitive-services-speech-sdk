@@ -36,7 +36,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and endpoint.
-speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+speech_key, speech_endpoint = "YourSubscriptionKey", "YourServiceEndpoint"
 
 # Set up endpoint with custom domain. This is required when using AAD token credential to authenticate.
 # For details on setting up a custom domain with private links, see:

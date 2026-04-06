@@ -22,7 +22,7 @@ except ImportError:
 
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and endpoint.
-speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+speech_key, speech_endpoint = "YourSubscriptionKey", "YourServiceEndpoint"
 
 
 def speech_synthesis_to_speaker() -> None:

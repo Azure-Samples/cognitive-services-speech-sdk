@@ -15,7 +15,7 @@ void synthesizeSpeech()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Configure the voice for speech synthesis. For a complete list of available voices,
     // visit https://aka.ms/speech/voices/neural

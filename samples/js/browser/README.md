@@ -49,6 +49,7 @@ app.get('/api/get-speech-token', async (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     const speechKey = process.env.SPEECH_KEY;
     const speechRegion = process.env.SPEECH_REGION;
+    const speechEndpoint = process.env.SPEECH_ENDPOINT;
 
     if (speechKey === 'paste-your-speech-key-here' || speechRegion === 'paste-your-speech-region-here') {
         res.status(400).send('You forgot to add your speech key or region to the .env file.');
@@ -61,7 +62,7 @@ app.get('/api/get-speech-token', async (req, res, next) => {
         };
 
         try {
-            const tokenResponse = await axios.post(`https://${speechRegion}.api.cognitive.microsoft.com/sts/v1.0/issueToken`, null, headers);
+            const tokenResponse = await axios.post(`${speechEndpoint}/sts/v1.0/issueToken`, null, headers);
             res.send({ token: tokenResponse.data, region: speechRegion });
         } catch (err) {
             res.status(401).send('There was an error authorizing your speech key.');
@@ -70,7 +71,7 @@ app.get('/api/get-speech-token', async (req, res, next) => {
 });
 ```
 
-In the request, you create a `Ocp-Apim-Subscription-Key` header, and pass your speech key as the value. Then you make a request to the **issueToken** endpoint for your region, and an authorization token is returned. In a production application, this endpoint returning the token should be *restricted by additional user authentication* whenever possible. 
+In the request, you create a `Ocp-Apim-Subscription-Key` header, and pass your speech key as the value. Then you make a request to the **issueToken** endpoint for your Speech resource, and an authorization token is returned. In a production application, this endpoint returning the token should be *restricted by additional user authentication* whenever possible. 
 
 On the front-end, both `public/index.html` and `public/synthesis.html` contain code (using the axios library) to retrieve the token from the server. 
 

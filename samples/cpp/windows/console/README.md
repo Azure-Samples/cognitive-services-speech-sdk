@@ -22,7 +22,7 @@ This sample demonstrates various forms of speech recognition, conversation trans
 * To tailor the sample to your configuration, use search and replace across the whole solution (for example, via **Edit** \> **Find and Replace** \> **Quick Replace**) to update the following strings:
 
   * `YourSubscriptionKey`: replace with your subscription key.
-  * `https://YourServiceRegion.api.cognitive.microsoft.com`: replace with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
+  * `YourServiceEndpoint`: replace with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section (e.g., `https://my-speech-resource.cognitiveservices.azure.com`).
   * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
   * The following settings apply to keyword-triggered recognition:
     * `YourKeywordRecognitionModelFile.table`: replace with the location of your keyword recognition model file.

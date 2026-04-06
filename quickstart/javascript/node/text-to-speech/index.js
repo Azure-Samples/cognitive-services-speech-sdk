@@ -8,10 +8,10 @@ import * as sdk from "microsoft-cognitiveservices-speech-sdk";
 import * as readline from "readline";
 
 // replace with your own subscription key,
-// service endpoint (e.g., "https://westus.api.cognitive.microsoft.com"), and
+// service endpoint (e.g., "https://my-speech-resource.cognitiveservices.azure.com"), and
 // the name of the file you save the synthesized audio.
 var subscriptionKey = "YourSubscriptionKey";
-var endpoint = "YourServiceEndpoint"; // e.g., "https://westus.api.cognitive.microsoft.com"
+var endpoint = "YourServiceEndpoint"; // e.g., "https://my-speech-resource.cognitiveservices.azure.com"
 var filename = "YourAudioFile.wav";
 
 // we are done with the setup

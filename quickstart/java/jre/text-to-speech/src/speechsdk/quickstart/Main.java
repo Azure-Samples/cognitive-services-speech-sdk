@@ -7,7 +7,13 @@ package speechsdk.quickstart;
 
 import java.util.Scanner;
 import java.util.concurrent.Future;
-import com.microsoft.cognitiveservices.speech.*;
+
+import com.microsoft.cognitiveservices.speech.CancellationReason;
+import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesisResult;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesizer;
 
 /**
  * Quickstart: synthesize speech using the Speech SDK for Java.
@@ -21,7 +27,7 @@ public class Main {
 
         // Replace below with your own subscription key
         String speechSubscriptionKey = "YourSubscriptionKey";
-        // Replace below with your own endpoint URL (e.g., "https://westus.api.cognitive.microsoft.com/")
+        // Replace below with your own endpoint URL (e.g., "https://my-speech-resource.cognitiveservices.azure.com")
         String endpointUrl = "YourEndpointUrl";
 
         // Creates an instance of a speech synthesizer using speech configuration with

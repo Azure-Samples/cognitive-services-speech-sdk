@@ -21,8 +21,7 @@ const char* getEnvVar(const char* var) {
 
 void recognizeSpeech() {
     const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
-    const char* serviceRegion = getEnvVar("SERVICE_REGION");
-    auto endpoint = "https://" + string(serviceRegion) + ".api.cognitive.microsoft.com";
+    auto endpoint = getEnvVar("SPEECH_ENDPOINT"); // e.g., "https://my-speech-resource.cognitiveservices.azure.com"
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
     auto config = SpeechConfig::FromEndpoint(endpoint.c_str(), subscriptionKey);

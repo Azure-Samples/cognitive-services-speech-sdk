@@ -25,7 +25,7 @@ void PronunciationAssessmentWithMicrophone()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
     // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
@@ -144,7 +144,7 @@ void PronunciationAssessmentWithStream()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Read audio data from file. In real scenario this can be from memory or network
     std::ifstream file("whatstheweatherlike.wav", std::ios::binary | std::ios::ate);
@@ -178,7 +178,7 @@ void PronunciationAssessmentConfiguredWithJson()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech recognizer from an audio file
     auto audioConfig = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");

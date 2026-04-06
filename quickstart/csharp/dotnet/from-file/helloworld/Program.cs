@@ -14,7 +14,7 @@ namespace helloworld
     {
         public static async Task RecognizeSpeechAsync()
         {
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             using (var audioConfig = AudioConfig.FromWavFileInput(@"YourFilePath"))
             using (var recognizer = new SpeechRecognizer(config, audioConfig))
