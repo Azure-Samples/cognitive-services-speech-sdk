@@ -223,11 +223,15 @@ app.post('/api/connectAvatar', async (req, res) => {
                         }
                     },
                     format: {
+                        resolution: {
+                            width: 1920,
+                            height: 1080
+                        },
                         crop: {
                             topLeft: { x: video_crop ? 600 : 0, y: 0 },
                             bottomRight: { x: video_crop ? 1320 : 1920, y: 1080 }
                         },
-                        bitrate: 1000000,
+                        bitrate: is_photo_avatar ? 500000 : 1000000,
                         codec: 'H264'
                     },
                     talkingAvatar: {
@@ -247,7 +251,7 @@ app.post('/api/connectAvatar', async (req, res) => {
                             rotationX: 0.0,
                             rotationY: 0.0,
                             rotationZ: 0.0,
-                            amplitude: 1.0
+                            amplitude: 0.6
                         }
                     }
                 }

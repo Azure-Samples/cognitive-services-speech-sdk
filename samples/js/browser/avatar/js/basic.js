@@ -221,17 +221,17 @@ window.startSession = () => {
     }
 
     let speechSynthesisConfig
-    let isCustomAvatar = document.getElementById('customizedAvatar').checked
-    let isCustomVoice = document.getElementById('customVoiceEndpointId').value !== ''
-    let endpoint_route = isCustomAvatar || isCustomVoice ? 'voice' : 'tts'
     if (privateEndpointEnabled) {
-        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}/${endpoint_route}/cognitiveservices/websocket/v1?enableTalkingAvatar=true`), cogSvcSubKey)
+        speechSynthesisConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(`wss://${privateEndpoint}`), cogSvcSubKey)
     } else {
         speechSynthesisConfig = SpeechSDK.SpeechConfig.fromSubscription(cogSvcSubKey, cogSvcRegion)
     }
     speechSynthesisConfig.endpointId = document.getElementById('customVoiceEndpointId').value
 
     const videoFormat = new SpeechSDK.AvatarVideoFormat()
+    videoFormat.width = 1920
+    videoFormat.height = 1080
+    videoFormat.bitrate = document.getElementById('photoAvatar').checked ? 500000 : 1000000
     let videoCropTopLeftX = document.getElementById('videoCrop').checked ? 600 : 0
     let videoCropBottomRightX = document.getElementById('videoCrop').checked ? 1320 : 1920
     videoFormat.setCropRange(new SpeechSDK.Coordinate(videoCropTopLeftX, 0), new SpeechSDK.Coordinate(videoCropBottomRightX, 1080));
@@ -244,7 +244,7 @@ window.startSession = () => {
     avatarConfig.useBuiltInVoice = document.getElementById('useBuiltInVoice').checked 
     avatarConfig.backgroundColor = document.getElementById('backgroundColor').value
     avatarConfig.backgroundImage = document.getElementById('backgroundImageUrl').value
-    avatarConfig.scene = new SpeechSDK.AvatarSceneConfig(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0)
+    avatarConfig.scene = new SpeechSDK.AvatarSceneConfig(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.6)
 
     document.getElementById('startSession').disabled = true
     
@@ -412,12 +412,12 @@ window.resetPhotoAvatarScene = () => {
     document.getElementById('sliderRotationX').value = 0.0
     document.getElementById('sliderRotationY').value = 0.0
     document.getElementById('sliderRotationZ').value = 0.0
-    document.getElementById('sliderAmplitude').value = 100.0
+    document.getElementById('sliderAmplitude').value = 60.0
     document.getElementById('valueZoom').textContent = '100%'
     document.getElementById('valuePositionX').textContent = '0%'
     document.getElementById('valuePositionY').textContent = '0%'
     document.getElementById('valueRotationX').textContent = '0 deg'
     document.getElementById('valueRotationY').textContent = '0 deg'
     document.getElementById('valueRotationZ').textContent = '0 deg'
-    document.getElementById('valueAmplitude').textContent = '100%'
+    document.getElementById('valueAmplitude').textContent = '60%'
 }

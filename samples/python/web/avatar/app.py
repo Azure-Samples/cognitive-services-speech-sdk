@@ -220,6 +220,10 @@ def connectAvatar() -> Response:
                         },
                     },
                     'format': {
+                        'resolution': {
+                            'width': 1920,
+                            'height': 1080
+                        },
                         'crop': {
                             'topLeft': {
                                 'x': 600 if video_crop.lower() == 'true' else 0,
@@ -230,7 +234,7 @@ def connectAvatar() -> Response:
                                 'y': 1080
                             }
                         },
-                        'bitrate': 1000000
+                        'bitrate': 500000 if is_photo_avatar else 1000000
                     },
                     'talkingAvatar': {
                         'photoAvatarBaseModel': 'vasa-1' if is_photo_avatar else '',
@@ -250,7 +254,7 @@ def connectAvatar() -> Response:
                             'rotationX': 0.0,
                             'rotationY': 0.0,
                             'rotationZ': 0.0,
-                            'amplitude': 1.0
+                            'amplitude': 0.6
                         }
                     }
                 }
