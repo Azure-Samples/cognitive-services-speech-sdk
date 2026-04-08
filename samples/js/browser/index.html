@@ -205,34 +205,6 @@
     <!-- Speech SDK REFERENCE -->
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
-    <!-- Speech Speech SDK Authorization token -->
-    <script>
-        // Note: Replace the URL with a valid endpoint to retrieve
-        //       authorization tokens for your subscription.
-
-        // An authorization token is a more secure method to authenticate for a browser deployment as
-        // it allows the subscription keys to be kept secure on a server and a 10 minute use token to be
-        // handed out to clients from an endpoint that can be protected from unauthorized access.
-        var authorizationEndpoint = "token.php";
-
-        function RequestAuthorizationToken() {
-            if (authorizationEndpoint) {
-                var a = new XMLHttpRequest();
-                a.open("GET", authorizationEndpoint);
-                a.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                a.send("");
-                a.onload = function () {
-                    var token = JSON.parse(atob(this.responseText.split(".")[1]));
-                    regionOptions.value = token.region;
-                    authorizationToken = this.responseText;
-                    key.disabled = true;
-                    key.value = "using authorization token (hit F5 to refresh)";
-                    console.log("Got an authorization token: " + token);
-                }
-            }
-        }
-    </script>
-
     <!-- Speech SDK presence check -->
     <script>
         // On document load resolve the Speech SDK dependency
@@ -249,7 +221,7 @@
     <script>
         var SpeechSDK;
         var phraseDiv, statusDiv;
-        var key, authorizationToken, phrases;
+        var key, phrases;
         var regionOptions;
         var languageOptions, formatOption, filePicker, microphoneSources;
         var useDetailedResults;
@@ -439,20 +411,8 @@
 
             enumerateMicrophones();
 
-            Initialize(async function (speechSdk) {
+            Initialize(function (speechSdk) {
                 SpeechSDK = speechSdk;
-
-                // in case we have a function for getting an authorization token, call it.
-                if (typeof RequestAuthorizationToken === "function") {
-                    const renewToken = async () => {
-                        await RequestAuthorizationToken();
-                        if(!!reco) {
-                            reco.authorizationToken = authorizationToken;
-                        }
-                        setTimeout(renewToken, 600000);
-                    };
-                    await renewToken();
-                }
             });
         });
     </script>
@@ -477,9 +437,7 @@
 
         function getSpeechConfig(sdkConfigType) {
             var speechConfig;
-            if (authorizationToken) {
-                speechConfig = sdkConfigType.fromAuthorizationToken(authorizationToken, regionOptions.value);
-            } else if (!key.value) {
+            if (!key.value) {
                 alert("Please enter your Cognitive Services Speech subscription key!");
                 return undefined;
             } else {
