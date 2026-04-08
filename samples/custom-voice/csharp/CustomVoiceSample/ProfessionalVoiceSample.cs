@@ -201,7 +201,9 @@ public class ProfessionalVoiceSample
             consentId,
             trainingSetId,
             voiceName,
-            Enum.Parse<RecipeKind>(recipeKind),
+            Enum.TryParse<RecipeKind>(recipeKind, ignoreCase: true, out var parsedRecipeKind)
+                ? parsedRecipeKind
+                : throw new ArgumentException($"Invalid recipe kind '{recipeKind}'. Valid values: {string.Join(", ", Enum.GetNames<RecipeKind>())}"),
             locale: null,
             properties: null).ConfigureAwait(false);
 

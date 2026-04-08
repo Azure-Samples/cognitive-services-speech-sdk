@@ -126,7 +126,7 @@ class TrainingSet(StatusObject):
         if audios is None:
             raise ValueError("'audios' is None")
         if (kind == DatasetKind.AudioAndScript or kind == DatasetKind.LongAudio) and scripts is None:
-            raise scripts("'audios' is None")
+            raise ValueError("'scripts' is None")
 
         headers = {'Ocp-Apim-Subscription-Key': config.key}
         api_url = config.url_prefix + 'trainingsets/' + training_set_id + ':upload' + '?' + config.api_version

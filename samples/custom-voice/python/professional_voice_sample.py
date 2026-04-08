@@ -96,7 +96,7 @@ def upload_training_set_to_blob(local_folder: str):
     sas_token = generate_container_sas(
                 container_client.account_name,
                 container_client.container_name,
-                account_key=container_client.credential.account_key,
+                account_key=BLOB_ACCOUNT_KEY,
                 permission=ContainerSasPermissions(read=True, list=True),
                 expiry=datetime.datetime.utcnow() + datetime.timedelta(hours=1)
             )
