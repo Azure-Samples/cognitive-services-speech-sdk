@@ -8,17 +8,36 @@ using Microsoft.CognitiveServices.Speech.Audio;
 
 public class PersonalVoiceSample
 {
-    // Update your key and region here.
-    private const string subscriptionKey = "YourSubscriptionKey";
-    private const string region = "YourServiceRegion. E.g., 'eastus'";  // # eastus, westeurope, southeastasia, westus2, eastasia
+    // Settings are loaded from environment variables.
+    // You can set them in a .env file (copy .env.sample to .env and fill in your values),
+    // or configure them in .vscode/launch.json "envFile" / "env" settings.
+
+    private static readonly string subscriptionKey = Environment.GetEnvironmentVariable("SPEECH_KEY") ?? "";
+    private static readonly string region = Environment.GetEnvironmentVariable("SPEECH_REGION") ?? "eastus";
+
+    // Voice settings
+    private static readonly string voiceTalentName = Environment.GetEnvironmentVariable("VOICE_TALENT_NAME") ?? "Sample Voice Actor";
+    private static readonly string companyName = Environment.GetEnvironmentVariable("COMPANY_NAME") ?? "Contoso";
+    private static readonly string locale = Environment.GetEnvironmentVariable("LOCALE") ?? "en-US";
+    private static readonly string consentFilePath = Environment.GetEnvironmentVariable("CONSENT_FILE_PATH") ?? "TestData/VoiceTalentVerbalStatement.wav";
+    private static readonly string audioFolder = Environment.GetEnvironmentVariable("AUDIO_FOLDER") ?? "TestData/PersonalVoice";
+
+    // Resource IDs (can keep defaults)
+    private static readonly string projectId = Environment.GetEnvironmentVariable("PERSONAL_PROJECT_ID") ?? "personal-voice-project-1";
+    private static readonly string consentId = Environment.GetEnvironmentVariable("PERSONAL_CONSENT_ID") ?? "personal-voice-consent-1";
+    private static readonly string personalVoiceId = Environment.GetEnvironmentVariable("PERSONAL_VOICE_ID") ?? "personal-voice-1";
 
     public static async Task PersonalVoiceTestAsync()
     {
-        var client = new CustomVoiceClient(region, subscriptionKey);
+        if (string.IsNullOrEmpty(subscriptionKey))
+        {
+            Console.WriteLine("ERROR: SPEECH_KEY environment variable is not set.");
+            Console.WriteLine();
+            Console.WriteLine("Please copy .env.sample to .env and fill in your values, or set them in .vscode/launch.json.");
+            return;
+        }
 
-        var projectId = "personal-voice-project-1";
-        var consentId = "personal-voice-consent-1";
-        var personalVoiceId = "personal-voice-1";
+        var client = new CustomVoiceClient(region, subscriptionKey);
 
         try
         {
@@ -32,10 +51,10 @@ public class PersonalVoiceSample
             var consent = await client.UploadConsentAsync(
                 consentId,
                 projectId,
-                "Sample Voice Actor",
-                "Contoso",
-                "en-US",
-                "TestData/VoiceTalentVerbalStatement.wav");
+                voiceTalentName,
+                companyName,
+                locale,
+                consentFilePath);
             Console.WriteLine($"Consent created. consent id: {consent.Id}");
 
             // Step 3: Create a personal voice
@@ -44,7 +63,7 @@ public class PersonalVoiceSample
                 projectId,
                 "personal voice create test",
                 consentId,
-                "TestData/PersonalVoice").ConfigureAwait(false);
+                audioFolder).ConfigureAwait(false);
 
             // Step 4: speak test
             var outputFilePath = "personalvoice_output.wav";

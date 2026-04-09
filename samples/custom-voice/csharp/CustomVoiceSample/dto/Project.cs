@@ -17,6 +17,8 @@ public class Project
 
     public ProjectKind Kind { get; set; }
 
+    public string Locale { get; set; }
+
     /// <summary>
     /// The time-stamp when the object was created.
     /// The time stamp is encoded as ISO 8601 date and time format
