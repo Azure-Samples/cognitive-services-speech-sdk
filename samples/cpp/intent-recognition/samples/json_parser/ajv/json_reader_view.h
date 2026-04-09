@@ -19,6 +19,15 @@ namespace ajv {
         JsonReaderView(std::string& json);
         ~JsonReaderView() = default;
 
+        JsonReaderView(const JsonReaderView& other)
+            : JsonView(other), m_readerRoot(InitCopyRoot(other)) {}
+
+        JsonReaderView(JsonReaderView&& other) noexcept
+            : JsonView(std::move(other)), m_readerRoot(InitCopyRoot(other)) {}
+
+        JsonReaderView& operator=(const JsonReaderView&) = delete;
+        JsonReaderView& operator=(JsonReaderView&&) = delete;
+
         const JsonView& View(int* item = nullptr) const { return m_readerRoot.View(item); }
 
         JsonReader Reader() const { return m_readerRoot; }
@@ -88,6 +97,13 @@ namespace ajv {
 
         JsonReader InitRoot(const char* json, size_t jsize);
         JsonReader ParsePtr(const char* json, size_t jsize);
+
+        JsonReader InitCopyRoot(const JsonReaderView& other)
+        {
+            int item = -1;
+            other.m_readerRoot.View(&item);
+            return JsonReader(*this, item);
+        }
 
     };
 
