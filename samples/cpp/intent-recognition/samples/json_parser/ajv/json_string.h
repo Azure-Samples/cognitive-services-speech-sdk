@@ -132,6 +132,10 @@ namespace ajv {
                                 *dest++ = Escape2Char(src[1]);
                                 src += 2;
                             }
+                            else
+                            {
+                                src++; // skip unrecognized escape backslash to avoid infinite loop
+                            }
                             continue;
                         }
 
