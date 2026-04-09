@@ -11,27 +11,63 @@ using Microsoft.CognitiveServices.Speech.Audio;
 
 public class ProfessionalVoiceSample
 {
-    // Update your key and region here.
-    private const string subscriptionKey = "YourSubscriptionKey";
-    private const string region = "YourServiceRegion. E.g., 'eastus'";
+    // Settings are loaded from environment variables.
+    // You can set them in a .env file (copy .env.sample to .env and fill in your values),
+    // or configure them in .vscode/launch.json "envFile" / "env" settings.
 
-    private const string projectId = "professional-voice-project-1";
-    private const string consentId = "professional-voice-consent-1";
-    private const string trainingSetId = "professional-voice-training-set-1";
-    private const string modelId = "professional-voice-model-1";
+    // Speech resource
+    private static readonly string subscriptionKey = Environment.GetEnvironmentVariable("SPEECH_KEY") ?? "";
+    private static readonly string region = Environment.GetEnvironmentVariable("SPEECH_REGION") ?? "eastus";
+
+    // Azure Blob Storage
+    private static readonly string blobAccountName = Environment.GetEnvironmentVariable("BLOB_ACCOUNT_NAME") ?? "";
+    private static readonly string blobAccountKey = Environment.GetEnvironmentVariable("BLOB_ACCOUNT_KEY") ?? "";
+    private static readonly string containerName = Environment.GetEnvironmentVariable("BLOB_CONTAINER_NAME") ?? "voicedata";
+    private static readonly string consentblobPrefix = Environment.GetEnvironmentVariable("BLOB_CONSENT_PREFIX") ?? "consents";
+    private static readonly string trainingDataBlobPrefix = Environment.GetEnvironmentVariable("BLOB_TRAINING_DATA_PREFIX") ?? "professionalvoice/trainingset";
+
+    // Local training data folder
+    private static readonly string localTrainingDataFolder = Environment.GetEnvironmentVariable("TRAINING_DATA_FOLDER") ?? "";
+
+    // Voice settings
+    private static readonly string voiceTalentName = Environment.GetEnvironmentVariable("VOICE_TALENT_NAME") ?? "Sample Voice Actor";
+    private static readonly string companyName = Environment.GetEnvironmentVariable("COMPANY_NAME") ?? "Contoso";
+    private static readonly string locale = Environment.GetEnvironmentVariable("LOCALE") ?? "en-US";
+    private static readonly string voiceName = Environment.GetEnvironmentVariable("VOICE_NAME") ?? "SampleVoiceNeural";
+    private static readonly string recipeKind = Environment.GetEnvironmentVariable("RECIPE_KIND") ?? "Default";
+    private static readonly string consentFilePath = Environment.GetEnvironmentVariable("CONSENT_FILE_PATH") ?? "TestData/VoiceTalentVerbalStatement.wav";
+
+    // Resource IDs (can keep defaults)
+    private static readonly string projectId = Environment.GetEnvironmentVariable("PROFESSIONAL_PROJECT_ID") ?? "professional-voice-project-1";
+    private static readonly string consentId = Environment.GetEnvironmentVariable("PROFESSIONAL_CONSENT_ID") ?? "professional-voice-consent-1";
+    private static readonly string trainingSetId = Environment.GetEnvironmentVariable("PROFESSIONAL_TRAINING_SET_ID") ?? "professional-voice-training-set-1";
+    private static readonly string modelId = Environment.GetEnvironmentVariable("PROFESSIONAL_MODEL_ID") ?? "professional-voice-model-1";
     private static Guid endpointId = Guid.NewGuid();
 
-    // Below are parameters for blob storage. You need to replace them with your own blob storage account information.
-    private const string blobAccountName = "YourBlobAccountName. E.g., 'voicetest'.";
-    private const string blobAccountKey = "YourBlobAccountKey";
-    private const string containerName = "YourContainerName.";
-    private const string consentblobPrefix = "YourBlobPrefix. E.g., consents";
-    private const string trainingDataBlobPrefix = "YourTrainingDataBlobPrefix. E.g., professionalvoice/trainingset";
-
-    private static CustomVoiceClient client = new CustomVoiceClient(region, subscriptionKey);
+    private static CustomVoiceClient client;
 
     public static async Task ProfessionalVoiceTestAsync()
     {
+        var missing = new List<string>();
+        if (string.IsNullOrEmpty(subscriptionKey)) missing.Add("SPEECH_KEY");
+        if (string.IsNullOrEmpty(blobAccountName)) missing.Add("BLOB_ACCOUNT_NAME");
+        if (string.IsNullOrEmpty(blobAccountKey)) missing.Add("BLOB_ACCOUNT_KEY");
+        if (string.IsNullOrEmpty(localTrainingDataFolder)) missing.Add("TRAINING_DATA_FOLDER");
+
+        if (missing.Count > 0)
+        {
+            Console.WriteLine("ERROR: The following required environment variables are not set:");
+            foreach (var name in missing)
+            {
+                Console.WriteLine($"  - {name}");
+            }
+            Console.WriteLine();
+            Console.WriteLine("Please copy .env.sample to .env and fill in your values, or set them in .vscode/launch.json.");
+            return;
+        }
+
+        client = new CustomVoiceClient(region, subscriptionKey);
+
         try
         {
             // Step 1: Create a project
@@ -58,7 +94,7 @@ public class ProfessionalVoiceSample
         }
         finally
         {
-            // Step 5: clean up
+            // Step 7: clean up
             Console.WriteLine("Uncomment below and Clean up resources if you don't need them.");
 
             // await client.DeleteEndpointAsync(endpointId).ConfigureAwait(false);
@@ -82,21 +118,21 @@ public class ProfessionalVoiceSample
 
     private static async Task<Consent> CreateConsentAsync()
     {
-        //   Step 1: Upload a consent audio file to blob storage
+        //   Upload consent audio file to blob storage
         var audioUrl = await UploadSingleFileIntoBlobAsync(
-            "TestData/VoiceTalentVerbalStatement.wav",
+            consentFilePath,
             blobAccountName,
             blobAccountKey,
             containerName,
             consentblobPrefix).ConfigureAwait(false);
 
-        //   Step 2: Create a consent
+        //   Create a consent
         var consent = await client.CreateConsentAsync(
             consentId,
             projectId,
-            "Sample Voice Actor",
-            "Contoso",
-            "en-US",
+            voiceTalentName,
+            companyName,
+            locale,
             audioUrl).ConfigureAwait(false);
         Console.WriteLine($"Consent created. consent id: {consent.Id}");
 
@@ -105,21 +141,15 @@ public class ProfessionalVoiceSample
 
     private static async Task<TrainingSet> UploadTrainingSetAsync()
     {
-        // You can find sample script and audio file here.
-        // https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/SampleScript.txt
-        // https://github.com/Azure-Samples/Cognitive-Speech-TTS/blob/master/CustomVoice/Sample%20Data/Individual%20utterances%20%2B%20matching%20script/SampleAudios.zip
-        //Pleae unzip audio file. Put both audio and script file in foler below.
-        var localTrainingDataFolder = "YourLocalTrainingDataFolder. E.g., C:\\trainingset";
-
-        //   Step 3.1: Create a training set
+        //   Create a training set
         var trainingSet = await client.CreateTrainingSetAsync(
             trainingSetId,
             projectId,
             "Test training set",
-            "en-US").ConfigureAwait(false);
+            locale).ConfigureAwait(false);
         Console.WriteLine($"Training set created. training set id: {trainingSet.Id}");
 
-        //   Step 3.2: Upload training data to blob storage
+        //   Upload training data to blob storage
         var trainingDataUrl = await UploadFolderIntoBlobAsync(
             localTrainingDataFolder,
             blobAccountName,
@@ -127,7 +157,7 @@ public class ProfessionalVoiceSample
             containerName,
             trainingDataBlobPrefix).ConfigureAwait(false);
 
-        //   Step 3.3: Add training data to the training set
+        //   Add training data to the training set
         var audios = new AzureBlobContentSource()
         {
             ContainerUrl = trainingDataUrl,
@@ -170,8 +200,10 @@ public class ProfessionalVoiceSample
             "Test model",
             consentId,
             trainingSetId,
-            "SampleVoiceNeural",
-            RecipeKind.Default,
+            voiceName,
+            Enum.TryParse<RecipeKind>(recipeKind, ignoreCase: true, out var parsedRecipeKind)
+                ? parsedRecipeKind
+                : throw new ArgumentException($"Invalid recipe kind '{recipeKind}'. Valid values: {string.Join(", ", Enum.GetNames<RecipeKind>())}"),
             locale: null,
             properties: null).ConfigureAwait(false);
 
@@ -228,7 +260,6 @@ public class ProfessionalVoiceSample
         string containerName,
         string blobPrefix)
     {
-        // Put your storage account name and key here
         var storageSharedKeyCredential = new StorageSharedKeyCredential(blobAccountName, blobAccountKey);
         var blobServiceClient = new BlobServiceClient(new Uri($"https://{blobAccountName}.blob.core.windows.net"), storageSharedKeyCredential);
         var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
@@ -275,8 +306,8 @@ public class ProfessionalVoiceSample
 
     private static Uri GenerateBlobSasTokenUrl(string accountName, string accountKey, string containerName, string blobPrefix)
     {
-        var staorageSharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
-        var blobServiceClient = new BlobServiceClient(new Uri($"https://{accountName}.blob.core.windows.net"), staorageSharedKeyCredential);
+        var storageSharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+        var blobServiceClient = new BlobServiceClient(new Uri($"https://{accountName}.blob.core.windows.net"), storageSharedKeyCredential);
         var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
         var sasBuilder = new BlobSasBuilder
         {
@@ -287,15 +318,15 @@ public class ProfessionalVoiceSample
             ExpiresOn = DateTimeOffset.UtcNow.AddHours(3)
         };
         sasBuilder.SetPermissions(BlobSasPermissions.Read);
-        var sasToken = sasBuilder.ToSasQueryParameters(staorageSharedKeyCredential);
+        var sasToken = sasBuilder.ToSasQueryParameters(storageSharedKeyCredential);
         var sasUri = new Uri($"{containerClient.Uri}/{blobPrefix}?{sasToken}");
         return sasUri;
     }
 
     private static Uri GenerateContainerSasTokenUrl(string accountName, string accountKey, string containerName)
     {
-        var staorageSharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
-        var blobServiceClient = new BlobServiceClient(new Uri($"https://{accountName}.blob.core.windows.net"), staorageSharedKeyCredential);
+        var storageSharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+        var blobServiceClient = new BlobServiceClient(new Uri($"https://{accountName}.blob.core.windows.net"), storageSharedKeyCredential);
         var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
         var sasBuilder = new BlobSasBuilder
         {
@@ -305,7 +336,7 @@ public class ProfessionalVoiceSample
             ExpiresOn = DateTimeOffset.UtcNow.AddHours(3)
         };
         sasBuilder.SetPermissions(BlobContainerSasPermissions.Read | BlobContainerSasPermissions.List);
-        var sasToken = sasBuilder.ToSasQueryParameters(staorageSharedKeyCredential);
+        var sasToken = sasBuilder.ToSasQueryParameters(storageSharedKeyCredential);
         var sasUri = new Uri($"{containerClient.Uri}?{sasToken}");
         return sasUri;
     }

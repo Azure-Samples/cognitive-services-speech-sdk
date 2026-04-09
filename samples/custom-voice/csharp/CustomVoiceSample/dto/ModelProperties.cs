@@ -10,4 +10,8 @@ public class ModelProperties
     public IEnumerable<string> PresetStyles { get; set; }
 
     public IReadOnlyDictionary<string, string> StyleTrainingSetIds { get; set; }
+
+    public IEnumerable<string> FailedTrainingsets { get; set; }
+
+    public IEnumerable<string> SecondaryLocales { get; set; }
 }

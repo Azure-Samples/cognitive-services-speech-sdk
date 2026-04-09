@@ -8,12 +8,13 @@ import logging
 
 
 class Config:
-    api_version = 'api-version=2024-02-01-preview'
+    api_version = 'api-version=2026-01-01'
 
     def __init__(self, key: str, region: str, logger: logging.Logger = None):
         self.key = key
         self.region = region
         self.url_prefix = 'https://' + region + '.api.cognitive.microsoft.com/customvoice/'
+
         if logger is None:
             self.logger = logging.getLogger()
         else:

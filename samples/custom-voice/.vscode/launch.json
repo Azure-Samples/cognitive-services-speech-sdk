@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Personal Voice Sample",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/python/personal_voice_sample.py",
+            "cwd": "${workspaceFolder}/python",
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Professional Voice Sample",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/python/professional_voice_sample.py",
+            "cwd": "${workspaceFolder}/python",
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "C#: Custom Voice Sample",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/csharp/CustomVoiceSample/bin/Debug/net8.0/CustomVoiceSample.dll",
+            "cwd": "${workspaceFolder}/csharp/CustomVoiceSample",
+            "envFile": "${workspaceFolder}/.env",
+            "console": "integratedTerminal"
+        }
+    ]
+}

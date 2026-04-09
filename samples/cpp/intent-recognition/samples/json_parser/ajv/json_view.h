@@ -289,14 +289,14 @@ namespace ajv {
             if (integer != nullptr)
             {
                 char buffer[50];
-                CopyItem(get, buffer, sizeof(buffer));
-                *integer = std::atoi(buffer);
+                if (CopyItem(get, buffer, sizeof(buffer)) != nullptr)
+                    *integer = std::atoi(buffer);
             }
             if (number != nullptr)
             {
                 char buffer[50];
-                CopyItem(get, buffer, sizeof(buffer));
-                *number = std::atof(buffer);
+                if (CopyItem(get, buffer, sizeof(buffer)) != nullptr)
+                    *number = std::atof(buffer);
             }
         }
 
@@ -325,6 +325,7 @@ namespace ajv {
         if (item <= 0 || item >= m_itemCount) return false;
 
         auto& get = m_items[item];
+        if (get.start == nullptr) return false;
 
         auto kind = get.start[0];
         if (IsStartString(kind))
@@ -343,6 +344,7 @@ namespace ajv {
         if (item <= 0 || item >= m_itemCount) return false;
 
         auto& get = m_items[item];
+        if (get.start == nullptr) return false;
         auto kind = get.start[0];
 
         if (IsStartBoolean(kind))
@@ -360,6 +362,7 @@ namespace ajv {
         if (item <= 0 || item >= m_itemCount) return false;
 
         auto& get = m_items[item];
+        if (get.start == nullptr) return false;
         auto kind = get.start[0];
 
         if (IsStartNumber(kind))
@@ -367,7 +370,8 @@ namespace ajv {
             if (value != nullptr)
             {
                 char buffer[50]; 
-                CopyItem(get, buffer, sizeof(buffer));
+                if (CopyItem(get, buffer, sizeof(buffer)) == nullptr)
+                    return true;
 
                 char *bufferEnd;
                 *value = std::strtoll(buffer, &bufferEnd, 10);
@@ -388,6 +392,7 @@ namespace ajv {
         if (item <= 0 || item >= m_itemCount) return false;
 
         auto& get = m_items[item];
+        if (get.start == nullptr) return false;
         auto kind = get.start[0];
 
         if (IsStartNumber(kind))
@@ -395,7 +400,8 @@ namespace ajv {
             if (value != nullptr)
             {
                 char buffer[50];
-                CopyItem(get, buffer, sizeof(buffer));
+                if (CopyItem(get, buffer, sizeof(buffer)) == nullptr)
+                    return true;
 
                 char* bufferEnd;
                 *value = std::strtoull(buffer, &bufferEnd, 10);
@@ -420,6 +426,7 @@ namespace ajv {
         if (item <= 0 || item >= m_itemCount) return false;
 
         auto& get = m_items[item];
+        if (get.start == nullptr) return false;
         auto kind = get.start[0];
 
         if (IsStartNumber(kind))
@@ -427,7 +434,8 @@ namespace ajv {
             if (number != nullptr)
             {
                 char buffer[50];
-                CopyItem(get, buffer, sizeof(buffer));
+                if (CopyItem(get, buffer, sizeof(buffer)) == nullptr)
+                    return true;
                 *number = std::atof(buffer);
             }
             return true;
@@ -692,6 +700,7 @@ namespace ajv {
     AJV_FN_NO_INLINE_(const char*) JsonView::ParseBoolean(const char* psz, const char* zend)
     {
         auto item = InitItem(psz);
+        if (item <= m_itemEnd) return ParseError(psz, zend);
 
         auto isTrue = psz + 3 < zend && psz[0] == 't' && psz[1] == 'r' && psz[2] == 'u' && psz[3] == 'e';
         if (isTrue) return EndItem(item, psz + 3);
@@ -722,6 +731,7 @@ namespace ajv {
         if (psz < zend && (*psz == 'e' || *psz == 'E'))
         {
             psz++;
+            if (psz >= zend) return ParseError(psz, zend);
             if (*psz == '-' || *psz == '+') psz++;
             if (psz >= zend || !IsDigit(*psz)) return ParseError(psz, zend);
             psz = SkipCharsInRange(psz + 1, zend, '0', '9');
@@ -733,6 +743,7 @@ namespace ajv {
     AJV_FN_NO_INLINE_(const char*) JsonView::ParseNull(const char* psz, const char* zend)
     {
         auto item = InitItem(psz);
+        if (item <= m_itemEnd) return ParseError(psz, zend);
 
         auto isNull = psz + 3 < zend && psz[0] == 'n' && psz[1] == 'u' && psz[2] == 'l' && psz[3] == 'l';
         if (isNull) return EndItem(item, psz + 3);
