@@ -19,15 +19,15 @@ Open `app/src/main/java/com/microsoft/cognitiveservices/speech/samples/ttstextst
 
 **Azure Speech Config:**
 ```java
-private static final String SPEECH_SUBSCRIPTION_KEY = "YourSubscriptionKey";
+private static final String SPEECH_KEY = "YourSubscriptionKey";
 private static final String SPEECH_REGION = "YourServiceRegion";
+private static final String SPEECH_VOICE = "en-us-Ava:DragonHDLatestNeural";
 ```
 
-**LLM Configuration (Optional):**
-If you have a local LLM or OpenAI endpoint you wish to test with:
-```java
-private static final String OPENAI_ENDPOINT = "http://Your-LLM-Server-IP:11434/v1";
-private static final String OPENAI_KEY = "YourOpenAIKey";
+This sample uses the websocket v2 endpoint internally:
+
+```text
+wss://{region}.tts.speech.microsoft.com/cognitiveservices/websocket/v2
 ```
 
 ### 3. Build and Run
@@ -35,7 +35,8 @@ private static final String OPENAI_KEY = "YourOpenAIKey";
 1. Connect an Android device or start an emulator.
 2. Build the project in Android Studio.
 3. Run the application.
-4. Click **Start Chat** to connect to the backend LLM and hear the streaming TTS output.
+4. Click **Start Demo** to send text chunks to the TTS input stream.
+5. The streamed text is shown in the middle panel, logs are shown at the bottom, audio is played through `AudioTrack`, and the generated WAV file is saved to the temporary directory reported in the runtime logs.
 
 ## API overview
 ### Create text stream request
@@ -51,14 +52,17 @@ For now we only support set voice name and output format.
 Please specify `speechsdk.SpeechSynthesisRequestInputType.TextStream` when creating the request.
 
 ### Send text to stream
-For each text that generated from GPT, call `request.input_stream.write(text)` to send text to the stream.  
+For each text chunk, call `request.input_stream.write(text)` to send text to the stream.  
 Please do not wait too long(longer than 30s) between creating the request and sending the first text, and also between sending two texts, otherwise the connection may be closed by server and you may got 503 error.
 
 ### Close text stream
-When GPT finished the output, call `request.input_stream.close()` to close the stream.
+When you finish sending chunks, call `request.input_stream.close()` to close the stream.
 
-## About MarkdownStreamFilter
-This sample integrates a `MarkdownStreamFilter` helper class to clean up LLM output for better speech synthesis results.
+## Sample behavior
 
-- **Purpose**: Removes visual Markdown formatting (like `**bold**`, `[links](url)`, ````code blocks````) that should not be read aloud.
-- **Working Principle**: It processes text chunks in real-time using a lightweight state machine. It handles markers split across network chunks and **processes characters with zero latency**. This ensures the TTS engine receives text immediately while filtering out unwanted symbols.
+This Android sample is self-contained.
+
+- It does not depend on an external LLM service.
+- It keeps the Android entrypoint and the text-stream demo logic in a single Java file for easier sample maintenance.
+- It streams a built-in list of text chunks to demonstrate the API flow.
+- It plays streamed PCM audio in real time through `AudioTrack` and also saves it as a WAV file after the stream completes.

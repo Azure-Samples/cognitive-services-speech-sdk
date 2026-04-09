@@ -1,512 +1,346 @@
+//
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
+//
 package com.microsoft.cognitiveservices.speech.samples.ttstextstream;
 
+import static android.Manifest.permission.INTERNET;
+
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.media.AudioTrack;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import android.media.AudioAttributes;
-import android.media.AudioFormat;
 
-import com.microsoft.cognitiveservices.speech.SpeechConfig;
-import com.microsoft.cognitiveservices.speech.SpeechSynthesisOutputFormat;
-import com.microsoft.cognitiveservices.speech.SpeechSynthesizer;
-import com.microsoft.cognitiveservices.speech.SpeechSynthesisRequest;
-import com.microsoft.cognitiveservices.speech.SpeechSynthesisResult;
-import com.microsoft.cognitiveservices.speech.ResultReason;
-import com.microsoft.cognitiveservices.speech.CancellationReason;
 import com.microsoft.cognitiveservices.speech.AudioDataStream;
-import com.microsoft.cognitiveservices.speech.PropertyId;
 import com.microsoft.cognitiveservices.speech.Connection;
+import com.microsoft.cognitiveservices.speech.PropertyId;
+import com.microsoft.cognitiveservices.speech.ResultReason;
+import com.microsoft.cognitiveservices.speech.SpeechConfig;
 import com.microsoft.cognitiveservices.speech.SpeechSynthesisCancellationDetails;
-import com.microsoft.cognitiveservices.speech.samples.ttstextstream.MarkdownStreamFilter;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesisOutputFormat;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesisRequest;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesisRequest.SpeechSynthesisRequestInputType;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesisResult;
+import com.microsoft.cognitiveservices.speech.SpeechSynthesizer;
 
-import java.util.concurrent.Executors;
-import java.nio.charset.StandardCharsets;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URI;
-
-import static android.Manifest.permission.INTERNET;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "TTSStreamSample";
-
-    private static final String SPEECH_SUBSCRIPTION_KEY = "YourSubscriptionKey";
+    private static final String SPEECH_KEY = "YourSubscriptionKey";
     private static final String SPEECH_REGION = "YourServiceRegion";
+    private static final String SPEECH_VOICE = "en-us-Ava:DragonHDLatestNeural";
+    private static final int SAMPLE_RATE = 16000;
+    private static final int CHANNEL_COUNT = 1;
+    private static final int BITS_PER_SAMPLE = 16;
+    private static final String[] TEXT_CHUNKS = {
+        "Hello! ",
+        "Welcome to the Azure ",
+        "Speech SDK text stream sample. ",
+        "This text is sent ",
+        "in small chunks, ",
+        "so speech starts ",
+        "before the whole text ",
+        "is available."
+    };
 
-    // OPENAI / OLLAMA Configuration
-    // Ensure your local LLM server is reachable from the Android Emulator/Device.
-    private static final String OPENAI_ENDPOINT = "http://Your-LLM-Server-IP:11434/v1";
-    private static final String OPENAI_KEY = "ollama"; // API Key if required
-    private static final String OPENAI_DEPLOYMENT_NAME = "qwen2.5"; // Model name
-    // -------------------------------------------------------------------------
-    private SpeechConfig speechConfig;
     private TextView outputMessage;
     private TextView contentTextView;
     private Button startButton;
     private Button stopButton;
-    private SpeechSynthesizer synthesizer;
-    private Connection connection;
-    private AudioTrack audioTrack;
-    // Buffer to capture full audio for WAV saving
-    private ByteArrayOutputStream fullAudioBuffer;
-    
-    private volatile boolean isStopped = false;
-    private final int SAMPLE_RATE = 16000;
 
-    // Add filter as a field
-    private MarkdownStreamFilter markdownFilter = new MarkdownStreamFilter();
+    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private volatile Future<?> currentTask;
+    private volatile boolean stopRequested;
+
+    private volatile StreamingSession activeSession;
+
+    private static final class StreamingSession {
+        final SpeechSynthesisRequest request;
+        final SpeechSynthesizer synthesizer;
+        final AudioTrack audioTrack;
+
+        StreamingSession(SpeechSynthesisRequest request, SpeechSynthesizer synthesizer, AudioTrack audioTrack) {
+            this.request = request;
+            this.synthesizer = synthesizer;
+            this.audioTrack = audioTrack;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Request Internet Permission
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{INTERNET}, 5);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
 
-        // UI Initialization
+        ActivityCompat.requestPermissions(this, new String[] { INTERNET }, 5);
+
         outputMessage = findViewById(R.id.outputMessage);
         contentTextView = findViewById(R.id.tv_content);
         startButton = findViewById(R.id.button_start_stream);
         stopButton = findViewById(R.id.button_stop_stream);
 
-        startButton.setOnClickListener(v -> onClickStart());
-        stopButton.setOnClickListener(v -> onClickStop());
+        startButton.setOnClickListener(v -> startDemo());
+        stopButton.setOnClickListener(v -> stopDemo());
     }
 
-    /**
-     * Handles the Stop button click.
-     * Signals the streaming loop to stop and cleans up audio resources.
-     */
-    private void onClickStop() {
-        isStopped = true;
-        log("Stopping...");
-        
-        // Stop Speech Synthesizer
-        if (synthesizer != null) {
-            synthesizer.StopSpeakingAsync();
-        }
-        
-        // Stop Audio Playback
-        if (audioTrack != null) {
-            try {
-                audioTrack.pause();
-                audioTrack.flush();
-            } catch (Exception e) {
-                 Log.w(TAG, "Error pausing/flushing AudioTrack: " + e.getMessage());
-            } finally {
-                try {
-                    audioTrack.release();
-                } catch (Exception e) {
-                    Log.e(TAG, "Error releasing AudioTrack: " + e.getMessage());
-                }
-                audioTrack = null;
-            }
-        }
-        
-        // Update UI
-        runOnUiThread(() -> {
-            startButton.setEnabled(true);
-            stopButton.setEnabled(false);
-        });
+    @Override
+    protected void onDestroy() {
+        stopDemo();
+        executorService.shutdownNow();
+        super.onDestroy();
     }
 
-    /**
-     * Handles the Start button click.
-     * Initializes resources and starts the background streaming task.
-     */
-    private void onClickStart() {
-        isStopped = false;
-        startButton.setEnabled(false);
-        stopButton.setEnabled(true);
-        
-        if (contentTextView != null) {
-            contentTextView.setText("", TextView.BufferType.SPANNABLE);
-        }
-        outputMessage.setText("Starting...");
-
-        // Clean up any previous session resources
-        cleanupResources();
-
-        // Run the main logic in a background thread
-        Executors.newSingleThreadExecutor().execute(this::runStreamingProcess);
-    }
-    
-    /**
-     * Safely cleans up Speech SDK and Audio resources.
-     */
-    private void cleanupResources() {
-        if (synthesizer != null) {
-            try {
-                if (connection != null) {
-                    connection.close();
-                    connection = null;
-                }
-                synthesizer.close();
-                synthesizer = null;
-            } catch (Exception e) {
-                Log.e(TAG, "Error closing synthesizer: " + e.getMessage());
-            }
-        }
-        if (audioTrack != null) {
-            try {
-                audioTrack.stop();
-                audioTrack.release();
-                audioTrack = null;
-            } catch (Exception e) {
-                Log.e(TAG, "Error releasing AudioTrack: " + e.getMessage());
-            }
-        }
-        if (fullAudioBuffer != null) {
-            try {
-                fullAudioBuffer.close();
-                fullAudioBuffer = null;
-            } catch (Exception e) {
-                // ignore
-            }
-        }
-    }
-
-    // Main background process:
-    private void runStreamingProcess() {
-        SpeechSynthesisRequest request = null;
-        java.util.concurrent.Future<SpeechSynthesisResult> resultFuture = null;
-        String filesDir = System.getProperty("java.io.tmpdir");
-
-        try {
-            // 1. Initialize AudioTrack
-            initializeAudioTrack();
-
-            // 2. Initialize Speech SDK
-            initializeSpeechSynthesizer(filesDir);
-
-            // 3. Create Request for Text Stream
-            log("Creating Speech Synthesis Request...");
-            request = new SpeechSynthesisRequest(SpeechSynthesisRequest.SpeechSynthesisRequestInputType.TextStream);
-
-            // 4. Start Synthesis (Async)
-            log("Starting Synthesis Task...");
-            resultFuture = synthesizer.SpeakRequestAsync(request);
-
-            // 5. Connect to LLM and Stream Text
-            streamTextFromLLM(request, filesDir);
-
-        } catch (java.net.ConnectException ce) {
-            log("Error connecting to LLM: " + ce.getMessage());
-            log("Please ensure Ollama/LLM server is running and reachable at " + OPENAI_ENDPOINT);
-        } catch (Exception e) {
-            log("Error: " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            // Signal End of Text Stream to TTS to unblock it (in case of error or stop)
-            if (request != null) {
-                try { request.getInputStream().close(); } catch (Exception ex) { /* fast fail */ }
-            }
-
-            // 6. Handle Completion (only if valid future exists and not stopped)
-            if (!isStopped && resultFuture != null) {
-                try {
-                    handleSynthesisCompletion(resultFuture, filesDir);
-                } catch (Exception e) {
-                   Log.w(TAG, "Error in completion handler: " + e.getMessage());
-                }
-            }
-            
-            runOnUiThread(() -> {
-                startButton.setEnabled(true);
-                stopButton.setEnabled(false);
-            });
-        }
-    }
-
-    private void initializeAudioTrack() {
-        int bufferSize = AudioTrack.getMinBufferSize(SAMPLE_RATE, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT);
-        audioTrack = new AudioTrack.Builder()
-                .setAudioAttributes(new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                    .build())
-                .setAudioFormat(new AudioFormat.Builder()
-                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                    .setSampleRate(SAMPLE_RATE)
-                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
-                    .build())
-                .setBufferSizeInBytes(bufferSize)
-                .setTransferMode(AudioTrack.MODE_STREAM)
-                .build();
-
-        audioTrack.play();
-        log("AudioTrack initialized and started.");
-    }
-
-    private void initializeSpeechSynthesizer(String logDir) {
-        // Use V2 endpoint for text streaming support
-        String endpoint = String.format("wss://%s.tts.speech.microsoft.com/cognitiveservices/websocket/v2", SPEECH_REGION);
-        speechConfig = SpeechConfig.fromEndpoint(URI.create(endpoint), SPEECH_SUBSCRIPTION_KEY);
-        
-        // Configure Voice and Output Format
-        // Note: Ensure the voice supports the language of your text (e.g., zh-CN for Chinese)
-        String voiceName = "zh-CN-XiaoxiaoMultilingualNeural";
-        speechConfig.setSpeechSynthesisVoiceName(voiceName);
-        speechConfig.setSpeechSynthesisLanguage("zh-CN");
-        speechConfig.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw16Khz16BitMonoPcm);
-        
-        // Advanced Properties
-        speechConfig.setProperty(PropertyId.SpeechServiceConnection_SynthVoice, voiceName);
-        speechConfig.setProperty(PropertyId.SpeechSynthesis_FrameTimeoutInterval, "120000"); // 120s timeout
-        speechConfig.setProperty(PropertyId.Speech_LogFilename, logDir + "/sdk_log.log");
-        speechConfig.setProperty("SpeechSynthesis_KeepConnectionAfterStopping", "true");
-
-        // Create Synthesizer
-        // Passing 'null' as AudioConfig because we act as a pull-stream consumer manually handling playback
-        synthesizer = new SpeechSynthesizer(speechConfig, null);
-        connection = Connection.fromSpeechSynthesizer(synthesizer);
-
-        // Reset buffer
-        fullAudioBuffer = new ByteArrayOutputStream();
-
-        // Subscribe to events
-        connection.connected.addEventListener((o, e) -> log("Speech Service Connected."));
-        connection.disconnected.addEventListener((o, e) -> log("Speech Service Disconnected."));
-        
-        // Handle Audio Data
-        synthesizer.Synthesizing.addEventListener((o, e) -> {
-            byte[] data = e.getResult().getAudioData();
-            int len = data != null ? data.length : 0;
-            log("Received " + len + " bytes audio.");
-            
-            if (len > 0 && !isStopped) {
-                // 1. Play Audio
-                if (audioTrack != null) {
-                    try {
-                        audioTrack.write(data, 0, len);
-                    } catch (Exception ex) {
-                        Log.e(TAG, "AudioTrack write error: " + ex.getMessage());
-                    }
-                }
-                
-                // 2. Save Audio to Buffer
-                if (fullAudioBuffer != null) {
-                    synchronized(fullAudioBuffer) {
-                        fullAudioBuffer.write(data, 0, len);
-                    }
-                }
-            }
-            e.close();
-        });
-
-        synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
-            String detail = SpeechSynthesisCancellationDetails.fromResult(e.getResult()).toString();
-            log("Synthesis Canceled: " + detail);
-        });
-    }
-
-    private void streamTextFromLLM(SpeechSynthesisRequest speechRequest, String logDir) throws Exception {
-        log("Connecting to LLM (Ollama)...");
-        
-        // Prepare Connection
-        String endpointUrl = OPENAI_ENDPOINT;
-        if (endpointUrl.endsWith("/")) endpointUrl = endpointUrl.substring(0, endpointUrl.length() - 1);
-        String urlString = endpointUrl + "/chat/completions";
-
-        java.net.URL url = new java.net.URL(urlString);
-        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("Authorization", "Bearer " + OPENAI_KEY);
-        conn.setDoOutput(true);
-        conn.setConnectTimeout(3000); // Fast fail on connection
-        conn.setReadTimeout(10000); // 10s read timeout (keep alive)
-
-        // Build Payload
-        org.json.JSONObject jsonBody = new org.json.JSONObject();
-        jsonBody.put("model", OPENAI_DEPLOYMENT_NAME);
-        jsonBody.put("stream", true);
-        jsonBody.put("max_tokens", 800); // Increased for richer content
-        jsonBody.put("temperature", 0.7); // More creative responses
-        
-        org.json.JSONArray messages = new org.json.JSONArray();
-        messages.put(new org.json.JSONObject()
-                .put("role", "system")
-                .put("content", "You are a helpful AI assistant. Response in Chinese (Simplified Chinese)."));
-        messages.put(new org.json.JSONObject()
-                .put("role", "user")
-                .put("content", "Hello! Please allow me to introduce yourself in 100 words."));
-        jsonBody.put("messages", messages);
-
-        // Send Request
-        log("Sending POST to: " + urlString);
-        try(java.io.OutputStream os = conn.getOutputStream()) {
-            byte[] input = jsonBody.toString().getBytes(StandardCharsets.UTF_8);
-            os.write(input, 0, input.length);
-        }
-
-        // Handle Response
-        int responseCode = conn.getResponseCode();
-        if (responseCode != 200) {
-            log("LLM Error: Code " + responseCode + " - " + conn.getResponseMessage());
-            speechRequest.getInputStream().close();
+    private void startDemo() {
+        clearOutput();
+        if (SPEECH_KEY.startsWith("Your") || SPEECH_REGION.startsWith("Your")) {
+            appendLog("Update SPEECH_KEY and SPEECH_REGION in MainActivity before running the sample.");
             return;
         }
 
-        log("Streaming Text from LLM...");
-        StringBuilder fullContentBuffer = new StringBuilder();
-            
-        try (java.io.BufferedReader br = new java.io.BufferedReader(
-                new java.io.InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-            
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (isStopped) break; 
-
-                if (line.startsWith("data: ")) {
-                    String data = line.substring(6).trim();
-                    if ("[DONE]".equals(data)) break;
-                    try {
-                        org.json.JSONObject chunk = new org.json.JSONObject(data);
-                        if (chunk.has("model")) {
-                            Log.v(TAG, "Model: " + chunk.getString("model"));
-                        }
-                        org.json.JSONArray choices = chunk.optJSONArray("choices");
-                        if (choices != null && choices.length() > 0) {
-                            org.json.JSONObject delta = choices.getJSONObject(0).optJSONObject("delta");
-                            if (delta != null) {
-                                String content = delta.optString("content", "");
-                                if (!content.isEmpty()) {
-                                    fullContentBuffer.append(content);
-                                    runOnUiThread(() -> {
-                                       if (contentTextView != null) {
-                                           contentTextView.append(content);
-                                           // autoScroll(contentTextView);
-                                       }
-                                    });
-                                    // Use process() for lower latency (character-by-character), 
-                                    // or processWithSentenceBoundary() for better prosody (but higher latency).
-                                    // consistently lower latency is usually preferred for real-time chat.
-                                    
-                                    // Filter Markdown for TTS
-                                    String filtered = markdownFilter.process(content);
-                                    
-                                    if (!filtered.isEmpty()) {
-                                        log("Filtered chunk: " + (filtered.length() > 50 ? filtered.substring(0, 50) + "..." : filtered));
-                                        speechRequest.getInputStream().write(filtered);
-                                    } else {
-                                        log("Buffered chunk: " + content.length() + " chars (Markdown hidden)");
-                                    }
-                                }
-                            }
-                        }
-                    } catch (org.json.JSONException je) {
-                        Log.e(TAG, "JSON parse error for chunk: " + data + " | " + je.getMessage());
-                    }
-                }
+        stopRequested = false;
+        setRunningState(true);
+        currentTask = executorService.submit(() -> {
+            try {
+                runTextStreamingDemo();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                appendLog("Streaming stopped.");
+            } catch (Exception e) {
+                appendLog("Error: " + e.getMessage());
+            } finally {
+                runOnUiThread(() -> setRunningState(false));
             }
-        }
-        log("LLM Stream Finished.");
-        
-        // Flush any remaining text in the filter
-        String remaining = markdownFilter.flush();
-        
-        if (!remaining.isEmpty()) {
-            log("Flushing filter: " + (remaining.length() > 50 ? remaining.substring(0, 50) + "..." : remaining));
-            speechRequest.getInputStream().write(remaining);
-        }
-        
-        speechRequest.getInputStream().close(); // Signal End of Text Stream to TTS
-        saveTextToFile(logDir + "/response.md", fullContentBuffer.toString());
-        log("Original Markdown saved to: " + logDir + "/response.md");
-    }
-
-    private void handleSynthesisCompletion(java.util.concurrent.Future<SpeechSynthesisResult> resultFuture, String filesDir) throws Exception {
-        if (!isStopped) {
-            log("Waiting for TTS completion...");
-            SpeechSynthesisResult result = resultFuture.get(); // Blocking wait
-            
-            if (result.getReason() == ResultReason.SynthesizingAudioCompleted) {
-                log("TTS Completed Successfully.");
-                
-                // Save captured audio buffer to WAV
-                if (fullAudioBuffer != null) {
-                    synchronized(fullAudioBuffer) {
-                        String fileName = filesDir + "/output.wav";
-                        saveAsWav(fileName, fullAudioBuffer.toByteArray(), SAMPLE_RATE, 16, 1);
-                        log("Audio saved to: " + fileName);
-                    }
-                }
-                
-            } else if (result.getReason() == ResultReason.Canceled) {
-                var cancellation = SpeechSynthesisCancellationDetails.fromResult(result);
-                log("TTS Canceled: " + cancellation.getReason() + " | " + cancellation.getErrorDetails());
-            }
-        } else {
-            log("Process stopped by user.");
-        }
-    }
-
-    // Helper to save text to file
-    private void saveTextToFile(String filename, String content) {
-        try (FileOutputStream fos = new FileOutputStream(filename)) {
-            fos.write(content.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            Log.e(TAG, "Error saving file: " + e.getMessage());
-        }
-    }
-    
-    private void log(final String message) {
-        runOnUiThread(() -> {
-            outputMessage.append("\n" + message);
-            autoScroll(outputMessage);
         });
-        Log.d(TAG, message);
     }
-    
-    private void autoScroll(TextView view) {
-        if (view.getParent() instanceof ScrollView) {
-            final ScrollView scroll = (ScrollView) view.getParent();
-            scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
+
+    private void stopDemo() {
+        stopRequested = true;
+
+        StreamingSession session = activeSession;
+        if (session != null) {
+            session.request.getInputStream().close();
+            session.synthesizer.StopSpeakingAsync();
+            session.audioTrack.pause();
+            session.audioTrack.flush();
+        }
+
+        if (currentTask != null) {
+            currentTask.cancel(true);
+        }
+
+        runOnUiThread(() -> setRunningState(false));
+    }
+
+    private void runTextStreamingDemo() throws Exception {
+        File logFile = new File(System.getProperty("java.io.tmpdir"), "log.log");
+        File wavFile = new File(logFile.getParentFile(), "streaming_output.wav");
+        String endpoint = "wss://" + SPEECH_REGION + ".tts.speech.microsoft.com/cognitiveservices/websocket/v2";
+        ByteArrayOutputStream audioBuffer = new ByteArrayOutputStream();
+
+        appendLog("Preparing text streaming ...");
+        appendLog("Text Streaming Demo");
+        appendLog("SDK log file: " + logFile.getAbsolutePath());
+        appendLog("Using endpoint: " + endpoint);
+
+        SpeechConfig speechConfig = SpeechConfig.fromEndpoint(new URI(endpoint), SPEECH_KEY);
+        speechConfig.setSpeechSynthesisOutputFormat(SpeechSynthesisOutputFormat.Raw16Khz16BitMonoPcm);
+        speechConfig.setSpeechSynthesisVoiceName(SPEECH_VOICE);
+        speechConfig.setProperty(PropertyId.SpeechServiceConnection_SynthVoice, SPEECH_VOICE);
+        speechConfig.setProperty(PropertyId.SpeechSynthesis_FrameTimeoutInterval, "10000");
+        speechConfig.setProperty(PropertyId.SpeechSynthesis_RtfTimeoutThreshold, "10");
+        speechConfig.setProperty(PropertyId.Speech_LogFilename, System.getProperty("java.io.tmpdir") + "/log.log");
+
+        AudioTrack audioTrack = createAudioTrack();
+        audioTrack.play();
+
+        SpeechSynthesizer synthesizer = new SpeechSynthesizer(speechConfig, null);
+        Connection connection = Connection.fromSpeechSynthesizer(synthesizer);
+        SpeechSynthesisRequest request = new SpeechSynthesisRequest(SpeechSynthesisRequestInputType.TextStream);
+        activeSession = new StreamingSession(request, synthesizer, audioTrack);
+        SpeechSynthesisResult result = null;
+        AudioDataStream audioDataStream = null;
+        Thread audioThread = null;
+
+        try {
+            connection.connected.addEventListener((o, e) -> appendLog("Connection established."));
+            connection.disconnected.addEventListener((o, e) -> appendLog("Disconnected."));
+            synthesizer.SynthesisStarted.addEventListener((o, e) -> {
+                appendLog("Synthesis started. ResultId: " + e.getResult().getResultId());
+                e.close();
+            });
+            synthesizer.SynthesisCompleted.addEventListener((o, e) -> {
+                appendLog("Synthesis completed.");
+                e.close();
+            });
+            synthesizer.SynthesisCanceled.addEventListener((o, e) -> {
+                appendLog("Synthesis canceled: " + SpeechSynthesisCancellationDetails.fromResult(e.getResult()));
+                e.close();
+            });
+            synthesizer.Synthesizing.addEventListener((o, e) -> {
+                byte[] data = e.getResult().getAudioData();
+                int len = data != null ? data.length : 0;
+                appendLog("Synthesizing event received " + len + " bytes audio data.");
+                e.close();
+            });
+
+            appendLog("Starting speech synthesis...");
+            Future<SpeechSynthesisResult> task = synthesizer.StartSpeakingRequestAsync(request);
+            result = task.get();
+            audioDataStream = AudioDataStream.fromResult(result);
+
+            AudioDataStream stream = audioDataStream;
+            audioThread = new Thread(() -> {
+                byte[] buffer = new byte[4096];
+
+                try {
+                    while (!stopRequested) {
+                        long readBytes = stream.readData(buffer);
+                        if (readBytes == 0) {
+                            break;
+                        }
+
+                        appendLog("[audio: " + readBytes + " bytes]");
+                        audioBuffer.write(buffer, 0, (int) readBytes);
+
+                        int offset = 0;
+                        while (offset < readBytes && !stopRequested) {
+                            int written = audioTrack.write(buffer, offset, (int) readBytes - offset, AudioTrack.WRITE_BLOCKING);
+                            if (written <= 0) {
+                                appendLog("AudioTrack write returned " + written + ".");
+                                return;
+                            }
+                            offset += written;
+                        }
+                    }
+                } catch (Exception e) {
+                    appendLog("Error reading audio stream: " + e.getMessage());
+                }
+            }, "tts-audio-reader");
+            audioThread.start();
+
+            for (String chunk : TEXT_CHUNKS) {
+                if (stopRequested) {
+                    break;
+                }
+                appendContent(chunk);
+                appendLog("[text: " + chunk.trim() + "]");
+                request.getInputStream().write(chunk);
+                Thread.sleep(200L);
+            }
+
+            request.getInputStream().close();
+            appendLog("[TEXT STREAM END]");
+
+            if (audioThread != null) {
+                audioThread.join();
+            }
+
+            if (result != null && result.getReason() == ResultReason.Canceled) {
+                appendLog("Synthesis canceled: " + SpeechSynthesisCancellationDetails.fromResult(result));
+            } else if (result != null && result.getReason() == ResultReason.SynthesizingAudioCompleted) {
+                appendLog("Synthesis audio stream finished.");
+            }
+
+            byte[] pcmData = audioBuffer.toByteArray();
+            saveAsWav(wavFile, pcmData);
+            appendLog("[AUDIO STREAM END] Total: " + pcmData.length + " bytes");
+            appendLog("Audio saved to: " + wavFile.getAbsolutePath());
+            appendLog("Total audio bytes: " + pcmData.length);
+        } finally {
+            activeSession = null;
+            currentTask = null;
+
+            try {
+                if (audioThread != null && audioThread.isAlive()) {
+                    audioThread.interrupt();
+                    audioThread.join(1000L);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            if (audioDataStream != null) {
+                audioDataStream.close();
+            }
+            if (result != null) {
+                result.close();
+            }
+            connection.close();
+            synthesizer.close();
+            speechConfig.close();
+            audioTrack.stop();
+            audioTrack.release();
+            audioBuffer.close();
         }
     }
 
-    // Saves raw PCM data as a WAV file with proper header
-    private void saveAsWav(String filename, byte[] pcmData, int sampleRate, int bitsPerSample, int channels) {
-        int byteRate = sampleRate * channels * bitsPerSample / 8;
-        int blockAlign = channels * bitsPerSample / 8;
+    private void clearOutput() {
+        runOnUiThread(() -> {
+            contentTextView.setText("");
+            outputMessage.setText("");
+        });
+    }
+
+    private AudioTrack createAudioTrack() {
+        return new AudioTrack.Builder()
+            .setAudioAttributes(new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ASSISTANT)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build())
+            .setAudioFormat(new AudioFormat.Builder()
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .setSampleRate(SAMPLE_RATE)
+                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                .build())
+            .setBufferSizeInBytes(AudioTrack.getMinBufferSize(
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_OUT_MONO,
+                AudioFormat.ENCODING_PCM_16BIT) * 2)
+            .setTransferMode(AudioTrack.MODE_STREAM)
+            .build();
+    }
+
+    private void saveAsWav(File file, byte[] pcmData) throws Exception {
+        int byteRate = SAMPLE_RATE * CHANNEL_COUNT * BITS_PER_SAMPLE / 8;
+        int blockAlign = CHANNEL_COUNT * BITS_PER_SAMPLE / 8;
         int dataSize = pcmData.length;
         int chunkSize = 36 + dataSize;
-        
-        try (FileOutputStream fos = new FileOutputStream(filename)) {
-            // RIFF header
-            fos.write("RIFF".getBytes());
-            fos.write(intToLittleEndian(chunkSize));
-            fos.write("WAVE".getBytes());
-            
-            // fmt subchunk
-            fos.write("fmt ".getBytes());
-            fos.write(intToLittleEndian(16));              // Subchunk1Size (16 for PCM)
-            fos.write(shortToLittleEndian((short) 1));     // AudioFormat (1 = PCM)
-            fos.write(shortToLittleEndian((short) channels));
-            fos.write(intToLittleEndian(sampleRate));
-            fos.write(intToLittleEndian(byteRate));
-            fos.write(shortToLittleEndian((short) blockAlign));
-            fos.write(shortToLittleEndian((short) bitsPerSample));
-            
-            // data subchunk
-            fos.write("data".getBytes());
-            fos.write(intToLittleEndian(dataSize));
-            fos.write(pcmData);
-        } catch (Exception e) {
-             Log.e(TAG, "Error saving WAV file: " + e.getMessage());
+
+        try (FileOutputStream output = new FileOutputStream(file)) {
+            output.write("RIFF".getBytes());
+            output.write(intToLittleEndian(chunkSize));
+            output.write("WAVE".getBytes());
+            output.write("fmt ".getBytes());
+            output.write(intToLittleEndian(16));
+            output.write(shortToLittleEndian((short) 1));
+            output.write(shortToLittleEndian((short) CHANNEL_COUNT));
+            output.write(intToLittleEndian(SAMPLE_RATE));
+            output.write(intToLittleEndian(byteRate));
+            output.write(shortToLittleEndian((short) blockAlign));
+            output.write(shortToLittleEndian((short) BITS_PER_SAMPLE));
+            output.write("data".getBytes());
+            output.write(intToLittleEndian(dataSize));
+            output.write(pcmData);
         }
     }
-    
+
     private byte[] intToLittleEndian(int value) {
         return new byte[] {
             (byte) (value & 0xFF),
@@ -515,17 +349,40 @@ public class MainActivity extends AppCompatActivity {
             (byte) ((value >> 24) & 0xFF)
         };
     }
-    
+
     private byte[] shortToLittleEndian(short value) {
         return new byte[] {
             (byte) (value & 0xFF),
             (byte) ((value >> 8) & 0xFF)
         };
     }
-    
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        cleanupResources();
+
+    private void appendContent(String text) {
+        runOnUiThread(() -> {
+            contentTextView.append(text);
+            autoScroll(contentTextView);
+        });
+    }
+
+    private void appendLog(String text) {
+        runOnUiThread(() -> {
+            if (outputMessage.length() > 0) {
+                outputMessage.append("\n");
+            }
+            outputMessage.append(text);
+            autoScroll(outputMessage);
+        });
+    }
+
+    private void autoScroll(TextView view) {
+        if (view.getParent() instanceof ScrollView) {
+            ScrollView scrollView = (ScrollView) view.getParent();
+            scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+        }
+    }
+
+    private void setRunningState(boolean running) {
+        startButton.setEnabled(!running);
+        stopButton.setEnabled(running);
     }
 }

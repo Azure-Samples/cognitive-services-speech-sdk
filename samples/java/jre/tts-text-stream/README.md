@@ -1,13 +1,13 @@
 # Java Console Sample: TTS Text Stream
 
-This sample demonstrates how to stream text from an LLM (simulated via Ollama) to Azure Text-to-Speech (TTS) using the Speech SDK for Java in a console application.
+This sample demonstrates how to push text to Azure Text-to-Speech in small chunks by using the Speech SDK text stream API from a Java console application.
 
 ## Prerequisites
 
 1.  **Java Development Kit (JDK)**: Version 8 or later.
 2.  **Maven**: For building the project.
 3.  **Azure Subscription**: An Azure subscription key for the Speech Service.
-4.  **Local LLM (Ollama)**: This sample is configured to connect to a local Ollama instance running at `http://localhost:11434`. You can change the endpoint in `Main.java`.
+4.  **Azure Speech resource**: A Speech resource key and region.
 
 ## Setup
 
@@ -15,6 +15,8 @@ This sample demonstrates how to stream text from an LLM (simulated via Ollama) t
     Set the following environment variables with your Azure Speech resource keys:
     *   `SPEECH_KEY`: Your subscription key.
     *   `SPEECH_REGION`: Your service region (e.g., `westus`, `eastus`).
+    *   `SPEECH_VOICE` (optional): Voice name. Default is `en-US-AvaMultilingualNeural`.
+    *   `OUTPUT_FILE` (optional): Output WAV file path. Default is `target/streaming_output.wav`.
 
     On Windows (PowerShell):
     ```powershell
@@ -35,20 +37,30 @@ This sample demonstrates how to stream text from an LLM (simulated via Ollama) t
     ```
 
 3.  **Run the Sample**:
-    Execute the JAR file generated in the `target` directory:
+    Execute the fat JAR generated in the `target` directory:
     ```bash
-    java -cp target/tts-text-stream-1.0-SNAPSHOT.jar;target/dependency/* com.microsoft.cognitiveservices.speech.samples.ttstextstream.Main
+    java -jar target/tts-text-stream-1.0-SNAPSHOT-jar-with-dependencies.jar
     ```
-    (Note: The `pom.xml` might need configuration to copy dependencies to `target/dependency`. If you use `mvn exec:java`, it's easier).
+    Using `mvn exec:java` is the simplest way to run the sample.
 
     **Using Maven Exec Plugin**:
     ```bash
     mvn exec:java
     ```
 
+    If you use an Azure China Speech resource, also set:
+    ```powershell
+    $env:SPEECH_DOMAIN="tts.speech.azure.cn"
+    ```
+
+    Or pass a full websocket endpoint explicitly:
+    ```powershell
+    $env:SPEECH_ENDPOINT="wss://<region>.<domain>/cognitiveservices/websocket/v2"
+    ```
+
 ## Functionality
 
-*   **Connects to Azure Speech Service**: Initializes the synthesizer with `Raw16Khz16BitMonoPcm` output format.
-*   **Audio Playback**: Uses Java `javax.sound.sampled` API to play the received audio stream in real-time.
-*   **LLM Streaming**: Connects to a local Ollama server, sends a prompt, and streams the text response.
-*   **Markdown Filtering**: Filters out Markdown syntax from the LLM response before sending it to TTS, ensuring clean speech output.
+*   **Uses the websocket v2 endpoint** required by the text stream API.
+*   **Streams text incrementally** by writing chunked text to `SpeechSynthesisRequestInputType.TextStream`.
+*   **Collects streamed PCM audio** from `AudioDataStream` and writes it to a WAV file.
+*   **Keeps the sample self-contained** with a built-in chunk list so it can run without an LLM backend.

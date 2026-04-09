@@ -19,8 +19,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     packagingOptions {
         exclude 'META-INF/INDEX.LIST'
@@ -37,10 +37,10 @@ android {
 
 dependencies {
     // Speech SDK
-    // implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.48.1'
-    implementation files('client-sdk-embedded-1.48.1.aar')
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.48.2'
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }
