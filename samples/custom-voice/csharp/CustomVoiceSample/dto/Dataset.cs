@@ -10,6 +10,12 @@ public enum DatasetKind
     AudioOnly = 3
 }
 
+public enum DatasetProcessAs
+{
+    Segmented = 1,
+    Contextual = 2
+}
+
 public class Dataset
 {
     public DatasetKind Kind { get; set; }
@@ -17,4 +23,6 @@ public class Dataset
     public AzureBlobContentSource Audios { get; set; }
 
     public AzureBlobContentSource Scripts { get; set; }
+
+    public DatasetProcessAs? ProcessAs { get; set; }
 }

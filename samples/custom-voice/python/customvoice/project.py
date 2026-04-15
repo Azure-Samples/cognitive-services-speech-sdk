@@ -24,6 +24,10 @@ class Project(CustomVoiceObject):
         if 'kind' not in json_dict:
             raise ValueError("could not find 'kind' in json_dict")
         self.kind = ProjectKind[json_dict['kind']]
+        if 'locale' in json_dict:
+            self.locale = json_dict['locale']
+        else:
+            self.locale = ''
 
     # get all projects in current speech account
     @staticmethod
@@ -58,13 +62,15 @@ class Project(CustomVoiceObject):
         return project
 
     @staticmethod
-    def create(config: Config, project_id: str, kind: ProjectKind, description=None):
+    def create(config: Config, project_id: str, kind: ProjectKind, description=None, locale: str = None):
         config.logger.debug('Project.create project_id = %s' % project_id)
         if project_id is None or len(project_id) == 0:
             raise ValueError("'project_id' is None or empty")
         api_url = config.url_prefix + 'projects/' + project_id + '?' + config.api_version
         headers = {'Ocp-Apim-Subscription-Key': config.key}
         request_dict = {'description': description, 'kind': kind.name}
+        if locale is not None and len(locale) > 0:
+            request_dict['locale'] = locale
         response = requests.put(api_url, json=request_dict, headers=headers)
         raise_exception_when_reqeust_failed('PUT', api_url, response, config.logger)
         project = Project(response.json())

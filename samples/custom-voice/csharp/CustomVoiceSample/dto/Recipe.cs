@@ -17,4 +17,6 @@ public class Recipe
     public RecipeKind Kind { get; set; }
 
     public string Description { get; set; }
+
+    public double? MinDurationInSeconds { get; set; }
 }

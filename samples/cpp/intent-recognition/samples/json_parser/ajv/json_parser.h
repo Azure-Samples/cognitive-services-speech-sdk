@@ -128,6 +128,8 @@ namespace ajv {
 
      AJV_FN_NO_INLINE_(JsonParser&) JsonParser::operator=(const JsonParser& other)
      {
+         if (this == &other) return *this;
+
          FreeDups();
 
          m_itemAlloc = 0;
@@ -201,7 +203,7 @@ namespace ajv {
         EndItem(next, nullptr);
         m_items[m_itemAlloc].next = next;
 
-        char *copy = new char[cch + 1];
+        char *copy = new char[cch + 1]();
         m_items[m_itemAlloc].start = copy;
         m_itemAlloc = next;
 

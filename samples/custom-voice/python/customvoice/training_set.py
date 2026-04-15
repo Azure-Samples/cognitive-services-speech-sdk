@@ -19,6 +19,11 @@ class DatasetKind(Enum):
     AudioOnly = 3
 
 
+class DatasetProcessAs(Enum):
+    Segmented = 1
+    Contextual = 2
+
+
 class AzureBlobContentSource(NamedTuple):
     containerUrl: str
     prefix: str
@@ -40,6 +45,10 @@ class TrainingSet(StatusObject):
             properties = json_dict['properties']
             if 'utteranceCount' in properties:
                 self.utteranceCount = int(properties['utteranceCount'])
+            if 'durationInSeconds' in properties:
+                self.duration_in_seconds = float(properties['durationInSeconds'])
+            if 'isContextual' in properties:
+                self.is_contextual = bool(properties['isContextual'])
 
     # get all training sets in project
     # when project_id is None, get all training sets in current speech account
@@ -110,14 +119,14 @@ class TrainingSet(StatusObject):
 
     @staticmethod
     def upload_data(config: Config, training_set_id: str, kind: DatasetKind, audios: AzureBlobContentSource,
-                    scripts: AzureBlobContentSource):
+                    scripts: AzureBlobContentSource, process_as: DatasetProcessAs = None):
         config.logger.debug('TrainingSet.upload_data training_set_id = %s' % training_set_id)
         if training_set_id is None or len(training_set_id) == 0:
             raise ValueError("'training_set_id' is None or empty")
         if audios is None:
             raise ValueError("'audios' is None")
         if (kind == DatasetKind.AudioAndScript or kind == DatasetKind.LongAudio) and scripts is None:
-            raise scripts("'audios' is None")
+            raise ValueError("'scripts' is None")
 
         headers = {'Ocp-Apim-Subscription-Key': config.key}
         api_url = config.url_prefix + 'trainingsets/' + training_set_id + ':upload' + '?' + config.api_version
@@ -135,5 +144,7 @@ class TrainingSet(StatusObject):
                 'prefix': scripts.prefix,
                 'extensions': scripts.extensions
             }
+        if process_as is not None:
+            request_dict['processAs'] = process_as.name
         response = requests.post(api_url, json=request_dict, headers=headers)
         raise_exception_when_reqeust_failed('POST', api_url, response, config.logger)

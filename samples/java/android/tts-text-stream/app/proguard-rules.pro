@@ -1,0 +1,2 @@
+-keep class com.microsoft.cognitiveservices.speech.internal.** { *; }
+-dontwarn com.microsoft.cognitiveservices.speech.internal.**
