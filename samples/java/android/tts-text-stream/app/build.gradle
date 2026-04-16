@@ -35,6 +35,13 @@ android {
     namespace 'com.microsoft.cognitiveservices.speech.samples.ttstextstream'
 }
 
+tasks.register('wrapper', Wrapper) {
+    gradleVersion = '8.10.2'
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+task prepareKotlinBuildScriptModel {}
+
 dependencies {
     // Speech SDK
     implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.48.2'
