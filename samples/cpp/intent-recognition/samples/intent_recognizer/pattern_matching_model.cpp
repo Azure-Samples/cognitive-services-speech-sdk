@@ -466,6 +466,10 @@ Maybe<std::shared_ptr<CSpxIntentMatchResult>> CSpxPatternMatchingModel::CheckPat
 
             for (auto& possiblePhrase : possiblePhrases)
             {
+                if (possiblePhrase.empty())
+                {
+                    continue;
+                }
                 // Let's treat each possiblePhrase as a separate possible pattern.
                 std::string newPattern;
                 if (*possiblePhrase.begin() != '{' &&
