@@ -109,8 +109,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 5. Speech recognition with pull audio stream.");
                 Console.WriteLine(" 6. Speech recognition with push audio stream.");
                 Console.WriteLine(" 7. Speech recognition with keyword spotting.");
-                Console.WriteLine(" 8. Speech continuous recognition using authorization token.");
-                Console.WriteLine(" 9. Speech Recognition using Phrase Lists");
+                Console.WriteLine(" 8. Speech Recognition using Phrase Lists");
                 Console.WriteLine(" a. Speech recognition with compressed input pull audio stream.");
                 Console.WriteLine(" b. Speech recognition with compressed input push audio stream.");
                 Console.WriteLine(" c. Keyword recognizer.");
@@ -158,10 +157,6 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.D8:
                     case ConsoleKey.NumPad8:
-                        SpeechRecognitionWithTokenSample.ContinuousRecognitionWithAuthorizationTokenAsync().Wait();
-                        break;
-                    case ConsoleKey.D9:
-                    case ConsoleKey.NumPad9:
                         SpeechRecognitionSamples.ContinuousRecognitionWithFileAndPhraseListsAsync().Wait();
                         break;
                     case ConsoleKey.A:
@@ -231,8 +226,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" b. Speech synthesis with word boundary event.");
                 Console.WriteLine(" c. Speech synthesis with viseme event.");
                 Console.WriteLine(" d. Speech synthesis with bookmark event.");
-                Console.WriteLine(" e. Speech synthesis using authorization token.");
-                Console.WriteLine(" f. Speech synthesis in server scenario.");
+                Console.WriteLine(" e. Speech synthesis in server scenario.");
                 Console.WriteLine(" g. Speech synthesis with source language auto detection.");
                 Console.WriteLine(" h. Speech synthesis using custom voice.");
                 Console.WriteLine(" i. Get available speech synthesis voices.");
@@ -298,9 +292,6 @@ namespace MicrosoftSpeechSDKSamples
                         SpeechSynthesisSamples.SynthesisBookmarkEventAsync().Wait();
                         break;
                     case ConsoleKey.E:
-                        SpeechSynthesisWithTokenSample.SpeechSynthesisWithAuthorizationTokenAsync().Wait();
-                        break;
-                    case ConsoleKey.F:
                         SpeechSynthesisServerScenarioSample.SpeechSynthesizeWithPool();
                         break;
                     case ConsoleKey.G:

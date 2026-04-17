@@ -27,6 +27,8 @@ namespace Avatar.Models
 
         public string? SpeechRegion { get; set; }
 
+        public string? SpeechEndpoint { get; set; }
+
         public string? SpeechKey { get; set; }
 
         public string? SpeechPrivateEndpoint { get; set; }

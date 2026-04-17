@@ -18,20 +18,19 @@ namespace helloworld
         public class ConfigSettings
         {
             public string SubscriptionKey { get; set; }
-            public string ServiceRegion { get; set; }
         }
 
         public static async Task TranslationContinuousRecognitionAsync()
         {
-            // Creates an instance of a speech translation config with specified subscription key and service region.
-            // Replace with your own subscription key and service region (e.g., "westus").
+            // Creates an instance of a speech translation config with specified endpoint and subscription key.
+            // Replace with your own endpoint and subscription key.
             string configFilePath = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
             string jsonString = await File.ReadAllTextAsync(configFilePath);
             ConfigSettings configSettings = JsonSerializer.Deserialize<ConfigSettings>(jsonString);
 
             // Creates an instance of a speech translation config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var endpoint = new Uri($"https://{configSettings.ServiceRegion}.api.cognitive.microsoft.com/");
+            var endpoint = new Uri("YourServiceEndpoint"); // e.g., "https://my-speech-resource.cognitiveservices.azure.com"
             var config = SpeechTranslationConfig.FromEndpoint(endpoint, "YourSubscriptionKey");
 
             // Sets source and target languages.

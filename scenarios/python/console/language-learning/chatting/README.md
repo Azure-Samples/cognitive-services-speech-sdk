@@ -17,7 +17,7 @@ pip install -r requirements.txt
 Update the following strings before running the sample:
 
   * `YourSubscriptionKey`: replace with your subscription key.
-  * `https://YourServiceRegion.api.cognitive.microsoft.com`: replace with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section.
+  * `YourServiceEndpoint`: replace with the endpoint for your Speech resource. You can find this endpoint in the Azure Portal under your Speech resource's "Keys and Endpoint" section (e.g., `https://my-speech-resource.cognitiveservices.azure.com`).
   * `YourOaiResourceName`: replace with the name of your Azure OpenAI Resource.
   * `YourOaiDeploymentName`: replace with the name of your model deployment. You're required to first deploy a model before you can make calls.
   * `YourOaiApiVersion`: replace with the [API version](https://learn.microsoft.com/azure/ai-services/openai/reference#chat-completions) to use for this operation. For example, `2023-05-15`.

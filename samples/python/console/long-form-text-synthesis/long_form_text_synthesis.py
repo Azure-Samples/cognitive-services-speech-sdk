@@ -146,7 +146,7 @@ class LongTextSynthesizer:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    s = LongTextSynthesizer(subscription="YourSubscriptionKey", endpoint="https://YourServiceRegion.api.cognitive.microsoft.com")
+    s = LongTextSynthesizer(subscription="YourSubscriptionKey", endpoint="YourServiceEndpoint")
     with Path('./Gatsby-chapter1.txt').open('r', encoding='utf-8') as r:
         s.synthesize_text(r.read(), output_path=Path('./gatsby'))
     s.synthesize_text(ssml_path=Path('multi-role.xml'), output_path=Path('./multi-role'))

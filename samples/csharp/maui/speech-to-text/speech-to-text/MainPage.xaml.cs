@@ -41,7 +41,7 @@ public partial class MainPage : ContentPage
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech recognizer using microphone as audio input.
             using (var recognizer = new SpeechRecognizer(config))

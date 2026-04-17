@@ -182,34 +182,6 @@
 
   <!-- Speech SDK reference sdk. -->
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
-  <!-- Speech Speech SDK Authorization token -->
-  <script>
-      // Note: Replace the URL with a valid endpoint to retrieve
-      //       authorization tokens for your subscription.
-
-      // An authorization token is a more secure method to authenticate for a browser deployment as
-      // it allows the subscription keys to be kept secure on a server and a 10 minute use token to be
-      // handed out to clients from an endpoint that can be protected from unauthorized access.
-      var authorizationEndpoint = "http://localhost:3001/api/get-speech-token";
-
-      async function RequestAuthorizationToken() {
-        if (authorizationEndpoint) {
-          try {
-            const res = await axios.get(authorizationEndpoint);
-            const token = res.data.token;
-            const region = res.data.region;
-            regionOptions.value = region;
-            authorizationToken = token;
-
-            console.log('Token fetched from back-end: ' + token);
-          } catch (err) {
-              console.log(err);
-          }
-        }
-      }
-  </script>
 
   <!-- Speech SDK USAGE -->
   <script>
@@ -235,7 +207,6 @@
 
     // subscription key and region for speech services.
     var subscriptionKey, regionOptions;
-    var authorizationToken;
     var voiceOptions, isSsml;
     var SpeechSDK;
     var synthesisText;
@@ -304,15 +275,11 @@
                 'https://' + regionOptions.value + ".tts.speech." +
                 (regionOptions.value.startsWith("china") ? "azure.cn" : "microsoft.com") +
                         "/cognitiveservices/voices/list", true);
-        if (authorizationToken) {
-          request.setRequestHeader("Authorization", "Bearer " + authorizationToken);
-        } else {
-          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
-            return;
-          }
-          request.setRequestHeader("Ocp-Apim-Subscription-Key", subscriptionKey.value);
+        if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          return;
         }
+        request.setRequestHeader("Ocp-Apim-Subscription-Key", subscriptionKey.value);
 
         request.onload = function() {
           if (request.status >= 200 && request.status < 400) {
@@ -358,15 +325,11 @@
 
         // if we got an authorization token, use the token. Otherwise use the provided subscription key
         var speechConfig;
-        if (authorizationToken) {
-          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
-        } else {
-          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
-            return;
-          }
-          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionOptions.value);
+        if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          return;
         }
+        speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionOptions.value);
 
         speechConfig.speechSynthesisVoiceName = voiceOptions.value;
         speechConfig.speechSynthesisOutputFormat = formatOptions.value;
@@ -495,15 +458,11 @@
         var speechConfig;
 
         // if we got an authorization token, use the token. Otherwise use the provided subscription key
-        if (authorizationToken) {
-          speechConfig = SpeechSDK.SpeechConfig.fromAuthorizationToken(authorizationToken, regionOptions.value);
-        } else {
-          if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-            alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
-            return;
-          }
-          speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionOptions.value);
+        if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
+          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          return;
         }
+        speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, regionOptions.value);
 
         speechConfig.speechSynthesisVoiceName = voiceOptions.value;
         speechConfig.speechSynthesisOutputFormat = formatOptions.value;
@@ -571,10 +530,7 @@
         );
         formatOptions.selectedIndex = SpeechSDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
 
-        // in case we have a function for getting an authorization token, call it.
-        if (typeof RequestAuthorizationToken === "function") {
-           await RequestAuthorizationToken();
-        }
+
       });
     });
   </script>

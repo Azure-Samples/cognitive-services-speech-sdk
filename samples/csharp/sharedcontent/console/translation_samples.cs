@@ -247,7 +247,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
             config.SpeechRecognitionLanguage = fromLanguage;
 
             // Translation target language(s).
@@ -371,7 +371,7 @@ namespace MicrosoftSpeechSDKSamples
 
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
             config.SpeechRecognitionLanguage = fromLanguage;
 
             // Translation target language(s).

@@ -13,7 +13,7 @@ using namespace Microsoft::CognitiveServices::Speech;
 void recognizeSpeech() {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech recognizer
     auto recognizer = SpeechRecognizer::FromConfig(config);

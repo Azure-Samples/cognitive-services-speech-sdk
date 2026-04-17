@@ -28,7 +28,7 @@ void SpeechRecognitionWithMicrophone()
     // <SpeechRecognitionWithMicrophone>
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
     auto recognizer = SpeechRecognizer::FromConfig(config);
@@ -72,7 +72,7 @@ void SpeechRecognitionWithLanguageAndUsingDetailedOutputFormat()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Request for detailed recognition result
     config->SetOutputFormat(OutputFormat::Detailed);
@@ -157,7 +157,7 @@ void SpeechContinuousRecognitionWithFile()
     // <SpeechContinuousRecognitionWithFile>
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech recognizer using file as audio input.
     // Replace with your own audio file name.
@@ -229,7 +229,7 @@ void SpeechRecognitionUsingCustomizedModel()
     // <SpeechRecognitionUsingCustomizedModel>
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
     // Set the endpoint ID of your customized model
     // Replace with your own CRIS endpoint ID.
     config->SetEndpointId("YourEndpointId");
@@ -310,7 +310,7 @@ void SpeechContinuousRecognitionWithPullStream()
 
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a callback that will read audio data from a WAV file.
     // Currently, the only supported WAV format is mono(single channel), 16 kHZ sample rate, 16 bits per sample.
@@ -389,7 +389,7 @@ void SpeechContinuousRecognitionWithPushStream()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a push stream
     auto pushStream = AudioInputStream::CreatePushStream();
@@ -482,7 +482,7 @@ void KeywordTriggeredSpeechRecognitionWithMicrophone()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech recognizer using microphone as audio input. The default language is "en-us".
     auto recognizer = SpeechRecognizer::FromConfig(config);
@@ -568,7 +568,7 @@ void PronunciationAssessmentWithMicrophone()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // The pronunciation assessment service has a longer default end silence timeout (5 seconds) than normal STT
     // as the pronunciation assessment is widely used in education scenario where kids have longer break in reading.
@@ -687,7 +687,7 @@ void PronunciationAssessmentWithStream()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Read audio data from file. In real scenario this can be from memory or network
     std::ifstream file("whatstheweatherlike.wav", std::ios::binary | std::ios::ate);
@@ -721,7 +721,7 @@ void PronunciationAssessmentConfiguredWithJson()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a speech recognizer from an audio file
     auto audioConfig = AudioConfig::FromWavFileInput("whatstheweatherlike.wav");
@@ -785,7 +785,7 @@ void SpeechRecognitionAndLanguageIdWithMicrophone()
     // <SpeechRecognitionAndLanguageIdWithMicrophone>
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto speechConfig = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto speechConfig = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Define the set of spoken languages that will need to be identified.
     // Replace the languages with your languages in BCP-47 format, e.g. "fr-FR".
@@ -835,7 +835,7 @@ void SpeechRecognitionAndLanguageIdWithCustomModelsWithMicrophone()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto speechConfig = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto speechConfig = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     std::vector<std::shared_ptr<SourceLanguageConfig>> sourceLanguageConfigs;
 
@@ -990,7 +990,7 @@ void SpeechContinuousRecognitionFromDefaultMicrophoneWithMASEnabled()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates an instance of audio config using default microphone as audio input and with audio processing options specified.
     // All default enhancements from Microsoft Audio Stack are enabled.
@@ -1061,7 +1061,7 @@ void SpeechRecognitionFromMicrophoneWithMASEnabledAndPresetGeometrySpecified()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates an instance of audio config using a microphone as audio input and with audio processing options specified.
     // All default enhancements from Microsoft Audio Stack are enabled and preset microphone array geometry is specified
@@ -1109,7 +1109,7 @@ void SpeechContinuousRecognitionFromMultiChannelFileWithMASEnabledAndCustomGeome
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates an instance of audio config using multi-channel WAV file as audio input and with audio processing options specified.
     // All default enhancements from Microsoft Audio Stack are enabled and custom microphone array geometry is provided.
@@ -1220,7 +1220,7 @@ void SpeechRecognitionFromPullStreamWithSelectMASEnhancementsEnabled()
 
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a callback that will read audio data from a WAV file.
     // Microsoft Audio Stack supports sample rates that are integral multiples of 16 KHz. Additionally, the following
@@ -1276,7 +1276,7 @@ void SpeechContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformingAngles
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a push stream.
     auto pushStream = AudioInputStream::CreatePushStream(AudioStreamFormat::GetWaveFormatPCM(16000, 16, 8));

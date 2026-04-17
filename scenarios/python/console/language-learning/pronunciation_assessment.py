@@ -25,7 +25,7 @@ with open("config.json", "r") as config_file:
 
 speech_key = config.get("SubscriptionKey")
 service_region = config.get("ServiceRegion")
-speech_endpoint = f"https://{service_region}.api.cognitive.microsoft.com"
+speech_endpoint = config.get("ServiceEndpoint")  # e.g., "https://my-speech-resource.cognitiveservices.azure.com"
 
 
 WEATHER_WAVE_FILE = "resources/whats_the_weather_like.wav"

@@ -8,11 +8,11 @@
   import * as fs from "fs";
   
   // replace with your own subscription key,
-  // service endpoint (e.g., "https://westus.api.cognitive.microsoft.com"), and
+  // service endpoint (e.g., "https://my-speech-resource.cognitiveservices.azure.com"), and
   // the name of the file you want to run
   // through the speech recognizer.
   var subscriptionKey = "YourSubscriptionKey";
-  var endpoint = "YourServiceEndpoint"; // e.g., "https://westus.api.cognitive.microsoft.com"
+  var endpoint = "YourServiceEndpoint"; // e.g., "https://my-speech-resource.cognitiveservices.azure.com"
   var filename = "YourAudioFile.wav"; // 16000 Hz, Mono
   
   // create the push stream we need for the speech sdk.

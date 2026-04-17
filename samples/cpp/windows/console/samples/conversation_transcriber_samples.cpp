@@ -23,7 +23,7 @@ void ConversationTranscriptionWithMicrophone()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
     auto recognizer = ConversationTranscriber::FromConfig(config);
     promise<void> recognitionEnd;
 
@@ -81,9 +81,9 @@ void ConversationTranscriptionWithMicrophone()
 
 void ConversationTranscriptionWithFile()
 {
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint (e.g., "https://my-speech-resource.cognitiveservices.azure.com") and subscription key.
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a conversation transcriber using file as audio input.
     // Replace with your own audio file name.
@@ -178,9 +178,9 @@ void ConversationTranscriptionWithPullAudioStream()
         WavFileReader m_reader;
     };
 
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint (e.g., "https://my-speech-resource.cognitiveservices.azure.com") and subscription key.
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a callback that will read audio data from a WAV file.
     // Currently, the only supported WAV format is mono(single channel), 16 kHZ sample rate, 16 bits per sample.
@@ -247,9 +247,9 @@ void ConversationTranscriptionWithPullAudioStream()
 
 void ConversationTranscriptionWithPushAudioStream()
 {
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint (e.g., "https://my-speech-resource.cognitiveservices.azure.com") and subscription key.
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Creates a push stream
     auto pushStream = AudioInputStream::CreatePushStream();
@@ -330,9 +330,9 @@ void ConversationTranscriptionWithPushAudioStream()
 
 void ConversationTranscriptionAndLanguageIdWithMicrophone()
 {
-    // Creates an instance of a speech config with specified subscription key and service region.
-    // Replace with your own subscription key and service region (e.g., "westus").
-    auto config = SpeechConfig::FromSubscription("YourSubscriptionKey", "YourServiceRegion");
+    // Creates an instance of a speech config with specified endpoint and subscription key.
+    // Replace with your own endpoint (e.g., "https://my-speech-resource.cognitiveservices.azure.com") and subscription key.
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Define the set of spoken languages that will need to be identified.
     // Replace the languages with your languages in BCP-47 format, e.g. "fr-FR".

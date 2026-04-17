@@ -31,7 +31,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "en-US";
@@ -120,7 +120,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Read audio data from file. In real scenario this can be from memory or network
             var audioDataWithHeader = File.ReadAllBytes("whatstheweatherlike.wav");
@@ -187,7 +187,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "en-US";
@@ -409,7 +409,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
             var waveFileName = @"zhcn_continuous_mode_sample.wav";
             var scriptFileName = @"zhcn_continuous_mode_sample.txt";
 
@@ -656,7 +656,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Replace the language with your language in BCP-47 format, e.g., en-US.
             var language = "en-US";

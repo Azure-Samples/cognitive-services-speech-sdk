@@ -17,7 +17,7 @@ namespace helloworld
         {
             // Creates an instance of a speech translation config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechTranslationConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Sets source and target languages.
             string fromLanguage = "en-US";

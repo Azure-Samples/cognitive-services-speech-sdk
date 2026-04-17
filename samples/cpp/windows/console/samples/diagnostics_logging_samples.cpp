@@ -22,7 +22,7 @@ void DiagnosticsLoggingFileLoggerWithoutFilter()
     // Do your Speech SDK calls... for example:
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
     auto recognizer = SpeechRecognizer::FromConfig(config);
 
     // Stop logging
@@ -49,7 +49,7 @@ void DiagnosticsLoggingFileLoggerWithFilter()
     // Do your Speech SDK calls... for example:
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
     auto recognizer = SpeechRecognizer::FromConfig(config);
 
     // Stop logging and clear filters
@@ -78,7 +78,7 @@ void DiagnosticsLoggingEventLoggerWithoutFilter()
     // Do your Speech SDK calls... for example:
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
     auto recognizer = SpeechRecognizer::FromConfig(config);
 
     // Stop logging by setting an empty callback
@@ -114,7 +114,7 @@ void DiagnosticsLoggingEventLoggerWithFilter()
     // Do your Speech SDK calls... for example:
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
     auto recognizer = SpeechRecognizer::FromConfig(config);
 
     // Stop logging and clear filters by setting an empty callback
@@ -154,7 +154,7 @@ void DiagnosticsLoggingMemoryLogger()
     // Do your Speech SDK calls... for example:
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
     auto recognizer = SpeechRecognizer::FromConfig(config);
 
     // Define the full path and name of a log file on your local disk

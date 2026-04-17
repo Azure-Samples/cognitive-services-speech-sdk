@@ -17,8 +17,7 @@ This sample demonstrates various forms of speech recognition, speech synthesis, 
 * Create an empty workspace in Eclipse and import the folder containing this sample as a project into your workspace.
 * To tailor the sample to your environment, use search and replace across the whole project to update the following strings:
   * `YourSubscriptionKey`: replace with your subscription key.
-  * `YourEndpointUrl`: replace with the endpoint URL for your subscription, for example, 
-    `https://westus.api.cognitive.microsoft.com/`.
+  * `YourEndpointUrl`: replace with the endpoint for your Speech resource (e.g., `https://my-speech-resource.cognitiveservices.azure.com/`).
   * `YourEndpointId` (optional): replace with the endpoint ID of your customized model in [CRIS](https://cris.ai).
   * `YourAudioFile.wav`: replace with a path to a `.wav` file on your disk **(required format: 16 kHz sample rate, 16 bit samples, mono / single-channel)**
   * The following settings apply to keyword-triggered recognition:

@@ -28,7 +28,7 @@ except ImportError:
 # Replace with your own subscription key and endpoint.
 # See the limitations in supported regions,
 # https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-conversation-transcription
-speech_key, speech_endpoint = "YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com"
+speech_key, speech_endpoint = "YourSubscriptionKey", "YourServiceEndpoint"
 
 # Set up endpoint with custom domain. This is required when using aad token credential to authenticate.
 # For details on setting up a custom domain with private links, see:

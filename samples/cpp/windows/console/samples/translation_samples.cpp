@@ -26,7 +26,7 @@ void TranslationWithMicrophone()
     // <TranslationWithMicrophone>
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechTranslationConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechTranslationConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Sets source and target languages
     // Replace with the languages of your choice.
@@ -86,7 +86,7 @@ void TranslationContinuousRecognition()
 {
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    auto config = SpeechTranslationConfig::FromEndpoint("https://YourServiceRegion.api.cognitive.microsoft.com", "YourSubscriptionKey");
+    auto config = SpeechTranslationConfig::FromEndpoint("YourServiceEndpoint", "YourSubscriptionKey");
 
     // Sets source and target languages
     auto fromLanguage = "en-US";

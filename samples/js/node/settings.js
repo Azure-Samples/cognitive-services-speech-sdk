@@ -4,7 +4,7 @@
 // Replace with your own subscription key, service region (e.g., "westus"),
 // and recognition language.
 export const subscriptionKey =   "YourSubscriptionKey";
-export const serviceEndpoint =   "YourServiceEndpoint"; // e.g., "https://westus.api.cognitive.microsoft.com"
+export const serviceEndpoint =   "YourServiceEndpoint"; // e.g., "https://my-speech-resource.cognitiveservices.azure.com"
 export const serviceRegion =     "YourSubscriptionRegion"; // e.g., "westus"
 export const language =          "en-US";
 

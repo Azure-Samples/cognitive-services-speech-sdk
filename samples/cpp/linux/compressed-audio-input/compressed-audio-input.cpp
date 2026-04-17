@@ -61,10 +61,9 @@ void recognizeSpeech(const std::string& compressedFileName)
     }
 
     const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
-    const char* serviceRegion = getEnvVar("SERVICE_REGION");
     // Creates an instance of a speech config with specified endpoint and subscription key.
     // Replace with your own endpoint and subscription key.
-    const string endpoint = "https://" + string(serviceRegion) + ".api.cognitive.microsoft.com";
+    const string endpoint = getEnvVar("SPEECH_ENDPOINT"); // e.g., "https://my-speech-resource.cognitiveservices.azure.com"
     auto config = SpeechConfig::FromEndpoint(endpoint, subscriptionKey);
 
     AudioStreamContainerFormat inputFormat;

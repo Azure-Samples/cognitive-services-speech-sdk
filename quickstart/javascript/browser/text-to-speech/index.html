@@ -64,15 +64,15 @@
     <table width="100%">
       <tr>
         <td></td>
-        <td><h1 style="font-weight:500;">Microsoft Cognitive Services Speech SDK JavaScript Quickstart</h1></td>
+        <td><h1 style="font-weight:500;">Azure AI Foundry Speech SDK JavaScript Quickstart</h1></td>
       </tr>
       <tr>
-        <td align="right"><a href="https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started" target="_blank">Subscription</a>:</td>
-        <td><input id="subscriptionKey" type="text" size="40" placeholder="YourSubscriptionKey"></td>
+        <td align="right">API Key:</td>
+        <td><input id="subscriptionKey" type="text" size="40" placeholder="YourAPIKey"></td>
       </tr>
       <tr>
-        <td align="right">Region</td>
-        <td><input id="serviceRegion" type="text" size="40" placeholder="YourServiceRegion"></td>
+        <td align="right">Endpoint</td>
+        <td><input id="serviceEndpoint" type="text" size="60" placeholder="https://YourResourceName.cognitiveservices.azure.com"></td>
       </tr>
       <tr>
         <td align="right" valign="top">Input Text</td>
@@ -100,14 +100,14 @@
     var startSpeakTextAsyncButton;
 
     // subscription key and region for speech services.
-    var subscriptionKey, serviceRegion;
+    var subscriptionKey, serviceEndpoint;
     var SpeechSDK;
     var synthesizer;
 
     document.addEventListener("DOMContentLoaded", function () {
       startSpeakTextAsyncButton = document.getElementById("startSpeakTextAsyncButton");
       subscriptionKey = document.getElementById("subscriptionKey");
-      serviceRegion = document.getElementById("serviceRegion");
+      serviceEndpoint = document.getElementById("serviceEndpoint");
       phraseDiv = document.getElementById("phraseDiv");
       resultDiv = document.getElementById("resultDiv");
 
@@ -116,11 +116,12 @@
         phraseDiv.innerHTML = "";
 
         if (subscriptionKey.value === "" || subscriptionKey.value === "subscription") {
-          alert("Please enter your Microsoft Cognitive Services Speech subscription key!");
+          alert("Please enter your Azure AI Foundry API key!");
           startSpeakTextAsyncButton.disabled = false;
           return;
         }
-        var speechConfig = SpeechSDK.SpeechConfig.fromSubscription(subscriptionKey.value, serviceRegion.value);
+
+        var speechConfig = SpeechSDK.SpeechConfig.fromEndpoint(new URL(serviceEndpoint.value), subscriptionKey.value);
 
         synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
 

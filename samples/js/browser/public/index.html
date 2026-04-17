@@ -205,34 +205,6 @@
 
     <!-- Speech SDK REFERENCE -->
     <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
-    <!-- Speech Speech SDK Authorization token -->
-    <script>
-        // Note: Replace the URL with a valid endpoint to retrieve
-        //       authorization tokens for your subscription.
-
-        // An authorization token is a more secure method to authenticate for a browser deployment as
-        // it allows the subscription keys to be kept secure on a server and a 10 minute use token to be
-        // handed out to clients from an endpoint that can be protected from unauthorized access.
-        let authorizationEndpoint = "http://localhost:3001/api/get-speech-token";
-
-        async function RequestAuthorizationToken() {
-          if (authorizationEndpoint) {
-            try {
-              const res = await axios.get(authorizationEndpoint);
-              const token = res.data.token;
-              const region = res.data.region;
-              regionOptions.value = region;
-              authorizationToken = token;
-
-              console.log('Token fetched from back-end: ' + token);
-            } catch (err) {
-                console.log(err);
-            }
-          }
-        }
-    </script>
 
     <!-- Speech SDK presence check -->
     <script>
@@ -250,7 +222,7 @@
     <script>
         var SpeechSDK;
         var phraseDiv, statusDiv;
-        var key, authorizationToken, phrases;
+        var key, phrases;
         var regionOptions;
         var languageOptions, formatOption, filePicker, microphoneSources;
         var useDetailedResults;
@@ -440,13 +412,8 @@
 
             enumerateMicrophones();
 
-            Initialize(async function (speechSdk) {
+            Initialize(function (speechSdk) {
                 SpeechSDK = speechSdk;
-
-                // in case we have a function for getting an authorization token, call it.
-                if (typeof RequestAuthorizationToken === "function") {
-                    await RequestAuthorizationToken();
-                }
             });
         });
     </script>
@@ -471,9 +438,7 @@
 
         function getSpeechConfig(sdkConfigType) {
             let speechConfig;
-            if (authorizationToken) {
-                speechConfig = sdkConfigType.fromAuthorizationToken(authorizationToken, regionOptions.value);
-            } else if (!key.value) {
+            if (!key.value) {
                 alert("Please enter your Cognitive Services Speech subscription key!");
                 return undefined;
             } else {

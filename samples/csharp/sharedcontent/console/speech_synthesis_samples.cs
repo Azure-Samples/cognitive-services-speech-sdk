@@ -18,7 +18,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer using the default speaker as audio output.
             using (var synthesizer = new SpeechSynthesizer(config))
@@ -62,7 +62,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Sets the synthesis language.
             // The full list of supported language can be found here:
@@ -112,7 +112,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Configure the voice for speech synthesis. For a complete list of available voices,
             // visit https://aka.ms/speech/voices/neural
@@ -169,7 +169,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
             // Replace with the endpoint id of your Custom Voice model.
             config.EndpointId = "YourEndpointId";
             // Replace with the voice name of your Custom Voice model.
@@ -218,7 +218,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer using file as audio output.
             // Replace with your own audio file name.
@@ -266,7 +266,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Sets the synthesis output format.
             // The full list of supported format can be found here:
@@ -320,7 +320,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Sets the synthesis output format.
             // The full list of supported format can be found here:
@@ -379,7 +379,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates an audio out stream.
             using (var stream = AudioOutputStream.CreatePullStream())
@@ -441,7 +441,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates an instance of a customer class inherited from PushAudioOutputStreamCallback
             var callback = new PushAudioOutputStreamSampleCallback();
@@ -495,7 +495,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
             // This means the audio output data will not be written to any stream.
@@ -543,7 +543,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
             // This means the audio output data will not be written to any stream.
@@ -613,7 +613,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
             // This means the audio output data will not be written to any stream.
@@ -677,7 +677,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
             // This means the audio output data will not be written to any stream.
@@ -733,7 +733,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
             // This means the audio output data will not be written to any stream.
@@ -789,7 +789,7 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer with a null output stream.
             // This means the audio output data will not be written to any stream.
@@ -839,7 +839,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates an instance of AutoDetectSourceLanguageConfig with open languages range
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromOpenRange();
@@ -890,7 +890,7 @@ namespace MicrosoftSpeechSDKSamples
             // Creates an instance of a speech config with specified endpoint and subscription key.
             // Replace with your own endpoint and subscription key.
             // The default language is "en-us".
-            var config = SpeechConfig.FromEndpoint(new Uri("https://YourServiceRegion.api.cognitive.microsoft.com"), "YourSubscriptionKey");
+            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
 
             // Creates a speech synthesizer
             using (var synthesizer = new SpeechSynthesizer(config, null as AudioConfig))
@@ -918,11 +918,11 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        private static async Task<SpeechSynthesisResult> SynthesizeOnceAsyncInternal(string key, string region,
+        private static async Task<SpeechSynthesisResult> SynthesizeOnceAsyncInternal(string key, string endpoint,
             string endpointId = null, string voiceName = null, string text = "Hello World!")
         {
             SpeechSynthesisResult synthesisResult = null;
-            var config = SpeechConfig.FromEndpoint(new Uri($"https://{region}.api.cognitive.microsoft.com"), key);
+            var config = SpeechConfig.FromEndpoint(new Uri(endpoint), key);
             if (!string.IsNullOrEmpty(endpointId))
             {
                 config.EndpointId = endpointId;
@@ -943,12 +943,12 @@ namespace MicrosoftSpeechSDKSamples
             return synthesisResult;
         }
 
-        // Speech synthesis with backup subscription region.
+        // Speech synthesis with backup subscription endpoint.
         public static async Task SynthesizeOnceToSpeakerAsyncSwitchSecondaryRegion()
         {
-            // Create a speech resource with primary subscription key and service region.
-            // Also create a speech resource with secondary subscription key and service region
-            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("YourPrimarySubscriptionKey", "YourPrimaryServiceRegion" );
+            // Create a speech resource with primary subscription key and service endpoint.
+            // Also create a speech resource with secondary subscription key and service endpoint
+            SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("YourPrimarySubscriptionKey", "YourPrimaryServiceEndpoint" );
             if (synthesisResult.Reason == ResultReason.Canceled)
             {
                 SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
@@ -956,7 +956,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
                     || details.ErrorCode == CancellationErrorCode.ServiceTimeout)
                 {
-                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceRegion");
+                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceEndpoint");
                 }
             }
         }
@@ -965,9 +965,9 @@ namespace MicrosoftSpeechSDKSamples
         // If custom voice service is unavailable, you can fallback to a standard platform voice.
         public static async Task SynthesizeOnceUseCustomVoiceToSpeakerAsyncSwitchPlatformVoice()
         {
-            // Create a custom voice speech resource with subscription key, service region, endpoint ID and voice name.
+            // Create a custom voice speech resource with subscription key, service endpoint, endpoint ID and voice name.
             SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey",
-                "YourServiceRegion", "YourEndpointId", "YourCustomVoiceName");
+                "YourServiceEndpoint", "YourEndpointId", "YourCustomVoiceName");
             if (synthesisResult.Reason == ResultReason.Canceled)
             {
                 SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
@@ -977,7 +977,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorDetails.Contains("Error code: 1007"))
                 {
                     // Synthesize using a standard platform voice, e.g. en-US-JennyNeural
-                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey", "YourServiceRegion", null, "YourPlatformVoiceName");
+                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSubscriptionKey", "YourServiceEndpoint", null, "YourPlatformVoiceName");
                 }
             }
         }
@@ -986,11 +986,11 @@ namespace MicrosoftSpeechSDKSamples
         // If custom voice service is unavailable, you can fallback to custom voice service in another region.
         public static async Task SynthesizeOnceUseCustomVoiceToSpeakerAsyncSwitchSecondaryRegion()
         {
-            // Create a custom voice resource with primary subscription key and service region.
-            // Also create a speech resource with secondary subscription key and service region.
+            // Create a custom voice resource with primary subscription key and service endpoint.
+            // Also create a speech resource with secondary subscription key and service endpoint.
             // Copy Custom Voice model from primary region to secondary region and deploy.
             SpeechSynthesisResult synthesisResult = await SynthesizeOnceAsyncInternal("YourPrimarySubscriptionKey",
-                "YourPrimaryServiceRegion", "YourEndpointIdOnPrimaryRegion", "YourCustomVoiceName");
+                "YourPrimaryServiceEndpoint", "YourEndpointIdOnPrimaryRegion", "YourCustomVoiceName");
             if (synthesisResult.Reason == ResultReason.Canceled)
             {
                 SpeechSynthesisCancellationDetails details = SpeechSynthesisCancellationDetails.FromResult(synthesisResult);
@@ -1000,7 +1000,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorDetails.Contains("Error code: 1007"))
                 {
                     // Synthesize using same custom voice model in secondary region.
-                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceRegion",
+                    synthesisResult = await SynthesizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceEndpoint",
                         "YourEndpointIdOnSecondaryRegion", "YourCustomVoiceName");
                 }
             }
