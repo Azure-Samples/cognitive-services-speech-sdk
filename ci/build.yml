@@ -75,7 +75,9 @@ jobs:
   pool:
     name: CarbonWS2022Compliant
   steps:
-  - bash: 'perl ci/patch-samples.pl "$(SpeechSdkVersion)" . && git diff'
+  - bash: |
+      SPEECHSDK_VERSION=$(head -n 1 ci/version.txt)
+      perl ci/patch-samples.pl "$SPEECHSDK_VERSION" . && git diff
     displayName: Patch samples
   # - bash: 'dotnet workload install maui-android'
   #   displayName: install maui-android workload.
