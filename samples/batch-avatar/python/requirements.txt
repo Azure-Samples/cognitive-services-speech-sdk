@@ -1,4 +1,5 @@
 requests
 azure-identity
 azure-core>=1.38.0
+cryptography>=46.0.5
 urllib3>=2.6.3

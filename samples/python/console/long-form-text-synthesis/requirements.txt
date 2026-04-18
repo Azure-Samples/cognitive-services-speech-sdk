@@ -1,5 +1,5 @@
 azure.cognitiveservices.speech
-nltk
+nltk>=3.9.3
 tqdm
 urllib3>=2.6.3
 azure-core>=1.38.0

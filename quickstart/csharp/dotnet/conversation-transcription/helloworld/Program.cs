@@ -91,7 +91,7 @@ namespace helloworld
         static async Task Main()
         {
             var subscriptionKey = "YourSubscriptionKey";
-            var endpoint = "YourServiceEndpoint";
+            var endpoint = "https://YourServiceRegion.api.cognitive.microsoft.com";
 
             await TranscribeConversationsAsync(subscriptionKey, endpoint);
             Console.WriteLine("Please press <Return> to continue.");

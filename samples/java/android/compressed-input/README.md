@@ -19,7 +19,7 @@ This sample demonstrates how to recognize speech from compressed audio input wit
   * Replace the string `YourServiceRegion` with the service region of your subscription.
     For example, replace with `westus` if you are using the 30-day free trial subscription.
 * Create folder `jniLibs` inside `app\src\main`. (`jniLibs` should be at the same level as the `java` folder)
-* Create four folders inside `jniLibs` with names `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64` respectively.
+* Create four folders inside `jniLibs` with names `arm64-v8a`, `armeabi-v7a`, `x86_64` respectively.
 * Create `libgstreamer_android.so` for each Application Binary Interface (ABI) using the information provided in  [Compressed audio input with the Speech SDK on Android](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-codec-compressed-audio-input-streams-android)
 * Place the `libgstreamer_android.so` inside `jniLibs\arm64-v8a` and the other folders respectively. 
 * Create a folder named `input` in the root of your phone's local storage. Copy the file [whatstheweatherlike.mp3](./whatstheweatherlike.mp3) into this folder.

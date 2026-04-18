@@ -8,7 +8,7 @@ https://github.com/Azure-Samples/cognitive-services-speech-sdk/blob/master/scena
 Run with:
 mvn clean dependency:copy-dependencies
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xsi:schemaLocation='http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd' xmlns='http://maven.apache.org/POM/4.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.microsoft.cognitiveservices.speech.samples</groupId>
   <artifactId>quickstart-eclipse</artifactId>
@@ -46,7 +46,17 @@ mvn clean dependency:copy-dependencies
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk</artifactId>
-      <version>1.48.1</version>
+      <version>1.49.1</version>
     </dependency>
   </dependencies>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.18.6</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>

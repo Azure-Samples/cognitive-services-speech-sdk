@@ -2,3 +2,4 @@ requests
 urllib3>=2.6.3
 azure-identity
 azure-core>=1.38.0
+cryptography>=46.0.5
