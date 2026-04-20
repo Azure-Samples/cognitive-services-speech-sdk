@@ -70,7 +70,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15to18</artifactId>
-            <version>1.78.1</version>
+            <version>1.84</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
