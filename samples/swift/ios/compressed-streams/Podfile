@@ -1,0 +1,5 @@
+target 'CompressedStreamsSample' do
+    platform :ios, '14.0'
+    pod 'MicrosoftCognitiveServicesSpeech-iOS', '~> 1.31'
+    use_frameworks!
+end
