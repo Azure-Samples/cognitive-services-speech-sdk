@@ -37,7 +37,8 @@ android {
 
 dependencies {
     // Speech SDK
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.49.1'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.48.1'
+    implementation platform('io.netty:netty-bom:4.2.13.Final')
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
