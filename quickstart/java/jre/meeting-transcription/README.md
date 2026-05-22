@@ -1,12 +1,10 @@
 # Quickstart: Transcribe meretingn from a file input stream in Java on Windows, macOS, or Linux
 
 This sample demonstrates how to enroll participant's voice signatures and transcribe metting with 2 participants with the Speech SDK for Java on Windows, macOS or Linux.
-See the [accompanying article](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-meeting-transcription) on the SDK documentation page which describes details about meeting transcription service.
 
 ## Prerequisites
 
 * A subscription key for the Speech service. See [Try the speech service for free](https://docs.microsoft.com/azure/cognitive-services/speech-service/get-started).
-> Note: See the [limitations in supported regions](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-meeting-transcription)
 * A PC (Windows, Linux, Mac) capable to run [Eclipse](https://www.eclipse.org),[<sup>[1]</sup>](#footnote1) with a working microphone.
 * See the [Speech SDK installation quickstart](https://learn.microsoft.com/azure/ai-services/speech-service/quickstarts/setup-platform?pivots=programming-language-java) for details on system requirements and setup.
 

@@ -27,8 +27,6 @@ except ImportError:
 
 # Set up the subscription info for the Speech Service:
 # Replace with your own subscription key and service region (e.g., "centralus").
-# See the limitations in supported regions,
-# https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-meeting-transcription
 speech_key, service_region = "YourSubscriptionKey", "YourServiceRegion"
 
 # This sample uses a wavfile which is captured using a supported Speech SDK devices

@@ -3,6 +3,8 @@
 // Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 //
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <iostream> // cin, cout
 #include <speechapi_cxx.h>
 #include <cstdlib>

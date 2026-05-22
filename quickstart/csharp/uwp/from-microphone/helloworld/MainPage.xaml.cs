@@ -49,16 +49,15 @@ namespace helloworld
         private async void SpeechRecognitionFromMicrophone_ButtonClicked(object sender, RoutedEventArgs e)
         {
         // </skeleton_1>
-            // <create_speech_configuration>
-            // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
-            // </create_speech_configuration>
-
             // <skeleton_2>
             try
             {
             // </skeleton_2>
+                // <create_speech_configuration>
+                // Creates an instance of a speech config with specified endpoint and subscription key.
+                // Replace with your own endpoint and subscription key.
+                var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
+                // </create_speech_configuration>
                 // <create_speech_recognizer_1>
                 // Creates a speech recognizer using microphone as audio input.
                 using (var recognizer = new SpeechRecognizer(config))

@@ -29,5 +29,4 @@ To debug the app and then run it, press F5 or use **Debug** \> **Start Debugging
 ## References
 
 * [Quickstart article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/quickstart-csharp-dotnet-windows)
-* [How to article on the SDK documentation site](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-meeting-transcription)
 * [Speech SDK API reference for C#](https://aka.ms/csspeech/csharpref)

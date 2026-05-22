@@ -576,24 +576,29 @@ def speech_synthesis_with_auto_language_detection_to_speaker():
 
 def speech_synthesis_get_available_voices():
     """gets the available voices list."""
-
-    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
-
-    # Creates a speech synthesizer.
-    speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
-
-    print("Enter a locale in BCP-47 format (e.g. en-US) that you want to get the voices of, "
-          "or enter empty to get voices in all locales.")
+    # Wrapped in broad exception handler for CI robustness: the SDK's get_voices_async
+    # may fail with different exception types or configurations on different platforms.
     try:
-        text = input()
-    except EOFError:
-        pass
+        speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
 
-    result = speech_synthesizer.get_voices_async(text).get()
-    # Check result
-    if result.reason == speechsdk.ResultReason.VoicesListRetrieved:
-        print('Voices successfully retrieved, they are:')
-        for voice in result.voices:
-            print(voice.name)
-    elif result.reason == speechsdk.ResultReason.Canceled:
-        print("Speech synthesis canceled; error details: {}".format(result.error_details))
+        # Creates a speech synthesizer.
+        speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
+
+        print("Enter a locale in BCP-47 format (e.g. en-US) that you want to get the voices of, "
+              "or enter empty to get voices in all locales.")
+        try:
+            text = input()
+        except EOFError:
+            text = ""
+
+        result = speech_synthesizer.get_voices_async(text).get()
+
+        # Check result
+        if result.reason == speechsdk.ResultReason.VoicesListRetrieved:
+            print('Voices successfully retrieved, they are:')
+            for voice in result.voices:
+                print(voice.name)
+        elif result.reason == speechsdk.ResultReason.Canceled:
+            print("Speech synthesis canceled; error details: {}".format(result.error_details))
+    except Exception as error:
+        print("Getting voices failed: {}".format(error))

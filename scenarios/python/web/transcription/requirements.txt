@@ -4,4 +4,4 @@ azure-cognitiveservices-speech==1.42.0
 gevent
 gevent-websocket
 numpy
-urllib3>=2.6.3
+urllib3>=2.7.0

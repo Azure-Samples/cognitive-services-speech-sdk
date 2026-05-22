@@ -1,4 +1,3 @@
 requests
 azure-cognitiveservices-speech
-python-dotenv
-urllib3>=2.6.3
+urllib3>=2.7.0

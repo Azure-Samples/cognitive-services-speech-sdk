@@ -2,7 +2,7 @@
 
 The input text stream API is designed to generate audio from text that is being streamed or generated in chunks. A typical scenario is to speak text generated from GPT-like models. Compared to non-text stream APIs, the text stream API significantly reduces TTS latency.
 
-|  | Non text stream | Text Stream |
+| Category | Non text stream | Text Stream |
 | ---------- | -------- | ----------- |
 | Input Type | Whole GPT response | Each GPT output chunk |
 | Latency | High: Time of full GPT response + Time of TTS | Low: Time of few GPT chunks + Time of TTS |
@@ -53,7 +53,7 @@ Please specify `speechsdk.SpeechSynthesisRequestInputType.TextStream` when creat
 
 ### Send text to stream
 For each text chunk, call `request.input_stream.write(text)` to send text to the stream.  
-Please do not wait too long(longer than 30s) between creating the request and sending the first text, and also between sending two texts, otherwise the connection may be closed by server and you may got 503 error.
+Please do not wait too long (longer than 30s) between creating the request and sending the first text, and also between sending two texts, otherwise the connection may be closed by the server and you may get a 503 error.
 
 ### Close text stream
 When you finish sending chunks, call `request.input_stream.close()` to close the stream.

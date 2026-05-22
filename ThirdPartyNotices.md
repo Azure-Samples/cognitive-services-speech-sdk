@@ -17,7 +17,7 @@ required to debug changes to any libraries licensed under the GNU Lesser General
 
 ---------------------------------------------------------
 
-com.fasterxml.jackson.core/jackson-annotations 2.13.1 - Apache-2.0
+com.fasterxml.jackson.core/jackson-annotations 2.18.6 - Apache-2.0
 
 
 
@@ -123,7 +123,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.fasterxml.jackson.core/jackson-core 2.13.1 - Apache-2.0
+com.fasterxml.jackson.core/jackson-core 2.18.6 - Apache-2.0
 
 
 
@@ -229,7 +229,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.fasterxml.jackson.core/jackson-databind 2.13.1 - Apache-2.0
+com.fasterxml.jackson.core/jackson-databind 2.18.6 - Apache-2.0
 
 
 
@@ -335,7 +335,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.fasterxml.jackson.datatype/jackson-datatype-jdk8 2.12.1 - Apache-2.0
+com.fasterxml.jackson.datatype/jackson-datatype-jdk8 2.18.6 - Apache-2.0
 
 
 
@@ -441,7 +441,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.fasterxml.jackson.datatype/jackson-datatype-joda 2.13.1 - Apache-2.0
+com.fasterxml.jackson.datatype/jackson-datatype-joda 2.18.6 - Apache-2.0
 
 
 
@@ -547,7 +547,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.fasterxml.jackson.datatype/jackson-datatype-jsr310 2.12.1 - Apache-2.0
+com.fasterxml.jackson.datatype/jackson-datatype-jsr310 2.18.6 - Apache-2.0
 
 
 
@@ -653,7 +653,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.fasterxml.jackson.module/jackson-module-parameter-names 2.12.1 - Apache-2.0
+com.fasterxml.jackson.module/jackson-module-parameter-names 2.18.6 - Apache-2.0
 
 
 
@@ -1927,7 +1927,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.squareup.okhttp3/logging-interceptor 3.12.2 - Apache-2.0
+com.squareup.okhttp3/logging-interceptor 4.12.0 - Apache-2.0
 
 
 
@@ -2033,7 +2033,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.squareup.okhttp3/okhttp 3.12.2 - Apache-2.0
+com.squareup.okhttp3/okhttp 4.12.0 - Apache-2.0
 
 
 
@@ -2139,7 +2139,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.squareup.okhttp3/okhttp-urlconnection 3.12.2 - Apache-2.0
+com.squareup.okhttp3/okhttp-urlconnection 4.12.0 - Apache-2.0
 
 
 
@@ -2245,7 +2245,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-com.squareup.okio/okio 1.15.0 - Apache-2.0
+com.squareup.okio/okio 3.12.0 - Apache-2.0
 
 
 
@@ -2672,7 +2672,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-commons-io/commons-io 2.8.0 - Apache-2.0
+commons-io/commons-io 2.14.0 - Apache-2.0
 
 
 
@@ -2990,7 +2990,7 @@ limitations under the License.
 
 ---------------------------------------------------------
 
-net.minidev/json-smart 2.4.7 - Apache-2.0
+net.minidev/json-smart 2.5.2 - Apache-2.0
 
 
 

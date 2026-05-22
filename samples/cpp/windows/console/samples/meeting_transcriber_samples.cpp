@@ -19,7 +19,6 @@ using namespace Microsoft::CognitiveServices::Speech::Audio;
 // Create voice signatures using REST API at https://signature.centralus.cts.speech.microsoft.com by using YourSubscriptionKey
 // and the provided enrollment_audio_katie.wav and enrollment_audio_steve.wav.
 // Replace the below voiceSignatureKatie and voiceSignatureSteve by copy the Signature value from the Response body. The Signature value contains Version, Tag and Data.
-// More details are at https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-meeting-transcription-service
 // The created signatures should look similar to ones shown below. Please note you should always create up to date signatures, and the example signatures shown below should not be used as such.
 const string voiceSignatureKatie = R"(
                { "Version": 0,

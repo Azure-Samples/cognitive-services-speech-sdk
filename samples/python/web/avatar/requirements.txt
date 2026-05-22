@@ -6,7 +6,7 @@ flask-socketio>=5.5.1
 openai>=1.76.0
 pytz
 requests
-urllib3>=2.6.3
+urllib3>=2.7.0
 torch>=2.6.0
 numpy
 torchaudio>=2.6.0

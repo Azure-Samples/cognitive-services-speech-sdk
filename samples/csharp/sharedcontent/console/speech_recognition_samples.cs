@@ -965,10 +965,10 @@ namespace MicrosoftSpeechSDKSamples
             }
         }
 
-        private static async Task<RecognitionResult> RecognizeOnceAsyncInternal(string key, string region)
+        private static async Task<RecognitionResult> RecognizeOnceAsyncInternal(string key, string endpoint)
         {
             RecognitionResult recognitionResult = null;
-            var config = SpeechConfig.FromEndpoint(new Uri(region), key);
+            var config = SpeechConfig.FromEndpoint(new Uri(endpoint), key);
 
             // Creates a speech recognizer using file as audio input.
             using (var audioInput = AudioConfig.FromWavFileInput(@"whatstheweatherlike.wav"))
@@ -985,9 +985,9 @@ namespace MicrosoftSpeechSDKSamples
         // Speech recognition with backup subscription region.
         public static async Task RecognitionOnceWithFileAsyncSwitchSecondaryRegion()
         {
-            // Create a speech resource with primary subscription key and service region.
-            // Also create a speech resource with secondary subscription key and service region
-            RecognitionResult recognitionResult = await RecognizeOnceAsyncInternal("YourPrimarySubscriptionKey", "YourPrimaryServiceRegion");
+            // Create a speech resource with primary subscription key and service endpoint.
+            // Also create a speech resource with secondary subscription key and service endpoint.
+            RecognitionResult recognitionResult = await RecognizeOnceAsyncInternal("YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com");
             if (recognitionResult.Reason == ResultReason.Canceled)
             {
                 CancellationDetails details = CancellationDetails.FromResult(recognitionResult);
@@ -995,7 +995,7 @@ namespace MicrosoftSpeechSDKSamples
                     || details.ErrorCode == CancellationErrorCode.ServiceUnavailable
                     || details.ErrorCode == CancellationErrorCode.ServiceTimeout)
                 {
-                    recognitionResult = await RecognizeOnceAsyncInternal("YourSecondarySubscriptionKey", "YourSecondaryServiceRegion");
+                    recognitionResult = await RecognizeOnceAsyncInternal("YourSubscriptionKey", "https://YourServiceRegion.api.cognitive.microsoft.com");
                 }
             }
             Console.WriteLine("Recognized {0}", recognitionResult.Text);
@@ -1391,13 +1391,13 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Create a token credential using DefaultAzureCredential.
             // This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
-            // For more types of token credentials, refer to: 
+            // For more types of token credentials, refer to:
             // https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
             TokenCredential credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions());
 
             // Define the v2 endpoint for Azure Speech Service.
             // This is required when using a private endpoint with a custom domain.
-            // For details on setting up a custom domain with private links, see: 
+            // For details on setting up a custom domain with private links, see:
             // https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
             var v2Endpoint = string.Format("wss://{custom domain}/stt/speech/universal/v2");
 
@@ -1493,13 +1493,13 @@ namespace MicrosoftSpeechSDKSamples
         {
             // Create a token credential using DefaultAzureCredential.
             // This credential supports multiple authentication methods, including Managed Identity, environment variables, and Azure CLI login.
-            // For more types of token credentials, refer to: 
+            // For more types of token credentials, refer to:
             // https://learn.microsoft.com/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet
             TokenCredential credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions());
 
             // Define the v2 endpoint for Azure Speech Service.
             // This is required when using a private endpoint with a custom domain.
-            // For details on setting up a custom domain with private links, see: 
+            // For details on setting up a custom domain with private links, see:
             // https://learn.microsoft.com/azure/ai-services/speech-service/speech-services-private-link?tabs=portal#create-a-custom-domain-name
             var v2Endpoint = string.Format("wss://{custom domain}/stt/speech/universal/v2");
 

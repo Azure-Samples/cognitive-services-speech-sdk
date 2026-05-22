@@ -49,17 +49,17 @@ namespace helloworld
 
         private async void SpeechTranslationFromMicrophone_ButtonClicked(object sender, RoutedEventArgs e)
         {
-            // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own endpoint and subscription key.
-            var config = SpeechTranslationConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
-
-            // Sets source and target languages.
-            string fromLanguage = "en-US";
-            config.SpeechRecognitionLanguage = fromLanguage;
-            config.AddTargetLanguage("de");
-
             try
             {
+                // Creates an instance of a speech config with specified endpoint and subscription key.
+                // Replace with your own endpoint and subscription key.
+                var config = SpeechTranslationConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
+
+                // Sets source and target languages.
+                string fromLanguage = "en-US";
+                config.SpeechRecognitionLanguage = fromLanguage;
+                config.AddTargetLanguage("de");
+
                 // Creates a speech recognizer using microphone as audio input.
                 using (var recognizer = new TranslationRecognizer(config))
                 {

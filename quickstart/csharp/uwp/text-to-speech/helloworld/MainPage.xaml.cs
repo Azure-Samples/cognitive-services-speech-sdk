@@ -31,15 +31,15 @@ namespace helloworld
 
         private async void Speak_ButtonClicked(object sender, RoutedEventArgs e)
         {
-            // Creates an instance of a speech config with specified endpoint and subscription key.
-            // Replace with your own endpoint and subscription key.
-            var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
-
             try
             {
+                // Creates an instance of a speech config with specified endpoint and subscription key.
+                // Replace with your own endpoint and subscription key.
+                var config = SpeechConfig.FromEndpoint(new Uri("YourServiceEndpoint"), "YourSubscriptionKey");
+
                 // Creates a speech synthesizer.
                 using (var synthesizer = new SpeechSynthesizer(config, null))
-                {
+                    {
                     // Receive a text from TextForSynthesis text box and synthesize it to speaker.
                     using (var result = await synthesizer.SpeakTextAsync(this.TextForSynthesis.Text).ConfigureAwait(false))
                     {

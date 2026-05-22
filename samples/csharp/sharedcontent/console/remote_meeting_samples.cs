@@ -23,8 +23,6 @@ namespace MicrosoftSpeechSDKSamples
         // This sample shows how to use real-time plus asynchronous
         // Meeting Transcriptions. This sample does not use voice
         // signatures. Talkers are differentiated as Guest 0 and Guest 1.
-        // For more information, including how to use voice signatures, see
-        // https://learn.microsoft.com/azure/cognitive-services/speech-service/how-to-async-meeting-transcription?pivots=programming-language-csharp
         public static async Task RemoteMeetingWithFileAsync()
         {
             string key = "YourSubscriptionKey";

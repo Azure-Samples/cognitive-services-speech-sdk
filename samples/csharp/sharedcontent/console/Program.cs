@@ -110,14 +110,14 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 6. Speech recognition with push audio stream.");
                 Console.WriteLine(" 7. Speech recognition with keyword spotting.");
                 Console.WriteLine(" 8. Speech Recognition using Phrase Lists");
-                Console.WriteLine(" a. Speech recognition with compressed input pull audio stream.");
-                Console.WriteLine(" b. Speech recognition with compressed input push audio stream.");
-                Console.WriteLine(" c. Keyword recognizer.");
-                Console.WriteLine(" d. Speech recognition with file input and a switch to secondary region.");
-                Console.WriteLine(" e. Speech continuous recognition authenticated via AAD token crendential.");
-                Console.WriteLine(" f. Speech once recognition authenticated via AAD token crendential.");
-                Console.WriteLine(" g. Speech continuous recognition authenticated via API key crendential.");
-                Console.WriteLine(" h. Speech once recognition authenticated via API key crendential.");
+                Console.WriteLine(" 9. Speech recognition with compressed input pull audio stream.");
+                Console.WriteLine(" a. Speech recognition with compressed input push audio stream.");
+                Console.WriteLine(" b. Keyword recognizer.");
+                Console.WriteLine(" c. Speech recognition with file input and a switch to secondary region.");
+                Console.WriteLine(" d. Speech continuous recognition authenticated via AAD token crendential.");
+                Console.WriteLine(" e. Speech once recognition authenticated via AAD token crendential.");
+                Console.WriteLine(" f. Speech continuous recognition authenticated via API key crendential.");
+                Console.WriteLine(" g. Speech once recognition authenticated via API key crendential.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -159,28 +159,28 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.NumPad8:
                         SpeechRecognitionSamples.ContinuousRecognitionWithFileAndPhraseListsAsync().Wait();
                         break;
-                    case ConsoleKey.A:
+                    case ConsoleKey.D9:
                         SpeechRecognitionSamples.SpeechRecognitionWithCompressedInputPullStreamAudio().Wait();
                         break;
-                    case ConsoleKey.B:
+                    case ConsoleKey.A:
                         SpeechRecognitionSamples.SpeechRecognitionWithCompressedInputPushStreamAudio().Wait();
                         break;
-                    case ConsoleKey.C:
+                    case ConsoleKey.B:
                         SpeechRecognitionSamples.KeywordRecognizer().Wait();
                         break;
-                    case ConsoleKey.D:
+                    case ConsoleKey.C:
                         SpeechRecognitionSamples.RecognitionOnceWithFileAsyncSwitchSecondaryRegion().Wait();
                         break;
-                    case ConsoleKey.E:
+                    case ConsoleKey.D:
                         SpeechRecognitionSamples.RecognitionContinuousAADTokenCredentialAsync().Wait();
                         break;
-                    case ConsoleKey.F:
+                    case ConsoleKey.E:
                         SpeechRecognitionSamples.RecognitionOnceAADTokenCredentialAsync().Wait();
                         break;
-                    case ConsoleKey.G:
+                    case ConsoleKey.F:
                         SpeechRecognitionSamples.RecognitionContinuousApiKeyCredentialAsync().Wait();
                         break;
-                    case ConsoleKey.H:
+                    case ConsoleKey.G:
                         SpeechRecognitionSamples.RecognitionOnceApiKeyCredentialAsync().Wait();
                         break;
                     case ConsoleKey.D0:
