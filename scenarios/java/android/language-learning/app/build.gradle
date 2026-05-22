@@ -36,6 +36,7 @@ android {
 dependencies {
     // Speech SDK
     implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.50.0'
+    implementation platform('io.netty:netty-bom:4.2.13.Final')
     // Diff lib for pronunciation assessment
     implementation "io.github.java-diff-utils:java-diff-utils:4.11"
 
