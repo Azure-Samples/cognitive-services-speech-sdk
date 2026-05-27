@@ -1,3 +1,160 @@
+Note: Use the Current version for new consent recordings. The Previous version is still supported.
+
+=================================================================
+Current version (recommended)
+=================================================================
+
+Arabic (Egypt)_ar-EG:
+"أنا [أذكر اسمك الأول والأخير] أقرّ وأوافق على أن صورتي أو تسجيلات الفيديو لصورتي وحركاتي سيتم استخدامها بواسطة [اذكر اسم الشركة] لإنشاء نسخة رمزية اصطناعية وواقعية لشخصيتي."
+
+Arabic (Saudi Arabia)_ar-SA:
+"أنا [أذكر اسمك الأول والأخير] أقرّ وأوافق على أن صورتي أو تسجيلات الفيديو لصورتي وحركاتي سيتم استخدامها بواسطة [اذكر اسم الشركة] لإنشاء نسخة رمزية اصطناعية واقعية لشخصيتي."
+
+Bulgarian (Bulgaria)_bg-BG:
+"Аз, [посочете Вашето име и фамилия], потвърждавам и се съгласявам, че моят образ или видеозаписи на моя образ и движения ще бъдат използвани от [посочете името на компанията] за създаване и използване на мой фотореалистичен, синтетичен аватар."
+
+Catalan (Spain)_ca-ES:
+"Jo, [indiqueu el vostre nom i cognom], reconec i accepto que la meva imatge o les gravacions de vídeo de la meva imatge i els meus moviments seran utilitzades per [indicar el nom de l'empresa] per crear i utilitzar una versió d'avatar fotorealista i sintètica meva."
+
+Chinese (Cantonese, Traditional)_zh-HK:
+"我[說出你的名字和姓氏]確認並同意，我的圖像或包含我的圖像和動作的影片將由[說出公司名稱]使用，以創建和使用我的逼真合成頭像版本。"
+
+Chinese (Mandarin, Simplified)_zh-CN:
+"我[说出你的名字和姓氏]确认并同意，[说出公司名称]将使用我的图像或包含我图像及动作的视频，以创建并使用我的逼真合成头像版本。"
+
+Chinese (Taiwanese Mandarin)_zh-TW:
+"我[你的名字和姓氏]確認並同意，[公司名稱]將使用我的照片或包含我的形象與動作的影片資料來創建和使用我的逼真合成人像化身。"
+
+Croatian (Croatia)_hr-HR:
+"Ja, [navedite svoje ime i prezime], potvrđujem i slažem se da će moja slika ili video snimke moje slike i pokreta biti korištene od strane [navesti naziv tvrtke] za izradu i korištenje fotorealistične, sintetičke verzije mog avatara."
+
+Czech (Czech)_cs-CZ:
+"Já, [uveďte své křestní jméno a příjmení], beru na vědomí a souhlasím s tím, že můj obraz nebo videozáznamy mého obrazu a pohybů budou použity [uveďte název společnosti] k vytvoření a použití fotorealistické, syntetické verze avatara mého já."
+
+Danish (Denmark)_da-DK:
+"Jeg, [angiv dit for- og efternavn], anerkender og accepterer, at mit billede eller videooptagelser af mit billede og mine bevægelser vil blive brugt af [angiv firmaets navn] til at skabe og bruge en fotorealistisk, syntetisk avatar-version af mig."
+
+Dutch (Netherlands)_nl-NL:
+"Ik, [vermeld uw voor- en achternaam], erken en ga ermee akkoord dat mijn beeld of video-opnamen van mijn beeld en bewegingen door [vermeld de naam van het bedrijf] zullen worden gebruikt om een fotorealistische, synthetische avatarversie van mij te maken en te gebruiken."
+
+English (Australia)_en-AU:
+"I, [state your first and last name], acknowledge and agree that my image or video recordings of my image and movements will be used by [state the name of the company] to create and use a photorealistic, synthetic avatar version of me."
+
+English (Canada)_en-CA:
+"I, [state your first and last name], acknowledge and agree that my image or video recordings of my image and movements will be used by [state the name of the company] to create and use a photorealistic, synthetic avatar version of me."
+
+English (India)_en-IN:
+"I, [state your first and last name], acknowledge and agree that my image or video recordings of my image and movements will be used by [state the name of the company] to create and use a photorealistic, synthetic avatar version of me."
+
+English (Ireland)_en-IE:
+"I, [state your first and last name], acknowledge and agree that my image or video recordings of my image and movements will be used by [state the name of the company] to create and use a photorealistic, synthetic avatar version of me."
+
+English (United Kingdom)_en-GB:
+"I, [state your first and last name], acknowledge and agree that my image or video recordings of my image and movements will be used by [state the name of the company] to create and use a photorealistic, synthetic avatar version of me."
+
+English (United States)_en-US:
+"I, [state your first and last name], acknowledge and agree that my image or video recordings of my image and movements will be used by [state the name of the company] to create and use a photorealistic, synthetic avatar version of me."
+
+Finnish (Finland)_fi-FI:
+"Minä, [ilmoita etu- ja sukunimesi], tunnustan ja hyväksyn, että kuvaani tai kuvaani ja liikkeitäni sisältäviä videotallenteita käytetään [ilmoita yrityksen nimi] toimesta luomaan ja käyttämään fotorealistisen ja synteettisen avatar-version minusta."
+
+French (Canada)_fr-CA:
+"Je, [indiquez votre prénom et votre nom], reconnais et accepte que mon image ou des enregistrements vidéo de mon image et de mes mouvements soient utilisés par [indiquez le nom de l'entreprise] pour créer et utiliser une version photoréaliste et synthétique de mon avatar."
+
+French (France)_fr-FR:
+"Je, [indiquez votre prénom et nom], reconnais et accepte que mon image ou des enregistrements vidéo de mon image et de mes mouvements soient utilisés par [indiquez le nom de l'entreprise] pour créer et utiliser une version synthétique et photoréaliste d'un avatar me représentant."
+
+French (Switzerland)_fr-CH:
+"Je, [indiquez votre prénom et nom], reconnais et accepte que mon image ou des enregistrements vidéo de mon image et de mes mouvements soient utilisés par [indiquez le nom de l'entreprise] pour créer et utiliser une version synthétique et photoréaliste d'un avatar me représentant."
+
+German (Austria)_de-AT:
+"Ich, [Angabe Ihres Vor- und Nachnamens], erkenne an und stimme zu, dass mein Bild oder Videoaufnahmen meines Bildes und meiner Bewegungen von [Angabe des Namens des Unternehmens] verwendet werden, um eine fotorealistische, synthetische Avatar-Version von mir zu erstellen und zu verwenden."
+
+German (Germany)_de-DE:
+"Ich, [Angabe Ihres Vor- und Nachnamens], erkenne an und stimme zu, dass mein Bild oder Videoaufnahmen meines Bildes und meiner Bewegungen von [Angabe des Namens des Unternehmens] verwendet werden, um eine fotorealistische, synthetische Avatar-Version von mir zu erstellen und zu verwenden."
+
+German (Switzerland)_de-CH:
+"Ich, [geben Sie Ihren Vor- und Nachnamen an], erkenne an und stimme zu, dass mein Bild oder Videoaufnahmen meines Bildes und meiner Bewegungen von [Name des Unternehmens angeben] verwendet werden, um eine fotorealistische, synthetische Avatar-Version von mir zu erstellen und zu verwenden."
+
+Greek (Greece)_el-GR:
+"Εγώ, ο/η [δηλώστε το ονοματεπώνυμό σας] αναγνωρίζω και συμφωνώ ότι η εικόνα μου ή οι εγγραφές βίντεο της εικόνας και των κινήσεών μου θα χρησιμοποιηθούν από τη/την [δηλώστε το όνομα της εταιρείας] για τη δημιουργία και τη χρήση μιας φωτορεαλιστικής, συνθετικής εκδοχής avatar μου."
+
+Hebrew (Israel)_he-IL:
+"אני [ציין את שמך הפרטי ושם משפחתך] מאשר ומסכים שהתמונה שלי או הקלטות וידאו של התמונה והתנועות שלי ישמשו את [ציין את שם החברה] כדי ליצור ולהשתמש בגרסת אווטאר סינטטית פוטוריאליסטית שלי."
+
+Hindi (India)_hi-IN:
+"मैं [अपना पहला और अंतिम नाम बताएं] स्वीकार करता/करती हूं और सहमत हूं कि मेरी छवि या मेरी छवि और गतिविधियों की वीडियो रिकॉर्डिंग का उपयोग [कंपनी का नाम बताएं] के द्वारा मेरा एक फोटोरियलिस्टिक, सिंथेटिक अवतार संस्करण बनाने और उपयोग करने के लिए किया जाएगा।"
+
+Hungarian (Hungary)_hu-HU:
+"Én, [adja meg vezeték- és utónevét], elismerem és elfogadom, hogy a képemet vagy a képemről és a mozdulataimról készült videofelvételeket a/az [adja meg a cég nevét] felhasználhatja egy fotórealisztikus, szintetikus avatar-verzióm létrehozására és annak használatára."
+
+Indonesian (Indonesia)_id-ID:
+"Saya, [sebutkan nama depan dan belakang Anda], mengakui dan menyetujui bahwa gambar saya atau rekaman video gambar dan gerakan saya akan digunakan oleh [sebutkan nama perusahaan] untuk membuat dan menggunakan versi avatar sintetis saya yang fotorealistik."
+
+Italian (Italy)_it-IT:
+"Io, [inserisci il tuo nome e cognome], riconosco e accetto che la mia immagine o le registrazioni video della mia immagine e dei miei movimenti verranno utilizzate da [inserisci il nome dell'azienda] per creare e utilizzare una mia versione avatar sintetica e fotorealistica."
+
+Japanese (Japan)_ja-JP:
+"私、[氏名]は、私の画像または私の画像と動作のビデオ録画が、私の写実的な合成アバター版を作成および利用するために [会社名] によって使用されることを認め、同意します。"
+
+Korean (Korea)_ko-KR:
+"본인 [귀하의 이름과 성을 기재]은 본인의 이미지 또는 본인의 이미지와 움직임이 담긴 동영상이 [회사 이름 기재]에 의해 본인의 사실적인 인조 아바타 버전을 생성하고 사용하는 데 사용될 것임을 인정하고 동의합니다."
+
+Malay (Malaysia)_ms-MY:
+"Saya, [nyatakan nama pertama dan nama keluarga anda], mengakui dan bersetuju bahawa imej saya atau rakaman video imej dan pergerakan saya akan digunakan oleh [nyatakan nama syarikat] untuk mencipta dan menggunakan fotorealistik, versi avatar sintetik saya."
+
+Norwegian (Bokmål, Norway)_nb-NO:
+"Jeg, [oppgi ditt for- og etternavn], erkjenner og samtykker i at bildet mitt eller videoopptak av bildet mitt og bevegelsene mine vil bli brukt av [oppgi navnet på selskapet] for å lage og bruke en fotorealistisk, syntetisk avatarversjon av meg."
+
+Polish (Poland)_pl-PL:
+"Ja, [podaj swoje imię i nazwisko], potwierdzam i wyrażam zgodę, że mój wizerunek lub nagrania wideo mojego wizerunku i ruchów zostaną wykorzystane przez [podać nazwę firmy] do stworzenia i wykorzystania fotorealistycznej, sztucznej wersji mojego awatara."
+
+Portuguese (Brazil)_pt-BR:
+"Eu, [informe seu nome e sobrenome], reconheço e concordo que minha imagem ou gravações de vídeo da minha imagem e movimentos serão usadas por [informe o nome da empresa] para criar e utilizar uma versão fotorrealista e sintética do meu avatar."
+
+Portuguese (Portugal)_pt-PT:
+"Eu, [informe seu nome e sobrenome], reconheço e concordo que a minha imagem ou gravações de vídeo da minha imagem e movimentos serão usadas por [informe o nome da empresa] para criar e utilizar uma versão fotorrealista e sintética do meu avatar."
+
+Romanian (Romania)_ro-RO:
+"Eu, [indicați numele și prenumele dvs.], recunosc și sunt de acord că imaginea mea sau înregistrările video ale imaginii mele și ale mișcărilor mele vor fi folosite de [indicați numele companiei] pentru a crea și utiliza o versiune fotorealistă și sintetică a avatarului meu."
+
+Russian (Russia)_ru-RU:
+"Я [назовите свое имя и фамилию] подтверждаю и соглашаюсь с тем, что мое изображение или видеозаписи моего изображения и движений могут быть использованы [назовите название компании] для создания и использования фотореалистичной, синтетической версии моего аватара."
+
+Slovak (Slovakia)_sk-SK:
+"Ja, [uveďte svoje meno a priezvisko], beriem na vedomie a súhlasím, že môj obraz alebo videonahrávky môjho obrazu a pohybov môžu byť použité spoločnosťou [uveďte názov spoločnosti] na vytvorenie a použitie mojej fotorealistickej syntetickej verzie avatara."
+
+Slovenian (Slovenia)_sl-SI:
+"Jaz, [Navedite svoje ime in priimek], potrjujem in se strinjam, da se bo moja podoba ali videoposnetki moje podobe in gibov uporabljali s strani [navedite ime podjetja] za ustvarjanje in uporabo fotorealistične, sintetične različice mojega avatarja."
+
+Spanish (Mexico)_es-MX:
+"Yo, [indique su nombre y apellidos], reconozco y acepto que mi imagen o las grabaciones de vídeo de mi imagen y mis movimientos serán utilizadas por [indique el nombre de la empresa] para crear y utilizar una versión fotorrealista y sintética de mí como avatar."
+
+Spanish (Spain)_es-ES:
+"Yo, [indique su nombre y apellidos], reconozco y acepto que mi imagen o las grabaciones de vídeo de mi imagen y mis movimientos serán utilizadas por [indique el nombre de la empresa] para crear y utilizar una versión fotorrealista y sintética de mí como avatar."
+
+Swedish (Sweden)_sv-SE:
+"Jag, [ange ditt för- och efternamn], bekräftar och samtycker till att min bild eller videoinspelningar av min bild och mina rörelser kommer att användas av [ange företagets namn] för att skapa och använda en fotorealistisk, syntetisk avatarversion av mig."
+
+Tamil (India)_ta-IN:
+"நான், [உங்கள் முதல் மற்றும் கடைசி பெயரைக் குறிப்பிடவும்], என் உருவப் படம் அல்லது என் உருவப் படம் மற்றும் இயக்கங்களின் வீடியோ பதிவுகள் [நிறுவனத்தின் பெயரைக் குறிப்பிடவும்] மூலம் எனது புகைப்படத்‑துல்லியமான, செயற்கை அவதார் பதிப்பை உருவாக்கவும் பயன்படுத்தவும் பயன்படும் என்பதை ஒப்புக்கொண்டு சம்மதிக்கிறேன்."
+
+Telugu (India)_te-IN:
+"నేను, [మీ మొదటి మరియు చివరి పేరును తెలియజేస్తున్నాను], నా రూపం లేదా నా రూపం మరియు కదలికల వీడియో రికార్డింగ్‌లు [కంపెనీ పేరును పేర్కొనండి] ద్వారా నా ఫోటోరియలిస్టిక్, సింథటిక్ అవతార్ సంచికను సృష్టించి ఉపయోగించడానికి ఉపయోగించబడతాయని అంగీకరిస్తూ సమ్మతిస్తున్నాను."
+
+Thai (Thailand)_th-TH:
+"ฉัน [ระบุชื่อและนามสกุลของคุณ] รับรองและยินยอมว่า รูปภาพของฉัน หรือการบันทึกวิดีโอของรูปภาพและการเคลื่อนไหวของฉัน อาจถูกใช้โดย [ระบุชื่อบริษัท] เพื่อสร้างและใช้อวตารแบบเสมือนจริงที่สังเคราะห์ขึ้นของฉัน."
+
+Turkish (Turkey)_tr-TR:
+"Ben, [adınızı ve soyadınızı belirtin], imajımın veya imajımın ve hareketlerimin video kayıtlarının [şirketin adını belirtin] tarafından fotogerçekçi ve sentetik bir avatar versiyonumu oluşturmak ve kullanmak için kullanılacağını kabul ediyor ve onaylıyorum."
+
+Vietnamese (Vietnam)_vi-VN:
+"Tôi, [nêu họ tên của bạn], xác nhận và đồng ý rằng hình ảnh của tôi hoặc các bản ghi video về hình ảnh và chuyển động của tôi sẽ được [nêu tên công ty] sử dụng để tạo và sử dụng phiên bản hình đại diện tổng hợp, chân thực của tôi."
+
+=================================================================
+Previous version (still supported)
+=================================================================
+
 Arabic (Egypt)_ar-EG:
 "أنا [أذكر اسمك الأول والأخير] على علم بأن تسجيلات الفيديو لصورتي وحركاتي سيتم استخدامها بواسطة [اذكر اسم الشركة] لإنشاء نسخة رمزية اصطناعية وواقعية واستخدامها."
 
