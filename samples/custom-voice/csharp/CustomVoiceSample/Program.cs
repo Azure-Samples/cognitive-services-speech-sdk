@@ -10,6 +10,9 @@ public class Program
         // Uncomment to run Professional Voice Sample
         // ProfessionalVoiceSample.ProfessionalVoiceTestAsync().Wait();
 
-        PersonalVoiceSample.PersonalVoiceTestAsync().Wait();
+        // Uncomment to run Voice Design Sample (creates a personal voice from a text prompt)
+        VoiceDesignSample.VoiceDesignTestAsync().Wait();
+
+        // PersonalVoiceSample.PersonalVoiceTestAsync().Wait();
     }
 }
