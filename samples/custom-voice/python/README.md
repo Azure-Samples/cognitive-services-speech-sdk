@@ -10,5 +10,9 @@ pip install -r requirements.txt
 
 ## Run the sample code
 
-The professional voice sample code is [professional_voice_sample.py](professional_voice_sample.py). The personal voice sample code is [personal_voice_sample.py](personal_voice_sample.py). They can be run using Python 3.7 or higher.
+Samples (Python 3.7+):
+
+- [professional_voice_sample.py](professional_voice_sample.py)
+- [personal_voice_sample.py](personal_voice_sample.py)
+- [voice_design_sample.py](voice_design_sample.py)
 
