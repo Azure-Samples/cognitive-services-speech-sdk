@@ -45,6 +45,7 @@ task prepareKotlinBuildScriptModel {}
 dependencies {
     // Speech SDK
     implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.50.0'
+    implementation platform('io.netty:netty-bom:4.2.13.Final')
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.cardview:cardview:1.0.0'
