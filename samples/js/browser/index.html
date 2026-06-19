@@ -529,10 +529,8 @@
                     }
 
                     if (result.translations) {
-                        var resultJson = JSON.parse(result.json);
-                        resultJson['privTranslationPhrase']['Translation']['Translations'].forEach(
-                            function (translation) {
-                            phraseDiv.innerHTML += ` [${translation.Language}] ${translation.Text}\r\n`;
+                        result.translations.languages.forEach(function (language) {
+                            phraseDiv.innerHTML += ` [${language}] ${result.translations.get(language)}\r\n`;
                         });
                     }
 
