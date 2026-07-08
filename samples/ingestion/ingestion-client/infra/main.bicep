@@ -144,7 +144,7 @@ param DeploymentId string = utcNow()
 param CompletedServiceBusConnectionString string = ''
 
 // Don't change the format for Version variable
-var Version = 'v2.1.12'
+var Version = 'v2.1.13'
 var AudioInputContainer = 'audio-input'
 var AudioProcessedContainer = 'audio-processed'
 var ErrorFilesOutputContainer = 'audio-failed'
