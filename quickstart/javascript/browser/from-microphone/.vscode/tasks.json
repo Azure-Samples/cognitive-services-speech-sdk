@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Configuration and Setup",
+            "type": "shell",
+            "command": "npm install -g http-server",
+            "problemMatcher": [],
+            "detail": "Install the http-server globally."
+        },
+        {
+            "label": "Run the App",
+            "type": "shell",
+            "command": "http-server . -o index.html",
+            "problemMatcher": [],
+            "detail": "Launches index.html in the default browser after installing http-server."
+        }
+    ]
+}
