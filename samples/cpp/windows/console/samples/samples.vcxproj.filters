@@ -50,21 +50,12 @@
     <ClCompile Include="diagnostics_logging_samples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="meeting_transcriber_samples.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="whatstheweatherlike.wav">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="katiesteve.wav">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="enrollment_audio_katie.wav">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="enrollment_audio_steve.wav">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="en-us_zh-cn.wav">

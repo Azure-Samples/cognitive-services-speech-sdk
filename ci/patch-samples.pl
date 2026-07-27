@@ -12,6 +12,9 @@ BEGIN {
   $mavenArtifactId = "client-sdk";
   $mavenEmbeddedArtifactId = "client-sdk-embedded";
 
+  # Whether to patch version.txt file.
+  $patchVersionFile = 0;
+
   # Some REs
   $reNugetId = qr/\QMicrosoft.CognitiveServices.Speech\E/;
   $reNugetExtensionEmbeddedSrId = qr/\QMicrosoft.CognitiveServices.Speech.Extension.Embedded.SR\E/;
@@ -30,6 +33,11 @@ BEGIN {
   $reVcxProj = qr/.*\.vcxproj/;
   $reGradleBuild = qr/build\.gradle/;
   $reMavenPom = qr/pom\.xml/;
+  $rePackageJson = qr/package\.json/;
+  $rePodfile = qr/Podfile/;
+  $reVersionTxt = qr/version\.txt/;
+  $reNpmPackageId = qr/\Qmicrosoft-cognitiveservices-speech-sdk\E/;
+  $reCocoapodsId = qr/\QMicrosoftCognitiveServicesSpeech\E-(?:iOS|macOS)/;
 
   $version = shift
     or die "Supply version to use as first argument\n";
@@ -68,7 +76,8 @@ BEGIN {
 
   @ARGV = ();
   find(sub {
-    m(^(?:$rePkgConfig|$reCsProj|$reVcxProj|$reGradleBuild|$reMavenPom)$) &&
+    (m(^(?:$rePkgConfig|$reCsProj|$reVcxProj|$reGradleBuild|$reMavenPom|$rePackageJson|$rePodfile)$) ||
+     ($patchVersionFile && m(^$reVersionTxt$) && $File::Find::name =~ m(/ci/$reVersionTxt$))) &&
     push @ARGV, $File::Find::name
   }, $samplesDir);
 
@@ -92,7 +101,7 @@ $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
   } elsif (m($reNugetExtensionTelemetryId)) {
     s((["'>](?:\.\.\\)*packages\\$reNugetExtensionTelemetryId\.)[^\\]*\\)($1$version\\)g;
   } elsif (m($reNugetExtensionRemoteConversation)) {
-    s((["'>](?:\.\.\\)*packages\\$reNugetExtensionTelemetryId\.)[^\\]*\\)($1$version\\)g;
+    s((["'>](?:\.\.\\)*packages\\$reNugetExtensionRemoteConversation\.)[^\\]*\\)($1$version\\)g;
   } elsif (m($reNugetExtensionMasId)) {
     s((["'>](?:\.\.\\)*packages\\$reNugetExtensionMasId\.)[^\\]*\\)($1$version\\)g;
   } else {
@@ -116,6 +125,9 @@ $ARGV =~ m(.*/(?:$reCsProj|$reVcxProj)$) && do {
   $seenPackageReference = m(<PackageReference Include="$reNugetId">);
 };
 $ARGV =~ m(.*/$reGradleBuild$) && s/(\bimplementation\s+(['"])($reMavenId|$reMavenEmbeddedId):)(.*?)\2/$1$version$2/;
+$ARGV =~ m(.*/$rePackageJson$) && s/("$reNpmPackageId"\s*:\s*"\^)[^"]*(")/$1$version$2/;
+$ARGV =~ m(.*/$rePodfile$) && s/('$reCocoapodsId',\s*'~>\s*)[^']*(')/$1$version$2/;
+$patchVersionFile && $ARGV =~ m(/ci/$reVersionTxt$) && s/^.*$/$version/;
 $ARGV =~ m(.*/$reMavenPom$) && do {
   if ($mavenDepState == 2) {
     $mavenDepState = 0 if s((?<=<version>)[^<]*)($version);

@@ -11,7 +11,6 @@ import speech_language_detection_sample
 import speech_sample
 import speech_synthesis_sample
 import transcription_sample
-import meeting_transcription_sample
 import translation_sample
 import speech_diagnostics_logging_sample
 
@@ -47,8 +46,6 @@ samples = OrderedDict([
         transcription_sample.conversation_transcription,
         transcription_sample.conversation_transcription_from_microphone,
         transcription_sample.conversation_transcription_with_aad_token_credential,
-    ]), (meeting_transcription_sample, [
-        meeting_transcription_sample.meeting_transcription_differentiate_speakers,
     ]), (speech_synthesis_sample, [
         speech_synthesis_sample.speech_synthesis_to_speaker,
         speech_synthesis_sample.speech_synthesis_with_language,

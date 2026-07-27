@@ -40,6 +40,6 @@ dependencies {
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    implementation "com.microsoft.cognitiveservices.speech:client-sdk:1.50.0"
+    implementation "com.microsoft.cognitiveservices.speech:client-sdk:1.51.1"
     implementation platform('io.netty:netty-bom:4.2.13.Final')
 }

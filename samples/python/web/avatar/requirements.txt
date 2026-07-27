@@ -1,6 +1,8 @@
 azure-cognitiveservices-speech
-azure-identity
+azure-identity>=1.21.0
 azure-core>=1.38.0
+cryptography>=48.0.1
+pyjwt>=2.12.0
 Flask>=3.1.1
 flask-socketio>=5.5.1
 openai>=1.76.0

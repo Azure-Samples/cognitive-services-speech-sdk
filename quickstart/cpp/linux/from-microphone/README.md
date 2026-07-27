@@ -73,11 +73,11 @@ Run the command `make` to build the sample. This will generate the `helloworld` 
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$SPEECHSDK_ROOT/lib/arm64"
     ```
 
-2. Export speech resource key and region as environment variables. For example, use `westus` as `SERVICE_REGION` if you are using the 30-day free trial subscription.
+2. Export speech resource key and endpoint as environment variables.
 
     ```sh
     export SPEECH_RESOURCE_KEY="{your_speech_service_key}"
-    export SERVICE_REGION="{your_speech_service_region}"
+  export SPEECH_ENDPOINT="https://{your_speech_service_region}.api.cognitive.microsoft.com/"
     ```
 3. Run the application:
 

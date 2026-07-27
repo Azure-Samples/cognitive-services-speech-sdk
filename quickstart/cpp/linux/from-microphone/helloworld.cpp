@@ -22,9 +22,7 @@ const char* getEnvVar(const char* var) {
 void recognizeSpeech() {
     const char* subscriptionKey = getEnvVar("SPEECH_RESOURCE_KEY");
     auto endpoint = getEnvVar("SPEECH_ENDPOINT"); // e.g., "https://my-speech-resource.cognitiveservices.azure.com"
-    // Creates an instance of a speech config with specified endpoint and subscription key.
-    // Replace with your own endpoint and subscription key.
-    auto config = SpeechConfig::FromEndpoint(endpoint.c_str(), subscriptionKey);
+    auto config = SpeechConfig::FromEndpoint(endpoint, subscriptionKey);
 
     // Creates a speech recognizer
     auto recognizer = SpeechRecognizer::FromConfig(config);
@@ -32,9 +30,9 @@ void recognizeSpeech() {
 
     // Starts speech recognition, and returns after a single utterance is recognized. The end of a
     // single utterance is determined by listening for silence at the end or until a maximum of about 30
-    // seconds of audio is processed.  The task returns the recognition text as result. 
+    // seconds of audio is processed.  The task returns the recognition text as result.
     // Note: Since RecognizeOnceAsync() returns only a single utterance, it is suitable only for single
-    // shot recognition like command or query. 
+    // shot recognition like command or query.
     // For long-running multi-utterance recognition, use StartContinuousRecognitionAsync() instead.
     auto result = recognizer->RecognizeOnceAsync().get();
 

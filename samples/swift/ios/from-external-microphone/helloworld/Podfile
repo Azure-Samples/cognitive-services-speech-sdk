@@ -1,5 +1,5 @@
 target 'helloworld' do
     platform :ios, '12.0'
-    pod 'MicrosoftCognitiveServicesSpeech-iOS', '~> 1.25'
+    pod 'MicrosoftCognitiveServicesSpeech-iOS', '~> 1.51.1'
     use_frameworks!
 end

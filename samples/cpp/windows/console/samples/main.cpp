@@ -50,11 +50,6 @@ extern void ConversationTranscriptionWithPullAudioStream();
 extern void ConversationTranscriptionWithPushAudioStream();
 extern void ConversationTranscriptionAndLanguageIdWithMicrophone();
 
-extern void MeetingTranscriptionWithMicrophoneUsingAudioProcessingOptions();
-extern void MeetingTranscriptionWithPullAudioStreamUsingMultichannelAudio();
-extern void MeetingTranscriptionWithPushAudioStreamUsingMultichannelAudio();
-extern void MeetingTranscriptionWithMultichannelAudioFile();
-
 // Language Id related samples
 extern void SpeechRecognitionAndLanguageIdWithMicrophone();
 extern void SpeechRecognitionAndLanguageIdWithCustomModelsWithMicrophone();
@@ -372,46 +367,6 @@ void ConversationTranscriberSamples()
     } while (input[0] != '0');
 }
 
-void MeetingTranscriberSamples()
-{
-    string input;
-    do
-    {
-        cout << "\nMeetingTranscriber SAMPLES:\n";
-        cout << "1.) MeetingTranscriber with microphone using audio processing options.\n";
-        cout << "2.) MeetingTranscriber with pull audio stream using multichannel audio.\n";
-        cout << "3.) MeetingTranscriber with push audio stream using multichannel audio.\n";
-        cout << "4.) MeetingTranscriber with audio file using multichannel audio.\n";
-        cout << "\nChoice (0 for MAIN MENU): ";
-        cout.flush();
-
-        input.clear();
-        getline(cin, input);
-
-        switch (input[0])
-        {
-        case '1':
-            MeetingTranscriptionWithMicrophoneUsingAudioProcessingOptions();
-            break;
-
-        case '2':
-            MeetingTranscriptionWithPullAudioStreamUsingMultichannelAudio();
-            break;
-
-        case '3':
-            MeetingTranscriptionWithPushAudioStreamUsingMultichannelAudio();
-            break;
-
-        case '4':
-            MeetingTranscriptionWithMultichannelAudioFile();
-            break;
-
-        case '0':
-            break;            
-        }
-    } while (input[0] != '0');
-}
-
 void StandaloneLanguageDetectionSamples()
 {
     string input;
@@ -501,7 +456,6 @@ int main(int argc, char **argv)
         cout << "2.) Translation samples.\n";
         cout << "3.) Speech synthesis samples.\n";
         cout << "4.) Conversation transcriber samples.\n";
-        cout << "5.) Meeting transcriber samples.\n";
         cout << "6.) Standalone language detection samples.\n";
         cout << "7.) Speech recognition with language detection samples.\n";
         cout << "8.) Diagnostics logging samples (trace logging).\n";
@@ -534,9 +488,6 @@ int main(int argc, char **argv)
             break;
         case 4:
             ConversationTranscriberSamples();
-            break;
-        case 5:
-            MeetingTranscriberSamples();
             break;
         case 6:
             StandaloneLanguageDetectionSamples();

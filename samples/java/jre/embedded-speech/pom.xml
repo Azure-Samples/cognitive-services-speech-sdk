@@ -56,7 +56,7 @@
     <dependency>
       <groupId>com.microsoft.cognitiveservices.speech</groupId>
       <artifactId>client-sdk-embedded</artifactId>
-      <version>1.50.0</version>
+      <version>1.51.1</version>
     </dependency>
     <dependency>
       <groupId>com.azure</groupId>
@@ -66,7 +66,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-codec-http</artifactId>
-      <version>4.2.13.Final</version>
+      <version>4.2.15.Final</version>
     </dependency>
     <dependency>
         <groupId>org.json</groupId>
@@ -85,24 +85,39 @@
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.2.13.Final</version>
+        <version>4.2.15.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-codec-http2</artifactId>
-        <version>4.2.13.Final</version>
+        <version>4.2.15.Final</version>
       </dependency>
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-codec-dns</artifactId>
-        <version>4.2.13.Final</version>
+        <version>4.2.15.Final</version>
       </dependency>
       <dependency>
         <groupId>io.netty</groupId>
         <artifactId>netty-codec-dns</artifactId>
-        <version>4.2.13.Final</version>
+        <version>4.2.15.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-handler</artifactId>
+        <version>4.2.15.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-resolver-dns</artifactId>
+        <version>4.2.15.Final</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.21.5</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
