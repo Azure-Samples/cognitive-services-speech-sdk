@@ -3,11 +3,12 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		071C9743C21F3C327237D771 /* Pods_speech_samples.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F75B62D68FA26B84DD23CFCC /* Pods_speech_samples.framework */; };
+		JJ111111111111111111111111 /* MicrosoftCognitiveServicesSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = JJ222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */; };
+		JJ444444444444444444444444 /* Differ in Frameworks */ = {isa = PBXBuildFile; productRef = JJ555555555555555555555555 /* Differ */; };
 		3CB230B12692E530009AD484 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB230B02692E530009AD484 /* AppDelegate.swift */; };
 		3CB230B32692E530009AD484 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB230B22692E530009AD484 /* SceneDelegate.swift */; };
 		3CB230B52692E530009AD484 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB230B42692E530009AD484 /* ViewController.swift */; };
@@ -35,9 +36,6 @@
 		520398BB2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = zhcn_continuous_mode_sample.txt; sourceTree = "<group>"; };
 		520398BC2CCB91FC00FD9FF6 /* zhcn_continuous_mode_sample.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = zhcn_continuous_mode_sample.wav; sourceTree = "<group>"; };
 		52FC64FD29CC4CB2000C8918 /* whatstheweatherlike.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = whatstheweatherlike.wav; sourceTree = "<group>"; };
-		7216C25C7CBBBBCE69D14199 /* Pods-speech-samples.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-speech-samples.debug.xcconfig"; path = "Target Support Files/Pods-speech-samples/Pods-speech-samples.debug.xcconfig"; sourceTree = "<group>"; };
-		A10FCD8CC92F4B35619760A7 /* Pods-speech-samples.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-speech-samples.release.xcconfig"; path = "Target Support Files/Pods-speech-samples/Pods-speech-samples.release.xcconfig"; sourceTree = "<group>"; };
-		F75B62D68FA26B84DD23CFCC /* Pods_speech_samples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_speech_samples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,21 +43,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				071C9743C21F3C327237D771 /* Pods_speech_samples.framework in Frameworks */,
+				JJ111111111111111111111111 /* MicrosoftCognitiveServicesSpeech in Frameworks */,
+				JJ444444444444444444444444 /* Differ in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		24FA6CF4926BAEF7C94067A1 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				F75B62D68FA26B84DD23CFCC /* Pods_speech_samples.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		3CB230A42692E52F009AD484 = {
 			isa = PBXGroup;
 			children = (
@@ -70,8 +61,6 @@
 				3CB230E426943123009AD484 /* pronunciation_assessment.wav */,
 				3CB230AF2692E530009AD484 /* speech-samples */,
 				3CB230AE2692E530009AD484 /* Products */,
-				B3EDDB0E8999BD31A5D6A60E /* Pods */,
-				24FA6CF4926BAEF7C94067A1 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -97,15 +86,6 @@
 			path = "speech-samples";
 			sourceTree = "<group>";
 		};
-		B3EDDB0E8999BD31A5D6A60E /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				7216C25C7CBBBBCE69D14199 /* Pods-speech-samples.debug.xcconfig */,
-				A10FCD8CC92F4B35619760A7 /* Pods-speech-samples.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -113,15 +93,17 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3CB230D72692E547009AD484 /* Build configuration list for PBXNativeTarget "speech-samples" */;
 			buildPhases = (
-				2558E3CD3C700ED14726E0A9 /* [CP] Check Pods Manifest.lock */,
 				3CB230A92692E530009AD484 /* Sources */,
 				3CB230AA2692E530009AD484 /* Frameworks */,
 				3CB230AB2692E530009AD484 /* Resources */,
-				D0D48567F598D0C9B3110B9F /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+			);
+			packageProductDependencies = (
+				JJ222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */,
+				JJ555555555555555555555555 /* Differ */,
 			);
 			name = "speech-samples";
 			productName = "speech-samples";
@@ -157,6 +139,10 @@
 			targets = (
 				3CB230AC2692E530009AD484 /* speech-samples */,
 			);
+			packageReferences = (
+				JJ333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */,
+				JJ666666666666666666666666 /* XCRemoteSwiftPackageReference "Differ" */,
+			);
 		};
 /* End PBXProject section */
 
@@ -178,47 +164,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		2558E3CD3C700ED14726E0A9 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-speech-samples-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		D0D48567F598D0C9B3110B9F /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-speech-samples/Pods-speech-samples-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-speech-samples/Pods-speech-samples-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-speech-samples/Pods-speech-samples-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3CB230A92692E530009AD484 /* Sources */ = {
@@ -371,7 +316,6 @@
 		};
 		3CB230D82692E547009AD484 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7216C25C7CBBBBCE69D14199 /* Pods-speech-samples.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -390,7 +334,6 @@
 		};
 		3CB230D92692E547009AD484 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A10FCD8CC92F4B35619760A7 /* Pods-speech-samples.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -429,6 +372,37 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		JJ333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "{{{PACKAGE_PATH}}}";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		JJ666666666666666666666666 /* XCRemoteSwiftPackageReference "Differ" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tonyarnold/Differ";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		JJ222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = JJ333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */;
+			productName = "MicrosoftCognitiveServicesSpeech-iOS";
+		};
+		JJ555555555555555555555555 /* Differ */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = JJ666666666666666666666666 /* XCRemoteSwiftPackageReference "Differ" */;
+			productName = Differ;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3CB230A52692E52F009AD484 /* Project object */;
 }

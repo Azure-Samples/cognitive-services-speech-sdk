@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Core" Version="1.44.1" />
-    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.50.0" />
+    <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.51.1" />
   </ItemGroup>
 
 </Project>

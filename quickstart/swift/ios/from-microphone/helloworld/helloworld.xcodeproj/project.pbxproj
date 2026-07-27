@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,6 +12,7 @@
 		DC1C153B22B8E27B00367496 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DC1C153922B8E27B00367496 /* Main.storyboard */; };
 		DC1C153D22B8E27D00367496 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC1C153C22B8E27D00367496 /* Assets.xcassets */; };
 		DC1C154022B8E27D00367496 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DC1C153E22B8E27D00367496 /* LaunchScreen.storyboard */; };
+		EE111111111111111111111111 /* MicrosoftCognitiveServicesSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = EE222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EE111111111111111111111111 /* MicrosoftCognitiveServicesSpeech in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +84,9 @@
 			dependencies = (
 			);
 			name = helloworld;
+			packageProductDependencies = (
+				EE222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */,
+			);
 			productName = helloworld;
 			productReference = DC1C153222B8E27B00367496 /* helloworld.app */;
 			productType = "com.apple.product-type.application";
@@ -115,6 +120,9 @@
 			projectRoot = "";
 			targets = (
 				DC1C153122B8E27B00367496 /* helloworld */,
+			);
+			packageReferences = (
+				EE333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */,
 			);
 		};
 /* End PBXProject section */
@@ -342,6 +350,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		EE333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "{{{PACKAGE_PATH}}}";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EE222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EE333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */;
+			productName = "MicrosoftCognitiveServicesSpeech-iOS";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DC1C152A22B8E27B00367496 /* Project object */;
 }

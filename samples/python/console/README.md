@@ -21,7 +21,7 @@ This sample demonstrates various forms of speech recognition, speech synthesis, 
   ```
 * To authenticate using an AAD token credential, install the azure-identity package in your Python interpreter by executing the command
   ```sh
-  pip install azure-identity
+  pip install "azure-identity>=1.21.0" "azure-core>=1.38.0" "pyjwt>=2.12.0" "cryptography>=48.0.1"
   ```
 * For AAD token authentication, you need to set up a custom domain endpoint for your Speech resource. Update the following setting in the sample files:
   * `YourEndpointWithCustomDomain`: replace with your Speech resource custom domain endpoint, such as `https://your-custom-domain.cognitiveservices.azure.com/`

@@ -31,7 +31,6 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 1. Speech recognition samples.");
                 Console.WriteLine(" 2. Speech translation samples.");
                 Console.WriteLine(" 3. Speech synthesis samples.");
-                Console.WriteLine(" 4. Meeting transcriber samples.");
                 Console.WriteLine(" 5. Speech recognition with language detection enabled samples");
                 Console.WriteLine(" 6. Standalone language detection samples.");
                 Console.WriteLine(" 7. Speech recognition with Microsoft Audio Stack (MAS) samples.");
@@ -55,10 +54,6 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D3:
                     case ConsoleKey.NumPad3:
                         SpeechSynthesis();
-                        break;
-                    case ConsoleKey.D4:
-                    case ConsoleKey.NumPad4:
-                        MeetingTranscriber();
                         break;
                     case ConsoleKey.D5:
                     case ConsoleKey.NumPad5:
@@ -390,47 +385,6 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D8:
                     case ConsoleKey.NumPad8:
                         TranslationSamples.TranslationWithApiKeyCredential().Wait();
-                        break;
-                    case ConsoleKey.D0:
-                    case ConsoleKey.NumPad0:
-                        Console.WriteLine(back);
-                        sampleWasRun = false;
-                        break;
-                    default:
-                        Console.WriteLine(invalid);
-                        sampleWasRun = false;
-                        break;
-                }
-
-                if (sampleWasRun) Console.WriteLine(done);
-
-            } while (x.Key != ConsoleKey.D0);
-        }
-
-        private static void MeetingTranscriber()
-        {
-            ConsoleKeyInfo x;
-
-            do
-            {
-                Console.WriteLine("");
-                Console.WriteLine(" Speech SDK - Meeting Transcriber Samples");
-                Console.WriteLine("");
-                Console.WriteLine(choose);
-                Console.WriteLine("");
-                Console.WriteLine(" 1. Remote Meeting for an async job.");
-                Console.WriteLine("");
-                Console.Write(prompt);
-
-                x = Console.ReadKey();
-                Console.WriteLine("\n");
-                bool sampleWasRun = true;
-
-                switch (x.Key)
-                {
-                    case ConsoleKey.D1:
-                    case ConsoleKey.NumPad1:
-                        RemoteMeetingSamples.RemoteMeetingWithFileAsync().Wait();
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:

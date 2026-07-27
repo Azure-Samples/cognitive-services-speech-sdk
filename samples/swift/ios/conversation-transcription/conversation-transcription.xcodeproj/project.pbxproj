@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		53AEF0906BA598C1FA585284 /* Pods_conversation_transcription.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4811CE021981F395F1F0C9FB /* Pods_conversation_transcription.framework */; };
+		II111111111111111111111111 /* MicrosoftCognitiveServicesSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = II222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */; };
 		FCB8F9232AA903F70020F068 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB8F9222AA903F70020F068 /* AppDelegate.swift */; };
 		FCB8F9252AA903F70020F068 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB8F9242AA903F70020F068 /* SceneDelegate.swift */; };
 		FCB8F9272AA903F70020F068 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCB8F9262AA903F70020F068 /* ViewController.swift */; };
@@ -18,9 +18,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1872596B8F0D1327DA121046 /* Pods-conversation-transcription.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-conversation-transcription.debug.xcconfig"; path = "Target Support Files/Pods-conversation-transcription/Pods-conversation-transcription.debug.xcconfig"; sourceTree = "<group>"; };
-		4811CE021981F395F1F0C9FB /* Pods_conversation_transcription.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_conversation_transcription.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F8776DB093DB8AFC7AAA3BEE /* Pods-conversation-transcription.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-conversation-transcription.release.xcconfig"; path = "Target Support Files/Pods-conversation-transcription/Pods-conversation-transcription.release.xcconfig"; sourceTree = "<group>"; };
 		FCB8F91F2AA903F70020F068 /* conversation-transcription.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "conversation-transcription.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCB8F9222AA903F70020F068 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FCB8F9242AA903F70020F068 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -37,38 +34,19 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				53AEF0906BA598C1FA585284 /* Pods_conversation_transcription.framework in Frameworks */,
+				II111111111111111111111111 /* MicrosoftCognitiveServicesSpeech in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7353C2BBE302FF85D9064C36 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				1872596B8F0D1327DA121046 /* Pods-conversation-transcription.debug.xcconfig */,
-				F8776DB093DB8AFC7AAA3BEE /* Pods-conversation-transcription.release.xcconfig */,
-			);
-			path = Pods;
-			sourceTree = "<group>";
-		};
-		97F4FC816199511DCEE047E6 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				4811CE021981F395F1F0C9FB /* Pods_conversation_transcription.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		FCB8F9162AA903F70020F068 = {
 			isa = PBXGroup;
 			children = (
 				FCB8F9362AA906AD0020F068 /* katiesteve_mono.wav */,
 				FCB8F9212AA903F70020F068 /* conversation-transcription */,
 				FCB8F9202AA903F70020F068 /* Products */,
-				7353C2BBE302FF85D9064C36 /* Pods */,
-				97F4FC816199511DCEE047E6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -101,15 +79,16 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FCB8F9332AA903FB0020F068 /* Build configuration list for PBXNativeTarget "conversation-transcription" */;
 			buildPhases = (
-				9947EB4B472F85C5586014D9 /* [CP] Check Pods Manifest.lock */,
 				FCB8F91B2AA903F70020F068 /* Sources */,
 				FCB8F91C2AA903F70020F068 /* Frameworks */,
 				FCB8F91D2AA903F70020F068 /* Resources */,
-				A988A9C1DCA9DCFE69F7EF27 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+			);
+			packageProductDependencies = (
+				II222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */,
 			);
 			name = "conversation-transcription";
 			productName = "conversation-transcription";
@@ -146,6 +125,9 @@
 			targets = (
 				FCB8F91E2AA903F70020F068 /* conversation-transcription */,
 			);
+			packageReferences = (
+				II333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */,
+			);
 		};
 /* End PBXProject section */
 
@@ -163,47 +145,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		9947EB4B472F85C5586014D9 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-conversation-transcription-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A988A9C1DCA9DCFE69F7EF27 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-conversation-transcription/Pods-conversation-transcription-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-conversation-transcription/Pods-conversation-transcription-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-conversation-transcription/Pods-conversation-transcription-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FCB8F91B2AA903F70020F068 /* Sources */ = {
@@ -354,7 +295,6 @@
 		};
 		FCB8F9342AA903FB0020F068 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 1872596B8F0D1327DA121046 /* Pods-conversation-transcription.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -382,7 +322,6 @@
 		};
 		FCB8F9352AA903FB0020F068 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F8776DB093DB8AFC7AAA3BEE /* Pods-conversation-transcription.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -430,6 +369,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		II333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "{{{PACKAGE_PATH}}}";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		II222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = II333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */;
+			productName = "MicrosoftCognitiveServicesSpeech-iOS";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FCB8F9172AA903F70020F068 /* Project object */;
 }

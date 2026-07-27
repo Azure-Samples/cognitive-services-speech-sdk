@@ -10,7 +10,7 @@
 ## Dependency modules:
     pip3 install termcolor
     pip3 install orjson
-    pip3 install urllib3
+    pip3 install "urllib3>=2.7.0"
     pip3 install requests
     pip3 install pydantic
 
