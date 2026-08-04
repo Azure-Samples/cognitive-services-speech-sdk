@@ -142,6 +142,10 @@ def run_file(
     sample_rate = wf.getframerate()
     channels = wf.getnchannels()
     sample_width = wf.getsampwidth()
+    total_frames = wf.getnframes()
+    if total_frames == 0:
+        wf.close()
+        raise ValueError("WAV contains no audio frames")
 
     speech_config = speechsdk.SpeechConfig(subscription=key, region=region)
     # --- word-level timestamps + detailed output (the key change) ---
@@ -251,7 +255,7 @@ def run_file(
     # overhead and OS timer coarseness from accumulating into cumulative drift.
     chunk_frames = int(sample_rate * CHUNK_MS / 1000)
     frame_bytes = sample_width * channels
-    audio_duration = wf.getnframes() / sample_rate
+    audio_duration = total_frames / sample_rate
     t0 = time.perf_counter()
     frames_sent = 0
     while True:
@@ -369,8 +373,9 @@ def main() -> None:
         parser.error("no WAV files found")
 
     failures: list[str] = []
+    failures_lock = threading.Lock()
 
-    def process(idx_wav):
+    def process(idx_wav: tuple[int, str]) -> None:
         i, wav_path = idx_wav
         name = os.path.basename(wav_path)
         print(f"[{i}/{len(wavs)}] start {name}", flush=True)
@@ -382,7 +387,8 @@ def main() -> None:
             )
         except Exception as exc:  # noqa: BLE001 - keep the batch going
             print(f"    ERROR {name}: {exc}", flush=True)
-            failures.append(name)
+            with failures_lock:
+                failures.append(name)
             return
         out_path = wav_path + (args.suffix or ".gen1.csv")
         write_csv(rows, out_path)
