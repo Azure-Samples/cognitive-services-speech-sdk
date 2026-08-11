@@ -24,11 +24,11 @@ class MainActivity : AppCompatActivity() {
     private val speechReco: SpeechRecognizer by lazy {
         speechConfig = SpeechConfig.fromSubscription(speechSubscriptionKey, speechRegion)
         destroyMicrophoneStream() // in case it was previously initialized
-        microphoneStream = MicrophoneStream()
-
+        val stream = MicrophoneStream()
+        microphoneStream = stream
         SpeechRecognizer(
             speechConfig,
-            AudioConfig.fromStreamInput(MicrophoneStream.create())
+            AudioConfig.fromStreamInput(stream)
         )
     }
 
