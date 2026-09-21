@@ -8,6 +8,8 @@ Translation recognition samples for the Microsoft Cognitive Services Speech SDK
 """
 
 import time
+import threading
+import wave
 
 from azure.identity import DefaultAzureCredential
 
@@ -182,6 +184,118 @@ def translation_continuous():
 
     recognizer.stop_continuous_recognition()
     # </TranslationContinuous>
+
+
+def translation_with_inline_commit():
+    """performs continuous speech translation with one inline commit on a push audio stream"""
+    # <TranslationWithInlineCommit>
+    if not hasattr(speechsdk.audio.PushAudioInputStream, "commit"):
+        raise RuntimeError("This sample requires a Speech SDK build that supports inline commit.")
+
+    translation_config = speechsdk.translation.SpeechTranslationConfig(
+        subscription=speech_key, endpoint=speech_endpoint,
+        speech_recognition_language="en-US", target_languages=("de", "fr"))
+    # Enable inline commit on a service deployment that supports the feature.
+    translation_config.set_service_property(
+        "setfeature", "forcecommit", speechsdk.ServicePropertyChannel.UriQueryParameter)
+
+    stream = speechsdk.audio.PushAudioInputStream()
+    audio_config = speechsdk.audio.AudioConfig(stream=stream)
+    recognizer = speechsdk.translation.TranslationRecognizer(
+        translation_config=translation_config, audio_config=audio_config)
+    recognition_done = threading.Event()
+    result_received = threading.Condition()
+    acknowledged_tokens = set()
+    stream_closed = False
+    cancellation_error = None
+
+    def recognized_cb(evt):
+        result = evt.result
+        commit_info = " commit_token={}".format(result.commit_token) if result.commit_token != 0 else ""
+        print("RECOGNIZED: reason={} text={}{}".format(result.reason, result.text, commit_info))
+        for language, text in result.translations.items():
+            print("\t{}: {}".format(language, text))
+        # NoMatch can acknowledge a commit when there is no pending speech to translate.
+        # Results from normal service segmentation have commit_token == 0.
+        with result_received:
+            if result.commit_token != 0:
+                acknowledged_tokens.add(result.commit_token)
+            result_received.notify_all()
+
+    def stop_cb(evt):
+        print("CLOSING: {}".format(evt))
+        with result_received:
+            recognition_done.set()
+            result_received.notify_all()
+
+    def canceled_cb(evt):
+        nonlocal cancellation_error
+        details = evt.result.cancellation_details
+        print("CANCELED: reason={} details={}".format(details.reason, details.error_details))
+        if details.reason == speechsdk.CancellationReason.Error:
+            cancellation_error = details.error_details or str(details.reason)
+        stop_cb(evt)
+
+    recognizer.recognizing.connect(lambda evt: print("RECOGNIZING: {}".format(evt.result.text)))
+    recognizer.recognized.connect(recognized_cb)
+    recognizer.session_stopped.connect(stop_cb)
+    recognizer.canceled.connect(canceled_cb)
+
+    try:
+        with wave.open(weatherfilename, "rb") as wav_file:
+            if (wav_file.getnchannels(), wav_file.getsampwidth(), wav_file.getframerate()) != (1, 2, 16000):
+                raise ValueError("Use a 16 kHz, 16-bit, mono PCM WAV file.")
+            commit_at_ms = 590
+            first_segment_frames = wav_file.getframerate() * commit_at_ms // 1000
+            if wav_file.getnframes() <= first_segment_frames:
+                raise ValueError("The WAV file must contain audio after the commit boundary.")
+
+            recognizer.start_continuous_recognition()
+            for segment, frames_remaining in enumerate(
+                    (first_segment_frames, wav_file.getnframes() - first_segment_frames)):
+                print("Writing audio segment {}".format(segment + 1))
+                while frames_remaining > 0 and not recognition_done.is_set():
+                    frames = wav_file.readframes(min(1600, frames_remaining))
+                    if not frames:
+                        raise ValueError("The WAV file ended before the expected audio boundary.")
+                    stream.write(frames)
+                    frames_remaining -= len(frames) // 2
+                    time.sleep(len(frames) / 32000)
+
+                if recognition_done.is_set():
+                    raise RuntimeError("Translation ended before the audio could be committed.")
+
+                # Closing the stream later finalizes the remaining audio without another commit.
+                if segment != 0:
+                    continue
+
+                # Commit the audio written so far, keeping this stream and recognizer open.
+                token = stream.commit()
+                print("COMMIT: token={}".format(token))
+                if token == 0:
+                    raise RuntimeError("The SDK rejected the commit request.")
+
+                # Wait for this token, not just any final result. An acknowledgment may
+                # arrive before commit() returns, so keep tokens received by the callback.
+                with result_received:
+                    result_received.wait_for(
+                        lambda: token in acknowledged_tokens or recognition_done.is_set(), timeout=15)
+                    if token not in acknowledged_tokens:
+                        raise RuntimeError(
+                            "No acknowledgment for commit token {} before timeout or session end. "
+                            "Check that the endpoint supports inline commit.".format(token))
+                print("COMMIT ACKNOWLEDGED: token={}".format(token))
+        stream.close()
+        stream_closed = True
+        if not recognition_done.wait(timeout=15):
+            raise RuntimeError("Timed out waiting for recognition to finish after the end of audio.")
+        if cancellation_error is not None:
+            raise RuntimeError("Recognition canceled: {}".format(cancellation_error))
+    finally:
+        if not stream_closed:
+            stream.close()
+        recognizer.stop_continuous_recognition()
+    # </TranslationWithInlineCommit>
 
 
 def translation_once_with_lid_from_file():
