@@ -6,6 +6,8 @@
 package com.microsoft.cognitiveservices.speech.samples.console;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.CompletableFuture;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -415,6 +417,134 @@ public class SpeechRecognitionSamples {
         config.close();
         audioInput.close();
         recognizer.close();
+    }
+
+    // Speech recognition with inline commit using a push audio stream.
+    public static void recognitionWithInlineCommitAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException, TimeoutException
+    {
+        // <recognitionWithInlineCommitAsync>
+        String endpoint = System.getenv("SPEECH_ENDPOINT");
+        String subscriptionKey = System.getenv("SPEECH_RESOURCE_KEY");
+        if (endpoint == null || endpoint.trim().isEmpty() || subscriptionKey == null || subscriptionKey.trim().isEmpty()) {
+            throw new IllegalArgumentException("Set SPEECH_ENDPOINT and SPEECH_RESOURCE_KEY before running this sample.");
+        }
+
+        try (SpeechConfig config = SpeechConfig.fromEndpoint(new URI(endpoint), subscriptionKey)) {
+            config.setSpeechRecognitionLanguage("en-US");
+            // Enable inline commit on a service deployment that supports the feature.
+            config.setServiceProperty("setfeature", "forcecommit", ServicePropertyChannel.UriQueryParameter);
+
+            // Use 16 kHz, 16-bit, mono PCM audio. WavStream skips the WAV header before writing to the push stream.
+            try (FileInputStream input = new FileInputStream("whatstheweatherlike.wav")) {
+                WavStream reader = new WavStream(input);
+                AudioStreamFormat format = reader.getFormat();
+                try (PushAudioInputStream pushStream = AudioInputStream.createPushStream(format);
+                     AudioConfig audioInput = AudioConfig.fromStreamInput(pushStream);
+                     SpeechRecognizer recognizer = new SpeechRecognizer(config, audioInput)) {
+                    CompletableFuture<Integer> commitAcknowledged = new CompletableFuture<>();
+                    CompletableFuture<String> recognitionStopped = new CompletableFuture<>();
+
+                    recognizer.recognizing.addEventListener((s, e) -> {
+                        System.out.println("RECOGNIZING: Text=" + e.getResult().getText());
+                    });
+                    recognizer.recognized.addEventListener((s, e) -> {
+                        int token = e.getResult().getCommitToken();
+                        String tokenText = token != 0 ? " commit_token=" + token : "";
+                        System.out.println("RECOGNIZED: Reason=" + e.getResult().getReason()
+                            + " Text=" + e.getResult().getText() + tokenText);
+                        // NoMatch can acknowledge a commit; naturally segmented results have token 0.
+                        if (token != 0) {
+                            // Keep the token even if this event arrives before commit() returns.
+                            commitAcknowledged.complete(token);
+                        }
+                    });
+                    recognizer.canceled.addEventListener((s, e) -> {
+                        System.out.println("CANCELED: Reason=" + e.getReason() + " Details=" + e.getErrorDetails());
+                        recognitionStopped.complete(e.getReason() == CancellationReason.Error
+                            ? "Recognition canceled: " + e.getErrorCode() + ". " + e.getErrorDetails() : null);
+                    });
+                    recognizer.sessionStopped.addEventListener((s, e) -> {
+                        System.out.println("SESSION STOPPED: SessionId=" + e.getSessionId());
+                        recognitionStopped.complete(null);
+                    });
+
+                    final int commitAtMilliseconds = 590;
+                    final int bytesPerSecond = 16000 * 2;
+                    boolean streamClosed = false;
+                    try {
+                        recognizer.startContinuousRecognitionAsync().get();
+                        for (int segment = 0; segment < 2; ++segment) {
+                            System.out.println("Writing audio segment " + (segment + 1));
+                            int bytesRemaining = bytesPerSecond * commitAtMilliseconds / 1000;
+                            while (segment != 0 || bytesRemaining > 0) {
+                                if (recognitionStopped.isDone()) {
+                                    String error = recognitionStopped.get();
+                                    throw new IllegalStateException("Recognition ended before all audio was written. "
+                                        + (error == null ? "" : error));
+                                }
+                                int bytesToRead = segment == 0 ? Math.min(3200, bytesRemaining) : 3200;
+                                byte[] buffer = new byte[bytesToRead];
+                                int bytesRead = reader.read(buffer);
+                                if (bytesRead == 0) {
+                                    if (segment == 0) {
+                                        throw new IllegalStateException("The WAV file ended before the commit boundary.");
+                                    }
+                                    break;
+                                }
+                                pushStream.write(bytesRead == buffer.length ? buffer : Arrays.copyOf(buffer, bytesRead));
+                                if (segment == 0) {
+                                    bytesRemaining -= bytesRead;
+                                }
+                                Thread.sleep(bytesRead * 1000L / bytesPerSecond);
+                            }
+
+                            // Closing the stream later finalizes the remaining audio without another commit.
+                            if (segment != 0) {
+                                continue;
+                            }
+                            // Commit the audio written so far without closing the stream or stopping recognition.
+                            int token = pushStream.commit();
+                            System.out.println("COMMIT: token=" + token);
+                            if (token == 0) {
+                                throw new IllegalStateException("The SDK rejected the commit request.");
+                            }
+                            // A returned token is a local request; wait for a matching service acknowledgment.
+                            try {
+                                CompletableFuture.anyOf(commitAcknowledged, recognitionStopped).get(15, TimeUnit.SECONDS);
+                            } catch (TimeoutException ex) {
+                                throw new TimeoutException("No acknowledgment before timeout. Check inline commit support.");
+                            }
+                            if (!commitAcknowledged.isDone() || commitAcknowledged.get() != token) {
+                                String error = recognitionStopped.getNow(null);
+                                throw new IllegalStateException("Recognition ended before the audio could be committed. "
+                                    + (error == null ? "" : error));
+                            }
+                            System.out.println("COMMIT ACKNOWLEDGED: token=" + token);
+                        }
+
+                        pushStream.close();
+                        streamClosed = true;
+                        String cancellationError;
+                        try {
+                            cancellationError = recognitionStopped.get(15, TimeUnit.SECONDS);
+                        } catch (TimeoutException ex) {
+                            throw new TimeoutException("Timed out waiting for recognition to finish after the end of audio.");
+                        }
+                        if (cancellationError != null) {
+                            throw new IllegalStateException(cancellationError);
+                        }
+                    } finally {
+                        if (!streamClosed) {
+                            pushStream.close();
+                        }
+                        recognizer.stopContinuousRecognitionAsync().get();
+                    }
+                } finally {
+                    format.close();
+                }
+            }
+        }
+        // </recognitionWithInlineCommitAsync>
     }
 
     // Speech recognition with events from a push stream
