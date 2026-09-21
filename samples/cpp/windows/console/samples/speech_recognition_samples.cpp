@@ -17,6 +17,11 @@
 #include <string>
 #include <iomanip>
 #include <cstdlib>
+#include <algorithm>
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -502,6 +507,154 @@ void SpeechContinuousRecognitionWithPushStream()
 
     // Stops recognition.
     recognizer->StopContinuousRecognitionAsync().get();
+}
+
+
+// Speech recognition with an inline commit on a push stream.
+void SpeechRecognitionWithInlineCommit()
+{
+    // <SpeechRecognitionWithInlineCommit>
+    auto config = SpeechConfig::FromEndpoint(getEnvVar("SPEECH_ENDPOINT"), getEnvVar("SPEECH_RESOURCE_KEY"));
+    config->SetSpeechRecognitionLanguage("en-US");
+    // Enable inline commit on a service deployment that supports the feature.
+    config->SetServiceProperty("setfeature", "forcecommit", ServicePropertyChannel::UriQueryParameter);
+
+    WavFileReader reader("whatstheweatherlike.wav");
+    mutex resultMutex;
+    condition_variable resultReceived;
+    bool recognitionDone = false;
+    uint32_t acknowledgedToken = 0;
+    string cancellationError;
+
+    // The input must be 16 kHz, 16-bit, mono PCM audio.
+    auto pushStream = AudioInputStream::CreatePushStream();
+    auto recognizer = SpeechRecognizer::FromConfig(config, AudioConfig::FromStreamInput(pushStream));
+
+    recognizer->Recognizing.Connect([](const SpeechRecognitionEventArgs& e)
+    {
+        cout << "RECOGNIZING: Text=" << e.Result->Text << endl;
+    });
+    recognizer->Recognized.Connect([&](const SpeechRecognitionEventArgs& e)
+    {
+        lock_guard<mutex> lock(resultMutex);
+        cout << "RECOGNIZED: Reason=" << (int)e.Result->Reason << " Text=" << e.Result->Text;
+        // NoMatch can acknowledge a commit; naturally segmented results have token 0.
+        if (e.Result->CommitToken() != 0)
+        {
+            acknowledgedToken = e.Result->CommitToken();
+            cout << " commit_token=" << acknowledgedToken;
+        }
+        cout << endl;
+        resultReceived.notify_all();
+    });
+    recognizer->Canceled.Connect([&](const SpeechRecognitionCanceledEventArgs& e)
+    {
+        lock_guard<mutex> lock(resultMutex);
+        cout << "CANCELED: Reason=" << (int)e.Reason << " Details=" << e.ErrorDetails << endl;
+        if (e.Reason == CancellationReason::Error)
+        {
+            cancellationError = e.ErrorDetails.empty() ? "Recognition canceled." : e.ErrorDetails;
+        }
+        recognitionDone = true;
+        resultReceived.notify_all();
+    });
+    recognizer->SessionStopped.Connect([&](const SessionEventArgs& e)
+    {
+        lock_guard<mutex> lock(resultMutex);
+        cout << "SESSION STOPPED: SessionId=" << e.SessionId << endl;
+        recognitionDone = true;
+        resultReceived.notify_all();
+    });
+
+    const uint32_t commitAtMilliseconds = 590;
+    const uint32_t bytesPerSecond = 16000 * 2;
+    vector<uint8_t> buffer(3200);
+    bool streamClosed = false;
+    try
+    {
+        recognizer->StartContinuousRecognitionAsync().get();
+        for (int segment = 0; segment < 2; ++segment)
+        {
+            cout << "Writing audio segment " << segment + 1 << endl;
+            uint32_t bytesRemaining = bytesPerSecond * commitAtMilliseconds / 1000;
+            while (segment != 0 || bytesRemaining > 0)
+            {
+                {
+                    lock_guard<mutex> lock(resultMutex);
+                    if (recognitionDone)
+                    {
+                        throw runtime_error("Recognition ended before all audio was written. " + cancellationError);
+                    }
+                }
+                uint32_t bytesToRead = segment == 0 ?
+                    (std::min)(static_cast<uint32_t>(buffer.size()), bytesRemaining) :
+                    static_cast<uint32_t>(buffer.size());
+                int bytesRead = reader.Read(buffer.data(), bytesToRead);
+                if (bytesRead == 0)
+                {
+                    if (segment == 0)
+                    {
+                        throw runtime_error("The WAV file ended before the commit boundary.");
+                    }
+                    break;
+                }
+                pushStream->Write(buffer.data(), static_cast<uint32_t>(bytesRead));
+                if (segment == 0)
+                {
+                    bytesRemaining -= static_cast<uint32_t>(bytesRead);
+                }
+                this_thread::sleep_for(chrono::duration<double>(static_cast<double>(bytesRead) / bytesPerSecond));
+            }
+
+            // Closing the stream later finalizes the remaining audio without another commit.
+            if (segment != 0)
+            {
+                continue;
+            }
+            // Commit the audio written so far without closing the stream or stopping recognition.
+            uint32_t token = pushStream->Commit();
+            cout << "COMMIT: token=" << token << endl;
+            if (token == 0)
+            {
+                throw runtime_error("The SDK rejected the commit request.");
+            }
+            // Keep the callback's token even if the acknowledgment arrives before Commit() returns.
+            unique_lock<mutex> lock(resultMutex);
+            resultReceived.wait_for(lock, chrono::seconds(15), [&]
+            {
+                return acknowledgedToken == token || recognitionDone;
+            });
+            if (acknowledgedToken != token)
+            {
+                throw runtime_error("No acknowledgment before timeout or session end. Check inline commit support. "
+                    + cancellationError);
+            }
+            cout << "COMMIT ACKNOWLEDGED: token=" << token << endl;
+        }
+
+        pushStream->Close();
+        streamClosed = true;
+        unique_lock<mutex> lock(resultMutex);
+        if (!resultReceived.wait_for(lock, chrono::seconds(15), [&] { return recognitionDone; }))
+        {
+            throw runtime_error("Timed out waiting for recognition to finish after the end of audio.");
+        }
+        if (!cancellationError.empty())
+        {
+            throw runtime_error(cancellationError);
+        }
+    }
+    catch (...)
+    {
+        if (!streamClosed)
+        {
+            pushStream->Close();
+        }
+        recognizer->StopContinuousRecognitionAsync().get();
+        throw;
+    }
+    recognizer->StopContinuousRecognitionAsync().get();
+    // </SpeechRecognitionWithInlineCommit>
 }
 
 // Keyword-triggered speech recognition using microphone.
