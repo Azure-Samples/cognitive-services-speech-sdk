@@ -134,6 +134,150 @@ namespace MicrosoftSpeechSDKSamples
             // </TranslationWithMicrophoneAsync>
         }
 
+        // Translation with inline commit using a push audio stream.
+        public static async Task TranslationWithInlineCommitAsync()
+        {
+            // <TranslationWithInlineCommitAsync>
+            var endpoint = Environment.GetEnvironmentVariable("SPEECH_ENDPOINT");
+            var subscriptionKey = Environment.GetEnvironmentVariable("SPEECH_RESOURCE_KEY");
+            if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(subscriptionKey))
+            {
+                throw new InvalidOperationException("Set SPEECH_ENDPOINT and SPEECH_RESOURCE_KEY before running this sample.");
+            }
+
+            var config = SpeechTranslationConfig.FromEndpoint(new Uri(endpoint), subscriptionKey);
+            config.SpeechRecognitionLanguage = "en-US";
+            config.AddTargetLanguage("de");
+            config.AddTargetLanguage("fr");
+            // Enable inline commit on a service deployment that supports the feature.
+            config.SetServiceProperty("setfeature", "forcecommit", ServicePropertyChannel.UriQueryParameter);
+
+            // The input must be 16 kHz, 16-bit, mono PCM audio.
+            using (var reader = Helper.CreateWavReader(@"whatstheweatherlike.wav"))
+            using (var pushStream = AudioInputStream.CreatePushStream())
+            using (var audioInput = AudioConfig.FromStreamInput(pushStream))
+            using (var recognizer = new TranslationRecognizer(config, audioInput))
+            {
+                var commitAcknowledged = new TaskCompletionSource<uint>(TaskCreationOptions.RunContinuationsAsynchronously);
+                var recognitionStopped = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                recognizer.Recognizing += (s, e) =>
+                {
+                    Console.WriteLine($"RECOGNIZING: Text={e.Result.Text}");
+                };
+                recognizer.Recognized += (s, e) =>
+                {
+                    var token = e.Result.CommitToken;
+                    var tokenText = token != 0 ? $" commit_token={token}" : "";
+                    Console.WriteLine($"RECOGNIZED: Reason={e.Result.Reason} Text={e.Result.Text}{tokenText}");
+                    foreach (var translation in e.Result.Translations)
+                    {
+                        Console.WriteLine($"  {translation.Key}: {translation.Value}");
+                    }
+                    // NoMatch can acknowledge a commit; naturally segmented results have token 0.
+                    if (token != 0)
+                    {
+                        // Keep the token even if this event arrives before Commit() returns.
+                        commitAcknowledged.TrySetResult(token);
+                    }
+                };
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine($"CANCELED: Reason={e.Reason} Details={e.ErrorDetails}");
+                    recognitionStopped.TrySetResult(e.Reason == CancellationReason.Error
+                        ? $"Recognition canceled: {e.ErrorCode}. {e.ErrorDetails}" : null);
+                };
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine($"SESSION STOPPED: SessionId={e.SessionId}");
+                    recognitionStopped.TrySetResult(null);
+                };
+
+                const int commitAtMilliseconds = 590;
+                const int bytesPerSecond = 16000 * 2;
+                var buffer = new byte[3200];
+                bool streamClosed = false;
+                try
+                {
+                    await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                    for (int segment = 0; segment < 2; ++segment)
+                    {
+                        Console.WriteLine($"Writing audio segment {segment + 1}");
+                        int bytesRemaining = bytesPerSecond * commitAtMilliseconds / 1000;
+                        while (segment != 0 || bytesRemaining > 0)
+                        {
+                            if (recognitionStopped.Task.IsCompleted)
+                            {
+                                throw new InvalidOperationException("Recognition ended before all audio was written. "
+                                    + await recognitionStopped.Task.ConfigureAwait(false));
+                            }
+                            int bytesToRead = segment == 0 ? Math.Min(buffer.Length, bytesRemaining) : buffer.Length;
+                            int bytesRead = reader.Read(buffer, (uint)bytesToRead);
+                            if (bytesRead == 0)
+                            {
+                                if (segment == 0)
+                                {
+                                    throw new InvalidOperationException("The WAV file ended before the commit boundary.");
+                                }
+                                break;
+                            }
+                            pushStream.Write(buffer, bytesRead);
+                            if (segment == 0)
+                            {
+                                bytesRemaining -= bytesRead;
+                            }
+                            await Task.Delay(TimeSpan.FromSeconds((double)bytesRead / bytesPerSecond)).ConfigureAwait(false);
+                        }
+
+                        // Closing the stream later finalizes the remaining audio without another commit.
+                        if (segment != 0)
+                        {
+                            continue;
+                        }
+                        // Commit the audio written so far without closing the stream or stopping recognition.
+                        uint token = pushStream.Commit();
+                        Console.WriteLine($"COMMIT: token={token}");
+                        if (token == 0)
+                        {
+                            throw new InvalidOperationException("The SDK rejected the commit request.");
+                        }
+                        // A returned token is a local request; wait for a matching service acknowledgment.
+                        await Task.WhenAny(commitAcknowledged.Task, recognitionStopped.Task,
+                            Task.Delay(TimeSpan.FromSeconds(15))).ConfigureAwait(false);
+                        if (!commitAcknowledged.Task.IsCompleted || await commitAcknowledged.Task.ConfigureAwait(false) != token)
+                        {
+                            var error = recognitionStopped.Task.IsCompleted
+                                ? await recognitionStopped.Task.ConfigureAwait(false) : "";
+                            throw new InvalidOperationException("No acknowledgment before timeout or session end. Check inline commit support. " + error);
+                        }
+                        Console.WriteLine($"COMMIT ACKNOWLEDGED: token={token}");
+                    }
+
+                    pushStream.Close();
+                    streamClosed = true;
+                    if (await Task.WhenAny(recognitionStopped.Task, Task.Delay(TimeSpan.FromSeconds(15))).ConfigureAwait(false)
+                        != recognitionStopped.Task)
+                    {
+                        throw new TimeoutException("Timed out waiting for recognition to finish after the end of audio.");
+                    }
+                    var cancellationError = await recognitionStopped.Task.ConfigureAwait(false);
+                    if (cancellationError != null)
+                    {
+                        throw new InvalidOperationException(cancellationError);
+                    }
+                }
+                finally
+                {
+                    if (!streamClosed)
+                    {
+                        pushStream.Close();
+                    }
+                    await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+                }
+            }
+            // </TranslationWithInlineCommitAsync>
+        }
+
         // Translation using file input.
         public static async Task TranslationWithFileAsync()
         {
