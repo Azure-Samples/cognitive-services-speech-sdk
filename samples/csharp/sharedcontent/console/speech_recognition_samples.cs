@@ -556,66 +556,75 @@ namespace MicrosoftSpeechSDKSamples
                     recognitionStopped.TrySetResult(null);
                 };
 
-                const int commitAtMilliseconds = 590;
-                const int bytesPerSecond = 16000 * 2;
-                var buffer = new byte[3200];
+                // Send the next durationMilliseconds of audio; omit the duration to send the rest.
+                // This helper keeps the file position and reuses the same push stream.
+                async Task StreamAudioAsync(int durationMilliseconds = 0)
+                {
+                    const int bytesPerSecond = 16000 * 2; // 16 kHz, 16-bit, mono PCM.
+                    int bytesRemaining = bytesPerSecond * durationMilliseconds / 1000;
+                    var buffer = new byte[3200]; // 100 ms of audio per write.
+                    while (durationMilliseconds == 0 || bytesRemaining > 0)
+                    {
+                        if (recognitionStopped.Task.IsCompleted)
+                        {
+                            throw new InvalidOperationException("Recognition ended before all audio was written. "
+                                + await recognitionStopped.Task.ConfigureAwait(false));
+                        }
+                        int bytesToRead = buffer.Length;
+                        if (durationMilliseconds != 0)
+                        {
+                            bytesToRead = Math.Min(bytesToRead, bytesRemaining);
+                        }
+                        int bytesRead = reader.Read(buffer, (uint)bytesToRead);
+                        if (bytesRead == 0)
+                        {
+                            if (durationMilliseconds != 0)
+                            {
+                                throw new InvalidOperationException("The WAV file ended before the requested duration.");
+                            }
+                            break;
+                        }
+                        pushStream.Write(buffer, bytesRead);
+                        if (durationMilliseconds != 0)
+                        {
+                            bytesRemaining -= bytesRead;
+                        }
+                        // Send at approximately the same pace as live audio.
+                        await Task.Delay(TimeSpan.FromSeconds((double)bytesRead / bytesPerSecond)).ConfigureAwait(false);
+                    }
+                }
+
                 bool streamClosed = false;
                 try
                 {
                     await recognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
-                    for (int segment = 0; segment < 2; ++segment)
+                    // 1. Stream the first 590 ms: approximately "what's the" in this recording.
+                    Console.WriteLine("Writing audio segment 1");
+                    await StreamAudioAsync(590).ConfigureAwait(false);
+
+                    // 2. Commit the first part without closing the stream or stopping recognition.
+                    uint token = pushStream.Commit();
+                    Console.WriteLine($"COMMIT: token={token}");
+                    if (token == 0)
                     {
-                        Console.WriteLine($"Writing audio segment {segment + 1}");
-                        int bytesRemaining = bytesPerSecond * commitAtMilliseconds / 1000;
-                        while (segment != 0 || bytesRemaining > 0)
-                        {
-                            if (recognitionStopped.Task.IsCompleted)
-                            {
-                                throw new InvalidOperationException("Recognition ended before all audio was written. "
-                                    + await recognitionStopped.Task.ConfigureAwait(false));
-                            }
-                            int bytesToRead = segment == 0 ? Math.Min(buffer.Length, bytesRemaining) : buffer.Length;
-                            int bytesRead = reader.Read(buffer, (uint)bytesToRead);
-                            if (bytesRead == 0)
-                            {
-                                if (segment == 0)
-                                {
-                                    throw new InvalidOperationException("The WAV file ended before the commit boundary.");
-                                }
-                                break;
-                            }
-                            pushStream.Write(buffer, bytesRead);
-                            if (segment == 0)
-                            {
-                                bytesRemaining -= bytesRead;
-                            }
-                            await Task.Delay(TimeSpan.FromSeconds((double)bytesRead / bytesPerSecond)).ConfigureAwait(false);
-                        }
-
-                        // Closing the stream later finalizes the remaining audio without another commit.
-                        if (segment != 0)
-                        {
-                            continue;
-                        }
-                        // Commit the audio written so far without closing the stream or stopping recognition.
-                        uint token = pushStream.Commit();
-                        Console.WriteLine($"COMMIT: token={token}");
-                        if (token == 0)
-                        {
-                            throw new InvalidOperationException("The SDK rejected the commit request.");
-                        }
-                        // A returned token is a local request; wait for a matching service acknowledgment.
-                        await Task.WhenAny(commitAcknowledged.Task, recognitionStopped.Task,
-                            Task.Delay(TimeSpan.FromSeconds(15))).ConfigureAwait(false);
-                        if (!commitAcknowledged.Task.IsCompleted || await commitAcknowledged.Task.ConfigureAwait(false) != token)
-                        {
-                            var error = recognitionStopped.Task.IsCompleted
-                                ? await recognitionStopped.Task.ConfigureAwait(false) : "";
-                            throw new InvalidOperationException("No acknowledgment before timeout or session end. Check inline commit support. " + error);
-                        }
-                        Console.WriteLine($"COMMIT ACKNOWLEDGED: token={token}");
+                        throw new InvalidOperationException("The SDK rejected the commit request.");
                     }
+                    // A returned token is a local request; wait for a matching service acknowledgment.
+                    await Task.WhenAny(commitAcknowledged.Task, recognitionStopped.Task,
+                        Task.Delay(TimeSpan.FromSeconds(15))).ConfigureAwait(false);
+                    if (!commitAcknowledged.Task.IsCompleted || await commitAcknowledged.Task.ConfigureAwait(false) != token)
+                    {
+                        var error = recognitionStopped.Task.IsCompleted
+                            ? await recognitionStopped.Task.ConfigureAwait(false) : "";
+                        throw new InvalidOperationException("No acknowledgment before timeout or session end. Check inline commit support. " + error);
+                    }
+                    Console.WriteLine($"COMMIT ACKNOWLEDGED: token={token}");
 
+                    // 3. Stream the rest ("weather like") using the same stream and recognizer.
+                    Console.WriteLine("Writing audio segment 2");
+                    await StreamAudioAsync().ConfigureAwait(false);
+
+                    // Closing the stream lets the service finalize the remaining audio normally.
                     pushStream.Close();
                     streamClosed = true;
                     if (await Task.WhenAny(recognitionStopped.Task, Task.Delay(TimeSpan.FromSeconds(15))).ConfigureAwait(false)

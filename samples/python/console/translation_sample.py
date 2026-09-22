@@ -241,6 +241,25 @@ def translation_with_inline_commit():
     recognizer.session_stopped.connect(stop_cb)
     recognizer.canceled.connect(canceled_cb)
 
+    def stream_audio(wav_file, frame_count):
+        """Send the next frame_count audio frames, continuing from the current file position."""
+        # A frame is one sample per channel. This mono, 16-bit file uses 2 bytes per frame.
+        bytes_per_frame = wav_file.getnchannels() * wav_file.getsampwidth()
+        frames_per_chunk = wav_file.getframerate() // 10  # 100 ms of audio per write.
+        while frame_count > 0:
+            if recognition_done.is_set():
+                raise RuntimeError("Recognition ended before all audio was written. " + (cancellation_error or ""))
+            audio = wav_file.readframes(min(frames_per_chunk, frame_count))
+            if not audio:
+                raise ValueError("The WAV file ended before the requested number of frames.")
+            stream.write(audio)
+            frames_written = len(audio) // bytes_per_frame
+            frame_count -= frames_written
+            # Send at approximately the same pace as live audio.
+            time.sleep(frames_written / wav_file.getframerate())
+        if recognition_done.is_set():
+            raise RuntimeError("Recognition ended before all audio was written. " + (cancellation_error or ""))
+
     try:
         with wave.open(weatherfilename, "rb") as wav_file:
             if (wav_file.getnchannels(), wav_file.getsampwidth(), wav_file.getframerate()) != (1, 2, 16000):
@@ -251,40 +270,31 @@ def translation_with_inline_commit():
                 raise ValueError("The WAV file must contain audio after the commit boundary.")
 
             recognizer.start_continuous_recognition()
-            for segment, frames_remaining in enumerate(
-                    (first_segment_frames, wav_file.getnframes() - first_segment_frames)):
-                print("Writing audio segment {}".format(segment + 1))
-                while frames_remaining > 0 and not recognition_done.is_set():
-                    frames = wav_file.readframes(min(1600, frames_remaining))
-                    if not frames:
-                        raise ValueError("The WAV file ended before the expected audio boundary.")
-                    stream.write(frames)
-                    frames_remaining -= len(frames) // 2
-                    time.sleep(len(frames) / 32000)
+            # 1. Stream the first 590 ms: approximately "what's the" in this recording.
+            print("Writing audio segment 1")
+            stream_audio(wav_file, first_segment_frames)
 
-                if recognition_done.is_set():
-                    raise RuntimeError("Translation ended before the audio could be committed.")
+            # 2. Commit the first part without closing the stream or stopping recognition.
+            token = stream.commit()
+            print("COMMIT: token={}".format(token))
+            if token == 0:
+                raise RuntimeError("The SDK rejected the commit request.")
 
-                # Closing the stream later finalizes the remaining audio without another commit.
-                if segment != 0:
-                    continue
+            # Wait for this token, not just any final result. An acknowledgment may
+            # arrive before commit() returns, so keep tokens received by the callback.
+            with result_received:
+                result_received.wait_for(
+                    lambda: token in acknowledged_tokens or recognition_done.is_set(), timeout=15)
+                if token not in acknowledged_tokens:
+                    raise RuntimeError(
+                        "No acknowledgment for commit token {} before timeout or session end. "
+                        "Check that the endpoint supports inline commit.".format(token))
+            print("COMMIT ACKNOWLEDGED: token={}".format(token))
 
-                # Commit the audio written so far, keeping this stream and recognizer open.
-                token = stream.commit()
-                print("COMMIT: token={}".format(token))
-                if token == 0:
-                    raise RuntimeError("The SDK rejected the commit request.")
-
-                # Wait for this token, not just any final result. An acknowledgment may
-                # arrive before commit() returns, so keep tokens received by the callback.
-                with result_received:
-                    result_received.wait_for(
-                        lambda: token in acknowledged_tokens or recognition_done.is_set(), timeout=15)
-                    if token not in acknowledged_tokens:
-                        raise RuntimeError(
-                            "No acknowledgment for commit token {} before timeout or session end. "
-                            "Check that the endpoint supports inline commit.".format(token))
-                print("COMMIT ACKNOWLEDGED: token={}".format(token))
+            # 3. Stream the rest ("weather like") using the same stream and recognizer.
+            print("Writing audio segment 2")
+            stream_audio(wav_file, wav_file.getnframes() - first_segment_frames)
+        # Closing the stream lets the service finalize the remaining audio normally.
         stream.close()
         stream_closed = True
         if not recognition_done.wait(timeout=15):

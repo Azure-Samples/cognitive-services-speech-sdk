@@ -566,58 +566,62 @@ void SpeechRecognitionWithInlineCommit()
         resultReceived.notify_all();
     });
 
-    const uint32_t commitAtMilliseconds = 590;
-    const uint32_t bytesPerSecond = 16000 * 2;
-    vector<uint8_t> buffer(3200);
+    // Send the next durationMilliseconds of audio; omit the duration to send the rest.
+    // This helper keeps the file position and reuses the same push stream.
+    auto streamAudio = [&](uint32_t durationMilliseconds = 0)
+    {
+        const uint32_t bytesPerSecond = 16000 * 2; // 16 kHz, 16-bit, mono PCM.
+        uint32_t bytesRemaining = bytesPerSecond * durationMilliseconds / 1000;
+        vector<uint8_t> buffer(3200); // 100 ms of audio per write.
+        while (durationMilliseconds == 0 || bytesRemaining > 0)
+        {
+            {
+                lock_guard<mutex> lock(resultMutex);
+                if (recognitionDone)
+                {
+                    throw runtime_error("Recognition ended before all audio was written. " + cancellationError);
+                }
+            }
+            uint32_t bytesToRead = static_cast<uint32_t>(buffer.size());
+            if (durationMilliseconds != 0)
+            {
+                bytesToRead = (std::min)(bytesToRead, bytesRemaining);
+            }
+            int bytesRead = reader.Read(buffer.data(), bytesToRead);
+            if (bytesRead == 0)
+            {
+                if (durationMilliseconds != 0)
+                {
+                    throw runtime_error("The WAV file ended before the requested duration.");
+                }
+                break;
+            }
+            pushStream->Write(buffer.data(), static_cast<uint32_t>(bytesRead));
+            if (durationMilliseconds != 0)
+            {
+                bytesRemaining -= static_cast<uint32_t>(bytesRead);
+            }
+            // Send at approximately the same pace as live audio.
+            this_thread::sleep_for(chrono::duration<double>(static_cast<double>(bytesRead) / bytesPerSecond));
+        }
+    };
+
     bool streamClosed = false;
     try
     {
         recognizer->StartContinuousRecognitionAsync().get();
-        for (int segment = 0; segment < 2; ++segment)
-        {
-            cout << "Writing audio segment " << segment + 1 << endl;
-            uint32_t bytesRemaining = bytesPerSecond * commitAtMilliseconds / 1000;
-            while (segment != 0 || bytesRemaining > 0)
-            {
-                {
-                    lock_guard<mutex> lock(resultMutex);
-                    if (recognitionDone)
-                    {
-                        throw runtime_error("Recognition ended before all audio was written. " + cancellationError);
-                    }
-                }
-                uint32_t bytesToRead = segment == 0 ?
-                    (std::min)(static_cast<uint32_t>(buffer.size()), bytesRemaining) :
-                    static_cast<uint32_t>(buffer.size());
-                int bytesRead = reader.Read(buffer.data(), bytesToRead);
-                if (bytesRead == 0)
-                {
-                    if (segment == 0)
-                    {
-                        throw runtime_error("The WAV file ended before the commit boundary.");
-                    }
-                    break;
-                }
-                pushStream->Write(buffer.data(), static_cast<uint32_t>(bytesRead));
-                if (segment == 0)
-                {
-                    bytesRemaining -= static_cast<uint32_t>(bytesRead);
-                }
-                this_thread::sleep_for(chrono::duration<double>(static_cast<double>(bytesRead) / bytesPerSecond));
-            }
+        // 1. Stream the first 590 ms: approximately "what's the" in this recording.
+        cout << "Writing audio segment 1" << endl;
+        streamAudio(590);
 
-            // Closing the stream later finalizes the remaining audio without another commit.
-            if (segment != 0)
-            {
-                continue;
-            }
-            // Commit the audio written so far without closing the stream or stopping recognition.
-            uint32_t token = pushStream->Commit();
-            cout << "COMMIT: token=" << token << endl;
-            if (token == 0)
-            {
-                throw runtime_error("The SDK rejected the commit request.");
-            }
+        // 2. Commit the first part without closing the stream or stopping recognition.
+        uint32_t token = pushStream->Commit();
+        cout << "COMMIT: token=" << token << endl;
+        if (token == 0)
+        {
+            throw runtime_error("The SDK rejected the commit request.");
+        }
+        {
             // Keep the callback's token even if the acknowledgment arrives before Commit() returns.
             unique_lock<mutex> lock(resultMutex);
             resultReceived.wait_for(lock, chrono::seconds(15), [&]
@@ -632,6 +636,11 @@ void SpeechRecognitionWithInlineCommit()
             cout << "COMMIT ACKNOWLEDGED: token=" << token << endl;
         }
 
+        // 3. Stream the rest ("weather like") using the same stream and recognizer.
+        cout << "Writing audio segment 2" << endl;
+        streamAudio();
+
+        // Closing the stream lets the service finalize the remaining audio normally.
         pushStream->Close();
         streamClosed = true;
         unique_lock<mutex> lock(resultMutex);

@@ -39,6 +39,41 @@ import com.microsoft.cognitiveservices.speech.translation.*;
 
 @SuppressWarnings("resource") // scanner
 public class TranslationSamples {
+    // Send the next durationMilliseconds of audio, or the rest of the file if duration is 0.
+    // Both calls continue from the current file position and use the same push stream.
+    private static void streamAudio(WavStream reader, PushAudioInputStream pushStream,
+        int durationMilliseconds, CompletableFuture<String> recognitionStopped)
+        throws InterruptedException, ExecutionException
+    {
+        final int bytesPerSecond = 16000 * 2; // 16 kHz, 16-bit, mono PCM.
+        int bytesRemaining = bytesPerSecond * durationMilliseconds / 1000;
+        while (durationMilliseconds == 0 || bytesRemaining > 0) {
+            if (recognitionStopped.isDone()) {
+                String error = recognitionStopped.get();
+                throw new IllegalStateException("Recognition ended before all audio was written. "
+                    + (error == null ? "" : error));
+            }
+            int bytesToRead = 3200; // 100 ms of audio per write.
+            if (durationMilliseconds != 0) {
+                bytesToRead = Math.min(bytesToRead, bytesRemaining);
+            }
+            byte[] buffer = new byte[bytesToRead];
+            int bytesRead = reader.read(buffer);
+            if (bytesRead == 0) {
+                if (durationMilliseconds != 0) {
+                    throw new IllegalStateException("The WAV file ended before the requested duration.");
+                }
+                break;
+            }
+            pushStream.write(bytesRead == buffer.length ? buffer : Arrays.copyOf(buffer, bytesRead));
+            if (durationMilliseconds != 0) {
+                bytesRemaining -= bytesRead;
+            }
+            // Send at approximately the same pace as live audio.
+            Thread.sleep(bytesRead * 1000L / bytesPerSecond);
+        }
+    }
+
     // Translation with inline commit using a push audio stream.
     public static void translationWithInlineCommitAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException, TimeoutException
     {
@@ -93,60 +128,37 @@ public class TranslationSamples {
                         recognitionStopped.complete(null);
                     });
 
-                    final int commitAtMilliseconds = 590;
-                    final int bytesPerSecond = 16000 * 2;
                     boolean streamClosed = false;
                     try {
                         recognizer.startContinuousRecognitionAsync().get();
-                        for (int segment = 0; segment < 2; ++segment) {
-                            System.out.println("Writing audio segment " + (segment + 1));
-                            int bytesRemaining = bytesPerSecond * commitAtMilliseconds / 1000;
-                            while (segment != 0 || bytesRemaining > 0) {
-                                if (recognitionStopped.isDone()) {
-                                    String error = recognitionStopped.get();
-                                    throw new IllegalStateException("Recognition ended before all audio was written. "
-                                        + (error == null ? "" : error));
-                                }
-                                int bytesToRead = segment == 0 ? Math.min(3200, bytesRemaining) : 3200;
-                                byte[] buffer = new byte[bytesToRead];
-                                int bytesRead = reader.read(buffer);
-                                if (bytesRead == 0) {
-                                    if (segment == 0) {
-                                        throw new IllegalStateException("The WAV file ended before the commit boundary.");
-                                    }
-                                    break;
-                                }
-                                pushStream.write(bytesRead == buffer.length ? buffer : Arrays.copyOf(buffer, bytesRead));
-                                if (segment == 0) {
-                                    bytesRemaining -= bytesRead;
-                                }
-                                Thread.sleep(bytesRead * 1000L / bytesPerSecond);
-                            }
+                        // 1. Stream the first 590 ms: approximately "what's the" in this recording.
+                        System.out.println("Writing audio segment 1");
+                        streamAudio(reader, pushStream, 590, recognitionStopped);
 
-                            // Closing the stream later finalizes the remaining audio without another commit.
-                            if (segment != 0) {
-                                continue;
-                            }
-                            // Commit the audio written so far without closing the stream or stopping recognition.
-                            int token = pushStream.commit();
-                            System.out.println("COMMIT: token=" + token);
-                            if (token == 0) {
-                                throw new IllegalStateException("The SDK rejected the commit request.");
-                            }
-                            // A returned token is a local request; wait for a matching service acknowledgment.
-                            try {
-                                CompletableFuture.anyOf(commitAcknowledged, recognitionStopped).get(15, TimeUnit.SECONDS);
-                            } catch (TimeoutException ex) {
-                                throw new TimeoutException("No acknowledgment before timeout. Check inline commit support.");
-                            }
-                            if (!commitAcknowledged.isDone() || commitAcknowledged.get() != token) {
-                                String error = recognitionStopped.getNow(null);
-                                throw new IllegalStateException("Recognition ended before the audio could be committed. "
-                                    + (error == null ? "" : error));
-                            }
-                            System.out.println("COMMIT ACKNOWLEDGED: token=" + token);
+                        // 2. Commit the first part without closing the stream or stopping recognition.
+                        int token = pushStream.commit();
+                        System.out.println("COMMIT: token=" + token);
+                        if (token == 0) {
+                            throw new IllegalStateException("The SDK rejected the commit request.");
                         }
+                        // A returned token is a local request; wait for a matching service acknowledgment.
+                        try {
+                            CompletableFuture.anyOf(commitAcknowledged, recognitionStopped).get(15, TimeUnit.SECONDS);
+                        } catch (TimeoutException ex) {
+                            throw new TimeoutException("No acknowledgment before timeout. Check inline commit support.");
+                        }
+                        if (!commitAcknowledged.isDone() || commitAcknowledged.get() != token) {
+                            String error = recognitionStopped.getNow(null);
+                            throw new IllegalStateException("Recognition ended before the audio could be committed. "
+                                + (error == null ? "" : error));
+                        }
+                        System.out.println("COMMIT ACKNOWLEDGED: token=" + token);
 
+                        // 3. Stream the rest ("weather like"); duration 0 means read to the end.
+                        System.out.println("Writing audio segment 2");
+                        streamAudio(reader, pushStream, 0, recognitionStopped);
+
+                        // Closing the stream lets the service finalize the remaining audio normally.
                         pushStream.close();
                         streamClosed = true;
                         String cancellationError;
