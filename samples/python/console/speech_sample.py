@@ -619,6 +619,7 @@ def speech_recognition_with_push_stream():
 
 def speech_recognition_with_inline_commit():
     """performs continuous speech recognition with one inline commit on a push audio stream"""
+    # <SpeechRecognitionWithInlineCommit>
     if not hasattr(speechsdk.audio.PushAudioInputStream, "commit"):
         raise RuntimeError("This sample requires a Speech SDK build that supports inline commit.")
 
@@ -732,6 +733,7 @@ def speech_recognition_with_inline_commit():
         if not stream_closed:
             stream.close()
         speech_recognizer.stop_continuous_recognition()
+    # </SpeechRecognitionWithInlineCommit>
 
 
 def speech_recognition_with_push_stream_mulaw():
