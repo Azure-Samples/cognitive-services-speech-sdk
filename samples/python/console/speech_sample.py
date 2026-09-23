@@ -617,6 +617,125 @@ def speech_recognition_with_push_stream():
     push_stream_writer_thread.join()
 
 
+def speech_recognition_with_inline_commit():
+    """performs continuous speech recognition with one inline commit on a push audio stream"""
+    # <SpeechRecognitionWithInlineCommit>
+    if not hasattr(speechsdk.audio.PushAudioInputStream, "commit"):
+        raise RuntimeError("This sample requires a Speech SDK build that supports inline commit.")
+
+    speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
+    speech_config.speech_recognition_language = "en-US"
+    # Enable inline commit on a service deployment that supports the feature.
+    speech_config.set_service_property(
+        "setfeature", "forcecommit", speechsdk.ServicePropertyChannel.UriQueryParameter)
+
+    stream = speechsdk.audio.PushAudioInputStream()
+    audio_config = speechsdk.audio.AudioConfig(stream=stream)
+    speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_config)
+    recognition_done = threading.Event()
+    result_received = threading.Condition()
+    acknowledged_tokens = set()
+    stream_closed = False
+    cancellation_error = None
+
+    def recognized_cb(evt):
+        result = evt.result
+        commit_info = " commit_token={}".format(result.commit_token) if result.commit_token != 0 else ""
+        print("RECOGNIZED: reason={} text={}{}".format(result.reason, result.text, commit_info))
+        # An acknowledgment can be a NoMatch result if there is no pending speech.
+        # Results from normal service segmentation have commit_token == 0.
+        with result_received:
+            if result.commit_token != 0:
+                acknowledged_tokens.add(result.commit_token)
+            result_received.notify_all()
+
+    def stop_cb(evt):
+        print("CLOSING: {}".format(evt))
+        with result_received:
+            recognition_done.set()
+            result_received.notify_all()
+
+    def canceled_cb(evt):
+        nonlocal cancellation_error
+        details = evt.result.cancellation_details
+        print("CANCELED: reason={} details={}".format(details.reason, details.error_details))
+        if details.reason == speechsdk.CancellationReason.Error:
+            cancellation_error = details.error_details or str(details.reason)
+        stop_cb(evt)
+
+    speech_recognizer.recognizing.connect(lambda evt: print("RECOGNIZING: {}".format(evt.result.text)))
+    speech_recognizer.recognized.connect(recognized_cb)
+    speech_recognizer.session_stopped.connect(stop_cb)
+    speech_recognizer.canceled.connect(canceled_cb)
+
+    def stream_audio(wav_file, frame_count):
+        """Send the next frame_count audio frames, continuing from the current file position."""
+        # A frame is one sample per channel. This mono, 16-bit file uses 2 bytes per frame.
+        bytes_per_frame = wav_file.getnchannels() * wav_file.getsampwidth()
+        frames_per_chunk = wav_file.getframerate() // 10  # 100 ms of audio per write.
+        while frame_count > 0:
+            if recognition_done.is_set():
+                raise RuntimeError("Recognition ended before all audio was written. " + (cancellation_error or ""))
+            audio = wav_file.readframes(min(frames_per_chunk, frame_count))
+            if not audio:
+                raise ValueError("The WAV file ended before the requested number of frames.")
+            stream.write(audio)
+            frames_written = len(audio) // bytes_per_frame
+            frame_count -= frames_written
+            # Send at approximately the same pace as live audio.
+            time.sleep(frames_written / wav_file.getframerate())
+        if recognition_done.is_set():
+            raise RuntimeError("Recognition ended before all audio was written. " + (cancellation_error or ""))
+
+    try:
+        with wave.open(weatherfilename, "rb") as wav_file:
+            if (wav_file.getnchannels(), wav_file.getsampwidth(), wav_file.getframerate()) != (1, 2, 16000):
+                raise ValueError("Use a 16 kHz, 16-bit, mono PCM WAV file.")
+            commit_at_ms = 590
+            first_segment_frames = wav_file.getframerate() * commit_at_ms // 1000
+            if wav_file.getnframes() <= first_segment_frames:
+                raise ValueError("The WAV file must contain audio after the commit boundary.")
+
+            speech_recognizer.start_continuous_recognition()
+            # 1. Stream the first 590 ms: approximately "what's the" in this recording.
+            print("Writing audio segment 1")
+            stream_audio(wav_file, first_segment_frames)
+
+            # 2. Commit the first part without closing the stream or stopping recognition.
+            token = stream.commit()
+            print("COMMIT: token={}".format(token))
+            if token == 0:
+                raise RuntimeError("The SDK rejected the commit request.")
+
+            # Wait for this token, not just any final result. An acknowledgment may
+            # arrive before commit() returns, so keep tokens received by the callback.
+            with result_received:
+                result_received.wait_for(
+                    lambda: token in acknowledged_tokens or recognition_done.is_set(), timeout=15)
+                if token not in acknowledged_tokens:
+                    raise RuntimeError(
+                        "No acknowledgment for commit token {} before timeout or session end. "
+                        "Check that the endpoint supports inline commit.".format(token))
+            print("COMMIT ACKNOWLEDGED: token={}".format(token))
+
+            # 3. Stream the rest ("weather like") using the same stream and recognizer.
+            print("Writing audio segment 2")
+            stream_audio(wav_file, wav_file.getnframes() - first_segment_frames)
+        # Closing the stream lets the service finalize the remaining audio normally.
+        stream.close()
+        stream_closed = True
+        if not recognition_done.wait(timeout=15):
+            raise RuntimeError("Timed out waiting for recognition to finish after the end of audio.")
+        if cancellation_error is not None:
+            raise RuntimeError("Recognition canceled: {}".format(cancellation_error))
+    finally:
+        # A commit is advisory; always clean up even if it is never acknowledged.
+        if not stream_closed:
+            stream.close()
+        speech_recognizer.stop_continuous_recognition()
+    # </SpeechRecognitionWithInlineCommit>
+
+
 def speech_recognition_with_push_stream_mulaw():
     """gives an example how to use a push mulaw audio stream to recognize speech from a custom audio
     source"""

@@ -113,6 +113,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" e. Speech once recognition authenticated via AAD token crendential.");
                 Console.WriteLine(" f. Speech continuous recognition authenticated via API key crendential.");
                 Console.WriteLine(" g. Speech once recognition authenticated via API key crendential.");
+                Console.WriteLine(" h. Speech recognition with inline commit using push audio stream.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -177,6 +178,17 @@ namespace MicrosoftSpeechSDKSamples
                         break;
                     case ConsoleKey.G:
                         SpeechRecognitionSamples.RecognitionOnceApiKeyCredentialAsync().Wait();
+                        break;
+                    case ConsoleKey.H:
+                        try
+                        {
+                            SpeechRecognitionSamples.RecognitionWithInlineCommitAsync().GetAwaiter().GetResult();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error running sample: {ex.Message}");
+                            sampleWasRun = false;
+                        }
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:
@@ -345,6 +357,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 6. Multilingual Translation with language identification.");
                 Console.WriteLine(" 7. Translation authenticated via AAD token credential.");
                 Console.WriteLine(" 8. Translation authenticated via API key credential.");
+                Console.WriteLine(" 9. Translation with inline commit using push audio stream.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -385,6 +398,18 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.D8:
                     case ConsoleKey.NumPad8:
                         TranslationSamples.TranslationWithApiKeyCredential().Wait();
+                        break;
+                    case ConsoleKey.D9:
+                    case ConsoleKey.NumPad9:
+                        try
+                        {
+                            TranslationSamples.TranslationWithInlineCommitAsync().GetAwaiter().GetResult();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error running sample: {ex.Message}");
+                            sampleWasRun = false;
+                        }
                         break;
                     case ConsoleKey.D0:
                     case ConsoleKey.NumPad0:

@@ -34,6 +34,7 @@ samples = OrderedDict([
         speech_sample.speech_recognize_keyword_locally_from_microphone,
         speech_sample.speech_recognize_once_from_file_with_aad,
         speech_sample.speech_recognize_continuous_from_file_with_aad,
+        speech_sample.speech_recognition_with_inline_commit,
     ]), (translation_sample, [
         translation_sample.translation_once_from_mic,
         translation_sample.translation_once_from_file,
@@ -42,6 +43,7 @@ samples = OrderedDict([
         translation_sample.translation_continuous_with_lid_from_multilingual_file,
         translation_sample.translation_once_from_file_with_aad_token_credential,
         translation_sample.translation_continuous_from_file_with_aad_token_credential,
+        translation_sample.translation_with_inline_commit,
     ]), (transcription_sample, [
         transcription_sample.conversation_transcription,
         transcription_sample.conversation_transcription_from_microphone,

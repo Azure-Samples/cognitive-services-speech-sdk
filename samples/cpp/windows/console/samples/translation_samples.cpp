@@ -12,6 +12,13 @@
     #include <windows.h>
 #endif
 #include <speechapi_cxx.h>
+#include "wav_file_reader.h"
+#include <algorithm>
+#include <chrono>
+#include <condition_variable>
+#include <cstdlib>
+#include <mutex>
+#include <thread>
 
 using namespace std;
 using namespace Microsoft::CognitiveServices::Speech;
@@ -79,6 +86,175 @@ void TranslationWithMicrophone()
         }
     }
     // </TranslationWithMicrophone>
+}
+
+
+// Speech translation with an inline commit on a push stream.
+void TranslationWithInlineCommit()
+{
+    // <TranslationWithInlineCommit>
+    const char* endpoint = getenv("SPEECH_ENDPOINT");
+    const char* subscriptionKey = getenv("SPEECH_RESOURCE_KEY");
+    if (endpoint == nullptr || subscriptionKey == nullptr || !*endpoint || !*subscriptionKey)
+    {
+        throw invalid_argument("Set SPEECH_ENDPOINT and SPEECH_RESOURCE_KEY before running this sample.");
+    }
+    auto config = SpeechTranslationConfig::FromEndpoint(endpoint, subscriptionKey);
+    config->SetSpeechRecognitionLanguage("en-US");
+    config->AddTargetLanguage("de");
+    config->AddTargetLanguage("fr");
+    // Enable inline commit on a service deployment that supports the feature.
+    config->SetServiceProperty("setfeature", "forcecommit", ServicePropertyChannel::UriQueryParameter);
+
+    WavFileReader reader("whatstheweatherlike.wav");
+    mutex resultMutex;
+    condition_variable resultReceived;
+    bool recognitionDone = false;
+    uint32_t acknowledgedToken = 0;
+    string cancellationError;
+
+    // The input must be 16 kHz, 16-bit, mono PCM audio.
+    auto pushStream = AudioInputStream::CreatePushStream();
+    auto recognizer = TranslationRecognizer::FromConfig(config, AudioConfig::FromStreamInput(pushStream));
+
+    recognizer->Recognizing.Connect([](const TranslationRecognitionEventArgs& e)
+    {
+        cout << "RECOGNIZING: Text=" << e.Result->Text << endl;
+    });
+    recognizer->Recognized.Connect([&](const TranslationRecognitionEventArgs& e)
+    {
+        lock_guard<mutex> lock(resultMutex);
+        cout << "RECOGNIZED: Reason=" << (int)e.Result->Reason << " Text=" << e.Result->Text;
+        // NoMatch can acknowledge a commit; naturally segmented results have token 0.
+        if (e.Result->CommitToken() != 0)
+        {
+            acknowledgedToken = e.Result->CommitToken();
+            cout << " commit_token=" << acknowledgedToken;
+        }
+        cout << endl;
+        for (const auto& translation : e.Result->Translations)
+        {
+            cout << "  " << translation.first << ": " << translation.second << endl;
+        }
+        resultReceived.notify_all();
+    });
+    recognizer->Canceled.Connect([&](const TranslationRecognitionCanceledEventArgs& e)
+    {
+        lock_guard<mutex> lock(resultMutex);
+        cout << "CANCELED: Reason=" << (int)e.Reason << " Details=" << e.ErrorDetails << endl;
+        if (e.Reason == CancellationReason::Error)
+        {
+            cancellationError = e.ErrorDetails.empty() ? "Recognition canceled." : e.ErrorDetails;
+        }
+        recognitionDone = true;
+        resultReceived.notify_all();
+    });
+    recognizer->SessionStopped.Connect([&](const SessionEventArgs& e)
+    {
+        lock_guard<mutex> lock(resultMutex);
+        cout << "SESSION STOPPED: SessionId=" << e.SessionId << endl;
+        recognitionDone = true;
+        resultReceived.notify_all();
+    });
+
+    // Send the next durationMilliseconds of audio; omit the duration to send the rest.
+    // This helper keeps the file position and reuses the same push stream.
+    auto streamAudio = [&](uint32_t durationMilliseconds = 0)
+    {
+        const uint32_t bytesPerSecond = 16000 * 2; // 16 kHz, 16-bit, mono PCM.
+        uint32_t bytesRemaining = bytesPerSecond * durationMilliseconds / 1000;
+        vector<uint8_t> buffer(3200); // 100 ms of audio per write.
+        while (durationMilliseconds == 0 || bytesRemaining > 0)
+        {
+            {
+                lock_guard<mutex> lock(resultMutex);
+                if (recognitionDone)
+                {
+                    throw runtime_error("Recognition ended before all audio was written. " + cancellationError);
+                }
+            }
+            uint32_t bytesToRead = static_cast<uint32_t>(buffer.size());
+            if (durationMilliseconds != 0)
+            {
+                bytesToRead = (std::min)(bytesToRead, bytesRemaining);
+            }
+            int bytesRead = reader.Read(buffer.data(), bytesToRead);
+            if (bytesRead == 0)
+            {
+                if (durationMilliseconds != 0)
+                {
+                    throw runtime_error("The WAV file ended before the requested duration.");
+                }
+                break;
+            }
+            pushStream->Write(buffer.data(), static_cast<uint32_t>(bytesRead));
+            if (durationMilliseconds != 0)
+            {
+                bytesRemaining -= static_cast<uint32_t>(bytesRead);
+            }
+            // Send at approximately the same pace as live audio.
+            this_thread::sleep_for(chrono::duration<double>(static_cast<double>(bytesRead) / bytesPerSecond));
+        }
+    };
+
+    bool streamClosed = false;
+    try
+    {
+        recognizer->StartContinuousRecognitionAsync().get();
+        // 1. Stream the first 590 ms: approximately "what's the" in this recording.
+        cout << "Writing audio segment 1" << endl;
+        streamAudio(590);
+
+        // 2. Commit the first part without closing the stream or stopping recognition.
+        uint32_t token = pushStream->Commit();
+        cout << "COMMIT: token=" << token << endl;
+        if (token == 0)
+        {
+            throw runtime_error("The SDK rejected the commit request.");
+        }
+        {
+            // Keep the callback's token even if the acknowledgment arrives before Commit() returns.
+            unique_lock<mutex> lock(resultMutex);
+            resultReceived.wait_for(lock, chrono::seconds(15), [&]
+            {
+                return acknowledgedToken == token || recognitionDone;
+            });
+            if (acknowledgedToken != token)
+            {
+                throw runtime_error("No acknowledgment before timeout or session end. Check inline commit support. "
+                    + cancellationError);
+            }
+            cout << "COMMIT ACKNOWLEDGED: token=" << token << endl;
+        }
+
+        // 3. Stream the rest ("weather like") using the same stream and recognizer.
+        cout << "Writing audio segment 2" << endl;
+        streamAudio();
+
+        // Closing the stream lets the service finalize the remaining audio normally.
+        pushStream->Close();
+        streamClosed = true;
+        unique_lock<mutex> lock(resultMutex);
+        if (!resultReceived.wait_for(lock, chrono::seconds(15), [&] { return recognitionDone; }))
+        {
+            throw runtime_error("Timed out waiting for recognition to finish after the end of audio.");
+        }
+        if (!cancellationError.empty())
+        {
+            throw runtime_error(cancellationError);
+        }
+    }
+    catch (...)
+    {
+        if (!streamClosed)
+        {
+            pushStream->Close();
+        }
+        recognizer->StopContinuousRecognitionAsync().get();
+        throw;
+    }
+    recognizer->StopContinuousRecognitionAsync().get();
+    // </TranslationWithInlineCommit>
 }
 
 // Continuous translation.
