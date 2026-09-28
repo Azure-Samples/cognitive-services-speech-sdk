@@ -134,10 +134,10 @@ namespace MicrosoftSpeechSDKSamples
             // </TranslationWithMicrophoneAsync>
         }
 
-        // Translation with inline commit using a push audio stream.
-        public static async Task TranslationWithInlineCommitAsync()
+        // Translation with commit using a push audio stream.
+        public static async Task TranslationWithPushStreamCommitAsync()
         {
-            // <TranslationWithInlineCommitAsync>
+            // <TranslationWithPushStreamCommitAsync>
             var endpoint = Environment.GetEnvironmentVariable("SPEECH_ENDPOINT");
             var subscriptionKey = Environment.GetEnvironmentVariable("SPEECH_RESOURCE_KEY");
             if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(subscriptionKey))
@@ -149,10 +149,9 @@ namespace MicrosoftSpeechSDKSamples
             config.SpeechRecognitionLanguage = "en-US";
             config.AddTargetLanguage("de");
             config.AddTargetLanguage("fr");
-            // Enable inline commit on a service deployment that supports the feature.
+            // Enable commit on a service deployment that supports the feature.
             config.SetServiceProperty("setfeature", "forcecommit", ServicePropertyChannel.UriQueryParameter);
 
-            // The input must be 16 kHz, 16-bit, mono PCM audio.
             using (var reader = Helper.CreateWavReader(@"whatstheweatherlike.wav"))
             using (var pushStream = AudioInputStream.CreatePushStream())
             using (var audioInput = AudioConfig.FromStreamInput(pushStream))
@@ -253,7 +252,7 @@ namespace MicrosoftSpeechSDKSamples
                     {
                         var error = recognitionStopped.Task.IsCompleted
                             ? await recognitionStopped.Task.ConfigureAwait(false) : "";
-                        throw new InvalidOperationException("No acknowledgment before timeout or session end. Check inline commit support. " + error);
+                        throw new InvalidOperationException("No acknowledgment before timeout or session end. Check commit support. " + error);
                     }
                     Console.WriteLine($"COMMIT ACKNOWLEDGED: token={token}");
 
@@ -284,7 +283,7 @@ namespace MicrosoftSpeechSDKSamples
                     await recognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
                 }
             }
-            // </TranslationWithInlineCommitAsync>
+            // </TranslationWithPushStreamCommitAsync>
         }
 
         // Translation using file input.

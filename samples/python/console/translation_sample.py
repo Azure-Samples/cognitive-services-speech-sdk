@@ -186,16 +186,16 @@ def translation_continuous():
     # </TranslationContinuous>
 
 
-def translation_with_inline_commit():
-    """performs continuous speech translation with one inline commit on a push audio stream"""
-    # <TranslationWithInlineCommit>
+def translation_with_push_stream_commit():
+    """performs continuous speech translation with one commit on a push audio stream"""
+    # <TranslationWithPushStreamCommit>
     if not hasattr(speechsdk.audio.PushAudioInputStream, "commit"):
-        raise RuntimeError("This sample requires a Speech SDK build that supports inline commit.")
+        raise RuntimeError("This sample requires a Speech SDK build that supports commit.")
 
     translation_config = speechsdk.translation.SpeechTranslationConfig(
         subscription=speech_key, endpoint=speech_endpoint,
         speech_recognition_language="en-US", target_languages=("de", "fr"))
-    # Enable inline commit on a service deployment that supports the feature.
+    # Enable commit on a service deployment that supports the feature.
     translation_config.set_service_property(
         "setfeature", "forcecommit", speechsdk.ServicePropertyChannel.UriQueryParameter)
 
@@ -263,7 +263,9 @@ def translation_with_inline_commit():
     try:
         with wave.open(weatherfilename, "rb") as wav_file:
             if (wav_file.getnchannels(), wav_file.getsampwidth(), wav_file.getframerate()) != (1, 2, 16000):
-                raise ValueError("Use a 16 kHz, 16-bit, mono PCM WAV file.")
+                raise ValueError(
+                    "This sample uses the default push stream format: 16 kHz, 16-bit, mono PCM. "
+                    "Use a matching WAV file.")
             commit_at_ms = 590
             first_segment_frames = wav_file.getframerate() * commit_at_ms // 1000
             if wav_file.getnframes() <= first_segment_frames:
@@ -288,7 +290,7 @@ def translation_with_inline_commit():
                 if token not in acknowledged_tokens:
                     raise RuntimeError(
                         "No acknowledgment for commit token {} before timeout or session end. "
-                        "Check that the endpoint supports inline commit.".format(token))
+                        "Check that the endpoint supports commit.".format(token))
             print("COMMIT ACKNOWLEDGED: token={}".format(token))
 
             # 3. Stream the rest ("weather like") using the same stream and recognizer.
@@ -305,7 +307,7 @@ def translation_with_inline_commit():
         if not stream_closed:
             stream.close()
         recognizer.stop_continuous_recognition()
-    # </TranslationWithInlineCommit>
+    # </TranslationWithPushStreamCommit>
 
 
 def translation_once_with_lid_from_file():

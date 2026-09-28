@@ -617,15 +617,15 @@ def speech_recognition_with_push_stream():
     push_stream_writer_thread.join()
 
 
-def speech_recognition_with_inline_commit():
-    """performs continuous speech recognition with one inline commit on a push audio stream"""
-    # <SpeechRecognitionWithInlineCommit>
+def speech_recognition_with_push_stream_commit():
+    """performs continuous speech recognition with one commit on a push audio stream"""
+    # <SpeechRecognitionWithPushStreamCommit>
     if not hasattr(speechsdk.audio.PushAudioInputStream, "commit"):
-        raise RuntimeError("This sample requires a Speech SDK build that supports inline commit.")
+        raise RuntimeError("This sample requires a Speech SDK build that supports commit.")
 
     speech_config = speechsdk.SpeechConfig(subscription=speech_key, endpoint=speech_endpoint)
     speech_config.speech_recognition_language = "en-US"
-    # Enable inline commit on a service deployment that supports the feature.
+    # Enable commit on a service deployment that supports the feature.
     speech_config.set_service_property(
         "setfeature", "forcecommit", speechsdk.ServicePropertyChannel.UriQueryParameter)
 
@@ -690,7 +690,9 @@ def speech_recognition_with_inline_commit():
     try:
         with wave.open(weatherfilename, "rb") as wav_file:
             if (wav_file.getnchannels(), wav_file.getsampwidth(), wav_file.getframerate()) != (1, 2, 16000):
-                raise ValueError("Use a 16 kHz, 16-bit, mono PCM WAV file.")
+                raise ValueError(
+                    "This sample uses the default push stream format: 16 kHz, 16-bit, mono PCM. "
+                    "Use a matching WAV file.")
             commit_at_ms = 590
             first_segment_frames = wav_file.getframerate() * commit_at_ms // 1000
             if wav_file.getnframes() <= first_segment_frames:
@@ -715,7 +717,7 @@ def speech_recognition_with_inline_commit():
                 if token not in acknowledged_tokens:
                     raise RuntimeError(
                         "No acknowledgment for commit token {} before timeout or session end. "
-                        "Check that the endpoint supports inline commit.".format(token))
+                        "Check that the endpoint supports commit.".format(token))
             print("COMMIT ACKNOWLEDGED: token={}".format(token))
 
             # 3. Stream the rest ("weather like") using the same stream and recognizer.
@@ -733,7 +735,7 @@ def speech_recognition_with_inline_commit():
         if not stream_closed:
             stream.close()
         speech_recognizer.stop_continuous_recognition()
-    # </SpeechRecognitionWithInlineCommit>
+    # </SpeechRecognitionWithPushStreamCommit>
 
 
 def speech_recognition_with_push_stream_mulaw():

@@ -74,10 +74,10 @@ public class TranslationSamples {
         }
     }
 
-    // Translation with inline commit using a push audio stream.
-    public static void translationWithInlineCommitAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException, TimeoutException
+    // Translation with commit using a push audio stream.
+    public static void translationWithPushStreamCommitAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException, TimeoutException
     {
-        // <translationWithInlineCommitAsync>
+        // <translationWithPushStreamCommitAsync>
         String endpoint = System.getenv("SPEECH_ENDPOINT");
         String subscriptionKey = System.getenv("SPEECH_RESOURCE_KEY");
         if (endpoint == null || endpoint.trim().isEmpty() || subscriptionKey == null || subscriptionKey.trim().isEmpty()) {
@@ -88,10 +88,10 @@ public class TranslationSamples {
             config.setSpeechRecognitionLanguage("en-US");
             config.addTargetLanguage("de");
             config.addTargetLanguage("fr");
-            // Enable inline commit on a service deployment that supports the feature.
+            // Enable commit on a service deployment that supports the feature.
             config.setServiceProperty("setfeature", "forcecommit", ServicePropertyChannel.UriQueryParameter);
 
-            // Use 16 kHz, 16-bit, mono PCM audio. WavStream skips the WAV header before writing to the push stream.
+            // WavStream skips the WAV header before writing to the push stream.
             try (FileInputStream input = new FileInputStream("whatstheweatherlike.wav")) {
                 WavStream reader = new WavStream(input);
                 AudioStreamFormat format = reader.getFormat();
@@ -145,7 +145,7 @@ public class TranslationSamples {
                         try {
                             CompletableFuture.anyOf(commitAcknowledged, recognitionStopped).get(15, TimeUnit.SECONDS);
                         } catch (TimeoutException ex) {
-                            throw new TimeoutException("No acknowledgment before timeout. Check inline commit support.");
+                            throw new TimeoutException("No acknowledgment before timeout. Check commit support.");
                         }
                         if (!commitAcknowledged.isDone() || commitAcknowledged.get() != token) {
                             String error = recognitionStopped.getNow(null);
@@ -181,7 +181,7 @@ public class TranslationSamples {
                 }
             }
         }
-        // </translationWithInlineCommitAsync>
+        // </translationWithPushStreamCommitAsync>
     }
 
     // Translation from microphone.

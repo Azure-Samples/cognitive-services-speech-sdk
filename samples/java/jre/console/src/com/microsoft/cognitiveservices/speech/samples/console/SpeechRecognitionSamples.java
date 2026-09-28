@@ -454,10 +454,10 @@ public class SpeechRecognitionSamples {
         }
     }
 
-    // Speech recognition with inline commit using a push audio stream.
-    public static void recognitionWithInlineCommitAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException, TimeoutException
+    // Speech recognition with commit using a push audio stream.
+    public static void recognitionWithPushStreamCommitAsync() throws InterruptedException, ExecutionException, IOException, URISyntaxException, TimeoutException
     {
-        // <recognitionWithInlineCommitAsync>
+        // <recognitionWithPushStreamCommitAsync>
         String endpoint = System.getenv("SPEECH_ENDPOINT");
         String subscriptionKey = System.getenv("SPEECH_RESOURCE_KEY");
         if (endpoint == null || endpoint.trim().isEmpty() || subscriptionKey == null || subscriptionKey.trim().isEmpty()) {
@@ -466,10 +466,10 @@ public class SpeechRecognitionSamples {
 
         try (SpeechConfig config = SpeechConfig.fromEndpoint(new URI(endpoint), subscriptionKey)) {
             config.setSpeechRecognitionLanguage("en-US");
-            // Enable inline commit on a service deployment that supports the feature.
+            // Enable commit on a service deployment that supports the feature.
             config.setServiceProperty("setfeature", "forcecommit", ServicePropertyChannel.UriQueryParameter);
 
-            // Use 16 kHz, 16-bit, mono PCM audio. WavStream skips the WAV header before writing to the push stream.
+            // WavStream skips the WAV header before writing to the push stream.
             try (FileInputStream input = new FileInputStream("whatstheweatherlike.wav")) {
                 WavStream reader = new WavStream(input);
                 AudioStreamFormat format = reader.getFormat();
@@ -520,7 +520,7 @@ public class SpeechRecognitionSamples {
                         try {
                             CompletableFuture.anyOf(commitAcknowledged, recognitionStopped).get(15, TimeUnit.SECONDS);
                         } catch (TimeoutException ex) {
-                            throw new TimeoutException("No acknowledgment before timeout. Check inline commit support.");
+                            throw new TimeoutException("No acknowledgment before timeout. Check commit support.");
                         }
                         if (!commitAcknowledged.isDone() || commitAcknowledged.get() != token) {
                             String error = recognitionStopped.getNow(null);
@@ -556,7 +556,7 @@ public class SpeechRecognitionSamples {
                 }
             }
         }
-        // </recognitionWithInlineCommitAsync>
+        // </recognitionWithPushStreamCommitAsync>
     }
 
     // Speech recognition with events from a push stream

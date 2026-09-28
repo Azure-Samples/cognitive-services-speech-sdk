@@ -14,7 +14,7 @@ extern void SpeechContinuousRecognitionWithFile();
 extern void SpeechRecognitionUsingCustomizedModel();
 extern void SpeechContinuousRecognitionWithPullStream();
 extern void SpeechContinuousRecognitionWithPushStream();
-extern void SpeechRecognitionWithInlineCommit();
+extern void SpeechRecognitionWithPushStreamCommit();
 extern void KeywordTriggeredSpeechRecognitionWithMicrophone();
 extern void PronunciationAssessmentWithMicrophone();
 extern void PronunciationAssessmentWithStream();
@@ -27,7 +27,7 @@ extern void SpeechContinuousRecognitionFromPushStreamWithMASEnabledAndBeamformin
 
 extern void TranslationWithMicrophone();
 extern void TranslationContinuousRecognition();
-extern void TranslationWithInlineCommit();
+extern void TranslationWithPushStreamCommit();
 
 extern void SpeechSynthesisToSpeaker();
 extern void SpeechSynthesisWithLanguage();
@@ -96,7 +96,7 @@ void SpeechSamples()
                 "    beam-forming angles specified.\n";
         cout << "e.) Pronunciation assessment with stream.\n";
         cout << "f.) Pronunciation assessment configured with json.\n";
-        cout << "g.) Speech recognition with inline commit using push stream input.\n";
+        cout << "g.) Speech recognition with commit using push stream input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -160,7 +160,7 @@ void SpeechSamples()
         case 'g':
             try
             {
-                SpeechRecognitionWithInlineCommit();
+                SpeechRecognitionWithPushStreamCommit();
             }
             catch (const exception& e)
             {
@@ -216,7 +216,7 @@ void TranslationSamples()
         cout << "3.) Single utterance translation with language detection using microphone input.\n";
         cout << "4.) Continuous translation with language detection using multi-lingual input file.\n";
         cout << "5.) Continuous multilingual translation with language identification.\n";
-        cout << "6.) Translation with inline commit using push stream input.\n";
+        cout << "6.) Translation with commit using push stream input.\n";
         cout << "\nChoice (0 for MAIN MENU): ";
         cout.flush();
 
@@ -243,7 +243,7 @@ void TranslationSamples()
         case '6':
             try
             {
-                TranslationWithInlineCommit();
+                TranslationWithPushStreamCommit();
             }
             catch (const exception& e)
             {

@@ -113,7 +113,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" e. Speech once recognition authenticated via AAD token crendential.");
                 Console.WriteLine(" f. Speech continuous recognition authenticated via API key crendential.");
                 Console.WriteLine(" g. Speech once recognition authenticated via API key crendential.");
-                Console.WriteLine(" h. Speech recognition with inline commit using push audio stream.");
+                Console.WriteLine(" h. Speech recognition with commit using push audio stream.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -182,7 +182,7 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.H:
                         try
                         {
-                            SpeechRecognitionSamples.RecognitionWithInlineCommitAsync().GetAwaiter().GetResult();
+                            SpeechRecognitionSamples.RecognitionWithPushStreamCommitAsync().GetAwaiter().GetResult();
                         }
                         catch (Exception ex)
                         {
@@ -357,7 +357,7 @@ namespace MicrosoftSpeechSDKSamples
                 Console.WriteLine(" 6. Multilingual Translation with language identification.");
                 Console.WriteLine(" 7. Translation authenticated via AAD token credential.");
                 Console.WriteLine(" 8. Translation authenticated via API key credential.");
-                Console.WriteLine(" 9. Translation with inline commit using push audio stream.");
+                Console.WriteLine(" 9. Translation with commit using push audio stream.");
                 Console.WriteLine("");
                 Console.Write(prompt);
 
@@ -403,7 +403,7 @@ namespace MicrosoftSpeechSDKSamples
                     case ConsoleKey.NumPad9:
                         try
                         {
-                            TranslationSamples.TranslationWithInlineCommitAsync().GetAwaiter().GetResult();
+                            TranslationSamples.TranslationWithPushStreamCommitAsync().GetAwaiter().GetResult();
                         }
                         catch (Exception ex)
                         {

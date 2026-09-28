@@ -89,10 +89,10 @@ void TranslationWithMicrophone()
 }
 
 
-// Speech translation with an inline commit on a push stream.
-void TranslationWithInlineCommit()
+// Speech translation with a commit on a push stream.
+void TranslationWithPushStreamCommit()
 {
-    // <TranslationWithInlineCommit>
+    // <TranslationWithPushStreamCommit>
     const char* endpoint = getenv("SPEECH_ENDPOINT");
     const char* subscriptionKey = getenv("SPEECH_RESOURCE_KEY");
     if (endpoint == nullptr || subscriptionKey == nullptr || !*endpoint || !*subscriptionKey)
@@ -103,7 +103,7 @@ void TranslationWithInlineCommit()
     config->SetSpeechRecognitionLanguage("en-US");
     config->AddTargetLanguage("de");
     config->AddTargetLanguage("fr");
-    // Enable inline commit on a service deployment that supports the feature.
+    // Enable commit on a service deployment that supports the feature.
     config->SetServiceProperty("setfeature", "forcecommit", ServicePropertyChannel::UriQueryParameter);
 
     WavFileReader reader("whatstheweatherlike.wav");
@@ -113,7 +113,6 @@ void TranslationWithInlineCommit()
     uint32_t acknowledgedToken = 0;
     string cancellationError;
 
-    // The input must be 16 kHz, 16-bit, mono PCM audio.
     auto pushStream = AudioInputStream::CreatePushStream();
     auto recognizer = TranslationRecognizer::FromConfig(config, AudioConfig::FromStreamInput(pushStream));
 
@@ -221,7 +220,7 @@ void TranslationWithInlineCommit()
             });
             if (acknowledgedToken != token)
             {
-                throw runtime_error("No acknowledgment before timeout or session end. Check inline commit support. "
+                throw runtime_error("No acknowledgment before timeout or session end. Check commit support. "
                     + cancellationError);
             }
             cout << "COMMIT ACKNOWLEDGED: token=" << token << endl;
@@ -254,7 +253,7 @@ void TranslationWithInlineCommit()
         throw;
     }
     recognizer->StopContinuousRecognitionAsync().get();
-    // </TranslationWithInlineCommit>
+    // </TranslationWithPushStreamCommit>
 }
 
 // Continuous translation.

@@ -510,13 +510,13 @@ void SpeechContinuousRecognitionWithPushStream()
 }
 
 
-// Speech recognition with an inline commit on a push stream.
-void SpeechRecognitionWithInlineCommit()
+// Speech recognition with a commit on a push stream.
+void SpeechRecognitionWithPushStreamCommit()
 {
-    // <SpeechRecognitionWithInlineCommit>
+    // <SpeechRecognitionWithPushStreamCommit>
     auto config = SpeechConfig::FromEndpoint(getEnvVar("SPEECH_ENDPOINT"), getEnvVar("SPEECH_RESOURCE_KEY"));
     config->SetSpeechRecognitionLanguage("en-US");
-    // Enable inline commit on a service deployment that supports the feature.
+    // Enable commit on a service deployment that supports the feature.
     config->SetServiceProperty("setfeature", "forcecommit", ServicePropertyChannel::UriQueryParameter);
 
     WavFileReader reader("whatstheweatherlike.wav");
@@ -526,7 +526,6 @@ void SpeechRecognitionWithInlineCommit()
     uint32_t acknowledgedToken = 0;
     string cancellationError;
 
-    // The input must be 16 kHz, 16-bit, mono PCM audio.
     auto pushStream = AudioInputStream::CreatePushStream();
     auto recognizer = SpeechRecognizer::FromConfig(config, AudioConfig::FromStreamInput(pushStream));
 
@@ -630,7 +629,7 @@ void SpeechRecognitionWithInlineCommit()
             });
             if (acknowledgedToken != token)
             {
-                throw runtime_error("No acknowledgment before timeout or session end. Check inline commit support. "
+                throw runtime_error("No acknowledgment before timeout or session end. Check commit support. "
                     + cancellationError);
             }
             cout << "COMMIT ACKNOWLEDGED: token=" << token << endl;
@@ -663,7 +662,7 @@ void SpeechRecognitionWithInlineCommit()
         throw;
     }
     recognizer->StopContinuousRecognitionAsync().get();
-    // </SpeechRecognitionWithInlineCommit>
+    // </SpeechRecognitionWithPushStreamCommit>
 }
 
 // Keyword-triggered speech recognition using microphone.
