@@ -305,7 +305,8 @@ app.post('/api/connectAvatar', async (req, res) => {
             }
         })
     } catch (e) {
-        res.status(400).send(`Error message: ${e.message}`)
+        console.error('Avatar connection failed.', e)
+        res.status(400).send('Avatar connection failed.')
     }
 
 })
@@ -413,8 +414,8 @@ app.post('/api/connectSTT', async (req, res) => {
         res.status(200).send()
     },
         (err) => {
-            console.error('STT connection failed. Error message:', err)
-            res.status(400).send(`STT connection failed. Error message: ${err}`)
+            console.error('STT connection failed.', err)
+            res.status(400).send('STT connection failed.')
         }
     )
 })
@@ -426,7 +427,8 @@ app.post('/api/disconnectSTT', (req, res) => {
         disconnectSttInternal(client_id)
         res.status(200).send('STT Disconnected.')
     } catch (e) {
-        res.status(400).send(`STT disconnection failed. Error message: ${e}`)
+        console.error('STT disconnection failed.', e)
+        res.status(400).send('STT disconnection failed.')
     }
 })
 
@@ -438,7 +440,8 @@ app.post('/api/speak', async (req, res) => {
         const result_id = await speakSsml(ssml, client_id)
         res.status(200).send(result_id)
     } catch (e) {
-        res.status(400).send(`Speak failed. Error message: ${e}`)
+        console.error('Speak failed.', e)
+        res.status(400).send('Speak failed.')
     }
 })
 
@@ -474,7 +477,8 @@ app.post('/api/updateScene', async (req, res) => {
             res.status(400).send('Connection not available.')
         }
     } catch (error) {
-        res.status(500).send(`Error: ${error.message}`)
+        console.error('Scene update failed.', error)
+        res.status(500).send('Scene update failed.')
     }
 })
 
@@ -530,7 +534,8 @@ app.post('/api/disconnectAvatar', async (req, res) => {
         await disconnectAvatarInternal(client_id, false)
         res.status(200).send('Disconnected avatar.')
     } catch (err) {
-        res.status(400).send(err.stack || err.message)
+        console.error('Disconnect avatar failed.', err)
+        res.status(400).send('Disconnect avatar failed.')
     }
 })
 
@@ -546,12 +551,22 @@ app.post('/api/releaseClient', async (req, res) => {
             console.log(`Client context released for client ${client_id}`)
             res.status(200).send('Client context released.')
         } catch (e) {
-            console.log(`Client context release failed. Error message: ${e}`)
-            res.status(400).send(`Client context release failed. Error message: ${e}`)
+            console.error('Client context release failed.', e)
+            res.status(400).send('Client context release failed.')
         }
     }
 })
 
+// Keep implementation details in server logs rather than HTTP error responses.
+app.use((err, req, res, next) => {
+    console.error('Unhandled request error.', err)
+    if (res.headersSent) {
+        return next(err)
+    }
+
+    const status_code = Number.isInteger(err.status) && err.status >= 400 && err.status < 600 ? err.status : 500
+    res.status(status_code).send(status_code < 500 ? 'Invalid request.' : 'Internal server error.')
+})
 
 io.on("connection", (socket) => {
     const client_id = socket.handshake.query.clientId
@@ -992,4 +1007,3 @@ const PORT = 5000
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`)
 })
-

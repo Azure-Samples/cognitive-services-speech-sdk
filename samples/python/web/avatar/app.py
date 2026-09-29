@@ -103,7 +103,7 @@ def getSpeechToken() -> Response:
     response.headers['SpeechRegion'] = speech_region
     if speech_private_endpoint:
         response.headers['SpeechPrivateEndpoint'] = speech_private_endpoint
-    return response
+    return response  # CodeQL [SM05390] Short-lived Speech auth token required by the client SDK; not a SAS token.
 
 
 # The API route to get the ICE token
