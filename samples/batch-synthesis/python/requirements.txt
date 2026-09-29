@@ -2,5 +2,5 @@ requests
 urllib3>=2.7.0
 azure-identity>=1.21.0
 azure-core>=1.38.0
-cryptography>=48.0.1
+cryptography>=50.0.0
 pyjwt>=2.12.0

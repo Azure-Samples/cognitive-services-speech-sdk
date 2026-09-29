@@ -27,7 +27,7 @@ except ImportError:
     installation instructions.
 
     For AAD authentication, install the azure-identity package:
-    pip install "azure-identity>=1.21.0" "azure-core>=1.38.0" "pyjwt>=2.12.0" "cryptography>=48.0.1"
+    pip install "azure-identity>=1.21.0" "azure-core>=1.38.0" "pyjwt>=2.12.0" "cryptography>=50.0.0"
     """
     )
     sys.exit(1)
@@ -972,7 +972,7 @@ def speech_recognize_once_from_file_with_aad():
         print(
             "1. Installed azure-identity: pip install "
             "\"azure-identity>=1.21.0\" \"azure-core>=1.38.0\" "
-            "\"pyjwt>=2.12.0\" \"cryptography>=48.0.1\""
+            "\"pyjwt>=2.12.0\" \"cryptography>=50.0.0\""
         )
         print("2. Set up a custom domain endpoint for your Speech resource")
         print("3. Proper permissions to access the Speech resource")
@@ -1054,7 +1054,7 @@ def speech_recognize_continuous_from_file_with_aad():
         print(
             "1. Installed azure-identity: pip install "
             "\"azure-identity>=1.21.0\" \"azure-core>=1.38.0\" "
-            "\"pyjwt>=2.12.0\" \"cryptography>=48.0.1\""
+            "\"pyjwt>=2.12.0\" \"cryptography>=50.0.0\""
         )
         print("2. Set up a custom domain endpoint for your Speech resource")
         print("3. Proper permissions to access the Speech resource")
