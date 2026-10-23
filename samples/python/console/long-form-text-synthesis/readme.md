@@ -16,7 +16,7 @@ pip install -r requirements.txt
 
 The basic steps to synthesize long-form text shown in this sample are
 
-- Split the long-form text to paragraphs or sentences as the speech synthesis service has a limitation on the length of input text and output audio. This sample uses `nltk` package to tokenize the input text; or split SSML based on `voice` tag.
+- Split the long-form text into paragraphs or sentences because the speech synthesis service limits input text and output audio length. This sample uses a punctuation-aware local splitter for plain text, or splits SSML based on the `voice` tag.
 - Synthesize each paragraph or sentence using Speech SDK, better in parallel to save time. The sample uses `multiprocessing` module to parallelize the synthesis and use a `SynthesizerPool` to reuse the synthesizer instances instead of creating new ones each time.
 - Merge the synthesized audio files into a single audio file, as well as the word and sentence boundaries. The audio offset of each sentence is started from 0, then we need to accumulate the offset of each sentence to get the final offset.
 
@@ -41,5 +41,4 @@ Depending on your platform, the Python 3 executable might also just be called `p
 ## Note
 
 The sample text [*The Great Gatsby* Chapter 1](./Gatsby-chapter1.txt) is an open-domain book and downloaded from [gutenberg](https://www.gutenberg.org/ebooks/64317)
-
 

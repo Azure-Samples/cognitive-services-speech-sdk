@@ -63,6 +63,9 @@ public class Main {
         System.out.println("52. Authenticate with an key credential for continuous speech recognition.");
         System.out.println("53. Authenticate with an key credential for translation.");
 
+        System.out.println("57. Speech recognition with commit using push audio stream.");
+        System.out.println("58. Translation with commit using push audio stream.");
+
         System.out.print(prompt);
 
         try {
@@ -211,6 +214,26 @@ public class Main {
                     break;
                 case "56" :
                     TranslationSamples.translationWithKeyCredentialAsync();
+                    break;
+                case "57":
+                    try {
+                        SpeechRecognitionSamples.recognitionWithPushStreamCommitAsync();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        throw ex;
+                    } catch (Exception ex) {
+                        System.out.println("Error running sample: " + ex.getMessage());
+                    }
+                    break;
+                case "58":
+                    try {
+                        TranslationSamples.translationWithPushStreamCommitAsync();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        throw ex;
+                    } catch (Exception ex) {
+                        System.out.println("Error running sample: " + ex.getMessage());
+                    }
                     break;
                 case "0":
                     System.out.println("Exiting...");

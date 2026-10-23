@@ -16,20 +16,35 @@ For an introduction to the SDK, please refer to the [quickstart articles for spe
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
-The Cognitive Services Speech SDK for iOS is distributed as a xcframework bundle.
-It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or downloaded directly [here](https://aka.ms/csspeech/iosbinary) and linked manually. This guide uses a CocoaPod.
+The Cognitive Services Speech SDK for iOS is distributed as an XCFramework bundle.
+It can be added to Xcode projects via [Swift Package Manager](https://swift.org/package-manager/) (recommended) or as a [CocoaPod](https://cocoapods.org/).
 
-## Install the SDK as a CocoaPod
+## Install the SDK using Swift Package Manager (Recommended)
+
+The Speech SDK is published as a Swift package at [microsoft/speech-sdk-spm](https://github.com/microsoft/speech-sdk-spm). To add it to an Xcode project:
+
+1. In Xcode, choose **File** > **Add Package Dependencies...**.
+1. Enter the package URL `https://github.com/microsoft/speech-sdk-spm` in the search field.
+1. Keep the default dependency rule (**Up to Next Major Version**, pre-filled with the latest release), or choose a specific version, then click **Add Package**.
+1. The package exposes three products — select **only one**, matching your scenario, add it to your app target, and click **Add Package**:
+   - **MicrosoftCognitiveServicesSpeech-iOS** — standard iOS SDK
+   - **MicrosoftCognitiveServicesSpeechEmbedded-iOS** — iOS SDK with on-device (embedded) speech
+   - **MicrosoftCognitiveServicesSpeech-macOS** — standard macOS SDK
+
+Then import the SDK in your source with `import MicrosoftCognitiveServicesSpeech`.
+
+## Install the SDK as a CocoaPod (Alternative)
 
 1. Install the CocoaPod dependency manager as described in its [installation instructions](https://guides.cocoapods.org/using/getting-started.html).
 1. Navigate to the directory of the downloaded sample app (e.g. `speech-samples`) in a terminal.
-1. Run the command `pod install`. This will generate a Xcode workspace containing both the sample app and the Speech SDK as a dependency. This workspace will be used in the following.
+1. Run the command `pod install`. This will generate a Xcode workspace containing both the sample app and the Speech SDK as a dependency.
 
 ## Build the samples
 
-Open either Xcode project with the sample code.
-This loads the project in Xcode.
-Next, add your subscription details to the `<sample name>/ViewController.swift` file:
+1. Open the project in Xcode:
+   - **Swift Package Manager:** Open the `.xcodeproj` file
+   - **CocoaPods:** After running `pod install`, open the `.xcworkspace` file
+1. Add your subscription details to the `<sample name>/ViewController.swift` file:
 
 1. Replace the string `YourSubscriptionKey` with your subscription key.
 2. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription (for example, `westus` for the free trial subscription).

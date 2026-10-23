@@ -213,7 +213,10 @@ def run_file(
         )
 
     rows: list[dict] = []
-    state = {"start_time": time.perf_counter()}
+    state = {
+        "start_time": time.perf_counter(),
+        "cancellation_error": None,
+    }
     done = threading.Event()
 
     def session_started(evt):
@@ -242,57 +245,79 @@ def run_file(
     def stop_cb(evt):
         done.set()
 
+    def canceled(evt):
+        details = evt.result.cancellation_details
+        if details.reason == speechsdk.CancellationReason.Error:
+            state["cancellation_error"] = (
+                details.error_details or str(details.reason)
+            )
+        done.set()
+
     recognizer.recognized.connect(recognized)
     recognizer.session_started.connect(session_started)
     recognizer.session_stopped.connect(stop_cb)
-    recognizer.canceled.connect(stop_cb)
+    recognizer.canceled.connect(canceled)
 
-    recognizer.start_continuous_recognition()
+    push_stream_closed = False
+    try:
+        recognizer.start_continuous_recognition()
 
-    # --- stream at real-time pace using an ABSOLUTE schedule ---
-    # Each chunk is released at t0 + (frames_sent / sample_rate). Sleeping to an
-    # absolute target (instead of a fixed per-chunk sleep) prevents write
-    # overhead and OS timer coarseness from accumulating into cumulative drift.
-    chunk_frames = int(sample_rate * CHUNK_MS / 1000)
-    frame_bytes = sample_width * channels
-    audio_duration = total_frames / sample_rate
-    t0 = time.perf_counter()
-    frames_sent = 0
-    while True:
-        data = wf.readframes(chunk_frames)
-        if not data:
-            break
-        push_stream.write(data)
-        frames_sent += len(data) // frame_bytes
-        dt = (t0 + frames_sent / sample_rate) - time.perf_counter()
-        if dt > 0:
-            time.sleep(dt)
-    wf.close()
+        # --- stream at real-time pace using an ABSOLUTE schedule ---
+        # Each chunk is released at t0 + (frames_sent / sample_rate). Sleeping to an
+        # absolute target (instead of a fixed per-chunk sleep) prevents write
+        # overhead and OS timer coarseness from accumulating into cumulative drift.
+        chunk_frames = int(sample_rate * CHUNK_MS / 1000)
+        frame_bytes = sample_width * channels
+        audio_duration = total_frames / sample_rate
+        t0 = time.perf_counter()
+        frames_sent = 0
+        while state["cancellation_error"] is None:
+            data = wf.readframes(chunk_frames)
+            if not data:
+                break
+            push_stream.write(data)
+            frames_sent += len(data) // frame_bytes
+            dt = (t0 + frames_sent / sample_rate) - time.perf_counter()
+            if dt > 0:
+                time.sleep(dt)
 
-    stream_wall = time.perf_counter() - t0
-    drift = stream_wall - audio_duration
-    print(
-        f"    [pacing] {os.path.basename(wav_path)}: audio={audio_duration:.1f}s "
-        f"wall={stream_wall:.1f}s drift={drift:+.2f}s "
-        f"({drift / audio_duration * 100:+.2f}%)",
-        flush=True,
-    )
+        stream_wall = time.perf_counter() - t0
+        drift = stream_wall - audio_duration
+        print(
+            f"    [pacing] {os.path.basename(wav_path)}: audio={audio_duration:.1f}s "
+            f"wall={stream_wall:.1f}s drift={drift:+.2f}s "
+            f"({drift / audio_duration * 100:+.2f}%)",
+            flush=True,
+        )
 
-    # --- trailing silence so the last segment finalizes (absolute pace) ---
-    silence = b"\x00" * chunk_frames * frame_bytes
-    silence_frames = int(TRAILING_SILENCE_SEC * sample_rate)
-    sent_silence = 0
-    ts0 = time.perf_counter()
-    while sent_silence < silence_frames:
-        push_stream.write(silence)
-        sent_silence += chunk_frames
-        dt = (ts0 + sent_silence / sample_rate) - time.perf_counter()
-        if dt > 0:
-            time.sleep(dt)
+        # --- trailing silence so the last segment finalizes (absolute pace) ---
+        silence = b"\x00" * chunk_frames * frame_bytes
+        silence_frames = int(TRAILING_SILENCE_SEC * sample_rate)
+        sent_silence = 0
+        ts0 = time.perf_counter()
+        while (
+            sent_silence < silence_frames
+            and state["cancellation_error"] is None
+        ):
+            push_stream.write(silence)
+            sent_silence += chunk_frames
+            dt = (ts0 + sent_silence / sample_rate) - time.perf_counter()
+            if dt > 0:
+                time.sleep(dt)
 
-    push_stream.close()
-    done.wait(timeout=30)
-    recognizer.stop_continuous_recognition()
+        push_stream.close()
+        push_stream_closed = True
+        done.wait(timeout=30)
+    finally:
+        wf.close()
+        if not push_stream_closed:
+            push_stream.close()
+        recognizer.stop_continuous_recognition()
+
+    if state["cancellation_error"] is not None:
+        raise RuntimeError(
+            f"Speech recognition canceled: {state['cancellation_error']}"
+        )
     return rows
 
 
@@ -385,28 +410,28 @@ def main() -> None:
                 args.silence_timeout_ms, args.post_refinement,
                 args.segmentation_strategy,
             )
+            out_path = wav_path + (args.suffix or ".gen1.csv")
+            write_csv(rows, out_path)
+            if rows:
+                lat = [
+                    r["eos_latency"]
+                    for r in rows
+                    if isinstance(r["eos_latency"], (int, float))
+                ]
+                if lat:
+                    avg = sum(lat) / len(lat)
+                    print(
+                        f"    done {name}: {len(rows)} segments, "
+                        f"mean eos_latency {avg:.2f}s",
+                        flush=True,
+                    )
+            else:
+                print(f"    done {name}: 0 segments", flush=True)
         except Exception as exc:  # noqa: BLE001 - keep the batch going
             print(f"    ERROR {name}: {exc}", flush=True)
             with failures_lock:
                 failures.append(name)
             return
-        out_path = wav_path + (args.suffix or ".gen1.csv")
-        write_csv(rows, out_path)
-        if rows:
-            lat = [
-                r["eos_latency"]
-                for r in rows
-                if isinstance(r["eos_latency"], (int, float))
-            ]
-            if lat:
-                avg = sum(lat) / len(lat)
-                print(
-                    f"    done {name}: {len(rows)} segments, "
-                    f"mean eos_latency {avg:.2f}s",
-                    flush=True,
-                )
-        else:
-            print(f"    done {name}: 0 segments", flush=True)
 
     items = list(enumerate(wavs, 1))
     if args.workers <= 1:
@@ -415,8 +440,15 @@ def main() -> None:
     else:
         with ThreadPoolExecutor(max_workers=args.workers) as pool:
             futures = [pool.submit(process, item) for item in items]
-            for _ in as_completed(futures):
-                pass
+            first_worker_error: Exception | None = None
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as exc:  # noqa: BLE001 - inspect every future
+                    if first_worker_error is None:
+                        first_worker_error = exc
+            if first_worker_error is not None:
+                raise first_worker_error
 
     if failures:
         print(f"Failed to process {len(failures)} of {len(wavs)} file(s).")

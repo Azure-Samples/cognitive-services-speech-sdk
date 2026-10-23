@@ -5,34 +5,43 @@
 # Licensed under the MIT license. See LICENSE.md file in the project root for full license information.
 
 import copy
+import io
 import json
 import logging
+import re
 import time
 import xml.etree.ElementTree as ET
 from multiprocessing.pool import ThreadPool
 from pathlib import Path
 from typing import List, Tuple
+from xml.parsers import expat
 
 import azure.cognitiveservices.speech as speechsdk
-import nltk
-from nltk.tokenize import sent_tokenize
 from tqdm import tqdm
 
 from synthesizer_pool import SynthesizerPool
 
-# Only needed for first run
-nltk.download('punkt_tab')
-
 logger = logging.getLogger(__name__)
+
+_SENTENCE_END = re.compile(
+    r'[.!?]+(?:["\'\u2019\u201D)\]}]+)?(?=\s|$)'
+    r'|[\u3002\uFF01\uFF1F]+(?:["\'\u2019\u201D)\]}]+)?'
+    r'|(?:\r?\n){2,}'
+)
+_ABBREVIATIONS = frozenset({
+    'dr.', 'e.g.', 'etc.', 'i.e.', 'jr.', 'mr.', 'mrs.', 'ms.',
+    'prof.', 'sr.', 'st.', 'u.k.', 'u.s.', 'vs.',
+})
+_INITIAL_OR_ACRONYM = re.compile(r'(?:[a-z]\.)+', re.IGNORECASE)
+_TRAILING_CLOSERS = '"\'\u2019\u201D)]}'
 
 
 class LongTextSynthesizer:
-    def __init__(self, subscription: str, endpoint: str, language: str = 'english',
+    def __init__(self, subscription: str, endpoint: str,
                  voice: str = 'en-US-JennyNeural', parallel_threads: int = 8) -> None:
         self.is_ssml = None
         self.subscription = subscription
         self.endpoint = endpoint
-        self.language = language
         self.voice = voice
         self.parallel_threads = parallel_threads
         self.synthesizer_pool = SynthesizerPool(self._create_synthesizer, self.parallel_threads)
@@ -117,18 +126,51 @@ class LongTextSynthesizer:
             with (output_path / "sentence_boundaries.json").open("w", encoding="utf-8") as f:
                 json.dump(all_sentence_boundaries, f, indent=4, ensure_ascii=False)
 
-    def split_text(self, text: str) -> List[str]:
-        sentences = sent_tokenize(text, language=self.language)
+    @staticmethod
+    def split_text(text: str) -> List[str]:
+        sentences = []
+        start = 0
+        for match in _SENTENCE_END.finditer(text):
+            sentence = text[start:match.end()].strip()
+            if sentence:
+                # A segment may consist solely of closing punctuation (for example a
+                # stray quote or bracket on its own line). Stripping the trailing
+                # closers then leaves an empty string, so guard against rsplit()
+                # returning no tokens before indexing into it.
+                tokens = sentence.rstrip(_TRAILING_CLOSERS).rsplit(maxsplit=1)
+                last_token = tokens[-1].lower() if tokens else ''
+                if match.group(0).startswith('.') and (
+                        last_token in _ABBREVIATIONS
+                        or _INITIAL_OR_ACRONYM.fullmatch(last_token)):
+                    continue
+                sentences.append(sentence)
+            start = match.end()
+
+        remainder = text[start:].strip()
+        if remainder:
+            sentences.append(remainder)
+
         logger.info(f'Splitting into {len(sentences)} sentences')
         logger.debug(sentences)
         return sentences
 
     @staticmethod
     def read_and_split_ssml(ssml_path: Path) -> List[str]:
-        namespaces = dict([node for _, node in ET.iterparse(ssml_path, events=['start-ns'])])
+        ssml = ssml_path.read_bytes()
+        parser = expat.ParserCreate()
+
+        def reject_doctype(*_args) -> None:
+            raise ValueError('DOCTYPE declarations are not allowed in SSML')
+
+        parser.StartDoctypeDeclHandler = reject_doctype
+        parser.Parse(ssml, True)
+
+        namespaces = dict([
+            node for _, node in ET.iterparse(io.BytesIO(ssml), events=['start-ns'])
+        ])
         for ns in namespaces:
             ET.register_namespace(ns, namespaces[ns])
-        root = ET.parse(ssml_path).getroot()
+        root = ET.fromstring(ssml)
         sentences = []
         speak_element = copy.deepcopy(root)
 

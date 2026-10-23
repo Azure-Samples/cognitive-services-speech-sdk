@@ -53,8 +53,6 @@ Please see the description of each individual sample for instructions on how to 
 
 ## Related GitHub repositories
 
-* [Azure-Samples/Cognitive-Services-Voice-Assistant](https://github.com/Azure-Samples/Cognitive-Services-Voice-Assistant) - Additional samples and tools to help you build an application that uses Speech SDK's DialogServiceConnector for voice communication with your [Bot-Framework bot](https://dev.botframework.com/) or [Custom Command](https://docs.microsoft.com/azure/cognitive-services/speech-service/custom-commands) web application.
-
 * [microsoft/cognitive-services-speech-sdk-js](https://github.com/microsoft/cognitive-services-speech-sdk-js) - JavaScript implementation of Speech SDK
 
 * [Microsoft/cognitive-services-speech-sdk-go](https://github.com/Microsoft/cognitive-services-speech-sdk-go) - Go implementation of Speech SDK
@@ -118,24 +116,9 @@ If you want to build them from scratch, please follow the quickstart or basics a
 | [Quickstart Objective-C macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/objectivec/macos/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 | [Quickstart Swift macOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/swift/macos/text-to-speech) | macOS | Demonstrates one-shot speech synthesis to the default speaker. |
 
-### Voice Assistant quickstarts
-
-The following quickstarts demonstrate how to create a custom Voice Assistant.
-The applications will connect to a previously authored bot configured to use the Direct Line Speech channel, send a voice request, and return a voice response activity (if configured).
-If you want to build these quickstarts from scratch, please follow the quickstart or basics articles on our [documentation page](https://docs.microsoft.com/azure/cognitive-services/speech-service/index-voice-assistants).
-
-See also [Azure-Samples/Cognitive-Services-Voice-Assistant](https://github.com/Azure-Samples/Cognitive-Services-Voice-Assistant) for full Voice Assistant samples and tools.
-
-<br>
-
-| Quickstart | Platform | Description |
-| ---------- | -------- | ----------- |
-| [Quickstart Java JRE](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/java/jre/virtual-assistant) | Windows, Linux, macOS | Demonstrates speech recognition through the DialogServiceConnector and receiving activity responses. |
-| [Quickstart C# UWP for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/quickstart/csharp/uwp/virtual-assistant) | Windows | Demonstrates speech recognition through the DialogServiceConnector and receiving activity responses. |
-
 ### Samples
 
-The following samples demonstrate additional capabilities of the Speech SDK, such as additional modes of speech recognition as well as translation. Voice Assistant samples can be found in a [separate GitHub repo](https://github.com/Azure-Samples/Cognitive-Services-Voice-Assistant).
+The following samples demonstrate additional capabilities of the Speech SDK, such as additional modes of speech recognition as well as translation.
 
 | Sample                                                                                                      | Platform | Description                                                          |
 | ---                                                                                                         | ---      | ---                                                                  |
@@ -153,8 +136,6 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 | [Speech recognition sample for iOS using a connection object](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios)  | iOS      | Demonstrates speech recognition |
 | [Extended speech recognition sample for iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios)           | iOS      | Demonstrates speech recognition using streams etc.|
 | [Speech synthesis sample for iOS](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/objective-c/ios)           | iOS      | Demonstrates speech synthesis using streams etc.|
-| [C# UWP DialogServiceConnector sample for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/uwp/virtualassistant-uwp/) | Windows | Demonstrates speech recognition through the DialogServiceConnector and receiving activity responses. |
-| [C#, C++ and Java DialogServiceConnector samples](https://github.com/Azure-Samples/Cognitive-Services-Voice-Assistant) | Windows, Linux, Android | Additional samples and tools to help you build an application that uses Speech SDK's DialogServiceConnector for voice communication with your [Bot-Framework Bot](https://dev.botframework.com/) or [Custom Command](https://docs.microsoft.com/azure/cognitive-services/speech-service/custom-commands) web application. |
 
 Samples for using the Speech Service REST API (no Speech SDK installation required):
 
