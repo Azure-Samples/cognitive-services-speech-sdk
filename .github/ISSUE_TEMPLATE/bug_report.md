@@ -7,7 +7,7 @@ about: Create a report to help us improve
 **IN ORDER TO ASSIST YOU, PLEASE PROVIDE THE FOLLOWING:**
 
 - Speech SDK log taken from a run that exhibits the reported issue. 
-See [instructions on how to take logs](https://docs.microsoft.com/azure/cognitive-services/speech-service/how-to-use-logging).
+See [instructions on how to take logs](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/how-to-use-logging).
 
 - A stripped down, simplified version of your source code that exhibits the issue. Or, preferably, try to reproduce the problem with one of the public samples in this repository (or a minimally modified version of it), and share the code.
 
