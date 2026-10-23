@@ -1,0 +1,2057 @@
+{
+    "duration": 120000,
+    "combinedPhrases": [
+        {
+            "text": "I think we got disconnected. Good. How are you? I have to say my little spill again. Just a heads up, Dimitri, to help improve the quality of our products, services and training, this call may be recorded and monitored. Information may be accessed internationally by Microsoft, our service provider, subsidiaries and affiliates. Is it OK if we continue? OK, fantastic. OK. So I I was talking. I think I, I, I, I kept rambling. And then I didn't hear you. So I guess we got disconnected there. And so just wanted to kind of follow up. So you're kind of comparing Shopify versus Azure. It looks like you're currently using an Azure trial. I guess as far as like questions, were you kind of. I know you kind of talked about price. I can definitely go over like pricing with you. If you're comparing apples to apples, I I saw that Spotify, you know obviously they're you know it's a SaaS platform. So if you want to run on that looks like their plans are as low as 29 bucks a month. What I was just saying is Microsoft has a little more flexibility. You kind of decide as far as you know our different options and then if your company scales and your e-commerce site goes goes big. You know, it's it's the fortunate thing about Microsoft is it's Microsoft, it's Azure. And then we have our Office 365 suite for you too for users, one share of company scale. So I didn't mean to kind of put the car before the horse, but that's kind of what I was saying. I'm talking to myself when we got cut off. But how can I kind of kind of help you out at this point, Dimitri? Well, I was wondering if there is a service that Microsoft offers where they can just look at my application and just, you know, tune it in or optimize it for the best performance. Sure. We do have a support team. Yeah, that's our engineering team on the back end. It's an option."
+        }
+    ],
+    "phrases": [
+        {
+            "offset": 240,
+            "duration": 1200,
+            "text": "I think we got disconnected.",
+            "words": [
+                {
+                    "text": "I",
+                    "offset": 240,
+                    "duration": 40
+                },
+                {
+                    "text": "think",
+                    "offset": 280,
+                    "duration": 160
+                },
+                {
+                    "text": "we",
+                    "offset": 440,
+                    "duration": 80
+                },
+                {
+                    "text": "got",
+                    "offset": 520,
+                    "duration": 200
+                },
+                {
+                    "text": "disconnected.",
+                    "offset": 720,
+                    "duration": 720
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 2000,
+            "duration": 200,
+            "text": "Good.",
+            "words": [
+                {
+                    "text": "Good.",
+                    "offset": 2000,
+                    "duration": 200
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 2200,
+            "duration": 440,
+            "text": "How are you?",
+            "words": [
+                {
+                    "text": "How",
+                    "offset": 2200,
+                    "duration": 80
+                },
+                {
+                    "text": "are",
+                    "offset": 2280,
+                    "duration": 200
+                },
+                {
+                    "text": "you?",
+                    "offset": 2480,
+                    "duration": 160
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 7760,
+            "duration": 1840,
+            "text": "I have to say my little spill again.",
+            "words": [
+                {
+                    "text": "I",
+                    "offset": 7760,
+                    "duration": 120
+                },
+                {
+                    "text": "have",
+                    "offset": 7880,
+                    "duration": 200
+                },
+                {
+                    "text": "to",
+                    "offset": 8080,
+                    "duration": 240
+                },
+                {
+                    "text": "say",
+                    "offset": 8480,
+                    "duration": 160
+                },
+                {
+                    "text": "my",
+                    "offset": 8640,
+                    "duration": 120
+                },
+                {
+                    "text": "little",
+                    "offset": 8760,
+                    "duration": 200
+                },
+                {
+                    "text": "spill",
+                    "offset": 8960,
+                    "duration": 320
+                },
+                {
+                    "text": "again.",
+                    "offset": 9280,
+                    "duration": 320
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 9680,
+            "duration": 5640,
+            "text": "Just a heads up, Dimitri, to help improve the quality of our products, services and training, this call may be recorded and monitored.",
+            "words": [
+                {
+                    "text": "Just",
+                    "offset": 9680,
+                    "duration": 240
+                },
+                {
+                    "text": "a",
+                    "offset": 9920,
+                    "duration": 40
+                },
+                {
+                    "text": "heads",
+                    "offset": 9960,
+                    "duration": 280
+                },
+                {
+                    "text": "up,",
+                    "offset": 10240,
+                    "duration": 120
+                },
+                {
+                    "text": "Dimitri,",
+                    "offset": 10360,
+                    "duration": 320
+                },
+                {
+                    "text": "to",
+                    "offset": 10680,
+                    "duration": 80
+                },
+                {
+                    "text": "help",
+                    "offset": 10760,
+                    "duration": 160
+                },
+                {
+                    "text": "improve",
+                    "offset": 10920,
+                    "duration": 240
+                },
+                {
+                    "text": "the",
+                    "offset": 11160,
+                    "duration": 80
+                },
+                {
+                    "text": "quality",
+                    "offset": 11240,
+                    "duration": 440
+                },
+                {
+                    "text": "of",
+                    "offset": 11680,
+                    "duration": 80
+                },
+                {
+                    "text": "our",
+                    "offset": 11760,
+                    "duration": 80
+                },
+                {
+                    "text": "products,",
+                    "offset": 11840,
+                    "duration": 360
+                },
+                {
+                    "text": "services",
+                    "offset": 12200,
+                    "duration": 400
+                },
+                {
+                    "text": "and",
+                    "offset": 12600,
+                    "duration": 160
+                },
+                {
+                    "text": "training,",
+                    "offset": 12760,
+                    "duration": 280
+                },
+                {
+                    "text": "this",
+                    "offset": 13040,
+                    "duration": 120
+                },
+                {
+                    "text": "call",
+                    "offset": 13160,
+                    "duration": 360
+                },
+                {
+                    "text": "may",
+                    "offset": 13600,
+                    "duration": 160
+                },
+                {
+                    "text": "be",
+                    "offset": 13760,
+                    "duration": 80
+                },
+                {
+                    "text": "recorded",
+                    "offset": 13840,
+                    "duration": 560
+                },
+                {
+                    "text": "and",
+                    "offset": 14760,
+                    "duration": 120
+                },
+                {
+                    "text": "monitored.",
+                    "offset": 14880,
+                    "duration": 440
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 15320,
+            "duration": 4960,
+            "text": "Information may be accessed internationally by Microsoft, our service provider, subsidiaries and affiliates.",
+            "words": [
+                {
+                    "text": "Information",
+                    "offset": 15320,
+                    "duration": 520
+                },
+                {
+                    "text": "may",
+                    "offset": 15840,
+                    "duration": 80
+                },
+                {
+                    "text": "be",
+                    "offset": 15920,
+                    "duration": 160
+                },
+                {
+                    "text": "accessed",
+                    "offset": 16080,
+                    "duration": 280
+                },
+                {
+                    "text": "internationally",
+                    "offset": 16360,
+                    "duration": 640
+                },
+                {
+                    "text": "by",
+                    "offset": 17000,
+                    "duration": 80
+                },
+                {
+                    "text": "Microsoft,",
+                    "offset": 17080,
+                    "duration": 680
+                },
+                {
+                    "text": "our",
+                    "offset": 18240,
+                    "duration": 240
+                },
+                {
+                    "text": "service",
+                    "offset": 18480,
+                    "duration": 360
+                },
+                {
+                    "text": "provider,",
+                    "offset": 18840,
+                    "duration": 440
+                },
+                {
+                    "text": "subsidiaries",
+                    "offset": 19280,
+                    "duration": 440
+                },
+                {
+                    "text": "and",
+                    "offset": 19720,
+                    "duration": 120
+                },
+                {
+                    "text": "affiliates.",
+                    "offset": 19840,
+                    "duration": 440
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 20320,
+            "duration": 1120,
+            "text": "Is it OK if we continue?",
+            "words": [
+                {
+                    "text": "Is",
+                    "offset": 20320,
+                    "duration": 120
+                },
+                {
+                    "text": "it",
+                    "offset": 20440,
+                    "duration": 120
+                },
+                {
+                    "text": "OK",
+                    "offset": 20560,
+                    "duration": 240
+                },
+                {
+                    "text": "if",
+                    "offset": 20800,
+                    "duration": 80
+                },
+                {
+                    "text": "we",
+                    "offset": 20880,
+                    "duration": 80
+                },
+                {
+                    "text": "continue?",
+                    "offset": 20960,
+                    "duration": 480
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 23440,
+            "duration": 1080,
+            "text": "OK, fantastic.",
+            "words": [
+                {
+                    "text": "OK,",
+                    "offset": 23440,
+                    "duration": 200
+                },
+                {
+                    "text": "fantastic.",
+                    "offset": 23920,
+                    "duration": 600
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 24520,
+            "duration": 160,
+            "text": "OK.",
+            "words": [
+                {
+                    "text": "OK.",
+                    "offset": 24520,
+                    "duration": 160
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 25120,
+            "duration": 2080,
+            "text": "So I I was talking.",
+            "words": [
+                {
+                    "text": "So",
+                    "offset": 25120,
+                    "duration": 480
+                },
+                {
+                    "text": "I",
+                    "offset": 25920,
+                    "duration": 400
+                },
+                {
+                    "text": "I",
+                    "offset": 26480,
+                    "duration": 80
+                },
+                {
+                    "text": "was",
+                    "offset": 26560,
+                    "duration": 160
+                },
+                {
+                    "text": "talking.",
+                    "offset": 26720,
+                    "duration": 480
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 27200,
+            "duration": 2400,
+            "text": "I think I, I, I, I kept rambling.",
+            "words": [
+                {
+                    "text": "I",
+                    "offset": 27200,
+                    "duration": 80
+                },
+                {
+                    "text": "think",
+                    "offset": 27280,
+                    "duration": 200
+                },
+                {
+                    "text": "I,",
+                    "offset": 27600,
+                    "duration": 80
+                },
+                {
+                    "text": "I,",
+                    "offset": 27760,
+                    "duration": 400
+                },
+                {
+                    "text": "I,",
+                    "offset": 28400,
+                    "duration": 80
+                },
+                {
+                    "text": "I",
+                    "offset": 28560,
+                    "duration": 160
+                },
+                {
+                    "text": "kept",
+                    "offset": 28720,
+                    "duration": 320
+                },
+                {
+                    "text": "rambling.",
+                    "offset": 29040,
+                    "duration": 560
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.92867047
+        },
+        {
+            "offset": 30000,
+            "duration": 880,
+            "text": "And then I didn't hear you.",
+            "words": [
+                {
+                    "text": "And",
+                    "offset": 30000,
+                    "duration": 120
+                },
+                {
+                    "text": "then",
+                    "offset": 30120,
+                    "duration": 120
+                },
+                {
+                    "text": "I",
+                    "offset": 30240,
+                    "duration": 40
+                },
+                {
+                    "text": "didn't",
+                    "offset": 30280,
+                    "duration": 240
+                },
+                {
+                    "text": "hear",
+                    "offset": 30520,
+                    "duration": 200
+                },
+                {
+                    "text": "you.",
+                    "offset": 30720,
+                    "duration": 160
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9149788
+        },
+        {
+            "offset": 30880,
+            "duration": 2480,
+            "text": "So I guess we got disconnected there.",
+            "words": [
+                {
+                    "text": "So",
+                    "offset": 30880,
+                    "duration": 400
+                },
+                {
+                    "text": "I",
+                    "offset": 31840,
+                    "duration": 80
+                },
+                {
+                    "text": "guess",
+                    "offset": 31920,
+                    "duration": 240
+                },
+                {
+                    "text": "we",
+                    "offset": 32160,
+                    "duration": 80
+                },
+                {
+                    "text": "got",
+                    "offset": 32240,
+                    "duration": 200
+                },
+                {
+                    "text": "disconnected",
+                    "offset": 32440,
+                    "duration": 600
+                },
+                {
+                    "text": "there.",
+                    "offset": 33040,
+                    "duration": 320
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9149788
+        },
+        {
+            "offset": 33920,
+            "duration": 2400,
+            "text": "And so just wanted to kind of follow up.",
+            "words": [
+                {
+                    "text": "And",
+                    "offset": 33920,
+                    "duration": 240
+                },
+                {
+                    "text": "so",
+                    "offset": 34160,
+                    "duration": 400
+                },
+                {
+                    "text": "just",
+                    "offset": 34880,
+                    "duration": 240
+                },
+                {
+                    "text": "wanted",
+                    "offset": 35120,
+                    "duration": 280
+                },
+                {
+                    "text": "to",
+                    "offset": 35400,
+                    "duration": 80
+                },
+                {
+                    "text": "kind",
+                    "offset": 35480,
+                    "duration": 200
+                },
+                {
+                    "text": "of",
+                    "offset": 35680,
+                    "duration": 80
+                },
+                {
+                    "text": "follow",
+                    "offset": 35760,
+                    "duration": 400
+                },
+                {
+                    "text": "up.",
+                    "offset": 36160,
+                    "duration": 160
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9149788
+        },
+        {
+            "offset": 36720,
+            "duration": 3960,
+            "text": "So you're kind of comparing Shopify versus Azure.",
+            "words": [
+                {
+                    "text": "So",
+                    "offset": 36720,
+                    "duration": 400
+                },
+                {
+                    "text": "you're",
+                    "offset": 37120,
+                    "duration": 160
+                },
+                {
+                    "text": "kind",
+                    "offset": 37280,
+                    "duration": 240
+                },
+                {
+                    "text": "of",
+                    "offset": 37520,
+                    "duration": 80
+                },
+                {
+                    "text": "comparing",
+                    "offset": 37600,
+                    "duration": 560
+                },
+                {
+                    "text": "Shopify",
+                    "offset": 39040,
+                    "duration": 720
+                },
+                {
+                    "text": "versus",
+                    "offset": 39760,
+                    "duration": 480
+                },
+                {
+                    "text": "Azure.",
+                    "offset": 40240,
+                    "duration": 440
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9149788
+        },
+        {
+            "offset": 40680,
+            "duration": 3000,
+            "text": "It looks like you're currently using an Azure trial.",
+            "words": [
+                {
+                    "text": "It",
+                    "offset": 40680,
+                    "duration": 80
+                },
+                {
+                    "text": "looks",
+                    "offset": 40760,
+                    "duration": 200
+                },
+                {
+                    "text": "like",
+                    "offset": 40960,
+                    "duration": 160
+                },
+                {
+                    "text": "you're",
+                    "offset": 41120,
+                    "duration": 320
+                },
+                {
+                    "text": "currently",
+                    "offset": 41440,
+                    "duration": 560
+                },
+                {
+                    "text": "using",
+                    "offset": 42320,
+                    "duration": 280
+                },
+                {
+                    "text": "an",
+                    "offset": 42600,
+                    "duration": 120
+                },
+                {
+                    "text": "Azure",
+                    "offset": 42720,
+                    "duration": 320
+                },
+                {
+                    "text": "trial.",
+                    "offset": 43040,
+                    "duration": 640
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9149788
+        },
+        {
+            "offset": 45360,
+            "duration": 2720,
+            "text": "I guess as far as like questions, were you kind of.",
+            "words": [
+                {
+                    "text": "I",
+                    "offset": 45360,
+                    "duration": 480
+                },
+                {
+                    "text": "guess",
+                    "offset": 45840,
+                    "duration": 240
+                },
+                {
+                    "text": "as",
+                    "offset": 46240,
+                    "duration": 80
+                },
+                {
+                    "text": "far",
+                    "offset": 46320,
+                    "duration": 280
+                },
+                {
+                    "text": "as",
+                    "offset": 46600,
+                    "duration": 80
+                },
+                {
+                    "text": "like",
+                    "offset": 46680,
+                    "duration": 160
+                },
+                {
+                    "text": "questions,",
+                    "offset": 46840,
+                    "duration": 640
+                },
+                {
+                    "text": "were",
+                    "offset": 47480,
+                    "duration": 200
+                },
+                {
+                    "text": "you",
+                    "offset": 47680,
+                    "duration": 80
+                },
+                {
+                    "text": "kind",
+                    "offset": 47760,
+                    "duration": 200
+                },
+                {
+                    "text": "of.",
+                    "offset": 47960,
+                    "duration": 120
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9149788
+        },
+        {
+            "offset": 49800,
+            "duration": 1680,
+            "text": "I know you kind of talked about price.",
+            "words": [
+                {
+                    "text": "I",
+                    "offset": 49800,
+                    "duration": 40
+                },
+                {
+                    "text": "know",
+                    "offset": 50080,
+                    "duration": 80
+                },
+                {
+                    "text": "you",
+                    "offset": 50160,
+                    "duration": 120
+                },
+                {
+                    "text": "kind",
+                    "offset": 50280,
+                    "duration": 200
+                },
+                {
+                    "text": "of",
+                    "offset": 50480,
+                    "duration": 80
+                },
+                {
+                    "text": "talked",
+                    "offset": 50560,
+                    "duration": 440
+                },
+                {
+                    "text": "about",
+                    "offset": 51000,
+                    "duration": 280
+                },
+                {
+                    "text": "price.",
+                    "offset": 51280,
+                    "duration": 200
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9328801
+        },
+        {
+            "offset": 51480,
+            "duration": 1760,
+            "text": "I can definitely go over like pricing with you.",
+            "words": [
+                {
+                    "text": "I",
+                    "offset": 51480,
+                    "duration": 40
+                },
+                {
+                    "text": "can",
+                    "offset": 51520,
+                    "duration": 120
+                },
+                {
+                    "text": "definitely",
+                    "offset": 51640,
+                    "duration": 360
+                },
+                {
+                    "text": "go",
+                    "offset": 52000,
+                    "duration": 120
+                },
+                {
+                    "text": "over",
+                    "offset": 52120,
+                    "duration": 200
+                },
+                {
+                    "text": "like",
+                    "offset": 52320,
+                    "duration": 160
+                },
+                {
+                    "text": "pricing",
+                    "offset": 52480,
+                    "duration": 480
+                },
+                {
+                    "text": "with",
+                    "offset": 52960,
+                    "duration": 160
+                },
+                {
+                    "text": "you.",
+                    "offset": 53120,
+                    "duration": 120
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9328801
+        },
+        {
+            "offset": 53800,
+            "duration": 6840,
+            "text": "If you're comparing apples to apples, I I saw that Spotify, you know obviously they're you know it's a SaaS platform.",
+            "words": [
+                {
+                    "text": "If",
+                    "offset": 53800,
+                    "duration": 80
+                },
+                {
+                    "text": "you're",
+                    "offset": 53880,
+                    "duration": 120
+                },
+                {
+                    "text": "comparing",
+                    "offset": 54000,
+                    "duration": 560
+                },
+                {
+                    "text": "apples",
+                    "offset": 54560,
+                    "duration": 440
+                },
+                {
+                    "text": "to",
+                    "offset": 55000,
+                    "duration": 80
+                },
+                {
+                    "text": "apples,",
+                    "offset": 55080,
+                    "duration": 520
+                },
+                {
+                    "text": "I",
+                    "offset": 55600,
+                    "duration": 40
+                },
+                {
+                    "text": "I",
+                    "offset": 55640,
+                    "duration": 280
+                },
+                {
+                    "text": "saw",
+                    "offset": 55920,
+                    "duration": 240
+                },
+                {
+                    "text": "that",
+                    "offset": 56160,
+                    "duration": 160
+                },
+                {
+                    "text": "Spotify,",
+                    "offset": 56320,
+                    "duration": 560
+                },
+                {
+                    "text": "you",
+                    "offset": 57760,
+                    "duration": 80
+                },
+                {
+                    "text": "know",
+                    "offset": 57840,
+                    "duration": 160
+                },
+                {
+                    "text": "obviously",
+                    "offset": 58080,
+                    "duration": 360
+                },
+                {
+                    "text": "they're",
+                    "offset": 58440,
+                    "duration": 280
+                },
+                {
+                    "text": "you",
+                    "offset": 59040,
+                    "duration": 80
+                },
+                {
+                    "text": "know",
+                    "offset": 59120,
+                    "duration": 160
+                },
+                {
+                    "text": "it's",
+                    "offset": 59360,
+                    "duration": 240
+                },
+                {
+                    "text": "a",
+                    "offset": 59600,
+                    "duration": 40
+                },
+                {
+                    "text": "SaaS",
+                    "offset": 59640,
+                    "duration": 360
+                },
+                {
+                    "text": "platform.",
+                    "offset": 60000,
+                    "duration": 640
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9328801
+        },
+        {
+            "offset": 60640,
+            "duration": 6600,
+            "text": "So if you want to run on that looks like their plans are as low as 29 bucks a month.",
+            "words": [
+                {
+                    "text": "So",
+                    "offset": 60640,
+                    "duration": 320
+                },
+                {
+                    "text": "if",
+                    "offset": 61680,
+                    "duration": 320
+                },
+                {
+                    "text": "you",
+                    "offset": 62000,
+                    "duration": 160
+                },
+                {
+                    "text": "want",
+                    "offset": 62800,
+                    "duration": 400
+                },
+                {
+                    "text": "to",
+                    "offset": 63280,
+                    "duration": 80
+                },
+                {
+                    "text": "run",
+                    "offset": 64240,
+                    "duration": 320
+                },
+                {
+                    "text": "on",
+                    "offset": 64560,
+                    "duration": 80
+                },
+                {
+                    "text": "that",
+                    "offset": 64640,
+                    "duration": 320
+                },
+                {
+                    "text": "looks",
+                    "offset": 64960,
+                    "duration": 160
+                },
+                {
+                    "text": "like",
+                    "offset": 65120,
+                    "duration": 160
+                },
+                {
+                    "text": "their",
+                    "offset": 65280,
+                    "duration": 240
+                },
+                {
+                    "text": "plans",
+                    "offset": 65520,
+                    "duration": 360
+                },
+                {
+                    "text": "are",
+                    "offset": 65880,
+                    "duration": 80
+                },
+                {
+                    "text": "as",
+                    "offset": 65960,
+                    "duration": 120
+                },
+                {
+                    "text": "low",
+                    "offset": 66080,
+                    "duration": 80
+                },
+                {
+                    "text": "as",
+                    "offset": 66160,
+                    "duration": 80
+                },
+                {
+                    "text": "29",
+                    "offset": 66240,
+                    "duration": 400
+                },
+                {
+                    "text": "bucks",
+                    "offset": 66640,
+                    "duration": 280
+                },
+                {
+                    "text": "a",
+                    "offset": 66920,
+                    "duration": 40
+                },
+                {
+                    "text": "month.",
+                    "offset": 66960,
+                    "duration": 280
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9328801
+        },
+        {
+            "offset": 67800,
+            "duration": 2840,
+            "text": "What I was just saying is Microsoft has a little more flexibility.",
+            "words": [
+                {
+                    "text": "What",
+                    "offset": 67800,
+                    "duration": 200
+                },
+                {
+                    "text": "I",
+                    "offset": 68000,
+                    "duration": 40
+                },
+                {
+                    "text": "was",
+                    "offset": 68040,
+                    "duration": 120
+                },
+                {
+                    "text": "just",
+                    "offset": 68160,
+                    "duration": 200
+                },
+                {
+                    "text": "saying",
+                    "offset": 68360,
+                    "duration": 200
+                },
+                {
+                    "text": "is",
+                    "offset": 68560,
+                    "duration": 160
+                },
+                {
+                    "text": "Microsoft",
+                    "offset": 68720,
+                    "duration": 440
+                },
+                {
+                    "text": "has",
+                    "offset": 69160,
+                    "duration": 120
+                },
+                {
+                    "text": "a",
+                    "offset": 69280,
+                    "duration": 40
+                },
+                {
+                    "text": "little",
+                    "offset": 69320,
+                    "duration": 280
+                },
+                {
+                    "text": "more",
+                    "offset": 69600,
+                    "duration": 160
+                },
+                {
+                    "text": "flexibility.",
+                    "offset": 69760,
+                    "duration": 880
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9328801
+        },
+        {
+            "offset": 71120,
+            "duration": 7120,
+            "text": "You kind of decide as far as you know our different options and then if your company scales and your e-commerce site goes goes big.",
+            "words": [
+                {
+                    "text": "You",
+                    "offset": 71120,
+                    "duration": 80
+                },
+                {
+                    "text": "kind",
+                    "offset": 71200,
+                    "duration": 360
+                },
+                {
+                    "text": "of",
+                    "offset": 71560,
+                    "duration": 80
+                },
+                {
+                    "text": "decide",
+                    "offset": 71640,
+                    "duration": 520
+                },
+                {
+                    "text": "as",
+                    "offset": 72160,
+                    "duration": 80
+                },
+                {
+                    "text": "far",
+                    "offset": 72240,
+                    "duration": 360
+                },
+                {
+                    "text": "as",
+                    "offset": 72600,
+                    "duration": 120
+                },
+                {
+                    "text": "you",
+                    "offset": 73040,
+                    "duration": 80
+                },
+                {
+                    "text": "know",
+                    "offset": 73120,
+                    "duration": 120
+                },
+                {
+                    "text": "our",
+                    "offset": 73280,
+                    "duration": 160
+                },
+                {
+                    "text": "different",
+                    "offset": 73440,
+                    "duration": 320
+                },
+                {
+                    "text": "options",
+                    "offset": 73760,
+                    "duration": 360
+                },
+                {
+                    "text": "and",
+                    "offset": 74120,
+                    "duration": 120
+                },
+                {
+                    "text": "then",
+                    "offset": 74520,
+                    "duration": 200
+                },
+                {
+                    "text": "if",
+                    "offset": 74720,
+                    "duration": 240
+                },
+                {
+                    "text": "your",
+                    "offset": 74960,
+                    "duration": 160
+                },
+                {
+                    "text": "company",
+                    "offset": 75120,
+                    "duration": 400
+                },
+                {
+                    "text": "scales",
+                    "offset": 75520,
+                    "duration": 560
+                },
+                {
+                    "text": "and",
+                    "offset": 76080,
+                    "duration": 120
+                },
+                {
+                    "text": "your",
+                    "offset": 76200,
+                    "duration": 120
+                },
+                {
+                    "text": "e-commerce",
+                    "offset": 76320,
+                    "duration": 520
+                },
+                {
+                    "text": "site",
+                    "offset": 76840,
+                    "duration": 240
+                },
+                {
+                    "text": "goes",
+                    "offset": 77080,
+                    "duration": 440
+                },
+                {
+                    "text": "goes",
+                    "offset": 77680,
+                    "duration": 240
+                },
+                {
+                    "text": "big.",
+                    "offset": 77920,
+                    "duration": 320
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9328801
+        },
+        {
+            "offset": 78640,
+            "duration": 4720,
+            "text": "You know, it's it's the fortunate thing about Microsoft is it's Microsoft, it's Azure.",
+            "words": [
+                {
+                    "text": "You",
+                    "offset": 78640,
+                    "duration": 80
+                },
+                {
+                    "text": "know,",
+                    "offset": 78720,
+                    "duration": 240
+                },
+                {
+                    "text": "it's",
+                    "offset": 78960,
+                    "duration": 280
+                },
+                {
+                    "text": "it's",
+                    "offset": 79280,
+                    "duration": 320
+                },
+                {
+                    "text": "the",
+                    "offset": 79840,
+                    "duration": 160
+                },
+                {
+                    "text": "fortunate",
+                    "offset": 80000,
+                    "duration": 480
+                },
+                {
+                    "text": "thing",
+                    "offset": 80480,
+                    "duration": 120
+                },
+                {
+                    "text": "about",
+                    "offset": 80600,
+                    "duration": 200
+                },
+                {
+                    "text": "Microsoft",
+                    "offset": 80800,
+                    "duration": 600
+                },
+                {
+                    "text": "is",
+                    "offset": 81400,
+                    "duration": 280
+                },
+                {
+                    "text": "it's",
+                    "offset": 81920,
+                    "duration": 200
+                },
+                {
+                    "text": "Microsoft,",
+                    "offset": 82120,
+                    "duration": 640
+                },
+                {
+                    "text": "it's",
+                    "offset": 82760,
+                    "duration": 120
+                },
+                {
+                    "text": "Azure.",
+                    "offset": 82880,
+                    "duration": 480
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9304696
+        },
+        {
+            "offset": 83760,
+            "duration": 4240,
+            "text": "And then we have our Office 365 suite for you too for users, one share of company scale.",
+            "words": [
+                {
+                    "text": "And",
+                    "offset": 83760,
+                    "duration": 160
+                },
+                {
+                    "text": "then",
+                    "offset": 83920,
+                    "duration": 120
+                },
+                {
+                    "text": "we",
+                    "offset": 84040,
+                    "duration": 120
+                },
+                {
+                    "text": "have",
+                    "offset": 84160,
+                    "duration": 200
+                },
+                {
+                    "text": "our",
+                    "offset": 84360,
+                    "duration": 120
+                },
+                {
+                    "text": "Office",
+                    "offset": 84480,
+                    "duration": 320
+                },
+                {
+                    "text": "365",
+                    "offset": 84800,
+                    "duration": 720
+                },
+                {
+                    "text": "suite",
+                    "offset": 85520,
+                    "duration": 280
+                },
+                {
+                    "text": "for",
+                    "offset": 85800,
+                    "duration": 200
+                },
+                {
+                    "text": "you",
+                    "offset": 86000,
+                    "duration": 80
+                },
+                {
+                    "text": "too",
+                    "offset": 86080,
+                    "duration": 160
+                },
+                {
+                    "text": "for",
+                    "offset": 86240,
+                    "duration": 160
+                },
+                {
+                    "text": "users,",
+                    "offset": 86400,
+                    "duration": 400
+                },
+                {
+                    "text": "one",
+                    "offset": 86800,
+                    "duration": 200
+                },
+                {
+                    "text": "share",
+                    "offset": 87000,
+                    "duration": 200
+                },
+                {
+                    "text": "of",
+                    "offset": 87200,
+                    "duration": 80
+                },
+                {
+                    "text": "company",
+                    "offset": 87280,
+                    "duration": 320
+                },
+                {
+                    "text": "scale.",
+                    "offset": 87600,
+                    "duration": 400
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9304696
+        },
+        {
+            "offset": 88000,
+            "duration": 3520,
+            "text": "So I didn't mean to kind of put the car before the horse, but that's kind of what I was saying.",
+            "words": [
+                {
+                    "text": "So",
+                    "offset": 88000,
+                    "duration": 240
+                },
+                {
+                    "text": "I",
+                    "offset": 88560,
+                    "duration": 40
+                },
+                {
+                    "text": "didn't",
+                    "offset": 88600,
+                    "duration": 320
+                },
+                {
+                    "text": "mean",
+                    "offset": 88920,
+                    "duration": 120
+                },
+                {
+                    "text": "to",
+                    "offset": 89040,
+                    "duration": 80
+                },
+                {
+                    "text": "kind",
+                    "offset": 89120,
+                    "duration": 160
+                },
+                {
+                    "text": "of",
+                    "offset": 89280,
+                    "duration": 80
+                },
+                {
+                    "text": "put",
+                    "offset": 89360,
+                    "duration": 120
+                },
+                {
+                    "text": "the",
+                    "offset": 89480,
+                    "duration": 80
+                },
+                {
+                    "text": "car",
+                    "offset": 89560,
+                    "duration": 120
+                },
+                {
+                    "text": "before",
+                    "offset": 89680,
+                    "duration": 280
+                },
+                {
+                    "text": "the",
+                    "offset": 89960,
+                    "duration": 80
+                },
+                {
+                    "text": "horse,",
+                    "offset": 90040,
+                    "duration": 240
+                },
+                {
+                    "text": "but",
+                    "offset": 90280,
+                    "duration": 160
+                },
+                {
+                    "text": "that's",
+                    "offset": 90440,
+                    "duration": 200
+                },
+                {
+                    "text": "kind",
+                    "offset": 90640,
+                    "duration": 200
+                },
+                {
+                    "text": "of",
+                    "offset": 90840,
+                    "duration": 80
+                },
+                {
+                    "text": "what",
+                    "offset": 90920,
+                    "duration": 160
+                },
+                {
+                    "text": "I",
+                    "offset": 91080,
+                    "duration": 40
+                },
+                {
+                    "text": "was",
+                    "offset": 91120,
+                    "duration": 120
+                },
+                {
+                    "text": "saying.",
+                    "offset": 91240,
+                    "duration": 280
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9304696
+        },
+        {
+            "offset": 91520,
+            "duration": 2800,
+            "text": "I'm talking to myself when we got cut off.",
+            "words": [
+                {
+                    "text": "I'm",
+                    "offset": 91520,
+                    "duration": 80
+                },
+                {
+                    "text": "talking",
+                    "offset": 92400,
+                    "duration": 240
+                },
+                {
+                    "text": "to",
+                    "offset": 92640,
+                    "duration": 160
+                },
+                {
+                    "text": "myself",
+                    "offset": 92800,
+                    "duration": 520
+                },
+                {
+                    "text": "when",
+                    "offset": 93320,
+                    "duration": 160
+                },
+                {
+                    "text": "we",
+                    "offset": 93480,
+                    "duration": 120
+                },
+                {
+                    "text": "got",
+                    "offset": 93600,
+                    "duration": 160
+                },
+                {
+                    "text": "cut",
+                    "offset": 93760,
+                    "duration": 320
+                },
+                {
+                    "text": "off.",
+                    "offset": 94080,
+                    "duration": 240
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9304696
+        },
+        {
+            "offset": 94320,
+            "duration": 4880,
+            "text": "But how can I kind of kind of help you out at this point, Dimitri?",
+            "words": [
+                {
+                    "text": "But",
+                    "offset": 94320,
+                    "duration": 320
+                },
+                {
+                    "text": "how",
+                    "offset": 95600,
+                    "duration": 200
+                },
+                {
+                    "text": "can",
+                    "offset": 95800,
+                    "duration": 200
+                },
+                {
+                    "text": "I",
+                    "offset": 96000,
+                    "duration": 160
+                },
+                {
+                    "text": "kind",
+                    "offset": 96160,
+                    "duration": 360
+                },
+                {
+                    "text": "of",
+                    "offset": 96520,
+                    "duration": 200
+                },
+                {
+                    "text": "kind",
+                    "offset": 97280,
+                    "duration": 160
+                },
+                {
+                    "text": "of",
+                    "offset": 97440,
+                    "duration": 80
+                },
+                {
+                    "text": "help",
+                    "offset": 97520,
+                    "duration": 240
+                },
+                {
+                    "text": "you",
+                    "offset": 97760,
+                    "duration": 80
+                },
+                {
+                    "text": "out",
+                    "offset": 97920,
+                    "duration": 120
+                },
+                {
+                    "text": "at",
+                    "offset": 98040,
+                    "duration": 80
+                },
+                {
+                    "text": "this",
+                    "offset": 98120,
+                    "duration": 200
+                },
+                {
+                    "text": "point,",
+                    "offset": 98320,
+                    "duration": 320
+                },
+                {
+                    "text": "Dimitri?",
+                    "offset": 98640,
+                    "duration": 560
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9304696
+        },
+        {
+            "offset": 100320,
+            "duration": 12560,
+            "text": "Well, I was wondering if there is a service that Microsoft offers where they can just look at my application and just, you know, tune it in or optimize it for the best performance.",
+            "words": [
+                {
+                    "text": "Well,",
+                    "offset": 100320,
+                    "duration": 240
+                },
+                {
+                    "text": "I",
+                    "offset": 100640,
+                    "duration": 80
+                },
+                {
+                    "text": "was",
+                    "offset": 100720,
+                    "duration": 120
+                },
+                {
+                    "text": "wondering",
+                    "offset": 100840,
+                    "duration": 840
+                },
+                {
+                    "text": "if",
+                    "offset": 101680,
+                    "duration": 320
+                },
+                {
+                    "text": "there",
+                    "offset": 102000,
+                    "duration": 200
+                },
+                {
+                    "text": "is",
+                    "offset": 102200,
+                    "duration": 200
+                },
+                {
+                    "text": "a",
+                    "offset": 102520,
+                    "duration": 40
+                },
+                {
+                    "text": "service",
+                    "offset": 102560,
+                    "duration": 480
+                },
+                {
+                    "text": "that",
+                    "offset": 103040,
+                    "duration": 240
+                },
+                {
+                    "text": "Microsoft",
+                    "offset": 103440,
+                    "duration": 640
+                },
+                {
+                    "text": "offers",
+                    "offset": 104080,
+                    "duration": 440
+                },
+                {
+                    "text": "where",
+                    "offset": 104520,
+                    "duration": 440
+                },
+                {
+                    "text": "they",
+                    "offset": 104960,
+                    "duration": 240
+                },
+                {
+                    "text": "can",
+                    "offset": 105360,
+                    "duration": 160
+                },
+                {
+                    "text": "just",
+                    "offset": 105520,
+                    "duration": 280
+                },
+                {
+                    "text": "look",
+                    "offset": 105800,
+                    "duration": 200
+                },
+                {
+                    "text": "at",
+                    "offset": 106000,
+                    "duration": 80
+                },
+                {
+                    "text": "my",
+                    "offset": 106080,
+                    "duration": 160
+                },
+                {
+                    "text": "application",
+                    "offset": 106240,
+                    "duration": 800
+                },
+                {
+                    "text": "and",
+                    "offset": 107040,
+                    "duration": 200
+                },
+                {
+                    "text": "just,",
+                    "offset": 107240,
+                    "duration": 640
+                },
+                {
+                    "text": "you",
+                    "offset": 108560,
+                    "duration": 120
+                },
+                {
+                    "text": "know,",
+                    "offset": 108680,
+                    "duration": 200
+                },
+                {
+                    "text": "tune",
+                    "offset": 109360,
+                    "duration": 320
+                },
+                {
+                    "text": "it",
+                    "offset": 109680,
+                    "duration": 160
+                },
+                {
+                    "text": "in",
+                    "offset": 109840,
+                    "duration": 160
+                },
+                {
+                    "text": "or",
+                    "offset": 110000,
+                    "duration": 240
+                },
+                {
+                    "text": "optimize",
+                    "offset": 110240,
+                    "duration": 560
+                },
+                {
+                    "text": "it",
+                    "offset": 110800,
+                    "duration": 120
+                },
+                {
+                    "text": "for",
+                    "offset": 111400,
+                    "duration": 120
+                },
+                {
+                    "text": "the",
+                    "offset": 111520,
+                    "duration": 120
+                },
+                {
+                    "text": "best",
+                    "offset": 111640,
+                    "duration": 320
+                },
+                {
+                    "text": "performance.",
+                    "offset": 112200,
+                    "duration": 680
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9264704
+        },
+        {
+            "offset": 113200,
+            "duration": 480,
+            "text": "Sure.",
+            "words": [
+                {
+                    "text": "Sure.",
+                    "offset": 113200,
+                    "duration": 480
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9264704
+        },
+        {
+            "offset": 114440,
+            "duration": 1400,
+            "text": "We do have a support team.",
+            "words": [
+                {
+                    "text": "We",
+                    "offset": 114440,
+                    "duration": 80
+                },
+                {
+                    "text": "do",
+                    "offset": 114520,
+                    "duration": 120
+                },
+                {
+                    "text": "have",
+                    "offset": 114640,
+                    "duration": 240
+                },
+                {
+                    "text": "a",
+                    "offset": 114880,
+                    "duration": 80
+                },
+                {
+                    "text": "support",
+                    "offset": 114960,
+                    "duration": 440
+                },
+                {
+                    "text": "team.",
+                    "offset": 115400,
+                    "duration": 440
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9264704
+        },
+        {
+            "offset": 116080,
+            "duration": 2880,
+            "text": "Yeah, that's our engineering team on the back end.",
+            "words": [
+                {
+                    "text": "Yeah,",
+                    "offset": 116080,
+                    "duration": 240
+                },
+                {
+                    "text": "that's",
+                    "offset": 116960,
+                    "duration": 200
+                },
+                {
+                    "text": "our",
+                    "offset": 117160,
+                    "duration": 120
+                },
+                {
+                    "text": "engineering",
+                    "offset": 117280,
+                    "duration": 640
+                },
+                {
+                    "text": "team",
+                    "offset": 117920,
+                    "duration": 200
+                },
+                {
+                    "text": "on",
+                    "offset": 118120,
+                    "duration": 120
+                },
+                {
+                    "text": "the",
+                    "offset": 118240,
+                    "duration": 80
+                },
+                {
+                    "text": "back",
+                    "offset": 118320,
+                    "duration": 400
+                },
+                {
+                    "text": "end.",
+                    "offset": 118720,
+                    "duration": 240
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9264704
+        },
+        {
+            "offset": 119120,
+            "duration": 800,
+            "text": "It's an option.",
+            "words": [
+                {
+                    "text": "It's",
+                    "offset": 119120,
+                    "duration": 200
+                },
+                {
+                    "text": "an",
+                    "offset": 119320,
+                    "duration": 120
+                },
+                {
+                    "text": "option.",
+                    "offset": 119440,
+                    "duration": 480
+                }
+            ],
+            "locale": "en-US",
+            "confidence": 0.9264704
+        }
+    ]
+}
