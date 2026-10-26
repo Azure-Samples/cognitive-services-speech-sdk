@@ -149,7 +149,8 @@ class AzureTTS:
         if incremental:
             config.set_property(sdk.PropertyId.SpeechSynthesis_FrameTimeoutInterval, FRAME_TIMEOUT_MS)
             config.set_property(sdk.PropertyId.SpeechSynthesis_RtfTimeoutThreshold, RTF_TIMEOUT_THRESHOLD)
-        output = sdk.SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm if incremental else sdk.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm
+        output = (sdk.SpeechSynthesisOutputFormat.Raw24Khz16BitMonoPcm if incremental
+                  else sdk.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm)
         config.set_speech_synthesis_output_format(output)
         return sdk.SpeechSynthesizer(speech_config=config, audio_config=None)
 
@@ -184,6 +185,7 @@ class AzureTTS:
             self._closed = True
             idle = self._idle[False] + self._idle[True]
             self._idle = {False: [], True: []}
+
         async def close_idle():
             clean = True
             for synth in idle:
@@ -227,6 +229,7 @@ class AzureTTS:
         if cancellation.is_set():
             return
         iterator = text_source.__aiter__()
+
         async def first_text():
             async for delta in iterator:
                 if not isinstance(delta, str):
@@ -247,7 +250,9 @@ class AzureTTS:
             await self._speak_stream(iterator, delta, on_audio, cancellation, cleanup_seconds, source_owned_by_stream)
         finally:
             for task in (first, stopped):
-                if not task.done(): task.cancel()
+                if not task.done():
+                    task.cancel()
+
             async def cleanup_prefetch():
                 await _best_effort(lambda: asyncio.gather(first, stopped, return_exceptions=True),
                                    'drain first-text tasks', cleanup_seconds)
@@ -384,6 +389,7 @@ class AzureTTS:
                 if task and not task.done():
                     task.cancel()
             callback_error.cancel()
+
             async def cleanup():
                 clean = True
                 if not succeeded:
