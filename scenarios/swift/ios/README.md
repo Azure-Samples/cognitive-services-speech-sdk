@@ -22,20 +22,22 @@ This [speech sample app](./language-learning) shows techniques for pronunciation
 
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
-The Cognitive Services Speech SDK for iOS is distributed as a xcframework bundle.
-It can be used in Xcode projects as a [CocoaPod](https://cocoapods.org/), or downloaded directly from [https://aka.ms/csspeech/iosbinary](https://aka.ms/csspeech/iosbinary) and linked manually.
+The Cognitive Services Speech SDK for iOS is distributed as an XCFramework bundle through [Swift Package Manager](https://swift.org/package-manager/).
 
-## Install the SDK as a CocoaPod
+## Install the SDK using Swift Package Manager
 
-1. Install the CocoaPod dependency manager as described in its [installation instructions](https://guides.cocoapods.org/using/getting-started.html).
-1. Navigate to the directory of the downloaded sample app (e.g. `speech-samples`) in a terminal.
-1. Run the command `pod install`. This will generate a Xcode workspace containing both the sample app and the Speech SDK as a dependency. This workspace will be used in the following.
+If `language-learning/speech-samples.xcodeproj` already lists `speech-sdk-spm` under **Package Dependencies**, no installation is needed.
+Otherwise, replace the CI-only local `{{{PACKAGE_PATH}}}` reference with the published SDK:
+
+1. Open `language-learning/speech-samples.xcodeproj` in Xcode.
+1. In the project's **Package Dependencies**, remove the unresolved local Speech SDK package reference (`{{{PACKAGE_PATH}}}`).
+1. Choose **File** > **Add Package Dependencies...** and enter `https://github.com/microsoft/speech-sdk-spm`.
+1. Keep the default version rule (**Up to Next Major Version**) or choose a specific version, then click **Add Package**.
+1. Select **MicrosoftCognitiveServicesSpeech-iOS**, add it to the `speech-samples` app target, and click **Add Package**. The `Differ` dependency is already configured in the project.
 
 ## Build the samples
 
-Open either Xcode project with the sample code.
-This loads the project in Xcode.
-Next, add your subscription details to the `<sample name>/ViewController.swift` file:
+Add your subscription details to the `language-learning/speech-samples/ViewController.swift` file:
 
 1. Replace the string `YourSubscriptionKey` with your subscription key.
 2. Replace the string `YourServiceRegion` with the [region](https://docs.microsoft.com/azure/cognitive-services/speech-service/regions) associated with your subscription (for example, `westus` for the free trial subscription).

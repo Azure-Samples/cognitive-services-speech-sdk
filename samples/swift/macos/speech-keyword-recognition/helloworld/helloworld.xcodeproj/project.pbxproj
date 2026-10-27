@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		30581BCFCC404D3697BEFDDC /* MicrosoftCognitiveServicesSpeech in Frameworks */ = {isa = PBXBuildFile; productRef = C8D98717E00C40F4B1AC97EA /* MicrosoftCognitiveServicesSpeech */; };
 		6219CF072BD9BD2E007CC6DE /* kws.table in Resources */ = {isa = PBXBuildFile; fileRef = 6219CF062BD9BD2E007CC6DE /* kws.table */; };
 		DCE16F6922F318CC00D148F5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCE16F6822F318CC00D148F5 /* AppDelegate.swift */; };
 		DCE16F6B22F318CD00D148F5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DCE16F6A22F318CD00D148F5 /* Assets.xcassets */; };
@@ -29,6 +30,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30581BCFCC404D3697BEFDDC /* MicrosoftCognitiveServicesSpeech in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +82,9 @@
 			);
 			dependencies = (
 			);
+			packageProductDependencies = (
+				C8D98717E00C40F4B1AC97EA /* MicrosoftCognitiveServicesSpeech */,
+			);
 			name = helloworld;
 			productName = helloworld;
 			productReference = DCE16F6522F318CC00D148F5 /* helloworld.app */;
@@ -117,6 +122,9 @@
 			productRefGroup = DCE16F6622F318CC00D148F5 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
+			packageReferences = (
+				E10443690E3B4DB1942C53BC /* XCRemoteSwiftPackageReference "speech-sdk-spm" */,
+			);
 			targets = (
 				DCE16F6422F318CC00D148F5 /* helloworld */,
 			);
@@ -336,6 +344,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E10443690E3B4DB1942C53BC /* XCRemoteSwiftPackageReference "speech-sdk-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/microsoft/speech-sdk-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.51.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C8D98717E00C40F4B1AC97EA /* MicrosoftCognitiveServicesSpeech */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E10443690E3B4DB1942C53BC /* XCRemoteSwiftPackageReference "speech-sdk-spm" */;
+			productName = "MicrosoftCognitiveServicesSpeech-macOS";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = DCE16F5D22F318CC00D148F5 /* Project object */;
 }

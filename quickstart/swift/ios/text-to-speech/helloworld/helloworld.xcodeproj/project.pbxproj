@@ -122,7 +122,7 @@
 				3C740CA322EFF7D800BA9D95 /* helloworld */,
 			);
 			packageReferences = (
-				FF333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */,
+				FF333333333333333333333333 /* XCRemoteSwiftPackageReference "speech-sdk-spm" */,
 			);
 		};
 /* End PBXProject section */
@@ -349,17 +349,21 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		FF333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "{{{PACKAGE_PATH}}}";
+/* Begin XCRemoteSwiftPackageReference section */
+		FF333333333333333333333333 /* XCRemoteSwiftPackageReference "speech-sdk-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/microsoft/speech-sdk-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.51.0;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		FF222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FF333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */;
+			package = FF333333333333333333333333 /* XCRemoteSwiftPackageReference "speech-sdk-spm" */;
 			productName = "MicrosoftCognitiveServicesSpeech-iOS";
 		};
 /* End XCSwiftPackageProductDependency section */

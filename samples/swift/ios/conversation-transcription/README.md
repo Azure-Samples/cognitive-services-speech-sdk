@@ -17,11 +17,13 @@ For an introduction to the SDK, please refer to the [quickstart articles for spe
 **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
 
 The Cognitive Services Speech SDK for iOS is distributed as an XCFramework bundle.
-It can be added to Xcode projects via [Swift Package Manager](https://swift.org/package-manager/) (recommended) or as a [CocoaPod](https://cocoapods.org/).
+It can be added to Xcode projects via [Swift Package Manager](https://swift.org/package-manager/).
 
-## Install the SDK using Swift Package Manager (Recommended)
+## Install the SDK using Swift Package Manager
 
-The Speech SDK is published as a Swift package at [microsoft/speech-sdk-spm](https://github.com/microsoft/speech-sdk-spm). To add it to an Xcode project:
+The Speech SDK is published as a Swift package at [microsoft/speech-sdk-spm](https://github.com/microsoft/speech-sdk-spm).
+If the sample project already lists `speech-sdk-spm` under **Package Dependencies**, no installation is needed.
+Otherwise, remove any unresolved local Speech SDK package reference and add the published package:
 
 1. In Xcode, choose **File** > **Add Package Dependencies...**.
 1. Enter the package URL `https://github.com/microsoft/speech-sdk-spm` in the search field.
@@ -33,17 +35,9 @@ The Speech SDK is published as a Swift package at [microsoft/speech-sdk-spm](htt
 
 Then import the SDK in your source with `import MicrosoftCognitiveServicesSpeech`.
 
-## Install the SDK as a CocoaPod (Alternative)
-
-1. Install the CocoaPod dependency manager as described in its [installation instructions](https://guides.cocoapods.org/using/getting-started.html).
-1. Navigate to the directory of the downloaded sample app (e.g. `speech-samples`) in a terminal.
-1. Run the command `pod install`. This will generate a Xcode workspace containing both the sample app and the Speech SDK as a dependency.
-
 ## Build the samples
 
-1. Open the project in Xcode:
-   - **Swift Package Manager:** Open the `.xcodeproj` file
-   - **CocoaPods:** After running `pod install`, open the `.xcworkspace` file
+1. Open the `.xcodeproj` file in Xcode.
 1. Add your subscription details to the `<sample name>/ViewController.swift` file:
 
 1. Replace the string `YourSubscriptionKey` with your subscription key.
