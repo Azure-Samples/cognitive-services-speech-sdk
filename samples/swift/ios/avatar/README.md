@@ -8,17 +8,21 @@ This sample demonstrates usage of Azure text-to-speech avatar real-time API, wit
 * A Mac with [Xcode](https://developer.apple.com/xcode/) installed as iOS development environment. These samples target iOS versions 12.0 or later.
 * An iOS device with iOS 12.0 or later [enabled for development](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device) with a working speaker.
 
-## Install the SDK as a CocoaPod
+## Install the SDK using Swift Package Manager
 
-* Install the CocoaPod dependency manager as described in its [installation instructions](https://guides.cocoapods.org/using/getting-started.html).
-* Navigate to the directory of the downloaded sample app (e.g. `speech-samples`) in a terminal.
-* Run the command `pod install`. This will generate a Xcode workspace containing both the sample app and the Speech SDK as a dependency. This workspace will be used in the following.
+* [Download the sample code to your development PC.](/README.md#get-the-samples)
+* **By downloading the Microsoft Cognitive Services Speech SDK, you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
+
+This sample also requires WebRTC, which is configured separately in the existing `Podfile`. Adding the Speech SDK package alone does not install WebRTC.
+
+1. In this directory, run `pod install` for the WebRTC dependency and open the generated `TalkingAvatar.xcworkspace` in Xcode.
+1. In Xcode, choose **File** > **Add Package Dependencies...**.
+1. Enter `https://github.com/microsoft/speech-sdk-spm` in the search field.
+1. Keep the default version rule (**Up to Next Major Version**) or choose a specific version, then click **Add Package**.
+1. Select **MicrosoftCognitiveServicesSpeech-iOS**, add it to the `TalkingAvatar` app target, and click **Add Package**.
 
 ## Build the sample
 
-* **By building this sample you will download the Microsoft Cognitive Services Speech SDK. By downloading you acknowledge its license, see [Speech SDK license agreement](https://aka.ms/csspeech/license).**
-* [Download the sample code to your development PC.](/README.md#get-the-samples)
-* Open either Xcode project with the sample code.
 * Edit the `<sample name>/ViewController.swift` source:
   * Replace the string `YourSubscriptionKey` with your own subscription key.
   * Replace the string `YourServiceRegion` with the service region of your subscription.

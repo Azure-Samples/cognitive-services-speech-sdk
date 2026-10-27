@@ -140,7 +140,7 @@
 				3CB230AC2692E530009AD484 /* speech-samples */,
 			);
 			packageReferences = (
-				JJ333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */,
+				JJ333333333333333333333333 /* XCRemoteSwiftPackageReference "speech-sdk-spm" */,
 				JJ666666666666666666666666 /* XCRemoteSwiftPackageReference "Differ" */,
 			);
 		};
@@ -373,14 +373,16 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		JJ333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "{{{PACKAGE_PATH}}}";
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
+		JJ333333333333333333333333 /* XCRemoteSwiftPackageReference "speech-sdk-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/microsoft/speech-sdk-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.51.0;
+			};
+		};
+
 		JJ666666666666666666666666 /* XCRemoteSwiftPackageReference "Differ" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/tonyarnold/Differ";
@@ -394,7 +396,7 @@
 /* Begin XCSwiftPackageProductDependency section */
 		JJ222222222222222222222222 /* MicrosoftCognitiveServicesSpeech */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = JJ333333333333333333333333 /* XCLocalSwiftPackageReference "{{{PACKAGE_PATH}}}" */;
+			package = JJ333333333333333333333333 /* XCRemoteSwiftPackageReference "speech-sdk-spm" */;
 			productName = "MicrosoftCognitiveServicesSpeech-iOS";
 		};
 		JJ555555555555555555555555 /* Differ */ = {
