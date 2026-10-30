@@ -4,15 +4,26 @@ Agent skills for adding Azure Speech text to speech to applications, streaming t
 
 ## Installation
 
-This repository's `skills/` directory is a distribution layout. Copy the entire `azure-tts-integrate` folder, including `references`, `assets` and `scripts`, into one supported project-level location:
+### Skills CLI
 
-| Target | Project-level destination |
-|---|---|
-| GitHub Copilot / Codex | `.agents/skills/azure-tts-integrate/` |
-| Claude Code | `.claude/skills/azure-tts-integrate/` |
-| VS Code alternative | `.github/skills/azure-tts-integrate/` |
+Run this command from your project:
 
-Choose one location and review an existing customization before replacing it.
+```bash
+npx skills add https://github.com/Azure-Samples/cognitive-services-speech-sdk --skill azure-tts-integrate
+```
+
+### Manual Installation
+
+Use the project-level skills directory:
+
+- **.agents/skills** for GitHub Copilot and Codex
+- **.claude/skills** for Claude Code
+
+```bash
+git clone https://github.com/Azure-Samples/cognitive-services-speech-sdk.git
+mkdir -p .agents/skills
+cp -R cognitive-services-speech-sdk/skills/azure-tts-integrate .agents/skills/
+```
 
 ## Skill Structure
 
@@ -62,6 +73,7 @@ azure-tts-integrate/
 - A coding agent that supports Agent Skills, file editing, and terminal commands.
 - A supported application runtime and the dependencies required by the selected path.
 - Azure Speech access and authentication for live validation.
+- Optional: Node.js/npm for installation through the Skills CLI.
 - Optional: Python 3.10+ for the feedback helper.
 
 Keep long-lived secrets on a trusted backend, never in chat or client code. Local checks do not prove end-to-end success, and Azure usage may be billable.
