@@ -1,10 +1,10 @@
 # Feedback
 
-Record integration issues when they happen and offer optional feedback once, after the integration is complete.
+Use only after an explicit feedback request or accepted invitation. Integration errors and retries alone do not start this workflow.
 
 ## 1. Record issues
 
-Create a record only when an issue occurs during implementation work: a service error, an SDK or documentation mismatch, a skill instruction that was wrong or missing, or an unsupported request. Do not create one for recommendation-only requests or issue-free work.
+After consent to draft, collect relevant service, SDK, documentation, skill or unsupported-request issues from existing records and session evidence. Do not start background tracking during integration. Issue-free feedback needs no record.
 
 1. Create or load `.azure-tts-integrate/<integration-id>.json` in the target project and tell the developer its location. Exclude it from Git locally (for example `.git/info/exclude`) or use another approved private location. Never upload or commit it.
 2. Keep one record per integration:
@@ -12,7 +12,7 @@ Create a record only when an issue occurs during implementation work: a service 
 | Field | Contents |
 |---|---|
 | Integration | Local ID, short non-sensitive goal, path, status and evidence sources |
-| Invitation | `feedback_invited=false`, `feedback_response=not_asked` |
+| Invitation | Preserve the existing invitation and drafting-consent state; it does not authorize sharing |
 | Issues | Stable issue ID, symptom, actions and verification history, status (`pending`, `in_progress`, `resolved`); mark untested results `unverified` |
 
 | Event | Action |
@@ -24,19 +24,9 @@ Create a record only when an issue occurs during implementation work: a service 
 
 Keep records minimal and redacted. Exclude keys, tokens, SAS URLs, connection strings, private hostnames or IP addresses, personal or customer data, proprietary details, raw audio and full logs.
 
-## 2. Invite once
+## 2. Preserve consent
 
-Invite only when all of these hold:
-
-- You reported **Integration complete** under the [status rules](../SKILL.md#report-status), or the developer explicitly asked to give feedback.
-- Owned runtime resources are released and temporary files removed (the record stays).
-- No earlier invitation exists for this integration (`feedback_invited=false` when a record exists).
-
-Ask once, with the question tool or a numbered list:
-
-> Share feedback about this Azure TTS integration? **Review feedback draft** / **Not now**.
-
-When a record exists, save `feedback_invited=true` and `feedback_response=pending` before waiting, then `accepted` or `declined`. Never repeat the invitation after refusal, silence, resume or another report.
+The [entry point](../SKILL.md#report-status) handles the one-time invitation. An accepted invitation or explicit feedback request permits drafting; proceed without another invitation. When a record exists, preserve that consent state. Never repeat an invitation after refusal, silence, resume or another report. Draft consent does not approve sharing.
 
 ## 3. Draft and review
 
