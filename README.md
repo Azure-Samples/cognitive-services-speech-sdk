@@ -3,6 +3,7 @@ page_type: sample
 languages:
 - cpp
 - csharp
+- go
 - java
 - javascript
 - nodejs
@@ -14,6 +15,7 @@ description: "Learn how to use the Microsoft Cognitive Services Speech SDK to ad
 products:
 - azure
 - azure-cognitive-services
+ai-usage: ai-assisted
 ---
 
 # Sample Repository for the Microsoft Cognitive Services Speech SDK
@@ -122,6 +124,7 @@ The following samples demonstrate additional capabilities of the Speech SDK, suc
 
 | Sample                                                                                                      | Platform | Description                                                          |
 | ---                                                                                                         | ---      | ---                                                                  |
+| [Live Interpreter samples](samples/live-interpreter) | See the sample's language-specific prerequisites. | Demonstrates speech-to-speech translation with open-range language identification and personal voice in eight SDK languages. |
 | [C++ Console app for Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/cpp/windows/console)                                                | Windows  | Demonstrates speech recognition, speech synthesis, conversation transcription and translation |
 | [C++ Speech Recognition from MP3/Opus file (Linux only)](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/cpp/linux/compressed-audio-input)        | Linux    | Demonstrates speech recognition from an MP3/Opus file |
 | [C# Console app for .NET Framework on Windows](https://github.com/Azure-Samples/cognitive-services-speech-sdk/tree/master/samples/csharp/dotnet-windows/console)                     | Windows  | Demonstrates speech recognition, speech synthesis, and translation |

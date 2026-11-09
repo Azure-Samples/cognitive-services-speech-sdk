@@ -1,0 +1,14 @@
+{
+  "name": "speech-sdk-live-interpreter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Translate a WAV file with Live Interpreter.",
+  "license": "MIT",
+  "scripts": {
+    "start": "node live_interpreter.js",
+    "test": "node --test live_interpreter.test.js"
+  },
+  "dependencies": {
+    "microsoft-cognitiveservices-speech-sdk": "1.53.0"
+  }
+}
