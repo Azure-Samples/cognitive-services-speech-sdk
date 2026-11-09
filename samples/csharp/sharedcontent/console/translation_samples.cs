@@ -866,7 +866,10 @@ namespace MicrosoftSpeechSDKSamples
         #endregion
 
         #region Multilingual Translation with language identification
-        public static async Task MultilingualTranslationWithLanguageIdentificationAsync()
+        // Pass true for LLM-based Live Interpreter with French output and
+        // personal voice. Personal voice access: https://aka.ms/customneural
+        public static async Task MultilingualTranslationWithLanguageIdentificationAsync(
+            bool useLlmBasedLiveInterpreter = false)
         {
             // When you use Multilingual Translation with language identification, 
             // you don't need to define any candidate languages to detect, but you must set a v2 endpoint and use
@@ -875,6 +878,11 @@ namespace MicrosoftSpeechSDKSamples
 
             // Please replace the service region with your region
             var v2EndpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/universal/v2", "YourRegion");
+            if (useLlmBasedLiveInterpreter)
+            {
+                v2EndpointInString += v2EndpointInString.Contains("?")
+                    ? "&setfeature=llm" : "?setfeature=llm";
+            }
             var v2EndpointUrl = new Uri(v2EndpointInString);
 
             // Creates an instance of a speech translation config with specified subscription key and service region.
@@ -883,8 +891,16 @@ namespace MicrosoftSpeechSDKSamples
 
             // Translation target language(s).
             // Replace with language(s) of your choice.
-            config.AddTargetLanguage("de");
-            config.AddTargetLanguage("fr");
+            if (useLlmBasedLiveInterpreter)
+            {
+                config.AddTargetLanguage("fr");
+                config.VoiceName = "personal-voice";
+            }
+            else
+            {
+                config.AddTargetLanguage("de");
+                config.AddTargetLanguage("fr");
+            }
 
             // You don't need to define any candidate languages to detect.
             var autoDetectSourceLanguageConfig = AutoDetectSourceLanguageConfig.FromOpenRange();
