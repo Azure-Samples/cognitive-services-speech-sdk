@@ -59,7 +59,8 @@ extern void SpeechContinuousRecognitionAndLanguageIdWithMultiLingualFile();
 
 extern void TranslationAndLanguageIdWithMicrophone();
 extern void ContinuousTranslationAndLanguageIdWithMultiLingualFile();
-extern void ContinuousMultilingualTranslationWithLanguageIdentification();
+extern void ContinuousMultilingualTranslationWithLanguageIdentification(
+    bool useLlmBasedLiveInterpreter = false);
 
 extern void StandaloneLanguageDetectionWithMicrophone();
 extern void StandaloneLanguageDetectionWithFileInput();
