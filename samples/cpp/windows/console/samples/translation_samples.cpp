@@ -520,11 +520,6 @@ void ContinuousMultilingualTranslationWithLanguageIdentification(
 
     // Replace "YourServiceRegion" with your service region (e.g. "westus"):
     string speechv2Endpoint = "wss://YourServiceRegion.stt.speech.microsoft.com/speech/universal/v2";
-    if (useLlmBasedLiveInterpreter)
-    {
-        speechv2Endpoint += speechv2Endpoint.find('?') != string::npos
-            ? "&setfeature=llm" : "?setfeature=llm";
-    }
 
     // Replace "YourSubscriptionKey" with your speech subscription key:
     auto config = SpeechTranslationConfig::FromEndpoint(speechv2Endpoint, "YourSubscriptionKey");
@@ -535,6 +530,8 @@ void ContinuousMultilingualTranslationWithLanguageIdentification(
     // Define the set of target (translation) languages
     if (useLlmBasedLiveInterpreter)
     {
+        config->SetServiceProperty(
+            "setfeature", "llm", ServicePropertyChannel::UriQueryParameter);
         config->AddTargetLanguage("fr");
         config->SetVoiceName("personal-voice");
     }

@@ -878,11 +878,6 @@ namespace MicrosoftSpeechSDKSamples
 
             // Please replace the service region with your region
             var v2EndpointInString = String.Format("wss://{0}.stt.speech.microsoft.com/speech/universal/v2", "YourRegion");
-            if (useLlmBasedLiveInterpreter)
-            {
-                v2EndpointInString += v2EndpointInString.Contains("?")
-                    ? "&setfeature=llm" : "?setfeature=llm";
-            }
             var v2EndpointUrl = new Uri(v2EndpointInString);
 
             // Creates an instance of a speech translation config with specified subscription key and service region.
@@ -893,6 +888,8 @@ namespace MicrosoftSpeechSDKSamples
             // Replace with language(s) of your choice.
             if (useLlmBasedLiveInterpreter)
             {
+                config.SetServiceProperty(
+                    "setfeature", "llm", ServicePropertyChannel.UriQueryParameter);
                 config.AddTargetLanguage("fr");
                 config.VoiceName = "personal-voice";
             }
