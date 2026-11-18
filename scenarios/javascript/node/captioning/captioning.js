@@ -386,8 +386,7 @@ function main(args)
     else
     {
         var userConfig = UserConfigFromArgs(args, usage);
-        Initialize(userConfig);    
-        var audio_config = AudioConfigFromUserConfig(userConfig);
+        Initialize(userConfig);
         var speechRecognizer = SpeechRecognizerFromUserConfig(userConfig);
         RecognizeContinuous(speechRecognizer, userConfig);
     }
